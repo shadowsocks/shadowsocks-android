@@ -409,8 +409,8 @@ public class Shadowsocks extends PreferenceActivity implements
                     getString(R.string.port_summary)));
 
         if (!settings.getString("remotePort", "").equals(""))
-            portText.setSummary(settings.getString("remotePort",
-                    getString(R.string.port_summary)));
+            remotePortText.setSummary(settings.getString("remotePort",
+                    getString(R.string.remote_port_summary)));
 
         if (!settings.getString("proxy", "").equals(""))
             proxyText.setSummary(settings.getString("proxy",

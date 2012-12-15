@@ -64,65 +64,42 @@ import java.util.HashSet;
 
 public class ShadowsocksService extends Service {
 
-    private Notification notification;
-    private NotificationManager notificationManager;
-    private PendingIntent pendIntent;
-    private PowerManager.WakeLock mWakeLock;
-
     public static final String BASE = "/data/data/com.github.shadowsocks/";
+    final static String REDSOCKS_CONF = "base {" +
+            " log_debug = off;" +
+            " log_info = off;" +
+            " log = stderr;" +
+            " daemon = on;" +
+            " redirector = iptables;" +
+            "}" +
+            "redsocks {" +
+            " local_ip = 127.0.0.1;" +
+            " local_port = 8123;" +
+            " ip = 127.0.0.1;" +
+            " port = %d;" +
+            " type = socks5;" +
+            "}";
+    final static String CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n";
+    final static String CMD_IPTABLES_REDIRECT_ADD_HTTP = " -t nat -A OUTPUT -p tcp "
+            + "--dport 80 -j REDIRECT --to 8123\n";
+    final static String CMD_IPTABLES_REDIRECT_ADD_HTTPS = " -t nat -A OUTPUT -p tcp "
+            + "--dport 443 -j REDIRECT --to 8124\n";
+    final static String CMD_IPTABLES_DNAT_ADD_HTTP = " -t nat -A OUTPUT -p tcp "
+            + "--dport 80 -j DNAT --to-destination 127.0.0.1:8123\n";
+    final static String CMD_IPTABLES_DNAT_ADD_HTTPS = " -t nat -A OUTPUT -p tcp "
+            + "--dport 443 -j DNAT --to-destination 127.0.0.1:8124\n";
     private static final int MSG_CONNECT_START = 0;
     private static final int MSG_CONNECT_FINISH = 1;
     private static final int MSG_CONNECT_SUCCESS = 2;
     private static final int MSG_CONNECT_FAIL = 3;
     private static final int MSG_HOST_CHANGE = 4;
     private static final int MSG_STOP_SELF = 5;
-
-    final static String CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n";
-
-    final static String CMD_IPTABLES_REDIRECT_ADD_HTTP = " -t nat -A OUTPUT -p tcp "
-            + "--dport 80 -j REDIRECT --to 8123\n";
-    final static String CMD_IPTABLES_REDIRECT_ADD_HTTPS = " -t nat -A OUTPUT -p tcp "
-            + "--dport 443 -j REDIRECT --to 8124\n";
-
-    final static String CMD_IPTABLES_DNAT_ADD_HTTP = " -t nat -A OUTPUT -p tcp "
-            + "--dport 80 -j DNAT --to-destination 127.0.0.1:8123\n";
-    final static String CMD_IPTABLES_DNAT_ADD_HTTPS = " -t nat -A OUTPUT -p tcp "
-            + "--dport 443 -j DNAT --to-destination 127.0.0.1:8124\n";
-
     private static final String TAG = "ShadowsocksService";
-    private static final String DEFAULT_HOST = "74.125.128.18";
     private final static int DNS_PORT = 8053;
-
-    private Process httpProcess = null;
-    private DataOutputStream httpOS = null;
-
-    private String appHost;
-    private int remotePort;
-    private int port;
-    private String sitekey;
-
-    private SharedPreferences settings = null;
-
-    private boolean hasRedirectSupport = true;
-    private boolean isGlobalProxy = false;
-    private boolean isGFWList = false;
-    private boolean isBypassApps = false;
-
-    private ProxyedApp apps[];
-
     private static final Class<?>[] mStartForegroundSignature = new Class[]{
             int.class, Notification.class};
     private static final Class<?>[] mStopForegroundSignature = new Class[]{boolean.class};
     private static final Class<?>[] mSetForegroundSignature = new Class[]{boolean.class};
-
-    private Method mSetForeground;
-    private Method mStartForeground;
-    private Method mStopForeground;
-
-    private Object[] mSetForegroundArgs = new Object[1];
-    private Object[] mStartForegroundArgs = new Object[2];
-    private Object[] mStopForegroundArgs = new Object[1];
-
     /*
       * This is a hack see
       * http://www.mail-archive.com/android-developers@googlegroups
@@ -132,20 +109,6 @@ public class ShadowsocksService extends Service {
       * reference will hopefully vanish
       */
     private static WeakReference<ShadowsocksService> sRunningInstance = null;
-
-    public static boolean isServiceStarted() {
-        final boolean isServiceStarted;
-        if (sRunningInstance == null) {
-            isServiceStarted = false;
-        } else if (sRunningInstance.get() == null) {
-            isServiceStarted = false;
-            sRunningInstance = null;
-        } else {
-            isServiceStarted = true;
-        }
-        return isServiceStarted;
-    }
-
     final Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -185,6 +148,41 @@ public class ShadowsocksService extends Service {
             super.handleMessage(msg);
         }
     };
+    private Notification notification;
+    private NotificationManager notificationManager;
+    private PendingIntent pendIntent;
+    private PowerManager.WakeLock mWakeLock;
+    private Process httpProcess = null;
+    private DataOutputStream httpOS = null;
+    private String appHost;
+    private int remotePort;
+    private int port;
+    private String sitekey;
+    private SharedPreferences settings = null;
+    private boolean hasRedirectSupport = true;
+    private boolean isGlobalProxy = false;
+    private boolean isGFWList = false;
+    private boolean isBypassApps = false;
+    private ProxyedApp apps[];
+    private Method mSetForeground;
+    private Method mStartForeground;
+    private Method mStopForeground;
+    private Object[] mSetForegroundArgs = new Object[1];
+    private Object[] mStartForegroundArgs = new Object[2];
+    private Object[] mStopForegroundArgs = new Object[1];
+
+    public static boolean isServiceStarted() {
+        final boolean isServiceStarted;
+        if (sRunningInstance == null) {
+            isServiceStarted = false;
+        } else if (sRunningInstance.get() == null) {
+            isServiceStarted = false;
+            sRunningInstance = null;
+        } else {
+            isServiceStarted = true;
+        }
+        return isServiceStarted;
+    }
 
     public void startShadowsocksDaemon() {
         final String cmd = String.format(BASE
@@ -269,6 +267,15 @@ public class ShadowsocksService extends Service {
         markServiceStarted();
     }
 
+    private void startRedsocksDaemon() {
+        String conf = String.format(REDSOCKS_CONF, port);
+        String cmd = String.format("%sredsocks -p %sredsocks.pid -c %sredsocks.conf",
+                BASE, BASE, BASE);
+        Utils.runRootCommand("echo \"" + conf + "\" > " + BASE + "redsocks.conf\n"
+                + cmd);
+
+    }
+
     /**
      * Called when the activity is first created.
      */
@@ -276,6 +283,7 @@ public class ShadowsocksService extends Service {
 
         startShadowsocksDaemon();
         startDnsDaemon();
+        startRedsocksDaemon();
         setupIptables();
 
         return true;
