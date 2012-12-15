@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+#	/etc/rc.d/init.d/pdnsd
+#
+# Script for starting the Proxy DNS Daemon
+# Modified by Paul Rombouts, 2003
+#
+# chkconfig: 2345 11 89
+# description: Proxy DNS Daemon
+# processname: pdnsd
+# config: /etc/pdnsd.conf
+
+PATH=/sbin:/usr/sbin:/usr/local/sbin:/bin:/usr/bin:/usr/local/bin
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+# Check that networking is up.
+if [[ $NETWORKING == [Nn][Oo] ]]; then exit 0; fi
+
+# Source sysconfig settings, if any.
+if [ -f /etc/sysconfig/pdnsd ]; then . /etc/sysconfig/pdnsd; fi
+
+start() {
+	echo -n 'Starting pdnsd: '
+	daemon @prefix@/sbin/pdnsd -d -s -p /var/run/pdnsd.pid "$EXTRAOPTIONS"
+	local RETVAL=$?
+	echo
+	if [ $RETVAL -eq 0 ]; then touch /var/lock/subsys/pdnsd; fi
+	return $RETVAL
+}
+
+stop() {
+	echo -n 'Shutting down pdnsd: '
+	killproc pdnsd
+	local RETVAL=$?
+	case @threadlib@ in
+	    [Ll]inux[Tt]hreads*|lt*)
+		# Wait until all threads have terminated.
+		local -i count=20
+		while [[ count -gt 0 ]] && pidof pdnsd > /dev/null
+		do
+		  usleep 200000
+		  let --count
+		done
+		;;
+	esac
+	echo
+	if [ $RETVAL -eq 0 ]; then rm -f /var/lock/subsys/pdnsd; fi
+	return $RETVAL
+}
+
+restart() {
+	stop
+	start
+}
+
+#
+#	See how we were called.
+#
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  status)
+	status pdnsd
+	;;
+  reload)
+	@prefix@/sbin/pdnsd-ctl config
+	;;
+  restart)
+	restart
+  	;;
+  condrestart)
+	if [ -f /var/lock/subsys/pdnsd ]; then restart; fi
+  	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+	exit 1
+esac
+
+exit

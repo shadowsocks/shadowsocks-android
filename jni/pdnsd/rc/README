@@ -1,0 +1,104 @@
+rc/
+===
+
+These are start scripts for different Linux distros and other things that
+do not directly belong to pdnsd. 
+If you do start scripts for the distro you use, please GPL them and send 
+them in, so that they can be included in this package for other users.
+Note that there is NO WARRANTY OF ANY KIND on anything in this directory;
+read the COPYING that comes with pdnsd for details.
+So far there are files in the following directories:
+
+SuSE
+----
+pdnsd	- Start script for SuSE Linux. Tested for 6.? but should run on some
+	  versions below. You can do 'make install' as root in the SuSE 
+	  directory to install it, or you can install manually:
+	  --manual installation-------------------------------------------------
+	  For manual installation, copy it into /sbin/init.d/, go to
+	  /sbin/init.d/rc2.d/ and create there the following two symlinks:
+	S11pdnsd -> ../pdnsd (do "ln -s ../pdnsd S11pdnsd" in that dir)
+	K34pdnsd -> ../pdnsd (do "ln -s ../pdnsd K34pdnsd" in that dir)
+	  The numbers dictate the order different services are started and 
+	  might need to be modified. Then edit your /etc/rc.config file and
+	  add the line "START_PDNSD=yes" to start pdnsd at boot time.
+	  ----------------------------------------------------------------------
+	  If you used the 'make install' command, "START_PDNSD=yes" has been
+	  appended to your /etc/rc.config file, causing pdnsd to be started
+	  at boot time. If you don't want that, change the "yes" into "no". 
+	  This start script was created from /sbin/init.d/skeleton by me, so the
+	  most is copyrighted by SuSE. They put it under the GPL, however, so
+	  the licence stated in COPYING also applies to this script.
+          This is no official SuSE script, and SuSE naturally does NO support 
+	  for it.
+
+Redhat
+------
+The contents of the Redhat directory and the following documentation were 
+contributed by Torben Janssen. Thanks a lot!
+
+pdnsd	- Start script for Redhat Linux. Tested for 6.1 but should run on 5.0+.
+	  You can do 'make install' as root in the Redhat directory to
+	  install it, or you can install manually:
+	    
+	  --manual installation-------------------------------------------------
+	  For manual installation, copy pdnsd into /etc/rc.d/init.d/
+		
+	  Then go to /etc/rc.d/rc3.d and create there the following symlink:
+	  S78pdnsd -> ../init.d/pdnsd 
+	  (do "ln -f -s ../init.d/pdnsd S78pdnsd" in that dir)
+		
+	  Then go to /etc/rc.d/rc0.d and create there the following symlink:
+	  K78pdnsd -> ../init.d/pdnsd 
+	  (do "ln -f -s ../init.d/pdnsd K78pdnsd" in that dir)
+		
+	  Then go to /etc/rc.d/rc6.d and create there the following symlink:
+	  K78pdnsd -> ../init.d/pdnsd 
+	  (do "ln -f -s ../init.d/pdnsd K78pdnsd" in that dir)
+		
+	  WHY
+	  ---
+	  the rc[0-6].d dirs includes the scripts which starts/stops the 
+	  services on entering runlevel [0-6]
+	  the interesting runlevels on Redhat are: 
+	  0 - halt
+	  3 - multi user system
+	  6 - reboot
+	  The links have an 'S' or 'K' and a number at the beginnig. All links
+	  with 'S' starts the script on entering the runlevel and 'K' stops 
+	  them.
+	  So, there's an 'S' link in rc3 and 'K' links in rc0 and rc6.
+	  I choose 78 as number, because there was no script with this number on
+	  my system. You can choose every number you want, AFAIK .
+	
+	  This is no offical Redhat script, and Redhat naturally does NO support
+	  for it.
+
+Debian
+------
+The contents of the Debian directory were contributed by Markus Mohr. 
+His installation instructions are (translated):
+Install the pdnsd script to /etc/init and run 
+update-rc.d pdnsd defaults 19
+as root.
+
+Slackware
+---------
+A Slackware start-up script rc.pdnsd was contributed by Nikola Kotur <kotnik@ns-linux.org>.
+His comments were:
+
+Slackware uses traditional BSD style init script layout instead of SystemV 
+style startup scripts.  So I adjusted the start-up script for pdnsd, and 
+now it can be used with Slackware 9.1 distribution, and probably with all the 
+others.
+
+Additional info:
+1) put these lines in the /etc/rc.d/rc.M:
+	if [ -x /etc/rc.d/rc.pdnsd ]; then
+		/etc/rc.d/rc.pdnsd start
+	fi
+
+2) put these lines in the /etc/rc.d/rc.6 and /etc/rc.d/rc.K:
+	if [ -x /etc/rc.d/rc.pdnsd ]; then
+		/etc/rc.d/rc.pdnsd stop
+	fi
