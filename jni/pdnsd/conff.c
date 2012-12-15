@@ -166,35 +166,6 @@ int read_config_file(const char *nm, globparm_t *global, servparm_array *servers
 				*errstr=NULL;
 			goto close_file;
 		}
-		else if (sb.st_uid!=init_uid) {
-			/* Note by Paul Rombouts:
-			   Perhaps we should use getpwuid_r() instead of getpwuid(), which is not necessarily thread safe.
-			   As long as getpwuid() is only used by only one thread, it should be OK,
-			   but it is something to keep in mind.
-			*/
-			struct passwd *pws;
-			char owner[24],user[24];
-			if((pws=getpwuid(sb.st_uid)))
-				strncp(owner,pws->pw_name,sizeof(owner));
-			else
-				sprintf(owner,"%i",sb.st_uid);
-			if((pws=getpwuid(init_uid)))
-				strncp(user,pws->pw_name,sizeof(user));
-			else
-				sprintf(user,"%i",init_uid);
-			if(asprintf(errstr,
-				    "Error: %s file %s is owned by '%s', but pdnsd was started as user '%s'.",
-				    conftype,nm,owner,user)<0)
-				*errstr=NULL;
-			goto close_file;
-		}
-		else if ((sb.st_mode&(S_IWGRP|S_IWOTH))) {
-			if(asprintf(errstr,
-				    "Error: Bad %s file permissions: file %s must be only writeable by the user.",
-				    conftype,nm)<0)
-				*errstr=NULL;
-			goto close_file;
-		}
 	}
 
 	retval=confparse(in,NULL,global,servers,includedepth,errstr);

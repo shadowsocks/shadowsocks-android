@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="fill_parent"
+	android:layout_height="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:duplicateParentState="false">
+	<TextView android:text="@string/proxyed_help"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:textSize="16sp" android:padding="3px" />
+	<ListView android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:id="@+id/applistview"></ListView>
+</LinearLayout>

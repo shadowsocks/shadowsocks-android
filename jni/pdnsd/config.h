@@ -40,7 +40,7 @@
  * In normal operation, you will currently only need IPv4. */
 #define ENABLE_IPV4 1
 #define DEFAULT_IPV4 1
-/* #undef ENABLE_IPV6 */
+#undef ENABLE_IPV6 
 
 /* In all pdnsd versions before 1.0.6, DNS queries were always done over
  * TCP. Now, you have the choice. You can control that behaviour using
@@ -55,7 +55,7 @@
  *       error or times out, the query is retried using UDP.
  * UDP_TCP: UDP, then TCP. If the UDP reply is truncated (i.e. the tc flag is set),
  *       the query is retried using TCP. */
-#define M_PRESET UDP_ONLY
+#define M_PRESET TCP_ONLY
 
 /* In addition to choosing the presets, you may also completely disable
  * one of the protocols (TCP for preset UDP_ONLY and UDP for preset TCP_ONLY).
@@ -104,7 +104,7 @@
  * default: native; others: gdbm */
 #define CACHE_DBM DBM_NATIVE
 
-#define CACHEDIR "/var/cache/pdnsd"
+#define CACHEDIR "/data/data/com.github.shadowsocks"
 
 #define TEMPDIR "/tmp";
 
@@ -214,10 +214,10 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `getline' function. */
-#define HAVE_GETLINE 1
+//#define HAVE_GETLINE 1
 
 /* Define to 1 if you have the `getpwnam_r' function. */
-#define HAVE_GETPWNAM_R 1
+//#define HAVE_GETPWNAM_R 1
 
 /* Define to 1 if you have the `gettimeofday' function. */
 #define HAVE_GETTIMEOFDAY 1
@@ -241,7 +241,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mempcpy' function. */
-#define HAVE_MEMPCPY 1
+//#define HAVE_MEMPCPY 1
 
 /* Define to 1 if you have the `mkfifo' function. */
 #define HAVE_MKFIFO 1
@@ -277,10 +277,10 @@
 #define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `stpcpy' function. */
-#define HAVE_STPCPY 1
+//#define HAVE_STPCPY 1
 
 /* Define to 1 if you have the `stpncpy' function. */
-#define HAVE_STPNCPY 1
+//#define HAVE_STPNCPY 1
 
 /* Define to 1 if you have the `strdup' function. */
 #define HAVE_STRDUP 1

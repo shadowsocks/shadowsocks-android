@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="horizontal" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<ImageView android:id="@+id/image" android:layout_width="wrap_content"
+		android:layout_height="fill_parent" android:layout_marginLeft="10dp"
+		android:layout_marginRight="10dp" android:src="@drawable/icon" />
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:orientation="vertical">
+		<TextView android:id="@+id/down_tv" android:layout_width="wrap_content"
+			android:layout_height="fill_parent" android:textSize="14sp"
+			android:paddingBottom="4dp" android:text="@string/downloading" />
+		<ProgressBar android:id="@+id/pb" android:layout_width="200dp"
+			android:layout_height="wrap_content" style="?android:attr/progressBarStyleHorizontal" />
+	</LinearLayout>
+</LinearLayout>

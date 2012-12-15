@@ -67,7 +67,7 @@ FILE *dbg_file=NULL;
 volatile int tcp_socket=-1;
 volatile int udp_socket=-1;
 sigset_t sigs_msk;
-char *conf_file=CONFDIR"/pdnsd.conf";
+char *conf_file="pdnsd.conf";
 
 
 /* version and licensing information */
@@ -140,7 +140,7 @@ static const char help_message[] =
 	"\n"
 	"-c\t\t--or--\n"
 	"--config-file\tspecifies the file the configuration is read from.\n"
-	"\t\tDefault is " CONFDIR "/pdnsd.conf\n"
+	"\t\tDefault is " "pdnsd.conf\n"
 #ifdef ENABLE_IPV4
 	"-4\t\tswitches to IPv4 mode.\n"
 	"\t\t"

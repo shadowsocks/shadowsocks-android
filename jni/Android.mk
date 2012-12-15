@@ -24,18 +24,15 @@ LOCAL_SRC_FILES := \
 
 include $(BUILD_STATIC_LIBRARY)
 
-#include $(CLEAR_VARS)
+include $(CLEAR_VARS)
 
-#PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/*.c)
+PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/*.c)
 
-#LOCAL_MODULE    := pdnsd
-#LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)%=%)
+LOCAL_MODULE    := pdnsd
+LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)%=%)
+LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 
-#LOCAL_CFLAGS    := -O3
-
-#LOCAL_STATIC_LIBRARIES := 
-
-#include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
@@ -46,6 +43,17 @@ LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/libev/ -I$(LOCAL_PATH)/openssl/incl
 LOCAL_STATIC_LIBRARIES := libev libcrypto
 
 LOCAL_LDLIBS := -llog
+
+include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE:= libexec
+
+LOCAL_SRC_FILES:= \
+	   termExec.cpp
+
+LOCAL_LDLIBS := -ldl -llog
 
 include $(BUILD_SHARED_LIBRARY)
 

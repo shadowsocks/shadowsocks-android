@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/function_cat">
+        <CheckBoxPreference
+                android:key="isRunning"
+                android:summary="@string/service_summary"
+                android:title="@string/service_controller">
+        </CheckBoxPreference>
+
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/proxy_cat">
+        <EditTextPreference
+                android:defaultValue="127.0.0.1"
+                android:key="proxy"
+                android:summary="@string/proxy_summary"
+                android:title="@string/proxy">
+        </EditTextPreference>
+        <EditTextPreference
+                android:defaultValue="1984"
+                android:key="remotePort"
+                android:summary="@string/remote_port_summary"
+                android:title="@string/remote_port">
+        </EditTextPreference>
+        <EditTextPreference
+                android:defaultValue="1080"
+                android:key="port"
+                android:summary="@string/port_summary"
+                android:title="@string/port">
+        </EditTextPreference>
+        <EditTextPreference
+                android:defaultValue=""
+                android:key="sitekey"
+                android:summary="@string/sitekey_summary"
+                android:title="@string/sitekey">
+        </EditTextPreference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/fearute_cat">
+        <CheckBoxPreference
+                android:key="isAutoConnect"
+                android:summary="@string/auto_connect_summary"
+                android:title="@string/auto_connect">
+        </CheckBoxPreference>
+        <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="isGFWList"
+                android:summary="@string/auto_set_gfwlist_summary"
+                android:title="@string/auto_set_gfwlist">
+        </CheckBoxPreference>
+        <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="isGlobalProxy"
+                android:summary="@string/auto_set_proxy_summary"
+                android:title="@string/auto_set_proxy">
+        </CheckBoxPreference>
+
+        <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="isBypassApps"
+                android:summary="@string/bypass_apps_summary"
+                android:title="@string/bypass_apps">
+        </CheckBoxPreference>
+        <Preference
+                android:key="proxyedApps"
+                android:summary="@string/proxyed_apps_summary"
+                android:title="@string/proxyed_apps">
+        </Preference>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

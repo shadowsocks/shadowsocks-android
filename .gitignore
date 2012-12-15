@@ -1,0 +1,21 @@
+classes
+bin
+gen
+obj
+target
+local.properties
+.classpath
+.project
+.settings
+tests/bin
+tests/gen
+tests/local.properties
+NUL
+libs
+
+#Intellij IDEA
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
