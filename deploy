@@ -1,0 +1,3 @@
+#!/bin/bash
+cd "${1}"
+swift -A https://auth.sinas3.com/v1.0 -U xony5n3m4n -K yi2iy14xjhh5ixyh1jl5w5k1zml0x4m351w05hli upload travis ${2}
