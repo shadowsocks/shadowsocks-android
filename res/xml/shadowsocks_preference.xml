@@ -37,11 +37,6 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/fearute_cat">
         <CheckBoxPreference
-                android:key="isAutoConnect"
-                android:summary="@string/auto_connect_summary"
-                android:title="@string/auto_connect">
-        </CheckBoxPreference>
-        <CheckBoxPreference
                 android:defaultValue="true"
                 android:key="isGFWList"
                 android:summary="@string/auto_set_gfwlist_summary"

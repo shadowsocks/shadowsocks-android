@@ -103,7 +103,6 @@ public class Shadowsocks extends PreferenceActivity implements
 
     private static ProgressDialog mProgressDialog = null;
 
-    private CheckBoxPreference isAutoConnectCheck;
     private CheckBoxPreference isGlobalProxyCheck;
     private EditTextPreference proxyText;
     private EditTextPreference portText;
@@ -169,7 +168,6 @@ public class Shadowsocks extends PreferenceActivity implements
         isGFWListCheck.setEnabled(false);
         isBypassAppsCheck.setEnabled(false);
 
-        isAutoConnectCheck.setEnabled(false);
         isGlobalProxyCheck.setEnabled(false);
     }
 
@@ -185,7 +183,6 @@ public class Shadowsocks extends PreferenceActivity implements
             isBypassAppsCheck.setEnabled(true);
         }
 
-        isAutoConnectCheck.setEnabled(true);
     }
 
     private boolean isTextEmpty(String s, String msg) {
@@ -213,7 +210,6 @@ public class Shadowsocks extends PreferenceActivity implements
         proxyedApps = findPreference("proxyedApps");
 
         isRunningCheck = (CheckBoxPreference) findPreference("isRunning");
-        isAutoConnectCheck = (CheckBoxPreference) findPreference("isAutoConnect");
         isGlobalProxyCheck = (CheckBoxPreference) findPreference("isGlobalProxy");
         isGFWListCheck = (CheckBoxPreference) findPreference("isGFWList");
         isBypassAppsCheck = (CheckBoxPreference) findPreference("isBypassApps");

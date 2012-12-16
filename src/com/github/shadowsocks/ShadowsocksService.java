@@ -57,6 +57,7 @@ import android.util.Log;
 import com.google.analytics.tracking.android.EasyTracker;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -183,10 +184,15 @@ public class ShadowsocksService extends Service {
     }
 
     public void startShadowsocksDaemon() {
-        final String cmd = String.format("nohup " + BASE
-                + "node " + BASE + "local.js -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" &",
-                appHost, remotePort, port, sitekey);
-        Utils.runRootCommand(cmd);
+        new Thread() {
+            @Override
+            public void run() {
+                final String cmd = String.format(BASE
+                        + "node " + BASE + "local.js -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\"",
+                        appHost, remotePort, port, sitekey);
+                Node.exec(cmd);
+            }
+        }.start();
     }
 
     public void startDnsDaemon() {
