@@ -164,6 +164,8 @@
 
   console.log("calculating ciphers");
 
+  console.log = function() {};
+
   tables = getTable(KEY);
 
   encryptTable = tables[0];
@@ -186,7 +188,8 @@
       var aServer, addrtype, buf, cmd, reply, tempBuf;
       if (stage === 5) {
         encrypt(encryptTable, data);
-        if (!remote.write(data)) {
+        // Android Patch
+        if (data == null || !remote.write(data)) {
           connection.pause();
         }
         return;

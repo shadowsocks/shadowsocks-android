@@ -83,5 +83,8 @@
     <string name="system_proxy">系统代理</string>
     <string name="system_proxy_summary">设置系统代理，无需ROOT权限，仅工作在Android 4.0及以上系统，并仅对当前Wifi连接生效</string>
 
+    <string name="remote_port">远程端口</string>
+    <string name="remote_port_summary">Shadowsocks服务器端口</string>
+
 
 </resources>

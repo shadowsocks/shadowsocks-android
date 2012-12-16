@@ -200,7 +200,6 @@ public class Shadowsocks extends PreferenceActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.main);
         addPreferencesFromResource(R.xml.shadowsocks_preference);
 
         proxyText = (EditTextPreference) findPreference("proxy");

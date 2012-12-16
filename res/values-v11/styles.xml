@@ -17,6 +17,6 @@
 <resources>
 
     <!-- Variation on the Light theme that turns off the title -->
-    <style name="Theme.GAEProxy" parent="android:Theme.Light"/>
+    <style name="Theme.GAEProxy" parent="android:Theme.Holo.Light"/>
 
 </resources>
