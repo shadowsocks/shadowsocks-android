@@ -162,9 +162,9 @@
 
   net = require("net");
 
-  console.log("calculating ciphers");
-
   console.log = function() {};
+
+  console.log("calculating ciphers");
 
   tables = getTable(KEY);
 
@@ -189,8 +189,13 @@
       if (stage === 5) {
         encrypt(encryptTable, data);
         // Android Patch
-        if (data == null || !remote.write(data)) {
+        try {
+          if (remote == null || !remote.write(data)) {
+            connection.pause();
+          }
+        } catch (e) {
           connection.pause();
+          console.warn("unexpected exception: " + e);
         }
         return;
       }
