@@ -79,15 +79,13 @@ public class ShadowsocksService extends Service {
             " port = %d;" +
             " type = socks5;" +
             "}";
+    final static String SHADOWSOCKS_CONF =
+            "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}";
     final static String CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n";
-    final static String CMD_IPTABLES_REDIRECT_ADD_HTTP = " -t nat -A OUTPUT -p tcp "
-            + "--dport 80 -j REDIRECT --to 8123\n";
-    final static String CMD_IPTABLES_REDIRECT_ADD_HTTPS = " -t nat -A OUTPUT -p tcp "
-            + "--dport 443 -j REDIRECT --to 8124\n";
-    final static String CMD_IPTABLES_DNAT_ADD_HTTP = " -t nat -A OUTPUT -p tcp "
-            + "--dport 80 -j DNAT --to-destination 127.0.0.1:8123\n";
-    final static String CMD_IPTABLES_DNAT_ADD_HTTPS = " -t nat -A OUTPUT -p tcp "
-            + "--dport 443 -j DNAT --to-destination 127.0.0.1:8124\n";
+    final static String CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp "
+            + "-j REDIRECT --to 8123\n";
+    final static String CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp "
+            + "-j DNAT --to-destination 127.0.0.1:8123\n";
     private static final int MSG_CONNECT_START = 0;
     private static final int MSG_CONNECT_FINISH = 1;
     private static final int MSG_CONNECT_SUCCESS = 2;
@@ -185,8 +183,8 @@ public class ShadowsocksService extends Service {
     }
 
     public void startShadowsocksDaemon() {
-        final String cmd = String.format(BASE
-                + "shadowsocks \"%s\" \"%d\" \"%d\" \"%s\"",
+        final String cmd = String.format("nohup " + BASE
+                + "node " + BASE + "local.js -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" &",
                 appHost, remotePort, port, sitekey);
         Utils.runRootCommand(cmd);
     }
@@ -475,6 +473,9 @@ public class ShadowsocksService extends Service {
         String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
 
         init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + remotePort));
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 8153));
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + port));
 
         init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
                 + getApplicationInfo().uid));
@@ -488,11 +489,8 @@ public class ShadowsocksService extends Service {
         }
         if (isGlobalProxy || isBypassApps) {
             http_sb.append(hasRedirectSupport ? Utils.getIptables()
-                    + CMD_IPTABLES_REDIRECT_ADD_HTTP : Utils.getIptables()
-                    + CMD_IPTABLES_DNAT_ADD_HTTP);
-            https_sb.append(hasRedirectSupport ? Utils.getIptables()
-                    + CMD_IPTABLES_REDIRECT_ADD_HTTPS : Utils.getIptables()
-                    + CMD_IPTABLES_DNAT_ADD_HTTPS);
+                    + CMD_IPTABLES_REDIRECT_ADD_SOCKS : Utils.getIptables()
+                    + CMD_IPTABLES_DNAT_ADD_SOCKS);
         }
         if (!isGlobalProxy) {
             // for proxy specified apps
@@ -508,12 +506,8 @@ public class ShadowsocksService extends Service {
             for (int uid : uidSet) {
                 if (!isBypassApps) {
                     http_sb.append((hasRedirectSupport ? Utils.getIptables()
-                            + CMD_IPTABLES_REDIRECT_ADD_HTTP : Utils.getIptables()
-                            + CMD_IPTABLES_DNAT_ADD_HTTP).replace("-t nat",
-                            "-t nat -m owner --uid-owner " + uid));
-                    https_sb.append((hasRedirectSupport ? Utils.getIptables()
-                            + CMD_IPTABLES_REDIRECT_ADD_HTTPS : Utils.getIptables()
-                            + CMD_IPTABLES_DNAT_ADD_HTTPS).replace("-t nat",
+                            + CMD_IPTABLES_REDIRECT_ADD_SOCKS : Utils.getIptables()
+                            + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat",
                             "-t nat -m owner --uid-owner " + uid));
                 } else {
                     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid));

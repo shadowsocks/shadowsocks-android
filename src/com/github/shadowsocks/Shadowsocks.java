@@ -504,9 +504,9 @@ public class Shadowsocks extends PreferenceActivity implements
         sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n");
         sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n");
         sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n");
-        sb.append("killall pdnsd").append("\n");
-        sb.append("killall redsocks").append("\n");
-        sb.append("killall shadowsocks").append("\n");
+        sb.append("killall -9 pdnsd").append("\n");
+        sb.append("killall -9 redsocks").append("\n");
+        sb.append("killall -9 node").append("\n");
         Utils.runRootCommand(sb.toString());
 
         copyAssets("");
@@ -514,7 +514,7 @@ public class Shadowsocks extends PreferenceActivity implements
         Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
                 + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
                 + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
-                + "chmod 755 /data/data/com.github.shadowsocks/shadowsocks\n"
+                + "chmod 755 /data/data/com.github.shadowsocks/node\n"
         );
     }
 
