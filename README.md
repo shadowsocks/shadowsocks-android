@@ -15,7 +15,7 @@ A shadowsocks client for Android, powered by amazing node.js.
 * Android SDK r17+
 * Android NDK r8+
 * Local maven dependencies
-  Use Maven Android SDK Deployer to install all android related dependencies.
+
   ```bash
   git clone https://github.com/mosabua/maven-android-sdk-deployer.git 
   pushd maven-android-sdk-deployer
@@ -23,7 +23,9 @@ A shadowsocks client for Android, powered by amazing node.js.
   mvn install -P 4.1
   popd
   ```
+
 * Build native dependecies
+
   ```bash
   ndk-build
   cp libs/armeabi/pdnsd assets/
