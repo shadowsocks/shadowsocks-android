@@ -95,7 +95,7 @@ public class ShadowsocksService extends Service {
     private static final int MSG_HOST_CHANGE = 4;
     private static final int MSG_STOP_SELF = 5;
     private static final String TAG = "ShadowsocksService";
-    private final static int DNS_PORT = 8053;
+    private final static int DNS_PORT = 8153;
     private static final Class<?>[] mStartForegroundSignature = new Class[]{
             int.class, Notification.class};
     private static final Class<?>[] mStopForegroundSignature = new Class[]{boolean.class};

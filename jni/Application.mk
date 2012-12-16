@@ -1,1 +1,1 @@
-APP_PLATFORM = anrdoid-7
+APP_PLATFORM = anrdoid-8

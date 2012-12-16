@@ -17,13 +17,10 @@
 #include <time.h>
 #include <unistd.h>
 #include <linux/limits.h>
-#include <android/log.h>
 
 #include "local.h"
 #include "encrypt.h"
-
-#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "shadowsocks", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "shadowsocks", __VA_ARGS__))
+#include "android.h"
 
 #define REPLY "HTTP/1.1 200 OK\n\nhello"
 
@@ -60,7 +57,7 @@ int create_and_bind(const char *port) {
 
     s = getaddrinfo("0.0.0.0", port, &hints, &result);
     if (s != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+        LOGD("getaddrinfo: %s", gai_strerror(s));
         return -1;
     }
 
@@ -83,7 +80,7 @@ int create_and_bind(const char *port) {
     }
 
     if (rp == NULL) {
-        fprintf(stderr, "Could not bind\n");
+        LOGE("Could not bind");
         return -1;
     }
 
@@ -171,8 +168,8 @@ static void server_send_cb (EV_P_ ev_io *w, int revents) {
             return;
         }
         if (r < server->buf_len) {
-            // printf("r=%d\n", r);
-            // printf("server->buf_len=%d\n", server->buf_len);
+            LOGD("r=%d\n", r);
+            LOGD("server->buf_len=%d\n", server->buf_len);
             // partly sent, move memory, wait for the next time to send
             char *pt;
             for (pt = server->buf; pt < pt + min(r, BUF_SIZE); pt++) {
@@ -204,7 +201,7 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
     }
     while (1) {
         ssize_t r = recv(remote->fd, server->buf, BUF_SIZE, 0);
-        // printf("after recv: r=%d\n", r);
+        /*LOGD("after recv: r=%d\n", r);*/
         if (r == 0) {
             // connection closed
             server->buf_len = 0;
@@ -227,7 +224,7 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
         }
         decrypt(server->buf, r);
         int w = send(server->fd, server->buf, r, MSG_NOSIGNAL);
-        // printf("after send: w=%d\n", w);
+        /*LOGD("after send: w=%d\n", w);*/
         if(w == -1) {
             perror("send");
             if (errno == EAGAIN) {
@@ -329,7 +326,6 @@ struct remote* new_remote(int fd) {
     remote->recv_ctx->connected = 0;
     remote->send_ctx->remote = remote;
     remote->send_ctx->connected = 0;
-    fprintf(stderr, "new remote\n");
     return remote;
 }
 void free_remote(struct remote *remote) {
@@ -340,7 +336,6 @@ void free_remote(struct remote *remote) {
         free(remote->recv_ctx);
         free(remote->send_ctx);
         free(remote);
-        fprintf(stderr, "free remote\n");
     }
 }
 void close_and_free_remote(EV_P_ struct remote *remote) {
@@ -363,7 +358,6 @@ struct server* new_server(int fd) {
     server->recv_ctx->connected = 0;
     server->send_ctx->server = server;
     server->send_ctx->connected = 0;
-    fprintf(stderr, "new server\n");
     return server;
 }
 void free_server(struct server *server) {
@@ -374,7 +368,6 @@ void free_server(struct server *server) {
         free(server->recv_ctx);
         free(server->send_ctx);
         free(server);
-        fprintf(stderr, "free server\n");
     }
 }
 void close_and_free_server(EV_P_ struct server *server) {
@@ -432,7 +425,7 @@ int main (int argc, char **argv)
     const char *server = argv[1];
     const char *remote_port = argv[2];
     const char *port = argv[3];
-    const char *key = argv[4];
+    const char *key =  argv[4];
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
@@ -478,7 +471,7 @@ int main (int argc, char **argv)
     _server = strdup(server);
     _remote_port = strdup(remote_port);
 
-    fprintf(stderr, "calculating ciphers\n");
+    LOGD("calculating ciphers");
     get_table(key);
 
     int listenfd;
