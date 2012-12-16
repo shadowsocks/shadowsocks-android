@@ -14,9 +14,9 @@
     <string name="service_failed">Please check your network and login information</string>
     <string name="reconnect_fail">Cannot reconnect</string>
     <string name="ok_iknow">OK, I know</string>
-    <string name="proxy">Address</string>
+    <string name="proxy">Server</string>
     <string name="port">Local Port</string>
-    <string name="sitekey">Site Key</string>
+    <string name="sitekey">Password</string>
     <string name="auto_connect">Auto Connect</string>
     <string name="auto_reconnect">Auto reconnect</string>
     <string name="auto_set_proxy">Global Proxy</string>
@@ -28,13 +28,13 @@
     <string name="service_controller">Proxy Switch</string>
     <string name="function_cat">Service Controller</string>
     <string name="service_summary">Enable / Disable Proxy</string>
-    <string name="proxy_summary">Shadowsocks URL</string>
-    <string name="port_summary">Listening port</string>
-    <string name="sitekey_summary">Site key for GoAgent</string>
+    <string name="proxy_summary">Hostname of your Shadowsocks server</string>
+    <string name="port_summary">Local port listening on</string>
+    <string name="sitekey_summary">Password of your Shadowsocks server</string>
     <string name="port_alert">The port number should be greater than 1024</string>
     <string name="auto_connect_summary">Start Shadowsocks at the startup</string>
-    <string name="auto_set_proxy_summary">Set up the global proxy (needs ROOT permission and
-        IPTABLES support)
+    <string name="auto_set_proxy_summary">Set up system wide proxy (require ROOT permission and
+        IPTABLES)
     </string>
     <string name="port_empty">Port should not be empty</string>
     <string name="proxy_empty">Proxy should not be empty</string>
@@ -164,6 +164,6 @@
         only works for Wifi on Android 4.0 and above.</string>
 
     <string name="remote_port">Remote Port</string>
-    <string name="remote_port_summary">Server port of shadowsocks</string>
+    <string name="remote_port_summary">Remote port of shadowsocks server</string>
 
 </resources>
