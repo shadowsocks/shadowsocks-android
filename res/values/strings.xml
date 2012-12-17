@@ -58,11 +58,7 @@
     <string name="crash_alert">An unexpected exit detected, context has been
         recovered
     </string>
-    <string name="copy_rights">Shadowsocks is an open source project
-        published under
-        the GPLv3. \n\nIf you have any questions, please visit
-        our project page on
-        googlecode. \n\n(github.com/clowwindy/shadowsocks)
+    <string name="copy_rights">Shadowsocks is an open source socks proxy.\n\nYou can find more details here:\ngithub.com/shadowsocks
     </string>
     <string name="about">About</string>
     <string name="proxy_type">Proxy Type</string>
