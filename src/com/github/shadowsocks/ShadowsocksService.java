@@ -507,21 +507,19 @@ public class ShadowsocksService extends Service {
 
         init_sb.append(Utils.getIptables()).append(" -t nat -F OUTPUT\n");
 
+        String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
+
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + remotePort));
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
+        init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"));
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
+                + getApplicationInfo().uid));
+
         if (hasRedirectSupport) {
             init_sb.append(Utils.getIptables()).append(" -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to ").append(DNS_PORT).append("\n");
         } else {
             init_sb.append(Utils.getIptables()).append(" -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:").append(DNS_PORT).append("\n");
         }
-
-        String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
-
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + remotePort));
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 8153));
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + port));
-
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
-                + getApplicationInfo().uid));
 
         if (isGFWList) {
             String[] chn_list = getResources().getStringArray(R.array.chn_list);
