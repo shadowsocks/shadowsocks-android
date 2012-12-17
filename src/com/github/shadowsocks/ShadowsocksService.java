@@ -56,8 +56,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import com.google.analytics.tracking.android.EasyTracker;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -183,7 +182,22 @@ public class ShadowsocksService extends Service {
         return isServiceStarted;
     }
 
-    public void startShadowsocksDaemon() {
+    private int getPid(String name) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(BASE + name + ".pid"));
+            final String line = reader.readLine();
+            return Integer.valueOf(line);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Cannot open pid file: " + name);
+        } catch (IOException e) {
+            Log.e(TAG, "Cannot read pid file: " + name);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Invalid pid", e);
+        }
+        return -1;
+    }
+
+    private void startShadowsocksDaemon() {
         new Thread() {
             @Override
             public void run() {
@@ -195,9 +209,9 @@ public class ShadowsocksService extends Service {
         }.start();
     }
 
-    public void startDnsDaemon() {
+    private void startDnsDaemon() {
         final String cmd = BASE + "pdnsd -c " + BASE + "pdnsd.conf";
-        Utils.runRootCommand(cmd);
+        Utils.runCommand(cmd);
     }
 
     private String getVersionName() {
@@ -277,7 +291,26 @@ public class ShadowsocksService extends Service {
                 BASE, BASE, BASE);
         Utils.runRootCommand("echo \"" + conf + "\" > " + BASE + "redsocks.conf\n"
                 + cmd);
+    }
 
+    private boolean waitForProcess(final String name) {
+        final int pid = getPid(name);
+        if (pid == -1) return false;
+
+        Exec.hangupProcessGroup(-pid);
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                Exec.waitFor(-pid);
+                Log.d(TAG, "Successfully exit pid: " + pid);
+            }
+        };
+        t.start();
+        try {
+            t.join(300);
+        } catch (InterruptedException ignored) {
+        }
+        return !t.isAlive();
     }
 
     /**
@@ -436,9 +469,13 @@ public class ShadowsocksService extends Service {
     private void onDisconnect() {
         Utils.runRootCommand(Utils.getIptables() + " -t nat -F OUTPUT");
         StringBuilder sb = new StringBuilder();
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n");
         sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n");
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n");
+        if (!waitForProcess("pdnsd")) {
+            sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n");
+        }
+        if (!waitForProcess("shadowsocks")) {
+            sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n");
+        }
         Utils.runRootCommand(sb.toString());
     }
 

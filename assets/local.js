@@ -164,6 +164,11 @@
 
   console.log = function() {};
 
+  var pid = ""+process.pid; // need to turn into a string
+  fs.writeFile('/data/data/com.github.shadowsocks/shadowsocks.pid', pid, function (err) {
+     // Ignore
+  });
+
   console.log("calculating ciphers");
 
   tables = getTable(KEY);
@@ -330,11 +335,6 @@
       }
       return connection.destroy();
     });
-  });
-
-  var pid = ""+process.pid; // need to turn into a string
-  fs.writeFile('/data/data/com.github.shadowsocks/shadowsocks.pid', pid, function (err) {
-     // Ignore
   });
 
   server.listen(PORT, function() {

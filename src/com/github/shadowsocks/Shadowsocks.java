@@ -103,13 +103,10 @@ public class Shadowsocks extends PreferenceActivity implements
 
     private static ProgressDialog mProgressDialog = null;
 
-    private CheckBoxPreference isGlobalProxyCheck;
     private EditTextPreference proxyText;
     private EditTextPreference portText;
     private EditTextPreference remotePortText;
     private EditTextPreference sitekeyText;
-    private CheckBoxPreference isGFWListCheck;
-    private CheckBoxPreference isRunningCheck;
     private Preference proxyedApps;
     private CheckBoxPreference isBypassAppsCheck;
 
@@ -159,32 +156,6 @@ public class Shadowsocks extends PreferenceActivity implements
 
     }
 
-    private void disableAll() {
-        proxyText.setEnabled(false);
-        portText.setEnabled(false);
-        remotePortText.setEnabled(false);
-        sitekeyText.setEnabled(false);
-        proxyedApps.setEnabled(false);
-        isGFWListCheck.setEnabled(false);
-        isBypassAppsCheck.setEnabled(false);
-
-        isGlobalProxyCheck.setEnabled(false);
-    }
-
-    private void enableAll() {
-        proxyText.setEnabled(true);
-        portText.setEnabled(true);
-        remotePortText.setEnabled(true);
-        sitekeyText.setEnabled(true);
-        isGlobalProxyCheck.setEnabled(true);
-        isGFWListCheck.setEnabled(true);
-        if (!isGlobalProxyCheck.isChecked()) {
-            proxyedApps.setEnabled(true);
-            isBypassAppsCheck.setEnabled(true);
-        }
-
-    }
-
     private boolean isTextEmpty(String s, String msg) {
         if (s == null || s.length() <= 0) {
             showAToast(msg);
@@ -208,9 +179,6 @@ public class Shadowsocks extends PreferenceActivity implements
         sitekeyText = (EditTextPreference) findPreference("sitekey");
         proxyedApps = findPreference("proxyedApps");
 
-        isRunningCheck = (CheckBoxPreference) findPreference("isRunning");
-        isGlobalProxyCheck = (CheckBoxPreference) findPreference("isGlobalProxy");
-        isGFWListCheck = (CheckBoxPreference) findPreference("isGFWList");
         isBypassAppsCheck = (CheckBoxPreference) findPreference("isBypassApps");
 
         if (mProgressDialog == null)
@@ -350,22 +318,13 @@ public class Shadowsocks extends PreferenceActivity implements
         SharedPreferences settings = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (settings.getBoolean("isSystemProxy", false)) {
-            isGlobalProxyCheck.setEnabled(false);
-            isGFWListCheck.setEnabled(false);
+        if (settings.getBoolean("isGlobalProxy", false)) {
             proxyedApps.setEnabled(false);
             isBypassAppsCheck.setEnabled(false);
         } else {
-            if (settings.getBoolean("isGlobalProxy", false)) {
-                proxyedApps.setEnabled(false);
-                isBypassAppsCheck.setEnabled(false);
-            } else {
-                proxyedApps.setEnabled(true);
-                isBypassAppsCheck.setEnabled(true);
-            }
+            proxyedApps.setEnabled(true);
+            isBypassAppsCheck.setEnabled(true);
         }
-
-        sitekeyText.setEnabled(true);
 
         Editor edit = settings.edit();
 
@@ -385,14 +344,6 @@ public class Shadowsocks extends PreferenceActivity implements
         }
 
         edit.commit();
-
-        if (settings.getBoolean("isRunning", false)) {
-            isRunningCheck.setChecked(true);
-            disableAll();
-        } else {
-            isRunningCheck.setChecked(false);
-            enableAll();
-        }
 
         // Setup the initial values
 
@@ -448,15 +399,6 @@ public class Shadowsocks extends PreferenceActivity implements
             }
         }
 
-        if (key.equals("isRunning")) {
-            if (settings.getBoolean("isRunning", false)) {
-                disableAll();
-                isRunningCheck.setChecked(true);
-            } else {
-                isRunningCheck.setChecked(false);
-                enableAll();
-            }
-        }
 
         if (key.equals("remotePort"))
             if (settings.getString("remotePort", "").equals(""))
