@@ -43,6 +43,7 @@ public class Exec {
      * Callers are responsible for calling Exec.close() on the returned file
      * descriptor.
      *
+     * @param rdt       Whether redirect stdout and stderr
      * @param cmd       The command to execute.
      * @param args      An array of arguments to the command.
      * @param envVars   An array of strings of the form "VAR=value" to be added to the
@@ -52,7 +53,7 @@ public class Exec {
      *                  process will be written.
      * @return          File descriptor
      */
-    public static native FileDescriptor createSubprocess(String cmd,
+    public static native FileDescriptor createSubprocess(int rdt, String cmd,
                                                          String[] args, String[] envVars,
                                                          String scripts, int[] processId);
 

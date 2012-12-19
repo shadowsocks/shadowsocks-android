@@ -44,7 +44,7 @@ public class Utils {
             String arg0 = argList.get(0);
             String[] args = argList.toArray(new String[1]);
 
-            return Exec.createSubprocess(arg0, args, null,
+            return Exec.createSubprocess(result != null ? 1 : 0, arg0, args, null,
                     scripts + "\nexit\n", processId);
         }
 
@@ -112,7 +112,7 @@ public class Utils {
                     pipe = createSubprocess(pid, getShell());
                 }
 
-                if (pipe == null) return;
+                if (result == null || pipe == null) return;
 
                 if (pid[0] != -1) {
                     exitcode = Exec.waitFor(pid[0]);
@@ -125,8 +125,7 @@ public class Utils {
                 // Read stdout
                 while (stdout.available() > 0) {
                     read = stdout.read(buf);
-                    if (result != null)
-                        result.append(new String(buf, 0, read));
+                    result.append(new String(buf, 0, read));
                 }
 
             } catch (Exception ex) {

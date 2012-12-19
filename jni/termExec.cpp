@@ -99,7 +99,7 @@ static int throwOutOfMemoryError(JNIEnv *env, const char *message)
     return env->ThrowNew(exClass, message);
 }
 
-static int create_subprocess(const char *cmd, char *const argv[], 
+static int create_subprocess(const int rdt, const char *cmd, char *const argv[], 
     char *const envp[], const char* scripts, int* pProcessId)
 {
     pid_t pid;
@@ -107,7 +107,10 @@ static int create_subprocess(const char *cmd, char *const argv[],
     int pfds2[2];
 
     pipe(pfds);
-    pipe(pfds2);
+
+    if (rdt) {
+      pipe(pfds2);
+    }
 
     pid = fork();
 
@@ -127,9 +130,13 @@ static int create_subprocess(const char *cmd, char *const argv[],
         dup2(pfds[0], 0);
         close(pfds[1]);
 
-        dup2(pfds2[1], 1);
-        dup2(pfds2[1], 2);
-        close(pfds2[0]);
+        if (rdt) {
+          close(1);
+          close(2);
+          dup2(pfds2[1], 1);
+          dup2(pfds2[1], 2);
+          close(pfds2[0]);
+        }
 
         execv(cmd, argv);
 
@@ -144,15 +151,18 @@ static int create_subprocess(const char *cmd, char *const argv[],
         close(pfds[0]);
 
         write(pfds[1], scripts, strlen(scripts)+1);
-
-        close(pfds2[1]);
-        return pfds2[0]; 
+        if (rdt) {
+            close(pfds2[1]);
+            return pfds2[0]; 
+        } else {
+            return -1;
+        }
     }
 }
 
 
 static jobject android_os_Exec_createSubProcess(JNIEnv *env, jobject clazz,
-    jstring cmd, jobjectArray args, jobjectArray envVars, jstring scripts,
+    jint rdt, jstring cmd, jobjectArray args, jobjectArray envVars, jstring scripts,
     jintArray processIdArray)
 {
     const jchar* str = cmd ? env->GetStringCritical(cmd, 0) : 0;
@@ -215,7 +225,7 @@ static jobject android_os_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     }
 
     int procId;
-    int ptm = create_subprocess(cmd_8.string(), argv, envp, scripts_8.string(), 
+    int ptm = create_subprocess(rdt, cmd_8.string(), argv, envp, scripts_8.string(), 
         &procId);
 
     if (argv) {
@@ -324,7 +334,7 @@ static int register_FileDescriptor(JNIEnv *env)
 static const char *classPathName = "com/github/shadowsocks/Exec";
 
 static JNINativeMethod method_table[] = {
-    { "createSubprocess", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;[I)Ljava/io/FileDescriptor;",
+    { "createSubprocess", "(ILjava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;[I)Ljava/io/FileDescriptor;",
         (void*) android_os_Exec_createSubProcess },
     { "waitFor", "(I)I",
         (void*) android_os_Exec_waitFor},
