@@ -1,1 +1,1 @@
-APP_PLATFORM = anrdoid-8
+APP_PLATFORM = android-9

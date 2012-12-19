@@ -49,6 +49,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <signal.h>
+#include <stdio.h>
 
 static jclass class_fileDescriptor;
 static jfieldID field_fileDescriptor_descriptor;
@@ -98,24 +99,15 @@ static int throwOutOfMemoryError(JNIEnv *env, const char *message)
     return env->ThrowNew(exClass, message);
 }
 
-static int create_subprocess(const char *cmd,
-    char *const argv[], char *const envp[], int* pProcessId)
+static int create_subprocess(const char *cmd, char *const argv[], 
+    char *const envp[], const char* scripts, int* pProcessId)
 {
-    char filename[] = "/data/data/com.github.shadowsocks/defout";
-    char script[] = "/data/data/com.github.shadowsocks/script";
     pid_t pid;
+    int pfds[2];
+    int pfds2[2];
 
-    if (chmod(script, 0755) < 0) {
-        LOGE("error to chmod\n");
-        exit(-1);
-    }
-
-    int defout = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0600);
-
-    if(defout < 0) { 
-        LOGE("open file error\n");
-        exit(-1);
-    }
+    pipe(pfds);
+    pipe(pfds2);
 
     pid = fork();
 
@@ -126,28 +118,41 @@ static int create_subprocess(const char *cmd,
 
     if(pid == 0){
 
-        //setsid();
-
-        dup2(defout, 1);
-        dup2(defout, 2);
-
         if (envp) {
             for (; *envp; ++envp) {
                 putenv(*envp);
             }
         }
 
+        dup2(pfds[0], 0);
+        close(pfds[1]);
+
+        dup2(pfds2[1], 1);
+        dup2(pfds2[1], 2);
+        close(pfds2[0]);
+
         execv(cmd, argv);
-        exit(-1);
+
+        fflush(NULL);
+
+        exit(0);
+
     } else {
         *pProcessId = (int) pid;
-        return defout;
+
+        dup2(pfds[1], 1);
+        close(pfds[0]);
+
+        write(pfds[1], scripts, strlen(scripts)+1);
+
+        close(pfds2[1]);
+        return pfds2[0]; 
     }
 }
 
 
 static jobject android_os_Exec_createSubProcess(JNIEnv *env, jobject clazz,
-    jstring cmd, jobjectArray args, jobjectArray envVars,
+    jstring cmd, jobjectArray args, jobjectArray envVars, jstring scripts,
     jintArray processIdArray)
 {
     const jchar* str = cmd ? env->GetStringCritical(cmd, 0) : 0;
@@ -155,6 +160,13 @@ static jobject android_os_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     if (str) {
         cmd_8.set(str, env->GetStringLength(cmd));
         env->ReleaseStringCritical(cmd, str);
+    }
+
+    const jchar* str_scripts = scripts ? env->GetStringCritical(scripts, 0) : 0;
+    String8 scripts_8;
+    if (str_scripts) {
+        scripts_8.set(str_scripts, env->GetStringLength(scripts));
+        env->ReleaseStringCritical(scripts, str_scripts);
     }
 
     jsize size = args ? env->GetArrayLength(args) : 0;
@@ -203,7 +215,8 @@ static jobject android_os_Exec_createSubProcess(JNIEnv *env, jobject clazz,
     }
 
     int procId;
-    int ptm = create_subprocess(cmd_8.string(), argv, envp, &procId);
+    int ptm = create_subprocess(cmd_8.string(), argv, envp, scripts_8.string(), 
+        &procId);
 
     if (argv) {
         for (char **tmp = argv; *tmp; ++tmp) {
@@ -311,7 +324,7 @@ static int register_FileDescriptor(JNIEnv *env)
 static const char *classPathName = "com/github/shadowsocks/Exec";
 
 static JNINativeMethod method_table[] = {
-    { "createSubprocess", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;[I)Ljava/io/FileDescriptor;",
+    { "createSubprocess", "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;[I)Ljava/io/FileDescriptor;",
         (void*) android_os_Exec_createSubProcess },
     { "waitFor", "(I)I",
         (void*) android_os_Exec_waitFor},
