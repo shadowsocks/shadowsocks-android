@@ -115,7 +115,7 @@ public class Utils {
                 if (pipe == null) return;
 
                 if (pid[0] != -1) {
-                    Exec.waitFor(pid[0]);
+                    exitcode = Exec.waitFor(pid[0]);
                 }
 
                 final InputStream stdout = new FileInputStream(pipe);
