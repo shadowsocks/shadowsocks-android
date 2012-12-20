@@ -112,11 +112,11 @@ public class Utils {
                     pipe = createSubprocess(pid, getShell());
                 }
 
-                if (result == null || pipe == null) return;
-
                 if (pid[0] != -1) {
                     exitcode = Exec.waitFor(pid[0]);
                 }
+
+                if (result == null || pipe == null) return;
 
                 final InputStream stdout = new FileInputStream(pipe);
                 final byte buf[] = new byte[8192];
