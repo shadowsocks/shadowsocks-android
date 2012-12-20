@@ -44,6 +44,13 @@
         <CheckBoxPreference
                 android:dependency="isRunning"
                 android:defaultValue="true"
+                android:key="isDNSProxy"
+                android:summary="@string/dns_proxy_summary"
+                android:title="@string/dns_proxy">
+        </CheckBoxPreference>
+        <CheckBoxPreference
+                android:dependency="isRunning"
+                android:defaultValue="true"
                 android:key="isGFWList"
                 android:summary="@string/auto_set_gfwlist_summary"
                 android:title="@string/auto_set_gfwlist">

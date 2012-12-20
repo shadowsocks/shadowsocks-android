@@ -160,6 +160,9 @@
         only works for Wifi on Android 4.0 and above.</string>
 
     <string name="remote_port">Remote Port</string>
-    <string name="remote_port_summary">Remote port of shadowsocks server</string>
+    <string name="remote_port_summary">Remote port of shadowsocks server.</string>
+
+    <string name="dns_proxy">DNS Proxy</string>
+    <string name="dns_proxy_summary">Redirect DNS queries to remote server.</string>
 
 </resources>

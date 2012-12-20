@@ -163,6 +163,7 @@ public class ShadowsocksService extends Service {
     private boolean isGlobalProxy = false;
     private boolean isGFWList = false;
     private boolean isBypassApps = false;
+    private boolean isDNSProxy = false;
     private ProxyedApp apps[];
     private Method mSetForeground;
     private Method mStartForeground;
@@ -203,7 +204,7 @@ public class ShadowsocksService extends Service {
         new Thread() {
             @Override
             public void run() {
-                final String cmd = String.format(BASE + 
+                final String cmd = String.format(BASE +
                         "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\"",
                         appHost, remotePort, port, sitekey);
                 Node.exec(cmd);
@@ -251,6 +252,7 @@ public class ShadowsocksService extends Service {
         isGlobalProxy = settings.getBoolean("isGlobalProxy", false);
         isGFWList = settings.getBoolean("isGFWList", false);
         isBypassApps = settings.getBoolean("isBypassApps", false);
+        isDNSProxy = settings.getBoolean("isDNSProxy", false);
 
         new Thread(new Runnable() {
             @Override
@@ -258,16 +260,20 @@ public class ShadowsocksService extends Service {
 
                 boolean resolved = false;
 
-                if (appHost != null) {
-                    InetAddress addr = null;
-                    try {
-                        addr = InetAddress.getByName(appHost);
-                    } catch (UnknownHostException ignored) {
+                if (isDNSProxy) {
+                    if (appHost != null) {
+                        InetAddress addr = null;
+                        try {
+                            addr = InetAddress.getByName(appHost);
+                        } catch (UnknownHostException ignored) {
+                        }
+                        if (addr != null) {
+                            appHost = addr.getHostAddress();
+                            resolved = true;
+                        }
                     }
-                    if (addr != null) {
-                        appHost = addr.getHostAddress();
-                        resolved = true;
-                    }
+                } else {
+                    resolved = true;
                 }
 
                 handler.sendEmptyMessage(MSG_CONNECT_START);
@@ -519,17 +525,17 @@ public class ShadowsocksService extends Service {
 
         StringBuilder http_sb = new StringBuilder();
 
-        StringBuilder https_sb = new StringBuilder();
-
         init_sb.append(Utils.getIptables()).append(" -t nat -F OUTPUT\n");
 
         String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
 
         init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + remotePort));
-        //init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
         init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"));
-        //init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
-                //+ getApplicationInfo().uid));
+        if (!isDNSProxy) {
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
+                    + getApplicationInfo().uid));
+        }
 
         if (hasRedirectSupport) {
             init_sb.append(Utils.getIptables()).append(" -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to ").append(DNS_PORT).append("\n");
@@ -576,8 +582,6 @@ public class ShadowsocksService extends Service {
         Utils.runRootCommand(init_rules, 30 * 1000);
 
         String redt_rules = http_sb.toString();
-
-        redt_rules += https_sb.toString();
 
         Utils.runRootCommand(redt_rules);
 
