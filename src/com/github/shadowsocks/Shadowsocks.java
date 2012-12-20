@@ -495,11 +495,7 @@ public class Shadowsocks extends PreferenceActivity implements
     public boolean serviceStart() {
 
         if (ShadowsocksService.isServiceStarted()) {
-            try {
-                stopService(new Intent(this, ShadowsocksService.class));
-            } catch (Exception e) {
-                // Nothing
-            }
+            stopService(new Intent(this, ShadowsocksService.class));
             return false;
         }
 
@@ -509,29 +505,6 @@ public class Shadowsocks extends PreferenceActivity implements
         final String proxy = settings.getString("proxy", "");
         if (isTextEmpty(proxy, getString(R.string.proxy_empty)))
             return false;
-
-        if (proxy.contains("proxyofmax.appspot.com")) {
-            final TextView message = new TextView(this);
-            message.setPadding(10, 5, 10, 5);
-            final SpannableString s = new SpannableString(
-                    getText(R.string.default_proxy_alert));
-            Linkify.addLinks(s, Linkify.WEB_URLS);
-            message.setText(s);
-            message.setMovementMethod(LinkMovementMethod.getInstance());
-
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.warning)
-                    .setCancelable(false)
-                    .setIcon(android.R.drawable.ic_dialog_info)
-                    .setNegativeButton(getString(R.string.ok_iknow),
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog,
-                                                    int id) {
-                                    dialog.cancel();
-                                }
-                            }).setView(message).create().show();
-        }
 
         String portText = settings.getString("port", "");
         if (isTextEmpty(portText, getString(R.string.port_empty)))
@@ -547,13 +520,8 @@ public class Shadowsocks extends PreferenceActivity implements
             return false;
         }
 
-        try {
-            Intent it = new Intent(this, ShadowsocksService.class);
-            startService(it);
-        } catch (Exception e) {
-            // Nothing
-            return false;
-        }
+        Intent it = new Intent(this, ShadowsocksService.class);
+        startService(it);
 
         return true;
     }

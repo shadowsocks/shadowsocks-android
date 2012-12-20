@@ -60,6 +60,8 @@ import java.io.*;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashSet;
 
 public class ShadowsocksService extends Service {
@@ -254,6 +256,20 @@ public class ShadowsocksService extends Service {
             @Override
             public void run() {
 
+                boolean resolved = false;
+
+                if (appHost != null) {
+                    InetAddress addr = null;
+                    try {
+                        addr = InetAddress.getByName(appHost);
+                    } catch (UnknownHostException ignored) {
+                    }
+                    if (addr != null) {
+                        appHost = addr.getHostAddress();
+                        resolved = true;
+                    }
+                }
+
                 handler.sendEmptyMessage(MSG_CONNECT_START);
 
                 Log.d(TAG, "IPTABLES: " + Utils.getIptables());
@@ -261,7 +277,7 @@ public class ShadowsocksService extends Service {
                 // Test for Redirect Support
                 hasRedirectSupport = Utils.getHasRedirectSupport();
 
-                if (handleConnection()) {
+                if (resolved && handleConnection()) {
                     // Connection and forward successful
                     notifyAlert(getString(R.string.forward_success),
                             getString(R.string.service_running));
@@ -510,10 +526,10 @@ public class ShadowsocksService extends Service {
         String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
 
         init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + remotePort));
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
+        //init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
         init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"));
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
-                + getApplicationInfo().uid));
+        //init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner "
+                //+ getApplicationInfo().uid));
 
         if (hasRedirectSupport) {
             init_sb.append(Utils.getIptables()).append(" -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to ").append(DNS_PORT).append("\n");
