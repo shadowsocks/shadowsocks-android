@@ -201,8 +201,8 @@ public class ShadowsocksService extends Service {
         new Thread() {
             @Override
             public void run() {
-                final String cmd = String.format(BASE
-                        + "node " + BASE + "local.js -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\"",
+                final String cmd = String.format(BASE + 
+                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\"",
                         appHost, remotePort, port, sitekey);
                 Node.exec(cmd);
             }
