@@ -51,14 +51,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.*;
-import android.text.SpannableString;
-import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.google.analytics.tracking.android.EasyTracker;
 
@@ -109,6 +105,7 @@ public class Shadowsocks extends PreferenceActivity implements
     private EditTextPreference sitekeyText;
     private Preference proxyedApps;
     private CheckBoxPreference isBypassAppsCheck;
+    private CheckBoxPreference isRunningCheck;
 
     private void copyAssets(String path) {
 
@@ -180,6 +177,7 @@ public class Shadowsocks extends PreferenceActivity implements
         proxyedApps = findPreference("proxyedApps");
 
         isBypassAppsCheck = (CheckBoxPreference) findPreference("isBypassApps");
+        isRunningCheck = (CheckBoxPreference) findPreference("isRunning");
 
         if (mProgressDialog == null)
             mProgressDialog = ProgressDialog.show(this, "",
@@ -373,6 +371,14 @@ public class Shadowsocks extends PreferenceActivity implements
         // Let's do something a preference value changes
         SharedPreferences settings = PreferenceManager
                 .getDefaultSharedPreferences(this);
+
+        if (key.equals("isRunning")) {
+            if (settings.getBoolean("isRunning", false)) {
+                isRunningCheck.setChecked(true);
+            } else {
+                isRunningCheck.setChecked(false);
+            }
+        }
 
         if (key.equals("isConnecting")) {
             if (settings.getBoolean("isConnecting", false)) {
