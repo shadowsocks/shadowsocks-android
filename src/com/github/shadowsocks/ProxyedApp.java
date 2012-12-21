@@ -7,7 +7,6 @@ public class ProxyedApp {
     private String username;
     private String procname;
     private String name;
-
     private boolean proxyed = false;
 
     /**
@@ -18,52 +17,17 @@ public class ProxyedApp {
     }
 
     /**
-     * @return the procname
-     */
-    public String getProcname() {
-        return procname;
-    }
-
-    /**
-     * @return the uid
-     */
-    public int getUid() {
-        return uid;
-    }
-
-    /**
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * @return the enabled
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * @return the proxyed
-     */
-    public boolean isProxyed() {
-        return proxyed;
-    }
-
-    /**
-     * @param enabled the enabled to set
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    /**
      * @param name the name to set
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the procname
+     */
+    public String getProcname() {
+        return procname;
     }
 
     /**
@@ -74,10 +38,10 @@ public class ProxyedApp {
     }
 
     /**
-     * @param proxyed the proxyed to set
+     * @return the uid
      */
-    public void setProxyed(boolean proxyed) {
-        this.proxyed = proxyed;
+    public int getUid() {
+        return uid;
     }
 
     /**
@@ -88,9 +52,44 @@ public class ProxyedApp {
     }
 
     /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
      * @param username the username to set
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    /**
+     * @return the enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * @param enabled the enabled to set
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    /**
+     * @return the proxyed
+     */
+    public boolean isProxyed() {
+        return proxyed;
+    }
+
+    /**
+     * @param proxyed the proxyed to set
+     */
+    public void setProxyed(boolean proxyed) {
+        this.proxyed = proxyed;
     }
 }

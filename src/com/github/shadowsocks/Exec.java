@@ -51,7 +51,7 @@ public class Exec {
      * @param scripts   The scripts to execute.
      * @param processId A one-element array to which the process ID of the started
      *                  process will be written.
-     * @return          File descriptor
+     * @return File descriptor
      */
     public static native FileDescriptor createSubprocess(int rdt, String cmd,
                                                          String[] args, String[] envVars,

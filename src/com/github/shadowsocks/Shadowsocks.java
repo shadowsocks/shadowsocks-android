@@ -66,13 +66,11 @@ import java.io.OutputStream;
 public class Shadowsocks extends PreferenceActivity implements
         OnSharedPreferenceChangeListener {
 
-    private static final String TAG = "Shadowsocks";
-
     public static final String PREFS_NAME = "Shadowsocks";
-
+    private static final String TAG = "Shadowsocks";
     private static final int MSG_CRASH_RECOVER = 1;
     private static final int MSG_INITIAL_FINISH = 2;
-
+    private static ProgressDialog mProgressDialog = null;
     final Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -96,9 +94,6 @@ public class Shadowsocks extends PreferenceActivity implements
             super.handleMessage(msg);
         }
     };
-
-    private static ProgressDialog mProgressDialog = null;
-
     private EditTextPreference proxyText;
     private EditTextPreference portText;
     private EditTextPreference remotePortText;

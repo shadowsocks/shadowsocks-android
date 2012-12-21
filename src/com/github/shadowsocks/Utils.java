@@ -16,151 +16,19 @@ import java.util.ArrayList;
 
 public class Utils {
 
-    /**
-     * Internal thread used to execute scripts (as root or not).
-     */
-    private static final class ScriptRunner extends Thread {
-        private final String scripts;
-        private final StringBuilder result;
-        private final boolean asroot;
-        public int exitcode = -1;
-
-        /**
-         * Creates a new script runner.
-         *
-         * @param script script to run
-         * @param result result output
-         * @param asroot if true, executes the script as root
-         */
-        public ScriptRunner(String script, StringBuilder result,
-                            boolean asroot) {
-            this.scripts = script;
-            this.result = result;
-            this.asroot = asroot;
-        }
-
-        private FileDescriptor createSubprocess(int[] processId, String cmd) {
-            ArrayList<String> argList = parse(cmd);
-            String arg0 = argList.get(0);
-            String[] args = argList.toArray(new String[1]);
-
-            return Exec.createSubprocess(result != null ? 1 : 0, arg0, args, null,
-                    scripts + "\nexit\n", processId);
-        }
-
-        private ArrayList<String> parse(String cmd) {
-            final int PLAIN = 0;
-            final int WHITESPACE = 1;
-            final int INQUOTE = 2;
-            int state = WHITESPACE;
-            ArrayList<String> result = new ArrayList<String>();
-            int cmdLen = cmd.length();
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < cmdLen; i++) {
-                char c = cmd.charAt(i);
-                if (state == PLAIN) {
-                    if (Character.isWhitespace(c)) {
-                        result.add(builder.toString());
-                        builder.delete(0, builder.length());
-                        state = WHITESPACE;
-                    } else if (c == '"') {
-                        state = INQUOTE;
-                    } else {
-                        builder.append(c);
-                    }
-                } else if (state == WHITESPACE) {
-                    if (Character.isWhitespace(c)) {
-                        // do nothing
-                    } else if (c == '"') {
-                        state = INQUOTE;
-                    } else {
-                        state = PLAIN;
-                        builder.append(c);
-                    }
-                } else if (state == INQUOTE) {
-                    if (c == '\\') {
-                        if (i + 1 < cmdLen) {
-                            i += 1;
-                            builder.append(cmd.charAt(i));
-                        }
-                    } else if (c == '"') {
-                        state = PLAIN;
-                    } else {
-                        builder.append(c);
-                    }
-                }
-            }
-            if (builder.length() > 0) {
-                result.add(builder.toString());
-            }
-            return result;
-        }
-
-        @Override
-        public void run() {
-            FileDescriptor pipe = null;
-            int pid[] = new int[1];
-            pid[0] = -1;
-
-            try {
-
-                if (this.asroot) {
-                    // Create the "su" request to run the script
-                    pipe = createSubprocess(pid, root_shell);
-                } else {
-                    // Create the "sh" request to run the script
-                    pipe = createSubprocess(pid, getShell());
-                }
-
-                if (pid[0] != -1) {
-                    exitcode = Exec.waitFor(pid[0]);
-                }
-
-                if (result == null || pipe == null) return;
-
-                final InputStream stdout = new FileInputStream(pipe);
-                final byte buf[] = new byte[8192];
-                int read = 0;
-
-                // Read stdout
-                while (stdout.available() > 0) {
-                    read = stdout.read(buf);
-                    result.append(new String(buf, 0, read));
-                }
-
-            } catch (Exception ex) {
-                Log.e(TAG, "Cannot execute command", ex);
-                if (result != null)
-                    result.append("\n").append(ex);
-            } finally {
-                if (pipe != null) {
-                    Exec.close(pipe);
-                }
-                if (pid[0] != -1) {
-                    Exec.hangupProcessGroup(pid[0]);
-                }
-            }
-        }
-    }
-
     public final static String TAG = "Shadowsocks";
-
     public final static String DEFAULT_SHELL = "/system/bin/sh";
     public final static String DEFAULT_ROOT = "/system/bin/su";
-
     public final static String ALTERNATIVE_ROOT = "/system/xbin/su";
     public final static String DEFAULT_IPTABLES = "/data/data/com.github.shadowsocks/iptables";
     public final static String ALTERNATIVE_IPTABLES = "/system/bin/iptables";
-
     public final static int TIME_OUT = -99;
     private static boolean initialized = false;
     private static int hasRedirectSupport = -1;
-
     private static int isRoot = -1;
     private static String shell = null;
     private static String root_shell = null;
     private static String iptables = null;
-
     private static String data_path = null;
 
     private static void checkIptables() {
@@ -392,5 +260,132 @@ public class Utils {
             return TIME_OUT;
         }
         return runner.exitcode;
+    }
+
+    /**
+     * Internal thread used to execute scripts (as root or not).
+     */
+    private static final class ScriptRunner extends Thread {
+        private final String scripts;
+        private final StringBuilder result;
+        private final boolean asroot;
+        public int exitcode = -1;
+
+        /**
+         * Creates a new script runner.
+         *
+         * @param script script to run
+         * @param result result output
+         * @param asroot if true, executes the script as root
+         */
+        public ScriptRunner(String script, StringBuilder result,
+                            boolean asroot) {
+            this.scripts = script;
+            this.result = result;
+            this.asroot = asroot;
+        }
+
+        private FileDescriptor createSubprocess(int[] processId, String cmd) {
+            ArrayList<String> argList = parse(cmd);
+            String arg0 = argList.get(0);
+            String[] args = argList.toArray(new String[1]);
+
+            return Exec.createSubprocess(result != null ? 1 : 0, arg0, args, null,
+                    scripts + "\nexit\n", processId);
+        }
+
+        private ArrayList<String> parse(String cmd) {
+            final int PLAIN = 0;
+            final int WHITESPACE = 1;
+            final int INQUOTE = 2;
+            int state = WHITESPACE;
+            ArrayList<String> result = new ArrayList<String>();
+            int cmdLen = cmd.length();
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < cmdLen; i++) {
+                char c = cmd.charAt(i);
+                if (state == PLAIN) {
+                    if (Character.isWhitespace(c)) {
+                        result.add(builder.toString());
+                        builder.delete(0, builder.length());
+                        state = WHITESPACE;
+                    } else if (c == '"') {
+                        state = INQUOTE;
+                    } else {
+                        builder.append(c);
+                    }
+                } else if (state == WHITESPACE) {
+                    if (Character.isWhitespace(c)) {
+                        // do nothing
+                    } else if (c == '"') {
+                        state = INQUOTE;
+                    } else {
+                        state = PLAIN;
+                        builder.append(c);
+                    }
+                } else if (state == INQUOTE) {
+                    if (c == '\\') {
+                        if (i + 1 < cmdLen) {
+                            i += 1;
+                            builder.append(cmd.charAt(i));
+                        }
+                    } else if (c == '"') {
+                        state = PLAIN;
+                    } else {
+                        builder.append(c);
+                    }
+                }
+            }
+            if (builder.length() > 0) {
+                result.add(builder.toString());
+            }
+            return result;
+        }
+
+        @Override
+        public void run() {
+            FileDescriptor pipe = null;
+            int pid[] = new int[1];
+            pid[0] = -1;
+
+            try {
+
+                if (this.asroot) {
+                    // Create the "su" request to run the script
+                    pipe = createSubprocess(pid, root_shell);
+                } else {
+                    // Create the "sh" request to run the script
+                    pipe = createSubprocess(pid, getShell());
+                }
+
+                if (pid[0] != -1) {
+                    exitcode = Exec.waitFor(pid[0]);
+                }
+
+                if (result == null || pipe == null) return;
+
+                final InputStream stdout = new FileInputStream(pipe);
+                final byte buf[] = new byte[8192];
+                int read = 0;
+
+                // Read stdout
+                while (stdout.available() > 0) {
+                    read = stdout.read(buf);
+                    result.append(new String(buf, 0, read));
+                }
+
+            } catch (Exception ex) {
+                Log.e(TAG, "Cannot execute command", ex);
+                if (result != null)
+                    result.append("\n").append(ex);
+            } finally {
+                if (pipe != null) {
+                    Exec.close(pipe);
+                }
+                if (pid[0] != -1) {
+                    Exec.hangupProcessGroup(pid[0]);
+                }
+            }
+        }
     }
 }

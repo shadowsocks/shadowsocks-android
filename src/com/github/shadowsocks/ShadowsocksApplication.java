@@ -1,7 +1,6 @@
 package com.github.shadowsocks;
 
 import android.app.Application;
-import android.content.Context;
 import com.google.analytics.tracking.android.EasyTracker;
 
 public class ShadowsocksApplication extends Application {

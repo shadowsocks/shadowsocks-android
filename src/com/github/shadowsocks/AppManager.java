@@ -30,11 +30,67 @@ import java.util.*;
 public class AppManager extends Activity implements OnCheckedChangeListener,
         OnClickListener {
 
-    private static class ListEntry {
-        private CheckBox box;
-        private TextView text;
-        private ImageView icon;
-    }
+    public final static String PREFS_KEY_PROXYED = "Proxyed";
+    private static final int MSG_LOAD_START = 1;
+    private static final int MSG_LOAD_FINISH = 2;
+    final Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_LOAD_START:
+                    pd = ProgressDialog.show(AppManager.this, "",
+                            getString(R.string.loading), true, true);
+                    break;
+                case MSG_LOAD_FINISH:
+
+                    listApps.setAdapter(adapter);
+
+                    listApps.setOnScrollListener(new OnScrollListener() {
+
+                        boolean visible;
+
+                        @Override
+                        public void onScroll(AbsListView view,
+                                             int firstVisibleItem, int visibleItemCount,
+                                             int totalItemCount) {
+                            if (visible) {
+                                String name = apps[firstVisibleItem].getName();
+                                if (name != null && name.length() > 1)
+                                    overlay.setText(apps[firstVisibleItem]
+                                            .getName().substring(0, 1));
+                                else
+                                    overlay.setText("*");
+                                overlay.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        public void onScrollStateChanged(AbsListView view,
+                                                         int scrollState) {
+                            visible = true;
+                            if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+                                overlay.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
+
+                    if (pd != null) {
+                        pd.dismiss();
+                        pd = null;
+                    }
+                    break;
+            }
+            super.handleMessage(msg);
+        }
+    };
+    private ProxyedApp[] apps = null;
+    private ListView listApps;
+    private AppManager mAppManager;
+    private TextView overlay;
+    private ProgressDialog pd = null;
+    private ListAdapter adapter;
+    private ImageLoader dm;
+    private boolean appsLoaded = false;
 
     public static ProxyedApp[] getProxyedApps(Context context) {
 
@@ -95,77 +151,6 @@ public class AppManager extends Activity implements OnCheckedChangeListener,
         vectorApps.toArray(apps);
         return apps;
     }
-
-    private ProxyedApp[] apps = null;
-
-    private ListView listApps;
-
-    private AppManager mAppManager;
-    private TextView overlay;
-
-    private ProgressDialog pd = null;
-    private ListAdapter adapter;
-
-    private ImageLoader dm;
-
-    private static final int MSG_LOAD_START = 1;
-
-    private static final int MSG_LOAD_FINISH = 2;
-
-    public final static String PREFS_KEY_PROXYED = "Proxyed";
-
-    private boolean appsLoaded = false;
-
-    final Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_LOAD_START:
-                    pd = ProgressDialog.show(AppManager.this, "",
-                            getString(R.string.loading), true, true);
-                    break;
-                case MSG_LOAD_FINISH:
-
-                    listApps.setAdapter(adapter);
-
-                    listApps.setOnScrollListener(new OnScrollListener() {
-
-                        boolean visible;
-
-                        @Override
-                        public void onScroll(AbsListView view,
-                                             int firstVisibleItem, int visibleItemCount,
-                                             int totalItemCount) {
-                            if (visible) {
-                                String name = apps[firstVisibleItem].getName();
-                                if (name != null && name.length() > 1)
-                                    overlay.setText(apps[firstVisibleItem]
-                                            .getName().substring(0, 1));
-                                else
-                                    overlay.setText("*");
-                                overlay.setVisibility(View.VISIBLE);
-                            }
-                        }
-
-                        @Override
-                        public void onScrollStateChanged(AbsListView view,
-                                                         int scrollState) {
-                            visible = true;
-                            if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-                                overlay.setVisibility(View.INVISIBLE);
-                            }
-                        }
-                    });
-
-                    if (pd != null) {
-                        pd.dismiss();
-                        pd = null;
-                    }
-                    break;
-            }
-            super.handleMessage(msg);
-        }
-    };
 
     public void getApps(Context context) {
 
@@ -411,6 +396,12 @@ public class AppManager extends Activity implements OnCheckedChangeListener,
         edit.putString(PREFS_KEY_PROXYED, tordApps.toString());
         edit.commit();
 
+    }
+
+    private static class ListEntry {
+        private CheckBox box;
+        private TextView text;
+        private ImageView icon;
     }
 
 }

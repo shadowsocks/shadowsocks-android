@@ -16,6 +16,116 @@ import java.util.Stack;
 
 public class ImageLoader {
 
+    final int stub_id = R.drawable.sym_def_app_icon;
+    PhotosQueue photosQueue = new PhotosQueue();
+    PhotosLoader photoLoaderThread = new PhotosLoader();
+    // the simplest in-memory cache implementation. This should be replaced with
+    // something like SoftReference or BitmapOptions.inPurgeable(since 1.6)
+    private HashMap<Integer, Bitmap> cache = new HashMap<Integer, Bitmap>();
+    private File cacheDir;
+    private Context context;
+
+    public ImageLoader(Context c) {
+        // Make the background thead low priority. This way it will not affect
+        // the UI performance
+        photoLoaderThread.setPriority(Thread.NORM_PRIORITY - 1);
+
+        context = c;
+
+        // Find the dir to save cached images
+        cacheDir = context.getCacheDir();
+
+    }
+
+    public void clearCache() {
+        // clear memory cache
+        cache.clear();
+
+        // clear SD cache
+        File[] files = cacheDir.listFiles();
+        for (File f : files)
+            f.delete();
+    }
+
+    // decodes image and scales it to reduce memory consumption
+    private Bitmap decodeFile(File f) {
+        try {
+            // decode image size
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
+
+            // Find the correct scale value. It should be the power of 2.
+            final int REQUIRED_SIZE = 70;
+            int width_tmp = o.outWidth, height_tmp = o.outHeight;
+            int scale = 1;
+            while (true) {
+                if (width_tmp / 2 < REQUIRED_SIZE
+                        || height_tmp / 2 < REQUIRED_SIZE)
+                    break;
+                width_tmp /= 2;
+                height_tmp /= 2;
+                scale *= 2;
+            }
+
+            // decode with inSampleSize
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize = scale;
+            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
+        } catch (FileNotFoundException ignored) {
+        }
+        return null;
+    }
+
+    public void DisplayImage(int uid, Activity activity, ImageView imageView) {
+        if (cache.containsKey(uid))
+            imageView.setImageBitmap(cache.get(uid));
+        else {
+            queuePhoto(uid, activity, imageView);
+            imageView.setImageResource(stub_id);
+        }
+    }
+
+    private Bitmap getBitmap(int uid) {
+        // I identify images by hashcode. Not a perfect solution, good for the
+        // demo.
+        String filename = String.valueOf(uid);
+        File f = new File(cacheDir, filename);
+
+        // from SD cache
+        Bitmap b = decodeFile(f);
+        if (b != null)
+            return b;
+
+        // from web
+        try {
+            BitmapDrawable icon = (BitmapDrawable) Utils.getAppIcon(context,
+                    uid);
+            return icon.getBitmap();
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private void queuePhoto(int uid, Activity activity, ImageView imageView) {
+        // This ImageView may be used for other images before. So there may be
+        // some old tasks in the queue. We need to discard them.
+        photosQueue.Clean(imageView);
+        PhotoToLoad p = new PhotoToLoad(uid, imageView);
+        synchronized (photosQueue.photosToLoad) {
+            photosQueue.photosToLoad.push(p);
+            photosQueue.photosToLoad.notifyAll();
+        }
+
+        // start thread if it's not started yet
+        if (photoLoaderThread.getState() == Thread.State.NEW)
+            photoLoaderThread.start();
+    }
+
+    public void stopThread() {
+        photoLoaderThread.interrupt();
+    }
+
     // Used to display bitmap in the UI thread
     class BitmapDisplayer implements Runnable {
         Bitmap bitmap;
@@ -95,121 +205,6 @@ public class ImageLoader {
             uid = u;
             imageView = i;
         }
-    }
-
-    // the simplest in-memory cache implementation. This should be replaced with
-    // something like SoftReference or BitmapOptions.inPurgeable(since 1.6)
-    private HashMap<Integer, Bitmap> cache = new HashMap<Integer, Bitmap>();
-
-    private File cacheDir;
-
-    private Context context;
-
-    final int stub_id = R.drawable.sym_def_app_icon;
-
-    PhotosQueue photosQueue = new PhotosQueue();
-
-    PhotosLoader photoLoaderThread = new PhotosLoader();
-
-    public ImageLoader(Context c) {
-        // Make the background thead low priority. This way it will not affect
-        // the UI performance
-        photoLoaderThread.setPriority(Thread.NORM_PRIORITY - 1);
-
-        context = c;
-
-        // Find the dir to save cached images
-        cacheDir = context.getCacheDir();
-
-    }
-
-    public void clearCache() {
-        // clear memory cache
-        cache.clear();
-
-        // clear SD cache
-        File[] files = cacheDir.listFiles();
-        for (File f : files)
-            f.delete();
-    }
-
-    // decodes image and scales it to reduce memory consumption
-    private Bitmap decodeFile(File f) {
-        try {
-            // decode image size
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
-
-            // Find the correct scale value. It should be the power of 2.
-            final int REQUIRED_SIZE = 70;
-            int width_tmp = o.outWidth, height_tmp = o.outHeight;
-            int scale = 1;
-            while (true) {
-                if (width_tmp / 2 < REQUIRED_SIZE
-                        || height_tmp / 2 < REQUIRED_SIZE)
-                    break;
-                width_tmp /= 2;
-                height_tmp /= 2;
-                scale *= 2;
-            }
-
-            // decode with inSampleSize
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {
-        }
-        return null;
-    }
-
-    public void DisplayImage(int uid, Activity activity, ImageView imageView) {
-        if (cache.containsKey(uid))
-            imageView.setImageBitmap(cache.get(uid));
-        else {
-            queuePhoto(uid, activity, imageView);
-            imageView.setImageResource(stub_id);
-        }
-    }
-
-    private Bitmap getBitmap(int uid) {
-        // I identify images by hashcode. Not a perfect solution, good for the
-        // demo.
-        String filename = String.valueOf(uid);
-        File f = new File(cacheDir, filename);
-
-        // from SD cache
-        Bitmap b = decodeFile(f);
-        if (b != null)
-            return b;
-
-        // from web
-        try {
-            BitmapDrawable icon = (BitmapDrawable) Utils.getAppIcon(context,
-                    uid);
-            return icon.getBitmap();
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
-    private void queuePhoto(int uid, Activity activity, ImageView imageView) {
-        // This ImageView may be used for other images before. So there may be
-        // some old tasks in the queue. We need to discard them.
-        photosQueue.Clean(imageView);
-        PhotoToLoad p = new PhotoToLoad(uid, imageView);
-        synchronized (photosQueue.photosToLoad) {
-            photosQueue.photosToLoad.push(p);
-            photosQueue.photosToLoad.notifyAll();
-        }
-
-        // start thread if it's not started yet
-        if (photoLoaderThread.getState() == Thread.State.NEW)
-            photoLoaderThread.start();
-    }
-
-    public void stopThread() {
-        photoLoaderThread.interrupt();
     }
 
 }
