@@ -271,6 +271,21 @@ public class Utils {
         private final boolean asroot;
         public int exitcode = -1;
 
+        private int[] pid = new int[1];
+        private FileDescriptor pipe;
+
+        @Override
+        public void destroy() {
+            if (pid[0] != -1) {
+                Exec.hangupProcessGroup(pid[0]);
+                pid[0] = -1;
+            }
+            if (pipe != null) {
+                Exec.close(pipe);
+                pipe = null;
+            }
+        }
+
         /**
          * Creates a new script runner.
          *
@@ -344,8 +359,6 @@ public class Utils {
 
         @Override
         public void run() {
-            FileDescriptor pipe = null;
-            int pid[] = new int[1];
             pid[0] = -1;
 
             try {
