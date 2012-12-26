@@ -534,13 +534,35 @@ static void accept_cb (EV_P_ ev_io *w, int revents)
 int main (int argc, char **argv)
 {
 
-    if (argc < 5)
-        return -1;
+    char *server = NULL;
+    char *remote_port = NULL;
+    char *port = NULL;
+    char *key = NULL;
+    int c;
 
-    const char *server = argv[1];
-    const char *remote_port = argv[2];
-    const char *port = argv[3];
-    const char *key =  argv[4];
+    opterr = 0;
+
+    while ((c = getopt (argc, argv, "s:p:l:k:")) != -1) {
+        switch (c) {
+            case 's':
+                server = optarg;
+                break;
+            case 'p':
+                remote_port = optarg;
+                break;
+            case 'l':
+                port = optarg;
+                break;
+            case 'k':
+                key = optarg;
+                break;
+        }
+    }
+
+    if (server == NULL || remote_port == NULL ||
+            port == NULL || key == NULL) {
+        exit(EXIT_FAILURE);
+    }
 
     /* Our process ID and Session ID */
     pid_t pid, sid;
