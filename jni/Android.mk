@@ -34,17 +34,17 @@ LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 
 include $(BUILD_EXECUTABLE)
 
-#include $(CLEAR_VARS)
+include $(CLEAR_VARS)
 
-#LOCAL_MODULE    := shadowsocks 
-#LOCAL_SRC_FILES := shadowsocks/local.c shadowsocks/encrypt.c
-#LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/libev/ -I$(LOCAL_PATH)/openssl/include -std=c99
+LOCAL_MODULE    := shadowsocks 
+LOCAL_SRC_FILES := shadowsocks/local.c shadowsocks/encrypt.c
+LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/libev/ -I$(LOCAL_PATH)/openssl/include -std=c99
 
-#LOCAL_STATIC_LIBRARIES := libev libcrypto
+LOCAL_STATIC_LIBRARIES := libev libcrypto
 
-#LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS := -llog
 
-#include $(BUILD_EXECUTABLE)
+include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
@@ -68,9 +68,9 @@ LOCAL_LDLIBS := -ldl
 
 include $(BUILD_SHARED_LIBRARY)
 
-#subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
-	#crypto \
-	#))
+subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
+	crypto \
+	))
 
-#include $(subdirs)
+include $(subdirs)
 
