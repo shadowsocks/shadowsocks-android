@@ -49,14 +49,10 @@ void get_table(const char* key) {
     _a = *(unsigned long long *)tmp_hash;
     unsigned int i;
 
-    LOGD("key hash: %lld", _a);
-
     for(i = 0; i < 256; ++i) {
         table[i] = i;
     }
     for(i = 1; i < 1024; ++i) {
-        // use bubble sort in order to keep the array stable as in Python
-        unsigned char t;
         _i = i;
         qsort(table, 256, sizeof(unsigned char), random_compare);
     }

@@ -539,10 +539,11 @@ int main (int argc, char **argv)
     char *port = NULL;
     char *key = NULL;
     int c;
+    int f_flags = 0;
 
     opterr = 0;
 
-    while ((c = getopt (argc, argv, "s:p:l:k:")) != -1) {
+    while ((c = getopt (argc, argv, "fs:p:l:k:")) != -1) {
         switch (c) {
             case 's':
                 server = optarg;
@@ -556,6 +557,9 @@ int main (int argc, char **argv)
             case 'k':
                 key = optarg;
                 break;
+            case 'f':
+                f_flags = 1;
+                break;
         }
     }
 
@@ -564,46 +568,49 @@ int main (int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    /* Our process ID and Session ID */
-    pid_t pid, sid;
+    if (f_flags) {
 
-    /* Fork off the parent process */
-    pid = fork();
-    if (pid < 0) {
-        exit(EXIT_FAILURE);
+        /* Our process ID and Session ID */
+        pid_t pid, sid;
+
+        /* Fork off the parent process */
+        pid = fork();
+        if (pid < 0) {
+            exit(EXIT_FAILURE);
+        }
+        /* If we got a good PID, then
+           we can exit the parent process. */
+        if (pid > 0) {
+            FILE *file = fopen("/data/data/com.github.shadowsocks/shadowsocks.pid", "w");
+            fprintf(file, "%d", pid);
+            fclose(file);
+            exit(EXIT_SUCCESS);
+        }
+
+        /* Change the file mode mask */
+        umask(0);
+
+        /* Open any logs here */        
+
+        /* Create a new SID for the child process */
+        sid = setsid();
+        if (sid < 0) {
+            /* Log the failure */
+            exit(EXIT_FAILURE);
+        }
+
+
+        /* Change the current working directory */
+        if ((chdir("/")) < 0) {
+            /* Log the failure */
+            exit(EXIT_FAILURE);
+        }
+
+        /* Close out the standard file descriptors */
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
     }
-    /* If we got a good PID, then
-       we can exit the parent process. */
-    if (pid > 0) {
-        FILE *file = fopen("/data/data/com.github.shadowsocks/shadowsocks.pid", "w");
-        fprintf(file, "%d", pid);
-        fclose(file);
-        exit(EXIT_SUCCESS);
-    }
-
-    /* Change the file mode mask */
-    umask(0);
-
-    /* Open any logs here */        
-
-    /* Create a new SID for the child process */
-    sid = setsid();
-    if (sid < 0) {
-        /* Log the failure */
-        exit(EXIT_FAILURE);
-    }
-
-
-    /* Change the current working directory */
-    if ((chdir("/")) < 0) {
-        /* Log the failure */
-        exit(EXIT_FAILURE);
-    }
-
-    /* Close out the standard file descriptors */
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
 
     _server = strdup(server);
     _remote_port = strdup(remote_port);
