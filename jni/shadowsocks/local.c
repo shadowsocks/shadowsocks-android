@@ -199,8 +199,8 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 addr_len += name_len;
 
                 // get port
-                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 4); 
-                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 4 + 1); 
+                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + sizeof(struct in_addr)); 
+                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + sizeof(struct in_addr) + 1); 
                 addr_to_send[addr_len] = 0;
 
             } else if (request->atyp == 3) {
@@ -610,6 +610,11 @@ int main (int argc, char **argv)
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
+    } else {
+        pid_t pid = getpid();
+        FILE *file = fopen("/data/data/com.github.shadowsocks/shadowsocks.pid", "w");
+        fprintf(file, "%d", pid);
+        fclose(file);
     }
 
     _server = strdup(server);
