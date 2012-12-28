@@ -191,16 +191,9 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
             if (request->atyp == 1) {
 
                 // IP V4
-                struct in_addr *in_addr;
-                in_addr = (struct in_addr *)(server->buf + 4);
-                char* addr_buf = inet_ntoa(*in_addr);
-                unsigned char name_len = strlen(addr_buf);
-                memcpy(addr_to_send + addr_len, addr_buf, name_len);
-                addr_len += name_len;
-
-                // get port
-                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 4); 
-                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 4 + 1); 
+                size_t in_addr_len = sizeof(struct in_addr);
+                memcpy(addr_to_send + addr_len, server->buf + 4, in_addr_len + 2);
+                addr_len += in_addr_len + 2;
                 addr_to_send[addr_len] = 0;
 
             } else if (request->atyp == 3) {
