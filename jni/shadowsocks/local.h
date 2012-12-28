@@ -2,7 +2,7 @@
 
 #include <ev.h>
 
-#define BUF_SIZE 1500
+#define BUF_SIZE 4096
 
 struct listen_ctx {
 	ev_io io;
