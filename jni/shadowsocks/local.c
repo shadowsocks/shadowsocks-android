@@ -603,6 +603,11 @@ int main (int argc, char **argv)
         close(STDIN_FILENO);
         close(STDOUT_FILENO);
         close(STDERR_FILENO);
+    } else {
+        pid_t pid = getpid();
+        FILE *file = fopen("/data/data/com.github.shadowsocks/shadowsocks.pid", "w");
+        fprintf(file, "%d", pid);
+        fclose(file);
     }
 
     _server = strdup(server);
