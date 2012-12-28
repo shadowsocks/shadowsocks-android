@@ -1,4 +1,4 @@
-/* Shadowsocks - GoAgent / WallProxy client App for Android
+/* Shadowsocks - A shadowsocks client for Android
  * Copyright (C) 2012 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -13,8 +13,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * 
+ *
+ *
  *                            ___====-_  _-====___
  *                      _--^^^#####//      \\#####^^^--_
  *                   _-^##########// (    ) \\##########^-_
