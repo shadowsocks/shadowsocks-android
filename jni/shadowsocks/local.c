@@ -98,15 +98,14 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
         close_and_free_server(EV_A_ server);
         return;
     }
-
-    char *buf = remote->buf;
-    int *buf_len = &remote->buf_len;
-    if (server->stage != 5) {
-        buf = server->buf;
-        buf_len = &server->buf_len;
-    }
-
     while (1) {
+        char *buf = remote->buf;
+        int *buf_len = &remote->buf_len;
+        if (server->stage != 5) {
+            buf = server->buf;
+            buf_len = &server->buf_len;
+        }
+
         ssize_t r = recv(server->fd, buf, BUF_SIZE, 0);
 
         if (r == 0) {
