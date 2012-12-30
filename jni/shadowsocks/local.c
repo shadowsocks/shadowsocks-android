@@ -16,6 +16,7 @@
 #include <strings.h>
 #include <time.h>
 #include <unistd.h>
+#include <assert.h>
 #include <linux/limits.h>
 
 #include "local.h"
@@ -23,13 +24,7 @@
 #include "encrypt.h"
 #include "android.h"
 
-#define REPLY "HTTP/1.1 200 OK\n\nhello"
-
 #define min(a,b) (((a)<(b))?(a):(b))
-
-// every watcher type has its own typedef'd struct
-// with the name ev_TYPE
-ev_io stdin_watcher;
 
 static char *_server;
 static char *_remote_port;
@@ -147,12 +142,13 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 }
             } else if(w < r) {
                 char *pt = remote->buf;
-                char *et = pt + min(w, BUF_SIZE);
-                while (pt < et) {
+                char *et = pt + r;
+                while (pt + w < et) {
                     *pt = *(pt + w);
                     pt++;
                 }
                 remote->buf_len = r - w;
+                assert(remote->buf_len >= 0);
                 ev_io_stop(EV_A_ &server_recv_ctx->io);
                 ev_io_start(EV_A_ &remote->send_ctx->io);
                 break;
@@ -270,12 +266,13 @@ static void server_send_cb (EV_P_ ev_io *w, int revents) {
         if (r < server->buf_len) {
             // partly sent, move memory, wait for the next time to send
             char *pt = server->buf;
-            char *et = pt + min(r, BUF_SIZE);
-            while (pt < et) {
+            char *et = pt + server->buf_len;
+            while (pt + r < et) {
                 *pt = *(pt + r);
                 pt++;
             }
             server->buf_len -= r;
+            assert(server->buf_len >= 0);
             return;
         } else {
             // all sent out, wait for reading
@@ -339,12 +336,13 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
             }
         } else if(w < r) {
             char *pt = server->buf;
-            char *et = pt + min(w, BUF_SIZE);
-            while (pt < et) {
+            char *et = pt + r;
+            while (pt + w < et) {
                 *pt = *(pt + w);
                 pt++;
             }
             server->buf_len = r - w;
+            assert(server->buf_len >= 0);
             ev_io_stop(EV_A_ &remote_recv_ctx->io);
             ev_io_start(EV_A_ &server->send_ctx->io);
             break;
@@ -398,12 +396,13 @@ static void remote_send_cb (EV_P_ ev_io *w, int revents) {
             if (r < remote->buf_len) {
                 // partly sent, move memory, wait for the next time to send
                 char *pt = remote->buf;
-                char *et = pt + min(r, BUF_SIZE);
-                while (pt < et) {
+                char *et = pt + remote->buf_len;
+                while (pt + r < et) {
                     *pt = *(pt + r);
                     pt++;
                 }
                 remote->buf_len -= r;
+                assert(remote->buf_len >= 0);
                 return;
             } else {
                 // all sent out, wait for reading
