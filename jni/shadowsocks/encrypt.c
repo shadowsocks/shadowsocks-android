@@ -2,10 +2,7 @@
 #include "android.h"
 
 #include <openssl/md5.h>
-
-typedef unsigned char uint8_t;
-typedef unsigned int uint32_t;
-typedef unsigned long long uint64_t;
+#include <endian.h>
 
 static int random_compare(const void *_x, const void *_y) {
     uint32_t i = _i;
@@ -150,9 +147,8 @@ int recv_decrypt(int sock, char *buf, int len, int flags) {
 
 void get_table(const char* key) {
     uint8_t *table = encrypt_table;
-    uint8_t *tmp_hash;
-    tmp_hash = MD5((const uint8_t*)key, strlen(key), NULL);
-    _a = *(uint64_t *)tmp_hash;
+    uint8_t *tmp_hash = MD5((const uint8_t*)key, strlen(key), NULL);
+    _a = htole64(*(uint64_t *)tmp_hash);
     uint32_t i;
 
     for(i = 0; i < 256; ++i) {

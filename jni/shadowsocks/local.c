@@ -508,7 +508,8 @@ static void accept_cb (EV_P_ ev_io *w, int revents)
         if (sockfd < 0) {
             perror("socket");
             close(sockfd);
-            free_server(server);
+            close_and_free_server(EV_A_ server);
+            freeaddrinfo(res);
             continue;
         }
         setnonblocking(sockfd);
@@ -630,7 +631,11 @@ int main (int argc, char **argv)
     setnonblocking(listenfd);
     struct listen_ctx listen_ctx;
     listen_ctx.fd = listenfd;
-    struct ev_loop *loop = EV_DEFAULT;
+    struct ev_loop *loop = ev_default_loop(EVBACKEND_EPOLL | EVFLAG_NOENV);
+    if (!loop) {
+        LOGE("no epoll found here, maybe it hides under your chair");
+        return 1;
+    }
     ev_io_init (&listen_ctx.io, accept_cb, listenfd, EV_READ);
     ev_io_start (loop, &listen_ctx.io);
     ev_run (loop, 0);
