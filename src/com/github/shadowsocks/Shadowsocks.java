@@ -98,6 +98,7 @@ public class Shadowsocks extends PreferenceActivity implements
     private EditTextPreference portText;
     private EditTextPreference remotePortText;
     private EditTextPreference sitekeyText;
+    private ListPreference encMethodText;
     private Preference proxyedApps;
     private CheckBoxPreference isBypassAppsCheck;
     private CheckBoxPreference isRunningCheck;
@@ -169,6 +170,7 @@ public class Shadowsocks extends PreferenceActivity implements
         portText = (EditTextPreference) findPreference("port");
         remotePortText = (EditTextPreference) findPreference("remotePort");
         sitekeyText = (EditTextPreference) findPreference("sitekey");
+        encMethodText = (ListPreference) findPreference("encMethod");
         proxyedApps = findPreference("proxyedApps");
 
         isBypassAppsCheck = (CheckBoxPreference) findPreference("isBypassApps");
@@ -343,6 +345,9 @@ public class Shadowsocks extends PreferenceActivity implements
         if (!settings.getString("sitekey", "").equals(""))
             sitekeyText.setSummary(settings.getString("sitekey", ""));
 
+        if (!settings.getString("encMethod", "").equals(""))
+            encMethodText.setSummary(settings.getString("encMethod", ""));
+
         if (!settings.getString("port", "").equals(""))
             portText.setSummary(settings.getString("port",
                     getString(R.string.port_summary)));
@@ -416,6 +421,9 @@ public class Shadowsocks extends PreferenceActivity implements
                 sitekeyText.setSummary(getString(R.string.sitekey_summary));
             else
                 sitekeyText.setSummary(settings.getString("sitekey", ""));
+        else if (key.equals("encMethod"))
+            if (!settings.getString("encMethod", "").equals(""))
+                encMethodText.setSummary(settings.getString("encMethod", ""));
         else if (key.equals("proxy"))
             if (settings.getString("proxy", "").equals("")) {
                 proxyText.setSummary(getString(R.string.proxy_summary));

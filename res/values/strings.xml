@@ -61,10 +61,15 @@
     <string name="copy_rights">Shadowsocks is an open source socks proxy.\n\nYou can find more details here:\ngithub.com/shadowsocks
     </string>
     <string name="about">About</string>
-    <string name="proxy_type">Proxy Type</string>
-    <array name="proxy_type_entry">
-        <item>GAE</item>
-        <item>PaaS</item>
+
+    <string name="enc_method">Encrypt Method</string>
+    <array name="enc_method_entry">
+        <item>Table</item>
+        <item>RC4</item>
+    </array>
+    <array name="enc_method_value">
+        <item>table</item>
+        <item>rc4</item>
     </array>
 
     <string-array name="gfw_list">

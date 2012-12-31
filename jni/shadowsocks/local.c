@@ -21,7 +21,6 @@
 
 #include "local.h"
 #include "socks5.h"
-#include "encrypt.h"
 #include "android.h"
 
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -567,12 +566,13 @@ int main (int argc, char **argv)
     char *port = NULL;
     char *key = NULL;
     char* timeout = "10";
+    char* method = NULL;
     int c;
     int f_flags = 0;
 
     opterr = 0;
 
-    while ((c = getopt (argc, argv, "fs:p:l:k:t:")) != -1) {
+    while ((c = getopt (argc, argv, "fs:p:l:k:t:m:")) != -1) {
         switch (c) {
             case 's':
                 server = optarg;
@@ -592,12 +592,21 @@ int main (int argc, char **argv)
             case 't':
                 timeout = optarg;
                 break;
+            case 'm':
+                method = optarg;
+                break;
         }
     }
 
     if (server == NULL || remote_port == NULL ||
             port == NULL || key == NULL) {
         exit(EXIT_FAILURE);
+    }
+
+    if (method != NULL) {
+        if (strcmp(method, "rc4") == 0) {
+            _method = RC4_ENC;
+        }
     }
 
     if (f_flags) {
@@ -653,7 +662,7 @@ int main (int argc, char **argv)
     _remote_port = strdup(remote_port);
     _timeout = atoi(timeout);
 
-    LOGD("calculating ciphers");
+    LOGD("calculating ciphers %d", _method);
     get_table(key);
 
     int listenfd;

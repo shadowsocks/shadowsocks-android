@@ -164,6 +164,7 @@ public class ShadowsocksService extends Service {
     private boolean isGFWList = false;
     private boolean isBypassApps = false;
     private boolean isDNSProxy = false;
+    private String encMethod;
     private ProxyedApp apps[];
     private Method mSetForeground;
     private Method mStartForeground;
@@ -205,8 +206,8 @@ public class ShadowsocksService extends Service {
             @Override
             public void run() {
                 final String cmd = String.format(BASE +
-                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\"",
-                        appHost, remotePort, port, sitekey);
+                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\"",
+                        appHost, remotePort, port, sitekey, encMethod);
                 Node.exec(cmd);
             }
         }.start();
@@ -238,6 +239,7 @@ public class ShadowsocksService extends Service {
 
         appHost = settings.getString("proxy", "127.0.0.1");
         sitekey = settings.getString("sitekey", "default");
+        encMethod = settings.getString("encMethod", "table");
         try {
             remotePort = Integer.valueOf(settings.getString("remotePort", "1984"));
         } catch (NumberFormatException ex) {

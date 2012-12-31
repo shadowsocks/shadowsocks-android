@@ -2,7 +2,7 @@
 
 #include <ev.h>
 
-#define BUF_SIZE 4096
+#include "encrypt.h"
 
 struct listen_ctx {
 	ev_io io;

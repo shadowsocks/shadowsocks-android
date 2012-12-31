@@ -1,9 +1,6 @@
 #include "encrypt.h"
 #include "android.h"
 
-#include <openssl/md5.h>
-#include <endian.h>
-
 static int random_compare(const void *_x, const void *_y) {
     uint32_t i = _i;
     uint64_t a = _a;
@@ -115,30 +112,42 @@ static void mergesort(uint8_t array[], int length)
 }
 
 void encrypt(char *buf, int len) {
-    char *end = buf + len;
-    while (buf < end) {
-        *buf = (char)encrypt_table[(uint8_t)*buf];
-        buf++;
+    if (_method == RC4_ENC) {
+        unsigned char mybuf[BUF_SIZE];
+        RC4(&rc4_key, len, (unsigned char *) buf, mybuf);
+        memcpy(buf, mybuf, len);
+    } else {
+        char *end = buf + len;
+        while (buf < end) {
+            *buf = (char)encrypt_table[(uint8_t)*buf];
+            buf++;
+        }
     }
 }
 
 void decrypt(char *buf, int len) {
-    char *end = buf + len;
-    while (buf < end) {
-        *buf = (char)decrypt_table[(uint8_t)*buf];
-        buf++;
+    if (_method == RC4_ENC) {
+        unsigned char mybuf[BUF_SIZE];
+        RC4(&rc4_key, len, (unsigned char *) buf, mybuf);
+        memcpy(buf, mybuf, len);
+    } else {
+        char *end = buf + len;
+        while (buf < end) {
+            *buf = (char)decrypt_table[(uint8_t)*buf];
+            buf++;
+        }
     }
 }
 
 int send_encrypt(int sock, char *buf, int len, int flags) {
-    char mybuf[4096];
+    char mybuf[BUF_SIZE];
     memcpy(mybuf, buf, len);
     encrypt(mybuf, len);
     return send(sock, mybuf, len, flags);
 }
 
 int recv_decrypt(int sock, char *buf, int len, int flags) {
-    char mybuf[4096];
+    char mybuf[BUF_SIZE];
     int result = recv(sock, mybuf, len, flags);
     memcpy(buf, mybuf, len);
     decrypt(buf, len);
@@ -146,20 +155,24 @@ int recv_decrypt(int sock, char *buf, int len, int flags) {
 }
 
 void get_table(const char* key) {
-    uint8_t *table = encrypt_table;
-    uint8_t *tmp_hash = MD5((const uint8_t*)key, strlen(key), NULL);
-    _a = htole64(*(uint64_t *)tmp_hash);
-    uint32_t i;
+    if (_method == RC4_ENC) {
+        RC4_set_key(&rc4_key, strlen(key), (unsigned char *) key);
+    } else {
+        uint8_t *table = encrypt_table;
+        uint8_t *tmp_hash = MD5((const uint8_t*)key, strlen(key), NULL);
+        _a = htole64(*(uint64_t *)tmp_hash);
+        uint32_t i;
 
-    for(i = 0; i < 256; ++i) {
-        table[i] = i;
-    }
-    for(i = 1; i < 1024; ++i) {
-        _i = i;
-        mergesort(table, 256);
-    }
-    for(i = 0; i < 256; ++i) {
-        // gen decrypt table from encrypt table
-        decrypt_table[encrypt_table[i]] = i;
+        for(i = 0; i < 256; ++i) {
+            table[i] = i;
+        }
+        for(i = 1; i < 1024; ++i) {
+            _i = i;
+            mergesort(table, 256);
+        }
+        for(i = 0; i < 256; ++i) {
+            // gen decrypt table from encrypt table
+            decrypt_table[encrypt_table[i]] = i;
+        }
     }
 }

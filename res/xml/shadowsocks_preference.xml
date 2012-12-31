@@ -39,6 +39,14 @@
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey">
         </EditTextPreference>
+        <ListPreference
+                android:dependency="isRunning"
+                android:defaultValue="table"
+                android:key="encMethod"
+                android:entries="@array/enc_method_entry"
+                android:entryValues="@array/enc_method_value"
+                android:title="@string/enc_method">
+        </ListPreference>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/fearute_cat">
         <CheckBoxPreference
