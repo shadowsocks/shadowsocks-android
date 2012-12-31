@@ -10,6 +10,12 @@ struct listen_ctx {
 	struct sockaddr sock;
 };
 
+struct server_ctx {
+	ev_io io;
+	int connected;
+	struct server *server;
+};
+
 struct server {
 	int fd;
 	char buf[BUF_SIZE]; // server send from, remote recv into
@@ -19,11 +25,14 @@ struct server {
 	struct server_ctx *send_ctx;
 	struct remote *remote;
 };
-struct server_ctx {
+
+struct remote_ctx {
 	ev_io io;
+    ev_timer watcher;
 	int connected;
-	struct server *server;
+	struct remote *remote;
 };
+
 struct remote {
 	int fd;
 	char buf[BUF_SIZE]; // remote send from, server recv into
@@ -31,11 +40,6 @@ struct remote {
 	struct remote_ctx *recv_ctx;
 	struct remote_ctx *send_ctx;
 	struct server *server;
-};
-struct remote_ctx {
-	ev_io io;
-	int connected;
-	struct remote *remote;
 };
 
 
