@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <openssl/md5.h>
-#include <openssl/rc4.h>
+#include <openssl/evp.h>
 #include <endian.h>
 
 #define BUF_SIZE 4096
@@ -15,7 +15,7 @@
 
 unsigned char encrypt_table[256];
 unsigned char decrypt_table[256];
-RC4_KEY rc4_key;
+EVP_CIPHER_CTX ctx;
 
 void get_table(const char* key);
 void encrypt(char *buf, int len);
