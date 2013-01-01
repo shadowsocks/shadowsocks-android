@@ -405,31 +405,35 @@ public class Shadowsocks extends PreferenceActivity implements
             }
         }
 
-
-        if (key.equals("remotePort"))
-            if (settings.getString("remotePort", "").equals(""))
+        if (key.equals("remotePort")) {
+            if (settings.getString("remotePort", "").equals("")) {
                 remotePortText.setSummary(getString(R.string.remote_port_summary));
-            else
+            } else {
                 remotePortText.setSummary(settings.getString("remotePort", ""));
-        else if (key.equals("port"))
-            if (settings.getString("port", "").equals(""))
+            }
+        } else if (key.equals("port")) {
+            if (settings.getString("port", "").equals("")) {
                 portText.setSummary(getString(R.string.port_summary));
-            else
+            } else {
                 portText.setSummary(settings.getString("port", ""));
-        else if (key.equals("sitekey"))
-            if (settings.getString("sitekey", "").equals(""))
+            }
+        } else if (key.equals("sitekey")) {
+            if (settings.getString("sitekey", "").equals("")) {
                 sitekeyText.setSummary(getString(R.string.sitekey_summary));
-            else
+            } else {
                 sitekeyText.setSummary(settings.getString("sitekey", ""));
-        else if (key.equals("encMethod"))
-            if (!settings.getString("encMethod", "").equals(""))
+            }
+        } else if (key.equals("encMethod")) {
+            if (!settings.getString("encMethod", "").equals("")) {
                 encMethodText.setSummary(settings.getString("encMethod", ""));
-        else if (key.equals("proxy"))
+            }
+        } else if (key.equals("proxy")) {
             if (settings.getString("proxy", "").equals("")) {
                 proxyText.setSummary(getString(R.string.proxy_summary));
             } else {
                 proxyText.setSummary(settings.getString("proxy", ""));
             }
+        }
     }
 
     @Override

@@ -21,6 +21,8 @@ struct server {
 	char buf[BUF_SIZE]; // server send from, remote recv into
     char stage;
 	int buf_len;
+    EVP_CIPHER_CTX *e_ctx;
+    EVP_CIPHER_CTX *d_ctx;
 	struct server_ctx *recv_ctx;
 	struct server_ctx *send_ctx;
 	struct remote *remote;

@@ -28,6 +28,7 @@
 static char *_server;
 static char *_remote_port;
 static int   _timeout;
+static char *_key;
 
 int setnonblocking(int fd) {
     int flags;
@@ -123,7 +124,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
 
         // local socks5 server
         if (server->stage == 5) {
-            encrypt(remote->buf, r);
+            encrypt(remote->buf, r, server->e_ctx);
             int w = send(remote->fd, remote->buf, r, 0);
             if(w == -1) {
                 if (errno == EAGAIN) {
@@ -186,7 +187,6 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 size_t in_addr_len = sizeof(struct in_addr);
                 memcpy(addr_to_send + addr_len, server->buf + 4, in_addr_len + 2);
                 addr_len += in_addr_len + 2;
-                addr_to_send[addr_len] = 0;
 
             } else if (request->atyp == 3) {
                 // Domain name
@@ -198,7 +198,6 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 // get port
                 addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 1 + name_len); 
                 addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 1 + name_len + 1); 
-                addr_to_send[addr_len] = 0;
             } else {
                 LOGE("unsupported addrtype: %d\n", request->atyp);
                 close_and_free_remote(EV_A_ remote);
@@ -206,7 +205,8 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 return;
             }
 
-            send_encrypt(remote->fd, addr_to_send, addr_len, 0);
+            encrypt(addr_to_send, addr_len, server->e_ctx);
+            send(remote->fd, addr_to_send, addr_len, 0);
 
             // Fake reply
             struct socks5_response response;
@@ -233,7 +233,6 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
             }
 
             server->stage = 5;
-
         }
     }
 }
@@ -333,7 +332,7 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
                 return;
             }
         }
-        decrypt(server->buf, r);
+        decrypt(server->buf, r, server->d_ctx);
         int w = send(server->fd, server->buf, r, MSG_NOSIGNAL);
         if(w == -1) {
             if (errno == EAGAIN) {
@@ -482,12 +481,27 @@ struct server* new_server(int fd) {
     server->send_ctx->server = server;
     server->send_ctx->connected = 0;
     server->stage = 0;
+    if (_method == RC4) {
+        server->e_ctx = malloc(sizeof(EVP_CIPHER_CTX));
+        server->d_ctx = malloc(sizeof(EVP_CIPHER_CTX));
+        enc_ctx_init(server->e_ctx, _key, 1);
+        enc_ctx_init(server->d_ctx, _key, 0);
+    } else {
+        server->e_ctx = NULL;
+        server->d_ctx = NULL;
+    }
     return server;
 }
 void free_server(struct server *server) {
     if (server != NULL) {
         if (server->remote != NULL) {
             server->remote->server = NULL;
+        }
+        if (_method == RC4) {
+            EVP_CIPHER_CTX_cleanup(server->e_ctx);
+            EVP_CIPHER_CTX_cleanup(server->d_ctx);
+            free(server->e_ctx);
+            free(server->d_ctx);
         }
         free(server->recv_ctx);
         free(server->send_ctx);
@@ -603,12 +617,6 @@ int main (int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (method != NULL) {
-        if (strcmp(method, "rc4") == 0) {
-            _method = RC4_ENC;
-        }
-    }
-
     if (f_flags) {
 
         /* Our process ID and Session ID */
@@ -658,12 +666,22 @@ int main (int argc, char **argv)
         fclose(file);
     }
 
+    // init global variables
     _server = strdup(server);
     _remote_port = strdup(remote_port);
     _timeout = atoi(timeout);
+    _key = key;
+    _method = TABLE;
+    if (method != NULL) {
+        if (strcmp(method, "rc4") == 0) {
+            _method = RC4;
+        }
+    }
 
     LOGD("calculating ciphers %d", _method);
-    get_table(key);
+    if (_method != RC4) {
+        get_table(key);
+    }
 
     int listenfd;
     listenfd = create_and_bind(port);
