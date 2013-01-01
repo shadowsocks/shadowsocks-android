@@ -38,7 +38,7 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := shadowsocks 
 LOCAL_SRC_FILES := shadowsocks/local.c shadowsocks/encrypt.c
-LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/libev/ -I$(LOCAL_PATH)/openssl/include -std=c99
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -I$(LOCAL_PATH)/libev/ -I$(LOCAL_PATH)/openssl/include
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto
 
