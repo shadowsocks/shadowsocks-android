@@ -17,7 +17,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libev
-LOCAL_CFLAGS += -O2 -DEV_MULTIPLICITY 
+LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H
 LOCAL_SRC_FILES := \
 	libev/ev.c \
 	libev/event.c 

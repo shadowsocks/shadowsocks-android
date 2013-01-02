@@ -114,9 +114,10 @@ static void mergesort(uint8_t array[], int length)
 void encrypt(char *buf, int len, EVP_CIPHER_CTX *ctx) {
     if (ctx != NULL) {
         int outlen;
-        unsigned char mybuf[BUF_SIZE];
+        unsigned char *mybuf = malloc(BUF_SIZE);
         EVP_CipherUpdate(ctx, mybuf, &outlen, (unsigned char*)buf, len);
         memcpy(buf, mybuf, len);
+        free(mybuf);
     } else {
         char *end = buf + len;
         while (buf < end) {
@@ -129,9 +130,10 @@ void encrypt(char *buf, int len, EVP_CIPHER_CTX *ctx) {
 void decrypt(char *buf, int len, EVP_CIPHER_CTX *ctx) {
     if (ctx != NULL) {
         int outlen;
-        unsigned char mybuf[BUF_SIZE];
+        unsigned char *mybuf = malloc(BUF_SIZE);
         EVP_CipherUpdate(ctx, mybuf, &outlen, (unsigned char*) buf, len);
         memcpy(buf, mybuf, len);
+        free(mybuf);
     } else {
         char *end = buf + len;
         while (buf < end) {
