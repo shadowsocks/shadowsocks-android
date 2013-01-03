@@ -1,6 +1,6 @@
 ## Shadowsocks for Android
 
-A shadowsocks client for Android, powered by amazing node.js.
+A shadowsocks client for Android, powered by amazing nodejs/golang/libev.
 
 ## TRAVIS CI STATUS
 
