@@ -72,6 +72,9 @@
         <item>rc4</item>
     </array>
 
+    <string name="http_proxy">HTTP Proxy</string>
+    <string name="http_proxy_summary">Local HTTP Proxy</string>
+
     <string-array name="gfw_list">
         <item>209.0.0.0/8</item>
         <item>72.0.0.0/8</item>

@@ -16,6 +16,19 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+POLIPO_SOURCES := util.c event.c io.c chunk.c atom.c object.c log.c diskcache.c main.c \
+	config.c local.c http.c client.c server.c auth.c tunnel.c \
+	http_parse.c parse_time.c dns.c forbidden.c \
+	md5.c fts_compat.c socks.c mingw.c
+
+LOCAL_MODULE := polipo
+LOCAL_SRC_FILES := $(addprefix polipo/, $(POLIPO_SOURCES))
+LOCAL_CFLAGS := -O2 -g -DHAS_STDINT_H -DNO_DISK_CACHE -DNO_SYSLOG -I$(LOCAL_PATH)/polipo
+
+include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
 LOCAL_MODULE := libev
 LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H
 LOCAL_SRC_FILES := \

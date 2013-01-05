@@ -56,7 +56,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import com.google.analytics.tracking.android.EasyTracker;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -152,11 +155,9 @@ public class ShadowsocksService extends Service {
     private NotificationManager notificationManager;
     private PendingIntent pendIntent;
     private PowerManager.WakeLock mWakeLock;
-    private Process httpProcess = null;
-    private DataOutputStream httpOS = null;
     private String appHost;
     private int remotePort;
-    private int port;
+    private int localPort;
     private String sitekey;
     private SharedPreferences settings = null;
     private boolean hasRedirectSupport = true;
@@ -164,6 +165,7 @@ public class ShadowsocksService extends Service {
     private boolean isGFWList = false;
     private boolean isBypassApps = false;
     private boolean isDNSProxy = false;
+    private boolean isHTTPProxy = false;
     private String encMethod;
     private ProxyedApp apps[];
     private Method mSetForeground;
@@ -207,7 +209,19 @@ public class ShadowsocksService extends Service {
             public void run() {
                 final String cmd = String.format(BASE +
                         "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\"",
-                        appHost, remotePort, port, sitekey, encMethod);
+                        appHost, remotePort, localPort, sitekey, encMethod);
+                Node.exec(cmd);
+            }
+        }.start();
+    }
+
+    private void startPolipoDaemon() {
+        new Thread() {
+            @Override
+            public void run() {
+                final String cmd = String.format(BASE +
+                        "polipo proxyPort=%d socksParentProxy=127.0.0.1:%d daemonise=true pidFile=\"%s\" logLevel=1 logFile=\"%s\"",
+                        localPort + 1, localPort, BASE + "polipo.pid", BASE + "polipo.log");
                 Node.exec(cmd);
             }
         }.start();
@@ -246,15 +260,20 @@ public class ShadowsocksService extends Service {
             remotePort = 1984;
         }
         try {
-            port = Integer.valueOf(settings.getString("port", "1984"));
+            localPort = Integer.valueOf(settings.getString("port", "1984"));
         } catch (NumberFormatException ex) {
-            port = 1984;
+            localPort = 1984;
         }
 
         isGlobalProxy = settings.getBoolean("isGlobalProxy", false);
         isGFWList = settings.getBoolean("isGFWList", false);
         isBypassApps = settings.getBoolean("isBypassApps", false);
         isDNSProxy = settings.getBoolean("isDNSProxy", false);
+        isHTTPProxy = settings.getBoolean("isHTTPProxy", false);
+
+        if (isHTTPProxy) {
+            localPort--;
+        }
 
         new Thread(new Runnable() {
             @Override
@@ -310,7 +329,7 @@ public class ShadowsocksService extends Service {
     }
 
     private void startRedsocksDaemon() {
-        String conf = String.format(REDSOCKS_CONF, port);
+        String conf = String.format(REDSOCKS_CONF, localPort);
         String cmd = String.format("%sredsocks -p %sredsocks.pid -c %sredsocks.conf",
                 BASE, BASE, BASE);
         Utils.runRootCommand("echo \"" + conf + "\" > " + BASE + "redsocks.conf\n"
@@ -342,6 +361,9 @@ public class ShadowsocksService extends Service {
      */
     public boolean handleConnection() {
 
+        if (isHTTPProxy) {
+            startPolipoDaemon();
+        }
         startShadowsocksDaemon();
         startDnsDaemon();
         startRedsocksDaemon();
@@ -451,26 +473,11 @@ public class ShadowsocksService extends Service {
                 getString(R.string.service_stopped),
                 Notification.FLAG_AUTO_CANCEL);
 
-        try {
-            if (httpOS != null) {
-                httpOS.close();
-                httpOS = null;
-            }
-            if (httpProcess != null) {
-                httpProcess.destroy();
-                httpProcess = null;
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "HTTP Server close unexpected");
-        }
-
         new Thread() {
             @Override
             public void run() {
-
                 // Make sure the connection is closed, important here
                 onDisconnect();
-
             }
         }.start();
 
@@ -499,6 +506,11 @@ public class ShadowsocksService extends Service {
         }
         if (!waitForProcess("shadowsocks")) {
             sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n");
+        }
+        if (isHTTPProxy) {
+            if (!waitForProcess("polipo")) {
+                sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n");
+            }
         }
         Utils.runRootCommand(sb.toString());
     }

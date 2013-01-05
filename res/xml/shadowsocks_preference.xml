@@ -51,6 +51,13 @@
     <PreferenceCategory android:title="@string/fearute_cat">
         <CheckBoxPreference
                 android:dependency="isRunning"
+                android:defaultValue="false"
+                android:key="isHTTPProxy"
+                android:summary="@string/http_proxy_summary"
+                android:title="@string/http_proxy">
+        </CheckBoxPreference>
+        <CheckBoxPreference
+                android:dependency="isRunning"
                 android:defaultValue="true"
                 android:key="isDNSProxy"
                 android:summary="@string/dns_proxy_summary"

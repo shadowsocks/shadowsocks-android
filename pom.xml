@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.shadowsocks</groupId>
     <artifactId>shadowsocks</artifactId>
-    <version>1.2.0</version>
+    <version>1.3</version>
     <packaging>apk</packaging>
     <name>Shadowsocks</name>
 

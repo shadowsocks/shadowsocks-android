@@ -11,6 +11,9 @@ tests/bin
 tests/gen
 tests/local.properties
 NUL
+libs/armeabi/polipo
+libs/armeabi/pdnsd
+libs/armeabi/shadowsocks
 
 #Intellij IDEA
 *.iml
