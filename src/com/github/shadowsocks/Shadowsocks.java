@@ -176,12 +176,10 @@ public class Shadowsocks extends PreferenceActivity implements
         isBypassAppsCheck = (CheckBoxPreference) findPreference("isBypassApps");
         isRunningCheck = (CheckBoxPreference) findPreference("isRunning");
 
-        if (mProgressDialog == null)
+        if (mProgressDialog == null) {
             mProgressDialog = ProgressDialog.show(this, "",
                     getString(R.string.initializing), true, true);
-
-        final SharedPreferences settings = PreferenceManager
-                .getDefaultSharedPreferences(this);
+        }
 
         new Thread() {
             @Override
@@ -197,14 +195,14 @@ public class Shadowsocks extends PreferenceActivity implements
                     versionName = "NONE";
                 }
 
-                if (!settings.getBoolean(versionName, false)) {
+                final SharedPreferences settings = PreferenceManager
+                        .getDefaultSharedPreferences(Shadowsocks.this);
 
+                if (!settings.getBoolean(versionName, false)) {
                     Editor edit = settings.edit();
                     edit.putBoolean(versionName, true);
                     edit.commit();
-
                     reset();
-
                 }
 
                 handler.sendEmptyMessage(MSG_INITIAL_FINISH);

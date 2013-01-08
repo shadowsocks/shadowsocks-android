@@ -4,7 +4,7 @@ A shadowsocks client for Android, powered by amazing nodejs/golang/libev.
 
 ## TRAVIS CI STATUS
 
-[![Build Status](https://secure.travis-ci.org/madeye/shadowsocks-android.png)](http://travis-ci.org/madeye/shadowsocks-android)
+[![Build Status](https://secure.travis-ci.org/shadowsocks/shadowsocks-android.png)](http://travis-ci.org/shadowsocks/shadowsocks-android)
 
 [Nightly Builds](http://buildbot.sinaapp.com)
 
