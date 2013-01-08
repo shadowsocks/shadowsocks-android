@@ -38,9 +38,9 @@
 
 package com.github.shadowsocks;
 
-public class Node {
+public class System {
     static {
-        System.loadLibrary("node");
+        java.lang.System.loadLibrary("system");
     }
 
     public static native void exec(String cmd);

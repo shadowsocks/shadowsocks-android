@@ -30,7 +30,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "Exec"
+#define LOG_TAG "Shadowsocks"
 
 #include "jni.h"
 #include <android/log.h>

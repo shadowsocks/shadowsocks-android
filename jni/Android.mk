@@ -61,7 +61,7 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE:= libexec
+LOCAL_MODULE:= exec
 
 LOCAL_SRC_FILES:= \
 	   termExec.cpp
@@ -72,12 +72,12 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE:= node
+LOCAL_MODULE:= system
 
 LOCAL_SRC_FILES:= \
-	   node.c
+	   system.cpp
 
-LOCAL_LDLIBS := -ldl 
+LOCAL_LDLIBS := -ldl -llog
 
 include $(BUILD_SHARED_LIBRARY)
 

@@ -210,7 +210,7 @@ public class ShadowsocksService extends Service {
                 final String cmd = String.format(BASE +
                         "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\"",
                         appHost, remotePort, localPort, sitekey, encMethod);
-                Node.exec(cmd);
+                System.exec(cmd);
             }
         }.start();
     }
@@ -222,7 +222,7 @@ public class ShadowsocksService extends Service {
                 final String cmd = String.format(BASE +
                         "polipo proxyPort=%d socksParentProxy=127.0.0.1:%d daemonise=true pidFile=\"%s\" logLevel=1 logFile=\"%s\"",
                         localPort + 1, localPort, BASE + "polipo.pid", BASE + "polipo.log");
-                Node.exec(cmd);
+                System.exec(cmd);
             }
         }.start();
     }

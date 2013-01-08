@@ -28,7 +28,7 @@ import java.io.FileDescriptor;
 
 public class Exec {
     static {
-        System.loadLibrary("exec");
+        java.lang.System.loadLibrary("exec");
     }
 
     /**
