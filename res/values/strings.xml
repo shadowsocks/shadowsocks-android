@@ -78,30 +78,48 @@
 
     <!-- array category -->
     <string-array name="chn_list">
-        <item>1.0.0.0/8</item>
+        <item>0.0.0.0/7</item>
         <item>14.0.0.0/8</item>
         <item>27.0.0.0/8</item>
         <item>36.0.0.0/8</item>
         <item>39.0.0.0/8</item>
-        <item>42.0.0.0/8</item>
+        <item>42.0.0.0/7</item>
         <item>49.0.0.0/8</item>
         <item>58.0.0.0/7</item>
         <item>60.0.0.0/7</item>
-        <item>96.0.0.0/3</item>
-        <item>128.0.0.0/4</item>
+        <item>101.0.0.0/8</item>
+        <item>103.0.0.0/8</item>
+        <item>106.0.0.0/8</item>
+        <item>110.0.0.0/7</item>
+        <item>112.0.0.0/4</item>
+        <item>134.128.0.0/9</item>
+        <item>139.0.0.0/9</item>
+        <item>139.128.0.0/9</item>
+        <item>140.0.0.0/9</item>
+        <item>140.128.0.0/9</item>
+        <item>144.0.0.0/9</item>
+        <item>144.128.0.0/9</item>
+        <item>150.0.0.0/8</item>
+        <item>153.0.0.0/8</item>
+        <item>157.0.0.0/9</item>
+        <item>157.128.0.0/9</item>
+        <item>159.128.0.0/9</item>
+        <item>161.128.0.0/9</item>
+        <item>162.0.0.0/9</item>
+        <item>163.0.0.0/8</item>
+        <item>166.0.0.0/9</item>
+        <item>167.128.0.0/9</item>
+        <item>168.128.0.0/9</item>
         <item>171.0.0.0/8</item>
         <item>175.0.0.0/8</item>
         <item>180.0.0.0/8</item>
-        <item>182.0.0.0/8</item>
-        <item>183.0.0.0/8</item>
-        <item>202.0.0.0/8</item>
-        <item>203.0.0.0/8</item>
-        <item>210.0.0.0/8</item>
-        <item>211.0.0.0/8</item>
-        <item>216.0.0.0/5</item>
-        <item>192.168.0.0/16</item>
-        <item>10.0.0.0/8</item>
-        <item>172.16.0.0/12</item>
+        <item>182.0.0.0/7</item>
+        <item>192.112.0.0/12</item>
+        <item>192.128.0.0/9</item>
+        <item>202.0.0.0/7</item>
+        <item>210.0.0.0/7</item>
+        <item>218.0.0.0/7</item>
+        <item>220.0.0.0/6</item>
     </string-array>
 
 </resources>
