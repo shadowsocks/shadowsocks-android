@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.github.shadowsocks"
           android:installLocation="auto"
-          android:versionCode="10"
-          android:versionName="1.3">
+          android:versionCode="11"
+          android:versionName="1.3.1">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
