@@ -61,12 +61,16 @@ OBFSPROXY_SOURCES := container.c crypt.c external.c \
 	main.c managed.c network.c \
 	obfs_main.c protocol.c sha256.c \
 	socks.c status.c util.c \
+	protocols/dummy.c protocols/obfs2.c
 
 LOCAL_STATIC_LIBRARIES := libevent libcrypto
 
 LOCAL_MODULE := obfsproxy
 LOCAL_SRC_FILES := $(addprefix obfsproxy/, $(OBFSPROXY_SOURCES))
-LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/obfsproxy
+LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/obfsproxy \
+	-I$(LOCAL_PATH)/libevent/include \
+	-I$(LOCAL_PATH)/libevent \
+	-I$(LOCAL_PATH)/openssl/include
 
 include $(BUILD_EXECUTABLE)
 

@@ -316,7 +316,7 @@
 #define _EVENT_HAVE_SYS_WAIT_H 1
 
 /* Define if TAILQ_FOREACH is defined in <sys/queue.h> */
-#define _EVENT_HAVE_TAILQFOREACH 1
+/* #undef _EVENT_HAVE_TAILQFOREACH */
 
 /* Define if timeradd is defined in <sys/time.h> */
 #define _EVENT_HAVE_TIMERADD 1

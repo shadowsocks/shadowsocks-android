@@ -90,6 +90,7 @@
 #include "evthread-internal.h"
 #include "evbuffer-internal.h"
 #include "bufferevent-internal.h"
+#include "event-internal.h"
 
 /* some systems do not have MAP_FAILED */
 #ifndef MAP_FAILED

@@ -273,7 +273,7 @@
 #define HAVE_SYS_PARAM_H 1
 
 /* Define to 1 if you have the <sys/queue.h> header file. */
-/* #undef HAVE_SYS_QUEUE_H */
+#define HAVE_SYS_QUEUE_H 1
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #define HAVE_SYS_SELECT_H 1
@@ -303,7 +303,7 @@
 #define HAVE_SYS_WAIT_H 1
 
 /* Define if TAILQ_FOREACH is defined in <sys/queue.h> */
-#define TAILQ_FOREACH 1
+/* #undef TAILQ_FOREACH */
 
 /* Define if timeradd is defined in <sys/time.h> */
 #define HAVE_TIMERADD 1
