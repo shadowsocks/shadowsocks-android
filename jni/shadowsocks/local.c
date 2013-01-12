@@ -157,7 +157,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
             response.ver = VERSION;
             response.method = 0;
             char *send_buf = (char *)&response;
-            send(server->fd, send_buf, sizeof(response), MSG_NOSIGNAL);
+            send(server->fd, send_buf, sizeof(response), 0);
             server->stage = 1;
             return;
         } else if (server->stage == 1) {
@@ -171,7 +171,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 response.rsv = 0;
                 response.atyp = 1;
                 char *send_buf = (char *)&response;
-                send(server->fd, send_buf, 4, MSG_NOSIGNAL);
+                send(server->fd, send_buf, 4, 0);
                 close_and_free_remote(EV_A_ remote);
                 close_and_free_server(EV_A_ server);
                 return;
@@ -225,7 +225,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
                 = (unsigned short) htons(atoi(_remote_port));
 
             int reply_size = 4 + sizeof(struct in_addr) + sizeof(unsigned short);
-            int r = send(server->fd, server->buf, reply_size, MSG_NOSIGNAL);
+            int r = send(server->fd, server->buf, reply_size, 0);
             if (r < reply_size) {
                 LOGE("header not complete sent\n");
                 close_and_free_remote(EV_A_ remote);
@@ -334,7 +334,7 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
             }
         }
         decrypt(server->buf, r, server->d_ctx);
-        int w = send(server->fd, server->buf, r, MSG_NOSIGNAL);
+        int w = send(server->fd, server->buf, r, 0);
         if(w < 0) {
             if (errno == EAGAIN) {
                 // no data, wait for send
@@ -669,6 +669,8 @@ int main (int argc, char **argv)
         fprintf(file, "%d", pid);
         fclose(file);
     }
+
+    signal(SIGPIPE, SIG_IGN);
 
     // init global variables
     _server = strdup(server);

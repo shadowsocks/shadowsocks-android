@@ -121,6 +121,8 @@ static int create_subprocess(const int rdt, const char *cmd, char *const argv[],
 
     if(pid == 0){
 
+        signal(SIGPIPE, SIG_IGN);
+
         if (envp) {
             for (; *envp; ++envp) {
                 putenv(*envp);
@@ -145,6 +147,9 @@ static int create_subprocess(const int rdt, const char *cmd, char *const argv[],
         exit(0);
 
     } else {
+
+        signal(SIGPIPE, SIG_IGN);
+
         *pProcessId = (int) pid;
 
         dup2(pfds[1], 1);
