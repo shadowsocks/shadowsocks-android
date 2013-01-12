@@ -54,7 +54,7 @@ int create_and_bind(const char *port) {
 
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         listen_sock = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-        if (listen_sock == -1)
+        if (listen_sock < 0)
             continue;
 
         int opt = 1;
@@ -126,9 +126,10 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
         if (server->stage == 5) {
             encrypt(remote->buf, r, server->e_ctx);
             int w = send(remote->fd, remote->buf, r, 0);
-            if(w == -1) {
+            if(w < 0) {
                 if (errno == EAGAIN) {
                     // no data, wait for send
+                    remote->buf_len = r;
                     ev_io_stop(EV_A_ &server_recv_ctx->io);
                     ev_io_start(EV_A_ &remote->send_ctx->io);
                     break;
@@ -334,9 +335,10 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
         }
         decrypt(server->buf, r, server->d_ctx);
         int w = send(server->fd, server->buf, r, MSG_NOSIGNAL);
-        if(w == -1) {
+        if(w < 0) {
             if (errno == EAGAIN) {
                 // no data, wait for send
+                server->buf_len = r;
                 ev_io_stop(EV_A_ &remote_recv_ctx->io);
                 ev_io_start(EV_A_ &server->send_ctx->io);
                 break;
@@ -524,7 +526,7 @@ static void accept_cb (EV_P_ ev_io *w, int revents)
     int serverfd;
     while (1) {
         serverfd = accept(listener->fd, NULL, NULL);
-        if (serverfd == -1) {
+        if (serverfd < 0) {
             perror("accept");
             break;
         }
@@ -691,7 +693,7 @@ int main (int argc, char **argv)
         LOGE("bind() error..");
         return 1;
     }
-    if (listen(listenfd, SOMAXCONN) == -1) {
+    if (listen(listenfd, SOMAXCONN) < 0) {
         LOGE("listen() error.");
         return 1;
     }
