@@ -12,7 +12,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+#
 LOCAL_PATH := $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LIBEVENT_SOURCES := \
+	buffer.c \
+	bufferevent.c bufferevent_filter.c \
+	bufferevent_openssl.c bufferevent_pair.c bufferevent_ratelim.c \
+	bufferevent_sock.c epoll.c \
+	epoll_sub.c evdns.c event.c \
+    event_tagging.c evmap.c \
+	evrpc.c evthread.c \
+	evthread_pthread.c evutil.c \
+	evutil_rand.c http.c \
+	listener.c log.c poll.c \
+	select.c signal.c strlcpy.c
+
+LOCAL_MODULE := event
+LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
+LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/libevent \
+	-I$(LOCAL_PATH)/libevent/include \
+	-I$(LOCAL_PATH)/openssl/include
+
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+
+REDSOCKS_SOURCES := base.c dnstc.c http-connect.c \
+	log.c md5.c socks5.c \
+	base64.c http-auth.c http-relay.c main.c \
+	parser.c redsocks.c socks4.c utils.c
+
+LOCAL_STATIC_LIBRARIES := libevent
+
+LOCAL_MODULE := redsocks
+LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES))
+LOCAL_CFLAGS := -O2 -std=gnu99 -g -I$(LOCAL_PATH)/redsocks \
+	-I$(LOCAL_PATH)/libevent/include \
+	-I$(LOCAL_PATH)/libevent
+
+include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
+OBFSPROXY_SOURCES := container.c crypt.c external.c \
+	main.c managed.c network.c \
+	obfs_main.c protocol.c sha256.c \
+	socks.c status.c util.c \
+	protocols/dummy.c protocols/obfs2.c
+
+LOCAL_STATIC_LIBRARIES := libevent libcrypto
+
+LOCAL_MODULE := obfsproxy
+LOCAL_SRC_FILES := $(addprefix obfsproxy/, $(OBFSPROXY_SOURCES))
+LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/obfsproxy \
+	-I$(LOCAL_PATH)/libevent/include \
+	-I$(LOCAL_PATH)/libevent \
+	-I$(LOCAL_PATH)/openssl/include
+
+include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 

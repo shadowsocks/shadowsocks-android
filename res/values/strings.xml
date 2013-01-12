@@ -79,6 +79,7 @@
     <!-- array category -->
     <string-array name="chn_list">
         <item>0.0.0.0/7</item>
+        <item>10.0.0.0/8</item>
         <item>14.0.0.0/8</item>
         <item>27.0.0.0/8</item>
         <item>36.0.0.0/8</item>
@@ -111,6 +112,7 @@
         <item>167.128.0.0/9</item>
         <item>168.128.0.0/9</item>
         <item>171.0.0.0/8</item>
+        <item>172.0.0.0/12</item>
         <item>175.0.0.0/8</item>
         <item>180.0.0.0/8</item>
         <item>182.0.0.0/7</item>
