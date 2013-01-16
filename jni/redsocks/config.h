@@ -1,1 +1,1 @@
-/* Unknown system, only generic firewall code is compiled */
+#define USE_IPTABLES
