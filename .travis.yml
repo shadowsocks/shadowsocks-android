@@ -1,8 +1,10 @@
 language: java
 before_install:
-  - sudo apt-get purge ia32-libs
-  - sudo apt-get install librtmp0
-  - sudo apt-get install ia32-libs
+  - sudo apt-get install libc6-dev-i386
+  - sudo apt-get install lib32ncurses5-dev
+  - sudo apt-get install libx11-dev
+  - sudo apt-get install g++-multilib
+  - sudo apt-get install lib32z1-dev
   - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
   - tar -zxf android-sdk_r21-linux.tgz
   - export ANDROID_HOME=`pwd`/android-sdk-linux
