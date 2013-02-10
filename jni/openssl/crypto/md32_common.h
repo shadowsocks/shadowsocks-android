@@ -165,7 +165,7 @@
 				asm (			\
 				"roll %1,%0"		\
 				: "=r"(ret)		\
-				: "I"(n), "0"(a)	\
+				: "I"(n), "0"((unsigned int)(a))	\
 				: "cc");		\
 			   ret;				\
 			})
@@ -383,6 +383,7 @@ int HASH_FINAL (unsigned char *md, HASH_CTX *c)
 	}
 
 #ifndef MD32_REG_T
+#if defined(__alpha) || defined(__sparcv9) || defined(__mips)
 #define MD32_REG_T long
 /*
  * This comment was originaly written for MD5, which is why it
@@ -400,9 +401,15 @@ int HASH_FINAL (unsigned char *md, HASH_CTX *c)
  * Well, to be honest it should say that this *prevents* 
  * performance degradation.
  *				<appro@fy.chalmers.se>
- * Apparently there're LP64 compilers that generate better
- * code if A-D are declared int. Most notably GCC-x86_64
- * generates better code.
+ */
+#else
+/*
+ * Above is not absolute and there are LP64 compilers that
+ * generate better code if MD32_REG_T is defined int. The above
+ * pre-processor condition reflects the circumstances under which
+ * the conclusion was made and is subject to further extension.
  *				<appro@fy.chalmers.se>
  */
+#define MD32_REG_T int
+#endif
 #endif

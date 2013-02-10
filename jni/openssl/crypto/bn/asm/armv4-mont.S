@@ -38,9 +38,9 @@ bn_mul_mont:
 .L1st:
 	ldr	r5,[r1],#4		@ ap[j],ap++
 	mov	r10,r11
+	ldr	r6,[r3],#4		@ np[j],np++
 	mov	r11,#0
 	umlal	r10,r11,r5,r2	@ ap[j]*bp[0]
-	ldr	r6,[r3],#4		@ np[j],np++
 	mov	r14,#0
 	umlal	r12,r14,r6,r8	@ np[j]*n0
 	adds	r12,r12,r10
@@ -50,21 +50,21 @@ bn_mul_mont:
 	bne	.L1st
 
 	adds	r12,r12,r11
-	mov	r14,#0
-	adc	r14,r14,#0
 	ldr	r4,[r0,#13*4]		@ restore bp
-	str	r12,[r0]		@ tp[num-1]=
+	mov	r14,#0
 	ldr	r8,[r0,#14*4]		@ restore n0
+	adc	r14,r14,#0
+	str	r12,[r0]		@ tp[num-1]=
 	str	r14,[r0,#4]		@ tp[num]=
 
 .Louter:
 	sub	r7,r0,sp		@ "original" r0-1 value
 	sub	r1,r1,r7		@ "rewind" ap to &ap[1]
-	sub	r3,r3,r7		@ "rewind" np to &np[1]
 	ldr	r2,[r4,#4]!		@ *(++bp)
+	sub	r3,r3,r7		@ "rewind" np to &np[1]
 	ldr	r5,[r1,#-4]		@ ap[0]
-	ldr	r6,[r3,#-4]		@ np[0]
 	ldr	r10,[sp]		@ tp[0]
+	ldr	r6,[r3,#-4]		@ np[0]
 	ldr	r7,[sp,#4]		@ tp[1]
 
 	mov	r11,#0
@@ -78,13 +78,13 @@ bn_mul_mont:
 .Linner:
 	ldr	r5,[r1],#4		@ ap[j],ap++
 	adds	r10,r11,r7		@ +=tp[j]
+	ldr	r6,[r3],#4		@ np[j],np++
 	mov	r11,#0
 	umlal	r10,r11,r5,r2	@ ap[j]*bp[i]
-	ldr	r6,[r3],#4		@ np[j],np++
 	mov	r14,#0
 	umlal	r12,r14,r6,r8	@ np[j]*n0
-	ldr	r7,[r4,#8]		@ tp[j+1]
 	adc	r11,r11,#0
+	ldr	r7,[r4,#8]		@ tp[j+1]
 	adds	r12,r12,r10
 	str	r12,[r4],#4		@ tp[j-1]=,tp++
 	adc	r12,r14,#0
@@ -93,13 +93,13 @@ bn_mul_mont:
 
 	adds	r12,r12,r11
 	mov	r14,#0
-	adc	r14,r14,#0
-	adds	r12,r12,r7
-	adc	r14,r14,#0
 	ldr	r4,[r0,#13*4]		@ restore bp
-	ldr	r7,[r0,#15*4]		@ restore &bp[num]
-	str	r12,[r0]		@ tp[num-1]=
+	adc	r14,r14,#0
 	ldr	r8,[r0,#14*4]		@ restore n0
+	adds	r12,r12,r7
+	ldr	r7,[r0,#15*4]		@ restore &bp[num]
+	adc	r14,r14,#0
+	str	r12,[r0]		@ tp[num-1]=
 	str	r14,[r0,#4]		@ tp[num]=
 
 	cmp	r4,r7

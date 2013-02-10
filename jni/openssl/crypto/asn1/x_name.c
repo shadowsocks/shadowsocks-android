@@ -214,7 +214,9 @@ static int x509_name_ex_d2i(ASN1_VALUE **val,
 	*val = nm.a;
 	*in = p;
 	return ret;
-	err:
+err:
+        if (nm.x != NULL)
+		X509_NAME_free(nm.x);
 	ASN1err(ASN1_F_X509_NAME_EX_D2I, ERR_R_NESTED_ASN1_ERROR);
 	return 0;
 }
@@ -397,8 +399,7 @@ static int asn1_string_canon(ASN1_STRING *out, ASN1_STRING *in)
 	/* If type not in bitmask just copy string across */
 	if (!(ASN1_tag2bit(in->type) & ASN1_MASK_CANON))
 		{
-		out->type = in->type;
-		if (!ASN1_STRING_set(out, in->data, in->length))
+		if (!ASN1_STRING_copy(out, in))
 			return 0;
 		return 1;
 		}
@@ -464,7 +465,8 @@ static int asn1_string_canon(ASN1_STRING *out, ASN1_STRING *in)
 			}
 		else
 			{
-			*to++ = tolower(*from++);
+			*to++ = tolower(*from);
+			from++;
 			i++;
 			}
 		}

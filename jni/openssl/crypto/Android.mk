@@ -6,7 +6,8 @@ arm_src_files := \
     bn/asm/armv4-mont.S \
     sha/asm/sha1-armv4-large.S \
     sha/asm/sha256-armv4.S \
-    sha/asm/sha512-armv4.S
+    sha/asm/sha512-armv4.S 
+
 non_arm_src_files := aes/aes_core.c
 
 local_src_files := \
@@ -22,10 +23,14 @@ local_src_files := \
 	o_time.c \
 	o_str.c \
 	o_dir.c \
+	o_fips.c \
+	o_init.c \
+	fips_ers.c \
 	aes/aes_cbc.c \
 	aes/aes_cfb.c \
 	aes/aes_ctr.c \
 	aes/aes_ecb.c \
+	aes/aes_ige.c \
 	aes/aes_misc.c \
 	aes/aes_ofb.c \
 	aes/aes_wrap.c \
@@ -133,7 +138,9 @@ local_src_files := \
 	bn/bn_add.c \
 	bn/bn_asm.c \
 	bn/bn_blind.c \
+	bn/bn_const.c \
 	bn/bn_ctx.c \
+	bn/bn_depr.c \
 	bn/bn_div.c \
 	bn/bn_err.c \
 	bn/bn_exp.c \
@@ -155,8 +162,13 @@ local_src_files := \
 	bn/bn_sqr.c \
 	bn/bn_sqrt.c \
 	bn/bn_word.c \
+	bn/bn_x931p.c \
 	buffer/buf_err.c \
+	buffer/buf_str.c \
 	buffer/buffer.c \
+	cmac/cmac.c \
+	cmac/cm_ameth.c \
+	cmac/cm_pmeth.c \
 	comp/c_rle.c \
 	comp/c_zlib.c \
 	comp/comp_err.c \
@@ -203,6 +215,7 @@ local_src_files := \
 	dh/dh_key.c \
 	dh/dh_lib.c \
 	dh/dh_pmeth.c \
+	dh/dh_prn.c \
 	dsa/dsa_ameth.c \
 	dsa/dsa_asn1.c \
 	dsa/dsa_depr.c \
@@ -223,6 +236,7 @@ local_src_files := \
 	dso/dso_openssl.c \
 	dso/dso_vms.c \
 	dso/dso_win32.c \
+	dso/dso_beos.c \
 	ec/ec2_mult.c \
 	ec/ec2_smpl.c \
 	ec/ec_ameth.c \
@@ -240,6 +254,13 @@ local_src_files := \
 	ec/ecp_mont.c \
 	ec/ecp_nist.c \
 	ec/ecp_smpl.c \
+	ec/ecp_nistp224.c \
+	ec/ecp_nistp256.c \
+	ec/ecp_nistp521.c \
+	ec/ecp_nistputil.c \
+	ec/ecp_oct.c \
+	ec/ec2_oct.c \
+	ec/ec_oct.c \
 	ecdh/ech_err.c \
 	ecdh/ech_key.c \
 	ecdh/ech_lib.c \
@@ -303,6 +324,15 @@ local_src_files := \
 	evp/pmeth_fn.c \
 	evp/pmeth_gn.c \
 	evp/pmeth_lib.c \
+	evp/e_idea.c \
+	evp/e_camellia.c \
+	evp/e_seed.c \
+	evp/e_cast.c \
+	evp/m_md2.c \
+	evp/m_sha.c \
+	evp/evp_fips.c \
+	evp/e_aes_cbc_hmac_sha1.c \
+	evp/e_rc4_hmac_md5.c \
 	hmac/hm_ameth.c \
 	hmac/hm_pmeth.c \
 	hmac/hmac.c \
@@ -314,9 +344,13 @@ local_src_files := \
 	md5/md5_dgst.c \
 	md5/md5_one.c \
 	modes/cbc128.c \
-	modes/cfb128.c \
 	modes/ctr128.c \
+	modes/cts128.c \
+	modes/cfb128.c \
 	modes/ofb128.c \
+	modes/gcm128.c \
+	modes/ccm128.c \
+	modes/xts128.c \
 	objects/o_names.c \
 	objects/obj_dat.c \
 	objects/obj_err.c \
@@ -365,6 +399,8 @@ local_src_files := \
 	pkcs7/pk7_mime.c \
 	pkcs7/pk7_smime.c \
 	pkcs7/pkcs7err.c \
+	pkcs7/bio_pk7.c \
+	pqueue/pqueue.c \
 	rand/md_rand.c \
 	rand/rand_egd.c \
 	rand/rand_err.c \
@@ -378,6 +414,7 @@ local_src_files := \
 	rc2/rc2ofb64.c \
 	rc4/rc4_enc.c \
 	rc4/rc4_skey.c \
+	rc4/rc4_utl.c \
 	ripemd/rmd_dgst.c \
 	ripemd/rmd_one.c \
 	rsa/rsa_ameth.c \
@@ -398,11 +435,16 @@ local_src_files := \
 	rsa/rsa_sign.c \
 	rsa/rsa_ssl.c \
 	rsa/rsa_x931.c \
+	rsa/rsa_depr.c \
+	rsa/rsa_crpt.c \
 	sha/sha1_one.c \
 	sha/sha1dgst.c \
 	sha/sha256.c \
 	sha/sha512.c \
 	sha/sha_dgst.c \
+	sha/sha_one.c \
+	srp/srp_lib.c \
+	srp/srp_vfy.c \
 	stack/stack.c \
 	ts/ts_err.c \
 	txt_db/txt_db.c \
@@ -444,6 +486,8 @@ local_src_files := \
 	x509v3/v3_akey.c \
 	x509v3/v3_akeya.c \
 	x509v3/v3_alt.c \
+	x509v3/v3_asid.c \
+	x509v3/v3_addr.c \
 	x509v3/v3_bcons.c \
 	x509v3/v3_bitst.c \
 	x509v3/v3_conf.c \
@@ -471,12 +515,12 @@ local_src_files := \
 	x509v3/v3err.c
 
 local_c_includes := \
-	$(LOCAL_PATH)/.. \
-	$(LOCAL_PATH)/../crypto/asn1 \
-	$(LOCAL_PATH)/../crypto/evp \
-	$(LOCAL_PATH)/../include \
-	$(LOCAL_PATH)/../include/openssl
-
+	$(NDK_PROJECT_PATH)/jni/openssl \
+	$(NDK_PROJECT_PATH)/jni/openssl/crypto/asn1 \
+	$(NDK_PROJECT_PATH)/jni/openssl/crypto/evp \
+	$(NDK_PROJECT_PATH)/jni/openssl/include \
+	$(NDK_PROJECT_PATH)/jni/openssl/include/openssl
+	
 local_c_flags := -DNO_WINDOWS_BRAINDEATH
 
 #######################################
@@ -501,4 +545,33 @@ ifeq ($(TARGET_SIMULATOR),true)
 endif
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE:= libcrypto
+include $(BUILD_SHARED_LIBRARY)
+
+#######################################
+# host shared library
+ifeq ($(WITH_HOST_DALVIK),true)
+    include $(CLEAR_VARS)
+    include $(LOCAL_PATH)/../android-config.mk
+    LOCAL_SRC_FILES += $(local_src_files)
+    LOCAL_CFLAGS += $(local_c_flags) -DPURIFY
+    LOCAL_C_INCLUDES += $(local_c_includes)
+    LOCAL_SRC_FILES += $(non_arm_src_files)
+    LOCAL_LDLIBS += -ldl
+    LOCAL_MODULE_TAGS := optional
+    LOCAL_MODULE:= libcrypto
+    include $(BUILD_SHARED_LIBRARY)
+endif
+
+########################################
+# host static library, which is used by some SDK tools.
+
+include $(CLEAR_VARS)
+include $(LOCAL_PATH)/../android-config.mk
+LOCAL_SRC_FILES += $(local_src_files)
+LOCAL_CFLAGS += $(local_c_flags) -DPURIFY
+LOCAL_C_INCLUDES += $(local_c_includes)
+LOCAL_SRC_FILES += $(non_arm_src_files)
+LOCAL_LDLIBS += -ldl
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE:= libcrypto_static
 include $(BUILD_STATIC_LIBRARY)

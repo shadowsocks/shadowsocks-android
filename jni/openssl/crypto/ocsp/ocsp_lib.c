@@ -124,7 +124,8 @@ OCSP_CERTID *OCSP_cert_id_new(const EVP_MD *dgst,
 	if (!(ASN1_OCTET_STRING_set(cid->issuerNameHash, md, i))) goto err;
 
 	/* Calculate the issuerKey hash, excluding tag and length */
-	EVP_Digest(issuerKey->data, issuerKey->length, md, &i, dgst, NULL);
+	if (!EVP_Digest(issuerKey->data, issuerKey->length, md, &i, dgst, NULL))
+		goto err;
 
 	if (!(ASN1_OCTET_STRING_set(cid->issuerKeyHash, md, i))) goto err;
 
@@ -170,13 +171,13 @@ int OCSP_parse_url(char *url, char **phost, char **pport, char **ppath, int *pss
 
 	char *host, *port;
 
-	/* dup the buffer since we are going to mess with it */
-	buf = BUF_strdup(url);
-	if (!buf) goto mem_err;
-
 	*phost = NULL;
 	*pport = NULL;
 	*ppath = NULL;
+
+	/* dup the buffer since we are going to mess with it */
+	buf = BUF_strdup(url);
+	if (!buf) goto mem_err;
 
 	/* Check for initial colon */
 	p = strchr(buf, ':');

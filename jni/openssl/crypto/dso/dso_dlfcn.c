@@ -85,7 +85,9 @@ DSO_METHOD *DSO_METHOD_dlfcn(void)
 # define HAVE_DLINFO 1
 # if defined(_AIX) || defined(__CYGWIN__) || \
      defined(__SCO_VERSION__) || defined(_SCO_ELF) || \
-     (defined(__OpenBSD__) && !defined(RTLD_SELF))
+     (defined(__osf__) && !defined(RTLD_NEXT))     || \
+     (defined(__OpenBSD__) && !defined(RTLD_SELF)) || \
+	defined(__ANDROID__)
 #  undef HAVE_DLINFO
 # endif
 #endif

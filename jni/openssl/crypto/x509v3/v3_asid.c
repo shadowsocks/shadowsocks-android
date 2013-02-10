@@ -61,7 +61,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include "cryptlib.h"
 #include <openssl/conf.h>
 #include <openssl/asn1.h>
@@ -172,11 +171,11 @@ static int ASIdOrRange_cmp(const ASIdOrRange * const *a_,
 {
   const ASIdOrRange *a = *a_, *b = *b_;
 
-  assert((a->type == ASIdOrRange_id && a->u.id != NULL) ||
+  OPENSSL_assert((a->type == ASIdOrRange_id && a->u.id != NULL) ||
 	 (a->type == ASIdOrRange_range && a->u.range != NULL &&
 	  a->u.range->min != NULL && a->u.range->max != NULL));
 
-  assert((b->type == ASIdOrRange_id && b->u.id != NULL) ||
+  OPENSSL_assert((b->type == ASIdOrRange_id && b->u.id != NULL) ||
 	 (b->type == ASIdOrRange_range && b->u.range != NULL &&
 	  b->u.range->min != NULL && b->u.range->max != NULL));
 
@@ -215,7 +214,7 @@ int v3_asid_add_inherit(ASIdentifiers *asid, int which)
   if (*choice == NULL) {
     if ((*choice = ASIdentifierChoice_new()) == NULL)
       return 0;
-    assert((*choice)->u.inherit == NULL);
+    OPENSSL_assert((*choice)->u.inherit == NULL);
     if (((*choice)->u.inherit = ASN1_NULL_new()) == NULL)
       return 0;
     (*choice)->type = ASIdentifierChoice_inherit;
@@ -250,7 +249,7 @@ int v3_asid_add_id_or_range(ASIdentifiers *asid,
   if (*choice == NULL) {
     if ((*choice = ASIdentifierChoice_new()) == NULL)
       return 0;
-    assert((*choice)->u.asIdsOrRanges == NULL);
+    OPENSSL_assert((*choice)->u.asIdsOrRanges == NULL);
     (*choice)->u.asIdsOrRanges = sk_ASIdOrRange_new(ASIdOrRange_cmp);
     if ((*choice)->u.asIdsOrRanges == NULL)
       return 0;
@@ -286,7 +285,7 @@ static void extract_min_max(ASIdOrRange *aor,
 			    ASN1_INTEGER **min,
 			    ASN1_INTEGER **max)
 {
-  assert(aor != NULL && min != NULL && max != NULL);
+  OPENSSL_assert(aor != NULL && min != NULL && max != NULL);
   switch (aor->type) {
   case ASIdOrRange_id:
     *min = aor->u.id;
@@ -359,6 +358,20 @@ static int ASIdentifierChoice_is_canonical(ASIdentifierChoice *choice)
       goto done;
   }
 
+  /*
+   * Check for inverted range.
+   */
+  i = sk_ASIdOrRange_num(choice->u.asIdsOrRanges) - 1;
+  {
+    ASIdOrRange *a = sk_ASIdOrRange_value(choice->u.asIdsOrRanges, i);
+    ASN1_INTEGER *a_min, *a_max;
+    if (a != NULL && a->type == ASIdOrRange_range) {
+      extract_min_max(a, &a_min, &a_max);
+      if (ASN1_INTEGER_cmp(a_min, a_max) > 0)
+	goto done;
+    }
+  }
+
   ret = 1;
 
  done:
@@ -373,7 +386,7 @@ static int ASIdentifierChoice_is_canonical(ASIdentifierChoice *choice)
 int v3_asid_is_canonical(ASIdentifiers *asid)
 {
   return (asid == NULL ||
-	  (ASIdentifierChoice_is_canonical(asid->asnum) ||
+	  (ASIdentifierChoice_is_canonical(asid->asnum) &&
 	   ASIdentifierChoice_is_canonical(asid->rdi)));
 }
 
@@ -393,9 +406,18 @@ static int ASIdentifierChoice_canonize(ASIdentifierChoice *choice)
     return 1;
 
   /*
-   * We have a list.  Sort it.
+   * If not a list, or if empty list, it's broken.
    */
-  assert(choice->type == ASIdentifierChoice_asIdsOrRanges);
+  if (choice->type != ASIdentifierChoice_asIdsOrRanges ||
+      sk_ASIdOrRange_num(choice->u.asIdsOrRanges) == 0) {
+    X509V3err(X509V3_F_ASIDENTIFIERCHOICE_CANONIZE,
+	      X509V3_R_EXTENSION_VALUE_ERROR);
+    return 0;
+  }
+
+  /*
+   * We have a non-empty list.  Sort it.
+   */
   sk_ASIdOrRange_sort(choice->u.asIdsOrRanges);
 
   /*
@@ -413,7 +435,14 @@ static int ASIdentifierChoice_canonize(ASIdentifierChoice *choice)
     /*
      * Make sure we're properly sorted (paranoia).
      */
-    assert(ASN1_INTEGER_cmp(a_min, b_min) <= 0);
+    OPENSSL_assert(ASN1_INTEGER_cmp(a_min, b_min) <= 0);
+
+    /*
+     * Punt inverted ranges.
+     */
+    if (ASN1_INTEGER_cmp(a_min, a_max) > 0 ||
+	ASN1_INTEGER_cmp(b_min, b_max) > 0)
+      goto done;
 
     /*
      * Check for overlaps.
@@ -466,13 +495,27 @@ static int ASIdentifierChoice_canonize(ASIdentifierChoice *choice)
 	break;
       }
       ASIdOrRange_free(b);
-      sk_ASIdOrRange_delete(choice->u.asIdsOrRanges, i + 1);
+      (void) sk_ASIdOrRange_delete(choice->u.asIdsOrRanges, i + 1);
       i--;
       continue;
     }
   }
 
-  assert(ASIdentifierChoice_is_canonical(choice)); /* Paranoia */
+  /*
+   * Check for final inverted range.
+   */
+  i = sk_ASIdOrRange_num(choice->u.asIdsOrRanges) - 1;
+  {
+    ASIdOrRange *a = sk_ASIdOrRange_value(choice->u.asIdsOrRanges, i);
+    ASN1_INTEGER *a_min, *a_max;
+    if (a != NULL && a->type == ASIdOrRange_range) {
+      extract_min_max(a, &a_min, &a_max);
+      if (ASN1_INTEGER_cmp(a_min, a_max) > 0)
+	goto done;
+    }
+  }
+
+  OPENSSL_assert(ASIdentifierChoice_is_canonical(choice)); /* Paranoia */
 
   ret = 1;
 
@@ -499,6 +542,7 @@ static void *v2i_ASIdentifiers(const struct v3_ext_method *method,
 			       struct v3_ext_ctx *ctx,
 			       STACK_OF(CONF_VALUE) *values)
 {
+  ASN1_INTEGER *min = NULL, *max = NULL;
   ASIdentifiers *asid = NULL;
   int i;
 
@@ -509,7 +553,6 @@ static void *v2i_ASIdentifiers(const struct v3_ext_method *method,
 
   for (i = 0; i < sk_CONF_VALUE_num(values); i++) {
     CONF_VALUE *val = sk_CONF_VALUE_value(values, i);
-    ASN1_INTEGER *min = NULL, *max = NULL;
     int i1, i2, i3, is_range, which;
 
     /*
@@ -579,18 +622,19 @@ static void *v2i_ASIdentifiers(const struct v3_ext_method *method,
       max = s2i_ASN1_INTEGER(NULL, s + i2);
       OPENSSL_free(s);
       if (min == NULL || max == NULL) {
-	ASN1_INTEGER_free(min);
-	ASN1_INTEGER_free(max);
 	X509V3err(X509V3_F_V2I_ASIDENTIFIERS, ERR_R_MALLOC_FAILURE);
+	goto err;
+      }
+      if (ASN1_INTEGER_cmp(min, max) > 0) {
+	X509V3err(X509V3_F_V2I_ASIDENTIFIERS, X509V3_R_EXTENSION_VALUE_ERROR);
 	goto err;
       }
     }
     if (!v3_asid_add_id_or_range(asid, which, min, max)) {
-      ASN1_INTEGER_free(min);
-      ASN1_INTEGER_free(max);
       X509V3err(X509V3_F_V2I_ASIDENTIFIERS, ERR_R_MALLOC_FAILURE);
       goto err;
     }
+    min = max = NULL;
   }
 
   /*
@@ -602,6 +646,8 @@ static void *v2i_ASIdentifiers(const struct v3_ext_method *method,
 
  err:
   ASIdentifiers_free(asid);
+  ASN1_INTEGER_free(min);
+  ASN1_INTEGER_free(max);
   return NULL;
 }
 
@@ -709,9 +755,9 @@ static int v3_asid_validate_path_internal(X509_STORE_CTX *ctx,
   int i, ret = 1, inherit_as = 0, inherit_rdi = 0;
   X509 *x;
 
-  assert(chain != NULL && sk_X509_num(chain) > 0);
-  assert(ctx != NULL || ext != NULL);
-  assert(ctx == NULL || ctx->verify_cb != NULL);
+  OPENSSL_assert(chain != NULL && sk_X509_num(chain) > 0);
+  OPENSSL_assert(ctx != NULL || ext != NULL);
+  OPENSSL_assert(ctx == NULL || ctx->verify_cb != NULL);
 
   /*
    * Figure out where to start.  If we don't have an extension to
@@ -724,7 +770,7 @@ static int v3_asid_validate_path_internal(X509_STORE_CTX *ctx,
   } else {
     i = 0;
     x = sk_X509_value(chain, i);
-    assert(x != NULL);
+    OPENSSL_assert(x != NULL);
     if ((ext = x->rfc3779_asid) == NULL)
       goto done;
   }
@@ -757,7 +803,7 @@ static int v3_asid_validate_path_internal(X509_STORE_CTX *ctx,
    */
   for (i++; i < sk_X509_num(chain); i++) {
     x = sk_X509_value(chain, i);
-    assert(x != NULL);
+    OPENSSL_assert(x != NULL);
     if (x->rfc3779_asid == NULL) {
       if (child_as != NULL || child_rdi != NULL)
 	validation_err(X509_V_ERR_UNNESTED_RESOURCE);
@@ -800,7 +846,7 @@ static int v3_asid_validate_path_internal(X509_STORE_CTX *ctx,
   /*
    * Trust anchor can't inherit.
    */
-  assert(x != NULL);
+  OPENSSL_assert(x != NULL);
   if (x->rfc3779_asid != NULL) {
     if (x->rfc3779_asid->asnum != NULL &&
 	x->rfc3779_asid->asnum->type == ASIdentifierChoice_inherit)

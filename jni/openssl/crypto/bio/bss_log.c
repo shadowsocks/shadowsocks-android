@@ -75,6 +75,15 @@
 #  include <descrip.h>
 #  include <lib$routines.h>
 #  include <starlet.h>
+/* Some compiler options may mask the declaration of "_malloc32". */
+#  if __INITIAL_POINTER_SIZE && defined _ANSI_C_SOURCE
+#    if __INITIAL_POINTER_SIZE == 64
+#      pragma pointer_size save
+#      pragma pointer_size 32
+    void * _malloc32  (__size_t);
+#      pragma pointer_size restore
+#    endif /* __INITIAL_POINTER_SIZE == 64 */
+#  endif /* __INITIAL_POINTER_SIZE && defined _ANSI_C_SOURCE */
 #elif defined(__ultrix)
 #  include <sys/syslog.h>
 #elif defined(OPENSSL_SYS_NETWARE)
@@ -300,7 +309,24 @@ static void xopenlog(BIO* bp, char* name, int level)
 static void xsyslog(BIO *bp, int priority, const char *string)
 {
 	struct dsc$descriptor_s opc_dsc;
+
+/* Arrange 32-bit pointer to opcdef buffer and malloc(), if needed. */
+#if __INITIAL_POINTER_SIZE == 64
+# pragma pointer_size save
+# pragma pointer_size 32
+# define OPCDEF_TYPE __char_ptr32
+# define OPCDEF_MALLOC _malloc32
+#else /* __INITIAL_POINTER_SIZE == 64 */
+# define OPCDEF_TYPE char *
+# define OPCDEF_MALLOC OPENSSL_malloc
+#endif /* __INITIAL_POINTER_SIZE == 64 [else] */
+
 	struct opcdef *opcdef_p;
+
+#if __INITIAL_POINTER_SIZE == 64
+# pragma pointer_size restore
+#endif /* __INITIAL_POINTER_SIZE == 64 */
+
 	char buf[10240];
 	unsigned int len;
         struct dsc$descriptor_s buf_dsc;
@@ -326,8 +352,8 @@ static void xsyslog(BIO *bp, int priority, const char *string)
 
 	lib$sys_fao(&fao_cmd, &len, &buf_dsc, priority_tag, string);
 
-	/* we know there's an 8 byte header.  That's documented */
-	opcdef_p = (struct opcdef *) OPENSSL_malloc(8 + len);
+	/* We know there's an 8-byte header.  That's documented. */
+	opcdef_p = OPCDEF_MALLOC( 8+ len);
 	opcdef_p->opc$b_ms_type = OPC$_RQ_RQST;
 	memcpy(opcdef_p->opc$z_ms_target_classes, &VMS_OPC_target, 3);
 	opcdef_p->opc$l_ms_rqstid = 0;
@@ -335,7 +361,7 @@ static void xsyslog(BIO *bp, int priority, const char *string)
 
 	opc_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
 	opc_dsc.dsc$b_class = DSC$K_CLASS_S;
-	opc_dsc.dsc$a_pointer = (char *)opcdef_p;
+	opc_dsc.dsc$a_pointer = (OPCDEF_TYPE) opcdef_p;
 	opc_dsc.dsc$w_length = len + 8;
 
 	sys$sndopr(opc_dsc, 0);

@@ -133,47 +133,87 @@
 # define FD_SETSIZE (8*sizeof(fd_set))
 #endif
 
-#ifdef __VOS__
+#if defined(OPENSSL_SYS_VOS)
+
+/* The following algorithm repeatedly samples the real-time clock
+   (RTC) to generate a sequence of unpredictable data.  The algorithm
+   relies upon the uneven execution speed of the code (due to factors
+   such as cache misses, interrupts, bus activity, and scheduling) and
+   upon the rather large relative difference between the speed of the
+   clock and the rate at which it can be read.
+
+   If this code is ported to an environment where execution speed is
+   more constant or where the RTC ticks at a much slower rate, or the
+   clock can be read with fewer instructions, it is likely that the
+   results would be far more predictable.
+
+   As a precaution, we generate 4 times the minimum required amount of
+   seed data.  */
+
 int RAND_poll(void)
 {
-	unsigned char buf[ENTROPY_NEEDED];
+	short int code;
+	gid_t curr_gid;
 	pid_t curr_pid;
 	uid_t curr_uid;
-	static int first=1;
-	int i;
-	long rnd = 0;
+	int i, k;
 	struct timespec ts;
-	unsigned seed;
+	unsigned char v;
 
-/* The VOS random() function starts from a static seed so its
-   initial value is predictable.  If random() returns the
-   initial value, reseed it with dynamic data.  The VOS
-   real-time clock has a granularity of 1 nsec so it should be
-   reasonably difficult to predict its exact value.  Do not
-   gratuitously reseed the PRNG because other code in this
-   process or thread may be using it.  */
+#ifdef OPENSSL_SYS_VOS_HPPA
+	long duration;
+	extern void s$sleep (long *_duration, short int *_code);
+#else
+#ifdef OPENSSL_SYS_VOS_IA32
+	long long duration;
+	extern void s$sleep2 (long long *_duration, short int *_code);
+#else
+#error "Unsupported Platform."
+#endif /* OPENSSL_SYS_VOS_IA32 */
+#endif /* OPENSSL_SYS_VOS_HPPA */
 
-	if (first) {
-		first = 0;
-		rnd = random ();
-		if (rnd == 1804289383) {
-			clock_gettime (CLOCK_REALTIME, &ts);
-			curr_pid = getpid();
-			curr_uid = getuid();
-			seed = ts.tv_sec ^ ts.tv_nsec ^ curr_pid ^ curr_uid;
-			srandom (seed);
-		}
+	/* Seed with the gid, pid, and uid, to ensure *some*
+	   variation between different processes.  */
+
+	curr_gid = getgid();
+	RAND_add (&curr_gid, sizeof curr_gid, 1);
+	curr_gid = 0;
+
+	curr_pid = getpid();
+	RAND_add (&curr_pid, sizeof curr_pid, 1);
+	curr_pid = 0;
+
+	curr_uid = getuid();
+	RAND_add (&curr_uid, sizeof curr_uid, 1);
+	curr_uid = 0;
+
+	for (i=0; i<(ENTROPY_NEEDED*4); i++)
+	{
+		/* burn some cpu; hope for interrupts, cache
+		   collisions, bus interference, etc.  */
+		for (k=0; k<99; k++)
+			ts.tv_nsec = random ();
+
+#ifdef OPENSSL_SYS_VOS_HPPA
+		/* sleep for 1/1024 of a second (976 us).  */
+		duration = 1;
+		s$sleep (&duration, &code);
+#else
+#ifdef OPENSSL_SYS_VOS_IA32
+		/* sleep for 1/65536 of a second (15 us).  */
+		duration = 1;
+		s$sleep2 (&duration, &code);
+#endif /* OPENSSL_SYS_VOS_IA32 */
+#endif /* OPENSSL_SYS_VOS_HPPA */
+
+		/* get wall clock time.  */
+		clock_gettime (CLOCK_REALTIME, &ts);
+
+		/* take 8 bits */
+		v = (unsigned char) (ts.tv_nsec % 256);
+		RAND_add (&v, sizeof v, 1);
+		v = 0;
 	}
-
-	for (i = 0; i < sizeof(buf); i++) {
-		if (i % 4 == 0)
-			rnd = random();
-		buf[i] = rnd;
-		rnd >>= 8;
-	}
-	RAND_add(buf, sizeof(buf), ENTROPY_NEEDED);
-	memset(buf, 0, sizeof(buf));
-
 	return 1;
 }
 #elif defined __OpenBSD__

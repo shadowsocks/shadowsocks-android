@@ -57,9 +57,6 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 
-#ifndef OPENSSL_SYSNAME_NETWARE
-#include <memory.h>
-#endif
 #include <stdio.h>
 
 /* Experimental NDEF ASN1 BIO support routines */

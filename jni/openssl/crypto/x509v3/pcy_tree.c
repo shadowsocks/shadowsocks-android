@@ -341,9 +341,8 @@ static int tree_link_nodes(X509_POLICY_LEVEL *curr,
 				const X509_POLICY_CACHE *cache)
 	{
 	int i;
-	X509_POLICY_LEVEL *last;
 	X509_POLICY_DATA *data;
-	last = curr - 1;
+
 	for (i = 0; i < sk_X509_POLICY_DATA_num(cache->data); i++)
 		{
 		data = sk_X509_POLICY_DATA_value(cache->data, i);

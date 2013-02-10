@@ -253,6 +253,24 @@ extern "C" {
 #define BN_HEX_FMT2	"%08X"
 #endif
 
+/* 2011-02-22 SMS.
+ * In various places, a size_t variable or a type cast to size_t was
+ * used to perform integer-only operations on pointers.  This failed on
+ * VMS with 64-bit pointers (CC /POINTER_SIZE = 64) because size_t is
+ * still only 32 bits.  What's needed in these cases is an integer type
+ * with the same size as a pointer, which size_t is not certain to be. 
+ * The only fix here is VMS-specific.
+ */
+#if defined(OPENSSL_SYS_VMS)
+# if __INITIAL_POINTER_SIZE == 64
+#  define PTR_SIZE_INT long long
+# else /* __INITIAL_POINTER_SIZE == 64 */
+#  define PTR_SIZE_INT int
+# endif /* __INITIAL_POINTER_SIZE == 64 [else] */
+#else /* defined(OPENSSL_SYS_VMS) */
+# define PTR_SIZE_INT size_t
+#endif /* defined(OPENSSL_SYS_VMS) [else] */
+
 #define BN_DEFAULT_BITS	1280
 
 #define BN_FLG_MALLOCED		0x01
@@ -540,6 +558,17 @@ int	BN_is_prime_ex(const BIGNUM *p,int nchecks, BN_CTX *ctx, BN_GENCB *cb);
 int	BN_is_prime_fasttest_ex(const BIGNUM *p,int nchecks, BN_CTX *ctx,
 		int do_trial_division, BN_GENCB *cb);
 
+int BN_X931_generate_Xpq(BIGNUM *Xp, BIGNUM *Xq, int nbits, BN_CTX *ctx);
+
+int BN_X931_derive_prime_ex(BIGNUM *p, BIGNUM *p1, BIGNUM *p2,
+			const BIGNUM *Xp, const BIGNUM *Xp1, const BIGNUM *Xp2,
+			const BIGNUM *e, BN_CTX *ctx, BN_GENCB *cb);
+int BN_X931_generate_prime_ex(BIGNUM *p, BIGNUM *p1, BIGNUM *p2,
+			BIGNUM *Xp1, BIGNUM *Xp2,
+			const BIGNUM *Xp,
+			const BIGNUM *e, BN_CTX *ctx,
+			BN_GENCB *cb);
+
 BN_MONT_CTX *BN_MONT_CTX_new(void );
 void BN_MONT_CTX_init(BN_MONT_CTX *ctx);
 int BN_mod_mul_montgomery(BIGNUM *r,const BIGNUM *a,const BIGNUM *b,
@@ -594,6 +623,8 @@ int	BN_mod_exp_recp(BIGNUM *r, const BIGNUM *a, const BIGNUM *p,
 int	BN_div_recp(BIGNUM *dv, BIGNUM *rem, const BIGNUM *m,
 	BN_RECP_CTX *recp, BN_CTX *ctx);
 
+#ifndef OPENSSL_NO_EC2M
+
 /* Functions for arithmetic over binary polynomials represented by BIGNUMs. 
  *
  * The BIGNUM::neg property of BIGNUMs representing binary polynomials is
@@ -644,6 +675,8 @@ int	BN_GF2m_mod_solve_quad_arr(BIGNUM *r, const BIGNUM *a,
 	const int p[], BN_CTX *ctx); /* r^2 + r = a mod p */
 int	BN_GF2m_poly2arr(const BIGNUM *a, int p[], int max);
 int	BN_GF2m_arr2poly(const int p[], BIGNUM *a);
+
+#endif
 
 /* faster mod functions for the 'NIST primes' 
  * 0 <= a < p^2 */

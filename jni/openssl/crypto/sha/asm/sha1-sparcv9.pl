@@ -276,6 +276,7 @@ $code.=<<___;
 .type	sha1_block_data_order,#function
 .size	sha1_block_data_order,(.-sha1_block_data_order)
 .asciz	"SHA1 block transform for SPARCv9, CRYPTOGAMS by <appro\@openssl.org>"
+.align	4
 ___
 
 $code =~ s/\`([^\`]*)\`/eval $1/gem;

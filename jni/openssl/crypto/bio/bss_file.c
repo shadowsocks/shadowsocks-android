@@ -123,6 +123,7 @@ BIO *BIO_new_file(const char *filename, const char *mode)
 
 #if defined(_WIN32) && defined(CP_UTF8)
 	int sz, len_0 = (int)strlen(filename)+1;
+	DWORD flags;
 
 	/*
 	 * Basically there are three cases to cover: a) filename is
@@ -136,17 +137,22 @@ BIO *BIO_new_file(const char *filename, const char *mode)
 	 * ERROR_NO_UNICODE_TRANSLATION, in which case we fall
 	 * back to fopen...
 	 */
-	if ((sz=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,
+	if ((sz=MultiByteToWideChar(CP_UTF8,(flags=MB_ERR_INVALID_CHARS),
+					filename,len_0,NULL,0))>0 ||
+	    (GetLastError()==ERROR_INVALID_FLAGS &&
+	     (sz=MultiByteToWideChar(CP_UTF8,(flags=0),
 					filename,len_0,NULL,0))>0)
+	   )
 		{
 		WCHAR  wmode[8];
 		WCHAR *wfilename = _alloca(sz*sizeof(WCHAR));
 
-		if (MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,
+		if (MultiByteToWideChar(CP_UTF8,flags,
 					filename,len_0,wfilename,sz) &&
 		    MultiByteToWideChar(CP_UTF8,0,mode,strlen(mode)+1,
 			    		wmode,sizeof(wmode)/sizeof(wmode[0])) &&
-		    (file=_wfopen(wfilename,wmode))==NULL && errno==ENOENT
+		    (file=_wfopen(wfilename,wmode))==NULL &&
+		    (errno==ENOENT || errno==EBADF)
 		   )	/* UTF-8 decode succeeded, but no file, filename
 			 * could still have been locale-ized... */
 			file = fopen(filename,mode);
