@@ -105,7 +105,7 @@ SHRPX_SOURCES := util.cc spdylay_ssl.cc \
 	shrpx_accesslog.cc http-parser/http_parser.c \
 	shrpx.cc 
 
-LOCAL_STATIC_LIBRARIES := libevent libcrypto libssl libspdylay
+LOCAL_STATIC_LIBRARIES := libevent libssl libcrypto libspdylay
 
 LOCAL_LDLIBS := -lz
 
