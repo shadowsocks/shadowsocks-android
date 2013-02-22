@@ -462,6 +462,7 @@ void free_remote(struct remote *remote) {
         free(remote);
     }
 }
+
 void close_and_free_remote(EV_P_ struct remote *remote) {
     if (remote != NULL) {
         ev_timer_stop(EV_A_ &remote->send_ctx->watcher);
@@ -471,6 +472,7 @@ void close_and_free_remote(EV_P_ struct remote *remote) {
         free_remote(remote);
     }
 }
+
 struct server* new_server(int fd) {
     struct server *server;
     server = malloc(sizeof(struct server));
@@ -485,10 +487,10 @@ struct server* new_server(int fd) {
     server->send_ctx->connected = 0;
     server->stage = 0;
     if (_method == RC4) {
-        server->e_ctx = malloc(sizeof(EVP_CIPHER_CTX));
-        server->d_ctx = malloc(sizeof(EVP_CIPHER_CTX));
-        enc_ctx_init(server->e_ctx, _key, 1);
-        enc_ctx_init(server->d_ctx, _key, 0);
+        server->e_ctx = malloc(sizeof(struct rc4_state));
+        server->d_ctx = malloc(sizeof(struct rc4_state));
+        enc_ctx_init(server->e_ctx, 1);
+        enc_ctx_init(server->d_ctx, 0);
     } else {
         server->e_ctx = NULL;
         server->d_ctx = NULL;
@@ -496,14 +498,13 @@ struct server* new_server(int fd) {
     server->buf_len = 0;
     return server;
 }
+
 void free_server(struct server *server) {
     if (server != NULL) {
         if (server->remote != NULL) {
             server->remote->server = NULL;
         }
         if (_method == RC4) {
-            EVP_CIPHER_CTX_cleanup(server->e_ctx);
-            EVP_CIPHER_CTX_cleanup(server->d_ctx);
             free(server->e_ctx);
             free(server->d_ctx);
         }
@@ -512,6 +513,7 @@ void free_server(struct server *server) {
         free(server);
     }
 }
+
 void close_and_free_server(EV_P_ struct server *server) {
     if (server != NULL) {
         ev_io_stop(EV_A_ &server->send_ctx->io);
@@ -520,6 +522,7 @@ void close_and_free_server(EV_P_ struct server *server) {
         free_server(server);
     }
 }
+
 static void accept_cb (EV_P_ ev_io *w, int revents)
 {
     struct listen_ctx *listener = (struct listen_ctx *)w;
@@ -685,7 +688,9 @@ int main (int argc, char **argv)
     }
 
     LOGD("calculating ciphers %d", _method);
-    if (_method != RC4) {
+    if (_method == RC4) {
+        enc_key_init(key);
+    } else {
         get_table(key);
     }
 

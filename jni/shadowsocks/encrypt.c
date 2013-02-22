@@ -1,6 +1,8 @@
 #include "encrypt.h"
 #include "android.h"
 
+#define OFFSET_ROL(p, o) ((u_int64_t)(*(p + o)) << (8 * o))
+
 static int random_compare(const void *_x, const void *_y) {
     uint32_t i = _i;
     uint64_t a = _a;
@@ -9,9 +11,14 @@ static int random_compare(const void *_x, const void *_y) {
     return (a % (x + i) - a % (y + i));
 }
 
+static void md5(const unsigned char *text, unsigned char *digest) {
+    md5_state_t state;
+    md5_init(&state);
+    md5_append(&state, text, strlen((char*)text));
+    md5_finish(&state, digest);
+}
 
-static void merge(uint8_t *left, int llength, uint8_t *right, int rlength)
-{
+static void merge(uint8_t *left, int llength, uint8_t *right, int rlength) {
 	/* Temporary memory locations for the 2 segments of the array to merge. */
 	uint8_t *ltmp = (uint8_t *) malloc(llength * sizeof(uint8_t));
 	uint8_t *rtmp = (uint8_t *) malloc(rlength * sizeof(uint8_t));
@@ -78,8 +85,7 @@ static void merge(uint8_t *left, int llength, uint8_t *right, int rlength)
 	free(rtmp);
 }
 
-static void mergesort(uint8_t array[], int length)
-{
+static void merge_sort(uint8_t array[], int length) {
 	/* This is the middle index and also the length of the right array. */
 	uint8_t middle;
 
@@ -106,73 +112,71 @@ static void mergesort(uint8_t array[], int length)
 	left = array;
 	right = array + llength;
 
-	mergesort(left, llength);
-	mergesort(right, middle);
+	merge_sort(left, llength);
+	merge_sort(right, middle);
 	merge(left, llength, right, middle);
 }
 
-void encrypt(char *buf, int len, EVP_CIPHER_CTX *ctx) {
+void encrypt(char *buf, int len, struct rc4_state *ctx) {
     if (ctx != NULL) {
-        int outlen;
-        unsigned char *mybuf = malloc(BUF_SIZE);
-        EVP_CipherUpdate(ctx, mybuf, &outlen, (unsigned char*)buf, len);
-        memcpy(buf, mybuf, len);
-        free(mybuf);
+        rc4_crypt(ctx, (unsigned char*) buf, (unsigned char*) buf, len);
     } else {
         char *end = buf + len;
         while (buf < end) {
-            *buf = (char)encrypt_table[(uint8_t)*buf];
+            *buf = (char)enc_ctx.table.encrypt_table[(uint8_t)*buf];
             buf++;
         }
     }
 }
 
-void decrypt(char *buf, int len, EVP_CIPHER_CTX *ctx) {
+void decrypt(char *buf, int len, struct rc4_state *ctx) {
     if (ctx != NULL) {
-        int outlen;
-        unsigned char *mybuf = malloc(BUF_SIZE);
-        EVP_CipherUpdate(ctx, mybuf, &outlen, (unsigned char*) buf, len);
-        memcpy(buf, mybuf, len);
-        free(mybuf);
+        rc4_crypt(ctx, (unsigned char*) buf, (unsigned char*) buf, len);
     } else {
         char *end = buf + len;
         while (buf < end) {
-            *buf = (char)decrypt_table[(uint8_t)*buf];
+            *buf = (char)enc_ctx.table.decrypt_table[(uint8_t)*buf];
             buf++;
         }
     }
 }
 
-void enc_ctx_init(EVP_CIPHER_CTX *ctx, const char *pass, int enc) {
-    unsigned char key[EVP_MAX_KEY_LENGTH];
-    unsigned char iv[EVP_MAX_IV_LENGTH];
-    int key_len = EVP_BytesToKey(EVP_rc4(), EVP_md5(), NULL, (unsigned char*) pass, 
-            strlen(pass), 1, key, iv);
-    EVP_CIPHER_CTX_init(ctx);
-    EVP_CipherInit_ex(ctx, EVP_rc4(), NULL, NULL, NULL, enc);
-    if (!EVP_CIPHER_CTX_set_key_length(ctx, key_len)) {
-        LOGE("Invalid key length: %d", key_len);
-        EVP_CIPHER_CTX_cleanup(ctx);
-        exit(EXIT_FAILURE);
-    }
-    EVP_CipherInit_ex(ctx, NULL, NULL, key, iv, enc);
+void enc_ctx_init(struct rc4_state *ctx, int enc) {
+    uint8_t *key = enc_ctx.rc4.key;
+    int key_len = enc_ctx.rc4.key_len;
+    rc4_init(ctx, key, key_len);
+}
+
+void enc_key_init(const char *pass) {
+    enc_ctx.rc4.key_len = 16;
+    enc_ctx.rc4.key = malloc(16);
+    md5((const unsigned char*)pass, enc_ctx.rc4.key);
 }
 
 void get_table(const char *pass) {
-    uint8_t *table = encrypt_table;
-    uint8_t *tmp_hash = MD5((unsigned char *) pass, strlen(pass), NULL);
-    _a = htole64(*(uint64_t *) tmp_hash);
+    uint8_t *enc_table = malloc(256);
+    uint8_t *dec_table = malloc(256);
+    uint8_t digest[16];
     uint32_t i;
 
+    md5((const unsigned char*)pass, digest);
+
+    for (i = 0; i < 8; i++) {
+        _a += OFFSET_ROL(digest, i);
+    }
+
     for(i = 0; i < 256; ++i) {
-        table[i] = i;
+        enc_table[i] = i;
     }
     for(i = 1; i < 1024; ++i) {
         _i = i;
-        mergesort(table, 256);
+        merge_sort(enc_table, 256);
     }
     for(i = 0; i < 256; ++i) {
         // gen decrypt table from encrypt table
-        decrypt_table[encrypt_table[i]] = i;
+        dec_table[enc_table[i]] = i;
     }
+
+    enc_ctx.table.encrypt_table = enc_table;
+    enc_ctx.table.decrypt_table = dec_table;
 }

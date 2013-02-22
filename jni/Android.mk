@@ -110,10 +110,10 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := shadowsocks 
-LOCAL_SRC_FILES := shadowsocks/local.c shadowsocks/encrypt.c
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -I$(LOCAL_PATH)/libev/ -I$(LOCAL_PATH)/openssl/include
+LOCAL_SRC_FILES := shadowsocks/local.c shadowsocks/encrypt.c shadowsocks/rc4.c shadowsocks/md5.c
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -I$(LOCAL_PATH)/libev/
 
-LOCAL_STATIC_LIBRARIES := libev libcrypto
+LOCAL_STATIC_LIBRARIES := libev
 
 LOCAL_LDLIBS := -llog
 
