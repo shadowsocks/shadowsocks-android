@@ -28,7 +28,6 @@
 static char *_server;
 static char *_remote_port;
 static int   _timeout;
-static char *_key;
 
 static int setnonblocking(int fd) {
     int flags;
@@ -256,7 +255,6 @@ static void server_send_cb (EV_P_ ev_io *w, int revents) {
                 perror("send");
                 close_and_free_remote(EV_A_ remote);
                 close_and_free_server(EV_A_ server);
-                return;
             }
             return;
         }
@@ -404,7 +402,6 @@ static void remote_send_cb (EV_P_ ev_io *w, int revents) {
                     // close and free
                     close_and_free_remote(EV_A_ remote);
                     close_and_free_server(EV_A_ server);
-                    return;
                 }
                 return;
             }
@@ -579,6 +576,15 @@ static void accept_cb (EV_P_ ev_io *w, int revents)
     }
 }
 
+static void print_usage() {
+    printf("usage: ss  -s server_host -p server_port -l local_port\n");
+    printf("           -k password [-m encrypt_method] [-f pid_file]\n");
+    printf("\n");
+    printf("info:\n");
+    printf("       encrypt_method:  table, rc4\n");
+    printf("       pid_file:        valid path to the pid file\n");
+}
+
 int main (int argc, char **argv)
 {
 
@@ -621,6 +627,7 @@ int main (int argc, char **argv)
 
     if (server == NULL || remote_port == NULL ||
             port == NULL || key == NULL) {
+        print_usage();
         exit(EXIT_FAILURE);
     }
 
@@ -679,7 +686,6 @@ int main (int argc, char **argv)
     _server = strdup(server);
     _remote_port = strdup(remote_port);
     _timeout = atoi(timeout);
-    _key = key;
     _method = TABLE;
     if (method != NULL) {
         if (strcmp(method, "rc4") == 0) {
@@ -709,7 +715,7 @@ int main (int argc, char **argv)
     setnonblocking(listenfd);
     struct listen_ctx listen_ctx;
     listen_ctx.fd = listenfd;
-    struct ev_loop *loop = ev_default_loop(EVBACKEND_EPOLL | EVFLAG_NOENV);
+    struct ev_loop *loop = ev_default_loop(0);
     if (!loop) {
         LOGE("no epoll found here, maybe it hides under your chair");
         return 1;
