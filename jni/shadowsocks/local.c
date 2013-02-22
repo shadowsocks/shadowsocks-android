@@ -30,14 +30,14 @@ static char *_remote_port;
 static int   _timeout;
 static char *_key;
 
-int setnonblocking(int fd) {
+static int setnonblocking(int fd) {
     int flags;
     if (-1 ==(flags = fcntl(fd, F_GETFL, 0)))
         flags = 0;
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-int create_and_bind(const char *port) {
+static int create_and_bind(const char *port) {
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     int s, listen_sock;
@@ -178,7 +178,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
             }
 
             char addr_to_send[256];
-            unsigned char addr_len = 0;
+            uint8_t addr_len = 0;
             addr_to_send[addr_len++] = request->atyp;
 
             // get remote addr and port
@@ -191,14 +191,14 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
 
             } else if (request->atyp == 3) {
                 // Domain name
-                unsigned char name_len = *(unsigned char *)(server->buf + 4);
+                uint8_t name_len = *(uint8_t *)(server->buf + 4);
                 addr_to_send[addr_len++] = name_len;
                 memcpy(addr_to_send + addr_len, server->buf + 4 + 1, name_len);
                 addr_len += name_len;
 
                 // get port
-                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 1 + name_len); 
-                addr_to_send[addr_len++] = *(unsigned char *)(server->buf + 4 + 1 + name_len + 1); 
+                addr_to_send[addr_len++] = *(uint8_t *)(server->buf + 4 + 1 + name_len); 
+                addr_to_send[addr_len++] = *(uint8_t *)(server->buf + 4 + 1 + name_len + 1); 
             } else {
                 LOGE("unsupported addrtype: %d\n", request->atyp);
                 close_and_free_remote(EV_A_ remote);

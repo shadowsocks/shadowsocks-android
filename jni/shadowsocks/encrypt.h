@@ -21,7 +21,7 @@ union {
     } table;
 
     struct {
-        unsigned char *key;
+        uint8_t *key;
         int key_len;
     } rc4;
 } enc_ctx;
