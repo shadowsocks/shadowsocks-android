@@ -551,7 +551,30 @@ int BIO_socket_ioctl(int fd, long type, void *arg)
 #ifdef __DJGPP__
 	i=ioctlsocket(fd,type,(char *)arg);
 #else
-	i=ioctlsocket(fd,type,arg);
+# if defined(OPENSSL_SYS_VMS)
+	/* 2011-02-18 SMS.
+	 * VMS ioctl() can't tolerate a 64-bit "void *arg", but we
+	 * observe that all the consumers pass in an "unsigned long *",
+	 * so we arrange a local copy with a short pointer, and use
+	 * that, instead.
+	 */
+#  if __INITIAL_POINTER_SIZE == 64
+#   define ARG arg_32p
+#   pragma pointer_size save
+#   pragma pointer_size 32
+	unsigned long arg_32;
+	unsigned long *arg_32p;
+#   pragma pointer_size restore
+	arg_32p = &arg_32;
+	arg_32 = *((unsigned long *) arg);
+#  else /* __INITIAL_POINTER_SIZE == 64 */
+#   define ARG arg
+#  endif /* __INITIAL_POINTER_SIZE == 64 [else] */
+# else /* defined(OPENSSL_SYS_VMS) */
+#  define ARG arg
+# endif /* defined(OPENSSL_SYS_VMS) [else] */
+
+	i=ioctlsocket(fd,type,ARG);
 #endif /* __DJGPP__ */
 	if (i < 0)
 		SYSerr(SYS_F_IOCTLSOCKET,get_last_socket_error());
@@ -660,6 +683,7 @@ int BIO_get_accept_socket(char *host, int bind_mode)
 	 * note that commonly IPv6 wildchard socket can service
 	 * IPv4 connections just as well...  */
 	memset(&hint,0,sizeof(hint));
+	hint.ai_flags = AI_PASSIVE;
 	if (h)
 		{
 		if (strchr(h,':'))
@@ -672,7 +696,10 @@ int BIO_get_accept_socket(char *host, int bind_mode)
 #endif
 			}
 	    	else if (h[0]=='*' && h[1]=='\0')
+			{
+			hint.ai_family = AF_INET;
 			h=NULL;
+			}
 		}
 
 	if ((*p_getaddrinfo.f)(h,p,&hint,&res)) break;
@@ -933,7 +960,6 @@ int BIO_set_tcp_ndelay(int s, int on)
 #endif
 	return(ret == 0);
 	}
-#endif
 
 int BIO_socket_nbio(int s, int mode)
 	{
@@ -946,3 +972,4 @@ int BIO_socket_nbio(int s, int mode)
 #endif
 	return(ret == 0);
 	}
+#endif

@@ -5,8 +5,14 @@
 #ifndef OPENSSL_DOING_MAKEDEPEND
 
 
+#ifndef OPENSSL_NO_BF
+# define OPENSSL_NO_BF
+#endif
 #ifndef OPENSSL_NO_CAST
 # define OPENSSL_NO_CAST
+#endif
+#ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
+# define OPENSSL_NO_EC_NISTP_64_GCC_128
 #endif
 #ifndef OPENSSL_NO_GMP
 # define OPENSSL_NO_GMP
@@ -29,17 +35,14 @@
 #ifndef OPENSSL_NO_RFC3779
 # define OPENSSL_NO_RFC3779
 #endif
+#ifndef OPENSSL_NO_SCTP
+# define OPENSSL_NO_SCTP
+#endif
 #ifndef OPENSSL_NO_SEED
 # define OPENSSL_NO_SEED
 #endif
-#ifndef OPENSSL_NO_SHA0
-# define OPENSSL_NO_SHA0
-#endif
 #ifndef OPENSSL_NO_STORE
 # define OPENSSL_NO_STORE
-#endif
-#ifndef OPENSSL_NO_WHRLPOOL
-# define OPENSSL_NO_WHRLPOOL
 #endif
 
 #endif /* OPENSSL_DOING_MAKEDEPEND */
@@ -56,8 +59,14 @@
    who haven't had the time to do the appropriate changes in their
    applications.  */
 #ifdef OPENSSL_ALGORITHM_DEFINES
+# if defined(OPENSSL_NO_BF) && !defined(NO_BF)
+#  define NO_BF
+# endif
 # if defined(OPENSSL_NO_CAST) && !defined(NO_CAST)
 #  define NO_CAST
+# endif
+# if defined(OPENSSL_NO_EC_NISTP_64_GCC_128) && !defined(NO_EC_NISTP_64_GCC_128)
+#  define NO_EC_NISTP_64_GCC_128
 # endif
 # if defined(OPENSSL_NO_GMP) && !defined(NO_GMP)
 #  define NO_GMP
@@ -80,17 +89,14 @@
 # if defined(OPENSSL_NO_RFC3779) && !defined(NO_RFC3779)
 #  define NO_RFC3779
 # endif
+# if defined(OPENSSL_NO_SCTP) && !defined(NO_SCTP)
+#  define NO_SCTP
+# endif
 # if defined(OPENSSL_NO_SEED) && !defined(NO_SEED)
 #  define NO_SEED
 # endif
-# if defined(OPENSSL_NO_SHA0) && !defined(NO_SHA0)
-#  define NO_SHA0
-# endif
 # if defined(OPENSSL_NO_STORE) && !defined(NO_STORE)
 #  define NO_STORE
-# endif
-# if defined(OPENSSL_NO_WHRLPOOL) && !defined(NO_WHRLPOOL)
-#  define NO_WHRLPOOL
 # endif
 #endif
 

@@ -16,11 +16,24 @@
 # allows to merge logical or arithmetic operation with shift or rotate
 # in one instruction and emit combined result every cycle. The module
 # is endian-neutral. The performance is ~42 cycles/byte for 128-bit
-# key.
+# key [on single-issue Xscale PXA250 core].
 
 # May 2007.
 #
 # AES_set_[en|de]crypt_key is added.
+
+# July 2010.
+#
+# Rescheduling for dual-issue pipeline resulted in 12% improvement on
+# Cortex A8 core and ~25 cycles per byte processed with 128-bit key.
+
+# February 2011.
+#
+# Profiler-assisted and platform-specific optimization resulted in 16%
+# improvement on Cortex A8 core and ~21.5 cycles per byte.
+
+while (($output=shift) && ($output!~/^\w[\w\-]*\.\w+$/)) {}
+open STDOUT,">$output";
 
 $s0="r0";
 $s1="r1";
@@ -38,6 +51,7 @@ $key="r11";
 $rounds="r12";
 
 $code=<<___;
+#include "arm_arch.h"
 .text
 .code	32
 
@@ -158,219 +172,243 @@ AES_encrypt:
 	mov	$rounds,r0		@ inp
 	mov	$key,r2
 	sub	$tbl,r3,#AES_encrypt-AES_Te	@ Te
-
+#if __ARM_ARCH__<7
 	ldrb	$s0,[$rounds,#3]	@ load input data in endian-neutral
 	ldrb	$t1,[$rounds,#2]	@ manner...
 	ldrb	$t2,[$rounds,#1]
 	ldrb	$t3,[$rounds,#0]
 	orr	$s0,$s0,$t1,lsl#8
-	orr	$s0,$s0,$t2,lsl#16
-	orr	$s0,$s0,$t3,lsl#24
 	ldrb	$s1,[$rounds,#7]
+	orr	$s0,$s0,$t2,lsl#16
 	ldrb	$t1,[$rounds,#6]
+	orr	$s0,$s0,$t3,lsl#24
 	ldrb	$t2,[$rounds,#5]
 	ldrb	$t3,[$rounds,#4]
 	orr	$s1,$s1,$t1,lsl#8
-	orr	$s1,$s1,$t2,lsl#16
-	orr	$s1,$s1,$t3,lsl#24
 	ldrb	$s2,[$rounds,#11]
+	orr	$s1,$s1,$t2,lsl#16
 	ldrb	$t1,[$rounds,#10]
+	orr	$s1,$s1,$t3,lsl#24
 	ldrb	$t2,[$rounds,#9]
 	ldrb	$t3,[$rounds,#8]
 	orr	$s2,$s2,$t1,lsl#8
-	orr	$s2,$s2,$t2,lsl#16
-	orr	$s2,$s2,$t3,lsl#24
 	ldrb	$s3,[$rounds,#15]
+	orr	$s2,$s2,$t2,lsl#16
 	ldrb	$t1,[$rounds,#14]
+	orr	$s2,$s2,$t3,lsl#24
 	ldrb	$t2,[$rounds,#13]
 	ldrb	$t3,[$rounds,#12]
 	orr	$s3,$s3,$t1,lsl#8
 	orr	$s3,$s3,$t2,lsl#16
 	orr	$s3,$s3,$t3,lsl#24
-
+#else
+	ldr	$s0,[$rounds,#0]
+	ldr	$s1,[$rounds,#4]
+	ldr	$s2,[$rounds,#8]
+	ldr	$s3,[$rounds,#12]
+#ifdef __ARMEL__
+	rev	$s0,$s0
+	rev	$s1,$s1
+	rev	$s2,$s2
+	rev	$s3,$s3
+#endif
+#endif
 	bl	_armv4_AES_encrypt
 
 	ldr	$rounds,[sp],#4		@ pop out
+#if __ARM_ARCH__>=7
+#ifdef __ARMEL__
+	rev	$s0,$s0
+	rev	$s1,$s1
+	rev	$s2,$s2
+	rev	$s3,$s3
+#endif
+	str	$s0,[$rounds,#0]
+	str	$s1,[$rounds,#4]
+	str	$s2,[$rounds,#8]
+	str	$s3,[$rounds,#12]
+#else
 	mov	$t1,$s0,lsr#24		@ write output in endian-neutral
 	mov	$t2,$s0,lsr#16		@ manner...
 	mov	$t3,$s0,lsr#8
 	strb	$t1,[$rounds,#0]
 	strb	$t2,[$rounds,#1]
-	strb	$t3,[$rounds,#2]
-	strb	$s0,[$rounds,#3]
 	mov	$t1,$s1,lsr#24
+	strb	$t3,[$rounds,#2]
 	mov	$t2,$s1,lsr#16
+	strb	$s0,[$rounds,#3]
 	mov	$t3,$s1,lsr#8
 	strb	$t1,[$rounds,#4]
 	strb	$t2,[$rounds,#5]
-	strb	$t3,[$rounds,#6]
-	strb	$s1,[$rounds,#7]
 	mov	$t1,$s2,lsr#24
+	strb	$t3,[$rounds,#6]
 	mov	$t2,$s2,lsr#16
+	strb	$s1,[$rounds,#7]
 	mov	$t3,$s2,lsr#8
 	strb	$t1,[$rounds,#8]
 	strb	$t2,[$rounds,#9]
-	strb	$t3,[$rounds,#10]
-	strb	$s2,[$rounds,#11]
 	mov	$t1,$s3,lsr#24
+	strb	$t3,[$rounds,#10]
 	mov	$t2,$s3,lsr#16
+	strb	$s2,[$rounds,#11]
 	mov	$t3,$s3,lsr#8
 	strb	$t1,[$rounds,#12]
 	strb	$t2,[$rounds,#13]
 	strb	$t3,[$rounds,#14]
 	strb	$s3,[$rounds,#15]
-
+#endif
+#if __ARM_ARCH__>=5
+	ldmia	sp!,{r4-r12,pc}
+#else
 	ldmia   sp!,{r4-r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
 	bx	lr			@ interoperable with Thumb ISA:-)
+#endif
 .size	AES_encrypt,.-AES_encrypt
 
 .type   _armv4_AES_encrypt,%function
 .align	2
 _armv4_AES_encrypt:
 	str	lr,[sp,#-4]!		@ push lr
-	ldr	$t1,[$key],#16
-	ldr	$t2,[$key,#-12]
-	ldr	$t3,[$key,#-8]
-	ldr	$i1,[$key,#-4]
-	ldr	$rounds,[$key,#240-16]
+	ldmia	$key!,{$t1-$i1}
 	eor	$s0,$s0,$t1
+	ldr	$rounds,[$key,#240-16]
 	eor	$s1,$s1,$t2
 	eor	$s2,$s2,$t3
 	eor	$s3,$s3,$i1
 	sub	$rounds,$rounds,#1
 	mov	lr,#255
 
-.Lenc_loop:
+	and	$i1,lr,$s0
 	and	$i2,lr,$s0,lsr#8
 	and	$i3,lr,$s0,lsr#16
-	and	$i1,lr,$s0
 	mov	$s0,$s0,lsr#24
+.Lenc_loop:
 	ldr	$t1,[$tbl,$i1,lsl#2]	@ Te3[s0>>0]
-	ldr	$s0,[$tbl,$s0,lsl#2]	@ Te0[s0>>24]
-	ldr	$t2,[$tbl,$i2,lsl#2]	@ Te2[s0>>8]
-	ldr	$t3,[$tbl,$i3,lsl#2]	@ Te1[s0>>16]
-
 	and	$i1,lr,$s1,lsr#16	@ i0
+	ldr	$t2,[$tbl,$i2,lsl#2]	@ Te2[s0>>8]
 	and	$i2,lr,$s1
+	ldr	$t3,[$tbl,$i3,lsl#2]	@ Te1[s0>>16]
 	and	$i3,lr,$s1,lsr#8
+	ldr	$s0,[$tbl,$s0,lsl#2]	@ Te0[s0>>24]
 	mov	$s1,$s1,lsr#24
+
 	ldr	$i1,[$tbl,$i1,lsl#2]	@ Te1[s1>>16]
-	ldr	$s1,[$tbl,$s1,lsl#2]	@ Te0[s1>>24]
 	ldr	$i2,[$tbl,$i2,lsl#2]	@ Te3[s1>>0]
 	ldr	$i3,[$tbl,$i3,lsl#2]	@ Te2[s1>>8]
 	eor	$s0,$s0,$i1,ror#8
-	eor	$s1,$s1,$t1,ror#24
-	eor	$t2,$t2,$i2,ror#8
-	eor	$t3,$t3,$i3,ror#8
-
+	ldr	$s1,[$tbl,$s1,lsl#2]	@ Te0[s1>>24]
 	and	$i1,lr,$s2,lsr#8	@ i0
+	eor	$t2,$t2,$i2,ror#8
 	and	$i2,lr,$s2,lsr#16	@ i1
+	eor	$t3,$t3,$i3,ror#8
 	and	$i3,lr,$s2
-	mov	$s2,$s2,lsr#24
 	ldr	$i1,[$tbl,$i1,lsl#2]	@ Te2[s2>>8]
+	eor	$s1,$s1,$t1,ror#24
 	ldr	$i2,[$tbl,$i2,lsl#2]	@ Te1[s2>>16]
-	ldr	$s2,[$tbl,$s2,lsl#2]	@ Te0[s2>>24]
+	mov	$s2,$s2,lsr#24
+
 	ldr	$i3,[$tbl,$i3,lsl#2]	@ Te3[s2>>0]
 	eor	$s0,$s0,$i1,ror#16
-	eor	$s1,$s1,$i2,ror#8
-	eor	$s2,$s2,$t2,ror#16
-	eor	$t3,$t3,$i3,ror#16
-
+	ldr	$s2,[$tbl,$s2,lsl#2]	@ Te0[s2>>24]
 	and	$i1,lr,$s3		@ i0
+	eor	$s1,$s1,$i2,ror#8
 	and	$i2,lr,$s3,lsr#8	@ i1
+	eor	$t3,$t3,$i3,ror#16
 	and	$i3,lr,$s3,lsr#16	@ i2
-	mov	$s3,$s3,lsr#24
 	ldr	$i1,[$tbl,$i1,lsl#2]	@ Te3[s3>>0]
+	eor	$s2,$s2,$t2,ror#16
 	ldr	$i2,[$tbl,$i2,lsl#2]	@ Te2[s3>>8]
+	mov	$s3,$s3,lsr#24
+
 	ldr	$i3,[$tbl,$i3,lsl#2]	@ Te1[s3>>16]
-	ldr	$s3,[$tbl,$s3,lsl#2]	@ Te0[s3>>24]
 	eor	$s0,$s0,$i1,ror#24
+	ldr	$i1,[$key],#16
 	eor	$s1,$s1,$i2,ror#16
+	ldr	$s3,[$tbl,$s3,lsl#2]	@ Te0[s3>>24]
 	eor	$s2,$s2,$i3,ror#8
+	ldr	$t1,[$key,#-12]
 	eor	$s3,$s3,$t3,ror#8
 
-	ldr	$t1,[$key],#16
-	ldr	$t2,[$key,#-12]
-	ldr	$t3,[$key,#-8]
-	ldr	$i1,[$key,#-4]
-	eor	$s0,$s0,$t1
-	eor	$s1,$s1,$t2
-	eor	$s2,$s2,$t3
-	eor	$s3,$s3,$i1
+	ldr	$t2,[$key,#-8]
+	eor	$s0,$s0,$i1
+	ldr	$t3,[$key,#-4]
+	and	$i1,lr,$s0
+	eor	$s1,$s1,$t1
+	and	$i2,lr,$s0,lsr#8
+	eor	$s2,$s2,$t2
+	and	$i3,lr,$s0,lsr#16
+	eor	$s3,$s3,$t3
+	mov	$s0,$s0,lsr#24
 
 	subs	$rounds,$rounds,#1
 	bne	.Lenc_loop
 
 	add	$tbl,$tbl,#2
 
-	and	$i1,lr,$s0
-	and	$i2,lr,$s0,lsr#8
-	and	$i3,lr,$s0,lsr#16
-	mov	$s0,$s0,lsr#24
 	ldrb	$t1,[$tbl,$i1,lsl#2]	@ Te4[s0>>0]
-	ldrb	$s0,[$tbl,$s0,lsl#2]	@ Te4[s0>>24]
-	ldrb	$t2,[$tbl,$i2,lsl#2]	@ Te4[s0>>8]
-	ldrb	$t3,[$tbl,$i3,lsl#2]	@ Te4[s0>>16]
-
 	and	$i1,lr,$s1,lsr#16	@ i0
+	ldrb	$t2,[$tbl,$i2,lsl#2]	@ Te4[s0>>8]
 	and	$i2,lr,$s1
+	ldrb	$t3,[$tbl,$i3,lsl#2]	@ Te4[s0>>16]
 	and	$i3,lr,$s1,lsr#8
+	ldrb	$s0,[$tbl,$s0,lsl#2]	@ Te4[s0>>24]
 	mov	$s1,$s1,lsr#24
+
 	ldrb	$i1,[$tbl,$i1,lsl#2]	@ Te4[s1>>16]
-	ldrb	$s1,[$tbl,$s1,lsl#2]	@ Te4[s1>>24]
 	ldrb	$i2,[$tbl,$i2,lsl#2]	@ Te4[s1>>0]
 	ldrb	$i3,[$tbl,$i3,lsl#2]	@ Te4[s1>>8]
 	eor	$s0,$i1,$s0,lsl#8
-	eor	$s1,$t1,$s1,lsl#24
-	eor	$t2,$i2,$t2,lsl#8
-	eor	$t3,$i3,$t3,lsl#8
-
+	ldrb	$s1,[$tbl,$s1,lsl#2]	@ Te4[s1>>24]
 	and	$i1,lr,$s2,lsr#8	@ i0
+	eor	$t2,$i2,$t2,lsl#8
 	and	$i2,lr,$s2,lsr#16	@ i1
+	eor	$t3,$i3,$t3,lsl#8
 	and	$i3,lr,$s2
-	mov	$s2,$s2,lsr#24
 	ldrb	$i1,[$tbl,$i1,lsl#2]	@ Te4[s2>>8]
+	eor	$s1,$t1,$s1,lsl#24
 	ldrb	$i2,[$tbl,$i2,lsl#2]	@ Te4[s2>>16]
-	ldrb	$s2,[$tbl,$s2,lsl#2]	@ Te4[s2>>24]
+	mov	$s2,$s2,lsr#24
+
 	ldrb	$i3,[$tbl,$i3,lsl#2]	@ Te4[s2>>0]
 	eor	$s0,$i1,$s0,lsl#8
-	eor	$s1,$s1,$i2,lsl#16
-	eor	$s2,$t2,$s2,lsl#24
-	eor	$t3,$i3,$t3,lsl#8
-
+	ldrb	$s2,[$tbl,$s2,lsl#2]	@ Te4[s2>>24]
 	and	$i1,lr,$s3		@ i0
+	eor	$s1,$s1,$i2,lsl#16
 	and	$i2,lr,$s3,lsr#8	@ i1
+	eor	$t3,$i3,$t3,lsl#8
 	and	$i3,lr,$s3,lsr#16	@ i2
-	mov	$s3,$s3,lsr#24
 	ldrb	$i1,[$tbl,$i1,lsl#2]	@ Te4[s3>>0]
+	eor	$s2,$t2,$s2,lsl#24
 	ldrb	$i2,[$tbl,$i2,lsl#2]	@ Te4[s3>>8]
-	ldrb	$i3,[$tbl,$i3,lsl#2]	@ Te4[s3>>16]
-	ldrb	$s3,[$tbl,$s3,lsl#2]	@ Te4[s3>>24]
-	eor	$s0,$i1,$s0,lsl#8
-	eor	$s1,$s1,$i2,lsl#8
-	eor	$s2,$s2,$i3,lsl#16
-	eor	$s3,$t3,$s3,lsl#24
+	mov	$s3,$s3,lsr#24
 
-	ldr	lr,[sp],#4		@ pop lr
-	ldr	$t1,[$key,#0]
-	ldr	$t2,[$key,#4]
-	ldr	$t3,[$key,#8]
-	ldr	$i1,[$key,#12]
-	eor	$s0,$s0,$t1
-	eor	$s1,$s1,$t2
-	eor	$s2,$s2,$t3
-	eor	$s3,$s3,$i1
+	ldrb	$i3,[$tbl,$i3,lsl#2]	@ Te4[s3>>16]
+	eor	$s0,$i1,$s0,lsl#8
+	ldr	$i1,[$key,#0]
+	ldrb	$s3,[$tbl,$s3,lsl#2]	@ Te4[s3>>24]
+	eor	$s1,$s1,$i2,lsl#8
+	ldr	$t1,[$key,#4]
+	eor	$s2,$s2,$i3,lsl#16
+	ldr	$t2,[$key,#8]
+	eor	$s3,$t3,$s3,lsl#24
+	ldr	$t3,[$key,#12]
+
+	eor	$s0,$s0,$i1
+	eor	$s1,$s1,$t1
+	eor	$s2,$s2,$t2
+	eor	$s3,$s3,$t3
 
 	sub	$tbl,$tbl,#2
-	mov	pc,lr			@ return
+	ldr	pc,[sp],#4		@ pop and return
 .size	_armv4_AES_encrypt,.-_armv4_AES_encrypt
 
-.global AES_set_encrypt_key
-.type   AES_set_encrypt_key,%function
+.global private_AES_set_encrypt_key
+.type   private_AES_set_encrypt_key,%function
 .align	5
-AES_set_encrypt_key:
+private_AES_set_encrypt_key:
+_armv4_AES_set_encrypt_key:
 	sub	r3,pc,#8		@ AES_set_encrypt_key
 	teq	r0,#0
 	moveq	r0,#-1
@@ -388,44 +426,61 @@ AES_set_encrypt_key:
 	bne	.Labrt
 
 .Lok:	stmdb   sp!,{r4-r12,lr}
-	sub	$tbl,r3,#AES_set_encrypt_key-AES_Te-1024	@ Te4
+	sub	$tbl,r3,#_armv4_AES_set_encrypt_key-AES_Te-1024	@ Te4
 
 	mov	$rounds,r0		@ inp
 	mov	lr,r1			@ bits
 	mov	$key,r2			@ key
 
+#if __ARM_ARCH__<7
 	ldrb	$s0,[$rounds,#3]	@ load input data in endian-neutral
 	ldrb	$t1,[$rounds,#2]	@ manner...
 	ldrb	$t2,[$rounds,#1]
 	ldrb	$t3,[$rounds,#0]
 	orr	$s0,$s0,$t1,lsl#8
-	orr	$s0,$s0,$t2,lsl#16
-	orr	$s0,$s0,$t3,lsl#24
 	ldrb	$s1,[$rounds,#7]
+	orr	$s0,$s0,$t2,lsl#16
 	ldrb	$t1,[$rounds,#6]
+	orr	$s0,$s0,$t3,lsl#24
 	ldrb	$t2,[$rounds,#5]
 	ldrb	$t3,[$rounds,#4]
 	orr	$s1,$s1,$t1,lsl#8
-	orr	$s1,$s1,$t2,lsl#16
-	orr	$s1,$s1,$t3,lsl#24
 	ldrb	$s2,[$rounds,#11]
+	orr	$s1,$s1,$t2,lsl#16
 	ldrb	$t1,[$rounds,#10]
+	orr	$s1,$s1,$t3,lsl#24
 	ldrb	$t2,[$rounds,#9]
 	ldrb	$t3,[$rounds,#8]
 	orr	$s2,$s2,$t1,lsl#8
-	orr	$s2,$s2,$t2,lsl#16
-	orr	$s2,$s2,$t3,lsl#24
 	ldrb	$s3,[$rounds,#15]
+	orr	$s2,$s2,$t2,lsl#16
 	ldrb	$t1,[$rounds,#14]
+	orr	$s2,$s2,$t3,lsl#24
 	ldrb	$t2,[$rounds,#13]
 	ldrb	$t3,[$rounds,#12]
 	orr	$s3,$s3,$t1,lsl#8
+	str	$s0,[$key],#16
 	orr	$s3,$s3,$t2,lsl#16
+	str	$s1,[$key,#-12]
 	orr	$s3,$s3,$t3,lsl#24
+	str	$s2,[$key,#-8]
+	str	$s3,[$key,#-4]
+#else
+	ldr	$s0,[$rounds,#0]
+	ldr	$s1,[$rounds,#4]
+	ldr	$s2,[$rounds,#8]
+	ldr	$s3,[$rounds,#12]
+#ifdef __ARMEL__
+	rev	$s0,$s0
+	rev	$s1,$s1
+	rev	$s2,$s2
+	rev	$s3,$s3
+#endif
 	str	$s0,[$key],#16
 	str	$s1,[$key,#-12]
 	str	$s2,[$key,#-8]
 	str	$s3,[$key,#-4]
+#endif
 
 	teq	lr,#128
 	bne	.Lnot128
@@ -437,48 +492,58 @@ AES_set_encrypt_key:
 .L128_loop:
 	and	$t2,lr,$s3,lsr#24
 	and	$i1,lr,$s3,lsr#16
-	and	$i2,lr,$s3,lsr#8
-	and	$i3,lr,$s3
 	ldrb	$t2,[$tbl,$t2]
+	and	$i2,lr,$s3,lsr#8
 	ldrb	$i1,[$tbl,$i1]
+	and	$i3,lr,$s3
 	ldrb	$i2,[$tbl,$i2]
-	ldrb	$i3,[$tbl,$i3]
-	ldr	$t1,[$t3],#4			@ rcon[i++]
 	orr	$t2,$t2,$i1,lsl#24
+	ldrb	$i3,[$tbl,$i3]
 	orr	$t2,$t2,$i2,lsl#16
+	ldr	$t1,[$t3],#4			@ rcon[i++]
 	orr	$t2,$t2,$i3,lsl#8
 	eor	$t2,$t2,$t1
 	eor	$s0,$s0,$t2			@ rk[4]=rk[0]^...
 	eor	$s1,$s1,$s0			@ rk[5]=rk[1]^rk[4]
-	eor	$s2,$s2,$s1			@ rk[6]=rk[2]^rk[5]
-	eor	$s3,$s3,$s2			@ rk[7]=rk[3]^rk[6]
 	str	$s0,[$key],#16
+	eor	$s2,$s2,$s1			@ rk[6]=rk[2]^rk[5]
 	str	$s1,[$key,#-12]
+	eor	$s3,$s3,$s2			@ rk[7]=rk[3]^rk[6]
 	str	$s2,[$key,#-8]
-	str	$s3,[$key,#-4]
-
 	subs	$rounds,$rounds,#1
+	str	$s3,[$key,#-4]
 	bne	.L128_loop
 	sub	r2,$key,#176
 	b	.Ldone
 
 .Lnot128:
+#if __ARM_ARCH__<7
 	ldrb	$i2,[$rounds,#19]
 	ldrb	$t1,[$rounds,#18]
 	ldrb	$t2,[$rounds,#17]
 	ldrb	$t3,[$rounds,#16]
 	orr	$i2,$i2,$t1,lsl#8
-	orr	$i2,$i2,$t2,lsl#16
-	orr	$i2,$i2,$t3,lsl#24
 	ldrb	$i3,[$rounds,#23]
+	orr	$i2,$i2,$t2,lsl#16
 	ldrb	$t1,[$rounds,#22]
+	orr	$i2,$i2,$t3,lsl#24
 	ldrb	$t2,[$rounds,#21]
 	ldrb	$t3,[$rounds,#20]
 	orr	$i3,$i3,$t1,lsl#8
 	orr	$i3,$i3,$t2,lsl#16
+	str	$i2,[$key],#8
 	orr	$i3,$i3,$t3,lsl#24
+	str	$i3,[$key,#-4]
+#else
+	ldr	$i2,[$rounds,#16]
+	ldr	$i3,[$rounds,#20]
+#ifdef __ARMEL__
+	rev	$i2,$i2
+	rev	$i3,$i3
+#endif
 	str	$i2,[$key],#8
 	str	$i3,[$key,#-4]
+#endif
 
 	teq	lr,#192
 	bne	.Lnot192
@@ -491,27 +556,26 @@ AES_set_encrypt_key:
 .L192_loop:
 	and	$t2,lr,$i3,lsr#24
 	and	$i1,lr,$i3,lsr#16
-	and	$i2,lr,$i3,lsr#8
-	and	$i3,lr,$i3
 	ldrb	$t2,[$tbl,$t2]
+	and	$i2,lr,$i3,lsr#8
 	ldrb	$i1,[$tbl,$i1]
+	and	$i3,lr,$i3
 	ldrb	$i2,[$tbl,$i2]
-	ldrb	$i3,[$tbl,$i3]
-	ldr	$t1,[$t3],#4			@ rcon[i++]
 	orr	$t2,$t2,$i1,lsl#24
+	ldrb	$i3,[$tbl,$i3]
 	orr	$t2,$t2,$i2,lsl#16
+	ldr	$t1,[$t3],#4			@ rcon[i++]
 	orr	$t2,$t2,$i3,lsl#8
 	eor	$i3,$t2,$t1
 	eor	$s0,$s0,$i3			@ rk[6]=rk[0]^...
 	eor	$s1,$s1,$s0			@ rk[7]=rk[1]^rk[6]
-	eor	$s2,$s2,$s1			@ rk[8]=rk[2]^rk[7]
-	eor	$s3,$s3,$s2			@ rk[9]=rk[3]^rk[8]
 	str	$s0,[$key],#24
+	eor	$s2,$s2,$s1			@ rk[8]=rk[2]^rk[7]
 	str	$s1,[$key,#-20]
+	eor	$s3,$s3,$s2			@ rk[9]=rk[3]^rk[8]
 	str	$s2,[$key,#-16]
-	str	$s3,[$key,#-12]
-
 	subs	$rounds,$rounds,#1
+	str	$s3,[$key,#-12]
 	subeq	r2,$key,#216
 	beq	.Ldone
 
@@ -524,22 +588,33 @@ AES_set_encrypt_key:
 	b	.L192_loop
 
 .Lnot192:
+#if __ARM_ARCH__<7
 	ldrb	$i2,[$rounds,#27]
 	ldrb	$t1,[$rounds,#26]
 	ldrb	$t2,[$rounds,#25]
 	ldrb	$t3,[$rounds,#24]
 	orr	$i2,$i2,$t1,lsl#8
-	orr	$i2,$i2,$t2,lsl#16
-	orr	$i2,$i2,$t3,lsl#24
 	ldrb	$i3,[$rounds,#31]
+	orr	$i2,$i2,$t2,lsl#16
 	ldrb	$t1,[$rounds,#30]
+	orr	$i2,$i2,$t3,lsl#24
 	ldrb	$t2,[$rounds,#29]
 	ldrb	$t3,[$rounds,#28]
 	orr	$i3,$i3,$t1,lsl#8
 	orr	$i3,$i3,$t2,lsl#16
+	str	$i2,[$key],#8
 	orr	$i3,$i3,$t3,lsl#24
+	str	$i3,[$key,#-4]
+#else
+	ldr	$i2,[$rounds,#24]
+	ldr	$i3,[$rounds,#28]
+#ifdef __ARMEL__
+	rev	$i2,$i2
+	rev	$i3,$i3
+#endif
 	str	$i2,[$key],#8
 	str	$i3,[$key,#-4]
+#endif
 
 	mov	$rounds,#14
 	str	$rounds,[$key,#240-32]
@@ -550,52 +625,51 @@ AES_set_encrypt_key:
 .L256_loop:
 	and	$t2,lr,$i3,lsr#24
 	and	$i1,lr,$i3,lsr#16
-	and	$i2,lr,$i3,lsr#8
-	and	$i3,lr,$i3
 	ldrb	$t2,[$tbl,$t2]
+	and	$i2,lr,$i3,lsr#8
 	ldrb	$i1,[$tbl,$i1]
+	and	$i3,lr,$i3
 	ldrb	$i2,[$tbl,$i2]
-	ldrb	$i3,[$tbl,$i3]
-	ldr	$t1,[$t3],#4			@ rcon[i++]
 	orr	$t2,$t2,$i1,lsl#24
+	ldrb	$i3,[$tbl,$i3]
 	orr	$t2,$t2,$i2,lsl#16
+	ldr	$t1,[$t3],#4			@ rcon[i++]
 	orr	$t2,$t2,$i3,lsl#8
 	eor	$i3,$t2,$t1
 	eor	$s0,$s0,$i3			@ rk[8]=rk[0]^...
 	eor	$s1,$s1,$s0			@ rk[9]=rk[1]^rk[8]
-	eor	$s2,$s2,$s1			@ rk[10]=rk[2]^rk[9]
-	eor	$s3,$s3,$s2			@ rk[11]=rk[3]^rk[10]
 	str	$s0,[$key],#32
+	eor	$s2,$s2,$s1			@ rk[10]=rk[2]^rk[9]
 	str	$s1,[$key,#-28]
+	eor	$s3,$s3,$s2			@ rk[11]=rk[3]^rk[10]
 	str	$s2,[$key,#-24]
-	str	$s3,[$key,#-20]
-
 	subs	$rounds,$rounds,#1
+	str	$s3,[$key,#-20]
 	subeq	r2,$key,#256
 	beq	.Ldone
 
 	and	$t2,lr,$s3
 	and	$i1,lr,$s3,lsr#8
-	and	$i2,lr,$s3,lsr#16
-	and	$i3,lr,$s3,lsr#24
 	ldrb	$t2,[$tbl,$t2]
+	and	$i2,lr,$s3,lsr#16
 	ldrb	$i1,[$tbl,$i1]
+	and	$i3,lr,$s3,lsr#24
 	ldrb	$i2,[$tbl,$i2]
-	ldrb	$i3,[$tbl,$i3]
 	orr	$t2,$t2,$i1,lsl#8
+	ldrb	$i3,[$tbl,$i3]
 	orr	$t2,$t2,$i2,lsl#16
+	ldr	$t1,[$key,#-48]
 	orr	$t2,$t2,$i3,lsl#24
 
-	ldr	$t1,[$key,#-48]
 	ldr	$i1,[$key,#-44]
 	ldr	$i2,[$key,#-40]
-	ldr	$i3,[$key,#-36]
 	eor	$t1,$t1,$t2			@ rk[12]=rk[4]^...
+	ldr	$i3,[$key,#-36]
 	eor	$i1,$i1,$t1			@ rk[13]=rk[5]^rk[12]
-	eor	$i2,$i2,$i1			@ rk[14]=rk[6]^rk[13]
-	eor	$i3,$i3,$i2			@ rk[15]=rk[7]^rk[14]
 	str	$t1,[$key,#-16]
+	eor	$i2,$i2,$i1			@ rk[14]=rk[6]^rk[13]
 	str	$i1,[$key,#-12]
+	eor	$i3,$i3,$i2			@ rk[15]=rk[7]^rk[14]
 	str	$i2,[$key,#-8]
 	str	$i3,[$key,#-4]
 	b	.L256_loop
@@ -605,14 +679,14 @@ AES_set_encrypt_key:
 .Labrt:	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
 	bx	lr			@ interoperable with Thumb ISA:-)
-.size	AES_set_encrypt_key,.-AES_set_encrypt_key
+.size	private_AES_set_encrypt_key,.-private_AES_set_encrypt_key
 
-.global AES_set_decrypt_key
-.type   AES_set_decrypt_key,%function
+.global private_AES_set_decrypt_key
+.type   private_AES_set_decrypt_key,%function
 .align	5
-AES_set_decrypt_key:
+private_AES_set_decrypt_key:
 	str	lr,[sp,#-4]!            @ push lr
-	bl	AES_set_encrypt_key
+	bl	_armv4_AES_set_encrypt_key
 	teq	r0,#0
 	ldrne	lr,[sp],#4              @ pop lr
 	bne	.Labrt
@@ -691,11 +765,15 @@ $code.=<<___;
 	bne	.Lmix
 
 	mov	r0,#0
+#if __ARM_ARCH__>=5
+	ldmia	sp!,{r4-r12,pc}
+#else
 	ldmia   sp!,{r4-r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
 	bx	lr			@ interoperable with Thumb ISA:-)
-.size	AES_set_decrypt_key,.-AES_set_decrypt_key
+#endif
+.size	private_AES_set_decrypt_key,.-private_AES_set_decrypt_key
 
 .type	AES_Td,%object
 .align	5
@@ -810,218 +888,242 @@ AES_decrypt:
 	mov	$rounds,r0		@ inp
 	mov	$key,r2
 	sub	$tbl,r3,#AES_decrypt-AES_Td		@ Td
-
+#if __ARM_ARCH__<7
 	ldrb	$s0,[$rounds,#3]	@ load input data in endian-neutral
 	ldrb	$t1,[$rounds,#2]	@ manner...
 	ldrb	$t2,[$rounds,#1]
 	ldrb	$t3,[$rounds,#0]
 	orr	$s0,$s0,$t1,lsl#8
-	orr	$s0,$s0,$t2,lsl#16
-	orr	$s0,$s0,$t3,lsl#24
 	ldrb	$s1,[$rounds,#7]
+	orr	$s0,$s0,$t2,lsl#16
 	ldrb	$t1,[$rounds,#6]
+	orr	$s0,$s0,$t3,lsl#24
 	ldrb	$t2,[$rounds,#5]
 	ldrb	$t3,[$rounds,#4]
 	orr	$s1,$s1,$t1,lsl#8
-	orr	$s1,$s1,$t2,lsl#16
-	orr	$s1,$s1,$t3,lsl#24
 	ldrb	$s2,[$rounds,#11]
+	orr	$s1,$s1,$t2,lsl#16
 	ldrb	$t1,[$rounds,#10]
+	orr	$s1,$s1,$t3,lsl#24
 	ldrb	$t2,[$rounds,#9]
 	ldrb	$t3,[$rounds,#8]
 	orr	$s2,$s2,$t1,lsl#8
-	orr	$s2,$s2,$t2,lsl#16
-	orr	$s2,$s2,$t3,lsl#24
 	ldrb	$s3,[$rounds,#15]
+	orr	$s2,$s2,$t2,lsl#16
 	ldrb	$t1,[$rounds,#14]
+	orr	$s2,$s2,$t3,lsl#24
 	ldrb	$t2,[$rounds,#13]
 	ldrb	$t3,[$rounds,#12]
 	orr	$s3,$s3,$t1,lsl#8
 	orr	$s3,$s3,$t2,lsl#16
 	orr	$s3,$s3,$t3,lsl#24
-
+#else
+	ldr	$s0,[$rounds,#0]
+	ldr	$s1,[$rounds,#4]
+	ldr	$s2,[$rounds,#8]
+	ldr	$s3,[$rounds,#12]
+#ifdef __ARMEL__
+	rev	$s0,$s0
+	rev	$s1,$s1
+	rev	$s2,$s2
+	rev	$s3,$s3
+#endif
+#endif
 	bl	_armv4_AES_decrypt
 
 	ldr	$rounds,[sp],#4		@ pop out
+#if __ARM_ARCH__>=7
+#ifdef __ARMEL__
+	rev	$s0,$s0
+	rev	$s1,$s1
+	rev	$s2,$s2
+	rev	$s3,$s3
+#endif
+	str	$s0,[$rounds,#0]
+	str	$s1,[$rounds,#4]
+	str	$s2,[$rounds,#8]
+	str	$s3,[$rounds,#12]
+#else
 	mov	$t1,$s0,lsr#24		@ write output in endian-neutral
 	mov	$t2,$s0,lsr#16		@ manner...
 	mov	$t3,$s0,lsr#8
 	strb	$t1,[$rounds,#0]
 	strb	$t2,[$rounds,#1]
-	strb	$t3,[$rounds,#2]
-	strb	$s0,[$rounds,#3]
 	mov	$t1,$s1,lsr#24
+	strb	$t3,[$rounds,#2]
 	mov	$t2,$s1,lsr#16
+	strb	$s0,[$rounds,#3]
 	mov	$t3,$s1,lsr#8
 	strb	$t1,[$rounds,#4]
 	strb	$t2,[$rounds,#5]
-	strb	$t3,[$rounds,#6]
-	strb	$s1,[$rounds,#7]
 	mov	$t1,$s2,lsr#24
+	strb	$t3,[$rounds,#6]
 	mov	$t2,$s2,lsr#16
+	strb	$s1,[$rounds,#7]
 	mov	$t3,$s2,lsr#8
 	strb	$t1,[$rounds,#8]
 	strb	$t2,[$rounds,#9]
-	strb	$t3,[$rounds,#10]
-	strb	$s2,[$rounds,#11]
 	mov	$t1,$s3,lsr#24
+	strb	$t3,[$rounds,#10]
 	mov	$t2,$s3,lsr#16
+	strb	$s2,[$rounds,#11]
 	mov	$t3,$s3,lsr#8
 	strb	$t1,[$rounds,#12]
 	strb	$t2,[$rounds,#13]
 	strb	$t3,[$rounds,#14]
 	strb	$s3,[$rounds,#15]
-
+#endif
+#if __ARM_ARCH__>=5
+	ldmia	sp!,{r4-r12,pc}
+#else
 	ldmia   sp!,{r4-r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
 	bx	lr			@ interoperable with Thumb ISA:-)
+#endif
 .size	AES_decrypt,.-AES_decrypt
 
 .type   _armv4_AES_decrypt,%function
 .align	2
 _armv4_AES_decrypt:
 	str	lr,[sp,#-4]!		@ push lr
-	ldr	$t1,[$key],#16
-	ldr	$t2,[$key,#-12]
-	ldr	$t3,[$key,#-8]
-	ldr	$i1,[$key,#-4]
-	ldr	$rounds,[$key,#240-16]
+	ldmia	$key!,{$t1-$i1}
 	eor	$s0,$s0,$t1
+	ldr	$rounds,[$key,#240-16]
 	eor	$s1,$s1,$t2
 	eor	$s2,$s2,$t3
 	eor	$s3,$s3,$i1
 	sub	$rounds,$rounds,#1
 	mov	lr,#255
 
-.Ldec_loop:
 	and	$i1,lr,$s0,lsr#16
 	and	$i2,lr,$s0,lsr#8
 	and	$i3,lr,$s0
 	mov	$s0,$s0,lsr#24
+.Ldec_loop:
 	ldr	$t1,[$tbl,$i1,lsl#2]	@ Td1[s0>>16]
-	ldr	$s0,[$tbl,$s0,lsl#2]	@ Td0[s0>>24]
-	ldr	$t2,[$tbl,$i2,lsl#2]	@ Td2[s0>>8]
-	ldr	$t3,[$tbl,$i3,lsl#2]	@ Td3[s0>>0]
-
 	and	$i1,lr,$s1		@ i0
+	ldr	$t2,[$tbl,$i2,lsl#2]	@ Td2[s0>>8]
 	and	$i2,lr,$s1,lsr#16
+	ldr	$t3,[$tbl,$i3,lsl#2]	@ Td3[s0>>0]
 	and	$i3,lr,$s1,lsr#8
+	ldr	$s0,[$tbl,$s0,lsl#2]	@ Td0[s0>>24]
 	mov	$s1,$s1,lsr#24
+
 	ldr	$i1,[$tbl,$i1,lsl#2]	@ Td3[s1>>0]
-	ldr	$s1,[$tbl,$s1,lsl#2]	@ Td0[s1>>24]
 	ldr	$i2,[$tbl,$i2,lsl#2]	@ Td1[s1>>16]
 	ldr	$i3,[$tbl,$i3,lsl#2]	@ Td2[s1>>8]
 	eor	$s0,$s0,$i1,ror#24
-	eor	$s1,$s1,$t1,ror#8
-	eor	$t2,$i2,$t2,ror#8
-	eor	$t3,$i3,$t3,ror#8
-
+	ldr	$s1,[$tbl,$s1,lsl#2]	@ Td0[s1>>24]
 	and	$i1,lr,$s2,lsr#8	@ i0
+	eor	$t2,$i2,$t2,ror#8
 	and	$i2,lr,$s2		@ i1
+	eor	$t3,$i3,$t3,ror#8
 	and	$i3,lr,$s2,lsr#16
-	mov	$s2,$s2,lsr#24
 	ldr	$i1,[$tbl,$i1,lsl#2]	@ Td2[s2>>8]
+	eor	$s1,$s1,$t1,ror#8
 	ldr	$i2,[$tbl,$i2,lsl#2]	@ Td3[s2>>0]
-	ldr	$s2,[$tbl,$s2,lsl#2]	@ Td0[s2>>24]
+	mov	$s2,$s2,lsr#24
+
 	ldr	$i3,[$tbl,$i3,lsl#2]	@ Td1[s2>>16]
 	eor	$s0,$s0,$i1,ror#16
-	eor	$s1,$s1,$i2,ror#24
-	eor	$s2,$s2,$t2,ror#8
-	eor	$t3,$i3,$t3,ror#8
-
+	ldr	$s2,[$tbl,$s2,lsl#2]	@ Td0[s2>>24]
 	and	$i1,lr,$s3,lsr#16	@ i0
+	eor	$s1,$s1,$i2,ror#24
 	and	$i2,lr,$s3,lsr#8	@ i1
+	eor	$t3,$i3,$t3,ror#8
 	and	$i3,lr,$s3		@ i2
-	mov	$s3,$s3,lsr#24
 	ldr	$i1,[$tbl,$i1,lsl#2]	@ Td1[s3>>16]
+	eor	$s2,$s2,$t2,ror#8
 	ldr	$i2,[$tbl,$i2,lsl#2]	@ Td2[s3>>8]
-	ldr	$i3,[$tbl,$i3,lsl#2]	@ Td3[s3>>0]
-	ldr	$s3,[$tbl,$s3,lsl#2]	@ Td0[s3>>24]
-	eor	$s0,$s0,$i1,ror#8
-	eor	$s1,$s1,$i2,ror#16
-	eor	$s2,$s2,$i3,ror#24
-	eor	$s3,$s3,$t3,ror#8
+	mov	$s3,$s3,lsr#24
 
-	ldr	$t1,[$key],#16
-	ldr	$t2,[$key,#-12]
-	ldr	$t3,[$key,#-8]
-	ldr	$i1,[$key,#-4]
-	eor	$s0,$s0,$t1
-	eor	$s1,$s1,$t2
-	eor	$s2,$s2,$t3
-	eor	$s3,$s3,$i1
+	ldr	$i3,[$tbl,$i3,lsl#2]	@ Td3[s3>>0]
+	eor	$s0,$s0,$i1,ror#8
+	ldr	$i1,[$key],#16
+	eor	$s1,$s1,$i2,ror#16
+	ldr	$s3,[$tbl,$s3,lsl#2]	@ Td0[s3>>24]
+	eor	$s2,$s2,$i3,ror#24
+
+	ldr	$t1,[$key,#-12]
+	eor	$s0,$s0,$i1
+	ldr	$t2,[$key,#-8]
+	eor	$s3,$s3,$t3,ror#8
+	ldr	$t3,[$key,#-4]
+	and	$i1,lr,$s0,lsr#16
+	eor	$s1,$s1,$t1
+	and	$i2,lr,$s0,lsr#8
+	eor	$s2,$s2,$t2
+	and	$i3,lr,$s0
+	eor	$s3,$s3,$t3
+	mov	$s0,$s0,lsr#24
 
 	subs	$rounds,$rounds,#1
 	bne	.Ldec_loop
 
 	add	$tbl,$tbl,#1024
 
-	ldr	$t1,[$tbl,#0]		@ prefetch Td4
-	ldr	$t2,[$tbl,#32]
-	ldr	$t3,[$tbl,#64]
-	ldr	$i1,[$tbl,#96]
-	ldr	$i2,[$tbl,#128]
-	ldr	$i3,[$tbl,#160]
-	ldr	$t1,[$tbl,#192]
-	ldr	$t2,[$tbl,#224]
+	ldr	$t2,[$tbl,#0]		@ prefetch Td4
+	ldr	$t3,[$tbl,#32]
+	ldr	$t1,[$tbl,#64]
+	ldr	$t2,[$tbl,#96]
+	ldr	$t3,[$tbl,#128]
+	ldr	$t1,[$tbl,#160]
+	ldr	$t2,[$tbl,#192]
+	ldr	$t3,[$tbl,#224]
 
-	and	$i1,lr,$s0,lsr#16
-	and	$i2,lr,$s0,lsr#8
-	and	$i3,lr,$s0
-	ldrb	$s0,[$tbl,$s0,lsr#24]	@ Td4[s0>>24]
+	ldrb	$s0,[$tbl,$s0]		@ Td4[s0>>24]
 	ldrb	$t1,[$tbl,$i1]		@ Td4[s0>>16]
-	ldrb	$t2,[$tbl,$i2]		@ Td4[s0>>8]
-	ldrb	$t3,[$tbl,$i3]		@ Td4[s0>>0]
-
 	and	$i1,lr,$s1		@ i0
+	ldrb	$t2,[$tbl,$i2]		@ Td4[s0>>8]
 	and	$i2,lr,$s1,lsr#16
+	ldrb	$t3,[$tbl,$i3]		@ Td4[s0>>0]
 	and	$i3,lr,$s1,lsr#8
+
 	ldrb	$i1,[$tbl,$i1]		@ Td4[s1>>0]
 	ldrb	$s1,[$tbl,$s1,lsr#24]	@ Td4[s1>>24]
 	ldrb	$i2,[$tbl,$i2]		@ Td4[s1>>16]
-	ldrb	$i3,[$tbl,$i3]		@ Td4[s1>>8]
 	eor	$s0,$i1,$s0,lsl#24
+	ldrb	$i3,[$tbl,$i3]		@ Td4[s1>>8]
 	eor	$s1,$t1,$s1,lsl#8
-	eor	$t2,$t2,$i2,lsl#8
-	eor	$t3,$t3,$i3,lsl#8
-
 	and	$i1,lr,$s2,lsr#8	@ i0
+	eor	$t2,$t2,$i2,lsl#8
 	and	$i2,lr,$s2		@ i1
-	and	$i3,lr,$s2,lsr#16
 	ldrb	$i1,[$tbl,$i1]		@ Td4[s2>>8]
+	eor	$t3,$t3,$i3,lsl#8
 	ldrb	$i2,[$tbl,$i2]		@ Td4[s2>>0]
-	ldrb	$s2,[$tbl,$s2,lsr#24]	@ Td4[s2>>24]
-	ldrb	$i3,[$tbl,$i3]		@ Td4[s2>>16]
-	eor	$s0,$s0,$i1,lsl#8
-	eor	$s1,$i2,$s1,lsl#16
-	eor	$s2,$t2,$s2,lsl#16
-	eor	$t3,$t3,$i3,lsl#16
+	and	$i3,lr,$s2,lsr#16
 
+	ldrb	$s2,[$tbl,$s2,lsr#24]	@ Td4[s2>>24]
+	eor	$s0,$s0,$i1,lsl#8
+	ldrb	$i3,[$tbl,$i3]		@ Td4[s2>>16]
+	eor	$s1,$i2,$s1,lsl#16
 	and	$i1,lr,$s3,lsr#16	@ i0
+	eor	$s2,$t2,$s2,lsl#16
 	and	$i2,lr,$s3,lsr#8	@ i1
-	and	$i3,lr,$s3		@ i2
 	ldrb	$i1,[$tbl,$i1]		@ Td4[s3>>16]
+	eor	$t3,$t3,$i3,lsl#16
 	ldrb	$i2,[$tbl,$i2]		@ Td4[s3>>8]
+	and	$i3,lr,$s3		@ i2
+
 	ldrb	$i3,[$tbl,$i3]		@ Td4[s3>>0]
 	ldrb	$s3,[$tbl,$s3,lsr#24]	@ Td4[s3>>24]
 	eor	$s0,$s0,$i1,lsl#16
+	ldr	$i1,[$key,#0]
 	eor	$s1,$s1,$i2,lsl#8
+	ldr	$t1,[$key,#4]
 	eor	$s2,$i3,$s2,lsl#8
+	ldr	$t2,[$key,#8]
 	eor	$s3,$t3,$s3,lsl#24
+	ldr	$t3,[$key,#12]
 
-	ldr	lr,[sp],#4		@ pop lr
-	ldr	$t1,[$key,#0]
-	ldr	$t2,[$key,#4]
-	ldr	$t3,[$key,#8]
-	ldr	$i1,[$key,#12]
-	eor	$s0,$s0,$t1
-	eor	$s1,$s1,$t2
-	eor	$s2,$s2,$t3
-	eor	$s3,$s3,$i1
+	eor	$s0,$s0,$i1
+	eor	$s1,$s1,$t1
+	eor	$s2,$s2,$t2
+	eor	$s3,$s3,$t3
 
 	sub	$tbl,$tbl,#1024
-	mov	pc,lr			@ return
+	ldr	pc,[sp],#4		@ pop and return
 .size	_armv4_AES_decrypt,.-_armv4_AES_decrypt
 .asciz	"AES for ARMv4, CRYPTOGAMS by <appro\@openssl.org>"
 .align	2
@@ -1029,3 +1131,4 @@ ___
 
 $code =~ s/\bbx\s+lr\b/.word\t0xe12fff1e/gm;	# make it possible to compile with -march=armv4
 print $code;
+close STDOUT;	# enforce flush

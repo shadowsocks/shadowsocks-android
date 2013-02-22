@@ -167,14 +167,13 @@ pqueue_pop(pqueue_s *pq)
 pitem *
 pqueue_find(pqueue_s *pq, unsigned char *prio64be)
 	{
-	pitem *next, *prev = NULL;
+	pitem *next;
 	pitem *found = NULL;
 
 	if ( pq->items == NULL)
 		return NULL;
 
-	for ( next = pq->items; next->next != NULL; 
-		  prev = next, next = next->next)
+	for ( next = pq->items; next->next != NULL; next = next->next)
 		{
 		if ( memcmp(next->priority, prio64be,8) == 0)
 			{

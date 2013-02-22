@@ -143,6 +143,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
 	crypto \
+	ssl \
 	))
 
 include $(subdirs)

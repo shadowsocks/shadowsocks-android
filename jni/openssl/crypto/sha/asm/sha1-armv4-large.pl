@@ -37,9 +37,22 @@
 #	modes are limited. As result it takes more instructions to do
 #	the same job in Thumb, therefore the code is never twice as
 #	small and always slower.
-# [***]	which is also ~35% better than compiler generated code.
+# [***]	which is also ~35% better than compiler generated code. Dual-
+#	issue Cortex A8 core was measured to process input block in
+#	~990 cycles.
 
-$output=shift;
+# August 2010.
+#
+# Rescheduling for dual-issue pipeline resulted in 13% improvement on
+# Cortex A8 core and in absolute terms ~870 cycles per input block
+# [or 13.6 cycles per byte].
+
+# February 2011.
+#
+# Profiler-assisted and platform-specific optimization resulted in 10%
+# improvement on Cortex A8 core and 12.2 cycles per byte.
+
+while (($output=shift) && ($output!~/^\w[\w\-]*\.\w+$/)) {}
 open STDOUT,">$output";
 
 $ctx="r0";
@@ -58,63 +71,62 @@ $t3="r12";
 $Xi="r14";
 @V=($a,$b,$c,$d,$e);
 
-# One can optimize this for aligned access on big-endian architecture,
-# but code's endian neutrality makes it too pretty:-)
-sub Xload {
-my ($a,$b,$c,$d,$e)=@_;
-$code.=<<___;
-	ldrb	$t0,[$inp],#4
-	ldrb	$t1,[$inp,#-3]
-	ldrb	$t2,[$inp,#-2]
-	ldrb	$t3,[$inp,#-1]
-	add	$e,$K,$e,ror#2			@ E+=K_00_19
-	orr	$t0,$t1,$t0,lsl#8
-	add	$e,$e,$a,ror#27			@ E+=ROR(A,27)
-	orr	$t0,$t2,$t0,lsl#8
-	eor	$t1,$c,$d			@ F_xx_xx
-	orr	$t0,$t3,$t0,lsl#8
-	add	$e,$e,$t0			@ E+=X[i]
-	str	$t0,[$Xi,#-4]!
-___
-}
 sub Xupdate {
-my ($a,$b,$c,$d,$e,$flag)=@_;
+my ($a,$b,$c,$d,$e,$opt1,$opt2)=@_;
 $code.=<<___;
 	ldr	$t0,[$Xi,#15*4]
 	ldr	$t1,[$Xi,#13*4]
 	ldr	$t2,[$Xi,#7*4]
-	ldr	$t3,[$Xi,#2*4]
 	add	$e,$K,$e,ror#2			@ E+=K_xx_xx
+	ldr	$t3,[$Xi,#2*4]
 	eor	$t0,$t0,$t1
-	eor	$t0,$t0,$t2
-	eor	$t0,$t0,$t3
-	add	$e,$e,$a,ror#27			@ E+=ROR(A,27)
-___
-$code.=<<___ if (!defined($flag));
-	eor	$t1,$c,$d			@ F_xx_xx, but not in 40_59
-___
-$code.=<<___;
+	eor	$t2,$t2,$t3			@ 1 cycle stall
+	eor	$t1,$c,$d			@ F_xx_xx
 	mov	$t0,$t0,ror#31
-	add	$e,$e,$t0			@ E+=X[i]
+	add	$e,$e,$a,ror#27			@ E+=ROR(A,27)
+	eor	$t0,$t0,$t2,ror#31
 	str	$t0,[$Xi,#-4]!
+	$opt1					@ F_xx_xx
+	$opt2					@ F_xx_xx
+	add	$e,$e,$t0			@ E+=X[i]
 ___
 }
 
 sub BODY_00_15 {
 my ($a,$b,$c,$d,$e)=@_;
-	&Xload(@_);
 $code.=<<___;
+#if __ARM_ARCH__<7
+	ldrb	$t1,[$inp,#2]
+	ldrb	$t0,[$inp,#3]
+	ldrb	$t2,[$inp,#1]
+	add	$e,$K,$e,ror#2			@ E+=K_00_19
+	ldrb	$t3,[$inp],#4
+	orr	$t0,$t0,$t1,lsl#8
+	eor	$t1,$c,$d			@ F_xx_xx
+	orr	$t0,$t0,$t2,lsl#16
+	add	$e,$e,$a,ror#27			@ E+=ROR(A,27)
+	orr	$t0,$t0,$t3,lsl#24
+#else
+	ldr	$t0,[$inp],#4			@ handles unaligned
+	add	$e,$K,$e,ror#2			@ E+=K_00_19
+	eor	$t1,$c,$d			@ F_xx_xx
+	add	$e,$e,$a,ror#27			@ E+=ROR(A,27)
+#ifdef __ARMEL__
+	rev	$t0,$t0				@ byte swap
+#endif
+#endif
 	and	$t1,$b,$t1,ror#2
+	add	$e,$e,$t0			@ E+=X[i]
 	eor	$t1,$t1,$d,ror#2		@ F_00_19(B,C,D)
+	str	$t0,[$Xi,#-4]!
 	add	$e,$e,$t1			@ E+=F_00_19(B,C,D)
 ___
 }
 
 sub BODY_16_19 {
 my ($a,$b,$c,$d,$e)=@_;
-	&Xupdate(@_);
+	&Xupdate(@_,"and $t1,$b,$t1,ror#2");
 $code.=<<___;
-	and	$t1,$b,$t1,ror#2
 	eor	$t1,$t1,$d,ror#2		@ F_00_19(B,C,D)
 	add	$e,$e,$t1			@ E+=F_00_19(B,C,D)
 ___
@@ -122,26 +134,24 @@ ___
 
 sub BODY_20_39 {
 my ($a,$b,$c,$d,$e)=@_;
-	&Xupdate(@_);
+	&Xupdate(@_,"eor $t1,$b,$t1,ror#2");
 $code.=<<___;
-	eor	$t1,$b,$t1,ror#2		@ F_20_39(B,C,D)
 	add	$e,$e,$t1			@ E+=F_20_39(B,C,D)
 ___
 }
 
 sub BODY_40_59 {
 my ($a,$b,$c,$d,$e)=@_;
-	&Xupdate(@_,1);
+	&Xupdate(@_,"and $t1,$b,$t1,ror#2","and $t2,$c,$d");
 $code.=<<___;
-	and	$t1,$b,$c,ror#2
-	orr	$t2,$b,$c,ror#2
-	and	$t2,$t2,$d,ror#2
-	orr	$t1,$t1,$t2			@ F_40_59(B,C,D)
 	add	$e,$e,$t1			@ E+=F_40_59(B,C,D)
+	add	$e,$e,$t2,ror#2
 ___
 }
 
 $code=<<___;
+#include "arm_arch.h"
+
 .text
 
 .global	sha1_block_data_order
@@ -215,10 +225,14 @@ $code.=<<___;
 	teq	$inp,$len
 	bne	.Lloop			@ [+18], total 1307
 
+#if __ARM_ARCH__>=5
+	ldmia	sp!,{r4-r12,pc}
+#else
 	ldmia	sp!,{r4-r12,lr}
 	tst	lr,#1
 	moveq	pc,lr			@ be binary compatible with V4, yet
 	bx	lr			@ interoperable with Thumb ISA:-)
+#endif
 .align	2
 .LK_00_19:	.word	0x5a827999
 .LK_20_39:	.word	0x6ed9eba1

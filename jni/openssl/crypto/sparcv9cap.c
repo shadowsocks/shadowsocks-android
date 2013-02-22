@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <setjmp.h>
+#include <signal.h>
 #include <sys/time.h>
 #include <openssl/bn.h>
 
@@ -9,6 +11,7 @@
 #define SPARCV9_VIS1		(1<<2)
 #define SPARCV9_VIS2		(1<<3)	/* reserved */
 #define SPARCV9_FMADD		(1<<4)	/* reserved for SPARC64 V */
+
 static int OPENSSL_sparcv9cap_P=SPARCV9_TICK_PRIVILEGED;
 
 int bn_mul_mont(BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp, const BN_ULONG *np,const BN_ULONG *n0, int num)
@@ -16,17 +19,22 @@ int bn_mul_mont(BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp, const BN_U
 	int bn_mul_mont_fpu(BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp, const BN_ULONG *np,const BN_ULONG *n0, int num);
 	int bn_mul_mont_int(BN_ULONG *rp, const BN_ULONG *ap, const BN_ULONG *bp, const BN_ULONG *np,const BN_ULONG *n0, int num);
 
-	if ((OPENSSL_sparcv9cap_P&(SPARCV9_PREFER_FPU|SPARCV9_VIS1)) ==
+	if (num>=8 && !(num&1) &&
+	    (OPENSSL_sparcv9cap_P&(SPARCV9_PREFER_FPU|SPARCV9_VIS1)) ==
 		(SPARCV9_PREFER_FPU|SPARCV9_VIS1))
 		return bn_mul_mont_fpu(rp,ap,bp,np,n0,num);
 	else
 		return bn_mul_mont_int(rp,ap,bp,np,n0,num);
 	}
 
+unsigned long	_sparcv9_rdtick(void);
+void		_sparcv9_vis1_probe(void);
+unsigned long	_sparcv9_vis1_instrument(void);
+void		_sparcv9_vis2_probe(void);
+void		_sparcv9_fmadd_probe(void);
+
 unsigned long OPENSSL_rdtsc(void)
 	{
-	unsigned long _sparcv9_rdtick(void);
-
 	if (OPENSSL_sparcv9cap_P&SPARCV9_TICK_PRIVILEGED)
 #if defined(__sun) && defined(__SVR4)
 		return gethrtime();
@@ -37,8 +45,11 @@ unsigned long OPENSSL_rdtsc(void)
 		return _sparcv9_rdtick();
 	}
 
-#if defined(__sun) && defined(__SVR4)
-
+#if 0 && defined(__sun) && defined(__SVR4)
+/* This code path is disabled, because of incompatibility of
+ * libdevinfo.so.1 and libmalloc.so.1 (see below for details)
+ */
+#include <malloc.h>
 #include <dlfcn.h>
 #include <libdevinfo.h>
 #include <sys/systeminfo.h>
@@ -110,7 +121,21 @@ void OPENSSL_cpuid_setup(void)
 			return;
 			}
 		}
-
+#ifdef M_KEEP
+	/*
+	 * Solaris libdevinfo.so.1 is effectively incomatible with
+	 * libmalloc.so.1. Specifically, if application is linked with
+	 * -lmalloc, it crashes upon startup with SIGSEGV in
+	 * free(3LIBMALLOC) called by di_fini. Prior call to
+	 * mallopt(M_KEEP,0) somehow helps... But not always...
+	 */
+	if ((h = dlopen(NULL,RTLD_LAZY)))
+		{
+		union { void *p; int (*f)(int,int); } sym;
+		if ((sym.p = dlsym(h,"mallopt"))) (*sym.f)(M_KEEP,0);
+		dlclose(h);
+		}
+#endif
 	if ((h = dlopen("libdevinfo.so.1",RTLD_LAZY))) do
 		{
 		di_init_t	di_init;
@@ -137,9 +162,18 @@ void OPENSSL_cpuid_setup(void)
 
 #else
 
+static sigjmp_buf common_jmp;
+static void common_handler(int sig) { siglongjmp(common_jmp,sig); }
+
 void OPENSSL_cpuid_setup(void)
 	{
 	char *e;
+	struct sigaction	common_act,ill_oact,bus_oact;
+	sigset_t		all_masked,oset;
+	static int trigger=0;
+
+	if (trigger) return;
+	trigger=1;
  
 	if ((e=getenv("OPENSSL_sparcv9cap")))
 		{
@@ -147,8 +181,57 @@ void OPENSSL_cpuid_setup(void)
 		return;
 		}
 
-	/* For now we assume that the rest supports UltraSPARC-I* only */
-	OPENSSL_sparcv9cap_P |= SPARCV9_PREFER_FPU|SPARCV9_VIS1;
+	/* Initial value, fits UltraSPARC-I&II... */
+	OPENSSL_sparcv9cap_P = SPARCV9_PREFER_FPU|SPARCV9_TICK_PRIVILEGED;
+
+	sigfillset(&all_masked);
+	sigdelset(&all_masked,SIGILL);
+	sigdelset(&all_masked,SIGTRAP);
+#ifdef SIGEMT
+	sigdelset(&all_masked,SIGEMT);
+#endif
+	sigdelset(&all_masked,SIGFPE);
+	sigdelset(&all_masked,SIGBUS);
+	sigdelset(&all_masked,SIGSEGV);
+	sigprocmask(SIG_SETMASK,&all_masked,&oset);
+
+	memset(&common_act,0,sizeof(common_act));
+	common_act.sa_handler = common_handler;
+	common_act.sa_mask    = all_masked;
+
+	sigaction(SIGILL,&common_act,&ill_oact);
+	sigaction(SIGBUS,&common_act,&bus_oact);/* T1 fails 16-bit ldda [on Linux] */
+
+	if (sigsetjmp(common_jmp,1) == 0)
+		{
+		_sparcv9_rdtick();
+		OPENSSL_sparcv9cap_P &= ~SPARCV9_TICK_PRIVILEGED;
+		}
+
+	if (sigsetjmp(common_jmp,1) == 0)
+		{
+		_sparcv9_vis1_probe();
+		OPENSSL_sparcv9cap_P |= SPARCV9_VIS1;
+		/* detect UltraSPARC-Tx, see sparccpud.S for details... */
+		if (_sparcv9_vis1_instrument() >= 12)
+			OPENSSL_sparcv9cap_P &= ~(SPARCV9_VIS1|SPARCV9_PREFER_FPU);
+		else
+			{
+			_sparcv9_vis2_probe();
+			OPENSSL_sparcv9cap_P |= SPARCV9_VIS2;
+			}
+		}
+
+	if (sigsetjmp(common_jmp,1) == 0)
+		{
+		_sparcv9_fmadd_probe();
+		OPENSSL_sparcv9cap_P |= SPARCV9_FMADD;
+		}
+
+	sigaction(SIGBUS,&bus_oact,NULL);
+	sigaction(SIGILL,&ill_oact,NULL);
+
+	sigprocmask(SIG_SETMASK,&oset,NULL);
 	}
 
 #endif

@@ -273,7 +273,7 @@ ASN1_INTEGER *d2i_ASN1_UINTEGER(ASN1_INTEGER **a, const unsigned char **pp,
 	{
 	ASN1_INTEGER *ret=NULL;
 	const unsigned char *p;
-	unsigned char *to,*s;
+	unsigned char *s;
 	long len;
 	int inf,tag,xclass;
 	int i;
@@ -308,7 +308,6 @@ ASN1_INTEGER *d2i_ASN1_UINTEGER(ASN1_INTEGER **a, const unsigned char **pp,
 		i=ERR_R_MALLOC_FAILURE;
 		goto err;
 		}
-	to=s;
 	ret->type=V_ASN1_INTEGER;
 	if(len) {
 		if ((*p == 0) && (len != 1))
@@ -387,8 +386,8 @@ long ASN1_INTEGER_get(const ASN1_INTEGER *a)
 	
 	if (a->length > (int)sizeof(long))
 		{
-		/* hmm... a bit ugly */
-		return(0xffffffffL);
+		/* hmm... a bit ugly, return all ones */
+		return -1;
 		}
 	if (a->data == NULL)
 		return 0;

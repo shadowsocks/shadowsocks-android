@@ -126,7 +126,7 @@ struct bn_blinding_st
 				  * used only by crypto/rsa/rsa_eay.c, rsa_lib.c */
 #endif
 	CRYPTO_THREADID tid;
-	unsigned int  counter;
+	int counter;
 	unsigned long flags;
 	BN_MONT_CTX *m_ctx;
 	int (*bn_mod_exp)(BIGNUM *r, const BIGNUM *a, const BIGNUM *p,
@@ -160,7 +160,10 @@ BN_BLINDING *BN_BLINDING_new(const BIGNUM *A, const BIGNUM *Ai, BIGNUM *mod)
 	if (BN_get_flags(mod, BN_FLG_CONSTTIME) != 0)
 		BN_set_flags(ret->mod, BN_FLG_CONSTTIME);
 
-	ret->counter = BN_BLINDING_COUNTER;
+	/* Set the counter to the special value -1
+	 * to indicate that this is never-used fresh blinding
+	 * that does not need updating before first use. */
+	ret->counter = -1;
 	CRYPTO_THREADID_current(&ret->tid);
 	return(ret);
 err:
@@ -190,7 +193,10 @@ int BN_BLINDING_update(BN_BLINDING *b, BN_CTX *ctx)
 		goto err;
 		}
 
-	if (--(b->counter) == 0 && b->e != NULL &&
+	if (b->counter == -1)
+		b->counter = 0;
+
+	if (++b->counter == BN_BLINDING_COUNTER && b->e != NULL &&
 		!(b->flags & BN_BLINDING_NO_RECREATE))
 		{
 		/* re-create blinding parameters */
@@ -205,8 +211,8 @@ int BN_BLINDING_update(BN_BLINDING *b, BN_CTX *ctx)
 
 	ret=1;
 err:
-	if (b->counter == 0)
-		b->counter = BN_BLINDING_COUNTER;
+	if (b->counter == BN_BLINDING_COUNTER)
+		b->counter = 0;
 	return(ret);
 	}
 
@@ -226,6 +232,12 @@ int BN_BLINDING_convert_ex(BIGNUM *n, BIGNUM *r, BN_BLINDING *b, BN_CTX *ctx)
 		BNerr(BN_F_BN_BLINDING_CONVERT_EX,BN_R_NOT_INITIALIZED);
 		return(0);
 		}
+
+	if (b->counter == -1)
+		/* Fresh blinding, doesn't need updating. */
+		b->counter = 0;
+	else if (!BN_BLINDING_update(b,ctx))
+		return(0);
 
 	if (r != NULL)
 		{
@@ -247,22 +259,19 @@ int BN_BLINDING_invert_ex(BIGNUM *n, const BIGNUM *r, BN_BLINDING *b, BN_CTX *ct
 	int ret;
 
 	bn_check_top(n);
-	if ((b->A == NULL) || (b->Ai == NULL))
-		{
-		BNerr(BN_F_BN_BLINDING_INVERT_EX,BN_R_NOT_INITIALIZED);
-		return(0);
-		}
 
 	if (r != NULL)
 		ret = BN_mod_mul(n, n, r, b->mod, ctx);
 	else
-		ret = BN_mod_mul(n, n, b->Ai, b->mod, ctx);
-
-	if (ret >= 0)
 		{
-		if (!BN_BLINDING_update(b,ctx))
+		if (b->Ai == NULL)
+			{
+			BNerr(BN_F_BN_BLINDING_INVERT_EX,BN_R_NOT_INITIALIZED);
 			return(0);
+			}
+		ret = BN_mod_mul(n, n, b->Ai, b->mod, ctx);
 		}
+
 	bn_check_top(n);
 	return(ret);
 	}
