@@ -1,0 +1,23 @@
+This module matches IP sets which can be defined by ipset(8).
+.TP
+[\fB!\fP] \fB\-\-match\-set\fP \fIsetname\fP \fIflag\fP[\fB,\fP\fIflag\fP]...
+where flags are the comma separated list of
+.BR "src"
+and/or
+.BR "dst" 
+specifications and there can be no more than six of them. Hence the command
+.IP
+ iptables \-A FORWARD \-m set \-\-match\-set test src,dst
+.IP
+will match packets, for which (if the set type is ipportmap) the source
+address and destination port pair can be found in the specified set. If
+the set type of the specified set is single dimension (for example ipmap),
+then the command will match packets for which the source address can be
+found in the specified set. 
+.PP
+The option \fB\-\-match\-set\fP can be replaced by \fB\-\-set\fP if that does 
+not clash with an option of other extensions.
+.PP
+Use of -m set requires that ipset kernel support is provided. As standard
+kernels do not ship this currently, the ipset or Xtables-addons package needs
+to be installed.

@@ -1,0 +1,7 @@
+This matches on a given arbitrary range of IP addresses.
+.TP
+[\fB!\fP] \fB\-\-src\-range\fP \fIfrom\fP[\fB\-\fP\fIto\fP]
+Match source IP in the specified range.
+.TP
+[\fB!\fP] \fB\-\-dst\-range\fP \fIfrom\fP[\fB\-\fP\fIto\fP]
+Match destination IP in the specified range.

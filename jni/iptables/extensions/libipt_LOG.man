@@ -1,0 +1,31 @@
+Turn on kernel logging of matching packets.  When this option is set
+for a rule, the Linux kernel will print some information on all
+matching packets (like most IP header fields) via the kernel log
+(where it can be read with
+.I dmesg
+or 
+.IR syslogd (8)).
+This is a "non-terminating target", i.e. rule traversal continues at
+the next rule.  So if you want to LOG the packets you refuse, use two
+separate rules with the same matching criteria, first using target LOG
+then DROP (or REJECT).
+.TP
+\fB\-\-log\-level\fP \fIlevel\fP
+Level of logging (numeric or see \fIsyslog.conf\fP(5)).
+.TP
+\fB\-\-log\-prefix\fP \fIprefix\fP
+Prefix log messages with the specified prefix; up to 29 letters long,
+and useful for distinguishing messages in the logs.
+.TP
+\fB\-\-log\-tcp\-sequence\fP
+Log TCP sequence numbers. This is a security risk if the log is
+readable by users.
+.TP
+\fB\-\-log\-tcp\-options\fP
+Log options from the TCP packet header.
+.TP
+\fB\-\-log\-ip\-options\fP
+Log options from the IP packet header.
+.TP
+\fB\-\-log\-uid\fP
+Log the userid of the process which generated the packet.

@@ -1,0 +1,28 @@
+.TP
+[\fB!\fP] \fB\-\-source\-port\fP,\fB\-\-sport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-destination\-port\fP,\fB\-\-dport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-chunk\-types\fP {\fBall\fP|\fBany\fP|\fBonly\fP} \fIchunktype\fP[\fB:\fP\fIflags\fP] [...]
+The flag letter in upper case indicates that the flag is to match if set,
+in the lower case indicates to match if unset.
+
+Chunk types: DATA INIT INIT_ACK SACK HEARTBEAT HEARTBEAT_ACK ABORT SHUTDOWN SHUTDOWN_ACK ERROR COOKIE_ECHO COOKIE_ACK ECN_ECNE ECN_CWR SHUTDOWN_COMPLETE ASCONF ASCONF_ACK FORWARD_TSN
+
+chunk type            available flags      
+.br
+DATA                  I U B E i u b e
+.br
+ABORT                 T t                 
+.br
+SHUTDOWN_COMPLETE     T t                 
+
+(lowercase means flag should be "off", uppercase means "on")
+.P
+Examples:
+
+iptables \-A INPUT \-p sctp \-\-dport 80 \-j DROP
+
+iptables \-A INPUT \-p sctp \-\-chunk\-types any DATA,INIT \-j DROP
+
+iptables \-A INPUT \-p sctp \-\-chunk\-types any DATA:Be \-j ACCEPT

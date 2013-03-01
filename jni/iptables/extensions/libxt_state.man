@@ -1,0 +1,24 @@
+This module, when combined with connection tracking, allows access to
+the connection tracking state for this packet.
+.TP
+[\fB!\fP] \fB\-\-state\fP \fIstate\fP
+Where state is a comma separated list of the connection states to
+match.  Possible states are
+.B INVALID
+meaning that the packet could not be identified for some reason which
+includes running out of memory and ICMP errors which don't correspond to any
+known connection,
+.B ESTABLISHED
+meaning that the packet is associated with a connection which has seen
+packets in both directions,
+.B NEW
+meaning that the packet has started a new connection, or otherwise
+associated with a connection which has not seen packets in both
+directions, and
+.B RELATED
+meaning that the packet is starting a new connection, but is
+associated with an existing connection, such as an FTP data transfer,
+or an ICMP error.
+.B UNTRACKED
+meaning that the packet is not tracked at all, which happens if you use
+the NOTRACK target in raw table.

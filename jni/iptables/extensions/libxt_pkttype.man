@@ -1,0 +1,3 @@
+This module matches the link-layer packet type.
+.TP
+[\fB!\fP] \fB\-\-pkt\-type\fP {\fBunicast\fP|\fBbroadcast\fP|\fBmulticast\fP}

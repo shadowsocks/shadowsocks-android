@@ -1,0 +1,10 @@
+This module matches the time to live field in the IP header.
+.TP
+\fB\-\-ttl\-eq\fP \fIttl\fP
+Matches the given TTL value.
+.TP
+\fB\-\-ttl\-gt\fP \fIttl\fP
+Matches if TTL is greater than the given TTL value.
+.TP
+\fB\-\-ttl\-lt\fP \fIttl\fP
+Matches if TTL is less than the given TTL value.

@@ -1,0 +1,50 @@
+.TH IP6TABLES-RESTORE 8 "Jan 30, 2002" "" ""
+.\"
+.\" Man page written by Harald Welte <laforge@gnumonks.org>
+.\" It is based on the iptables man page.
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\"
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\"
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\"
+.SH NAME
+ip6tables-restore \(em Restore IPv6 Tables
+.SH SYNOPSIS
+\fBip6tables\-restore\fP [\fB\-c\fP] [\fB\-n\fP]
+.SH DESCRIPTION
+.PP
+.B ip6tables-restore
+is used to restore IPv6 Tables from data specified on STDIN. Use 
+I/O redirection provided by your shell to read from a file
+.TP
+\fB\-c\fR, \fB\-\-counters\fR
+restore the values of all packet and byte counters
+.TP
+\fB\-n\fR, \fB\-\-noflush\fR 
+.TP
+don't flush the previous contents of the table. If not specified, 
+.B ip6tables-restore
+flushes (deletes) all previous contents of the respective IPv6 Table.
+.SH BUGS
+None known as of iptables-1.2.1 release
+.SH AUTHORS
+Harald Welte <laforge@gnumonks.org>
+.br
+Andras Kis-Szabo <kisza@sch.bme.hu>
+.SH SEE ALSO
+\fBip6tables\-save\fP(8), \fBip6tables\fP(8)
+.PP
+The iptables-HOWTO, which details more iptables usage, the NAT-HOWTO,
+which details NAT, and the netfilter-hacking-HOWTO which details the
+internals.

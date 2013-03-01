@@ -1,0 +1,105 @@
+.TH IPQ_SET_MODE 3 "16 October 2001" "Linux iptables 1.2" "Linux Programmer's Manual" 
+.\"
+.\"     Copyright (c) 2000-2001 Netfilter Core Team
+.\"
+.\"     This program is free software; you can redistribute it and/or modify
+.\"     it under the terms of the GNU General Public License as published by
+.\"     the Free Software Foundation; either version 2 of the License, or
+.\"     (at your option) any later version.
+.\"
+.\"     This program is distributed in the hope that it will be useful,
+.\"     but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"     GNU General Public License for more details.
+.\"
+.\"     You should have received a copy of the GNU General Public License
+.\"     along with this program; if not, write to the Free Software
+.\"     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\"
+.SH NAME
+ipq_set_mode \(em set the ip_queue queuing mode
+.SH SYNOPSIS
+.B #include <linux/netfilter.h>
+.br
+.B #include <libipq.h>
+.sp
+.BI "int ipq_set_mode(const struct ipq_handle *" h ", u_int8_t " mode ", size_t " range );
+.SH DESCRIPTION
+The
+.B ipq_set_mode
+function sends a message to the kernel ip_queue module, specifying whether
+packet metadata only, or packet payloads as well as metadata should be copied to
+userspace.
+.PP
+The
+.I h
+parameter is a context handle which must previously have been returned 
+successfully from a call to
+.BR ipq_create_handle .
+.PP
+The
+.I mode
+parameter must be one of:
+.TP
+.B IPQ_COPY_META
+Copy only packet metadata to userspace.
+.TP
+.B IPQ_COPY_PACKET
+Copy packet metadata and packet payloads to userspace.
+.PP
+The
+.I range
+parameter is used to specify how many bytes of the payload to copy
+to userspace.  It is only valid for
+.B IPQ_COPY_PACKET
+mode and is otherwise ignored.  The maximum useful value for
+.I range
+is 65535 (greater values will be clamped to this by ip_queue).
+.PP
+.B ipq_set_mode
+is usually used immediately following
+.B ipq_create_handle
+to enable the flow of packets to userspace.
+.PP
+Note that as the underlying Netlink messaging transport is connectionless,
+the ip_queue module does not know that a userspace application is ready to
+communicate until it receives a message such as this.
+.SH RETURN VALUE
+On failure, \-1 is returned.
+.br
+On success, a non-zero positive value is returned.
+.SH ERRORS
+On failure, a descriptive error message will be available
+via the
+.B ipq_errstr
+function.
+.SH DIAGNOSTICS
+A relatively common failure may occur if the ip_queue module is not loaded.
+In this case, the following code excerpt:
+.PP
+.RS
+.nf
+status = ipq_set_mode(h, IPQ_COPY_META, 0);
+if (status < 0) {
+	ipq_perror("myapp");
+	ipq_destroy_handle(h);
+	exit(1);
+}
+.RE
+.fi
+.PP
+would generate the following output:
+.PP
+.I myapp: Failed to send netlink message: Connection refused
+.SH BUGS
+None known.
+.SH AUTHOR
+James Morris <jmorris@intercode.com.au>
+.SH COPYRIGHT
+Copyright (c) 2000-2001 Netfilter Core Team.
+.PP
+Distributed under the GNU General Public License.
+.SH SEE ALSO
+.BR libipq (3),
+.BR iptables (8).

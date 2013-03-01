@@ -1,0 +1,29 @@
+This target provides logging of matching packets. When this target is
+set for a rule, the Linux kernel will pass the packet to the loaded
+logging backend to log the packet. This is usually used in combination
+with nfnetlink_log as logging backend, which will multicast the packet
+through a
+.IR netlink
+socket to the specified multicast group. One or more userspace processes
+may subscribe to the group to receive the packets. Like LOG, this is a
+non-terminating target, i.e. rule traversal continues at the next rule.
+.TP
+\fB\-\-nflog\-group\fP \fInlgroup\fP
+The netlink group (1 \- 2^32\-1) to which packets are (only applicable for
+nfnetlink_log). The default value is 0.
+.TP
+\fB\-\-nflog\-prefix\fP \fIprefix\fP
+A prefix string to include in the log message, up to 64 characters
+long, useful for distinguishing messages in the logs.
+.TP
+\fB\-\-nflog\-range\fP \fIsize\fP
+The number of bytes to be copied to userspace (only applicable for
+nfnetlink_log). nfnetlink_log instances may specify their own
+range, this option overrides it.
+.TP
+\fB\-\-nflog\-threshold\fP \fIsize\fP
+Number of packets to queue inside the kernel before sending them
+to userspace (only applicable for nfnetlink_log). Higher values
+result in less overhead per packet, but increase delay until the
+packets reach userspace. The default value is 1.
+.BR

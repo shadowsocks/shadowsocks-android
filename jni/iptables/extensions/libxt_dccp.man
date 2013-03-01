@@ -1,0 +1,12 @@
+.TP
+[\fB!\fP] \fB\-\-source\-port\fP,\fB\-\-sport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-destination\-port\fP,\fB\-\-dport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-dccp\-types\fP \fImask\fP
+Match when the DCCP packet type is one of 'mask'. 'mask' is a comma-separated
+list of packet types.  Packet types are: 
+.BR "REQUEST RESPONSE DATA ACK DATAACK CLOSEREQ CLOSE RESET SYNC SYNCACK INVALID" .
+.TP
+[\fB!\fP] \fB\-\-dccp\-option\fP \fInumber\fP
+Match if DCP option set.

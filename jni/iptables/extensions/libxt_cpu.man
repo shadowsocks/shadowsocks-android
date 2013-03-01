@@ -1,0 +1,15 @@
+.TP
+[\fB!\fP] \fB\-\-cpu\fP \fInumber\fP
+Match cpu handling this packet. cpus are numbered from 0 to NR_CPUS-1
+Can be used in combination with RPS (Remote Packet Steering) or
+multiqueue NICs to spread network traffic on different queues.
+.PP
+Example:
+.PP
+iptables \-t nat \-A PREROUTING \-p tcp \-\-dport 80 \-m cpu \-\-cpu 0 
+\-j REDIRECT \-\-to\-port 8080
+.PP
+iptables \-t nat \-A PREROUTING \-p tcp \-\-dport 80 \-m cpu \-\-cpu 1 
+\-j REDIRECT \-\-to\-port 8081
+.PP
+Available since Linux 2.6.36.

@@ -1,0 +1,14 @@
+This target allows to create audit records for packets hitting the target.
+It can be used to record accepted, dropped, and rejected packets. See
+auditd(8) for additional details.
+.TP
+\fB\-\-type\fP {\fBaccept\fP|\fBdrop\fP|\fBreject\fP}
+Set type of audit record.
+.PP
+Example:
+.IP
+iptables \-N AUDIT_DROP
+.IP
+iptables \-A AUDIT_DROP \-j AUDIT \-\-type drop
+.IP
+iptables \-A AUDIT_DROP \-j DROP

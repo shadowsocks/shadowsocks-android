@@ -1,0 +1,3 @@
+This module matches the SPIs in ESP header of IPsec packets.
+.TP
+[\fB!\fP] \fB\-\-espspi\fP \fIspi\fP[\fB:\fP\fIspi\fP]

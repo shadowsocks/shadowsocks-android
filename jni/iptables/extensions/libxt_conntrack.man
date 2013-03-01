@@ -1,0 +1,86 @@
+This module, when combined with connection tracking, allows access to the
+connection tracking state for this packet/connection.
+.TP
+[\fB!\fP] \fB\-\-ctstate\fP \fIstatelist\fP
+\fIstatelist\fP is a comma separated list of the connection states to match.
+Possible states are listed below.
+.TP
+[\fB!\fP] \fB\-\-ctproto\fP \fIl4proto\fP
+Layer-4 protocol to match (by number or name)
+.TP
+[\fB!\fP] \fB\-\-ctorigsrc\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+.TP
+[\fB!\fP] \fB\-\-ctorigdst\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+.TP
+[\fB!\fP] \fB\-\-ctreplsrc\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+.TP
+[\fB!\fP] \fB\-\-ctrepldst\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+Match against original/reply source/destination address
+.TP
+[\fB!\fP] \fB\-\-ctorigsrcport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-ctorigdstport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-ctreplsrcport\fP \fIport\fP[\fB:\fP\fIport\fP]
+.TP
+[\fB!\fP] \fB\-\-ctrepldstport\fP \fIport\fP[\fB:\fP\fIport\fP]
+Match against original/reply source/destination port (TCP/UDP/etc.) or GRE key.
+Matching against port ranges is only supported in kernel versions above 2.6.38.
+.TP
+[\fB!\fP] \fB\-\-ctstatus\fP \fIstatelist\fP
+\fIstatuslist\fP is a comma separated list of the connection statuses to match.
+Possible statuses are listed below.
+.TP
+[\fB!\fP] \fB\-\-ctexpire\fP \fItime\fP[\fB:\fP\fItime\fP]
+Match remaining lifetime in seconds against given value or range of values
+(inclusive)
+.TP
+\fB\-\-ctdir\fP {\fBORIGINAL\fP|\fBREPLY\fP}
+Match packets that are flowing in the specified direction. If this flag is not
+specified at all, matches packets in both directions.
+.PP
+States for \fB\-\-ctstate\fP:
+.TP
+\fBINVALID\fP
+meaning that the packet is associated with no known connection
+.TP
+\fBNEW\fP
+meaning that the packet has started a new connection, or otherwise associated
+with a connection which has not seen packets in both directions, and
+.TP
+\fBESTABLISHED\fP
+meaning that the packet is associated with a connection which has seen packets
+in both directions,
+.TP
+\fBRELATED\fP
+meaning that the packet is starting a new connection, but is associated with an
+existing connection, such as an FTP data transfer, or an ICMP error.
+.TP
+\fBUNTRACKED\fP
+meaning that the packet is not tracked at all, which happens if you use
+the NOTRACK target in raw table.
+.TP
+\fBSNAT\fP
+A virtual state, matching if the original source address differs from the reply
+destination.
+.TP
+\fBDNAT\fP
+A virtual state, matching if the original destination differs from the reply
+source.
+.PP
+Statuses for \fB\-\-ctstatus\fP:
+.TP
+\fBNONE\fP
+None of the below.
+.TP
+\fBEXPECTED\fP
+This is an expected connection (i.e. a conntrack helper set it up)
+.TP
+\fBSEEN_REPLY\fP
+Conntrack has seen packets in both directions.
+.TP
+\fBASSURED\fP
+Conntrack entry should never be early-expired.
+.TP
+\fBCONFIRMED\fP
+Connection is confirmed: originating packet has left box.

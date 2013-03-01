@@ -1,0 +1,4 @@
+This matches the TCP MSS (maximum segment size) field of the TCP header.  You can only use this on TCP SYN or SYN/ACK packets, since the MSS is only negotiated during the TCP handshake at connection startup time.
+.TP
+[\fB!\fP] \fB\-\-mss\fP \fIvalue\fP[\fB:\fP\fIvalue\fP]
+Match a given TCP MSS value or range.

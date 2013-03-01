@@ -14,6 +14,7 @@
 #
 #
 LOCAL_PATH := $(call my-dir)
+ROOT_PATH := $(LOCAL_PATH)
 
 include $(CLEAR_VARS)
 
@@ -141,10 +142,19 @@ LOCAL_LDLIBS := -ldl -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
-subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
+# OpenSSL
+openssl_subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
 	crypto \
 	ssl \
 	))
+include $(openssl_subdirs)
 
-include $(subdirs)
+# Iptables
+LOCAL_PATH := $(ROOT_PATH)
+iptables_subdirs := $(addprefix $(LOCAL_PATH)/iptables/,$(addsuffix /Android.mk, \
+	iptables \
+	extensions \
+	libiptc \
+	))
+include $(iptables_subdirs)
 

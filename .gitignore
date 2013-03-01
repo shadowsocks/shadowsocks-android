@@ -12,6 +12,7 @@ tests/gen
 tests/local.properties
 NUL
 libs/armeabi/*
+gen_*
 
 #Intellij IDEA
 *.iml
