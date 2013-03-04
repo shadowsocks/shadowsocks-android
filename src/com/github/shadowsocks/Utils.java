@@ -46,15 +46,17 @@ import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 
 public class Utils {
 
     public final static String TAG = "Shadowsocks";
+    public final static String ABI_PROP = "ro.product.cpu.abi";
+    public final static String ABI2_PROP = "ro.product.cpu.abi2";
+    public final static String ARM_ABI = "arm";
+    public final static String X86_ABI = "x86";
+    public final static String MIPS_ABI = "mips";
     public final static String DEFAULT_SHELL = "/system/bin/sh";
     public final static String DEFAULT_ROOT = "/system/bin/su";
     public final static String ALTERNATIVE_ROOT = "/system/xbin/su";
@@ -68,6 +70,54 @@ public class Utils {
     private static String root_shell = null;
     private static String iptables = null;
     private static String data_path = null;
+
+    public static String getABI() {
+        String abi = getSystemProperty(ABI_PROP);
+        String abi2 = getSystemProperty(ABI2_PROP);
+        if (abi2 != null) {
+            if (abi2.toLowerCase().contains(ARM_ABI)) {
+                return ARM_ABI;
+            } else if (abi2.toLowerCase().contains(X86_ABI)) {
+                return X86_ABI;
+            }
+        } else if (abi != null) {
+            if (abi.toLowerCase().contains(ARM_ABI)) {
+                return ARM_ABI;
+            } else if (abi.toLowerCase().contains(X86_ABI)) {
+                return X86_ABI;
+            }
+        }
+        return ARM_ABI;
+    }
+
+    /**
+     * Returns a SystemProperty
+     *
+     * @param propName The Property to retrieve
+     * @return The Property, or NULL if not found
+     */
+    private static String getSystemProperty(String propName) {
+        String line;
+        BufferedReader input = null;
+        try {
+            Process p = Runtime.getRuntime().exec("getprop " + propName);
+            input = new BufferedReader(new InputStreamReader(p.getInputStream()), 1024);
+            line = input.readLine();
+            input.close();
+        } catch (IOException ex) {
+            Log.e(TAG, "Unable to read sysprop " + propName, ex);
+            return null;
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Exception while closing InputStream", e);
+                }
+            }
+        }
+        return line;
+    }
 
     private static void checkIptables() {
 

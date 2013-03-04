@@ -460,6 +460,7 @@ public class Shadowsocks extends PreferenceActivity implements
         Utils.runRootCommand(sb.toString());
 
         copyAssets("");
+        copyAssets(Utils.getABI());
 
         Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
                 + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
