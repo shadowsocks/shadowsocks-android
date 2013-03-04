@@ -73,14 +73,7 @@ public class Utils {
 
     public static String getABI() {
         String abi = getSystemProperty(ABI_PROP);
-        String abi2 = getSystemProperty(ABI2_PROP);
-        if (abi2 != null) {
-            if (abi2.toLowerCase().contains(ARM_ABI)) {
-                return ARM_ABI;
-            } else if (abi2.toLowerCase().contains(X86_ABI)) {
-                return X86_ABI;
-            }
-        } else if (abi != null) {
+        if (abi != null) {
             if (abi.toLowerCase().contains(ARM_ABI)) {
                 return ARM_ABI;
             } else if (abi.toLowerCase().contains(X86_ABI)) {
