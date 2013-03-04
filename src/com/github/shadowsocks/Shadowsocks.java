@@ -117,7 +117,7 @@ public class Shadowsocks extends PreferenceActivity implements
                 InputStream in = null;
                 OutputStream out = null;
                 try {
-                    in = assetManager.open(file);
+                    in = assetManager.open(path + "/" + file);
                     out = new FileOutputStream("/data/data/com.github.shadowsocks/"
                             + file);
                     copyFile(in, out);
