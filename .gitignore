@@ -11,8 +11,21 @@ tests/bin
 tests/gen
 tests/local.properties
 NUL
-libs/armeabi/*
 gen_*
+libs/armeabi/ip6tables
+libs/armeabi/iptables
+libs/armeabi/obfsproxy
+libs/armeabi/pdnsd
+libs/armeabi/polipo
+libs/armeabi/redsocks
+libs/armeabi/shadowsocks
+libs/x86/ip6tables
+libs/x86/iptables
+libs/x86/obfsproxy
+libs/x86/pdnsd
+libs/x86/polipo
+libs/x86/redsocks
+libs/x86/shadowsocks
 
 #Intellij IDEA
 *.iml
