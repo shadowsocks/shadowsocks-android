@@ -29,14 +29,14 @@ static char *_server;
 static char *_remote_port;
 static int   _timeout;
 
-static int setnonblocking(int fd) {
+int setnonblocking(int fd) {
     int flags;
     if (-1 ==(flags = fcntl(fd, F_GETFL, 0)))
         flags = 0;
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
-static int create_and_bind(const char *port) {
+int create_and_bind(const char *port) {
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     int s, listen_sock;
@@ -83,7 +83,7 @@ static int create_and_bind(const char *port) {
     return listen_sock;
 }
 
-static void server_recv_cb (EV_P_ ev_io *w, int revents) {
+void server_recv_cb (EV_P_ ev_io *w, int revents) {
     struct server_ctx *server_recv_ctx = (struct server_ctx *)w;
     struct server *server = server_recv_ctx->server;
     struct remote *remote = server->remote;
@@ -237,7 +237,7 @@ static void server_recv_cb (EV_P_ ev_io *w, int revents) {
     }
 }
 
-static void server_send_cb (EV_P_ ev_io *w, int revents) {
+void server_send_cb (EV_P_ ev_io *w, int revents) {
     struct server_ctx *server_send_ctx = (struct server_ctx *)w;
     struct server *server = server_send_ctx->server;
     struct remote *remote = server->remote;
@@ -284,7 +284,7 @@ static void server_send_cb (EV_P_ ev_io *w, int revents) {
 
 }
 
-static void remote_timeout_cb(EV_P_ ev_timer *watcher, int revents) {
+void remote_timeout_cb(EV_P_ ev_timer *watcher, int revents) {
     struct remote_ctx *remote_ctx = (struct remote_ctx *) (((void*)watcher)
             - sizeof(ev_io));
     struct remote *remote = remote_ctx->remote;
@@ -302,7 +302,7 @@ static void remote_timeout_cb(EV_P_ ev_timer *watcher, int revents) {
     close_and_free_server(EV_A_ server);
 }
 
-static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
+void remote_recv_cb (EV_P_ ev_io *w, int revents) {
     struct remote_ctx *remote_recv_ctx = (struct remote_ctx *)w;
     struct remote *remote = remote_recv_ctx->remote;
     struct server *server = remote->server;
@@ -362,7 +362,7 @@ static void remote_recv_cb (EV_P_ ev_io *w, int revents) {
     }
 }
 
-static void remote_send_cb (EV_P_ ev_io *w, int revents) {
+void remote_send_cb (EV_P_ ev_io *w, int revents) {
     struct remote_ctx *remote_send_ctx = (struct remote_ctx *)w;
     struct remote *remote = remote_send_ctx->remote;
     struct server *server = remote->server;
@@ -520,60 +520,55 @@ void close_and_free_server(EV_P_ struct server *server) {
     }
 }
 
-static void accept_cb (EV_P_ ev_io *w, int revents)
-{
+void accept_cb (EV_P_ ev_io *w, int revents) {
     struct listen_ctx *listener = (struct listen_ctx *)w;
     int serverfd;
-    while (1) {
-        serverfd = accept(listener->fd, NULL, NULL);
-        if (serverfd < 0) {
-            perror("accept");
-            break;
-        }
-        setnonblocking(serverfd);
-        struct server *server = new_server(serverfd);
-        struct addrinfo hints, *res;
-        int sockfd;
-        memset(&hints, 0, sizeof hints);
-        hints.ai_family = AF_UNSPEC;
-        hints.ai_socktype = SOCK_STREAM;
-        int err = getaddrinfo(_server, _remote_port, &hints, &res);
-        if (err) {
-            perror("getaddrinfo");
-            close_and_free_server(EV_A_ server);
-            break;
-        }
-
-        sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-        if (sockfd < 0) {
-            perror("socket");
-            close(sockfd);
-            close_and_free_server(EV_A_ server);
-            freeaddrinfo(res);
-            break;
-        }
-
-        struct timeval timeout;
-        timeout.tv_sec = _timeout;
-        timeout.tv_usec = 0;
-        err = setsockopt(sockfd, SOL_SOCKET, 
-                SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
-        if (err) perror("setsockopt");
-        err = setsockopt(sockfd, SOL_SOCKET,
-                SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
-        if (err) perror("setsockopt");
-
-        setnonblocking(sockfd);
-        struct remote *remote = new_remote(sockfd);
-        server->remote = remote;
-        remote->server = server;
-        connect(sockfd, res->ai_addr, res->ai_addrlen);
-        freeaddrinfo(res);
-        // listen to remote connected event
-        ev_io_start(EV_A_ &remote->send_ctx->io);
-        ev_timer_start(EV_A_ &remote->send_ctx->watcher);
-        break;
+    serverfd = accept(listener->fd, NULL, NULL);
+    if (serverfd < 0) {
+        perror("accept");
+        return;
     }
+    setnonblocking(serverfd);
+
+    struct addrinfo hints, *res;
+    int sockfd;
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    int err = getaddrinfo(_server, _remote_port, &hints, &res);
+    if (err) {
+        perror("getaddrinfo");
+        return;
+    }
+
+    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    if (sockfd < 0) {
+        perror("socket");
+        close(sockfd);
+        freeaddrinfo(res);
+        return;
+    }
+
+    struct timeval timeout;
+    timeout.tv_sec = _timeout;
+    timeout.tv_usec = 0;
+    err = setsockopt(sockfd, SOL_SOCKET, 
+            SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
+    if (err) perror("setsockopt");
+    err = setsockopt(sockfd, SOL_SOCKET,
+            SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
+    if (err) perror("setsockopt");
+
+    setnonblocking(sockfd);
+    struct server *server = new_server(serverfd);
+    struct remote *remote = new_remote(sockfd);
+    server->remote = remote;
+    remote->server = server;
+    connect(sockfd, res->ai_addr, res->ai_addrlen);
+    freeaddrinfo(res);
+    // listen to remote connected event
+    ev_io_start(EV_A_ &remote->send_ctx->io);
+    ev_timer_start(EV_A_ &remote->send_ctx->watcher);
 }
 
 static void print_usage() {
