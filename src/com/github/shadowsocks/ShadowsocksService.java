@@ -279,6 +279,8 @@ public class ShadowsocksService extends Service {
             @Override
             public void run() {
 
+                handler.sendEmptyMessage(MSG_CONNECT_START);
+
                 boolean resolved = false;
 
                 if (isDNSProxy) {
@@ -296,8 +298,6 @@ public class ShadowsocksService extends Service {
                 } else {
                     resolved = true;
                 }
-
-                handler.sendEmptyMessage(MSG_CONNECT_START);
 
                 Log.d(TAG, "IPTABLES: " + Utils.getIptables());
 
