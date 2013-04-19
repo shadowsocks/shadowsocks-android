@@ -110,9 +110,11 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
+SHADOWSOCKS_SOURCES := local.c encrypt.c rc4.c md5.c utils.c json.c jconf.c
+
 LOCAL_MODULE    := shadowsocks 
-LOCAL_SRC_FILES := shadowsocks/local.c shadowsocks/encrypt.c shadowsocks/rc4.c shadowsocks/md5.c
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -I$(LOCAL_PATH)/libev/
+LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -I$(LOCAL_PATH)/libev/ -DHAVE_CONFIG_H -DANDROID
 
 LOCAL_STATIC_LIBRARIES := libev
 
