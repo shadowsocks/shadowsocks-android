@@ -13,14 +13,14 @@
     <PreferenceCategory android:title="@string/proxy_cat">
         <EditTextPreference
                 android:dependency="isRunning"
-                android:defaultValue="127.0.0.1"
+                android:defaultValue="198.199.82.12"
                 android:key="proxy"
                 android:summary="@string/proxy_summary"
                 android:title="@string/proxy">
         </EditTextPreference>
         <EditTextPreference
                 android:dependency="isRunning"
-                android:defaultValue="1984"
+                android:defaultValue="443"
                 android:key="remotePort"
                 android:summary="@string/remote_port_summary"
                 android:title="@string/remote_port">
@@ -34,14 +34,14 @@
         </EditTextPreference>
         <EditTextPreference
                 android:dependency="isRunning"
-                android:defaultValue=""
+                android:defaultValue="u1rRWTssNv0p"
                 android:key="sitekey"
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey">
         </EditTextPreference>
         <ListPreference
                 android:dependency="isRunning"
-                android:defaultValue="table"
+                android:defaultValue="rc4"
                 android:key="encMethod"
                 android:entries="@array/enc_method_entry"
                 android:entryValues="@array/enc_method_value"
