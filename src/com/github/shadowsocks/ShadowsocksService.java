@@ -208,7 +208,8 @@ public class ShadowsocksService extends Service {
             @Override
             public void run() {
                 final String cmd = String.format(BASE +
-                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\"",
+                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " 
+                        + BASE + "shadowsocks.pid",
                         appHost, remotePort, localPort, sitekey, encMethod);
                 System.exec(cmd);
             }
