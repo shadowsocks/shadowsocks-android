@@ -1,5 +1,6 @@
 language: java
 before_install:
+  - sudo apt-get update
   - sudo apt-get install libc6-dev-i386
   - sudo apt-get install lib32ncurses5-dev
   - sudo apt-get install libx11-dev
