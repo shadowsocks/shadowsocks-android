@@ -552,6 +552,7 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
 
         @Override
         public void onPause() {
+            super.onPause();
             // Unregister the listener whenever a key changes
             getPreferenceScreen().getSharedPreferences()
                     .unregisterOnSharedPreferenceChangeListener(this);
@@ -601,6 +602,7 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
 
         @Override
         public void onPause() {
+            super.onPause();
             // Unregister the listener whenever a key changes
             getPreferenceScreen().getSharedPreferences()
                     .unregisterOnSharedPreferenceChangeListener(this);

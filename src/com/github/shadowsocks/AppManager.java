@@ -24,10 +24,11 @@ import android.view.WindowManager;
 import android.widget.*;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import com.actionbarsherlock.app.SherlockActivity;
 
 import java.util.*;
 
-public class AppManager extends Activity implements OnCheckedChangeListener,
+public class AppManager extends SherlockActivity implements OnCheckedChangeListener,
         OnClickListener {
 
     public final static String PREFS_KEY_PROXYED = "Proxyed";
