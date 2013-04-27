@@ -53,20 +53,29 @@ import android.os.Message;
 import android.preference.*;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
+import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment;
+import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity;
+import org.jraf.android.backport.switchwidget.Switch;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class Shadowsocks extends PreferenceActivity implements
-        OnSharedPreferenceChangeListener {
+public class Shadowsocks extends UnifiedSherlockPreferenceActivity
+        implements CompoundButton.OnCheckedChangeListener, OnSharedPreferenceChangeListener {
 
     public static final String PREFS_NAME = "Shadowsocks";
+    public static final String[] PROXY_PREFS = {"proxy", "remotePort", "port"
+            , "sitekey", "encMethod"};
+    public static final String[] FEATRUE_PREFS = {"isHTTPProxy", "isDNSProxy", "isGFWList", "isGlobalProxy", "isBypassApps"
+            , "proxyedApps", "isAutoConnect"};
     private static final String TAG = "Shadowsocks";
     private static final int MSG_CRASH_RECOVER = 1;
     private static final int MSG_INITIAL_FINISH = 2;
@@ -94,14 +103,7 @@ public class Shadowsocks extends PreferenceActivity implements
             super.handleMessage(msg);
         }
     };
-    private EditTextPreference proxyText;
-    private EditTextPreference portText;
-    private EditTextPreference remotePortText;
-    private EditTextPreference sitekeyText;
-    private ListPreference encMethodText;
-    private Preference proxyedApps;
-    private CheckBoxPreference isBypassAppsCheck;
-    private CheckBoxPreference isRunningCheck;
+    private Switch switchButton;
 
     private void copyAssets(String path) {
 
@@ -161,67 +163,43 @@ public class Shadowsocks extends PreferenceActivity implements
         return false;
     }
 
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        if (compoundButton == switchButton) {
+            if (!serviceStart()) {
+                switchButton.setChecked(false);
+            }
+        }
+    }
+
     /**
      * Called when the activity is first created.
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        setHeaderRes(R.xml.shadowsocks_headers);
         super.onCreate(savedInstanceState);
 
-        addPreferencesFromResource(R.xml.shadowsocks_preference);
+        RelativeLayout switchLayout = (RelativeLayout)
+                getLayoutInflater().inflate(R.layout.layout_switch, null);
 
-        proxyText = (EditTextPreference) findPreference("proxy");
-        portText = (EditTextPreference) findPreference("port");
-        remotePortText = (EditTextPreference) findPreference("remotePort");
-        sitekeyText = (EditTextPreference) findPreference("sitekey");
-        encMethodText = (ListPreference) findPreference("encMethod");
-        proxyedApps = findPreference("proxyedApps");
+        getSupportActionBar().setCustomView(switchLayout);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
 
-        isBypassAppsCheck = (CheckBoxPreference) findPreference("isBypassApps");
-        isRunningCheck = (CheckBoxPreference) findPreference("isRunning");
+        switchButton = (Switch) switchLayout.findViewById(R.id.switchButton);
 
-        if (mProgressDialog == null) {
-            mProgressDialog = ProgressDialog.show(this, "",
-                    getString(R.string.initializing), true, true);
-        }
-
-        new Thread() {
-            @Override
-            public void run() {
-
-                Utils.isRoot();
-
-                String versionName;
-                try {
-                    versionName = getPackageManager().getPackageInfo(
-                            getPackageName(), 0).versionName;
-                } catch (NameNotFoundException e) {
-                    versionName = "NONE";
-                }
-
-                final SharedPreferences settings = PreferenceManager
-                        .getDefaultSharedPreferences(Shadowsocks.this);
-
-                if (!settings.getBoolean(versionName, false)) {
-                    Editor edit = settings.edit();
-                    edit.putBoolean(versionName, true);
-                    edit.commit();
-                    reset();
-                }
-
-                handler.sendEmptyMessage(MSG_INITIAL_FINISH);
-            }
-        }.start();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(Menu.NONE, Menu.FIRST + 1, 1, getString(R.string.recovery))
-                .setIcon(android.R.drawable.ic_menu_delete);
-        menu.add(Menu.NONE, Menu.FIRST + 2, 2, getString(R.string.about))
-                .setIcon(android.R.drawable.ic_menu_info_details);
+        menu.add(0, 0, 0, R.string.recovery)
+                .setIcon(android.R.drawable.ic_menu_revert)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+        menu.add(0, 1, 1, R.string.about)
+                .setIcon(android.R.drawable.ic_menu_info_details)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
         return true;
-
     }
 
     /**
@@ -234,11 +212,6 @@ public class Shadowsocks extends PreferenceActivity implements
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("isConnected", ShadowsocksService.isServiceStarted());
         editor.commit();
-
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-            mProgressDialog = null;
-        }
 
         super.onDestroy();
     }
@@ -256,14 +229,13 @@ public class Shadowsocks extends PreferenceActivity implements
         return super.onKeyDown(keyCode, event);
     }
 
-    // 菜单项被选择事件
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case Menu.FIRST + 1:
+            case 0:
                 recovery();
                 break;
-            case Menu.FIRST + 2:
+            case 1:
                 String versionName = "";
                 try {
                     versionName = getPackageManager().getPackageInfo(
@@ -276,37 +248,14 @@ public class Shadowsocks extends PreferenceActivity implements
                 break;
         }
 
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        // Unregister the listener whenever a key changes
-        getPreferenceScreen().getSharedPreferences()
+        PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
-                                         Preference preference) {
-        SharedPreferences settings = PreferenceManager
-                .getDefaultSharedPreferences(this);
-
-        if (preference.getKey() != null
-                && preference.getKey().equals("proxyedApps")) {
-            Intent intent = new Intent(this, AppManager.class);
-            startActivity(intent);
-        } else if (preference.getKey() != null
-                && preference.getKey().equals("isRunning")) {
-            if (!serviceStart()) {
-                Editor edit = settings.edit();
-                edit.putBoolean("isRunning", false);
-                edit.commit();
-            }
-        }
-        return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
 
     @Override
@@ -315,18 +264,11 @@ public class Shadowsocks extends PreferenceActivity implements
         SharedPreferences settings = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        if (settings.getBoolean("isGlobalProxy", false)) {
-            proxyedApps.setEnabled(false);
-            isBypassAppsCheck.setEnabled(false);
-        } else {
-            proxyedApps.setEnabled(true);
-            isBypassAppsCheck.setEnabled(true);
-        }
-
         Editor edit = settings.edit();
 
         if (ShadowsocksService.isServiceStarted()) {
             edit.putBoolean("isRunning", true);
+            switchButton.setChecked(true);
         } else {
             if (settings.getBoolean("isRunning", false)) {
                 new Thread() {
@@ -338,33 +280,44 @@ public class Shadowsocks extends PreferenceActivity implements
                 }.start();
             }
             edit.putBoolean("isRunning", false);
+            switchButton.setChecked(false);
         }
 
         edit.commit();
 
-        // Setup the initial values
+        setPreferenceEnabled();
 
-        if (!settings.getString("sitekey", "").equals(""))
-            sitekeyText.setSummary(settings.getString("sitekey", ""));
-
-        if (!settings.getString("encMethod", "").equals(""))
-            encMethodText.setSummary(settings.getString("encMethod", ""));
-
-        if (!settings.getString("port", "").equals(""))
-            portText.setSummary(settings.getString("port",
-                    getString(R.string.port_summary)));
-
-        if (!settings.getString("remotePort", "").equals(""))
-            remotePortText.setSummary(settings.getString("remotePort",
-                    getString(R.string.remote_port_summary)));
-
-        if (!settings.getString("proxy", "").equals(""))
-            proxyText.setSummary(settings.getString("proxy",
-                    getString(R.string.proxy_summary)));
-
-        // Set up a listener whenever a key changes
-        getPreferenceScreen().getSharedPreferences()
+        switchButton.setOnCheckedChangeListener(this);
+        PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
+
+    }
+
+    private void setPreferenceEnabled() {
+        SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(Shadowsocks.this);
+
+        boolean enabled = !settings.getBoolean("isRunning", false)
+                && !settings.getBoolean("isConnecting", false);
+
+        for (String name : PROXY_PREFS) {
+            Preference pref = findPreference(name);
+            if (pref != null) {
+                pref.setEnabled(enabled);
+            }
+        }
+        for (String name : FEATRUE_PREFS) {
+            Preference pref = findPreference(name);
+            if (pref != null) {
+                if (name.equals("isBypassApps")
+                        || name.equals("proxyedApps")) {
+                    boolean isGlobalProxy = settings.getBoolean("isGlobalProxy", false);
+                    pref.setEnabled(enabled && !isGlobalProxy);
+                } else {
+                    pref.setEnabled(enabled);
+                }
+            }
+        }
     }
 
     @Override
@@ -376,9 +329,9 @@ public class Shadowsocks extends PreferenceActivity implements
 
         if (key.equals("isRunning")) {
             if (settings.getBoolean("isRunning", false)) {
-                isRunningCheck.setChecked(true);
+                switchButton.setChecked(true);
             } else {
-                isRunningCheck.setChecked(false);
+                switchButton.setChecked(false);
             }
         }
 
@@ -397,44 +350,8 @@ public class Shadowsocks extends PreferenceActivity implements
             }
         }
 
-        if (key.equals("isGlobalProxy")) {
-            if (settings.getBoolean("isGlobalProxy", false)) {
-                proxyedApps.setEnabled(false);
-                isBypassAppsCheck.setEnabled(false);
-            } else {
-                proxyedApps.setEnabled(true);
-                isBypassAppsCheck.setEnabled(true);
-            }
-        }
-
-        if (key.equals("remotePort")) {
-            if (settings.getString("remotePort", "").equals("")) {
-                remotePortText.setSummary(getString(R.string.remote_port_summary));
-            } else {
-                remotePortText.setSummary(settings.getString("remotePort", ""));
-            }
-        } else if (key.equals("port")) {
-            if (settings.getString("port", "").equals("")) {
-                portText.setSummary(getString(R.string.port_summary));
-            } else {
-                portText.setSummary(settings.getString("port", ""));
-            }
-        } else if (key.equals("sitekey")) {
-            if (settings.getString("sitekey", "").equals("")) {
-                sitekeyText.setSummary(getString(R.string.sitekey_summary));
-            } else {
-                sitekeyText.setSummary(settings.getString("sitekey", ""));
-            }
-        } else if (key.equals("encMethod")) {
-            if (!settings.getString("encMethod", "").equals("")) {
-                encMethodText.setSummary(settings.getString("encMethod", ""));
-            }
-        } else if (key.equals("proxy")) {
-            if (settings.getString("proxy", "").equals("")) {
-                proxyText.setSummary(getString(R.string.proxy_summary));
-            } else {
-                proxyText.setSummary(settings.getString("proxy", ""));
-            }
+        if (key.equals("isRunning") || key.equals("isGlobalProxy")) {
+            setPreferenceEnabled();
         }
     }
 
@@ -442,12 +359,56 @@ public class Shadowsocks extends PreferenceActivity implements
     public void onStart() {
         super.onStart();
         EasyTracker.getInstance().activityStart(this);
+
+        final SharedPreferences settings = PreferenceManager
+                .getDefaultSharedPreferences(Shadowsocks.this);
+
+        boolean init = !settings.getBoolean("isRunning", false)
+                && !settings.getBoolean("isConnecting", false);
+
+        if (init) {
+            if (mProgressDialog == null) {
+                mProgressDialog = ProgressDialog.show(this, "",
+                        getString(R.string.initializing), true, true);
+            }
+
+            new Thread() {
+                @Override
+                public void run() {
+
+                    Utils.isRoot();
+
+                    String versionName;
+                    try {
+                        versionName = getPackageManager().getPackageInfo(
+                                getPackageName(), 0).versionName;
+                    } catch (NameNotFoundException e) {
+                        versionName = "NONE";
+                    }
+
+
+                    if (!settings.getBoolean(versionName, false)) {
+                        Editor edit = settings.edit();
+                        edit.putBoolean(versionName, true);
+                        edit.commit();
+                        reset();
+                    }
+
+                    handler.sendEmptyMessage(MSG_INITIAL_FINISH);
+                }
+            }.start();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
         EasyTracker.getInstance().activityStop(this);
+
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+            mProgressDialog = null;
+        }
     }
 
     public void reset() {
@@ -558,6 +519,99 @@ public class Shadowsocks extends PreferenceActivity implements
                         });
         AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public static class ProxyFragment extends UnifiedPreferenceFragment
+            implements OnSharedPreferenceChangeListener {
+
+        private void setPreferenceEnabled() {
+            SharedPreferences settings = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+
+            boolean enabled = !settings.getBoolean("isRunning", false)
+                    && !settings.getBoolean("isConnecting", false);
+
+            for (String name : PROXY_PREFS) {
+                Preference pref = findPreference(name);
+                if (pref != null) {
+                    pref.setEnabled(enabled);
+                }
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            setPreferenceEnabled();
+
+            // Set up a listener whenever a key changes
+            getPreferenceScreen().getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(this);
+
+        }
+
+        @Override
+        public void onPause() {
+            // Unregister the listener whenever a key changes
+            getPreferenceScreen().getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("isRunning") || key.equals("isGlobalProxy")) {
+                setPreferenceEnabled();
+            }
+        }
+    }
+
+    public static class FeatureFragment extends UnifiedPreferenceFragment
+            implements OnSharedPreferenceChangeListener {
+
+        private void setPreferenceEnabled() {
+            SharedPreferences settings = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+
+            boolean enabled = !settings.getBoolean("isRunning", false)
+                    && !settings.getBoolean("isConnecting", false);
+
+            for (String name : FEATRUE_PREFS) {
+                Preference pref = findPreference(name);
+                if (pref != null) {
+                    if (name.equals("isBypassApps")
+                            || name.equals("proxyedApps")) {
+                        boolean isGlobalProxy = settings.getBoolean("isGlobalProxy", false);
+                        pref.setEnabled(enabled && !isGlobalProxy);
+                    } else {
+                        pref.setEnabled(enabled);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            setPreferenceEnabled();
+
+            // Set up a listener whenever a key changes
+            getPreferenceScreen().getSharedPreferences()
+                    .registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onPause() {
+            // Unregister the listener whenever a key changes
+            getPreferenceScreen().getSharedPreferences()
+                    .unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("isRunning") || key.equals("isGlobalProxy")) {
+                setPreferenceEnabled();
+            }
+        }
     }
 
 }

@@ -17,6 +17,9 @@
 <resources>
 
     <!-- Variation on the Light theme that turns off the title -->
-    <style name="Theme.GAEProxy" parent="android:Theme.Light"/>
+    <style name="Theme.GAEProxy" parent="@style/Theme.Sherlock.Light">
+        <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
+    </style>
+
 
 </resources>

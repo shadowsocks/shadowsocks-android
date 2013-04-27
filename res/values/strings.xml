@@ -29,7 +29,7 @@
     </array>
 
     <!-- feature category -->
-    <string name="fearute_cat">Feature Settings</string>
+    <string name="feature_cat">Feature Settings</string>
     <string name="http_proxy">HTTP Proxy</string>
     <string name="http_proxy_summary">Local HTTP Proxy</string>
     <string name="dns_proxy">DNS Proxy</string>
@@ -40,10 +40,10 @@
     <string name="auto_set_proxy">Global Proxy</string>
     <string name="auto_set_proxy_summary">Set up system wide proxy
     </string>
-    <string name="proxyed_apps">Individual Proxy</string>
-    <string name="proxyed_apps_summary">Set individual proxy for apps
+    <string name="proxied_apps">Individual Proxy</string>
+    <string name="proxied_apps_summary">Set individual proxy for apps
     </string>
-    <string name="proxyed_help">Select apps to use with Shadowsocks:</string>
+    <string name="proxied_help">Select apps to use with Shadowsocks:</string>
     <string name="bypass_apps">Bypass Mode</string>
     <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
     <string name="auto_connect">Auto Connect</string>

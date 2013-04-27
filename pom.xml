@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.shadowsocks</groupId>
@@ -36,6 +36,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.actionbarsherlock</groupId>
+            <artifactId>actionbarsherlock</artifactId>
+            <version>4.3.0</version>
+            <type>apklib</type>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.android.analytics</groupId>
             <artifactId>analytics</artifactId>
             <version>2.0beta4</version>
@@ -45,6 +52,20 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.saik0.android.unifiedpreference</groupId>
+            <artifactId>unifiedpreference</artifactId>
+            <version>0.0.2</version>
+            <type>apklib</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jraf</groupId>
+            <artifactId>android-switch-backport</artifactId>
+            <version>1.0</version>
+            <type>apklib</type>
         </dependency>
 
     </dependencies>
