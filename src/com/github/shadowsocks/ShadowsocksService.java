@@ -284,20 +284,16 @@ public class ShadowsocksService extends Service {
 
                 boolean resolved = false;
 
-                if (isDNSProxy) {
-                    if (appHost != null) {
-                        InetAddress addr = null;
-                        try {
-                            addr = InetAddress.getByName(appHost);
-                        } catch (UnknownHostException ignored) {
-                        }
-                        if (addr != null) {
-                            appHost = addr.getHostAddress();
-                            resolved = true;
-                        }
+                if (appHost != null) {
+                    InetAddress addr = null;
+                    try {
+                        addr = InetAddress.getByName(appHost);
+                    } catch (UnknownHostException ignored) {
                     }
-                } else {
-                    resolved = true;
+                    if (addr != null) {
+                        appHost = addr.getHostAddress();
+                        resolved = true;
+                    }
                 }
 
                 Log.d(TAG, "IPTABLES: " + Utils.getIptables());
@@ -544,7 +540,7 @@ public class ShadowsocksService extends Service {
 
         String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
 
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + remotePort));
+        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + appHost));
         init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"));
         if (!isDNSProxy) {
             init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
