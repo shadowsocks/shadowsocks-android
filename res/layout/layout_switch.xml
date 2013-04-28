@@ -9,7 +9,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:layout_marginLeft="24dp"
+            android:layout_marginLeft="16dp"
             android:textSize="28sp"
             android:text="@string/app_name"
             android:layout_alignParentLeft="true"
