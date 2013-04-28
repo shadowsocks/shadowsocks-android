@@ -58,13 +58,14 @@ import android.view.KeyEvent;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.analytics.tracking.android.EasyTracker;
 import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment;
 import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity;
 import org.jraf.android.backport.switchwidget.Switch;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -92,8 +93,7 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
             Editor ed = settings.edit();
             switch (msg.what) {
                 case MSG_CRASH_RECOVER:
-                    Toast.makeText(Shadowsocks.this, R.string.crash_alert,
-                            Toast.LENGTH_LONG).show();
+                    Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show();
                     ed.putBoolean("isRunning", false);
                     break;
                 case MSG_INITIAL_FINISH:
@@ -153,9 +153,17 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
 
     private void crash_recovery() {
 
-        Utils.runRootCommand(Utils.getIptables() + " -t nat -F OUTPUT");
-
-        Utils.runCommand(ShadowsocksService.BASE + "proxy.sh stop");
+        StringBuilder sb = new StringBuilder();
+        sb.append(Utils.getIptables()).append(" -t nat -F OUTPUT").append("\n");
+        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n");
+        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n");
+        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n");
+        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n");
+        sb.append("killall -9 pdnsd").append("\n");
+        sb.append("killall -9 redsocks").append("\n");
+        sb.append("killall -9 shadowsocks").append("\n");
+        sb.append("killall -9 polipo").append("\n");
+        Utils.runRootCommand(sb.toString());
 
     }
 
@@ -229,7 +237,7 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) { // 按下的如果是BACK，同时没有重复
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
             try {
                 finish();
             } catch (Exception ignore) {
@@ -423,17 +431,8 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
     }
 
     public void reset() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Utils.getIptables()).append(" -t nat -F OUTPUT").append("\n");
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n");
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n");
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n");
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n");
-        sb.append("killall -9 pdnsd").append("\n");
-        sb.append("killall -9 redsocks").append("\n");
-        sb.append("killall -9 shadowsocks").append("\n");
-        sb.append("killall -9 polipo").append("\n");
-        Utils.runRootCommand(sb.toString());
+
+        crash_recovery();
 
         copyAssets("");
         copyAssets(Utils.getABI());
@@ -462,11 +461,7 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
             }
         };
 
-        try {
-            stopService(new Intent(this, ShadowsocksService.class));
-        } catch (Exception e) {
-            // Nothing
-        }
+        stopService(new Intent(this, ShadowsocksService.class));
 
         new Thread() {
             @Override

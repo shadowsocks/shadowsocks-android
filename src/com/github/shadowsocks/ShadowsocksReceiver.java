@@ -52,6 +52,14 @@ public class ShadowsocksReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        if (intent != null) {
+            final String action = intent.getAction();
+            if (action.equals(Intent.ACTION_SHUTDOWN)) {
+                context.stopService(new Intent(context, ShadowsocksService.class));
+                return;
+            }
+        }
+
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String versionName;
         try {

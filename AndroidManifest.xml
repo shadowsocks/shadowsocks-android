@@ -51,6 +51,7 @@
         <receiver android:name=".ShadowsocksReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
             </intent-filter>
         </receiver>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.shadowsocks</groupId>
     <artifactId>shadowsocks</artifactId>
@@ -21,54 +21,70 @@
         </repository>
     </repositories>
 
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
             <version>4.1.1.4</version>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.android</groupId>
+            <artifactId>support-v4</artifactId>
+            <version>r7</version>
+        </dependency>
+        <dependency>
+            <artifactId>crouton</artifactId>
+            <version>1.7</version>
+            <groupId>de.keyboardsurfer.android.widget</groupId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.android</groupId>
+                    <artifactId>support-v4</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>com.actionbarsherlock</groupId>
             <artifactId>actionbarsherlock</artifactId>
-            <version>4.2.0</version>
+            <version>4.3.0</version>
             <type>apklib</type>
         </dependency>
-
         <dependency>
             <groupId>com.google.android.analytics</groupId>
             <artifactId>analytics</artifactId>
             <version>2.0beta4</version>
         </dependency>
-
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.5</version>
-        </dependency>
-
         <dependency>
             <groupId>net.saik0.android.unifiedpreference</groupId>
             <artifactId>unifiedpreference</artifactId>
             <version>0.0.2</version>
             <type>apklib</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.actionbarsherlock</groupId>
+                    <artifactId>actionbarsherlock</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
         <dependency>
             <groupId>org.jraf</groupId>
             <artifactId>android-switch-backport</artifactId>
             <version>1.0</version>
             <type>apklib</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.actionbarsherlock</groupId>
+                    <artifactId>actionbarsherlock</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
     </dependencies>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <sourceDirectory>src</sourceDirectory>
@@ -122,8 +138,10 @@
                             <keypass>${sign.keypass}</keypass>
                             <verbose>true</verbose>
                             <arguments>
-                                <argument>-sigalg</argument><argument>MD5withRSA</argument>
-                                <argument>-digestalg</argument><argument>SHA1</argument>
+                                <argument>-sigalg</argument>
+                                <argument>MD5withRSA</argument>
+                                <argument>-digestalg</argument>
+                                <argument>SHA1</argument>
                             </arguments>
                         </configuration>
                     </execution>
