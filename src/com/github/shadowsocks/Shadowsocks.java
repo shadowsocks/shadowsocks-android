@@ -40,6 +40,7 @@ package com.github.shadowsocks;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -47,6 +48,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -55,6 +57,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -67,6 +70,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
 
 public class Shadowsocks extends UnifiedSherlockPreferenceActivity
         implements CompoundButton.OnCheckedChangeListener, OnSharedPreferenceChangeListener {
@@ -186,8 +190,15 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
         getSupportActionBar().setCustomView(switchLayout);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+
 
         switchButton = (Switch) switchLayout.findViewById(R.id.switchButton);
+
+        TextView title = (TextView) switchLayout.findViewById(R.id.title);
+        Typeface tf = Typefaces.get(this, "fonts/Iceland.ttf");
+        if (tf != null) title.setTypeface(tf);
+        title.setText(R.string.app_name);
 
     }
 
@@ -612,6 +623,29 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if (key.equals("isRunning") || key.equals("isGlobalProxy")) {
                 setPreferenceEnabled();
+            }
+        }
+    }
+
+    public static class Typefaces {
+        private static final String TAG = "Typefaces";
+
+        private static final Hashtable<String, Typeface> cache = new Hashtable<String, Typeface>();
+
+        public static Typeface get(Context c, String assetPath) {
+            synchronized (cache) {
+                if (!cache.containsKey(assetPath)) {
+                    try {
+                        Typeface t = Typeface.createFromAsset(c.getAssets(),
+                                assetPath);
+                        cache.put(assetPath, t);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Could not get typeface '" + assetPath
+                                + "' because " + e.getMessage());
+                        return null;
+                    }
+                }
+                return cache.get(assetPath);
             }
         }
     }

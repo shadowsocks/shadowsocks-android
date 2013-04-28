@@ -45,9 +45,14 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.util.Log;
+import org.apache.http.conn.util.InetAddressUtils;
 
 import java.io.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Utils {
 
@@ -70,6 +75,30 @@ public class Utils {
     private static String root_shell = null;
     private static String iptables = null;
     private static String data_path = null;
+
+    /**
+     * Get IP address from first non-localhost interface
+     */
+    public static boolean isIPv6Support() {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress()) {
+                        String sAddr = addr.getHostAddress().toUpperCase();
+                        boolean isIPv6 = InetAddressUtils.isIPv6Address(sAddr);
+                        if (isIPv6) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            // Ignore
+        } // for now eat exceptions
+        return false;
+    }
 
     public static String getABI() {
         String abi = getSystemProperty(ABI_PROP);
