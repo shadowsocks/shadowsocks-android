@@ -85,10 +85,11 @@ public class Utils {
             for (NetworkInterface intf : interfaces) {
                 List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
                 for (InetAddress addr : addrs) {
-                    if (!addr.isLoopbackAddress()) {
+                    if (!addr.isLoopbackAddress() && !addr.isLinkLocalAddress()) {
                         String sAddr = addr.getHostAddress().toUpperCase();
                         boolean isIPv6 = InetAddressUtils.isIPv6Address(sAddr);
                         if (isIPv6) {
+                            Log.d(TAG, "IPv6 address detected");
                             return true;
                         }
                     }

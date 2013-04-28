@@ -55,6 +55,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import com.google.analytics.tracking.android.EasyTracker;
+import org.apache.http.conn.util.InetAddressUtils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -63,6 +64,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -208,7 +210,7 @@ public class ShadowsocksService extends Service {
             @Override
             public void run() {
                 final String cmd = String.format(BASE +
-                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " 
+                        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f "
                         + BASE + "shadowsocks.pid",
                         appHost, remotePort, localPort, sitekey, encMethod);
                 System.exec(cmd);
@@ -285,11 +287,26 @@ public class ShadowsocksService extends Service {
                 boolean resolved = false;
 
                 if (appHost != null) {
+
+                    boolean isIPv6Support = Utils.isIPv6Support();
                     InetAddress addr = null;
-                    try {
-                        addr = InetAddress.getByName(appHost);
-                    } catch (UnknownHostException ignored) {
+
+                    if (isIPv6Support) {
+                        try {
+                            addr = Inet6Address.getByName(appHost);
+                        } catch (UnknownHostException ignored) {
+                            addr = null;
+                        }
                     }
+
+                    if (addr == null) {
+                        try {
+                            addr = InetAddress.getByName(appHost);
+                        } catch (UnknownHostException ignored) {
+                            addr = null;
+                        }
+                    }
+
                     if (addr != null) {
                         appHost = addr.getHostAddress();
                         resolved = true;
@@ -540,7 +557,9 @@ public class ShadowsocksService extends Service {
 
         String cmd_bypass = Utils.getIptables() + CMD_IPTABLES_RETURN;
 
-        init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + appHost));
+        if (!InetAddressUtils.isIPv6Address(appHost.toUpperCase())) {
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + appHost));
+        }
         init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"));
         if (!isDNSProxy) {
             init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53));
