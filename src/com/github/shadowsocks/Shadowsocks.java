@@ -178,8 +178,11 @@ public class Shadowsocks extends UnifiedSherlockPreferenceActivity
   @Override
   public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
     if (compoundButton == switchButton) {
+      final SharedPreferences settings =
+          PreferenceManager.getDefaultSharedPreferences(Shadowsocks.this);
+      settings.edit().putBoolean("isRunning", true).commit();
       if (!serviceStart()) {
-        switchButton.setChecked(false);
+        settings.edit().putBoolean("isRunning", false).commit();
       }
     }
   }
