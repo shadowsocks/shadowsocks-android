@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<preference-headers xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:unified="http://schemas.android.com/apk/res-auto">
+<preference-headers
+    xmlns:unified="http://schemas.android.com/apk/res-auto">
 
-    <header
-            unified:fragment="com.github.shadowsocks.Shadowsocks$ProxyFragment"
-            unified:title="@string/proxy_cat"
-            unified:preferenceRes="@xml/pref_proxy"/>
-    <header
-            unified:fragment="com.github.shadowsocks.Shadowsocks$FeatureFragment"
-            unified:title="@string/feature_cat"
-            unified:preferenceRes="@xml/pref_feature"/>
+  <header
+      unified:fragment="com.github.shadowsocks.Shadowsocks$ProxyFragment"
+      unified:title="@string/proxy_cat"
+      unified:preferenceRes="@xml/pref_proxy"/>
+  <header
+      unified:fragment="com.github.shadowsocks.Shadowsocks$FeatureFragment"
+      unified:title="@string/feature_cat"
+      unified:preferenceRes="@xml/pref_feature"/>
 
 
 </preference-headers>

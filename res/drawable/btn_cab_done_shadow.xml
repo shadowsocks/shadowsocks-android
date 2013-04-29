@@ -18,10 +18,10 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true"
-        android:drawable="@drawable/btn_cab_done_pressed_shadow" />
-    <item android:state_focused="true" android:state_enabled="true"
-        android:drawable="@drawable/btn_cab_done_focused_shadow" />
-    <item android:state_enabled="true"
-        android:drawable="@drawable/btn_cab_done_default_shadow" />
+  <item android:state_pressed="true"
+      android:drawable="@drawable/btn_cab_done_pressed_shadow"/>
+  <item android:state_focused="true" android:state_enabled="true"
+      android:drawable="@drawable/btn_cab_done_focused_shadow"/>
+  <item android:state_enabled="true"
+      android:drawable="@drawable/btn_cab_done_default_shadow"/>
 </selector>

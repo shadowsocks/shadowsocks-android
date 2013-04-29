@@ -43,16 +43,15 @@ import com.google.analytics.tracking.android.EasyTracker;
 
 public class ShadowsocksApplication extends Application {
 
-    private static String sTmpDir;
+  private static String sTmpDir;
 
-    public static String getTmpDir() {
-        return sTmpDir;
-    }
+  public static String getTmpDir() {
+    return sTmpDir;
+  }
 
-    @Override
-    public void onCreate() {
-        EasyTracker.getInstance().setContext(this);
-        sTmpDir = getCacheDir().getAbsolutePath();
-    }
-
+  @Override
+  public void onCreate() {
+    EasyTracker.getInstance().setContext(this);
+    sTmpDir = getCacheDir().getAbsolutePath();
+  }
 }

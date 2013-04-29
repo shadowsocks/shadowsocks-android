@@ -1,127 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">shadowsocks</string>
+  <string name="app_name">shadowsocks</string>
 
-    <!-- function category -->
-    <string name="function_cat">Service Controller</string>
-    <string name="service_controller">Proxy Switch</string>
-    <string name="service_summary">Enable / Disable Proxy</string>
+  <!-- function category -->
+  <string name="function_cat">Service Controller</string>
+  <string name="service_controller">Proxy Switch</string>
+  <string name="service_summary">Enable / Disable Proxy</string>
 
-    <!-- proxy category -->
-    <string name="proxy_cat">Shadowsocks Settings</string>
-    <string name="proxy">Server</string>
-    <string name="proxy_summary">Hostname of your Shadowsocks server</string>
-    <string name="remote_port">Remote Port</string>
-    <string name="remote_port_summary">Remote port of shadowsocks server.</string>
-    <string name="port">Local Port</string>
-    <string name="port_summary">Local port listening on</string>
-    <string name="sitekey">Password</string>
-    <string name="sitekey_summary">Password of your Shadowsocks server</string>
-    <string name="enc_method">Encrypt Method</string>
-    <array name="enc_method_entry">
-        <item>Table</item>
-        <item>RC4</item>
-    </array>
-    <array name="enc_method_value">
-        <item>table</item>
-        <item>rc4</item>
-    </array>
+  <!-- proxy category -->
+  <string name="proxy_cat">Shadowsocks Settings</string>
+  <string name="proxy">Server</string>
+  <string name="proxy_summary">Hostname of your Shadowsocks server</string>
+  <string name="remote_port">Remote Port</string>
+  <string name="remote_port_summary">Remote port of shadowsocks server.</string>
+  <string name="port">Local Port</string>
+  <string name="port_summary">Local port listening on</string>
+  <string name="sitekey">Password</string>
+  <string name="sitekey_summary">Password of your Shadowsocks server</string>
+  <string name="enc_method">Encrypt Method</string>
+  <array name="enc_method_entry">
+    <item>Table</item>
+    <item>RC4</item>
+  </array>
+  <array name="enc_method_value">
+    <item>table</item>
+    <item>rc4</item>
+  </array>
 
-    <!-- feature category -->
-    <string name="feature_cat">Feature Settings</string>
-    <string name="http_proxy">HTTP Proxy</string>
-    <string name="http_proxy_summary">Local HTTP Proxy</string>
-    <string name="dns_proxy">DNS Proxy</string>
-    <string name="dns_proxy_summary">Redirect DNS queries to remote server.</string>
-    <string name="auto_set_gfwlist">CHN Route</string>
-    <string name="auto_set_gfwlist_summary">Bypass all sites located in China
-    </string>
-    <string name="auto_set_proxy">Global Proxy</string>
-    <string name="auto_set_proxy_summary">Set up system wide proxy
-    </string>
-    <string name="proxied_apps">Individual Proxy</string>
-    <string name="proxied_apps_summary">Set individual proxy for apps
-    </string>
-    <string name="proxied_help">Select apps to use with Shadowsocks:</string>
-    <string name="bypass_apps">Bypass Mode</string>
-    <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
-    <string name="auto_connect">Auto Connect</string>
-    <string name="auto_connect_summary">Start Shadowsocks at the startup</string>
+  <!-- feature category -->
+  <string name="feature_cat">Feature Settings</string>
+  <string name="http_proxy">HTTP Proxy</string>
+  <string name="http_proxy_summary">Local HTTP Proxy</string>
+  <string name="dns_proxy">DNS Proxy</string>
+  <string name="dns_proxy_summary">Redirect DNS queries to remote server.</string>
+  <string name="auto_set_gfwlist">CHN Route</string>
+  <string name="auto_set_gfwlist_summary">Bypass all sites located in China
+  </string>
+  <string name="auto_set_proxy">Global Proxy</string>
+  <string name="auto_set_proxy_summary">Set up system wide proxy
+  </string>
+  <string name="proxied_apps">Individual Proxy</string>
+  <string name="proxied_apps_summary">Set individual proxy for apps
+  </string>
+  <string name="proxied_help">Select apps to use with Shadowsocks:</string>
+  <string name="bypass_apps">Bypass Mode</string>
+  <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
+  <string name="auto_connect">Auto Connect</string>
+  <string name="auto_connect_summary">Start Shadowsocks at the startup</string>
 
-    <!-- notification category -->
-    <string name="forward_success">Shadowsocks started</string>
-    <string name="service_running">Running in the background</string>
-    <string name="forward_fail">Shadowsocks failed to start</string>
-    <string name="service_stopped">Shadowsocks stopped</string>
-    <string name="forward_stop">Shadowsocks stopped</string>
-    <string name="service_failed">Please check your network status and try again.</string>
+  <!-- notification category -->
+  <string name="forward_success">Shadowsocks started</string>
+  <string name="service_running">Running in the background</string>
+  <string name="forward_fail">Shadowsocks failed to start</string>
+  <string name="service_stopped">Shadowsocks stopped</string>
+  <string name="forward_stop">Shadowsocks stopped</string>
+  <string name="service_failed">Please check your network status and try again.</string>
 
-    <!-- alert category -->
-    <string name="ok_iknow">OK</string>
-    <string name="port_alert">The port number should be greater than 1024</string>
-    <string name="port_empty">Port should not be empty</string>
-    <string name="proxy_empty">Proxy should not be empty</string>
-    <string name="crash_alert">An unexpected exit detected, context has been recovered
-    </string>
-    <string name="connecting">Connecting…</string>
-    <string name="initializing">Initializing…</string>
-    <string name="recovering">Reseting…</string>
-    <string name="loading">Loading app list…</string>
+  <!-- alert category -->
+  <string name="ok_iknow">OK</string>
+  <string name="port_alert">The port number should be greater than 1024</string>
+  <string name="port_empty">Port should not be empty</string>
+  <string name="proxy_empty">Proxy should not be empty</string>
+  <string name="crash_alert">An unexpected exit detected, context has been recovered
+  </string>
+  <string name="connecting">Connecting…</string>
+  <string name="initializing">Initializing…</string>
+  <string name="recovering">Reseting…</string>
+  <string name="loading">Loading app list…</string>
 
-    <!-- menu category -->
-    <string name="recovery">Reset</string>
-    <string name="about">About</string>
-    <string name="copy_rights">Shadowsocks is an open source socks proxy.\n\nYou can find more details
-        here:\ngithub.com/shadowsocks
-    </string>
+  <!-- menu category -->
+  <string name="recovery">Reset</string>
+  <string name="about">About</string>
+  <string name="copy_rights">Shadowsocks is an open source socks proxy.\n\nYou can find more details
+    here:\ngithub.com/shadowsocks
+  </string>
 
-    <!-- array category -->
-    <string-array name="chn_list">
-        <item>0.0.0.0/7</item>
-        <item>10.0.0.0/8</item>
-        <item>14.0.0.0/8</item>
-        <item>27.0.0.0/8</item>
-        <item>36.0.0.0/8</item>
-        <item>39.0.0.0/8</item>
-        <item>42.0.0.0/7</item>
-        <item>49.0.0.0/8</item>
-        <item>58.0.0.0/7</item>
-        <item>60.0.0.0/7</item>
-        <item>101.0.0.0/8</item>
-        <item>103.0.0.0/8</item>
-        <item>106.0.0.0/8</item>
-        <item>110.0.0.0/7</item>
-        <item>112.0.0.0/4</item>
-        <item>134.128.0.0/9</item>
-        <item>139.0.0.0/9</item>
-        <item>139.128.0.0/9</item>
-        <item>140.0.0.0/9</item>
-        <item>140.128.0.0/9</item>
-        <item>144.0.0.0/9</item>
-        <item>144.128.0.0/9</item>
-        <item>150.0.0.0/8</item>
-        <item>153.0.0.0/8</item>
-        <item>157.0.0.0/9</item>
-        <item>157.128.0.0/9</item>
-        <item>159.128.0.0/9</item>
-        <item>161.128.0.0/9</item>
-        <item>162.0.0.0/9</item>
-        <item>163.0.0.0/8</item>
-        <item>166.0.0.0/9</item>
-        <item>167.128.0.0/9</item>
-        <item>168.128.0.0/9</item>
-        <item>171.0.0.0/8</item>
-        <item>172.0.0.0/12</item>
-        <item>175.0.0.0/8</item>
-        <item>180.0.0.0/8</item>
-        <item>182.0.0.0/7</item>
-        <item>192.112.0.0/12</item>
-        <item>192.128.0.0/9</item>
-        <item>202.0.0.0/7</item>
-        <item>210.0.0.0/7</item>
-        <item>218.0.0.0/7</item>
-        <item>220.0.0.0/6</item>
-    </string-array>
+  <!-- array category -->
+  <string-array name="chn_list">
+    <item>0.0.0.0/7</item>
+    <item>10.0.0.0/8</item>
+    <item>14.0.0.0/8</item>
+    <item>27.0.0.0/8</item>
+    <item>36.0.0.0/8</item>
+    <item>39.0.0.0/8</item>
+    <item>42.0.0.0/7</item>
+    <item>49.0.0.0/8</item>
+    <item>58.0.0.0/7</item>
+    <item>60.0.0.0/7</item>
+    <item>101.0.0.0/8</item>
+    <item>103.0.0.0/8</item>
+    <item>106.0.0.0/8</item>
+    <item>110.0.0.0/7</item>
+    <item>112.0.0.0/4</item>
+    <item>134.128.0.0/9</item>
+    <item>139.0.0.0/9</item>
+    <item>139.128.0.0/9</item>
+    <item>140.0.0.0/9</item>
+    <item>140.128.0.0/9</item>
+    <item>144.0.0.0/9</item>
+    <item>144.128.0.0/9</item>
+    <item>150.0.0.0/8</item>
+    <item>153.0.0.0/8</item>
+    <item>157.0.0.0/9</item>
+    <item>157.128.0.0/9</item>
+    <item>159.128.0.0/9</item>
+    <item>161.128.0.0/9</item>
+    <item>162.0.0.0/9</item>
+    <item>163.0.0.0/8</item>
+    <item>166.0.0.0/9</item>
+    <item>167.128.0.0/9</item>
+    <item>168.128.0.0/9</item>
+    <item>171.0.0.0/8</item>
+    <item>172.0.0.0/12</item>
+    <item>175.0.0.0/8</item>
+    <item>180.0.0.0/8</item>
+    <item>182.0.0.0/7</item>
+    <item>192.112.0.0/12</item>
+    <item>192.128.0.0/9</item>
+    <item>202.0.0.0/7</item>
+    <item>210.0.0.0/7</item>
+    <item>218.0.0.0/7</item>
+    <item>220.0.0.0/6</item>
+  </string-array>
 
 </resources>

@@ -19,17 +19,17 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@android:id/background"
-          android:drawable="@drawable/progress_bg_shadow" />
+  <item android:id="@android:id/background"
+      android:drawable="@drawable/progress_bg_shadow"/>
 
-    <item android:id="@android:id/secondaryProgress">
-        <scale android:scaleWidth="100%"
-               android:drawable="@drawable/progress_secondary_shadow" />
-    </item>
+  <item android:id="@android:id/secondaryProgress">
+    <scale android:scaleWidth="100%"
+        android:drawable="@drawable/progress_secondary_shadow"/>
+  </item>
 
-    <item android:id="@android:id/progress">
-        <scale android:scaleWidth="100%"
-               android:drawable="@drawable/progress_primary_shadow" />
-    </item>
+  <item android:id="@android:id/progress">
+    <scale android:scaleWidth="100%"
+        android:drawable="@drawable/progress_primary_shadow"/>
+  </item>
 
 </layer-list>

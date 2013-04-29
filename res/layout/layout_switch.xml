@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:layout_marginLeft="16dp"
-            android:textSize="28sp"
-            android:textColor="@color/title"
-            android:text="@string/app_name"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
+  <TextView
+      android:id="@+id/title"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center_vertical"
+      android:layout_marginLeft="16dp"
+      android:textSize="28sp"
+      android:textColor="@color/title"
+      android:text="@string/app_name"
+      android:layout_alignParentLeft="true"
+      android:layout_centerVertical="true"/>
 
-    <org.jraf.android.backport.switchwidget.Switch
-            android:id="@+id/switchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"/>
+  <org.jraf.android.backport.switchwidget.Switch
+      android:id="@+id/switchButton"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentRight="true"
+      android:layout_centerVertical="true"/>
 
 </RelativeLayout>

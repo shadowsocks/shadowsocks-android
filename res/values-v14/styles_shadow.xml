@@ -19,38 +19,39 @@
 
 <resources>
 
-    <style name="Theme.Shadow" parent="@style/Theme.Sherlock.Light.DarkActionBar">
-        <item name="android:actionBarItemBackground">@drawable/selectable_background_shadow</item>
-        <item name="android:popupMenuStyle">@style/PopupMenu.Shadow</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Shadow</item>
-        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Shadow</item>
-        <item name="android:actionDropDownStyle">@style/DropDownNav.Shadow</item>
-        <item name="android:actionBarStyle">@style/ActionBar.Solid.Shadow</item>
-        <item name="android:actionModeBackground">@drawable/cab_background_top_shadow</item>
-        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_shadow</item>
-        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Shadow</item>
-        
-                <!-- Light.DarkActionBar specific -->
-        <item name="android:actionBarWidgetTheme">@style/Theme.Shadow.Widget</item>
+  <style name="Theme.Shadow" parent="@style/Theme.Sherlock.Light.DarkActionBar">
+    <item name="android:actionBarItemBackground">@drawable/selectable_background_shadow</item>
+    <item name="android:popupMenuStyle">@style/PopupMenu.Shadow</item>
+    <item name="android:dropDownListViewStyle">@style/DropDownListView.Shadow</item>
+    <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Shadow</item>
+    <item name="android:actionDropDownStyle">@style/DropDownNav.Shadow</item>
+    <item name="android:actionBarStyle">@style/ActionBar.Solid.Shadow</item>
+    <item name="android:actionModeBackground">@drawable/cab_background_top_shadow</item>
+    <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_shadow</item>
+    <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Shadow</item>
 
-    </style>
+    <!-- Light.DarkActionBar specific -->
+    <item name="android:actionBarWidgetTheme">@style/Theme.Shadow.Widget</item>
 
-    <style name="ActionBar.Solid.Shadow" parent="@style/Widget.Sherlock.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_solid_shadow</item>
-        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_shadow</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_shadow</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.Shadow</item>
-    </style>
+  </style>
 
-    <style name="ActionBar.Transparent.Shadow" parent="@style/Widget.Sherlock.ActionBar">
-        <item name="android:background">@drawable/ab_transparent_shadow</item>
-        <item name="android:progressBarStyle">@style/ProgressBar.Shadow</item>
-    </style>
-    
-    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
-    <style name="Theme.Shadow.Widget" parent="@style/Theme.Sherlock">
-        <item name="android:popupMenuStyle">@style/PopupMenu.Shadow</item>
-        <item name="android:dropDownListViewStyle">@style/DropDownListView.Shadow</item>
-    </style>
+  <style name="ActionBar.Solid.Shadow"
+      parent="@style/Widget.Sherlock.Light.ActionBar.Solid.Inverse">
+    <item name="android:background">@drawable/ab_solid_shadow</item>
+    <item name="android:backgroundStacked">@drawable/ab_stacked_solid_shadow</item>
+    <item name="android:backgroundSplit">@drawable/ab_bottom_solid_shadow</item>
+    <item name="android:progressBarStyle">@style/ProgressBar.Shadow</item>
+  </style>
+
+  <style name="ActionBar.Transparent.Shadow" parent="@style/Widget.Sherlock.ActionBar">
+    <item name="android:background">@drawable/ab_transparent_shadow</item>
+    <item name="android:progressBarStyle">@style/ProgressBar.Shadow</item>
+  </style>
+
+  <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+  <style name="Theme.Shadow.Widget" parent="@style/Theme.Sherlock">
+    <item name="android:popupMenuStyle">@style/PopupMenu.Shadow</item>
+    <item name="android:dropDownListViewStyle">@style/DropDownListView.Shadow</item>
+  </style>
 
 </resources>
