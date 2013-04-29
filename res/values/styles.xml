@@ -16,10 +16,14 @@
 
 <resources>
 
-    <!-- Variation on the Light theme that turns off the title -->
-    <style name="Theme.GAEProxy" parent="@style/Theme.Sherlock.Light">
-        <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
-    </style>
+  <style name="Widget.Shadow.Switch" parent="@style/Widget.Holo.CompoundButton.Switch">
+    <item name="switchTextAppearance">@android:style/TextAppearance.Small.Inverse</item>
+  </style>
+
+  <!-- Variation on the Light theme that turns off the title -->
+  <style name="Theme.GAEProxy" parent="@style/Theme.Shadow">
+    <item name="switchStyle">@style/Widget.Shadow.Switch</item>
+  </style>
 
 
 </resources>
