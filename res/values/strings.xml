@@ -50,12 +50,13 @@
   <string name="auto_connect_summary">Start Shadowsocks at the startup</string>
 
   <!-- notification category -->
-  <string name="forward_success">Shadowsocks started</string>
-  <string name="service_running">Running in the background</string>
-  <string name="forward_fail">Shadowsocks failed to start</string>
-  <string name="service_stopped">Shadowsocks stopped</string>
-  <string name="forward_stop">Shadowsocks stopped</string>
+  <string name="forward_success">Shadowsocks started.</string>
+  <string name="service_running">Running in the background.</string>
+  <string name="forward_fail">Shadowsocks failed to start.</string>
+  <string name="service_stopped">Shadowsocks stopped.</string>
+  <string name="forward_stop">Shadowsocks stopped.</string>
   <string name="service_failed">Please check your network status and try again.</string>
+  <string name="stop">Stop the service</string>
 
   <!-- alert category -->
   <string name="ok_iknow">OK</string>

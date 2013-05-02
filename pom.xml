@@ -35,7 +35,7 @@
         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>support-v4</artifactId>
-            <version>r7</version>
+            <version>r12</version>
         </dependency>
         <dependency>
             <artifactId>crouton</artifactId>

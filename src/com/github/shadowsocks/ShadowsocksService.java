@@ -48,11 +48,14 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import com.google.analytics.tracking.android.EasyTracker;
 import java.io.BufferedReader;
@@ -153,9 +156,7 @@ public class ShadowsocksService extends Service {
       super.handleMessage(msg);
     }
   };
-  private Notification notification;
   private NotificationManager notificationManager;
-  private PendingIntent pendIntent;
   private PowerManager.WakeLock mWakeLock;
   private String appHost;
   private int remotePort;
@@ -403,22 +404,29 @@ public class ShadowsocksService extends Service {
   }
 
   private void notifyAlert(String title, String info) {
-    notification.icon = R.drawable.ic_stat_shadowsocks;
-    notification.tickerText = title;
-    notification.flags = Notification.FLAG_ONGOING_EVENT;
-    initSoundVibrateLights(notification);
-    // notification.defaults = Notification.DEFAULT_SOUND;
-    notification.setLatestEventInfo(this, getString(R.string.app_name), info, pendIntent);
-    startForegroundCompat(1, notification);
-  }
 
-  private void notifyAlert(String title, String info, int flags) {
-    notification.icon = R.drawable.ic_stat_shadowsocks;
-    notification.tickerText = title;
-    notification.flags = flags;
-    initSoundVibrateLights(notification);
-    notification.setLatestEventInfo(this, getString(R.string.app_name), info, pendIntent);
-    notificationManager.notify(0, notification);
+    // ContentIntent
+    Intent openIntent = new Intent(this, Shadowsocks.class);
+    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0);
+
+    // ActionIntent
+    Intent closeIntent = new Intent(ShadowsocksReceiver.CLOSE_ACTION);
+    PendingIntent actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0);
+
+    //large icon for notification,normally use App icon
+    final Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_stat_large);
+
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+    builder.setSmallIcon(R.drawable.ic_stat_shadowsocks)
+        .setWhen(0)
+        .setTicker(title)
+        .setContentTitle(getString(R.string.app_name))
+        .setContentText(info)
+        .setContentIntent(contentIntent)
+        .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop), actionIntent);
+
+    startForegroundCompat(1, builder.build());
   }
 
   @Override
@@ -434,11 +442,6 @@ public class ShadowsocksService extends Service {
 
     settings = PreferenceManager.getDefaultSharedPreferences(this);
     notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
-
-    Intent intent = new Intent(this, Shadowsocks.class);
-    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-    pendIntent = PendingIntent.getActivity(this, 0, intent, 0);
-    notification = new Notification();
 
     try {
       mStartForeground = getClass().getMethod("startForeground", mStartForegroundSignature);
@@ -463,9 +466,6 @@ public class ShadowsocksService extends Service {
     EasyTracker.getTracker().trackEvent("service", "stop", getVersionName(), 0L);
 
     stopForegroundCompat(1);
-
-    notifyAlert(getString(R.string.forward_stop), getString(R.string.service_stopped),
-        Notification.FLAG_AUTO_CANCEL);
 
     new Thread() {
       @Override

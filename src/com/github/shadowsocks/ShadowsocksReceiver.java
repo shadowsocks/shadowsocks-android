@@ -47,6 +47,8 @@ import android.preference.PreferenceManager;
 
 public class ShadowsocksReceiver extends BroadcastReceiver {
 
+  public static final String CLOSE_ACTION = "com.github.shadowsocks.ACTION_SHUTDOWN";
+
   private static final String TAG = "Shadowsocks";
 
   @Override
@@ -54,7 +56,8 @@ public class ShadowsocksReceiver extends BroadcastReceiver {
 
     if (intent != null) {
       final String action = intent.getAction();
-      if (action.equals(Intent.ACTION_SHUTDOWN)) {
+      if (action.equals(Intent.ACTION_SHUTDOWN)
+          || action.equals(CLOSE_ACTION)) {
         context.stopService(new Intent(context, ShadowsocksService.class));
         return;
       }
