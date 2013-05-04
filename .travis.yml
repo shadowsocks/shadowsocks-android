@@ -1,4 +1,4 @@
-language: java
+language: scala
 before_install:
   - sudo apt-get update
   - sudo apt-get install libc6-dev-i386
@@ -14,4 +14,8 @@ before_install:
 install:
   - sudo pip install python-swiftclient
 script: 
-  - mvn clean install -DTRAVIS=true
+  - wget https://raw.github.com/paulp/sbt-extras/master/sbt
+  - chmod u+x ./sbt
+  - cp local.sbt.example local.sbt
+  - ./sbt android:package-release
+  - ./sbt deploy

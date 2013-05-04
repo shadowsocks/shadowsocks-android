@@ -1,0 +1,3 @@
+import org.scalasbt.androidplugin.AndroidKeys._
+
+keyalias in Android := "travis"

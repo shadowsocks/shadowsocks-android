@@ -12,20 +12,9 @@ tests/gen
 tests/local.properties
 NUL
 gen_*
-libs/armeabi/ip6tables
-libs/armeabi/iptables
-libs/armeabi/obfsproxy
-libs/armeabi/pdnsd
-libs/armeabi/polipo
-libs/armeabi/redsocks
-libs/armeabi/shadowsocks
-libs/x86/ip6tables
-libs/x86/iptables
-libs/x86/obfsproxy
-libs/x86/pdnsd
-libs/x86/polipo
-libs/x86/redsocks
-libs/x86/shadowsocks
+*.class
+*.o
+local.sbt
 
 #Intellij IDEA
 *.iml
@@ -33,3 +22,19 @@ libs/x86/shadowsocks
 *.iws
 .idea/
 out/
+
+#NDK
+src/main/libs/armeabi/ip6tables
+src/main/libs/armeabi/iptables
+src/main/libs/armeabi/obfsproxy
+src/main/libs/armeabi/pdnsd
+src/main/libs/armeabi/polipo
+src/main/libs/armeabi/redsocks
+src/main/libs/armeabi/shadowsocks
+src/main/libs/x86/ip6tables
+src/main/libs/x86/iptables
+src/main/libs/x86/obfsproxy
+src/main/libs/x86/pdnsd
+src/main/libs/x86/polipo
+src/main/libs/x86/redsocks
+src/main/libs/x86/shadowsocks

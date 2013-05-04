@@ -11,53 +11,21 @@ A [shadowsocks](http://shadowsocks.org) client for Android, powered by amazing n
 ## PREREQUISITES
 
 * JDK 1.6+
-* Maven 3.0.3+
+* SBT 0.12.3+
 * Android SDK r17+
-* Android NDK r8+
-* Local maven dependencies
-
-  ```bash
-  git clone https://github.com/mosabua/maven-android-sdk-deployer.git 
-  pushd maven-android-sdk-deployer
-  export ANDROID_HOME=/path/to/android/sdk
-  mvn install -P 4.1
-  popd
-  ```
-
-* Build native dependecies
-
-  ```bash
-  ndk-build
-  cp libs/armeabi/pdnsd assets/
-  ```
+* Android NDK r8d+
 
 ## BUILD
 
-* Create your key following the instructions at
-http://developer.android.com/guide/publishing/app-signing.html#cert
-
-* Create a profile in your settings.xml file in ~/.m2 like this
-
-```xml
-  <settings>
-    <profiles>
-      <profile>
-        <activation>
-          <activeByDefault>true</activeByDefault>
-        </activation>
-        <properties>
-          <sign.keystore>/absolute/path/to/your.keystore</sign.keystore>
-          <sign.alias>youralias</sign.alias>
-          <sign.keypass>keypass</sign.keypass>
-          <sign.storepass>storepass</sign.storepass>
-        </properties>
-      </profile>
-    </profiles>
-  </settings>
-```
-
+* Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
+* Put your key in ~/.keystore
+* Create local.sbt from local.sbt.example with your own key alias
 * Invoke the building like this
 
 ```bash
-  mvn clean install
+    # Optional
+    ./build-ndk.sh
+
+    # Build
+    sbt android:prepare-market
 ```
