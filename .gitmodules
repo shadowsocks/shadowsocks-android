@@ -1,0 +1,3 @@
+[submodule "src/main/jni/shadowsocks"]
+	path = src/main/jni/shadowsocks
+	url = https://github.com/madeye/shadowsocks-libev.git
