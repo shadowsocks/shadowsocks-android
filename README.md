@@ -1,6 +1,6 @@
 ## Shadowsocks for Android
 
-A [shadowsocks](http://shadowsocks.org) client for Android, powered by amazing nodejs/golang/libev.
+A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ## TRAVIS CI STATUS
 
@@ -12,14 +12,14 @@ A [shadowsocks](http://shadowsocks.org) client for Android, powered by amazing n
 
 * JDK 1.6+
 * SBT 0.12.3+
-* Android SDK r17+
+* Android SDK r21+
 * Android NDK r8d+
 
 ## BUILD
 
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
-* Create local.sbt from local.sbt.example with your own key alias
+* Create `local.sbt` from `local.sbt.example` with your own key alias
 * Invoke the building like this
 
 ```bash
