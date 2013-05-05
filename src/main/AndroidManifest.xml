@@ -1,59 +1,69 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.github.shadowsocks">
+          package="com.github.shadowsocks">
 
-  <uses-permission android:name="android.permission.INTERNET"/>
-  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-  <uses-permission android:name="android.permission.WAKE_LOCK"/>
-  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-  <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
 
-  <uses-feature
-      android:name="android.hardware.touchscreen"
-      android:required="false"/>
+    <uses-feature
+            android:name="android.hardware.touchscreen"
+            android:required="false"/>
 
-  <uses-sdk
-      android:minSdkVersion="9"
-      android:targetSdkVersion="16"/>
+    <uses-sdk
+            android:minSdkVersion="9"
+            android:targetSdkVersion="16"/>
 
-  <application
-      android:name="com.github.shadowsocks.ShadowsocksApplication"
-      android:hardwareAccelerated="true"
-      android:icon="@drawable/ic_launcher"
-      android:label="@string/app_name">
+    <application
+            android:name="com.github.shadowsocks.ShadowsocksApplication"
+            android:hardwareAccelerated="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name">
 
-    <activity
-        android:name="com.github.shadowsocks.Shadowsocks"
-        android:label="@string/app_name"
-        android:theme="@style/Theme.GAEProxy"
-        android:launchMode="singleTask">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-      </intent-filter>
-    </activity>
+        <activity
+                android:name="com.github.shadowsocks.Shadowsocks"
+                android:label="@string/app_name"
+                android:theme="@style/Theme.GAEProxy"
+                android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
-    <activity
-        android:name="com.github.shadowsocks.AppManager"
-        android:theme="@style/Theme.GAEProxy"
-        android:label="@string/app_name">
-      <intent-filter>
-        <action android:name="com.github.shadowsocks.AppManager"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-      </intent-filter>
-    </activity>
+        <activity
+                android:name="com.github.shadowsocks.AppManager"
+                android:theme="@style/Theme.GAEProxy"
+                android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.AppManager"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
 
-    <service
-        android:name="com.github.shadowsocks.ShadowsocksService"
-        android:enabled="true"/>
+        <service
+                android:name="com.github.shadowsocks.ShadowsocksService"
+                android:enabled="true"/>
 
-    <receiver android:name="com.github.shadowsocks.ShadowsocksReceiver">
-      <intent-filter>
-        <action android:name="android.intent.action.BOOT_COMPLETED"/>
-        <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
-        <action android:name="com.github.shadowsocks.ACTION_SHUTDOWN"/>
-      </intent-filter>
-    </receiver>
+        <service
+                android:name="com.github.shadowsocks.ShadowVpnService"
+                android:label="@string/app_name"
+                android:permission="android.permission.BIND_VPN_SERVICE"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
+        </service>
 
-  </application>
+        <receiver android:name="com.github.shadowsocks.ShadowsocksReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
+                <action android:name="com.github.shadowsocks.ACTION_SHUTDOWN"/>
+            </intent-filter>
+        </receiver>
+
+    </application>
 
 </manifest>

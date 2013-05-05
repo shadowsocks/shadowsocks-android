@@ -85,8 +85,16 @@ class ShadowsocksReceiver extends BroadcastReceiver {
           return
         }
       }
-      val it: Intent = new Intent(context, classOf[ShadowsocksService])
-      context.startService(it)
+
+      if (Utils.getRoot) {
+        if (ShadowsocksService.isServiceStarted) return
+        val it: Intent = new Intent(context, classOf[ShadowsocksService])
+        context.startService(it)
+      } else {
+        if (ShadowVpnService.isServiceStarted) return
+        val it: Intent = new Intent(context, classOf[ShadowVpnService])
+        context.startService(it)
+      }
     }
   }
 }

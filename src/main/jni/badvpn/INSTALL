@@ -1,0 +1,76 @@
+1 Requirements
+
+1.1 Operating system
+
+Linux:
+- Linux kernel 2.6. Kernel 2.4 will work, but performance will suffer.
+- tested on x86, x86_64 and ARM architectures. Not tested on any big-endian architecture.
+
+Windows:
+- Windows XP or newer; tested on Windows XP and Windows 7
+
+FreeBSD:
+- Not regularly tested.
+
+Other systems are not supported.
+
+1.2 Compilers
+
+Linux:
+  - gcc
+  - clang, except >=3.0 (clang bug http://llvm.org/bugs/show_bug.cgi?id=11535)
+
+Windows:
+  - gcc from the mingw-w64 project for 32-bit targets
+
+C language features used:
+  - Standard (all part of C99):
+    - designated initializers
+    - stdint.h, inttypes.h, stddef.h
+    - intermingled declarations and code
+    - for loop initial declaration
+    - one-line "//" comments
+  - Extensions:
+    - packed structure attribute (to pack a structure and allow unaligned access)
+
+1.3 CMake
+
+The build system uses CMake.
+
+1.4 OpenSSL
+
+Libcrypto (part of OpenSSL) is used for block ciphers, hash functions and random data generation.
+
+1.5 Network Security Services (NSS)
+
+The NSS library from Mozilla is used for TLS support. NSS command-line tools are also needed
+for setting up certificates.
+
+1.6 TAP-Win32 (Windows only) (runtime only)
+
+The TAP-Win32 driver, part of OpenVPN.
+
+2 Compilation
+
+2.1 Compiling on Linux
+
+$ tar xf badvpn-<version>.tar.bz2
+$ mkdir build
+$ cd build
+$ cmake ../badvpn-<version> -DCMAKE_INSTALL_PREFIX=/usr/local
+$ make
+If you want to install it, run as root:
+# make install
+
+If you only want NCD or tun2socks and not the VPN system, you can avoid the NSS dependency by passing
+the following to the cmake command:
+-DBUILD_NCD=1 -DBUILD_TUN2SOCKS=1 -DBUILD_NOTHING_BY_DEFAULT=1
+
+2.2 Compiling for Windows
+
+See the file INSTALL-WINDOWS for detailed instructions.
+
+3 Usage
+
+The primary documentation is on the BadVPN homepage, http://code.google.com/p/badvpn/ .
+Additionally, some man pages are installed (badvpn(7), badvpn-server(8), badvpn-client(8)).

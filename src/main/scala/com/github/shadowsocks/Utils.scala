@@ -45,7 +45,6 @@ import android.os.Environment
 import android.util.Log
 import java.io._
 import java.net.NetworkInterface
-import java.util.ArrayList
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
 
@@ -263,6 +262,9 @@ object Utils {
     val lines = sb.toString()
     if (lines.contains("system")) {
       isRoot = 1
+    } else {
+      if (rootTries > 3) isRoot = 0
+      rootTries += 1
     }
     isRoot == 1
   }
@@ -302,7 +304,7 @@ object Utils {
         runner.join()
       }
       if (runner.isAlive) {
-        runner.destroy
+        runner.destroy()
         runner.join(1000)
         return TIME_OUT
       }
@@ -335,6 +337,7 @@ object Utils {
   var root_shell: String = null
   var iptables: String = null
   var data_path: String = null
+  var rootTries = 0
 
   /**
    * Internal thread used to execute scripts (as root or not).
@@ -345,8 +348,8 @@ object Utils {
    * @param asroot if true, executes the script as root
    */
   class ScriptRunner(val scripts: String,
-                                   val result: StringBuilder,
-                                   val asroot: Boolean) extends Thread {
+                     val result: StringBuilder,
+                     val asroot: Boolean) extends Thread {
     override def destroy() {
       if (pid(0) != -1) {
         Exec.hangupProcessGroup(pid(0))
@@ -421,7 +424,7 @@ object Utils {
         }
         if (result == null || pipe == null) return
         val stdout: InputStream = new FileInputStream(pipe)
-        val buf= new Array[Byte](8192)
+        val buf = new Array[Byte](8192)
         var read: Int = 0
         while (stdout.available > 0) {
           read = stdout.read(buf)

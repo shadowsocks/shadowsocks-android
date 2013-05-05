@@ -37,8 +37,7 @@
  */
 package com.github.shadowsocks
 
-import android.app.AlertDialog
-import android.app.ProgressDialog
+import android.app.{Activity, AlertDialog, ProgressDialog}
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -46,9 +45,7 @@ import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.res.AssetManager
 import android.graphics.Typeface
-import android.os.Bundle
-import android.os.Handler
-import android.os.Message
+import android.os.{Build, Bundle, Handler, Message}
 import android.preference.Preference
 import android.preference.PreferenceManager
 import android.util.Log
@@ -70,12 +67,14 @@ import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment
 import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity
 import org.jraf.android.backport.switchwidget.Switch
 import android.content.pm.PackageManager
+import android.net.VpnService
 
 object Shadowsocks {
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array("proxy", "remotePort", "port", "sitekey", "encMethod")
   val FEATRUE_PREFS = Array("isHTTPProxy", "isDNSProxy", "isGFWList", "isGlobalProxy", "isBypassApps", "proxyedApps", "isAutoConnect")
   val TAG = "Shadowsocks"
+  val REQUEST_CONNECT = 1
 
   class ProxyFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener {
     private def setPreferenceEnabled() {
@@ -231,10 +230,12 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n")
+    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
     sb.append("killall -9 pdnsd").append("\n")
     sb.append("killall -9 redsocks").append("\n")
     sb.append("killall -9 shadowsocks").append("\n")
     sb.append("killall -9 polipo").append("\n")
+    sb.append("killall -9 tun2socks").append("\n")
     Utils.runRootCommand(sb.toString())
   }
 
@@ -246,12 +247,26 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     false
   }
 
-  def onCheckedChanged(compoundButton: CompoundButton, b: Boolean) {
+  def onCheckedChanged(compoundButton: CompoundButton, checked: Boolean) {
     if (compoundButton eq switchButton) {
-      val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(Shadowsocks.this)
-      settings.edit.putBoolean("isRunning", true).commit
-      if (!serviceStart) {
-        settings.edit.putBoolean("isRunning", false).commit
+      checked match {
+        case true => {
+          if (isVpnEnabled) {
+            if (!serviceStart) {
+              switchButton.setChecked(false)
+            }
+          } else {
+            val intent = VpnService.prepare(this)
+            if (intent != null) {
+              startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
+            } else {
+              onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+            }
+          }
+        }
+        case false => {
+          serviceStop()
+        }
       }
     }
   }
@@ -306,15 +321,6 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     true
   }
 
-  /** Called when the activity is closed. */
-  override def onDestroy() {
-    val settings: SharedPreferences = getSharedPreferences(Shadowsocks.PREFS_NAME, 0)
-    val editor: SharedPreferences.Editor = settings.edit
-    editor.putBoolean("isConnected", ShadowsocksService.isServiceStarted)
-    editor.commit
-    super.onDestroy()
-  }
-
   override def onKeyDown(keyCode: Int, event: KeyEvent): Boolean = {
     if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount == 0) {
       try {
@@ -356,9 +362,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   protected override def onResume() {
     super.onResume()
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-    val edit: SharedPreferences.Editor = settings.edit
-    if (ShadowsocksService.isServiceStarted) {
-      edit.putBoolean("isRunning", true)
+    if (isServiceStarted) {
       switchButton.setChecked(true)
     }
     else {
@@ -370,10 +374,8 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
           }
         }.start()
       }
-      edit.putBoolean("isRunning", false)
       switchButton.setChecked(false)
     }
-    edit.commit
     setPreferenceEnabled()
     switchButton.setOnCheckedChangeListener(this)
     PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this)
@@ -406,10 +408,10 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     if (key == "isRunning") {
       if (settings.getBoolean("isRunning", false)) {
-        switchButton.setChecked(true)
+        if (!switchButton.isChecked) switchButton.setChecked(true)
       }
       else {
-        switchButton.setChecked(false)
+        if (switchButton.isChecked) switchButton.setChecked(false)
       }
     }
     if (key == "isConnecting") {
@@ -450,7 +452,12 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     crash_recovery()
     copyAssets("")
     copyAssets(Utils.getABI)
-    Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n" + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n" + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n" + "chmod 755 /data/data/com.github.shadowsocks/shadowsocks\n" + "chmod 755 /data/data/com.github.shadowsocks/polipo\n")
+    Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/shadowsocks\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/polipo\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/tun2socks\n")
   }
 
   private def recovery() {
@@ -465,7 +472,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         }
       }
     }
-    stopService(new Intent(this, classOf[ShadowsocksService]))
+    serviceStop()
     new Thread {
       override def run() {
         reset()
@@ -474,12 +481,43 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     }.start()
   }
 
-  /** Called when connect button is clicked. */
-  def serviceStart: Boolean = {
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    resultCode match {
+      case Activity.RESULT_OK => {
+        if (!serviceStart) {
+          switchButton.setChecked(false)
+        }
+      }
+      case _ => {
+        Log.e(Shadowsocks.TAG, "Failed to start VpnService")
+      }
+    }
+  }
+
+  def isVpnEnabled: Boolean = {
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !Utils.getRoot
+  }
+
+  def isServiceStarted: Boolean = {
+    ShadowsocksService.isServiceStarted || ShadowVpnService.isServiceStarted
+  }
+
+  def serviceStop() {
+    if (ShadowVpnService.isServiceStarted) {
+      if (ShadowVpnService.sConn != null) {
+        ShadowVpnService.sConn.close()
+        ShadowVpnService.sConn = null
+      }
+      stopService(new Intent(this, classOf[ShadowVpnService]))
+    }
     if (ShadowsocksService.isServiceStarted) {
       stopService(new Intent(this, classOf[ShadowsocksService]))
-      return false
     }
+  }
+
+  /** Called when connect button is clicked. */
+  def serviceStart: Boolean = {
+
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     val proxy = settings.getString("proxy", "")
     if (isTextEmpty(proxy, getString(R.string.proxy_empty))) return false
@@ -498,8 +536,17 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         return false
       }
     }
-    val it: Intent = new Intent(this, classOf[ShadowsocksService])
-    startService(it)
+
+    if (isVpnEnabled) {
+      if (ShadowsocksService.isServiceStarted) return false
+      val it: Intent = new Intent(this, classOf[ShadowsocksService])
+      startService(it)
+    } else {
+      if (ShadowVpnService.isServiceStarted) return false
+      val it: Intent = new Intent(this, classOf[ShadowVpnService])
+      startService(it)
+    }
+
     true
   }
 

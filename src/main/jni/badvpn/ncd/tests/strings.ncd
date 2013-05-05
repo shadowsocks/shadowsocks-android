@@ -1,0 +1,47 @@
+process main {
+    buffer() buf;
+    buf->append("12");
+    buf->append("345");
+    buf->append("6");
+    num_equal(buf, "123456") a;
+    assert(a);
+    
+    var("false") check;
+    call("test_func", {});
+    assert(check);
+    
+    buffer() buf;
+    buf->append("test_func");
+    var("false") check;
+    call(buf, {});
+    assert(check);
+    
+    concat("test_func") cnc;
+    var("false") check;
+    call(cnc, {});
+    assert(check);
+    
+    buffer() buf;
+    buf->append("test_func");
+    var("false") check;
+    process_manager() mgr;
+    mgr->start(buf, {});
+    assert(check);
+    
+    buffer() buf;
+    buf->append("/bin/echo");
+    runonce({buf, buf});
+    
+    buffer() buf;
+    buf->append("12");
+    buf->append("345");
+    to_string(buf) str;
+    val_equal(str, "\"12345\"") a;
+    assert(a);
+    
+    exit("0");
+}
+
+template test_func {
+    _caller.check->set("true");
+}
