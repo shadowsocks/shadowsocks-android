@@ -57,6 +57,7 @@
   <string name="forward_stop">Shadowsocks stopped.</string>
   <string name="service_failed">Please check your network status and try again.</string>
   <string name="stop">Stop the service</string>
+  <string name="vpn_status">You can only disable the VPN service through the notification bar.</string>
 
   <!-- alert category -->
   <string name="ok_iknow">OK</string>

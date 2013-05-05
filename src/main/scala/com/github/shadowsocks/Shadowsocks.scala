@@ -252,15 +252,15 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
       checked match {
         case true => {
           if (isVpnEnabled) {
-            if (!serviceStart) {
-              switchButton.setChecked(false)
-            }
-          } else {
             val intent = VpnService.prepare(this)
             if (intent != null) {
               startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
             } else {
               onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+            }
+          } else {
+            if (!serviceStart) {
+              switchButton.setChecked(false)
             }
           }
         }
@@ -364,6 +364,14 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     if (isServiceStarted) {
       switchButton.setChecked(true)
+      if (ShadowVpnService.isServiceStarted) {
+        val style = new Style.Builder()
+          .setBackgroundColorValue(Style.holoBlueLight)
+          .setDuration(Style.DURATION_INFINITE)
+          .build()
+        switchButton.setEnabled(false)
+        Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+      }
     }
     else {
       if (settings.getBoolean("isRunning", false)) {
@@ -446,6 +454,11 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
       progressDialog.dismiss()
       progressDialog = null
     }
+  }
+
+  override def onDestroy() {
+    super.onDestroy()
+    Crouton.cancelAllCroutons()
   }
 
   def reset() {
@@ -538,12 +551,18 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     }
 
     if (isVpnEnabled) {
-      if (ShadowsocksService.isServiceStarted) return false
-      val it: Intent = new Intent(this, classOf[ShadowsocksService])
-      startService(it)
-    } else {
       if (ShadowVpnService.isServiceStarted) return false
       val it: Intent = new Intent(this, classOf[ShadowVpnService])
+      startService(it)
+      val style = new Style.Builder()
+        .setBackgroundColorValue(Style.holoBlueLight)
+        .setDuration(Style.DURATION_INFINITE)
+        .build()
+      Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+      switchButton.setEnabled(false)
+    } else {
+      if (ShadowsocksService.isServiceStarted) return false
+      val it: Intent = new Intent(this, classOf[ShadowsocksService])
       startService(it)
     }
 
