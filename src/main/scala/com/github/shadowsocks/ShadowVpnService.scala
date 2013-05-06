@@ -56,6 +56,7 @@ import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.UnknownHostException
 import android.net.VpnService
+import org.apache.http.conn.util.InetAddressUtils
 
 object ShadowVpnService {
   def isServiceStarted: Boolean = {
@@ -229,7 +230,6 @@ class ShadowVpnService extends VpnService {
 
   def startVpn() {
 
-    val prefix = appHost.substring(0, appHost.indexOf('.')).toInt
     val builder = new Builder()
     builder
       .setSession(getString(R.string.app_name))
@@ -237,9 +237,21 @@ class ShadowVpnService extends VpnService {
       .addAddress("172.16.0.1", 24)
       .addDnsServer("8.8.8.8")
 
-    for (i <- 1 to 254) {
-      if (i != prefix && i != 127
-        && i != 172 && i != 192 && i != 10) builder.addRoute(i + ".0.0.0", 8)
+    if (InetAddressUtils.isIPv6Address(appHost)) {
+      builder.addRoute("0.0.0.0", 0)
+    } else if (isGFWList) {
+      val gfwList = getResources.getStringArray(R.array.gfw_list)
+      val address = appHost.split('.')
+      val prefix = address(0) + "." + address(1)
+      gfwList.foreach(addr =>
+        if (addr != prefix) builder.addRoute(prefix + ".0.0", 16)
+      )
+    } else {
+      val prefix = appHost.split('.')(0).toInt
+      for (i <- 1 to 254) {
+        if (i != prefix && i != 127
+          && i != 172 && i != 192 && i != 10) builder.addRoute(i + ".0.0.0", 8)
+      }
     }
 
     conn = builder.establish()
