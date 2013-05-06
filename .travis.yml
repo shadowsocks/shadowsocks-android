@@ -17,5 +17,5 @@ script:
   - wget https://raw.github.com/paulp/sbt-extras/master/sbt
   - chmod u+x ./sbt
   - cp local.sbt.example local.sbt
-  - ./sbt android:package-release
+  - ./sbt android:package-debug
   - ./sbt deploy

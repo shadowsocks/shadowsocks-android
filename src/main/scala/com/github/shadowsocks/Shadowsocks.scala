@@ -362,27 +362,28 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   protected override def onResume() {
     super.onResume()
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-    if (isServiceStarted) {
-      switchButton.setChecked(true)
-      if (ShadowVpnService.isServiceStarted) {
-        val style = new Style.Builder()
-          .setBackgroundColorValue(Style.holoBlueLight)
-          .setDuration(Style.DURATION_INFINITE)
-          .build()
-        switchButton.setEnabled(false)
-        Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+    if (getIntent.getAction != Shadowsocks.REQUEST_CONNECT) {
+      if (isServiceStarted) {
+        switchButton.setChecked(true)
+        if (ShadowVpnService.isServiceStarted) {
+          val style = new Style.Builder()
+            .setBackgroundColorValue(Style.holoBlueLight)
+            .setDuration(Style.DURATION_INFINITE)
+            .build()
+          switchButton.setEnabled(false)
+          Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+        }
+      } else {
+        switchButton.setChecked(false)
+        if (settings.getBoolean("isRunning", false)) {
+          new Thread {
+            override def run() {
+              crash_recovery()
+              handler.sendEmptyMessage(MSG_CRASH_RECOVER)
+            }
+          }.start()
+        }
       }
-    }
-    else {
-      if (settings.getBoolean("isRunning", false)) {
-        new Thread {
-          override def run() {
-            crash_recovery()
-            handler.sendEmptyMessage(MSG_CRASH_RECOVER)
-          }
-        }.start()
-      }
-      switchButton.setChecked(false)
     }
     setPreferenceEnabled()
     switchButton.setOnCheckedChangeListener(this)
@@ -517,10 +518,6 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
 
   def serviceStop() {
     if (ShadowVpnService.isServiceStarted) {
-      if (ShadowVpnService.sConn != null) {
-        ShadowVpnService.sConn.close()
-        ShadowVpnService.sConn = null
-      }
       stopService(new Intent(this, classOf[ShadowVpnService]))
     }
     if (ShadowsocksService.isServiceStarted) {

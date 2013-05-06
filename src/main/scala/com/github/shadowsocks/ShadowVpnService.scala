@@ -71,8 +71,6 @@ object ShadowVpnService {
 
   var sRunningInstance: WeakReference[ShadowVpnService] = null
 
-  var sConn: ParcelFileDescriptor = null
-
 }
 
 class ShadowVpnService extends VpnService {
@@ -87,6 +85,7 @@ class ShadowVpnService extends VpnService {
   val MSG_HOST_CHANGE: Int = 4
   val MSG_STOP_SELF: Int = 5
   val VPN_MTU = 1500
+  var conn: ParcelFileDescriptor = null
 
   def getPid(name: String): Int = {
     try {
@@ -243,13 +242,13 @@ class ShadowVpnService extends VpnService {
         && i != 172 && i != 192 && i != 10) builder.addRoute(i + ".0.0.0", 8)
     }
 
-    ShadowVpnService.sConn = builder.establish()
-    if (ShadowVpnService.sConn == null) {
+    conn = builder.establish()
+    if (conn == null) {
       stopSelf()
       return
     }
 
-    val fd = ShadowVpnService.sConn.getFd
+    val fd = conn.getFd
 
     val cmd = (BASE + "tun2socks --netif-ipaddr 172.16.0.2  --udpgw-remote-server-addr 158.255.208.201:7300 " +
       "--netif-netmask 255.255.255.0 --socks-server-addr 127.0.0.1:%d --tunfd %d --tunmtu %d --pid " + BASE + "tun2socks.pid")
@@ -315,6 +314,10 @@ class ShadowVpnService extends VpnService {
     ed.putBoolean("isRunning", false)
     ed.putBoolean("isConnecting", false)
     ed.commit
+    if (conn != null) {
+      conn.close()
+      conn = null
+    }
     super.onDestroy()
     markServiceStopped()
   }
