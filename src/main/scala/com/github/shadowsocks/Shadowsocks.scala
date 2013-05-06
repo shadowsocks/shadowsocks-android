@@ -313,28 +313,6 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         }
       }.start()
     }
-
-    if (isServiceStarted) {
-      switchButton.setChecked(true)
-      if (ShadowVpnService.isServiceStarted) {
-        val style = new Style.Builder()
-          .setBackgroundColorValue(Style.holoBlueLight)
-          .setDuration(Style.DURATION_INFINITE)
-          .build()
-        switchButton.setEnabled(false)
-        Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
-      }
-    } else {
-      switchButton.setChecked(false)
-      if (settings.getBoolean("isRunning", false)) {
-        new Thread {
-          override def run() {
-            crash_recovery()
-            handler.sendEmptyMessage(MSG_CRASH_RECOVER)
-          }
-        }.start()
-      }
-    }
   }
 
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
@@ -376,6 +354,11 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     super.onOptionsItemSelected(item)
   }
 
+  protected override def onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    setIntent(intent)
+  }
+
   protected override def onPause() {
     super.onPause()
     PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this)
@@ -383,7 +366,32 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
 
   protected override def onResume() {
     super.onResume()
-    val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+    if (getIntent.getAction != Shadowsocks.REQUEST_CONNECT) {
+      val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+      if (isServiceStarted) {
+        switchButton.setChecked(true)
+        if (ShadowVpnService.isServiceStarted) {
+          val style = new Style.Builder()
+            .setBackgroundColorValue(Style.holoBlueLight)
+            .setDuration(Style.DURATION_INFINITE)
+            .build()
+          switchButton.setEnabled(false)
+          Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+        }
+      } else {
+        switchButton.setEnabled(true)
+        switchButton.setChecked(false)
+        Crouton.cancelAllCroutons()
+        if (settings.getBoolean("isRunning", false)) {
+          new Thread {
+            override def run() {
+              crash_recovery()
+              handler.sendEmptyMessage(MSG_CRASH_RECOVER)
+            }
+          }.start()
+        }
+      }
+    }
     setPreferenceEnabled()
     switchButton.setOnCheckedChangeListener(this)
     PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this)
@@ -419,7 +427,10 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         if (!switchButton.isChecked) switchButton.setChecked(true)
       }
       else {
-        if (switchButton.isChecked) switchButton.setChecked(false)
+        if (switchButton.isChecked) {
+          switchButton.setEnabled(true)
+          switchButton.setChecked(false)
+        }
       }
     }
     if (key == "isConnecting") {

@@ -236,6 +236,7 @@ class ShadowVpnService extends VpnService {
       .setMtu(VPN_MTU)
       .addAddress("172.16.0.1", 24)
       .addDnsServer("8.8.8.8")
+      .addDnsServer("8.8.4.4")
 
     if (InetAddressUtils.isIPv6Address(appHost)) {
       builder.addRoute("0.0.0.0", 0)
@@ -244,8 +245,11 @@ class ShadowVpnService extends VpnService {
       val address = appHost.split('.')
       val prefix = address(0) + "." + address(1)
       gfwList.foreach(addr =>
-        if (addr != prefix) builder.addRoute(prefix + ".0.0", 16)
+        if (addr != prefix) {
+          builder.addRoute(addr + ".0.0", 16)
+        }
       )
+      builder.addRoute("8.8.0.0", 16)
     } else {
       val prefix = appHost.split('.')(0).toInt
       for (i <- 1 to 254) {
