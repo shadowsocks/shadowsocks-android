@@ -126,9 +126,9 @@ class ShadowVpnService extends VpnService {
     val records = lookup.run()
     for (r <- records) {
       addrType match {
-        case org.xbill.DNS.Type.A =>
+        case Type.A =>
           return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
-        case org.xbill.DNS.Type.AAAA =>
+        case Type.AAAA =>
           return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
       }
     }
@@ -192,6 +192,7 @@ class ShadowVpnService extends VpnService {
                 appHost = host
                 resolved = true
               }
+              case None =>
             }
           }
           if (!resolved) {
@@ -200,6 +201,7 @@ class ShadowVpnService extends VpnService {
                 appHost = host
                 resolved = true
               }
+              case None =>
             }
           }
         } else {

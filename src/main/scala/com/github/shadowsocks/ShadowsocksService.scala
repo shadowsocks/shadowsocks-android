@@ -66,6 +66,8 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
+import org.xbill.DNS._
+import scala.Some
 
 object ShadowsocksService {
   def isServiceStarted: Boolean = {
@@ -162,6 +164,23 @@ class ShadowsocksService extends Service {
     version
   }
 
+  def resolve(host: String, addrType: Int): Option[String] = {
+    val lookup = new Lookup(host, addrType)
+    val resolver = new SimpleResolver("8.8.8.8")
+    resolver.setTimeout(5)
+    lookup.setResolver(resolver)
+    val records = lookup.run()
+    for (r <- records) {
+      addrType match {
+        case Type.A =>
+          return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
+        case Type.AAAA =>
+          return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
+      }
+    }
+    None
+  }
+
   def handleCommand(intent: Intent) {
     if (intent == null) {
       stopSelf()
@@ -198,28 +217,29 @@ class ShadowsocksService extends Service {
       def run() {
         handler.sendEmptyMessage(MSG_CONNECT_START)
         var resolved: Boolean = false
-        if (appHost != null) {
-          var addr: InetAddress = null
-          val isIPv6Support: Boolean = Utils.isIPv6Support
-
-          try {
-            val addrs = InetAddress.getAllByName(appHost)
-            for (a <- addrs) {
-              if (isIPv6Support && addr == null && a.isInstanceOf[Inet6Address]) {
-                addr = a
+        if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
+          if (Utils.isIPv6Support) {
+            resolve(appHost, Type.AAAA) match {
+              case Some(host) => {
+                appHost = host
+                resolved = true
               }
-            }
-            if (addr == null) addr = addrs(0)
-          } catch {
-            case ignored: UnknownHostException => {
-              addr = null
+              case None =>
             }
           }
-          if (addr != null) {
-            appHost = addr.getHostAddress
-            resolved = true
+          if (!resolved) {
+            resolve(appHost, Type.A) match {
+              case Some(host) => {
+                appHost = host
+                resolved = true
+              }
+              case None =>
+            }
           }
+        } else {
+          resolved = true
         }
+
         Log.d(TAG, "IPTABLES: " + Utils.getIptables)
         hasRedirectSupport = Utils.getHasRedirectSupport
         if (resolved && handleConnection) {
