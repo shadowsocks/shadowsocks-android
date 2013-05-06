@@ -52,11 +52,11 @@ import android.util.Log
 import com.google.analytics.tracking.android.EasyTracker
 import java.io._
 import java.lang.ref.WeakReference
-import java.net.Inet6Address
-import java.net.InetAddress
-import java.net.UnknownHostException
 import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
+import org.xbill.DNS._
+import android.os.Message
+import scala.Some
 
 object ShadowVpnService {
   def isServiceStarted: Boolean = {
@@ -118,6 +118,23 @@ class ShadowVpnService extends VpnService {
     }.start()
   }
 
+  def resolve(host: String, addrType: Int): Option[String] = {
+    val lookup = new Lookup(host, addrType)
+    val resolver = new SimpleResolver("8.8.8.8")
+    resolver.setTimeout(5)
+    lookup.setResolver(resolver)
+    val records = lookup.run()
+    for (r <- records) {
+      addrType match {
+        case org.xbill.DNS.Type.A =>
+          return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
+        case org.xbill.DNS.Type.AAAA =>
+          return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
+      }
+    }
+    None
+  }
+
   def getVersionName: String = {
     var version: String = null
     try {
@@ -168,35 +185,30 @@ class ShadowVpnService extends VpnService {
       def run() {
         handler.sendEmptyMessage(MSG_CONNECT_START)
         var resolved: Boolean = false
-        if (appHost != null) {
-          var addr: InetAddress = null
-          val isIPv6Support: Boolean = Utils.isIPv6Support
-
-          try {
-            val addrs = InetAddress.getAllByName(appHost)
-            for (a <- addrs) {
-              if (isIPv6Support && addr == null && a.isInstanceOf[Inet6Address]) {
-                addr = a
+        if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
+          if (Utils.isIPv6Support) {
+            resolve(appHost, Type.AAAA) match {
+              case Some(host) => {
+                appHost = host
+                resolved = true
               }
             }
-            if (addr == null) addr = addrs(0)
-          } catch {
-            case ignored: UnknownHostException => {
-              addr = null
+          }
+          if (!resolved) {
+            resolve(appHost, Type.A) match {
+              case Some(host) => {
+                appHost = host
+                resolved = true
+              }
             }
           }
-          if (addr != null) {
-            appHost = addr.getHostAddress
-            resolved = true
-          }
+        } else {
+          resolved = true
         }
-        Log.d(TAG, "IPTABLES: " + Utils.getIptables)
-        hasRedirectSupport = Utils.getHasRedirectSupport
         if (resolved && handleConnection) {
           notifyAlert(getString(R.string.forward_success), getString(R.string.service_running))
           handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
-        }
-        else {
+        } else {
           notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
           stopSelf()
           handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
@@ -391,7 +403,6 @@ class ShadowVpnService extends VpnService {
   var localPort: Int = 0
   var sitekey: String = null
   var settings: SharedPreferences = null
-  var hasRedirectSupport: Boolean = true
   var isGlobalProxy: Boolean = false
   var isGFWList: Boolean = false
   var isBypassApps: Boolean = false

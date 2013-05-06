@@ -11,6 +11,7 @@ libraryDependencies ++= Seq(
   "com.actionbarsherlock" % "actionbarsherlock" % "4.2.0" artifacts(Artifact("actionbarsherlock", "apklib", "apklib")),
   "net.saik0.android.unifiedpreference" % "unifiedpreference" % "0.0.2" artifacts(Artifact("unifiedpreference", "apklib", "apklib")),
   "org.jraf" % "android-switch-backport" % "1.0" artifacts(Artifact("android-switch-backport", "apklib", "apklib")),
-  "de.keyboardsurfer.android.widget" % "crouton" % "1.7"
+  "de.keyboardsurfer.android.widget" % "crouton" % "1.7",
+  "dnsjava" % "dnsjava" % "2.1.1"
 )
 
