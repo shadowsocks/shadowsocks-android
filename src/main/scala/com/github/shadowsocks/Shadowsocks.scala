@@ -169,9 +169,12 @@ object Typefaces {
 
 class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.OnCheckedChangeListener with OnSharedPreferenceChangeListener {
 
-  private var progressDialog: ProgressDialog = null
   private val MSG_CRASH_RECOVER: Int = 1
   private val MSG_INITIAL_FINISH: Int = 2
+
+  private var switchButton: Switch = null
+  private var progressDialog: ProgressDialog = null
+  private var prepared = false
 
   private def copyAssets(path: String) {
     val assetManager: AssetManager = getAssets
@@ -354,19 +357,15 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     super.onOptionsItemSelected(item)
   }
 
-  protected override def onNewIntent(intent: Intent) {
-    super.onNewIntent(intent)
-    setIntent(intent)
-  }
-
   protected override def onPause() {
     super.onPause()
+    prepared = false
     PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this)
   }
 
   protected override def onResume() {
     super.onResume()
-    if (getIntent.getAction != Shadowsocks.REQUEST_CONNECT) {
+    if (!prepared) {
       val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
       if (isServiceStarted) {
         switchButton.setChecked(true)
@@ -508,6 +507,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     resultCode match {
       case Activity.RESULT_OK => {
+        prepared = true
         if (!serviceStart) {
           switchButton.setChecked(false)
         }
@@ -605,5 +605,5 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
       super.handleMessage(msg)
     }
   }
-  private var switchButton: Switch = null
+
 }
