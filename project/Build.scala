@@ -5,7 +5,8 @@ import org.scalasbt.androidplugin._
 import org.scalasbt.androidplugin.AndroidKeys._
 
 object App {
-  val version = "1.4.0"
+  val version = "1.4.1"
+  val versionCode = 23
 }
 
 object General {
@@ -13,7 +14,7 @@ object General {
   val settings = Defaults.defaultSettings ++ Seq (
     name := "shadowsocks",
     version := App.version,
-    versionCode := 22,
+    versionCode := App.versionCode,
     scalaVersion := "2.9.2",
     compileOrder := CompileOrder.JavaThenScala,
     platformName in Android := "android-16",

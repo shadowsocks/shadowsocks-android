@@ -244,6 +244,11 @@ class ShadowVpnService extends VpnService {
 
   def startVpn() {
 
+    val address = appHost.split('.')
+    val prefix1 = address(0)
+    val prefix2 = address.slice(0, 2).mkString(".")
+    val prefix3 = address.slice(0, 3).mkString(".")
+
     val builder = new Builder()
     builder
       .setSession(getString(R.string.app_name))
@@ -256,19 +261,28 @@ class ShadowVpnService extends VpnService {
       builder.addRoute("0.0.0.0", 0)
     } else if (isGFWList) {
       val gfwList = getResources.getStringArray(R.array.gfw_list)
-      val address = appHost.split('.')
-      val prefix = address(0) + "." + address(1)
       gfwList.foreach(addr =>
-        if (addr != prefix) {
+        if (addr != prefix2) {
           builder.addRoute(addr + ".0.0", 16)
+        } else {
+          for (i <- 0 to 255) {
+            val prefix = Array(addr, i.toString).mkString(".")
+            if (prefix != prefix3) builder.addRoute(prefix + ".0", 24)
+          }
         }
       )
       builder.addRoute("8.8.0.0", 16)
     } else {
-      val prefix = appHost.split('.')(0).toInt
       for (i <- 1 to 254) {
-        if (i != prefix && i != 127
-          && i != 172 && i != 192 && i != 10) builder.addRoute(i + ".0.0.0", 8)
+        if (i != 127 && i != 172 && i != 192 && i != 10 && i.toString != prefix1) {
+          builder.addRoute(i + ".0.0.0", 8)
+        } else if (i.toString == prefix1) {
+          for (j <- 0 to 255) {
+            val prefix = Array(i.toString, j.toString).mkString(".")
+            if (prefix != prefix2) builder.addRoute(prefix + ".0.0", 16)
+          }
+        }
+        builder.addRoute("8.8.0.0", 16)
       }
     }
 
