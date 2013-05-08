@@ -126,6 +126,7 @@ class ShadowVpnService extends VpnService {
     resolver.setTimeout(5)
     lookup.setResolver(resolver)
     val records = lookup.run()
+    if (records == null) return None
     for (r <- records) {
       addrType match {
         case Type.A =>
@@ -219,7 +220,7 @@ class ShadowVpnService extends VpnService {
             case None => resolved = false
           }
         }
-        
+
         if (resolved && handleConnection) {
           notifyAlert(getString(R.string.forward_success), getString(R.string.service_running))
           handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
