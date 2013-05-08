@@ -86,7 +86,9 @@ class ShadowVpnService extends VpnService {
   val MSG_HOST_CHANGE: Int = 4
   val MSG_STOP_SELF: Int = 5
   val VPN_MTU = 1500
+
   var conn: ParcelFileDescriptor = null
+  var udpgw: String = null
 
   def getPid(name: String): Int = {
     try {
@@ -184,6 +186,8 @@ class ShadowVpnService extends VpnService {
     new Thread(new Runnable {
       def run() {
         handler.sendEmptyMessage(MSG_CONNECT_START)
+
+        // Resolve server address
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
           if (Utils.isIPv6Support) {
@@ -207,6 +211,15 @@ class ShadowVpnService extends VpnService {
         } else {
           resolved = true
         }
+
+        // Resolve UDP gateway
+        if (resolved) {
+          resolve("u.maxcdn.info", Type.A) match {
+            case Some(host) => udpgw = host
+            case None => resolved = false
+          }
+        }
+        
         if (resolved && handleConnection) {
           notifyAlert(getString(R.string.forward_success), getString(R.string.service_running))
           handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
@@ -294,9 +307,9 @@ class ShadowVpnService extends VpnService {
 
     val fd = conn.getFd
 
-    val cmd = (BASE + "tun2socks --netif-ipaddr 172.16.0.2  --udpgw-remote-server-addr 158.255.208.201:7300 " +
+    val cmd = (BASE + "tun2socks --netif-ipaddr 172.16.0.2  --udpgw-remote-server-addr %s:7300 " +
       "--netif-netmask 255.255.255.0 --socks-server-addr 127.0.0.1:%d --tunfd %d --tunmtu %d --pid " + BASE + "tun2socks.pid")
-      .format(localPort, fd, VPN_MTU)
+      .format(udpgw, localPort, fd, VPN_MTU)
 
     Log.d(TAG, cmd)
     System.exec(cmd)

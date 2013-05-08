@@ -49,6 +49,35 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
 
 object Utils {
+
+  /**
+   * Get local IPv4 address
+   */
+  def getIPv4Address: Option[String] = {
+    try {
+      val interfaces = NetworkInterface.getNetworkInterfaces
+      while (interfaces.hasMoreElements) {
+        val intf = interfaces.nextElement()
+        val addrs = intf.getInetAddresses
+        while (addrs.hasMoreElements) {
+          val addr = addrs.nextElement()
+          if (!addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
+            val sAddr = addr.getHostAddress.toUpperCase
+            if (InetAddressUtils.isIPv4Address(sAddr)) {
+              return Some(sAddr)
+            }
+          }
+        }
+      }
+    }
+    catch {
+      case ex: Exception => {
+        Log.e(TAG, "Failed to get interfaces' addresses.", ex)
+      }
+    }
+    None
+  }
+
   /**
    * If there exists a valid IPv6 interface
    */
