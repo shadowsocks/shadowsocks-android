@@ -110,14 +110,15 @@ object Shadowsocks {
     private def setPreferenceEnabled() {
       val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity)
       val enabled: Boolean = !settings.getBoolean("isRunning", false) && !settings.getBoolean("isConnecting", false)
-      for (name <- FEATRUE_PREFS) {
+      for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
           if ((name == "isBypassApps") || (name == "proxyedApps")) {
             val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
             pref.setEnabled(enabled && !isGlobalProxy)
-          }
-          else {
+          } else if (name == "isAutoConnect") {
+            pref.setEnabled(Utils.getRoot)
+          } else {
             pref.setEnabled(enabled)
           }
         }
@@ -411,8 +412,9 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         if ((name == "isBypassApps") || (name == "proxyedApps")) {
           val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
           pref.setEnabled(enabled && !isGlobalProxy)
-        }
-        else {
+        } else if (name == "isAutoConnect") {
+          pref.setEnabled(Utils.getRoot)
+        } else {
           pref.setEnabled(enabled)
         }
       }
@@ -531,7 +533,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
       stopService(new Intent(this, classOf[ShadowVpnService]))
     }
     if (ShadowsocksService.isServiceStarted) {
-      stopService(new Intent(this, classOf[ShadowsocksService]))
+      sendBroadcast(new Intent(Utils.CLOSE_ACTION))
     }
   }
 

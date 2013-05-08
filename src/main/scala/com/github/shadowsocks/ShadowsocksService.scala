@@ -61,9 +61,6 @@ import java.io.IOException
 import java.lang.ref.WeakReference
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.net.Inet6Address
-import java.net.InetAddress
-import java.net.UnknownHostException
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import org.xbill.DNS._
@@ -243,7 +240,7 @@ class ShadowsocksService extends Service {
         Log.d(TAG, "IPTABLES: " + Utils.getIptables)
         hasRedirectSupport = Utils.getHasRedirectSupport
         if (resolved && handleConnection) {
-          notifyAlert(getString(R.string.forward_success), getString(R.string.service_running))
+          notifyForegroundAlert(getString(R.string.forward_success), getString(R.string.service_running))
           handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
         }
         else {
@@ -323,15 +320,33 @@ class ShadowsocksService extends Service {
     ShadowsocksService.sRunningInstance = null
   }
 
-  def notifyAlert(title: String, info: String) {
+  def notifyForegroundAlert(title: String, info: String) {
     val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
     val closeIntent: Intent = new Intent(Utils.CLOSE_ACTION)
     val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
-    builder.setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0).setTicker(title).setContentTitle(getString(R.string.app_name)).setContentText(info).setContentIntent(contentIntent).addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop), actionIntent)
+    builder
+      .setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0)
+      .setTicker(title).setContentTitle(getString(R.string.app_name))
+      .setContentText(info).setContentIntent(contentIntent)
+      .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop), actionIntent)
     startForegroundCompat(1, builder.build)
+  }
+
+  def notifyAlert(title: String, info: String) {
+    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
+    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
+    val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
+    builder
+      .setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0)
+      .setTicker(title)
+      .setContentTitle(getString(R.string.app_name))
+      .setContentText(info).setContentIntent(contentIntent)
+      .setAutoCancel(true)
+    notificationManager.notify(1, builder.build)
   }
 
   def onBind(intent: Intent): IBinder = {
@@ -378,15 +393,8 @@ class ShadowsocksService extends Service {
     ed.putBoolean("isRunning", false)
     ed.putBoolean("isConnecting", false)
     ed.commit
-    try {
-      notificationManager.cancel(0)
-    }
-    catch {
-      case ignore: Exception => {
-      }
-    }
-    super.onDestroy()
     markServiceStopped()
+    super.onDestroy()
   }
 
   def onDisconnect() {

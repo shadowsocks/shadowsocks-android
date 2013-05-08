@@ -37,12 +37,8 @@
  */
 package com.github.shadowsocks
 
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.app.{NotificationManager, Notification, PendingIntent, Service}
+import android.content._
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os._
@@ -222,7 +218,6 @@ class ShadowVpnService extends VpnService {
         }
 
         if (resolved && handleConnection) {
-          notifyAlert(getString(R.string.forward_success), getString(R.string.service_running))
           handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
         } else {
           notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
@@ -340,10 +335,13 @@ class ShadowVpnService extends VpnService {
     val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent: Intent = new Intent(Utils.CLOSE_ACTION)
-    val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
-    builder.setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0).setTicker(title).setContentTitle(getString(R.string.app_name)).setContentText(info).setContentIntent(contentIntent).addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop), actionIntent)
+    builder
+      .setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0)
+      .setTicker(title).setContentTitle(getString(R.string.app_name))
+      .setContentText(info).setContentIntent(contentIntent)
+      .setAutoCancel(true)
+    notificationManager.notify(1, builder.build)
   }
 
   override def onBind(intent: Intent): IBinder = {
@@ -358,11 +356,20 @@ class ShadowVpnService extends VpnService {
     super.onCreate()
     EasyTracker.getTracker.sendEvent("service", "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
+
+    notificationManager = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
+
+    // register close receiver
+    val filter = new IntentFilter()
+    filter.addAction(Intent.ACTION_SHUTDOWN)
+    filter.addAction(Utils.CLOSE_ACTION)
+    receiver = new CloseReceiver
+    registerReceiver(receiver, filter)
   }
 
-  /** Called when the activity is closed. */
-  override def onDestroy() {
+  def destroy() {
     EasyTracker.getTracker.sendEvent("service", "stop", getVersionName, 0L)
+    if (receiver != null) unregisterReceiver(receiver)
     new Thread {
       override def run() {
         onDisconnect()
@@ -376,21 +383,27 @@ class ShadowVpnService extends VpnService {
       conn.close()
       conn = null
     }
-    super.onDestroy()
     markServiceStopped()
   }
 
+  /** Called when the activity is closed. */
+  override def onDestroy() {
+    destroy()
+    super.onDestroy()
+  }
+
   def onDisconnect() {
-    Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
     val sb = new StringBuilder
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
+    if (!waitForProcess("redsocks")) {
+      sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
+    }
     if (!waitForProcess("shadowsocks")) {
       sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
     }
     if (!waitForProcess("tun2socks")) {
       sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
     }
-    Utils.runRootCommand(sb.toString())
+    Utils.runCommand(sb.toString())
   }
 
   override def onStart(intent: Intent, startId: Int) {
@@ -404,6 +417,13 @@ class ShadowVpnService extends VpnService {
 
   override def onRevoke() {
     stopSelf()
+  }
+
+  class CloseReceiver extends BroadcastReceiver {
+    def onReceive(p1: Context, p2: Intent) {
+      destroy()
+      stopSelf()
+    }
   }
 
   val handler: Handler = new Handler {
@@ -428,6 +448,9 @@ class ShadowVpnService extends VpnService {
       super.handleMessage(msg)
     }
   }
+
+  var notificationManager: NotificationManager = null
+  var receiver: CloseReceiver = null
   var appHost: String = null
   var remotePort: Int = 0
   var localPort: Int = 0
