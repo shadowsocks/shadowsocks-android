@@ -50,13 +50,6 @@ class ShadowsocksReceiver extends BroadcastReceiver {
   val TAG = "Shadowsocks"
 
   def onReceive(context: Context, intent: Intent) {
-    if (intent != null) {
-      val action = intent.getAction
-      if ((action == Intent.ACTION_SHUTDOWN) || (action == Utils.CLOSE_ACTION)) {
-        context.stopService(new Intent(context, classOf[ShadowsocksService]))
-        return
-      }
-    }
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     var versionName: String = null
     try {

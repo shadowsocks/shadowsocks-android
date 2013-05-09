@@ -59,8 +59,6 @@
         <receiver android:name="com.github.shadowsocks.ShadowsocksReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
-                <action android:name="com.github.shadowsocks.ACTION_SHUTDOWN"/>
             </intent-filter>
         </receiver>
 

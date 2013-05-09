@@ -41,9 +41,7 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content._
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Handler
@@ -65,6 +63,7 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import org.xbill.DNS._
 import scala.Some
+import scala.Some
 
 object ShadowsocksService {
   def isServiceStarted: Boolean = {
@@ -82,25 +81,6 @@ object ShadowsocksService {
 }
 
 class ShadowsocksService extends Service {
-
-  val TAG = "ShadowsocksService"
-  val BASE = "/data/data/com.github.shadowsocks/"
-  val REDSOCKS_CONF = "base {" + " log_debug = off;" + " log_info = off;" + " log = stderr;" + " daemon = on;" + " redirector = iptables;" + "}" + "redsocks {" + " local_ip = 127.0.0.1;" + " local_port = 8123;" + " ip = 127.0.0.1;" + " port = %d;" + " type = socks5;" + "}"
-  val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
-  val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
-  val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
-  val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j DNAT --to-destination 127.0.0.1:8123\n"
-  val MSG_CONNECT_START: Int = 0
-  val MSG_CONNECT_FINISH: Int = 1
-  val MSG_CONNECT_SUCCESS: Int = 2
-  val MSG_CONNECT_FAIL: Int = 3
-  val MSG_HOST_CHANGE: Int = 4
-  val MSG_STOP_SELF: Int = 5
-  val DNS_PORT: Int = 8153
-
-  val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
-  val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
-  val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
 
   def getPid(name: String): Int = {
     try {
@@ -378,6 +358,16 @@ class ShadowsocksService extends Service {
         throw new IllegalStateException("OS doesn't have Service.startForeground OR Service.setForeground!")
       }
     }
+
+    // register close receiver
+    val filter = new IntentFilter()
+    filter.addAction(Intent.ACTION_SHUTDOWN)
+    filter.addAction(Utils.CLOSE_ACTION)
+    receiver = new BroadcastReceiver() {
+      def onReceive(p1: Context, p2: Intent) { stopSelf() }
+    }
+    registerReceiver(receiver, filter)
+
   }
 
   /** Called when the activity is closed. */
@@ -389,11 +379,18 @@ class ShadowsocksService extends Service {
         onDisconnect()
       }
     }.start()
+
     val ed: SharedPreferences.Editor = settings.edit
     ed.putBoolean("isRunning", false)
     ed.putBoolean("isConnecting", false)
     ed.commit
     markServiceStopped()
+
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null
+    }
+
     super.onDestroy()
   }
 
@@ -542,6 +539,27 @@ class ShadowsocksService extends Service {
       super.handleMessage(msg)
     }
   }
+
+  val TAG = "ShadowsocksService"
+  val BASE = "/data/data/com.github.shadowsocks/"
+  val REDSOCKS_CONF = "base {" + " log_debug = off;" + " log_info = off;" + " log = stderr;" + " daemon = on;" + " redirector = iptables;" + "}" + "redsocks {" + " local_ip = 127.0.0.1;" + " local_port = 8123;" + " ip = 127.0.0.1;" + " port = %d;" + " type = socks5;" + "}"
+  val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
+  val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
+  val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
+  val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j DNAT --to-destination 127.0.0.1:8123\n"
+  val MSG_CONNECT_START: Int = 0
+  val MSG_CONNECT_FINISH: Int = 1
+  val MSG_CONNECT_SUCCESS: Int = 2
+  val MSG_CONNECT_FAIL: Int = 3
+  val MSG_HOST_CHANGE: Int = 4
+  val MSG_STOP_SELF: Int = 5
+  val DNS_PORT: Int = 8153
+
+  val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
+  val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
+  val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
+
+  var receiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
   var mWakeLock: PowerManager#WakeLock = null
   var appHost: String = null

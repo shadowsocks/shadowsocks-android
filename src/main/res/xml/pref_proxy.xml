@@ -19,12 +19,13 @@
       android:summary="@string/port_summary"
       android:title="@string/port">
   </com.github.shadowsocks.preferences.SummaryEditTextPreference>
-  <com.github.shadowsocks.preferences.SummaryEditTextPreference
+  <com.github.shadowsocks.preferences.PasswordEditTextPreference
+      android:inputType="textPassword"
       android:defaultValue="u1rRWTssNv0p"
       android:key="sitekey"
       android:summary="@string/sitekey_summary"
       android:title="@string/sitekey">
-  </com.github.shadowsocks.preferences.SummaryEditTextPreference>
+  </com.github.shadowsocks.preferences.PasswordEditTextPreference>
   <ListPreference
       android:defaultValue="rc4"
       android:key="encMethod"
