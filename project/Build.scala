@@ -42,8 +42,7 @@ object General {
     proguardSettings ++
     AndroidManifestGenerator.settings ++
     AndroidMarketPublish.settings ++ Seq (
-      cachePasswords in Android := true, 
-      libraryDependencies += "org.scalatest" %% "scalatest" % "1.8" % "test"
+      cachePasswords in Android := true
     )
 }
 
