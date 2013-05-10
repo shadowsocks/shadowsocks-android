@@ -2,6 +2,8 @@
 
 A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
+[![Google Play](http://www.android.com/images/brand/get_it_on_play_logo_large.png)](https://play.google.com/store/apps/details?id=com.github.shadowsocks)
+
 ## TRAVIS CI STATUS
 
 [![Build Status](https://secure.travis-ci.org/shadowsocks/shadowsocks-android.png)](http://travis-ci.org/shadowsocks/shadowsocks-android)
