@@ -67,7 +67,11 @@ import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment
 import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity
 import org.jraf.android.backport.switchwidget.Switch
 import android.content.pm.PackageManager
-import android.net.VpnService
+import android.net.{Uri, VpnService}
+import android.text.SpannableString
+import android.text.util.Linkify
+import android.text.method.LinkMovementMethod
+import android.webkit.{WebViewClient, WebView}
 
 object Shadowsocks {
   val PREFS_NAME = "Shadowsocks"
@@ -245,7 +249,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
 
   private def isTextEmpty(s: String, msg: String): Boolean = {
     if (s == null || s.length <= 0) {
-      showAToast(msg)
+      showDialog(msg)
       return true
     }
     false
@@ -322,6 +326,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
     menu.add(0, 0, 0, R.string.recovery).setIcon(android.R.drawable.ic_menu_revert).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     menu.add(0, 1, 1, R.string.about).setIcon(android.R.drawable.ic_menu_info_details).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    menu.add(0, 2, 2, R.string.donate).setIcon(android.R.drawable.ic_menu_info_details).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     true
   }
 
@@ -344,16 +349,9 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
       case 0 =>
         recovery()
       case 1 =>
-        var versionName = ""
-        try {
-          versionName = getPackageManager.getPackageInfo(getPackageName, 0).versionName
-        }
-        catch {
-          case ex: PackageManager.NameNotFoundException => {
-            versionName = ""
-          }
-        }
-        showAToast(getString(R.string.about) + " (" + versionName + ")\n\n" + getString(R.string.copy_rights))
+        showAbout()
+      case 2 =>
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.donate_address))))
     }
     super.onOptionsItemSelected(item)
   }
@@ -548,13 +546,13 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     try {
       val port: Int = Integer.valueOf(portText)
       if (port <= 1024) {
-        this.showAToast(getString(R.string.port_alert))
+        this.showDialog(getString(R.string.port_alert))
         return false
       }
     }
     catch {
       case ex: Exception => {
-        this.showAToast(getString(R.string.port_alert))
+        this.showDialog(getString(R.string.port_alert))
         return false
       }
     }
@@ -578,7 +576,36 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     true
   }
 
-  private def showAToast(msg: String) {
+  private def showAbout() {
+
+    val web = new WebView(this)
+    web.loadUrl("file:///android_asset/pages/about.html")
+    web.setWebViewClient(new WebViewClient() {
+      override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        true
+      }
+    })
+
+    var versionName = ""
+    try {
+      versionName = getPackageManager.getPackageInfo(getPackageName, 0).versionName
+    } catch {
+      case ex: PackageManager.NameNotFoundException => {
+        versionName = ""
+      }
+    }
+
+    new AlertDialog.Builder(this).setTitle(getString(R.string.about_title).format(versionName))
+      .setCancelable(false)
+      .setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener() {
+      override def onClick(dialog: DialogInterface, id: Int) {
+        dialog.cancel()
+      }
+    }).setView(web).create().show()
+  }
+
+  private def showDialog(msg: String) {
     val builder: AlertDialog.Builder = new AlertDialog.Builder(this)
     builder.setMessage(msg).setCancelable(false).setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener {
       def onClick(dialog: DialogInterface, id: Int) {

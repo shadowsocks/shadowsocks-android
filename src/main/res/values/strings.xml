@@ -74,9 +74,9 @@
   <!-- menu category -->
   <string name="recovery">Reset</string>
   <string name="about">About</string>
-  <string name="copy_rights">Shadowsocks is an open source socks proxy.\n\nYou can find more details
-    here:\ngithub.com/shadowsocks
-  </string>
+  <string name="about_title">Shadowsocks %s</string>
+  <string name="donate">Donate</string>
+  <string name="donate_address">http://forum.xda-developers.com/donatetome.php?u=3604670</string>
 
 
 </resources>
