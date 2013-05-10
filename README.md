@@ -4,20 +4,20 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 [![Google Play](http://www.android.com/images/brand/get_it_on_play_logo_large.png)](https://play.google.com/store/apps/details?id=com.github.shadowsocks)
 
-## TRAVIS CI STATUS
+### TRAVIS CI STATUS
 
 [![Build Status](https://secure.travis-ci.org/shadowsocks/shadowsocks-android.png)](http://travis-ci.org/shadowsocks/shadowsocks-android)
 
 [Nightly Builds](http://buildbot.sinaapp.com)
 
-## PREREQUISITES
+### PREREQUISITES
 
 * JDK 1.6+
 * SBT 0.12.3+
 * Android SDK r21+
 * Android NDK r8d+
 
-## BUILD
+### BUILD
 
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
@@ -32,7 +32,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
     sbt android:prepare-market
 ```
 
-## LICENSE
+### LICENSE
 
 Copyright (C) 2013 Max Lv <max.c.lv@gmail.com>
 
