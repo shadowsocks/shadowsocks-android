@@ -53,6 +53,7 @@ import org.apache.http.conn.util.InetAddressUtils
 import org.xbill.DNS._
 import android.os.Message
 import scala.Some
+import java.net.{UnknownHostException, InetAddress}
 
 object ShadowVpnService {
   def isServiceStarted: Boolean = {
@@ -116,24 +117,6 @@ class ShadowVpnService extends VpnService {
     }.start()
   }
 
-  def resolve(host: String, addrType: Int): Option[String] = {
-    val lookup = new Lookup(host, addrType)
-    val resolver = new SimpleResolver("8.8.8.8")
-    resolver.setTimeout(5)
-    lookup.setResolver(resolver)
-    val records = lookup.run()
-    if (records == null) return None
-    for (r <- records) {
-      addrType match {
-        case Type.A =>
-          return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
-        case Type.AAAA =>
-          return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
-      }
-    }
-    None
-  }
-
   def getVersionName: String = {
     var version: String = null
     try {
@@ -187,23 +170,11 @@ class ShadowVpnService extends VpnService {
         // Resolve server address
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
-          if (Utils.isIPv6Support) {
-            resolve(appHost, Type.AAAA) match {
-              case Some(host) => {
-                appHost = host
-                resolved = true
-              }
-              case None =>
-            }
-          }
-          if (!resolved) {
-            resolve(appHost, Type.A) match {
-              case Some(host) => {
-                appHost = host
-                resolved = true
-              }
-              case None =>
-            }
+          Utils.resolve(appHost, enableIPv6 = true) match {
+            case Some(addr) =>
+              appHost = addr
+              resolved = true
+            case None => resolved = false
           }
         } else {
           resolved = true
@@ -211,20 +182,20 @@ class ShadowVpnService extends VpnService {
 
         // Resolve UDP gateway
         if (resolved) {
-          resolve("u.maxcdn.info", Type.A) match {
+          Utils.resolve("u.maxcdn.info", enableIPv6 = false) match {
             case Some(host) => udpgw = host
             case None => resolved = false
           }
         }
 
         if (resolved && handleConnection) {
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
+          handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 300)
         } else {
           notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-          stopSelf()
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
+          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 300)
+          handler.sendEmptyMessageDelayed(MSG_STOP_SELF, 500)
         }
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 500)
+        handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 300)
       }
     }).start()
     markServiceStarted()
@@ -363,13 +334,20 @@ class ShadowVpnService extends VpnService {
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
     filter.addAction(Utils.CLOSE_ACTION)
-    receiver = new CloseReceiver
+    receiver = new BroadcastReceiver {
+      def onReceive(p1: Context, p2: Intent) {
+        destroy()
+        stopSelf()}
+    }
     registerReceiver(receiver, filter)
   }
 
   def destroy() {
     EasyTracker.getTracker.sendEvent("service", "stop", getVersionName, 0L)
-    if (receiver != null) unregisterReceiver(receiver)
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null
+    }
     new Thread {
       override def run() {
         onDisconnect()
@@ -383,6 +361,7 @@ class ShadowVpnService extends VpnService {
       conn.close()
       conn = null
     }
+    notificationManager.cancel(1)
     markServiceStopped()
   }
 
@@ -419,20 +398,12 @@ class ShadowVpnService extends VpnService {
     stopSelf()
   }
 
-  class CloseReceiver extends BroadcastReceiver {
-    def onReceive(p1: Context, p2: Intent) {
-      destroy()
-      stopSelf()
-    }
-  }
-
   val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
       val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
         case MSG_CONNECT_START =>
           ed.putBoolean("isConnecting", true)
-          val pm: PowerManager = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
         case MSG_CONNECT_FINISH =>
           ed.putBoolean("isConnecting", false)
         case MSG_CONNECT_SUCCESS =>
@@ -442,6 +413,7 @@ class ShadowVpnService extends VpnService {
         case MSG_HOST_CHANGE =>
           ed.putString("appHost", appHost)
         case MSG_STOP_SELF =>
+          destroy()
           stopSelf()
       }
       ed.commit
@@ -450,7 +422,7 @@ class ShadowVpnService extends VpnService {
   }
 
   var notificationManager: NotificationManager = null
-  var receiver: CloseReceiver = null
+  var receiver: BroadcastReceiver = null
   var appHost: String = null
   var remotePort: Int = 0
   var localPort: Int = 0

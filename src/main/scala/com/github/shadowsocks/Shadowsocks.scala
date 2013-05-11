@@ -421,14 +421,15 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-    if (key == "isRunning") {
+    if ((key == "isConnecting" || key == "isRunning")
+      && !settings.getBoolean("isConnecting", false)) {
       if (settings.getBoolean("isRunning", false)) {
         if (!switchButton.isChecked) switchButton.setChecked(true)
-      }
-      else {
+      } else {
         if (switchButton.isChecked) {
           switchButton.setEnabled(true)
           switchButton.setChecked(false)
+          Crouton.cancelAllCroutons()
         }
       }
     }

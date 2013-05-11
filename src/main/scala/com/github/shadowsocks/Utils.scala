@@ -44,11 +44,65 @@ import android.graphics.drawable.Drawable
 import android.os.Environment
 import android.util.Log
 import java.io._
-import java.net.NetworkInterface
+import java.net.{UnknownHostException, InetAddress, NetworkInterface}
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
+import org.xbill.DNS._
+import scala.Some
 
 object Utils {
+
+
+  def resolve(host: String, addrType: Int): Option[String] = {
+    val lookup = new Lookup(host, addrType)
+    val resolver = new SimpleResolver("8.8.8.8")
+    resolver.setTimeout(5)
+    lookup.setResolver(resolver)
+    val records = lookup.run()
+    if (records == null) return None
+    for (r <- records) {
+      addrType match {
+        case Type.A =>
+          return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
+        case Type.AAAA =>
+          return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
+      }
+    }
+    None
+  }
+
+  def resolve(host: String): Option[String] = {
+    try {
+      val addr = InetAddress.getByName(host)
+      Some(addr.getHostAddress)
+    } catch {
+      case e: UnknownHostException => None
+    }
+  }
+
+  def resolve(host: String, enableIPv6: Boolean): Option[String] = {
+    if (enableIPv6 && Utils.isIPv6Support) {
+      resolve(host, Type.AAAA) match {
+        case Some(addr) => {
+          return Some(addr)
+        }
+        case None =>
+      }
+    }
+    resolve(host, Type.A) match {
+      case Some(addr) => {
+        return Some(addr)
+      }
+      case None =>
+    }
+    resolve(host) match {
+      case Some(addr) => {
+        return Some(addr)
+      }
+      case None =>
+    }
+    None
+  }
 
   /**
    * Get local IPv4 address

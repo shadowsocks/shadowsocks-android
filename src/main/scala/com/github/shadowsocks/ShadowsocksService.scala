@@ -64,6 +64,7 @@ import scala.collection._
 import org.xbill.DNS._
 import scala.Some
 import scala.Some
+import java.net.{UnknownHostException, InetAddress}
 
 object ShadowsocksService {
   def isServiceStarted: Boolean = {
@@ -141,23 +142,6 @@ class ShadowsocksService extends Service {
     version
   }
 
-  def resolve(host: String, addrType: Int): Option[String] = {
-    val lookup = new Lookup(host, addrType)
-    val resolver = new SimpleResolver("8.8.8.8")
-    resolver.setTimeout(5)
-    lookup.setResolver(resolver)
-    val records = lookup.run()
-    for (r <- records) {
-      addrType match {
-        case Type.A =>
-          return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
-        case Type.AAAA =>
-          return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
-      }
-    }
-    None
-  }
-
   def handleCommand(intent: Intent) {
     if (intent == null) {
       stopSelf()
@@ -195,23 +179,11 @@ class ShadowsocksService extends Service {
         handler.sendEmptyMessage(MSG_CONNECT_START)
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
-          if (Utils.isIPv6Support) {
-            resolve(appHost, Type.AAAA) match {
-              case Some(host) => {
-                appHost = host
-                resolved = true
-              }
-              case None =>
-            }
-          }
-          if (!resolved) {
-            resolve(appHost, Type.A) match {
-              case Some(host) => {
-                appHost = host
-                resolved = true
-              }
-              case None =>
-            }
+          Utils.resolve(appHost, enableIPv6 = true) match {
+            case Some(addr) =>
+              appHost = addr
+              resolved = true
+            case None => resolved = false
           }
         } else {
           resolved = true
