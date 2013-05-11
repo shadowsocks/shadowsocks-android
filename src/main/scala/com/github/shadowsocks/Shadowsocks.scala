@@ -233,17 +233,21 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
 
   private def crash_recovery() {
     val sb = new StringBuilder
+
     sb.append(Utils.getIptables).append(" -t nat -F OUTPUT").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
     sb.append("killall -9 pdnsd").append("\n")
-    sb.append("killall -9 redsocks").append("\n")
     sb.append("killall -9 shadowsocks").append("\n")
     sb.append("killall -9 polipo").append("\n")
     sb.append("killall -9 tun2socks").append("\n")
+    Utils.runCommand(sb.toString())
+
+    sb.clear()
+    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
+    sb.append("killall -9 redsocks").append("\n")
     Utils.runRootCommand(sb.toString())
   }
 

@@ -368,20 +368,28 @@ class ShadowsocksService extends Service {
 
   def onDisconnect() {
     Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+
     val sb = new StringBuilder
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
+    sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`" ++= "\n"
+    sb ++= "killall -9 redsocks" ++= "\n"
+    Utils.runRootCommand(sb.toString())
+
+    sb.clear()
     if (!waitForProcess("pdnsd")) {
-      sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n")
+      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`" ++= "\n"
+      sb ++= "killall -9 pdnsd" ++= "\n"
     }
     if (!waitForProcess("shadowsocks")) {
-      sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
+      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
+      sb ++= "killall -9 shadowsocks" ++= "\n"
     }
     if (isHTTPProxy) {
       if (!waitForProcess("polipo")) {
-        sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n")
+        sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`" ++= "\n"
+        sb ++= "killall -9 polipo" ++= "\n"
       }
     }
-    Utils.runRootCommand(sb.toString())
+    Utils.runCommand(sb.toString())
   }
 
   override def onStart(intent: Intent, startId: Int) {

@@ -373,14 +373,13 @@ class ShadowVpnService extends VpnService {
 
   def onDisconnect() {
     val sb = new StringBuilder
-    if (!waitForProcess("redsocks")) {
-      sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
-    }
     if (!waitForProcess("shadowsocks")) {
-      sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
+      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
+      sb ++= "killall -9 shadowsocks" ++= "\n"
     }
     if (!waitForProcess("tun2socks")) {
-      sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
+      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`" ++= "\n"
+      sb ++= "killall -9 tun2socks" ++= "\n"
     }
     Utils.runCommand(sb.toString())
   }
