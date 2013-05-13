@@ -433,8 +433,8 @@ class ShadowsocksService extends Service {
       if (apps == null || apps.length <= 0) apps = AppManager.getProxiedApps(this)
       val uidSet: mutable.HashSet[Int] = new mutable.HashSet[Int]
       for (app <- apps) {
-        if (app.isProxied) {
-          uidSet.add(app.getUid)
+        if (app.proxied) {
+          uidSet.add(app.uid)
         }
       }
       for (uid <- uidSet) {

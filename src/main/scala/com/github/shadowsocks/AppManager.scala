@@ -38,18 +38,15 @@
 
 package com.github.shadowsocks
 
-import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
-import android.graphics.PixelFormat
+import android.content.pm.{ApplicationInfo, PackageManager}
+import android.graphics.{Bitmap, PixelFormat}
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
 import android.preference.PreferenceManager
-import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
@@ -67,7 +64,12 @@ import android.widget.ListView
 import android.widget.TextView
 import com.actionbarsherlock.app.SherlockActivity
 import java.util.StringTokenizer
-import scala.collection.mutable.ArrayBuffer
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader
+import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
+import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
+
+case class ProxiedApp(uid: Int, name: String, var proxied: Boolean)
 
 object AppManager {
 
@@ -82,44 +84,24 @@ object AppManager {
   implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]) = new ObjectArrayTools(a)
 
   def getProxiedApps(context: Context): Array[ProxiedApp] = {
+
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     val proxiedAppString = prefs.getString(PREFS_KEY_PROXYED, "")
-    val st: StringTokenizer = new StringTokenizer(proxiedAppString, "|")
-    val proxiedApps = new Array[String](st.countTokens)
-    var idx = 0
-    while (st.hasMoreTokens) {
-      proxiedApps(idx) = st.nextToken()
-      idx += 1
-    }
-    proxiedApps.sortWith(_ < _)
-    val pMgr: PackageManager = context.getPackageManager
-    val lAppInfo = pMgr.getInstalledApplications(0)
-    val itAppInfo = lAppInfo.iterator
-    val result = new ArrayBuffer[ProxiedApp]
-    var aInfo: ApplicationInfo = null
-    while (itAppInfo.hasNext) {
-      aInfo = itAppInfo.next
-      if (aInfo.uid >= 10000) {
-        val app: ProxiedApp = new ProxiedApp
-        app.setUid(aInfo.uid)
-        app.setUsername(pMgr.getNameForUid(app.getUid))
-        if (aInfo.packageName != null && (aInfo.packageName == "com.github.shadowsocks")) {
-          app.setProxyed(true)
-        } else if (proxiedApps.binarySearch(app.getUsername) >= 0) {
-          app.setProxyed(true)
-        } else {
-          app.setProxyed(false)
-        }
-        result += app
-      }
-    }
-    result.toArray
-  }
+    val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
-  class ListEntry {
-    var box: CheckBox = null
-    var text: TextView = null
-    var icon: ImageView = null
+    import scala.collection.JavaConversions._
+
+    val packageManager: PackageManager = context.getPackageManager
+    val appList = packageManager.getInstalledApplications(0)
+
+    appList.filter(_.uid >= 10000).map {
+      case a => {
+        val uid = a.uid
+        val userName = uid.toString
+        val proxied = proxiedApps.binarySearch(userName) >= 0
+        new ProxiedApp(uid, userName, proxied)
+      }
+    }.toArray
   }
 
 }
@@ -128,84 +110,69 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
 
   implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]) = new AppManager.ObjectArrayTools(a)
 
-  val MSG_LOAD_START = 1
-  val MSG_LOAD_FINISH = 2
-
-  def initApps(context: Context) {
+  def loadApps(context: Context): Array[ProxiedApp] = {
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     val proxiedAppString = prefs.getString(AppManager.PREFS_KEY_PROXYED, "")
-    val st: StringTokenizer = new StringTokenizer(proxiedAppString, "|")
-    var proxiedApps = new Array[String](st.countTokens)
-    var idx = 0
-    while (st.hasMoreTokens) {
-      proxiedApps(idx) = st.nextToken()
-      idx += 1
-    }
-    proxiedApps = proxiedApps.sortWith(_ < _)
-    val pMgr: PackageManager = context.getPackageManager
-    val lAppInfo = pMgr.getInstalledApplications(0)
-    val itAppInfo = lAppInfo.iterator
-    val result = new ArrayBuffer[ProxiedApp]
-    var aInfo: ApplicationInfo = null
+    val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
-    while (itAppInfo.hasNext) {
-      aInfo = itAppInfo.next
-      aInfo match {
-        case null => {}
-        case a if a.uid < 10000 => {}
-        case a if a.processName == null => {}
-        case a if pMgr.getApplicationLabel(a) == null => {}
-        case a if (pMgr.getApplicationLabel(aInfo).toString == "") => {}
-        case a if pMgr.getApplicationIcon(aInfo) == null => {}
-        case _ => {
-          val tApp: ProxiedApp = new ProxiedApp
-          tApp.setEnabled(aInfo.enabled)
-          tApp.setUid(aInfo.uid)
-          tApp.setUsername(pMgr.getNameForUid(tApp.getUid))
-          tApp.setProcname(aInfo.processName)
-          tApp.setName(pMgr.getApplicationLabel(aInfo).toString)
-          tApp.setProxyed((proxiedApps binarySearch tApp.getUsername) >= 0)
-          result += tApp
-        }
-      }
-    }
-    apps = result.toArray
+    import scala.collection.JavaConversions._
+
+    val packageManager: PackageManager = context.getPackageManager
+    val appList = packageManager.getInstalledApplications(0)
+
+    appList.filter (a => a.uid >= 10000
+      && packageManager.getApplicationLabel(a) != null
+      && packageManager.getApplicationIcon(a) != null).map { a =>
+        val uid = a.uid
+        val userName = uid.toString
+        val name = packageManager.getApplicationLabel(a).toString
+        val proxied = (proxiedApps binarySearch userName) >= 0
+        new ProxiedApp(uid, name, proxied)
+      }.toArray
   }
 
   def loadApps() {
-    initApps(this)
-    apps = apps.sortWith((a, b) => {
-      if (a == null || b == null || a.getName == null || b.getName == null) true
-      else if (a.isProxied == b.isProxied) a.getName < b.getName
-      else if (a.isProxied) true
+    apps = loadApps(this).sortWith((a, b) => {
+      if (a == null || b == null || a.name == null || b.name == null) true
+      else if (a.proxied == b.proxied) a.name < b.name
+      else if (a.proxied) true
       else false
     })
-    val inflater: LayoutInflater = getLayoutInflater
     adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
       override def getView(position: Int, view: View, parent: ViewGroup): View = {
         var convertView = view
-        var entry: AppManager.ListEntry = null
+        var entry: ListEntry = null
         if (convertView == null) {
-          convertView = inflater.inflate(R.layout.layout_apps_item, parent, false)
-          entry = new AppManager.ListEntry
-          entry.icon = convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
-          entry.box = convertView.findViewById(R.id.itemcheck).asInstanceOf[CheckBox]
-          entry.text = convertView.findViewById(R.id.itemtext).asInstanceOf[TextView]
+          convertView = getLayoutInflater.inflate(R.layout.layout_apps_item, parent, false)
+          val icon = convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
+          val box = convertView.findViewById(R.id.itemcheck).asInstanceOf[CheckBox]
+          val text = convertView.findViewById(R.id.itemtext).asInstanceOf[TextView]
+          entry = new ListEntry(box, text, icon)
           entry.text.setOnClickListener(AppManager.this)
           entry.text.setOnClickListener(AppManager.this)
           convertView.setTag(entry)
           entry.box.setOnCheckedChangeListener(AppManager.this)
         }
         else {
-          entry = convertView.getTag.asInstanceOf[AppManager.ListEntry]
+          entry = convertView.getTag.asInstanceOf[ListEntry]
         }
+
         val app: ProxiedApp = apps(position)
-        entry.icon.setTag(app.getUid)
-        imageLoader.DisplayImage(app.getUid, convertView.getContext.asInstanceOf[Activity], entry.icon)
-        entry.text.setText(app.getName)
+        val options =
+          new DisplayImageOptions.Builder().showStubImage(STUB)
+            .showImageForEmptyUri(STUB)
+            .showImageOnFail(STUB)
+            .resetViewBeforeLoading()
+            .cacheInMemory()
+            .cacheOnDisc()
+            .displayer(new FadeInBitmapDisplayer(300))
+            .build()
+        ImageLoader.getInstance().displayImage("app://" + app.uid, entry.icon, options)
+
+        entry.text.setText(app.name)
         val box: CheckBox = entry.box
         box.setTag(app)
-        box.setChecked(app.isProxied)
+        box.setChecked(app.proxied)
         entry.text.setTag(box)
         convertView
       }
@@ -217,7 +184,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
   def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
     val app: ProxiedApp = buttonView.getTag.asInstanceOf[ProxiedApp]
     if (app != null) {
-      app.setProxyed(isChecked)
+      app.proxied = isChecked
     }
     saveAppSettings(this)
   }
@@ -226,8 +193,8 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
     val cbox: CheckBox = v.getTag.asInstanceOf[CheckBox]
     val app: ProxiedApp = cbox.getTag.asInstanceOf[ProxiedApp]
     if (app != null) {
-      app.setProxyed(!app.isProxied)
-      cbox.setChecked(app.isProxied)
+      app.proxied = !app.proxied
+      cbox.setChecked(app.proxied)
     }
     saveAppSettings(this)
   }
@@ -235,9 +202,14 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
   protected override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     this.setContentView(R.layout.layout_apps)
-    this.imageLoader = ImageLoader.getImageLoader(this)
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_APPLICATION, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
+
+    val config =
+      new ImageLoaderConfiguration.Builder(this).imageDownloader(
+        new AppIconDownloader(this)).build()
+    ImageLoader.getInstance().init(config)
+
   }
 
   protected override def onResume() {
@@ -260,12 +232,11 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
     if (apps == null) return
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     val proxiedApps = new StringBuilder
-    apps.foreach(app => {
-      if (app.isProxied) {
-        proxiedApps ++= app.getUsername
+    apps.foreach(app =>
+      if (app.proxied) {
+        proxiedApps ++= app.uid.toString
         proxiedApps += '|'
       }
-    }
     )
     val edit: SharedPreferences.Editor = prefs.edit
     edit.putString(AppManager.PREFS_KEY_PROXYED, proxiedApps.toString())
@@ -282,9 +253,9 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
           appListView.setOnScrollListener(new AbsListView.OnScrollListener {
             def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
               if (visible) {
-                val name: String = apps(firstVisibleItem).getName
+                val name: String = apps(firstVisibleItem).name
                 if (name != null && name.length > 1) {
-                  overlay.setText(apps(firstVisibleItem).getName.substring(0, 1))
+                  overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
                 }
                 else {
                   overlay.setText("*")
@@ -310,11 +281,34 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
       super.handleMessage(msg)
     }
   }
+
+  class AppIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
+    extends BaseImageDownloader(context, connectTimeout, readTimeout) {
+
+    def this(context: Context) { this(context, 0, 0) }
+
+    override def getStreamFromOtherSource(imageUri: String, extra: AnyRef): InputStream = {
+      val uid = imageUri.substring(SCHEME.length).toInt
+      val drawable = Utils.getAppIcon(getBaseContext, uid)
+      val bitmap = Utils.drawableToBitmap(drawable)
+
+      val os = new ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
+      new ByteArrayInputStream(os.toByteArray)
+    }
+  }
+
+  case class ListEntry(box: CheckBox, text: TextView, icon: ImageView)
+
   var apps: Array[ProxiedApp] = null
   var appListView: ListView = null
   var overlay: TextView = null
   var progressDialog: ProgressDialog = null
   var adapter: ListAdapter = null
-  var imageLoader: ImageLoader = null
   var appsLoaded: Boolean = false
+
+  val MSG_LOAD_START = 1
+  val MSG_LOAD_FINISH = 2
+  val SCHEME = "app://"
+  val STUB = android.R.drawable.sym_def_app_icon
 }

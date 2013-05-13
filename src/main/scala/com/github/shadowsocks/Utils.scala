@@ -40,7 +40,7 @@ package com.github.shadowsocks
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
+import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.os.Environment
 import android.util.Log
 import java.io._
@@ -49,6 +49,7 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
 import org.xbill.DNS._
 import scala.Some
+import android.graphics.{Canvas, Bitmap}
 
 object Utils {
 
@@ -245,12 +246,28 @@ object Utils {
     }
   }
 
+  def drawableToBitmap (drawable: Drawable): Bitmap = {
+    if (drawable.isInstanceOf[BitmapDrawable]) {
+      return drawable.asInstanceOf[BitmapDrawable].getBitmap
+    }
+
+    val width = if (drawable.getIntrinsicWidth > 0) drawable.getIntrinsicWidth else 1
+    val height = if (drawable.getIntrinsicWidth > 0) drawable.getIntrinsicWidth else 1
+
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = new Canvas(bitmap)
+    drawable.setBounds(0, 0, canvas.getWidth, canvas.getHeight)
+    drawable.draw(canvas)
+
+    bitmap
+  }
+
   def getAppIcon(c: Context, uid: Int): Drawable = {
     val pm: PackageManager = c.getPackageManager
     var appIcon: Drawable = c.getResources.getDrawable(android.R.drawable.sym_def_app_icon)
     val packages: Array[String] = pm.getPackagesForUid(uid)
     if (packages != null) {
-      if (packages.length == 1) {
+      if (packages.length >= 1) {
         try {
           val appInfo: ApplicationInfo = pm.getApplicationInfo(packages(0), 0)
           appIcon = pm.getApplicationIcon(appInfo)
