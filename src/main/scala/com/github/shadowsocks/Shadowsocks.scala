@@ -68,22 +68,22 @@ import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity
 import org.jraf.android.backport.switchwidget.Switch
 import android.content.pm.PackageManager
 import android.net.{Uri, VpnService}
-import android.text.SpannableString
-import android.text.util.Linkify
-import android.text.method.LinkMovementMethod
 import android.webkit.{WebViewClient, WebView}
 
 object Shadowsocks {
+
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array("proxy", "remotePort", "port", "sitekey", "encMethod")
-  val FEATRUE_PREFS = Array("isHTTPProxy", "isDNSProxy", "isGFWList", "isGlobalProxy", "isBypassApps", "proxyedApps", "isAutoConnect")
+  val FEATRUE_PREFS = Array("isHTTPProxy", "isDNSProxy", "isGFWList", "isGlobalProxy",
+    "isBypassApps", "proxyedApps", "isAutoConnect")
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
 
   class ProxyFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener {
     private def setPreferenceEnabled() {
       val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity)
-      val enabled: Boolean = !settings.getBoolean("isRunning", false) && !settings.getBoolean("isConnecting", false)
+      val enabled: Boolean = !settings.getBoolean("isRunning", false) &&
+        !settings.getBoolean("isConnecting", false)
       for (name <- PROXY_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
@@ -113,7 +113,8 @@ object Shadowsocks {
   class FeatureFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener {
     private def setPreferenceEnabled() {
       val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity)
-      val enabled: Boolean = !settings.getBoolean("isRunning", false) && !settings.getBoolean("isConnecting", false)
+      val enabled: Boolean = !settings.getBoolean("isRunning", false) &&
+        !settings.getBoolean("isConnecting", false)
       for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
@@ -156,8 +157,7 @@ object Typefaces {
         try {
           val t: Typeface = Typeface.createFromAsset(c.getAssets, assetPath)
           cache.put(assetPath, t)
-        }
-        catch {
+        } catch {
           case e: Exception => {
             Log.e(TAG, "Could not get typeface '" + assetPath + "' because " + e.getMessage)
             return null
@@ -172,7 +172,9 @@ object Typefaces {
   private final val cache: Hashtable[String, Typeface] = new Hashtable[String, Typeface]
 }
 
-class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.OnCheckedChangeListener with OnSharedPreferenceChangeListener {
+class Shadowsocks
+  extends UnifiedSherlockPreferenceActivity with CompoundButton.OnCheckedChangeListener with
+  OnSharedPreferenceChangeListener {
 
   private val MSG_CRASH_RECOVER: Int = 1
   private val MSG_INITIAL_FINISH: Int = 2
@@ -181,13 +183,32 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   private var progressDialog: ProgressDialog = null
   private var prepared = false
 
+  private val handler: Handler = new Handler {
+    override def handleMessage(msg: Message) {
+      val settings: SharedPreferences = PreferenceManager
+        .getDefaultSharedPreferences(Shadowsocks.this)
+      val ed: SharedPreferences.Editor = settings.edit
+      msg.what match {
+        case MSG_CRASH_RECOVER =>
+          Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
+          ed.putBoolean("isRunning", false)
+        case MSG_INITIAL_FINISH =>
+          if (progressDialog != null) {
+            progressDialog.dismiss()
+            progressDialog = null
+          }
+      }
+      ed.commit
+      super.handleMessage(msg)
+    }
+  }
+
   private def copyAssets(path: String) {
     val assetManager: AssetManager = getAssets
     var files: Array[String] = null
     try {
       files = assetManager.list(path)
-    }
-    catch {
+    } catch {
       case e: IOException => {
         Log.e(Shadowsocks.TAG, e.getMessage)
       }
@@ -199,8 +220,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         try {
           if (path.length > 0) {
             in = assetManager.open(path + "/" + file)
-          }
-          else {
+          } else {
             in = assetManager.open(file)
           }
           out = new FileOutputStream("/data/data/com.github.shadowsocks/" + file)
@@ -210,8 +230,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
           out.flush()
           out.close()
           out = null
-        }
-        catch {
+        } catch {
           case ex: Exception => {
             Log.e(Shadowsocks.TAG, ex.getMessage)
           }
@@ -287,7 +306,9 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   override def onCreate(savedInstanceState: Bundle) {
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
-    val switchLayout: RelativeLayout = getLayoutInflater.inflate(R.layout.layout_switch, null).asInstanceOf[RelativeLayout]
+    val switchLayout: RelativeLayout = getLayoutInflater
+      .inflate(R.layout.layout_switch, null)
+      .asInstanceOf[RelativeLayout]
     getSupportActionBar.setCustomView(switchLayout)
     getSupportActionBar.setDisplayShowTitleEnabled(false)
     getSupportActionBar.setDisplayShowCustomEnabled(true)
@@ -297,8 +318,10 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     title.setText(R.string.app_name)
-    val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(Shadowsocks.this)
-    val init: Boolean = !settings.getBoolean("isRunning", false) && !settings.getBoolean("isConnecting", false)
+    val settings: SharedPreferences = PreferenceManager
+      .getDefaultSharedPreferences(Shadowsocks.this)
+    val init: Boolean = !settings.getBoolean("isRunning", false) &&
+      !settings.getBoolean("isConnecting", false)
     if (init) {
       if (progressDialog == null) {
         progressDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true, true)
@@ -309,8 +332,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
           var versionName: String = null
           try {
             versionName = getPackageManager.getPackageInfo(getPackageName, 0).versionName
-          }
-          catch {
+          } catch {
             case e: PackageManager.NameNotFoundException => {
               versionName = "NONE"
             }
@@ -328,9 +350,18 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   }
 
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
-    menu.add(0, 0, 0, R.string.recovery).setIcon(android.R.drawable.ic_menu_revert).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    menu.add(0, 1, 1, R.string.about).setIcon(android.R.drawable.ic_menu_info_details).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    menu.add(0, 2, 2, R.string.donate).setIcon(android.R.drawable.ic_menu_info_details).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    menu
+      .add(0, 0, 0, R.string.recovery)
+      .setIcon(android.R.drawable.ic_menu_revert)
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    menu
+      .add(0, 1, 1, R.string.about)
+      .setIcon(android.R.drawable.ic_menu_info_details)
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    menu
+      .add(0, 2, 2, R.string.donate)
+      .setIcon(android.R.drawable.ic_menu_info_details)
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     true
   }
 
@@ -338,8 +369,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount == 0) {
       try {
         finish()
-      }
-      catch {
+      } catch {
         case ignore: Exception => {
         }
       }
@@ -363,7 +393,9 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
   protected override def onPause() {
     super.onPause()
     prepared = false
-    PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this)
+    PreferenceManager
+      .getDefaultSharedPreferences(this)
+      .unregisterOnSharedPreferenceChangeListener(this)
   }
 
   protected override def onResume() {
@@ -396,12 +428,16 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     }
     setPreferenceEnabled()
     switchButton.setOnCheckedChangeListener(this)
-    PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this)
+    PreferenceManager
+      .getDefaultSharedPreferences(this)
+      .registerOnSharedPreferenceChangeListener(this)
   }
 
   private def setPreferenceEnabled() {
-    val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(Shadowsocks.this)
-    val enabled: Boolean = !settings.getBoolean("isRunning", false) && !settings.getBoolean("isConnecting", false)
+    val settings: SharedPreferences = PreferenceManager
+      .getDefaultSharedPreferences(Shadowsocks.this)
+    val enabled: Boolean = !settings.getBoolean("isRunning", false) &&
+      !settings.getBoolean("isConnecting", false)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref: Preference = findPreference(name)
       if (pref != null) {
@@ -443,8 +479,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         if (progressDialog == null) {
           progressDialog = ProgressDialog.show(this, "", getString(R.string.connecting), true, true)
         }
-      }
-      else {
+      } else {
         Log.d(Shadowsocks.TAG, "Connecting finish")
         if (progressDialog != null) {
           progressDialog.dismiss()
@@ -554,8 +589,7 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
         this.showDialog(getString(R.string.port_alert))
         return false
       }
-    }
-    catch {
+    } catch {
       case ex: Exception => {
         this.showDialog(getString(R.string.port_alert))
         return false
@@ -601,18 +635,25 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
       }
     }
 
-    new AlertDialog.Builder(this).setTitle(getString(R.string.about_title).format(versionName))
+    new AlertDialog.Builder(this)
+      .setTitle(getString(R.string.about_title).format(versionName))
       .setCancelable(false)
       .setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener() {
       override def onClick(dialog: DialogInterface, id: Int) {
         dialog.cancel()
       }
-    }).setView(web).create().show()
+    })
+      .setView(web)
+      .create()
+      .show()
   }
 
   private def showDialog(msg: String) {
     val builder: AlertDialog.Builder = new AlertDialog.Builder(this)
-    builder.setMessage(msg).setCancelable(false).setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener {
+    builder
+      .setMessage(msg)
+      .setCancelable(false)
+      .setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener {
       def onClick(dialog: DialogInterface, id: Int) {
         dialog.cancel()
       }
@@ -620,24 +661,4 @@ class Shadowsocks extends UnifiedSherlockPreferenceActivity with CompoundButton.
     val alert: AlertDialog = builder.create
     alert.show()
   }
-
-  private[shadowsocks] final val handler: Handler = new Handler {
-    override def handleMessage(msg: Message) {
-      val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(Shadowsocks.this)
-      val ed: SharedPreferences.Editor = settings.edit
-      msg.what match {
-        case MSG_CRASH_RECOVER =>
-          Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
-          ed.putBoolean("isRunning", false)
-        case MSG_INITIAL_FINISH =>
-          if (progressDialog != null) {
-            progressDialog.dismiss()
-            progressDialog = null
-          }
-      }
-      ed.commit
-      super.handleMessage(msg)
-    }
-  }
-
 }

@@ -53,6 +53,27 @@ import android.graphics.{Canvas, Bitmap}
 
 object Utils {
 
+  val CLOSE_ACTION = "com.github.shadowsocks.ACTION_SHUTDOWN"
+  val TAG: String = "Shadowsocks"
+  val ABI_PROP: String = "ro.product.cpu.abi"
+  val ABI2_PROP: String = "ro.product.cpu.abi2"
+  val ARM_ABI: String = "arm"
+  val X86_ABI: String = "x86"
+  val MIPS_ABI: String = "mips"
+  val DEFAULT_SHELL: String = "/system/bin/sh"
+  val DEFAULT_ROOT: String = "/system/bin/su"
+  val ALTERNATIVE_ROOT: String = "/system/xbin/su"
+  val DEFAULT_IPTABLES: String = "/data/data/com.github.shadowsocks/iptables"
+  val ALTERNATIVE_IPTABLES: String = "/system/bin/iptables"
+  val TIME_OUT: Int = -99
+  var initialized: Boolean = false
+  var hasRedirectSupport: Int = -1
+  var isRoot: Int = -1
+  var shell: String = null
+  var root_shell: String = null
+  var iptables: String = null
+  var data_path: String = null
+  var rootTries = 0
 
   def resolve(host: String, addrType: Int): Option[String] = {
     val lookup = new Lookup(host, addrType)
@@ -124,8 +145,7 @@ object Utils {
           }
         }
       }
-    }
-    catch {
+    } catch {
       case ex: Exception => {
         Log.e(TAG, "Failed to get interfaces' addresses.", ex)
       }
@@ -153,8 +173,7 @@ object Utils {
           }
         }
       }
-    }
-    catch {
+    } catch {
       case ex: Exception => {
         Log.e(TAG, "Failed to get interfaces' addresses.", ex)
       }
@@ -189,19 +208,16 @@ object Utils {
       input = new BufferedReader(new InputStreamReader(p.getInputStream), 1024)
       line = input.readLine
       input.close()
-    }
-    catch {
+    } catch {
       case ex: IOException => {
         Log.e(TAG, "Unable to read sysprop " + propName, ex)
         return null
       }
-    }
-    finally {
+    } finally {
       if (input != null) {
         try {
           input.close()
-        }
-        catch {
+        } catch {
           case ex: IOException => {
             Log.e(TAG, "Exception while closing InputStream", ex)
           }
@@ -246,7 +262,7 @@ object Utils {
     }
   }
 
-  def drawableToBitmap (drawable: Drawable): Bitmap = {
+  def drawableToBitmap(drawable: Drawable): Bitmap = {
     if (drawable.isInstanceOf[BitmapDrawable]) {
       return drawable.asInstanceOf[BitmapDrawable].getBitmap
     }
@@ -271,15 +287,13 @@ object Utils {
         try {
           val appInfo: ApplicationInfo = pm.getApplicationInfo(packages(0), 0)
           appIcon = pm.getApplicationIcon(appInfo)
-        }
-        catch {
+        } catch {
           case e: PackageManager.NameNotFoundException => {
             Log.e(c.getPackageName, "No package found matching with the uid " + uid)
           }
         }
       }
-    }
-    else {
+    } else {
       Log.e(c.getPackageName, "Package not found for uid " + uid)
     }
     appIcon
@@ -289,8 +303,7 @@ object Utils {
     if (data_path == null) {
       if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState) {
         data_path = Environment.getExternalStorageDirectory.getAbsolutePath
-      }
-      else {
+      } else {
         data_path = ctx.getFilesDir.getAbsolutePath
       }
       Log.d(TAG, "Python Data Path: " + data_path)
@@ -346,11 +359,9 @@ object Utils {
     if (isRoot != -1) return isRoot == 1
     if (new File(DEFAULT_ROOT).exists) {
       root_shell = DEFAULT_ROOT
-    }
-    else if (new File(ALTERNATIVE_ROOT).exists) {
+    } else if (new File(ALTERNATIVE_ROOT).exists) {
       root_shell = ALTERNATIVE_ROOT
-    }
-    else {
+    } else {
       root_shell = "su"
     }
     val sb = new StringBuilder
@@ -399,8 +410,7 @@ object Utils {
     try {
       if (timeout > 0) {
         runner.join(timeout)
-      }
-      else {
+      } else {
         runner.join()
       }
       if (runner.isAlive) {
@@ -408,36 +418,13 @@ object Utils {
         runner.join(1000)
         return TIME_OUT
       }
-    }
-    catch {
+    } catch {
       case ex: InterruptedException => {
         return TIME_OUT
       }
     }
     runner.exitcode
   }
-
-  val CLOSE_ACTION = "com.github.shadowsocks.ACTION_SHUTDOWN"
-  val TAG: String = "Shadowsocks"
-  val ABI_PROP: String = "ro.product.cpu.abi"
-  val ABI2_PROP: String = "ro.product.cpu.abi2"
-  val ARM_ABI: String = "arm"
-  val X86_ABI: String = "x86"
-  val MIPS_ABI: String = "mips"
-  val DEFAULT_SHELL: String = "/system/bin/sh"
-  val DEFAULT_ROOT: String = "/system/bin/su"
-  val ALTERNATIVE_ROOT: String = "/system/xbin/su"
-  val DEFAULT_IPTABLES: String = "/data/data/com.github.shadowsocks/iptables"
-  val ALTERNATIVE_IPTABLES: String = "/system/bin/iptables"
-  val TIME_OUT: Int = -99
-  var initialized: Boolean = false
-  var hasRedirectSupport: Int = -1
-  var isRoot: Int = -1
-  var shell: String = null
-  var root_shell: String = null
-  var iptables: String = null
-  var data_path: String = null
-  var rootTries = 0
 
   /**
    * Internal thread used to execute scripts (as root or not).
@@ -447,9 +434,13 @@ object Utils {
    * @param result result output
    * @param asroot if true, executes the script as root
    */
-  class ScriptRunner(val scripts: String,
-                     val result: StringBuilder,
-                     val asroot: Boolean) extends Thread {
+  class ScriptRunner(val scripts: String, val result: StringBuilder, val asroot: Boolean)
+    extends Thread {
+
+    var exitcode: Int = -1
+    val pid: Array[Int] = new Array[Int](1)
+    var pipe: FileDescriptor = null
+
     override def destroy() {
       if (pid(0) != -1) {
         Exec.hangupProcessGroup(pid(0))
@@ -464,7 +455,9 @@ object Utils {
     def createSubprocess(processId: Array[Int], cmd: String): FileDescriptor = {
       val args = parse(cmd)
       val arg0 = args(0)
-      Exec.createSubprocess(if (result != null) 1 else 0, arg0, args, null, scripts + "\nexit\n", processId)
+      Exec
+        .createSubprocess(if (result != null) 1 else 0, arg0, args, null, scripts + "\nexit\n",
+        processId)
     }
 
     def parse(cmd: String): Array[String] = {
@@ -515,8 +508,7 @@ object Utils {
       try {
         if (this.asroot) {
           pipe = createSubprocess(pid, root_shell)
-        }
-        else {
+        } else {
           pipe = createSubprocess(pid, getShell)
         }
         if (pid(0) != -1) {
@@ -530,14 +522,12 @@ object Utils {
           read = stdout.read(buf)
           result.append(new String(buf, 0, read))
         }
-      }
-      catch {
+      } catch {
         case ex: Exception => {
           Log.e(TAG, "Cannot execute command", ex)
           if (result != null) result.append("\n").append(ex)
         }
-      }
-      finally {
+      } finally {
         if (pipe != null) {
           Exec.close(pipe)
         }
@@ -546,10 +536,6 @@ object Utils {
         }
       }
     }
-
-    var exitcode: Int = -1
-    val pid: Array[Int] = new Array[Int](1)
-    var pipe: FileDescriptor = null
   }
 
 }

@@ -61,10 +61,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
-import org.xbill.DNS._
 import scala.Some
-import scala.Some
-import java.net.{UnknownHostException, InetAddress}
 
 object ShadowsocksService {
   def isServiceStarted: Boolean = {
@@ -83,13 +80,68 @@ object ShadowsocksService {
 
 class ShadowsocksService extends Service {
 
+  val TAG = "ShadowsocksService"
+  val BASE = "/data/data/com.github.shadowsocks/"
+  val REDSOCKS_CONF = "base {" +
+    " log_debug = off;" +
+    " log_info = off;" +
+    " log = stderr;" +
+    " daemon = on;" +
+    " redirector = iptables;" +
+    "}" +
+    "redsocks {" +
+    " local_ip = 127.0.0.1;" +
+    " local_port = 8123;" +
+    " ip = 127.0.0.1;" +
+    " port = %d;" +
+    " type = socks5;" +
+    "}"
+  val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
+  val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
+  val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
+  val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
+    "-j DNAT --to-destination 127.0.0.1:8123\n"
+  val MSG_CONNECT_START: Int = 0
+  val MSG_CONNECT_FINISH: Int = 1
+  val MSG_CONNECT_SUCCESS: Int = 2
+  val MSG_CONNECT_FAIL: Int = 3
+  val MSG_HOST_CHANGE: Int = 4
+  val MSG_STOP_SELF: Int = 5
+  val DNS_PORT: Int = 8153
+
+  val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
+  val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
+  val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
+
+  var receiver: BroadcastReceiver = null
+  var notificationManager: NotificationManager = null
+  var mWakeLock: PowerManager#WakeLock = null
+  var appHost: String = null
+  var remotePort: Int = 0
+  var localPort: Int = 0
+  var sitekey: String = null
+  var settings: SharedPreferences = null
+  var hasRedirectSupport: Boolean = true
+  var isGlobalProxy: Boolean = false
+  var isGFWList: Boolean = false
+  var isBypassApps: Boolean = false
+  var isDNSProxy: Boolean = false
+  var isHTTPProxy: Boolean = false
+  var encMethod: String = null
+  var apps: Array[ProxiedApp] = null
+  var mSetForeground: Method = null
+  var mStartForeground: Method = null
+  var mStopForeground: Method = null
+  var mSetForegroundArgs = new Array[AnyRef](1)
+  var mStartForegroundArgs = new Array[AnyRef](2)
+  var mStopForegroundArgs = new Array[AnyRef](1)
+
   def getPid(name: String): Int = {
     try {
       val reader: BufferedReader = new BufferedReader(new FileReader(BASE + name + ".pid"))
       val line = reader.readLine
       return Integer.valueOf(line)
-    }
-    catch {
+    } catch {
       case e: FileNotFoundException => {
         Log.e(TAG, "Cannot open pid file: " + name)
       }
@@ -106,8 +158,10 @@ class ShadowsocksService extends Service {
   def startShadowsocksDaemon() {
     new Thread {
       override def run() {
-        val cmd: String = (BASE + "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " + BASE + "shadowsocks.pid")
-          .format(appHost, remotePort, localPort, sitekey, encMethod)
+        val cmd: String = (BASE +
+          "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+          BASE +
+          "shadowsocks.pid").format(appHost, remotePort, localPort, sitekey, encMethod)
         System.exec(cmd)
       }
     }.start()
@@ -116,7 +170,8 @@ class ShadowsocksService extends Service {
   def startPolipoDaemon() {
     new Thread {
       override def run() {
-        val cmd: String = (BASE + "polipo proxyPort=%d socksParentProxy=127.0.0.1:%d daemonise=true pidFile=\"%s\" logLevel=1 logFile=\"%s\"")
+        val cmd: String = (BASE +
+          "polipo proxyPort=%d socksParentProxy=127.0.0.1:%d daemonise=true pidFile=\"%s\" logLevel=1 logFile=\"%s\"")
           .format(localPort + 1, localPort, BASE + "polipo.pid", BASE + "polipo.log")
         System.exec(cmd)
       }
@@ -133,8 +188,7 @@ class ShadowsocksService extends Service {
     try {
       val pi: PackageInfo = getPackageManager.getPackageInfo(getPackageName, 0)
       version = pi.versionName
-    }
-    catch {
+    } catch {
       case e: PackageManager.NameNotFoundException => {
         version = "Package name not found"
       }
@@ -152,16 +206,14 @@ class ShadowsocksService extends Service {
     encMethod = settings.getString("encMethod", "table")
     try {
       remotePort = Integer.valueOf(settings.getString("remotePort", "1984"))
-    }
-    catch {
+    } catch {
       case ex: NumberFormatException => {
         remotePort = 1984
       }
     }
     try {
       localPort = Integer.valueOf(settings.getString("port", "1984"))
-    }
-    catch {
+    } catch {
       case ex: NumberFormatException => {
         localPort = 1984
       }
@@ -192,10 +244,10 @@ class ShadowsocksService extends Service {
         Log.d(TAG, "IPTABLES: " + Utils.getIptables)
         hasRedirectSupport = Utils.getHasRedirectSupport
         if (resolved && handleConnection) {
-          notifyForegroundAlert(getString(R.string.forward_success), getString(R.string.service_running))
+          notifyForegroundAlert(getString(R.string.forward_success),
+            getString(R.string.service_running))
           handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
-        }
-        else {
+        } else {
           notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
           stopSelf()
           handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
@@ -225,8 +277,7 @@ class ShadowsocksService extends Service {
     t.start()
     try {
       t.join(300)
-    }
-    catch {
+    } catch {
       case ignored: InterruptedException => {
       }
     }
@@ -253,8 +304,7 @@ class ShadowsocksService extends Service {
   def invokeMethod(method: Method, args: Array[AnyRef]) {
     try {
       method.invoke(this, mStartForegroundArgs: _*)
-    }
-    catch {
+    } catch {
       case e: InvocationTargetException => {
         Log.w(TAG, "Unable to invoke method", e)
       }
@@ -280,10 +330,14 @@ class ShadowsocksService extends Service {
     val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
     builder
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0)
-      .setTicker(title).setContentTitle(getString(R.string.app_name))
-      .setContentText(info).setContentIntent(contentIntent)
-      .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop), actionIntent)
+      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
+      .setWhen(0)
+      .setTicker(title)
+      .setContentTitle(getString(R.string.app_name))
+      .setContentText(info)
+      .setContentIntent(contentIntent)
+      .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
+      actionIntent)
     startForegroundCompat(1, builder.build)
   }
 
@@ -293,10 +347,12 @@ class ShadowsocksService extends Service {
     val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
     builder
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks).setWhen(0)
+      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
+      .setWhen(0)
       .setTicker(title)
       .setContentTitle(getString(R.string.app_name))
-      .setContentText(info).setContentIntent(contentIntent)
+      .setContentText(info)
+      .setContentIntent(contentIntent)
       .setAutoCancel(true)
     notificationManager.notify(1, builder.build)
   }
@@ -309,12 +365,13 @@ class ShadowsocksService extends Service {
     super.onCreate()
     EasyTracker.getTracker.sendEvent("service", "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
-    notificationManager = this.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
+    notificationManager = this
+      .getSystemService(Context.NOTIFICATION_SERVICE)
+      .asInstanceOf[NotificationManager]
     try {
       mStartForeground = getClass.getMethod("startForeground", mStartForegroundSignature: _*)
       mStopForeground = getClass.getMethod("stopForeground", mStopForegroundSignature: _*)
-    }
-    catch {
+    } catch {
       case e: NoSuchMethodException => {
         mStartForeground = ({
           mStopForeground = null
@@ -324,10 +381,10 @@ class ShadowsocksService extends Service {
     }
     try {
       mSetForeground = getClass.getMethod("setForeground", mSetForegroundSignature: _*)
-    }
-    catch {
+    } catch {
       case e: NoSuchMethodException => {
-        throw new IllegalStateException("OS doesn't have Service.startForeground OR Service.setForeground!")
+        throw new IllegalStateException(
+          "OS doesn't have Service.startForeground OR Service.setForeground!")
       }
     }
 
@@ -336,10 +393,11 @@ class ShadowsocksService extends Service {
     filter.addAction(Intent.ACTION_SHUTDOWN)
     filter.addAction(Utils.CLOSE_ACTION)
     receiver = new BroadcastReceiver() {
-      def onReceive(p1: Context, p2: Intent) { stopSelf() }
+      def onReceive(p1: Context, p2: Intent) {
+        stopSelf()
+      }
     }
     registerReceiver(receiver, filter)
-
   }
 
   /** Called when the activity is closed. */
@@ -412,13 +470,21 @@ class ShadowsocksService extends Service {
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
     if (!isDNSProxy) {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53))
-      init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + getApplicationInfo.uid))
+      init_sb
+        .append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + getApplicationInfo.uid))
     }
     if (hasRedirectSupport) {
-      init_sb.append(Utils.getIptables).append(" -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to ").append(DNS_PORT).append("\n")
-    }
-    else {
-      init_sb.append(Utils.getIptables).append(" -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:").append(DNS_PORT).append("\n")
+      init_sb
+        .append(Utils.getIptables)
+        .append(" -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to ")
+        .append(DNS_PORT)
+        .append("\n")
+    } else {
+      init_sb
+        .append(Utils.getIptables)
+        .append(" -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:")
+        .append(DNS_PORT)
+        .append("\n")
     }
     if (isGFWList) {
       val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
@@ -427,7 +493,12 @@ class ShadowsocksService extends Service {
       }
     }
     if (isGlobalProxy || isBypassApps) {
-      http_sb.append(if (hasRedirectSupport) Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS else Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+      http_sb
+        .append(if (hasRedirectSupport) {
+        Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
+      } else {
+        Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
+      })
     }
     if (!isGlobalProxy) {
       if (apps == null || apps.length <= 0) apps = AppManager.getProxiedApps(this)
@@ -439,9 +510,14 @@ class ShadowsocksService extends Service {
       }
       for (uid <- uidSet) {
         if (!isBypassApps) {
-          http_sb.append((if (hasRedirectSupport) Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS else Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
-        }
-        else {
+          http_sb
+            .append((if (hasRedirectSupport) {
+            Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
+          } else {
+            Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
+          })
+            .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+        } else {
           init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
         }
       }
@@ -478,8 +554,7 @@ class ShadowsocksService extends Service {
       mStopForegroundArgs(0) = boolean2Boolean(x = true)
       try {
         mStopForeground.invoke(this, mStopForegroundArgs: _*)
-      }
-      catch {
+      } catch {
         case e: InvocationTargetException => {
           Log.w(TAG, "Unable to invoke stopForeground", e)
         }
@@ -501,7 +576,9 @@ class ShadowsocksService extends Service {
         case MSG_CONNECT_START =>
           ed.putBoolean("isConnecting", true)
           val pm: PowerManager = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-          mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "GAEProxy")
+          mWakeLock = pm
+            .newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
+            "GAEProxy")
           mWakeLock.acquire()
         case MSG_CONNECT_FINISH =>
           ed.putBoolean("isConnecting", false)
@@ -519,46 +596,4 @@ class ShadowsocksService extends Service {
       super.handleMessage(msg)
     }
   }
-
-  val TAG = "ShadowsocksService"
-  val BASE = "/data/data/com.github.shadowsocks/"
-  val REDSOCKS_CONF = "base {" + " log_debug = off;" + " log_info = off;" + " log = stderr;" + " daemon = on;" + " redirector = iptables;" + "}" + "redsocks {" + " local_ip = 127.0.0.1;" + " local_port = 8123;" + " ip = 127.0.0.1;" + " port = %d;" + " type = socks5;" + "}"
-  val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
-  val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
-  val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
-  val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j DNAT --to-destination 127.0.0.1:8123\n"
-  val MSG_CONNECT_START: Int = 0
-  val MSG_CONNECT_FINISH: Int = 1
-  val MSG_CONNECT_SUCCESS: Int = 2
-  val MSG_CONNECT_FAIL: Int = 3
-  val MSG_HOST_CHANGE: Int = 4
-  val MSG_STOP_SELF: Int = 5
-  val DNS_PORT: Int = 8153
-
-  val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
-  val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
-  val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
-
-  var receiver: BroadcastReceiver = null
-  var notificationManager: NotificationManager = null
-  var mWakeLock: PowerManager#WakeLock = null
-  var appHost: String = null
-  var remotePort: Int = 0
-  var localPort: Int = 0
-  var sitekey: String = null
-  var settings: SharedPreferences = null
-  var hasRedirectSupport: Boolean = true
-  var isGlobalProxy: Boolean = false
-  var isGFWList: Boolean = false
-  var isBypassApps: Boolean = false
-  var isDNSProxy: Boolean = false
-  var isHTTPProxy: Boolean = false
-  var encMethod: String = null
-  var apps: Array[ProxiedApp] = null
-  var mSetForeground: Method = null
-  var mStartForeground: Method = null
-  var mStopForeground: Method = null
-  var mSetForegroundArgs = new Array[AnyRef](1)
-  var mStartForegroundArgs = new Array[AnyRef](2)
-  var mStopForegroundArgs = new Array[AnyRef](1)
 }

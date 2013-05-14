@@ -44,7 +44,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.preference.PreferenceManager
 
-
 class ShadowsocksReceiver extends BroadcastReceiver {
 
   val TAG = "Shadowsocks"
@@ -54,8 +53,7 @@ class ShadowsocksReceiver extends BroadcastReceiver {
     var versionName: String = null
     try {
       versionName = context.getPackageManager.getPackageInfo(context.getPackageName, 0).versionName
-    }
-    catch {
+    } catch {
       case e: PackageManager.NameNotFoundException => {
         versionName = "NONE"
       }
@@ -72,8 +70,7 @@ class ShadowsocksReceiver extends BroadcastReceiver {
         if (port <= 1024) {
           return
         }
-      }
-      catch {
+      } catch {
         case e: Exception => {
           return
         }
@@ -84,7 +81,6 @@ class ShadowsocksReceiver extends BroadcastReceiver {
         val it: Intent = new Intent(context, classOf[ShadowsocksService])
         context.startService(it)
       }
-
     }
   }
 }
