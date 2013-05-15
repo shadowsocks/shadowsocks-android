@@ -195,51 +195,6 @@ int BTap_Init (BTap *o, BReactor *reactor, char *devname, BTap_handler_error han
     return BTap_Init2(o, reactor, init_data, handler_error, handler_error_user);
 }
 
-#ifdef ANDROID
-int BTap_InitWithFD (BTap *o, BReactor *reactor, int fd, int mtu, BTap_handler_error handler_error, void *handler_error_user, int tun)
-{
-    ASSERT(tun == 0 || tun == 1)
-    
-    #ifndef BADVPN_LINUX
-
-    return 0;
-
-    #endif
-    
-    o->reactor = reactor;
-    o->handler_error = handler_error;
-    o->handler_error_user = handler_error_user;
-    o->frame_mtu = mtu;
-    o->fd = fd;
-
-    // init file descriptor object
-    BFileDescriptor_Init(&o->bfd, o->fd, (BFileDescriptor_handler)fd_handler, o);
-    if (!BReactor_AddFileDescriptor(o->reactor, &o->bfd)) {
-        BLog(BLOG_ERROR, "BReactor_AddFileDescriptor failed");
-        goto fail1;
-    }
-    o->poll_events = 0;
-    
-    goto success;
-    
-fail1:
-    ASSERT_FORCE(close(o->fd) == 0)
-fail0:
-    return 0;
-    
-success:
-    // init output
-    PacketRecvInterface_Init(&o->output, o->frame_mtu, (PacketRecvInterface_handler_recv)output_handler_recv, o, BReactor_PendingGroup(o->reactor));
-    
-    // set no output packet
-    o->output_packet = NULL;
-    
-    DebugError_Init(&o->d_err, BReactor_PendingGroup(o->reactor));
-    DebugObject_Init(&o->d_obj);
-    return 1;
-}
-#endif
-
 int BTap_Init2 (BTap *o, BReactor *reactor, struct BTap_init_data init_data, BTap_handler_error handler_error, void *handler_error_user)
 {
     ASSERT(init_data.dev_type == BTAP_DEV_TUN || init_data.dev_type == BTAP_DEV_TAP)

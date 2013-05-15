@@ -107,10 +107,6 @@ typedef struct {
  */
 int BTap_Init (BTap *o, BReactor *bsys, char *devname, BTap_handler_error handler_error, void *handler_error_user, int tun) WARN_UNUSED;
 
-#ifdef ANDROID
-int BTap_InitWithFD (BTap *o, BReactor *bsys, int fd, int mtu, BTap_handler_error handler_error, void *handler_error_user, int tun) WARN_UNUSED;
-#endif
-
 enum BTap_dev_type {BTAP_DEV_TUN, BTAP_DEV_TAP};
 
 enum BTap_init_type {

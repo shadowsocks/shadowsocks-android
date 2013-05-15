@@ -392,8 +392,15 @@ int main (int argc, char **argv)
     
 #ifdef ANDROID
     // use supplied file descriptor
-    if (!BTap_InitWithFD(&device, &ss, options.tun_fd, options.tun_mtu, device_error_handler, NULL, 1)) {
-        BLog(BLOG_ERROR, "BTap_InitWithFD failed");
+
+    struct BTap_init_data init_data;
+    init_data.dev_type = BTAP_DEV_TUN;
+    init_data.init_type = BTAP_INIT_FD;
+    init_data.init.fd.fd = options.tun_fd;
+    init_data.init.fd.mtu = options.tun_mtu;
+    
+    if (!BTap_Init2(&device, &ss, init_data, device_error_handler, NULL)) {
+        BLog(BLOG_ERROR, "BTap_Init2 failed");
         goto fail3;
     }
 #else
