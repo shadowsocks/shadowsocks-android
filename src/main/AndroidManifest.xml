@@ -16,13 +16,13 @@
             android:targetSdkVersion="16"/>
 
     <application
-            android:name="com.github.shadowsocks.ShadowsocksApplication"
+            android:name=".ShadowsocksApplication"
             android:hardwareAccelerated="true"
             android:icon="@drawable/ic_launcher"
             android:label="@string/app_name">
 
         <activity
-                android:name="com.github.shadowsocks.Shadowsocks"
+                android:name=".Shadowsocks"
                 android:label="@string/app_name"
                 android:theme="@style/Theme.GAEProxy"
                 android:launchMode="singleTask">
@@ -32,8 +32,14 @@
             </intent-filter>
         </activity>
 
+      <activity
+          android:name=".ShadowVpnActivity"
+          android:theme="@android:style/Theme.Translucent.NoTitleBar"
+          android:launchMode="singleTask">
+      </activity>
+
         <activity
-                android:name="com.github.shadowsocks.AppManager"
+                android:name=".AppManager"
                 android:theme="@style/Theme.GAEProxy"
                 android:label="@string/app_name">
             <intent-filter>
@@ -43,11 +49,11 @@
         </activity>
 
         <service
-                android:name="com.github.shadowsocks.ShadowsocksService"
+                android:name=".ShadowsocksService"
                 android:enabled="true"/>
 
         <service
-                android:name="com.github.shadowsocks.ShadowVpnService"
+                android:name=".ShadowVpnService"
                 android:label="@string/app_name"
                 android:permission="android.permission.BIND_VPN_SERVICE"
                 android:exported="false">
@@ -56,7 +62,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name="com.github.shadowsocks.ShadowsocksReceiver">
+        <receiver android:name=".ShadowsocksReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>

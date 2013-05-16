@@ -37,7 +37,7 @@
  */
 package com.github.shadowsocks
 
-import android.app.{NotificationManager, Notification, PendingIntent, Service}
+import android.app._
 import android.content._
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -166,10 +166,15 @@ class ShadowVpnService extends VpnService {
   }
 
   def handleCommand(intent: Intent) {
-    if (intent == null) {
+
+    if (VpnService.prepare(this) != null) {
+      val i = new Intent(this, classOf[ShadowVpnActivity])
+      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      startActivity(i)
       stopSelf()
       return
     }
+
     appHost = settings.getString("proxy", "127.0.0.1")
     sitekey = settings.getString("sitekey", "default")
     encMethod = settings.getString("encMethod", "table")
@@ -362,7 +367,6 @@ class ShadowVpnService extends VpnService {
     super.onCreate()
     EasyTracker.getTracker.sendEvent("service", "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
-
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
 
