@@ -1,21 +1,29 @@
+---
 language: scala
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install libc6-dev-i386
-  - sudo apt-get install lib32ncurses5-dev
-  - sudo apt-get install libx11-dev
-  - sudo apt-get install g++-multilib
-  - sudo apt-get install lib32z1-dev
-  - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
-  - tar -zxf android-sdk_r21-linux.tgz
-  - export ANDROID_HOME=`pwd`/android-sdk-linux
-  - export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-  - android update sdk --filter tools,platform-tools,android-16,addon-google_apis-google-16,extra-android-support,extra-google-admob_ads_sdk,extra-google-analytics_sdk,extra-google-gcm,extra-google-play_apk_expansion,extra-google-play_billing,extra-google-play_licensing --no-ui --force --no-https -a
+- sudo apt-get update
+- sudo apt-get install libc6-dev-i386
+- sudo apt-get install lib32ncurses5-dev
+- sudo apt-get install libx11-dev
+- sudo apt-get install g++-multilib
+- sudo apt-get install lib32z1-dev
+- wget http://dl.google.com/android/android-sdk_r21-linux.tgz
+- tar -zxf android-sdk_r21-linux.tgz
+- export ANDROID_HOME=`pwd`/android-sdk-linux
+- export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+- android update sdk --filter tools,platform-tools,android-16,addon-google_apis-google-16,extra-android-support,extra-google-admob_ads_sdk,extra-google-analytics_sdk,extra-google-gcm,extra-google-play_apk_expansion,extra-google-play_billing,extra-google-play_licensing --no-ui --force --no-https -a
 install:
-  - sudo pip install python-swiftclient
-script: 
-  - wget https://raw.github.com/paulp/sbt-extras/master/sbt
-  - chmod u+x ./sbt
-  - cp local.sbt.example local.sbt
-  - ./sbt android:package-debug
-  - ./sbt deploy
+- gem install travis-artifacts
+script:
+- wget https://raw.github.com/paulp/sbt-extras/master/sbt
+- chmod u+x ./sbt
+- cp local.sbt.example local.sbt
+- ./sbt android:package-debug
+after_success:
+- ./sbt deploy
+env:
+  global:
+  - "ARTIFACTS_AWS_REGION=ap-northeast-1"
+  - "ARTIFACTS_S3_BUCKET=travis-nightly"
+  - secure: "GkAdnMh07id2VKhpCW16lE73A0LK2Jsk3hzkFvdx76JKW8FjLgaimLJ2T/+i\nxFfDw8XBinLE09dqg8JxSNS6JbLHLcav8P3yJIlzFh1NqfJABU9U4I8atb6P\nITSdSo9nb3LX6sB8SOU0nqXb5U+nj7jiekQqiBhmEmu6iDmMtfU="
+  - secure: "eCh5BjCFccp+sB/FIrjsmxJU4475D4qiWvDV++khcIHLel6lgUjDX18ImBlJ\n+IdiCKxvR6EpRDV1Cs4gJ2jZEAV0PbojQMoQOXbs1FLggM8RRq/Re1qWQFq7\nWkBRjjr8w8ddjJZHRo459cTUvgvD7krhp07coabAnEahDaGWSUo="
