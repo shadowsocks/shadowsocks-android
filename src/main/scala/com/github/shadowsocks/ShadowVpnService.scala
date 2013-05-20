@@ -250,7 +250,6 @@ class ShadowVpnService extends VpnService {
     val t: Thread = new Thread {
       override def run() {
         Exec.waitFor(-pid)
-        Log.d(TAG, "Successfully exit pid: " + pid)
       }
     }
     t.start()
@@ -326,16 +325,13 @@ class ShadowVpnService extends VpnService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--pid %stun2socks.pid")
-      .format(localAddress.format(2), udpgw, localPort, fd, VPN_MTU, BASE)
+      + "--pid %stun2socks.pid").format(localAddress.format(2), udpgw, localPort, fd, VPN_MTU, BASE)
 
-    Log.d(TAG, cmd)
     System.exec(cmd)
   }
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
-
     startShadowsocksDaemon()
     startVpn()
     true

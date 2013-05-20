@@ -276,7 +276,6 @@ class ShadowsocksService extends Service {
     val t: Thread = new Thread {
       override def run() {
         Exec.waitFor(-pid)
-        Log.d(TAG, "Successfully exit pid: " + pid)
       }
     }
     t.start()
@@ -498,8 +497,7 @@ class ShadowsocksService extends Service {
       }
     }
     if (isGlobalProxy || isBypassApps) {
-      http_sb
-        .append(if (hasRedirectSupport) {
+      http_sb.append(if (hasRedirectSupport) {
         Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
       } else {
         Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
@@ -515,13 +513,11 @@ class ShadowsocksService extends Service {
       }
       for (uid <- uidSet) {
         if (!isBypassApps) {
-          http_sb
-            .append((if (hasRedirectSupport) {
+          http_sb.append((if (hasRedirectSupport) {
             Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
           } else {
             Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
-          })
-            .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          }).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
         } else {
           init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
         }

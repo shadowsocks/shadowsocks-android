@@ -8,15 +8,14 @@ class SummaryEditTextPreference(context: Context, attrs: AttributeSet, defStyle:
   extends EditTextPreference(context, attrs, defStyle) {
 
   def this(context: Context, attrs: AttributeSet) = {
-    this (context, attrs, android.R.attr.editTextPreferenceStyle)
+    this(context, attrs, android.R.attr.editTextPreferenceStyle)
     mDefaultSummary = getSummary
   }
 
   override def setSummary(summary: CharSequence) {
     if (summary.toString.isEmpty) {
       super.setSummary(mDefaultSummary)
-    }
-    else {
+    } else {
       super.setSummary(summary)
     }
   }

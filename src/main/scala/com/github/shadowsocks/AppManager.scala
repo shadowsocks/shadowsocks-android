@@ -221,8 +221,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
     super.onCreate(savedInstanceState)
     this.setContentView(R.layout.layout_apps)
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
-    getWindowManager
-      .addView(overlay, new
+    getWindowManager.addView(overlay, new
         WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
           WindowManager.LayoutParams.TYPE_APPLICATION,
           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
