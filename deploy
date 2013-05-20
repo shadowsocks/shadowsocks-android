@@ -1,0 +1,3 @@
+#!/bin/bash
+cd ${1}
+travis-artifacts upload --path ${2} --target-path /
