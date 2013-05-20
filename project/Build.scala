@@ -51,7 +51,7 @@ object AndroidBuild extends Build {
   val deploy = TaskKey[Unit]("deploy", "deploy to the build server")
 
   val deployTask = deploy := {
-    "./travis-artifacts upload --path target/shadowsocks-" + App.version + ".apk" !;
+    "travis-artifacts upload --path target/shadowsocks-" + App.version + ".apk" !;
     println("Deploy successfully")
   }
 
