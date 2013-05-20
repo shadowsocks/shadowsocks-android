@@ -201,6 +201,7 @@ class ShadowsocksService extends Service {
       stopSelf()
       return
     }
+
     appHost = settings.getString("proxy", "127.0.0.1")
     sitekey = settings.getString("sitekey", "default")
     encMethod = settings.getString("encMethod", "table")
@@ -229,6 +230,9 @@ class ShadowsocksService extends Service {
     new Thread(new Runnable {
       def run() {
         handler.sendEmptyMessage(MSG_CONNECT_START)
+
+        killProcesses()
+
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
           Utils.resolve(appHost, enableIPv6 = true) match {
@@ -243,6 +247,7 @@ class ShadowsocksService extends Service {
 
         Log.d(TAG, "IPTABLES: " + Utils.getIptables)
         hasRedirectSupport = Utils.getHasRedirectSupport
+
         if (resolved && handleConnection) {
           notifyForegroundAlert(getString(R.string.forward_success),
             getString(R.string.service_running))
@@ -406,7 +411,7 @@ class ShadowsocksService extends Service {
     stopForegroundCompat(1)
     new Thread {
       override def run() {
-        onDisconnect()
+        killProcesses()
       }
     }.start()
 
@@ -424,7 +429,7 @@ class ShadowsocksService extends Service {
     super.onDestroy()
   }
 
-  def onDisconnect() {
+  def killProcesses() {
     Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
 
     val sb = new StringBuilder

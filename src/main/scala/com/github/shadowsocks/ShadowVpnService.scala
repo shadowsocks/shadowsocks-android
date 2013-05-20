@@ -81,6 +81,9 @@ class ShadowVpnService extends VpnService {
   val MSG_STOP_SELF: Int = 5
   val VPN_MTU = 1500
 
+  val PRIVATE_VLAN_10 = "10.254.254.%d"
+  val PRIVATE_VLAN_172 = "172.30.254.%d"
+
   var conn: ParcelFileDescriptor = null
   var udpgw: String = null
   var notificationManager: NotificationManager = null
@@ -204,6 +207,8 @@ class ShadowVpnService extends VpnService {
       def run() {
         handler.sendEmptyMessage(MSG_CONNECT_START)
 
+        killProcesses()
+
         // Resolve server address
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
@@ -265,11 +270,16 @@ class ShadowVpnService extends VpnService {
     val prefix2 = address.slice(0, 2).mkString(".")
     val prefix3 = address.slice(0, 3).mkString(".")
 
+    val localAddress = Utils.getIPv4Address match {
+      case Some(ip) if ip.split('.')(0) == "172" => PRIVATE_VLAN_10
+      case _ => PRIVATE_VLAN_172
+    }
+
     val builder = new Builder()
     builder
       .setSession(getString(R.string.app_name))
       .setMtu(VPN_MTU)
-      .addAddress("172.16.0.1", 24)
+      .addAddress(localAddress.format(1), 24)
       .addDnsServer("8.8.8.8")
       .addDnsServer("8.8.4.4")
 
@@ -310,10 +320,14 @@ class ShadowVpnService extends VpnService {
     val fd = conn.getFd
 
     val cmd = (BASE +
-      "tun2socks --netif-ipaddr 172.16.0.2  --udpgw-remote-server-addr %s:7300 " +
-      "--netif-netmask 255.255.255.0 --socks-server-addr 127.0.0.1:%d --tunfd %d --tunmtu %d --pid " +
-      BASE +
-      "tun2socks.pid").format(udpgw, localPort, fd, VPN_MTU)
+      "tun2socks --netif-ipaddr %s "
+      + "--udpgw-remote-server-addr %s:7300 "
+      + "--netif-netmask 255.255.255.0 "
+      + "--socks-server-addr 127.0.0.1:%d "
+      + "--tunfd %d "
+      + "--tunmtu %d "
+      + "--pid %stun2socks.pid")
+      .format(localAddress.format(2), udpgw, localPort, fd, VPN_MTU, BASE)
 
     Log.d(TAG, cmd)
     System.exec(cmd)
@@ -321,6 +335,7 @@ class ShadowVpnService extends VpnService {
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
+
     startShadowsocksDaemon()
     startVpn()
     true
@@ -391,7 +406,7 @@ class ShadowVpnService extends VpnService {
     }
     new Thread {
       override def run() {
-        onDisconnect()
+        killProcesses()
       }
     }.start()
     val ed: SharedPreferences.Editor = settings.edit
@@ -412,7 +427,7 @@ class ShadowVpnService extends VpnService {
     super.onDestroy()
   }
 
-  def onDisconnect() {
+  def killProcesses() {
     val sb = new StringBuilder
     if (!waitForProcess("shadowsocks")) {
       sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
