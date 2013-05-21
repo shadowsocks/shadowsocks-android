@@ -76,7 +76,7 @@
   <string name="about">About</string>
   <string name="about_title">Shadowsocks %s</string>
   <string name="donate">Donate</string>
-  <string name="donate_address">http://forum.xda-developers.com/donatetome.php?u=3604670</string>
+  <string name="donate_address">http://buildbot.sinaapp.com/donate.html</string>
 
 
 </resources>
