@@ -471,16 +471,24 @@ class Shadowsocks
           switchButton.setChecked(false)
           Crouton.cancelAllCroutons()
         }
+
+        val msg = settings.getString("vpnError", null)
+        if (msg != null) {
+          Crouton.cancelAllCroutons()
+          val style = new Style.Builder()
+            .setBackgroundColorValue(Style.holoRedLight)
+            .setDuration(Style.DURATION_INFINITE)
+            .build()
+          Crouton.makeText(this, getString(R.string.vpn_error).format(msg), style).show()
+        }
       }
     }
     if (key == "isConnecting") {
       if (settings.getBoolean("isConnecting", false)) {
-        Log.d(Shadowsocks.TAG, "Connecting start")
         if (progressDialog == null) {
           progressDialog = ProgressDialog.show(this, "", getString(R.string.connecting), true, true)
         }
       } else {
-        Log.d(Shadowsocks.TAG, "Connecting finish")
         if (progressDialog != null) {
           progressDialog.dismiss()
           progressDialog = null

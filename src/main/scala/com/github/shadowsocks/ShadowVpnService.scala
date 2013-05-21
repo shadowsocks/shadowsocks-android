@@ -79,6 +79,8 @@ class ShadowVpnService extends VpnService {
   val MSG_CONNECT_FAIL: Int = 3
   val MSG_HOST_CHANGE: Int = 4
   val MSG_STOP_SELF: Int = 5
+  val MSG_VPN_ERROR: Int = 6
+
   val VPN_MTU = 1500
 
   val PRIVATE_VLAN_10 = "10.254.254.%d"
@@ -107,6 +109,7 @@ class ShadowVpnService extends VpnService {
       msg.what match {
         case MSG_CONNECT_START =>
           ed.putBoolean("isConnecting", true)
+          ed.remove("vpnError")
         case MSG_CONNECT_FINISH =>
           ed.putBoolean("isConnecting", false)
         case MSG_CONNECT_SUCCESS =>
@@ -115,6 +118,8 @@ class ShadowVpnService extends VpnService {
           ed.putBoolean("isRunning", false)
         case MSG_HOST_CHANGE =>
           ed.putString("appHost", appHost)
+        case MSG_VPN_ERROR =>
+          if (msg.obj != null) ed.putString("vpnError", msg.obj.asInstanceOf[String])
         case MSG_STOP_SELF =>
           destroy()
           stopSelf()
@@ -310,7 +315,19 @@ class ShadowVpnService extends VpnService {
       }
     }
 
-    conn = builder.establish()
+    try {
+      conn = builder.establish()
+    } catch {
+      case ex: IllegalStateException => {
+        val msg = new Message()
+        msg.what = MSG_VPN_ERROR
+        msg.obj = ex.getMessage
+        handler.sendMessage(msg)
+        conn = null
+      }
+      case ex: Exception => conn = null
+    }
+
     if (conn == null) {
       stopSelf()
       return
