@@ -367,7 +367,7 @@ class ShadowsocksService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    EasyTracker.getTracker.sendEvent("service", "start", getVersionName, 0L)
+    EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
     notificationManager = this
       .getSystemService(Context.NOTIFICATION_SERVICE)
@@ -406,7 +406,7 @@ class ShadowsocksService extends Service {
 
   /** Called when the activity is closed. */
   override def onDestroy() {
-    EasyTracker.getTracker.sendEvent("service", "stop", getVersionName, 0L)
+    EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     stopForegroundCompat(1)
     new Thread {
       override def run() {

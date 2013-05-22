@@ -393,7 +393,7 @@ class ShadowVpnService extends VpnService {
 
   override def onCreate() {
     super.onCreate()
-    EasyTracker.getTracker.sendEvent("service", "start", getVersionName, 0L)
+    EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
@@ -412,7 +412,7 @@ class ShadowVpnService extends VpnService {
   }
 
   def destroy() {
-    EasyTracker.getTracker.sendEvent("service", "stop", getVersionName, 0L)
+    EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null

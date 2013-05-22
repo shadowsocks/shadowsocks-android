@@ -66,7 +66,7 @@ import java.util.Hashtable
 import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment
 import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity
 import org.jraf.android.backport.switchwidget.Switch
-import android.content.pm.PackageManager
+import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Uri, VpnService}
 import android.webkit.{WebViewClient, WebView}
 
@@ -270,6 +270,19 @@ class Shadowsocks
     Utils.runRootCommand(sb.toString())
   }
 
+  private def getVersionName: String = {
+    var version: String = null
+    try {
+      val pi: PackageInfo = getPackageManager.getPackageInfo(getPackageName, 0)
+      version = pi.versionName
+    } catch {
+      case e: PackageManager.NameNotFoundException => {
+        version = "Package name not found"
+      }
+    }
+    version
+  }
+
   private def isTextEmpty(s: String, msg: String): Boolean = {
     if (s == null || s.length <= 0) {
       showDialog(msg)
@@ -380,12 +393,18 @@ class Shadowsocks
 
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
     item.getItemId match {
-      case 0 =>
+      case 0 => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "reset", getVersionName, 0L)
         recovery()
-      case 1 =>
+      }
+      case 1 => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
         showAbout()
-      case 2 =>
+      }
+      case 2 => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "donate", getVersionName, 0L)
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.donate_address))))
+      }
     }
     super.onOptionsItemSelected(item)
   }
