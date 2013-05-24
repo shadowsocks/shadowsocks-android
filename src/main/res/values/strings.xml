@@ -32,10 +32,10 @@
   <array name="enc_method_value">
     <item>table</item>
     <item>rc4</item>
-    <item>aes-128-cfba</item>
-    <item>aes-192-cfba</item>
-    <item>aes-256-cfbb</item>
-    <item>bf-cfbc</item>
+    <item>aes-128-cfb</item>
+    <item>aes-192-cfb</item>
+    <item>aes-256-cfb</item>
+    <item>bf-cfb</item>
     <item>cast5-cfb</item>
     <item>des-cfb</item>
   </array>
