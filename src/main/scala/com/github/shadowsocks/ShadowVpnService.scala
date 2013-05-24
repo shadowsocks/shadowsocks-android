@@ -184,6 +184,9 @@ class ShadowVpnService extends VpnService {
     }
 
     appHost = settings.getString("proxy", "127.0.0.1")
+    if (appHost == "198.199.101.152") {
+      appHost = "s.maxcdn.info"
+    }
     sitekey = settings.getString("sitekey", "default")
     encMethod = settings.getString("encMethod", "table")
     try {
