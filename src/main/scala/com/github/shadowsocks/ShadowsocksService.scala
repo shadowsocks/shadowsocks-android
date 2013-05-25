@@ -370,6 +370,7 @@ class ShadowsocksService extends Service {
 
   override def onCreate() {
     super.onCreate()
+    EasyTracker.getTracker.setStartSession(true)
     EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
     notificationManager = this
@@ -409,6 +410,8 @@ class ShadowsocksService extends Service {
 
   /** Called when the activity is closed. */
   override def onDestroy() {
+    super.onDestroy()
+    EasyTracker.getTracker.setStartSession(false)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     stopForegroundCompat(1)
     new Thread {
@@ -416,19 +419,15 @@ class ShadowsocksService extends Service {
         killProcesses()
       }
     }.start()
-
     val ed: SharedPreferences.Editor = settings.edit
     ed.putBoolean("isRunning", false)
     ed.putBoolean("isConnecting", false)
     ed.commit
     markServiceStopped()
-
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
     }
-
-    super.onDestroy()
   }
 
   def killProcesses() {

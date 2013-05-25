@@ -67,6 +67,7 @@ import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
+import com.google.analytics.tracking.android.EasyTracker
 
 case class ProxiedApp(uid: Int, name: String, var proxied: Boolean)
 
@@ -246,8 +247,14 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
     }.start()
   }
 
+  protected override def onStart() {
+    super.onStart()
+    EasyTracker.getInstance.activityStart(this)
+  }
+
   protected override def onStop() {
     super.onStop()
+    EasyTracker.getInstance.activityStop(this)
   }
 
   def saveAppSettings(context: Context) {

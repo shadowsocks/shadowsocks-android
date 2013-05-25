@@ -396,6 +396,7 @@ class ShadowVpnService extends VpnService {
 
   override def onCreate() {
     super.onCreate()
+    EasyTracker.getTracker.setStartSession(true)
     EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
     settings = PreferenceManager.getDefaultSharedPreferences(this)
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
@@ -439,8 +440,10 @@ class ShadowVpnService extends VpnService {
 
   /** Called when the activity is closed. */
   override def onDestroy() {
-    destroy()
     super.onDestroy()
+    EasyTracker.getTracker.setStartSession(false)
+    EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
+    destroy()
   }
 
   def killProcesses() {
