@@ -63,7 +63,6 @@ class ShadowVpnService extends VpnService {
   val TAG = "ShadowVpnService"
   val BASE = "/data/data/com.github.shadowsocks/"
   val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
-  val MSG_CONNECT_START = 0
   val MSG_CONNECT_FINISH = 1
   val MSG_CONNECT_SUCCESS = 2
   val MSG_CONNECT_FAIL = 3
@@ -103,30 +102,27 @@ class ShadowVpnService extends VpnService {
     if (state != s) {
       state = s
       if (m != null) message = m
-      sendBroadcast(new Intent(Utils.ACTION_UPDATE_STATE))
+      val intent = new Intent(Action.UPDATE_STATE)
+      intent.putExtra(Extra.STATE, state)
+      intent.putExtra(Extra.MESSAGE, message)
+      sendBroadcast(intent)
     }
   }
 
   val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
-      val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
-        case MSG_CONNECT_START =>
-          changeState(State.CONNECTING)
         case MSG_CONNECT_SUCCESS =>
           changeState(State.CONNECTED)
-          ed.putBoolean("isRunning", true)
         case MSG_CONNECT_FAIL =>
-          changeState(State.FAILED)
-          ed.putBoolean("isRunning", false)
+          changeState(State.STOPPED)
         case MSG_VPN_ERROR =>
-          if (msg.obj != null) changeState(State.FAILED, msg.obj.asInstanceOf[String])
+          if (msg.obj != null) changeState(State.STOPPED, msg.obj.asInstanceOf[String])
         case MSG_STOP_SELF =>
           destroy()
           stopSelf()
         case _ =>
       }
-      ed.commit
       super.handleMessage(msg)
     }
   }
@@ -185,6 +181,10 @@ class ShadowVpnService extends VpnService {
       return
     }
 
+    settings.edit().putBoolean("isRunning", true).commit()
+
+    changeState(State.CONNECTING)
+
     appHost = settings.getString("proxy", "127.0.0.1")
     if (appHost == "198.199.101.152") {
       appHost = "s.maxcdn.info"
@@ -213,9 +213,9 @@ class ShadowVpnService extends VpnService {
     if (isHTTPProxy) {
       localPort -= 1
     }
+
     new Thread(new Runnable {
       def run() {
-        handler.sendEmptyMessage(MSG_CONNECT_START)
 
         killProcesses()
 
@@ -384,16 +384,7 @@ class ShadowVpnService extends VpnService {
     if (VpnService.SERVICE_INTERFACE == action) {
       return super.onBind(intent)
     }
-
-    new IStateService.Stub {
-      def getMessage: String = {
-        val m = message
-        message = null
-        m
-      }
-
-      def getState: Int = state
-    }
+    null
   }
 
   override def onCreate() {
@@ -407,7 +398,7 @@ class ShadowVpnService extends VpnService {
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Utils.ACTION_CLOSE)
+    filter.addAction(Action.CLOSE)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
         destroy()
@@ -419,6 +410,7 @@ class ShadowVpnService extends VpnService {
 
   def destroy() {
     changeState(State.STOPPED)
+    settings.edit.putBoolean("isRunning", false).commit
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     if (receiver != null) {
       unregisterReceiver(receiver)
@@ -429,9 +421,6 @@ class ShadowVpnService extends VpnService {
         killProcesses()
       }
     }.start()
-    val ed: SharedPreferences.Editor = settings.edit
-    ed.putBoolean("isRunning", false)
-    ed.commit
     if (conn != null) {
       conn.close()
       conn = null

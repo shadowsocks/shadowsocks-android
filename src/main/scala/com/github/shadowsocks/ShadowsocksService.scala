@@ -90,7 +90,6 @@ class ShadowsocksService extends Service {
     "-j DNAT --to-destination 127.0.0.1:8123\n"
   val DNS_PORT = 8153
 
-  val MSG_CONNECT_START = 0
   val MSG_CONNECT_FINISH = 1
   val MSG_CONNECT_SUCCESS = 2
   val MSG_CONNECT_FAIL = 3
@@ -128,7 +127,9 @@ class ShadowsocksService extends Service {
   private def changeState(s: Int) {
     if (state != s) {
       state = s
-      sendBroadcast(new Intent(Utils.ACTION_UPDATE_STATE))
+      val intent = new Intent(Action.UPDATE_STATE)
+      intent.putExtra(Extra.STATE, state)
+      sendBroadcast(intent)
     }
   }
 
@@ -136,14 +137,11 @@ class ShadowsocksService extends Service {
     override def handleMessage(msg: Message) {
       val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
-        case MSG_CONNECT_START =>
-          changeState(State.CONNECTING)
         case MSG_CONNECT_SUCCESS =>
           changeState(State.CONNECTED)
           ed.putBoolean("isRunning", true)
         case MSG_CONNECT_FAIL =>
-          changeState(State.FAILED)
-          ed.putBoolean("isRunning", false)
+          changeState(State.STOPPED)
         case MSG_STOP_SELF =>
           stopSelf()
         case _ =>
@@ -219,6 +217,8 @@ class ShadowsocksService extends Service {
       return
     }
 
+    changeState(State.CONNECTING)
+
     appHost = settings.getString("proxy", "127.0.0.1")
     if (appHost == "198.199.101.152") {
       appHost = "s.maxcdn.info"
@@ -249,7 +249,6 @@ class ShadowsocksService extends Service {
     }
     new Thread(new Runnable {
       def run() {
-        handler.sendEmptyMessage(MSG_CONNECT_START)
 
         killProcesses()
 
@@ -341,7 +340,7 @@ class ShadowsocksService extends Service {
     val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent: Intent = new Intent(Utils.ACTION_CLOSE)
+    val closeIntent: Intent = new Intent(Action.CLOSE)
     val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
     builder
@@ -373,10 +372,7 @@ class ShadowsocksService extends Service {
   }
 
   def onBind(intent: Intent): IBinder = {
-    new IStateService.Stub {
-      def getMessage: String = null
-      def getState: Int = state
-    }
+    null
   }
 
   override def onCreate() {
@@ -410,7 +406,7 @@ class ShadowsocksService extends Service {
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Utils.ACTION_CLOSE)
+    filter.addAction(Action.CLOSE)
     receiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
         stopSelf()

@@ -54,17 +54,23 @@ import android.app.ActivityManager
 
 object State {
   val INIT = 0
-  val CONNECTED = 1
-  val CONNECTING = 2
-  val FAILED = 3
-  val STOPPED = 4
+  val CONNECTING = 1
+  val CONNECTED = 2
+  val STOPPED = 3
+}
+
+object Action {
+  val CLOSE = "com.github.shadowsocks.ACTION_SHUTDOWN"
+  val UPDATE_STATE = "com.github.shadowsocks.ACTION_UPDATE_STATE"
+  val UPDATE_FRAGMENT = "com.github.shadowsocks.ACTION_UPDATE_FRAGMENT"
+}
+
+object Extra {
+  val STATE = "state"
+  val MESSAGE = "message"
 }
 
 object Utils {
-
-  val ACTION_CLOSE = "com.github.shadowsocks.ACTION_SHUTDOWN"
-  val ACTION_UPDATE_STATE = "com.github.shadowsocks.ACTION_UPDATE_STATE"
-  val ACTION_UPDATE_FRAGMENT = "com.github.shadowsocks.ACTION_UPDATE_FRAGMENT"
 
   val TAG: String = "Shadowsocks"
   val ABI_PROP: String = "ro.product.cpu.abi"

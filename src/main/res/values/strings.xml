@@ -9,7 +9,7 @@
   <string name="service_summary">Enable / Disable Proxy</string>
 
   <!-- proxy category -->
-  <string name="proxy_cat">Shadowsocks Settings</string>
+  <string name="proxy_cat">Server Settings</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname of your Shadowsocks server</string>
   <string name="remote_port">Remote Port</string>

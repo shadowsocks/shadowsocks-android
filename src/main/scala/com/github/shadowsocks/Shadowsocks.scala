@@ -94,10 +94,10 @@ object Shadowsocks {
       }
     }
 
-    override def onStart() {
-      super.onStart()
+    override def onCreate(bundle: Bundle) {
+      super.onCreate(bundle)
       val filter = new IntentFilter()
-      filter.addAction(Utils.ACTION_UPDATE_FRAGMENT)
+      filter.addAction(Action.UPDATE_FRAGMENT)
       receiver = new BroadcastReceiver {
         def onReceive(p1: Context, p2: Intent) {
           setPreferenceEnabled()
@@ -106,8 +106,8 @@ object Shadowsocks {
       getActivity.getApplicationContext.registerReceiver(receiver, filter)
     }
 
-    override def onStop() {
-      super.onStop()
+    override def onDestroy() {
+      super.onDestroy()
       getActivity.getApplicationContext.unregisterReceiver(receiver)
     }
 
@@ -144,10 +144,10 @@ object Shadowsocks {
       }
     }
 
-    override def onStart() {
-      super.onStart()
+    override def onCreate(bundle: Bundle) {
+      super.onCreate(bundle)
       val filter = new IntentFilter()
-      filter.addAction(Utils.ACTION_UPDATE_FRAGMENT)
+      filter.addAction(Action.UPDATE_FRAGMENT)
       receiver = new BroadcastReceiver {
         def onReceive(p1: Context, p2: Intent) {
           setPreferenceEnabled()
@@ -156,8 +156,8 @@ object Shadowsocks {
       getActivity.getApplicationContext.registerReceiver(receiver, filter)
     }
 
-    override def onStop() {
-      super.onStop()
+    override def onDestroy() {
+      super.onDestroy()
       getActivity.getApplicationContext.unregisterReceiver(receiver)
     }
 
@@ -207,20 +207,7 @@ class Shadowsocks
   private var settings: SharedPreferences = null
   private var prepared = false
   private var state = State.INIT
-  private var binder: IStateService = null
   private var receiver: StateBroadcastReceiver = null
-
-  private val connection = new ServiceConnection {
-    def onServiceDisconnected(name: ComponentName) {
-      onStateChanged(binder.getState, binder.getMessage)
-      binder = null
-    }
-
-    def onServiceConnected(name: ComponentName, s: IBinder) {
-      binder = IStateService.Stub.asInterface(s)
-      onStateChanged(binder.getState, binder.getMessage)
-    }
-  }
 
   private val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
@@ -356,7 +343,8 @@ class Shadowsocks
   override def onCreate(savedInstanceState: Bundle) {
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
-    val switchLayout: RelativeLayout = getLayoutInflater
+
+    val switchLayout = getLayoutInflater
       .inflate(R.layout.layout_switch, null)
       .asInstanceOf[RelativeLayout]
     getSupportActionBar.setCustomView(switchLayout)
@@ -364,12 +352,15 @@ class Shadowsocks
     getSupportActionBar.setDisplayShowCustomEnabled(true)
     getSupportActionBar.setDisplayShowHomeEnabled(false)
 
-    switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
     val title: TextView = switchLayout.findViewById(R.id.title).asInstanceOf[TextView]
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     title.setText(R.string.app_name)
+
+    switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
     settings = PreferenceManager.getDefaultSharedPreferences(this)
+    receiver = new StateBroadcastReceiver()
+    registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
 
     val init: Boolean = !settings.getBoolean("isRunning", false) &&
       !settings.getBoolean("isConnecting", false)
@@ -464,11 +455,9 @@ class Shadowsocks
             .build()
           switchButton.setEnabled(false)
           Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
-          if (binder == null) bindService(new Intent(this, classOf[ShadowVpnService]), connection, 0)
-        } else {
-          if (binder == null) bindService(new Intent(this, classOf[ShadowsocksService]), connection, 0)
         }
         setPreferenceEnabled(false)
+        onStateChanged(State.CONNECTED, null)
       } else {
         switchButton.setEnabled(true)
         switchButton.setChecked(false)
@@ -482,6 +471,7 @@ class Shadowsocks
             }
           }.start()
         }
+        onStateChanged(State.STOPPED, null)
       }
     }
 
@@ -512,14 +502,11 @@ class Shadowsocks
 
   override def onStart() {
     super.onStart()
-    receiver = new StateBroadcastReceiver()
-    registerReceiver(receiver, new IntentFilter(Utils.ACTION_UPDATE_STATE))
     EasyTracker.getInstance.activityStart(this)
   }
 
   override def onStop() {
     super.onStop()
-    unregisterReceiver(receiver)
     EasyTracker.getInstance.activityStop(this)
     if (progressDialog != null) {
       progressDialog.dismiss()
@@ -530,7 +517,7 @@ class Shadowsocks
   override def onDestroy() {
     super.onDestroy()
     Crouton.cancelAllCroutons()
-    if (binder != null) unbindService(connection)
+    unregisterReceiver(receiver)
   }
 
   def reset() {
@@ -589,7 +576,7 @@ class Shadowsocks
       stopService(new Intent(this, classOf[ShadowVpnService]))
     }
     if (ShadowsocksService.isServiceStarted(this)) {
-      sendBroadcast(new Intent(Utils.ACTION_CLOSE))
+      sendBroadcast(new Intent(Action.CLOSE))
     }
   }
 
@@ -617,7 +604,6 @@ class Shadowsocks
       if (ShadowVpnService.isServiceStarted(this)) return false
       val it: Intent = new Intent(this, classOf[ShadowVpnService])
       startService(it)
-      bindService(it, connection, 0)
       val style = new Style.Builder()
         .setBackgroundColorValue(Style.holoBlueLight)
         .setDuration(Style.DURATION_INFINITE)
@@ -628,7 +614,6 @@ class Shadowsocks
       if (ShadowsocksService.isServiceStarted(this)) return false
       val it: Intent = new Intent(this, classOf[ShadowsocksService])
       startService(it)
-      bindService(it, connection, 0)
     }
     true
   }
@@ -702,7 +687,7 @@ class Shadowsocks
           if (!switchButton.isChecked) switchButton.setChecked(true)
           setPreferenceEnabled(false)
         }
-        case State.FAILED => {
+        case State.STOPPED => {
           clearDialog()
           if (switchButton.isChecked) {
             switchButton.setEnabled(true)
@@ -719,24 +704,16 @@ class Shadowsocks
           }
           setPreferenceEnabled(true)
         }
-        case State.STOPPED => {
-          clearDialog()
-          Crouton.cancelAllCroutons()
-          if (switchButton.isChecked) switchButton.setChecked(false)
-          setPreferenceEnabled(true)
-        }
       }
-      sendBroadcast(new Intent(Utils.ACTION_UPDATE_FRAGMENT))
+      sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
     }
   }
 
   class StateBroadcastReceiver extends BroadcastReceiver {
     override def onReceive(context: Context, intent: Intent) {
-      if (binder != null) {
-        val s = binder.getState
-        val m = binder.getMessage
-        onStateChanged(s, m)
-      }
+      val state = intent.getIntExtra(Extra.STATE, State.INIT)
+      val message = intent.getStringExtra(Extra.MESSAGE)
+      onStateChanged(state, message)
     }
   }
 }
