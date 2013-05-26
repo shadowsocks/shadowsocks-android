@@ -50,10 +50,22 @@ import scala.collection.mutable.ArrayBuffer
 import org.xbill.DNS._
 import scala.Some
 import android.graphics.{Canvas, Bitmap}
+import android.app.ActivityManager
+
+object State {
+  val INIT = 0
+  val CONNECTED = 1
+  val CONNECTING = 2
+  val FAILED = 3
+  val STOPPED = 4
+}
 
 object Utils {
 
-  val CLOSE_ACTION = "com.github.shadowsocks.ACTION_SHUTDOWN"
+  val ACTION_CLOSE = "com.github.shadowsocks.ACTION_SHUTDOWN"
+  val ACTION_UPDATE_STATE = "com.github.shadowsocks.ACTION_UPDATE_STATE"
+  val ACTION_UPDATE_FRAGMENT = "com.github.shadowsocks.ACTION_UPDATE_FRAGMENT"
+
   val TAG: String = "Shadowsocks"
   val ABI_PROP: String = "ro.product.cpu.abi"
   val ABI2_PROP: String = "ro.product.cpu.abi2"
@@ -74,6 +86,21 @@ object Utils {
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
+
+  def isServiceStarted(name: String, context: Context): Boolean = {
+    import scala.collection.JavaConversions._
+
+    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE).asInstanceOf[ActivityManager]
+    val services = activityManager.getRunningServices(Integer.MAX_VALUE)
+
+    for (service <- services) {
+      if (service.service.getClassName == name) {
+        return true
+      }
+    }
+
+    false
+  }
 
   def resolve(host: String, addrType: Int): Option[String] = {
     val lookup = new Lookup(host, addrType)

@@ -50,11 +50,13 @@
 
         <service
                 android:name=".ShadowsocksService"
-                android:enabled="true"/>
+                android:process=":proxy"
+                android:exported="false"/>
 
         <service
                 android:name=".ShadowVpnService"
                 android:label="@string/app_name"
+                android:process=":vpn"
                 android:permission="android.permission.BIND_VPN_SERVICE"
                 android:exported="false">
             <intent-filter>

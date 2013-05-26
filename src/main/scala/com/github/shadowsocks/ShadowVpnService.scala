@@ -47,25 +47,15 @@ import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.google.analytics.tracking.android.EasyTracker
 import java.io._
-import java.lang.ref.WeakReference
 import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
 import scala.Some
 
 object ShadowVpnService {
-  def isServiceStarted: Boolean = {
-    if (sRunningInstance == null) {
-      false
-    } else if (sRunningInstance.get == null) {
-      sRunningInstance = null
-      false
-    } else {
-      true
-    }
+  def isServiceStarted(context: Context): Boolean = {
+    Utils.isServiceStarted("com.github.shadowsocks.ShadowVpnService", context)
   }
-
-  var sRunningInstance: WeakReference[ShadowVpnService] = null
 }
 
 class ShadowVpnService extends VpnService {
@@ -73,13 +63,12 @@ class ShadowVpnService extends VpnService {
   val TAG = "ShadowVpnService"
   val BASE = "/data/data/com.github.shadowsocks/"
   val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
-  val MSG_CONNECT_START: Int = 0
-  val MSG_CONNECT_FINISH: Int = 1
-  val MSG_CONNECT_SUCCESS: Int = 2
-  val MSG_CONNECT_FAIL: Int = 3
-  val MSG_HOST_CHANGE: Int = 4
-  val MSG_STOP_SELF: Int = 5
-  val MSG_VPN_ERROR: Int = 6
+  val MSG_CONNECT_START = 0
+  val MSG_CONNECT_FINISH = 1
+  val MSG_CONNECT_SUCCESS = 2
+  val MSG_CONNECT_FAIL = 3
+  val MSG_STOP_SELF = 5
+  val MSG_VPN_ERROR = 6
 
   val VPN_MTU = 1500
 
@@ -103,26 +92,39 @@ class ShadowVpnService extends VpnService {
   var encMethod: String = null
   var apps: Array[ProxiedApp] = null
 
+  private var state = State.INIT
+  private var message: String = null
+
+  def changeState(s: Int) {
+    changeState(s, null)
+  }
+
+  def changeState(s: Int, m: String) {
+    if (state != s) {
+      state = s
+      if (m != null) message = m
+      sendBroadcast(new Intent(Utils.ACTION_UPDATE_STATE))
+    }
+  }
+
   val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
       val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
         case MSG_CONNECT_START =>
-          ed.putBoolean("isConnecting", true)
-          ed.remove("vpnError")
-        case MSG_CONNECT_FINISH =>
-          ed.putBoolean("isConnecting", false)
+          changeState(State.CONNECTING)
         case MSG_CONNECT_SUCCESS =>
+          changeState(State.CONNECTED)
           ed.putBoolean("isRunning", true)
         case MSG_CONNECT_FAIL =>
+          changeState(State.FAILED)
           ed.putBoolean("isRunning", false)
-        case MSG_HOST_CHANGE =>
-          ed.putString("appHost", appHost)
         case MSG_VPN_ERROR =>
-          if (msg.obj != null) ed.putString("vpnError", msg.obj.asInstanceOf[String])
+          if (msg.obj != null) changeState(State.FAILED, msg.obj.asInstanceOf[String])
         case MSG_STOP_SELF =>
           destroy()
           stopSelf()
+        case _ =>
       }
       ed.commit
       super.handleMessage(msg)
@@ -248,7 +250,6 @@ class ShadowVpnService extends VpnService {
         handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 300)
       }
     }).start()
-    markServiceStarted()
   }
 
   def waitForProcess(name: String): Boolean = {
@@ -362,14 +363,6 @@ class ShadowVpnService extends VpnService {
     notification.defaults |= Notification.DEFAULT_LIGHTS
   }
 
-  def markServiceStarted() {
-    ShadowVpnService.sRunningInstance = new WeakReference[ShadowVpnService](this)
-  }
-
-  def markServiceStopped() {
-    ShadowVpnService.sRunningInstance = null
-  }
-
   def notifyAlert(title: String, info: String) {
     val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -391,7 +384,16 @@ class ShadowVpnService extends VpnService {
     if (VpnService.SERVICE_INTERFACE == action) {
       return super.onBind(intent)
     }
-    null
+
+    new IStateService.Stub {
+      def getMessage: String = {
+        val m = message
+        message = null
+        m
+      }
+
+      def getState: Int = state
+    }
   }
 
   override def onCreate() {
@@ -405,7 +407,7 @@ class ShadowVpnService extends VpnService {
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Utils.CLOSE_ACTION)
+    filter.addAction(Utils.ACTION_CLOSE)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
         destroy()
@@ -416,6 +418,7 @@ class ShadowVpnService extends VpnService {
   }
 
   def destroy() {
+    changeState(State.STOPPED)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     if (receiver != null) {
       unregisterReceiver(receiver)
@@ -428,22 +431,20 @@ class ShadowVpnService extends VpnService {
     }.start()
     val ed: SharedPreferences.Editor = settings.edit
     ed.putBoolean("isRunning", false)
-    ed.putBoolean("isConnecting", false)
     ed.commit
     if (conn != null) {
       conn.close()
       conn = null
     }
     notificationManager.cancel(1)
-    markServiceStopped()
   }
 
   /** Called when the activity is closed. */
   override def onDestroy() {
-    super.onDestroy()
     EasyTracker.getTracker.setStartSession(false)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     destroy()
+    super.onDestroy()
   }
 
   def killProcesses() {

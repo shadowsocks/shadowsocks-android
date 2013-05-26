@@ -44,10 +44,7 @@ import android.app.Service
 import android.content._
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.os.Handler
-import android.os.IBinder
-import android.os.Message
-import android.os.PowerManager
+import android.os._
 import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.util.Log
@@ -56,7 +53,6 @@ import java.io.BufferedReader
 import java.io.FileNotFoundException
 import java.io.FileReader
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import org.apache.http.conn.util.InetAddressUtils
@@ -64,18 +60,9 @@ import scala.collection._
 import scala.Some
 
 object ShadowsocksService {
-  def isServiceStarted: Boolean = {
-    if (sRunningInstance == null) {
-      false
-    } else if (sRunningInstance.get == null) {
-      sRunningInstance = null
-      false
-    } else {
-      true
-    }
+  def isServiceStarted(context: Context): Boolean = {
+    Utils.isServiceStarted("com.github.shadowsocks.ShadowsocksService", context)
   }
-
-  var sRunningInstance: WeakReference[ShadowsocksService] = null
 }
 
 class ShadowsocksService extends Service {
@@ -101,13 +88,14 @@ class ShadowsocksService extends Service {
   val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123\n"
-  val MSG_CONNECT_START: Int = 0
-  val MSG_CONNECT_FINISH: Int = 1
-  val MSG_CONNECT_SUCCESS: Int = 2
-  val MSG_CONNECT_FAIL: Int = 3
-  val MSG_HOST_CHANGE: Int = 4
-  val MSG_STOP_SELF: Int = 5
-  val DNS_PORT: Int = 8153
+  val DNS_PORT = 8153
+
+  val MSG_CONNECT_START = 0
+  val MSG_CONNECT_FINISH = 1
+  val MSG_CONNECT_SUCCESS = 2
+  val MSG_CONNECT_FAIL = 3
+  val MSG_STOP_SELF = 4
+  val MSG_VPN_ERROR = 5
 
   val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
   val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
@@ -115,7 +103,6 @@ class ShadowsocksService extends Service {
 
   var receiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
-  var mWakeLock: PowerManager#WakeLock = null
   var appHost: String = null
   var remotePort: Int = 0
   var localPort: Int = 0
@@ -135,6 +122,36 @@ class ShadowsocksService extends Service {
   var mSetForegroundArgs = new Array[AnyRef](1)
   var mStartForegroundArgs = new Array[AnyRef](2)
   var mStopForegroundArgs = new Array[AnyRef](1)
+
+  private var state = State.INIT
+
+  private def changeState(s: Int) {
+    if (state != s) {
+      state = s
+      sendBroadcast(new Intent(Utils.ACTION_UPDATE_STATE))
+    }
+  }
+
+  val handler: Handler = new Handler {
+    override def handleMessage(msg: Message) {
+      val ed: SharedPreferences.Editor = settings.edit
+      msg.what match {
+        case MSG_CONNECT_START =>
+          changeState(State.CONNECTING)
+        case MSG_CONNECT_SUCCESS =>
+          changeState(State.CONNECTED)
+          ed.putBoolean("isRunning", true)
+        case MSG_CONNECT_FAIL =>
+          changeState(State.FAILED)
+          ed.putBoolean("isRunning", false)
+        case MSG_STOP_SELF =>
+          stopSelf()
+        case _ =>
+      }
+      ed.commit
+      super.handleMessage(msg)
+    }
+  }
 
   def getPid(name: String): Int = {
     try {
@@ -263,7 +280,6 @@ class ShadowsocksService extends Service {
         handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 500)
       }
     }).start()
-    markServiceStarted()
   }
 
   def startRedsocksDaemon() {
@@ -321,19 +337,11 @@ class ShadowsocksService extends Service {
     }
   }
 
-  def markServiceStarted() {
-    ShadowsocksService.sRunningInstance = new WeakReference[ShadowsocksService](this)
-  }
-
-  def markServiceStopped() {
-    ShadowsocksService.sRunningInstance = null
-  }
-
   def notifyForegroundAlert(title: String, info: String) {
     val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent: Intent = new Intent(Utils.CLOSE_ACTION)
+    val closeIntent: Intent = new Intent(Utils.ACTION_CLOSE)
     val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
     builder
@@ -365,7 +373,10 @@ class ShadowsocksService extends Service {
   }
 
   def onBind(intent: Intent): IBinder = {
-    null
+    new IStateService.Stub {
+      def getMessage: String = null
+      def getState: Int = state
+    }
   }
 
   override def onCreate() {
@@ -399,7 +410,7 @@ class ShadowsocksService extends Service {
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Utils.CLOSE_ACTION)
+    filter.addAction(Utils.ACTION_CLOSE)
     receiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
         stopSelf()
@@ -410,7 +421,7 @@ class ShadowsocksService extends Service {
 
   /** Called when the activity is closed. */
   override def onDestroy() {
-    super.onDestroy()
+    changeState(State.STOPPED)
     EasyTracker.getTracker.setStartSession(false)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     stopForegroundCompat(1)
@@ -421,13 +432,12 @@ class ShadowsocksService extends Service {
     }.start()
     val ed: SharedPreferences.Editor = settings.edit
     ed.putBoolean("isRunning", false)
-    ed.putBoolean("isConnecting", false)
     ed.commit
-    markServiceStopped()
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
     }
+    super.onDestroy()
   }
 
   def killProcesses() {
@@ -572,31 +582,5 @@ class ShadowsocksService extends Service {
     invokeMethod(mSetForeground, mSetForegroundArgs)
   }
 
-  val handler: Handler = new Handler {
-    override def handleMessage(msg: Message) {
-      val ed: SharedPreferences.Editor = settings.edit
-      msg.what match {
-        case MSG_CONNECT_START =>
-          ed.putBoolean("isConnecting", true)
-          val pm: PowerManager = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-          mWakeLock = pm
-            .newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE,
-            "GAEProxy")
-          mWakeLock.acquire()
-        case MSG_CONNECT_FINISH =>
-          ed.putBoolean("isConnecting", false)
-          if (mWakeLock != null && mWakeLock.isHeld) mWakeLock.release()
-        case MSG_CONNECT_SUCCESS =>
-          ed.putBoolean("isRunning", true)
-        case MSG_CONNECT_FAIL =>
-          ed.putBoolean("isRunning", false)
-        case MSG_HOST_CHANGE =>
-          ed.putString("appHost", appHost)
-        case MSG_STOP_SELF =>
-          stopSelf()
-      }
-      ed.commit
-      super.handleMessage(msg)
-    }
-  }
+
 }

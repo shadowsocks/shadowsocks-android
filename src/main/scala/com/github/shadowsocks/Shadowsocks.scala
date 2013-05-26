@@ -38,14 +38,10 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, AlertDialog, ProgressDialog}
-import android.content.Context
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content._
 import android.content.res.AssetManager
 import android.graphics.Typeface
-import android.os.{Build, Bundle, Handler, Message}
+import android.os._
 import android.preference.Preference
 import android.preference.PreferenceManager
 import android.util.Log
@@ -79,11 +75,17 @@ object Shadowsocks {
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
 
-  class ProxyFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener {
+  def isServiceStarted(context: Context): Boolean = {
+    ShadowsocksService.isServiceStarted(context) || ShadowVpnService.isServiceStarted(context)
+  }
+
+  class ProxyFragment extends UnifiedPreferenceFragment {
+
+    var receiver: BroadcastReceiver = null
+
     private def setPreferenceEnabled() {
-      val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity)
-      val enabled: Boolean = !settings.getBoolean("isRunning", false) &&
-        !settings.getBoolean("isConnecting", false)
+      val state = getActivity.asInstanceOf[Shadowsocks].state
+      val enabled: Boolean = state != State.CONNECTED && state != State.CONNECTING
       for (name <- PROXY_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
@@ -92,32 +94,44 @@ object Shadowsocks {
       }
     }
 
+    override def onStart() {
+      super.onStart()
+      val filter = new IntentFilter()
+      filter.addAction(Utils.ACTION_UPDATE_FRAGMENT)
+      receiver = new BroadcastReceiver {
+        def onReceive(p1: Context, p2: Intent) {
+          setPreferenceEnabled()
+        }
+      }
+      getActivity.getApplicationContext.registerReceiver(receiver, filter)
+    }
+
+    override def onStop() {
+      super.onStop()
+      getActivity.getApplicationContext.unregisterReceiver(receiver)
+    }
+
     override def onResume() {
       super.onResume()
       setPreferenceEnabled()
-      getPreferenceScreen.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
     override def onPause() {
       super.onPause()
-      getPreferenceScreen.getSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-      if ((key == "isRunning") || (key == "isGlobalProxy")) {
-        setPreferenceEnabled()
-      }
     }
   }
 
-  class FeatureFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener {
+  class FeatureFragment extends UnifiedPreferenceFragment {
+
+    var receiver: BroadcastReceiver = null
+
     private def setPreferenceEnabled() {
-      val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity)
-      val enabled: Boolean = !settings.getBoolean("isRunning", false) &&
-        !settings.getBoolean("isConnecting", false)
+      val state = getActivity.asInstanceOf[Shadowsocks].state
+      val enabled: Boolean = state != State.CONNECTED && state != State.CONNECTING
       for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
+          val settings = PreferenceManager.getDefaultSharedPreferences(getActivity)
           if ((name == "isBypassApps") || (name == "proxyedApps")) {
             val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
             pref.setEnabled(enabled && !isGlobalProxy)
@@ -130,21 +144,30 @@ object Shadowsocks {
       }
     }
 
+    override def onStart() {
+      super.onStart()
+      val filter = new IntentFilter()
+      filter.addAction(Utils.ACTION_UPDATE_FRAGMENT)
+      receiver = new BroadcastReceiver {
+        def onReceive(p1: Context, p2: Intent) {
+          setPreferenceEnabled()
+        }
+      }
+      getActivity.getApplicationContext.registerReceiver(receiver, filter)
+    }
+
+    override def onStop() {
+      super.onStop()
+      getActivity.getApplicationContext.unregisterReceiver(receiver)
+    }
+
     override def onResume() {
       super.onResume()
       setPreferenceEnabled()
-      getPreferenceScreen.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
     }
 
     override def onPause() {
       super.onPause()
-      getPreferenceScreen.getSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-      if ((key == "isRunning") || (key == "isGlobalProxy")) {
-        setPreferenceEnabled()
-      }
     }
   }
 
@@ -173,20 +196,34 @@ object Typefaces {
 }
 
 class Shadowsocks
-  extends UnifiedSherlockPreferenceActivity with CompoundButton.OnCheckedChangeListener with
-  OnSharedPreferenceChangeListener {
+  extends UnifiedSherlockPreferenceActivity
+  with CompoundButton.OnCheckedChangeListener {
 
   private val MSG_CRASH_RECOVER: Int = 1
   private val MSG_INITIAL_FINISH: Int = 2
 
   private var switchButton: Switch = null
   private var progressDialog: ProgressDialog = null
+  private var settings: SharedPreferences = null
   private var prepared = false
+  private var state = State.INIT
+  private var binder: IStateService = null
+  private var receiver: StateBroadcastReceiver = null
+
+  private val connection = new ServiceConnection {
+    def onServiceDisconnected(name: ComponentName) {
+      onStateChanged(binder.getState, binder.getMessage)
+      binder = null
+    }
+
+    def onServiceConnected(name: ComponentName, s: IBinder) {
+      binder = IStateService.Stub.asInterface(s)
+      onStateChanged(binder.getState, binder.getMessage)
+    }
+  }
 
   private val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
-      val settings: SharedPreferences = PreferenceManager
-        .getDefaultSharedPreferences(Shadowsocks.this)
       val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
         case MSG_CRASH_RECOVER =>
@@ -326,13 +363,14 @@ class Shadowsocks
     getSupportActionBar.setDisplayShowTitleEnabled(false)
     getSupportActionBar.setDisplayShowCustomEnabled(true)
     getSupportActionBar.setDisplayShowHomeEnabled(false)
+
     switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
     val title: TextView = switchLayout.findViewById(R.id.title).asInstanceOf[TextView]
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     title.setText(R.string.app_name)
-    val settings: SharedPreferences = PreferenceManager
-      .getDefaultSharedPreferences(Shadowsocks.this)
+    settings = PreferenceManager.getDefaultSharedPreferences(this)
+
     val init: Boolean = !settings.getBoolean("isRunning", false) &&
       !settings.getBoolean("isConnecting", false)
     if (init) {
@@ -412,29 +450,30 @@ class Shadowsocks
   protected override def onPause() {
     super.onPause()
     prepared = false
-    PreferenceManager
-      .getDefaultSharedPreferences(this)
-      .unregisterOnSharedPreferenceChangeListener(this)
   }
 
   protected override def onResume() {
     super.onResume()
     if (!prepared) {
-      val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-      if (isServiceStarted) {
+      if (Shadowsocks.isServiceStarted(this)) {
         switchButton.setChecked(true)
-        if (ShadowVpnService.isServiceStarted) {
+        if (ShadowVpnService.isServiceStarted(this)) {
           val style = new Style.Builder()
             .setBackgroundColorValue(Style.holoBlueLight)
             .setDuration(Style.DURATION_INFINITE)
             .build()
           switchButton.setEnabled(false)
           Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+          if (binder == null) bindService(new Intent(this, classOf[ShadowVpnService]), connection, 0)
+        } else {
+          if (binder == null) bindService(new Intent(this, classOf[ShadowsocksService]), connection, 0)
         }
+        setPreferenceEnabled(false)
       } else {
         switchButton.setEnabled(true)
         switchButton.setChecked(false)
         Crouton.cancelAllCroutons()
+        setPreferenceEnabled(true)
         if (settings.getBoolean("isRunning", false)) {
           new Thread {
             override def run() {
@@ -445,18 +484,11 @@ class Shadowsocks
         }
       }
     }
-    setPreferenceEnabled()
+
     switchButton.setOnCheckedChangeListener(this)
-    PreferenceManager
-      .getDefaultSharedPreferences(this)
-      .registerOnSharedPreferenceChangeListener(this)
   }
 
-  private def setPreferenceEnabled() {
-    val settings: SharedPreferences = PreferenceManager
-      .getDefaultSharedPreferences(Shadowsocks.this)
-    val enabled: Boolean = !settings.getBoolean("isRunning", false) &&
-      !settings.getBoolean("isConnecting", false)
+  private def setPreferenceEnabled(enabled: Boolean) {
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref: Preference = findPreference(name)
       if (pref != null) {
@@ -478,54 +510,16 @@ class Shadowsocks
     }
   }
 
-  def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-    val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-    if ((key == "isConnecting" || key == "isRunning")
-      && !settings.getBoolean("isConnecting", false)) {
-      if (settings.getBoolean("isRunning", false)) {
-        if (!switchButton.isChecked) switchButton.setChecked(true)
-      } else {
-        if (switchButton.isChecked) {
-          switchButton.setEnabled(true)
-          switchButton.setChecked(false)
-          Crouton.cancelAllCroutons()
-        }
-
-        val msg = settings.getString("vpnError", null)
-        if (msg != null) {
-          Crouton.cancelAllCroutons()
-          val style = new Style.Builder()
-            .setBackgroundColorValue(Style.holoRedLight)
-            .setDuration(Style.DURATION_INFINITE)
-            .build()
-          Crouton.makeText(this, getString(R.string.vpn_error).format(msg), style).show()
-        }
-      }
-    }
-    if (key == "isConnecting") {
-      if (settings.getBoolean("isConnecting", false)) {
-        if (progressDialog == null) {
-          progressDialog = ProgressDialog.show(this, "", getString(R.string.connecting), true, true)
-        }
-      } else {
-        if (progressDialog != null) {
-          progressDialog.dismiss()
-          progressDialog = null
-        }
-      }
-    }
-    if ((key == "isRunning") || (key == "isGlobalProxy")) {
-      setPreferenceEnabled()
-    }
-  }
-
   override def onStart() {
     super.onStart()
+    receiver = new StateBroadcastReceiver()
+    registerReceiver(receiver, new IntentFilter(Utils.ACTION_UPDATE_STATE))
     EasyTracker.getInstance.activityStart(this)
   }
 
   override def onStop() {
     super.onStop()
+    unregisterReceiver(receiver)
     EasyTracker.getInstance.activityStop(this)
     if (progressDialog != null) {
       progressDialog.dismiss()
@@ -536,6 +530,7 @@ class Shadowsocks
   override def onDestroy() {
     super.onDestroy()
     Crouton.cancelAllCroutons()
+    if (binder != null) unbindService(connection)
   }
 
   def reset() {
@@ -589,23 +584,18 @@ class Shadowsocks
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !Utils.getRoot
   }
 
-  def isServiceStarted: Boolean = {
-    ShadowsocksService.isServiceStarted || ShadowVpnService.isServiceStarted
-  }
-
   def serviceStop() {
-    if (ShadowVpnService.isServiceStarted) {
+    if (ShadowVpnService.isServiceStarted(this)) {
       stopService(new Intent(this, classOf[ShadowVpnService]))
     }
-    if (ShadowsocksService.isServiceStarted) {
-      sendBroadcast(new Intent(Utils.CLOSE_ACTION))
+    if (ShadowsocksService.isServiceStarted(this)) {
+      sendBroadcast(new Intent(Utils.ACTION_CLOSE))
     }
   }
 
   /** Called when connect button is clicked. */
   def serviceStart: Boolean = {
 
-    val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     val proxy = settings.getString("proxy", "")
     if (isTextEmpty(proxy, getString(R.string.proxy_empty))) return false
     val portText = settings.getString("port", "")
@@ -624,9 +614,10 @@ class Shadowsocks
     }
 
     if (isVpnEnabled) {
-      if (ShadowVpnService.isServiceStarted) return false
+      if (ShadowVpnService.isServiceStarted(this)) return false
       val it: Intent = new Intent(this, classOf[ShadowVpnService])
       startService(it)
+      bindService(it, connection, 0)
       val style = new Style.Builder()
         .setBackgroundColorValue(Style.holoBlueLight)
         .setDuration(Style.DURATION_INFINITE)
@@ -634,11 +625,11 @@ class Shadowsocks
       Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
       switchButton.setEnabled(false)
     } else {
-      if (ShadowsocksService.isServiceStarted) return false
+      if (ShadowsocksService.isServiceStarted(this)) return false
       val it: Intent = new Intent(this, classOf[ShadowsocksService])
       startService(it)
+      bindService(it, connection, 0)
     }
-
     true
   }
 
@@ -687,5 +678,65 @@ class Shadowsocks
     })
     val alert: AlertDialog = builder.create
     alert.show()
+  }
+
+  def clearDialog() {
+    if (progressDialog != null) {
+      progressDialog.dismiss()
+      progressDialog = null
+    }
+  }
+
+  def onStateChanged(s: Int, m: String) {
+    if (state != s) {
+      state = s
+      state match {
+        case State.CONNECTING => {
+          if (progressDialog == null) {
+            progressDialog = ProgressDialog.show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+          }
+          setPreferenceEnabled(false)
+        }
+        case State.CONNECTED => {
+          clearDialog()
+          if (!switchButton.isChecked) switchButton.setChecked(true)
+          setPreferenceEnabled(false)
+        }
+        case State.FAILED => {
+          clearDialog()
+          if (switchButton.isChecked) {
+            switchButton.setEnabled(true)
+            switchButton.setChecked(false)
+            Crouton.cancelAllCroutons()
+          }
+          if (m != null) {
+            Crouton.cancelAllCroutons()
+            val style = new Style.Builder()
+              .setBackgroundColorValue(Style.holoRedLight)
+              .setDuration(Style.DURATION_INFINITE)
+              .build()
+            Crouton.makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style).show()
+          }
+          setPreferenceEnabled(true)
+        }
+        case State.STOPPED => {
+          clearDialog()
+          Crouton.cancelAllCroutons()
+          if (switchButton.isChecked) switchButton.setChecked(false)
+          setPreferenceEnabled(true)
+        }
+      }
+      sendBroadcast(new Intent(Utils.ACTION_UPDATE_FRAGMENT))
+    }
+  }
+
+  class StateBroadcastReceiver extends BroadcastReceiver {
+    override def onReceive(context: Context, intent: Intent) {
+      if (binder != null) {
+        val s = binder.getState
+        val m = binder.getMessage
+        onStateChanged(s, m)
+      }
+    }
   }
 }
