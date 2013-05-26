@@ -102,19 +102,11 @@ class ShadowsocksService extends Service {
 
   var receiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
-  var appHost: String = null
-  var remotePort: Int = 0
-  var localPort: Int = 0
-  var sitekey: String = null
-  var settings: SharedPreferences = null
-  var hasRedirectSupport: Boolean = true
-  var isGlobalProxy: Boolean = false
-  var isGFWList: Boolean = false
-  var isBypassApps: Boolean = false
-  var isDNSProxy: Boolean = false
-  var isHTTPProxy: Boolean = false
-  var encMethod: String = null
+  var config: Config = null
+  var hasRedirectSupport = false
   var apps: Array[ProxiedApp] = null
+  var settings: SharedPreferences = null
+
   var mSetForeground: Method = null
   var mStartForeground: Method = null
   var mStopForeground: Method = null
@@ -176,7 +168,9 @@ class ShadowsocksService extends Service {
         val cmd: String = (BASE +
           "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
           BASE +
-          "shadowsocks.pid").format(appHost, remotePort, localPort, sitekey, encMethod)
+          "shadowsocks.pid").format(config.proxy, config.remotePort, config.localPort,
+          config.sitekey, config.encMethod)
+        Log.d(TAG, cmd)
         System.exec(cmd)
       }
     }.start()
@@ -187,7 +181,8 @@ class ShadowsocksService extends Service {
       override def run() {
         val cmd: String = (BASE +
           "polipo proxyPort=%d socksParentProxy=127.0.0.1:%d daemonise=true pidFile=\"%s\" logLevel=1 logFile=\"%s\"")
-          .format(localPort + 1, localPort, BASE + "polipo.pid", BASE + "polipo.log")
+          .format(config.localPort + 1, config.localPort, BASE + "polipo.pid", BASE + "polipo.log")
+        Log.d(TAG, cmd)
         System.exec(cmd)
       }
     }.start()
@@ -219,44 +214,18 @@ class ShadowsocksService extends Service {
 
     changeState(State.CONNECTING)
 
-    appHost = settings.getString("proxy", "127.0.0.1")
-    if (appHost == "198.199.101.152") {
-      appHost = "s.maxcdn.info"
-    }
-    sitekey = settings.getString("sitekey", "default")
-    encMethod = settings.getString("encMethod", "table")
-    try {
-      remotePort = Integer.valueOf(settings.getString("remotePort", "1984"))
-    } catch {
-      case ex: NumberFormatException => {
-        remotePort = 1984
-      }
-    }
-    try {
-      localPort = Integer.valueOf(settings.getString("port", "1984"))
-    } catch {
-      case ex: NumberFormatException => {
-        localPort = 1984
-      }
-    }
-    isGlobalProxy = settings.getBoolean("isGlobalProxy", false)
-    isGFWList = settings.getBoolean("isGFWList", false)
-    isBypassApps = settings.getBoolean("isBypassApps", false)
-    isDNSProxy = settings.getBoolean("isDNSProxy", false)
-    isHTTPProxy = settings.getBoolean("isHTTPProxy", false)
-    if (isHTTPProxy) {
-      localPort -= 1
-    }
+    config = Extra.get(intent)
+
     new Thread(new Runnable {
       def run() {
 
         killProcesses()
 
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
-          Utils.resolve(appHost, enableIPv6 = true) match {
-            case Some(addr) =>
-              appHost = addr
+        if (!InetAddressUtils.isIPv4Address(config.proxy) && !InetAddressUtils.isIPv6Address(config.proxy)) {
+          Utils.resolve(config.proxy, enableIPv6 = true) match {
+            case Some(a) =>
+              config.proxy = a
               resolved = true
             case None => resolved = false
           }
@@ -282,7 +251,7 @@ class ShadowsocksService extends Service {
   }
 
   def startRedsocksDaemon() {
-    val conf = REDSOCKS_CONF.format(localPort)
+    val conf = REDSOCKS_CONF.format(config.localPort)
     val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf".format(BASE, BASE, BASE)
     Utils.runRootCommand("echo \"" + conf + "\" > " + BASE + "redsocks.conf\n" + cmd)
   }
@@ -308,7 +277,7 @@ class ShadowsocksService extends Service {
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
-    if (isHTTPProxy) {
+    if (config.isHTTPProxy) {
       startPolipoDaemon()
     }
     startShadowsocksDaemon()
@@ -453,7 +422,7 @@ class ShadowsocksService extends Service {
       sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
       sb ++= "killall -9 shadowsocks" ++= "\n"
     }
-    if (isHTTPProxy) {
+    if (config.isHTTPProxy) {
       if (!waitForProcess("polipo")) {
         sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`" ++= "\n"
         sb ++= "killall -9 polipo" ++= "\n"
@@ -476,11 +445,11 @@ class ShadowsocksService extends Service {
     val http_sb = new StringBuilder
     init_sb.append(Utils.getIptables).append(" -t nat -F OUTPUT\n")
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
-    if (!InetAddressUtils.isIPv6Address(appHost.toUpperCase)) {
-      init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + appHost))
+    if (!InetAddressUtils.isIPv6Address(config.proxy.toUpperCase)) {
+      init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
-    if (!isDNSProxy) {
+    if (!config.isDNSProxy) {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53))
       init_sb
         .append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + getApplicationInfo.uid))
@@ -498,20 +467,20 @@ class ShadowsocksService extends Service {
         .append(DNS_PORT)
         .append("\n")
     }
-    if (isGFWList) {
+    if (config.isGFWList) {
       val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
       for (item <- chn_list) {
         init_sb.append(cmd_bypass.replace("0.0.0.0", item))
       }
     }
-    if (isGlobalProxy || isBypassApps) {
+    if (config.isGlobalProxy || config.isBypassApps) {
       http_sb.append(if (hasRedirectSupport) {
         Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
       } else {
         Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
       })
     }
-    if (!isGlobalProxy) {
+    if (!config.isGlobalProxy) {
       if (apps == null || apps.length <= 0) apps = AppManager.getProxiedApps(this)
       val uidSet: mutable.HashSet[Int] = new mutable.HashSet[Int]
       for (app <- apps) {
@@ -520,7 +489,7 @@ class ShadowsocksService extends Service {
         }
       }
       for (uid <- uidSet) {
-        if (!isBypassApps) {
+        if (!config.isBypassApps) {
           http_sb.append((if (hasRedirectSupport) {
             Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
           } else {
@@ -577,6 +546,4 @@ class ShadowsocksService extends Service {
     mSetForegroundArgs(0) = boolean2Boolean(x = false)
     invokeMethod(mSetForeground, mSetForegroundArgs)
   }
-
-
 }

@@ -78,18 +78,9 @@ class ShadowVpnService extends VpnService {
   var udpgw: String = null
   var notificationManager: NotificationManager = null
   var receiver: BroadcastReceiver = null
-  var appHost: String = null
-  var remotePort: Int = 0
-  var localPort: Int = 0
-  var sitekey: String = null
   var settings: SharedPreferences = null
-  var isGlobalProxy: Boolean = false
-  var isGFWList: Boolean = false
-  var isBypassApps: Boolean = false
-  var isDNSProxy: Boolean = false
-  var isHTTPProxy: Boolean = false
-  var encMethod: String = null
   var apps: Array[ProxiedApp] = null
+  var config: Config = null
 
   private var state = State.INIT
   private var message: String = null
@@ -152,7 +143,9 @@ class ShadowVpnService extends VpnService {
         val cmd: String = (BASE +
           "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
           BASE +
-          "shadowsocks.pid").format(appHost, remotePort, localPort, sitekey, encMethod)
+          "shadowsocks.pid").format(config.proxy, config.remotePort, config.localPort,
+          config.sitekey, config.encMethod)
+        Log.d(TAG, cmd)
         System.exec(cmd)
       }
     }.start()
@@ -185,34 +178,7 @@ class ShadowVpnService extends VpnService {
 
     changeState(State.CONNECTING)
 
-    appHost = settings.getString("proxy", "127.0.0.1")
-    if (appHost == "198.199.101.152") {
-      appHost = "s.maxcdn.info"
-    }
-    sitekey = settings.getString("sitekey", "default")
-    encMethod = settings.getString("encMethod", "table")
-    try {
-      remotePort = Integer.valueOf(settings.getString("remotePort", "1984"))
-    } catch {
-      case ex: NumberFormatException => {
-        remotePort = 1984
-      }
-    }
-    try {
-      localPort = Integer.valueOf(settings.getString("port", "1984"))
-    } catch {
-      case ex: NumberFormatException => {
-        localPort = 1984
-      }
-    }
-    isGlobalProxy = settings.getBoolean("isGlobalProxy", false)
-    isGFWList = settings.getBoolean("isGFWList", false)
-    isBypassApps = settings.getBoolean("isBypassApps", false)
-    isDNSProxy = settings.getBoolean("isDNSProxy", false)
-    isHTTPProxy = settings.getBoolean("isHTTPProxy", false)
-    if (isHTTPProxy) {
-      localPort -= 1
-    }
+    config = Extra.get(intent)
 
     new Thread(new Runnable {
       def run() {
@@ -221,10 +187,10 @@ class ShadowVpnService extends VpnService {
 
         // Resolve server address
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(appHost) && !InetAddressUtils.isIPv6Address(appHost)) {
-          Utils.resolve(appHost, enableIPv6 = true) match {
+        if (!InetAddressUtils.isIPv4Address(config.proxy) && !InetAddressUtils.isIPv6Address(config.proxy)) {
+          Utils.resolve(config.proxy, enableIPv6 = true) match {
             case Some(addr) =>
-              appHost = addr
+              config.proxy = addr
               resolved = true
             case None => resolved = false
           }
@@ -273,7 +239,7 @@ class ShadowVpnService extends VpnService {
 
   def startVpn() {
 
-    val address = appHost.split('.')
+    val address = config.proxy.split('.')
     val prefix1 = address(0)
     val prefix2 = address.slice(0, 2).mkString(".")
     val prefix3 = address.slice(0, 3).mkString(".")
@@ -291,9 +257,9 @@ class ShadowVpnService extends VpnService {
       .addDnsServer("8.8.8.8")
       .addDnsServer("8.8.4.4")
 
-    if (InetAddressUtils.isIPv6Address(appHost)) {
+    if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
-    } else if (isGFWList) {
+    } else if (config.isGFWList) {
       val gfwList = getResources.getStringArray(R.array.gfw_list)
       gfwList.foreach(addr =>
         if (addr != prefix2) {
@@ -346,8 +312,8 @@ class ShadowVpnService extends VpnService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--pid %stun2socks.pid").format(localAddress.format(2), udpgw, localPort, fd, VPN_MTU, BASE)
-
+      + "--pid %stun2socks.pid").format(localAddress.format(2), udpgw, config.localPort, fd, VPN_MTU, BASE)
+    Log.d(TAG, cmd)
     System.exec(cmd)
   }
 

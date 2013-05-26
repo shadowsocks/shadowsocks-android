@@ -61,25 +61,11 @@ class ShadowsocksReceiver extends BroadcastReceiver {
     val isAutoConnect: Boolean = settings.getBoolean("isAutoConnect", false)
     val isInstalled: Boolean = settings.getBoolean(versionName, false)
     if (isAutoConnect && isInstalled) {
-      val portText: String = settings.getString("port", "")
-      if (portText == null || portText.length <= 0) {
-        return
-      }
-      try {
-        val port: Int = Integer.valueOf(portText)
-        if (port <= 1024) {
-          return
-        }
-      } catch {
-        case e: Exception => {
-          return
-        }
-      }
-
       if (Utils.getRoot) {
         if (ShadowsocksService.isServiceStarted(context)) return
-        val it: Intent = new Intent(context, classOf[ShadowsocksService])
-        context.startService(it)
+        val intent: Intent = new Intent(context, classOf[ShadowsocksService])
+        Extra.put(settings, intent)
+        context.startService(intent)
       }
     }
   }

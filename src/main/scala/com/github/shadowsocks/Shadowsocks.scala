@@ -602,8 +602,9 @@ class Shadowsocks
 
     if (isVpnEnabled) {
       if (ShadowVpnService.isServiceStarted(this)) return false
-      val it: Intent = new Intent(this, classOf[ShadowVpnService])
-      startService(it)
+      val intent: Intent = new Intent(this, classOf[ShadowVpnService])
+      Extra.put(settings, intent)
+      startService(intent)
       val style = new Style.Builder()
         .setBackgroundColorValue(Style.holoBlueLight)
         .setDuration(Style.DURATION_INFINITE)
@@ -612,8 +613,9 @@ class Shadowsocks
       switchButton.setEnabled(false)
     } else {
       if (ShadowsocksService.isServiceStarted(this)) return false
-      val it: Intent = new Intent(this, classOf[ShadowsocksService])
-      startService(it)
+      val intent: Intent = new Intent(this, classOf[ShadowsocksService])
+      Extra.put(settings, intent)
+      startService(intent)
     }
     true
   }

@@ -37,7 +37,7 @@
  */
 package com.github.shadowsocks
 
-import android.content.Context
+import android.content.{Intent, SharedPreferences, Context}
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.{BitmapDrawable, Drawable}
@@ -51,6 +51,33 @@ import org.xbill.DNS._
 import scala.Some
 import android.graphics.{Canvas, Bitmap}
 import android.app.ActivityManager
+
+object Key {
+  val isGlobalProxy = "isGlobalProxy"
+  val isGFWList = "isGFWList"
+  val isBypassApps = "isBypassApps"
+  val isDNSProxy = "isDNSProxy"
+  val isHTTPProxy = "isHTTPProxy"
+
+  val proxy = "proxy"
+  val sitekey = "sitekey"
+  val encMethod = "encMethod"
+  val remotePort = "remotePort"
+  val localPort = "port"
+}
+
+case class Config (
+  isGlobalProxy: Boolean,
+  isGFWList: Boolean,
+  isBypassApps: Boolean,
+  isDNSProxy: Boolean,
+  isHTTPProxy: Boolean,
+  var proxy: String,
+  sitekey: String,
+  encMethod: String,
+  remotePort: Int,
+  localPort: Int
+)
 
 object State {
   val INIT = 0
@@ -68,6 +95,64 @@ object Action {
 object Extra {
   val STATE = "state"
   val MESSAGE = "message"
+
+  def get(intent: Intent): Config  = {
+    val isGlobalProxy = intent.getBooleanExtra(Key.isGlobalProxy, false)
+    val isGFWList = intent.getBooleanExtra(Key.isGFWList, false)
+    val isBypassApps = intent.getBooleanExtra(Key.isBypassApps, false)
+    val isDNSProxy = intent.getBooleanExtra(Key.isDNSProxy, false)
+    val isHTTPProxy = intent.getBooleanExtra(Key.isHTTPProxy, false)
+    val proxy = intent.getStringExtra(Key.proxy)
+    val sitekey =  intent.getStringExtra(Key.sitekey)
+    val encMethod =  intent.getStringExtra(Key.encMethod)
+    val remotePort = intent.getIntExtra(Key.remotePort, 1984)
+    val localPort = intent.getIntExtra(Key.localPort, 1984)
+
+    new Config(isGlobalProxy, isGFWList, isBypassApps, isDNSProxy,
+      isHTTPProxy, proxy, sitekey, encMethod, remotePort, localPort)
+  }
+
+  def put(settings: SharedPreferences, intent: Intent) {
+    val isGlobalProxy = settings.getBoolean(Key.isGlobalProxy, false)
+    val isGFWList = settings.getBoolean(Key.isGFWList, false)
+    val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
+    val isDNSProxy = settings.getBoolean(Key.isDNSProxy, false)
+    val isHTTPProxy = settings.getBoolean(Key.isHTTPProxy, false)
+    val proxy = settings.getString(Key.proxy, "127.0.0.1") match {
+      case "198.199.101.152" => "s.maxcdn.info"
+      case s: String => s
+      case _ => "127.0.0.1"
+    }
+    val sitekey = settings.getString(Key.sitekey, "default")
+    val encMethod = settings.getString(Key.encMethod, "table")
+    val remotePort: Int = try {
+      Integer.valueOf(settings.getString(Key.remotePort, "1984"))
+    } catch {
+      case ex: NumberFormatException => {
+        1984
+      }
+    }
+    val localProt: Int = try {
+      val p = Integer.valueOf(settings.getString(Key.localPort, "1984"))
+      if (isHTTPProxy) p - 1 else p
+    } catch {
+      case ex: NumberFormatException => {
+        1984
+      }
+    }
+
+    intent.putExtra(Key.isGlobalProxy, isGlobalProxy)
+    intent.putExtra(Key.isGFWList, isGFWList)
+    intent.putExtra(Key.isBypassApps, isBypassApps)
+    intent.putExtra(Key.isDNSProxy, isDNSProxy)
+    intent.putExtra(Key.isHTTPProxy, isHTTPProxy)
+
+    intent.putExtra(Key.proxy, proxy)
+    intent.putExtra(Key.sitekey, sitekey)
+    intent.putExtra(Key.encMethod, encMethod)
+    intent.putExtra(Key.remotePort, remotePort)
+    intent.putExtra(Key.localPort, localProt)
+  }
 }
 
 object Utils {
