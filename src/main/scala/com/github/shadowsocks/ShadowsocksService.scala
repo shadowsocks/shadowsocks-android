@@ -422,11 +422,9 @@ class ShadowsocksService extends Service {
       sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
       sb ++= "killall -9 shadowsocks" ++= "\n"
     }
-    if (config.isHTTPProxy) {
-      if (!waitForProcess("polipo")) {
-        sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`" ++= "\n"
-        sb ++= "killall -9 polipo" ++= "\n"
-      }
+    if (!waitForProcess("polipo")) {
+      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`" ++= "\n"
+      sb ++= "killall -9 polipo" ++= "\n"
     }
     Utils.runCommand(sb.toString())
   }
