@@ -59,7 +59,7 @@
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
-  <string name="auto_connect_summary">Start Shadowsocks at the startup</string>
+  <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
