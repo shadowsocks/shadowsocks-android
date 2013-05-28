@@ -70,7 +70,7 @@ object Shadowsocks {
 
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array("proxy", "remotePort", "port", "sitekey", "encMethod")
-  val FEATRUE_PREFS = Array("isHTTPProxy", "isDNSProxy", "isGFWList", "isGlobalProxy",
+  val FEATRUE_PREFS = Array("isDNSProxy", "isGFWList", "isGlobalProxy",
     "isBypassApps", "proxyedApps", "isAutoConnect")
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1

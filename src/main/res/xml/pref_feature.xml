@@ -2,12 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
   <CheckBoxPreference
-      android:defaultValue="false"
-      android:key="isHTTPProxy"
-      android:summary="@string/http_proxy_summary"
-      android:title="@string/http_proxy">
-  </CheckBoxPreference>
-  <CheckBoxPreference
       android:defaultValue="true"
       android:key="isDNSProxy"
       android:summary="@string/dns_proxy_summary"
