@@ -127,18 +127,16 @@ class ShadowsocksService extends Service {
 
   val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
-      val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
         case MSG_CONNECT_SUCCESS =>
           changeState(State.CONNECTED)
-          ed.putBoolean("isRunning", true)
+          settings.edit().putBoolean(Key.isRunning, true).apply()
         case MSG_CONNECT_FAIL =>
           changeState(State.STOPPED)
         case MSG_STOP_SELF =>
           stopSelf()
         case _ =>
       }
-      ed.commit
       super.handleMessage(msg)
     }
   }
@@ -215,6 +213,7 @@ class ShadowsocksService extends Service {
     changeState(State.CONNECTING)
 
     config = Extra.get(intent)
+    Extra.save(settings, config)
 
     new Thread(new Runnable {
       def run() {
@@ -395,9 +394,7 @@ class ShadowsocksService extends Service {
         killProcesses()
       }
     }.start()
-    val ed: SharedPreferences.Editor = settings.edit
-    ed.putBoolean("isRunning", false)
-    ed.commit
+    settings.edit.putBoolean(Key.isRunning, false).apply()
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null

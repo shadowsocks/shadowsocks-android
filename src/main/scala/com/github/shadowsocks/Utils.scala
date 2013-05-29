@@ -53,6 +53,8 @@ import android.graphics.{Canvas, Bitmap}
 import android.app.ActivityManager
 
 object Key {
+  val isRunning = "isRunning"
+
   val isGlobalProxy = "isGlobalProxy"
   val isGFWList = "isGFWList"
   val isBypassApps = "isBypassApps"
@@ -95,6 +97,24 @@ object Action {
 object Extra {
   val STATE = "state"
   val MESSAGE = "message"
+
+  def save(settings: SharedPreferences, config: Config) {
+    val edit = settings.edit()
+
+    edit.putBoolean(Key.isGlobalProxy, config.isGlobalProxy)
+    edit.putBoolean(Key.isGFWList, config.isGFWList)
+    edit.putBoolean(Key.isBypassApps, config.isBypassApps)
+    edit.putBoolean(Key.isDNSProxy, config.isDNSProxy)
+    edit.putBoolean(Key.isHTTPProxy, config.isHTTPProxy)
+
+    edit.putString(Key.proxy, config.proxy)
+    edit.putString(Key.sitekey, config.sitekey)
+    edit.putString(Key.encMethod, config.encMethod)
+    edit.putString(Key.remotePort, config.remotePort.toString)
+    edit.putString(Key.localPort, config.localPort.toString)
+
+    edit.apply()
+  }
 
   def get(intent: Intent): Config  = {
     val isGlobalProxy = intent.getBooleanExtra(Key.isGlobalProxy, false)

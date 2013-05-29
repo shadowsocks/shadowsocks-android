@@ -174,11 +174,12 @@ class ShadowVpnService extends VpnService {
       return
     }
 
-    settings.edit().putBoolean("isRunning", true).commit()
+    settings.edit().putBoolean(Key.isRunning, true).commit()
 
     changeState(State.CONNECTING)
 
     config = Extra.get(intent)
+    Extra.save(settings, config)
 
     new Thread(new Runnable {
       def run() {
@@ -376,7 +377,7 @@ class ShadowVpnService extends VpnService {
 
   def destroy() {
     changeState(State.STOPPED)
-    settings.edit.putBoolean("isRunning", false).commit
+    settings.edit.putBoolean(Key.isRunning, false).commit
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     if (receiver != null) {
       unregisterReceiver(receiver)

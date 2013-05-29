@@ -211,18 +211,16 @@ class Shadowsocks
 
   private val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
-      val ed: SharedPreferences.Editor = settings.edit
       msg.what match {
         case MSG_CRASH_RECOVER =>
           Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
-          ed.putBoolean("isRunning", false)
+          settings.edit().putBoolean(Key.isRunning, false).apply()
         case MSG_INITIAL_FINISH =>
           if (progressDialog != null) {
             progressDialog.dismiss()
             progressDialog = null
           }
       }
-      ed.commit
       super.handleMessage(msg)
     }
   }
@@ -380,9 +378,7 @@ class Shadowsocks
             }
           }
           if (!settings.getBoolean(versionName, false)) {
-            val edit: SharedPreferences.Editor = settings.edit
-            edit.putBoolean(versionName, true)
-            edit.commit
+            settings.edit.putBoolean(versionName, true).apply()
             reset()
           }
           handler.sendEmptyMessage(MSG_INITIAL_FINISH)
