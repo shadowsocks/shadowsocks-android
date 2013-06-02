@@ -50,6 +50,18 @@ class ShadowsocksReceiver extends BroadcastReceiver {
 
   def onReceive(context: Context, intent: Intent) {
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+
+    if (intent.getAction == Action.UPDATE_STATE) {
+      val state = intent.getIntExtra(Extra.STATE, State.INIT)
+      val running = state match {
+        case State.CONNECTING => true
+        case State.CONNECTED => true
+        case _ => false
+      }
+      settings.edit.putBoolean(Key.isRunning, running).apply()
+      return
+    }
+
     var versionName: String = null
     try {
       versionName = context.getPackageManager.getPackageInfo(context.getPackageName, 0).versionName

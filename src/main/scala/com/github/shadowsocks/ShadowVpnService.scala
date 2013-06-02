@@ -42,7 +42,6 @@ import android.content._
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os._
-import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.google.analytics.tracking.android.EasyTracker
@@ -78,7 +77,6 @@ class ShadowVpnService extends VpnService {
   var udpgw: String = null
   var notificationManager: NotificationManager = null
   var receiver: BroadcastReceiver = null
-  var settings: SharedPreferences = null
   var apps: Array[ProxiedApp] = null
   var config: Config = null
 
@@ -174,12 +172,9 @@ class ShadowVpnService extends VpnService {
       return
     }
 
-    settings.edit().putBoolean(Key.isRunning, true).commit()
-
     changeState(State.CONNECTING)
 
     config = Extra.get(intent)
-    Extra.save(settings, config)
 
     new Thread(new Runnable {
       def run() {
@@ -358,7 +353,6 @@ class ShadowVpnService extends VpnService {
     super.onCreate()
     EasyTracker.getTracker.setStartSession(true)
     EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
-    settings = PreferenceManager.getDefaultSharedPreferences(this)
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
 
@@ -377,7 +371,6 @@ class ShadowVpnService extends VpnService {
 
   def destroy() {
     changeState(State.STOPPED)
-    settings.edit.putBoolean(Key.isRunning, false).commit
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     if (receiver != null) {
       unregisterReceiver(receiver)

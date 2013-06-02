@@ -45,7 +45,6 @@ import android.content._
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os._
-import android.preference.PreferenceManager
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.google.analytics.tracking.android.EasyTracker
@@ -105,7 +104,6 @@ class ShadowsocksService extends Service {
   var config: Config = null
   var hasRedirectSupport = false
   var apps: Array[ProxiedApp] = null
-  var settings: SharedPreferences = null
 
   var mSetForeground: Method = null
   var mStartForeground: Method = null
@@ -130,7 +128,6 @@ class ShadowsocksService extends Service {
       msg.what match {
         case MSG_CONNECT_SUCCESS =>
           changeState(State.CONNECTED)
-          settings.edit().putBoolean(Key.isRunning, true).apply()
         case MSG_CONNECT_FAIL =>
           changeState(State.STOPPED)
         case MSG_STOP_SELF =>
@@ -213,7 +210,6 @@ class ShadowsocksService extends Service {
     changeState(State.CONNECTING)
 
     config = Extra.get(intent)
-    Extra.save(settings, config)
 
     new Thread(new Runnable {
       def run() {
@@ -347,7 +343,6 @@ class ShadowsocksService extends Service {
     super.onCreate()
     EasyTracker.getTracker.setStartSession(true)
     EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
-    settings = PreferenceManager.getDefaultSharedPreferences(this)
     notificationManager = this
       .getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
@@ -394,7 +389,6 @@ class ShadowsocksService extends Service {
         killProcesses()
       }
     }.start()
-    settings.edit.putBoolean(Key.isRunning, false).apply()
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null

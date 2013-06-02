@@ -360,8 +360,7 @@ class Shadowsocks
     receiver = new StateBroadcastReceiver()
     registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
 
-    val init: Boolean = !settings.getBoolean("isRunning", false) &&
-      !settings.getBoolean("isConnecting", false)
+    val init: Boolean = !Shadowsocks.isServiceStarted(this)
     if (init) {
       if (progressDialog == null) {
         progressDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true, true)
@@ -459,7 +458,7 @@ class Shadowsocks
         switchButton.setChecked(false)
         Crouton.cancelAllCroutons()
         setPreferenceEnabled(true)
-        if (settings.getBoolean("isRunning", false)) {
+        if (settings.getBoolean(Key.isRunning, false)) {
           new Thread {
             override def run() {
               crash_recovery()
@@ -714,4 +713,5 @@ class Shadowsocks
       onStateChanged(state, message)
     }
   }
+
 }
