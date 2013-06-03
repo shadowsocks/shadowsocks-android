@@ -164,6 +164,11 @@ class ShadowVpnService extends VpnService {
 
   def handleCommand(intent: Intent) {
 
+    if (intent == null) {
+      stopSelf()
+      return
+    }
+
     if (VpnService.prepare(this) != null) {
       val i = new Intent(this, classOf[ShadowVpnActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
