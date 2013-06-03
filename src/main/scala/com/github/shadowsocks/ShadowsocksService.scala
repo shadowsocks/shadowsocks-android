@@ -272,9 +272,6 @@ class ShadowsocksService extends Service {
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
-    if (config.isHTTPProxy) {
-      startPolipoDaemon()
-    }
     startShadowsocksDaemon()
     startDnsDaemon()
     startRedsocksDaemon()
@@ -438,11 +435,9 @@ class ShadowsocksService extends Service {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
-    if (!config.isDNSProxy) {
-      init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53))
-      init_sb
-        .append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + getApplicationInfo.uid))
-    }
+    init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53))
+    init_sb
+      .append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + getApplicationInfo.uid))
     if (hasRedirectSupport) {
       init_sb
         .append(Utils.getIptables)
