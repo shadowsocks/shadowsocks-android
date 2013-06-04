@@ -66,15 +66,18 @@ import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Uri, VpnService}
 import android.webkit.{WebViewClient, WebView}
 import android.app.backup.BackupManager
+import scala.concurrent.ops._
 
 object Shadowsocks {
 
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array("proxy", "remotePort", "port", "sitekey", "encMethod")
-  val FEATRUE_PREFS = Array("isDNSProxy", "isGFWList", "isGlobalProxy",
-    "isBypassApps", "proxyedApps", "isAutoConnect")
+  val FEATRUE_PREFS = Array("isGFWList", "isGlobalProxy", "isBypassApps", "proxyedApps",
+    "isAutoConnect")
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
+
+  private var vpnEnabled = -1
 
   def isServiceStarted(context: Context): Boolean = {
     ShadowsocksService.isServiceStarted(context) || ShadowVpnService.isServiceStarted(context)
@@ -133,11 +136,11 @@ object Shadowsocks {
         val pref: Preference = findPreference(name)
         if (pref != null) {
           val settings = PreferenceManager.getDefaultSharedPreferences(getActivity)
-          if ((name == "isBypassApps") || (name == "proxyedApps")) {
-            val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
+          if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
+            val isGlobalProxy: Boolean = settings.getBoolean(Key.isGlobalProxy, false)
             pref.setEnabled(enabled && !isGlobalProxy)
-          } else if (name == "isAutoConnect") {
-            pref.setEnabled(Utils.getRoot)
+          } else if (name == Key.isAutoConnect) {
+            pref.setEnabled(if (Shadowsocks.vpnEnabled == 1) false else true)
           } else {
             pref.setEnabled(enabled)
           }
@@ -217,10 +220,7 @@ class Shadowsocks
           Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
           settings.edit().putBoolean(Key.isRunning, false).apply()
         case MSG_INITIAL_FINISH =>
-          if (progressDialog != null) {
-            progressDialog.dismiss()
-            progressDialog = null
-          }
+          clearDialog()
       }
       super.handleMessage(msg)
     }
@@ -314,22 +314,31 @@ class Shadowsocks
     false
   }
 
+  def prepareStartService() {
+    clearDialog()
+    progressDialog = ProgressDialog
+      .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+    spawn {
+      if (isVpnEnabled) {
+        val intent = VpnService.prepare(this)
+        if (intent != null) {
+          startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
+        } else {
+          onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+        }
+      } else {
+        if (!serviceStart) {
+          switchButton.setChecked(false)
+        }
+      }
+    }
+  }
+
   def onCheckedChanged(compoundButton: CompoundButton, checked: Boolean) {
     if (compoundButton eq switchButton) {
       checked match {
         case true => {
-          if (isVpnEnabled) {
-            val intent = VpnService.prepare(this)
-            if (intent != null) {
-              startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
-            } else {
-              onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
-            }
-          } else {
-            if (!serviceStart) {
-              switchButton.setChecked(false)
-            }
-          }
+          prepareStartService()
         }
         case false => {
           serviceStop()
@@ -366,24 +375,15 @@ class Shadowsocks
       if (progressDialog == null) {
         progressDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true, true)
       }
-      new Thread {
-        override def run() {
-          Utils.getRoot
-          var versionName: String = null
-          try {
-            versionName = getPackageManager.getPackageInfo(getPackageName, 0).versionName
-          } catch {
-            case e: PackageManager.NameNotFoundException => {
-              versionName = "NONE"
-            }
-          }
-          if (!settings.getBoolean(versionName, false)) {
-            settings.edit.putBoolean(versionName, true).apply()
-            reset()
-          }
-          handler.sendEmptyMessage(MSG_INITIAL_FINISH)
+      spawn {
+        Utils.getRoot
+        val update = getSharedPreferences(Key.update, Context.MODE_WORLD_WRITEABLE)
+        if (!update.getBoolean(getVersionName, false)) {
+          update.edit.putBoolean(getVersionName, true).apply()
+          reset()
         }
-      }.start()
+        handler.sendEmptyMessage(MSG_INITIAL_FINISH)
+      }
     }
   }
 
@@ -460,12 +460,10 @@ class Shadowsocks
         Crouton.cancelAllCroutons()
         setPreferenceEnabled(true)
         if (settings.getBoolean(Key.isRunning, false)) {
-          new Thread {
-            override def run() {
-              crash_recovery()
-              handler.sendEmptyMessage(MSG_CRASH_RECOVER)
-            }
-          }.start()
+          spawn {
+            crash_recovery()
+            handler.sendEmptyMessage(MSG_CRASH_RECOVER)
+          }
         }
         onStateChanged(State.STOPPED, null)
       }
@@ -484,11 +482,11 @@ class Shadowsocks
     for (name <- Shadowsocks.FEATRUE_PREFS) {
       val pref: Preference = findPreference(name)
       if (pref != null) {
-        if ((name == "isBypassApps") || (name == "proxyedApps")) {
+        if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
           val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
           pref.setEnabled(enabled && !isGlobalProxy)
-        } else if (name == "isAutoConnect") {
-          pref.setEnabled(Utils.getRoot)
+        } else if (name == Key.isAutoConnect) {
+          pref.setEnabled(if (Shadowsocks.vpnEnabled == 1) false else true)
         } else {
           pref.setEnabled(enabled)
         }
@@ -504,10 +502,7 @@ class Shadowsocks
   override def onStop() {
     super.onStop()
     EasyTracker.getInstance.activityStop(this)
-    if (progressDialog != null) {
-      progressDialog.dismiss()
-      progressDialog = null
-    }
+    clearDialog()
   }
 
   override def onDestroy() {
@@ -530,24 +525,18 @@ class Shadowsocks
   }
 
   private def recovery() {
-    if (progressDialog == null) {
-      progressDialog = ProgressDialog.show(this, "", getString(R.string.recovering), true, true)
-    }
+    clearDialog()
+    progressDialog = ProgressDialog.show(this, "", getString(R.string.recovering), true, true)
     val h: Handler = new Handler {
       override def handleMessage(msg: Message) {
-        if (progressDialog != null) {
-          progressDialog.dismiss()
-          progressDialog = null
-        }
+        clearDialog()
       }
     }
     serviceStop()
-    new Thread {
-      override def run() {
-        reset()
-        h.sendEmptyMessage(0)
-      }
-    }.start()
+    spawn {
+      reset()
+      h.sendEmptyMessage(0)
+    }
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -565,7 +554,15 @@ class Shadowsocks
   }
 
   def isVpnEnabled: Boolean = {
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !Utils.getRoot
+    if (Shadowsocks.vpnEnabled < 0) {
+      Shadowsocks.vpnEnabled = if (Build.VERSION.SDK_INT
+        >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !Utils.getRoot) {
+        1
+      } else {
+        0
+      }
+    }
+    if (Shadowsocks.vpnEnabled == 1) true else false
   }
 
   def serviceStop() {
@@ -580,9 +577,9 @@ class Shadowsocks
   /** Called when connect button is clicked. */
   def serviceStart: Boolean = {
 
-    val proxy = settings.getString("proxy", "")
+    val proxy = settings.getString(Key.proxy, "")
     if (isTextEmpty(proxy, getString(R.string.proxy_empty))) return false
-    val portText = settings.getString("port", "")
+    val portText = settings.getString(Key.localPort, "")
     if (isTextEmpty(portText, getString(R.string.port_empty))) return false
     try {
       val port: Int = Integer.valueOf(portText)
@@ -677,7 +674,8 @@ class Shadowsocks
       state match {
         case State.CONNECTING => {
           if (progressDialog == null) {
-            progressDialog = ProgressDialog.show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+            progressDialog = ProgressDialog
+              .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
           }
           setPreferenceEnabled(false)
         }
@@ -699,7 +697,9 @@ class Shadowsocks
               .setBackgroundColorValue(Style.holoRedLight)
               .setDuration(Style.DURATION_INFINITE)
               .build()
-            Crouton.makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style).show()
+            Crouton
+              .makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style)
+              .show()
           }
           setPreferenceEnabled(true)
         }

@@ -53,7 +53,11 @@ import android.graphics.{Canvas, Bitmap}
 import android.app.ActivityManager
 
 object Key {
+  val update = "update"
+  val proxyedApps = "proxyedApps"
+
   val isRunning = "isRunning"
+  val isAutoConnect = "isAutoConnect"
 
   val isGlobalProxy = "isGlobalProxy"
   val isGFWList = "isGFWList"
@@ -490,16 +494,16 @@ object Utils {
       root_shell = "su"
     }
     val sb = new StringBuilder
-    val command: String = "ls /\n exit\n"
+    val command: String = "id\n"
     val exitcode: Int = runScript(command, sb, 10 * 1000, asroot = true)
     if (exitcode == TIME_OUT) {
       return false
     }
     val lines = sb.toString()
-    if (lines.contains("system")) {
+    if (lines.contains("uid=0")) {
       isRoot = 1
     } else {
-      if (rootTries > 3) isRoot = 0
+      if (rootTries >= 1) isRoot = 0
       rootTries += 1
     }
     isRoot == 1
