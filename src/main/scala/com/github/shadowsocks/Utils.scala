@@ -70,16 +70,8 @@ object Key {
   val localPort = "port"
 }
 
-case class Config (
-  isGlobalProxy: Boolean,
-  isGFWList: Boolean,
-  isBypassApps: Boolean,
-  var proxy: String,
-  sitekey: String,
-  encMethod: String,
-  remotePort: Int,
-  localPort: Int
-)
+case class Config(isGlobalProxy: Boolean, isGFWList: Boolean, isBypassApps: Boolean,
+  var proxy: String, sitekey: String, encMethod: String, remotePort: Int, localPort: Int)
 
 object State {
   val INIT = 0
@@ -114,18 +106,18 @@ object Extra {
     edit.apply()
   }
 
-  def get(intent: Intent): Config  = {
+  def get(intent: Intent): Config = {
     val isGlobalProxy = intent.getBooleanExtra(Key.isGlobalProxy, false)
     val isGFWList = intent.getBooleanExtra(Key.isGFWList, false)
     val isBypassApps = intent.getBooleanExtra(Key.isBypassApps, false)
     val proxy = intent.getStringExtra(Key.proxy)
-    val sitekey =  intent.getStringExtra(Key.sitekey)
-    val encMethod =  intent.getStringExtra(Key.encMethod)
+    val sitekey = intent.getStringExtra(Key.sitekey)
+    val encMethod = intent.getStringExtra(Key.encMethod)
     val remotePort = intent.getIntExtra(Key.remotePort, 1984)
     val localPort = intent.getIntExtra(Key.localPort, 1984)
 
-    new Config(isGlobalProxy, isGFWList, isBypassApps,
-      proxy, sitekey, encMethod, remotePort, localPort)
+    new Config(isGlobalProxy, isGFWList, isBypassApps, proxy, sitekey, encMethod, remotePort,
+      localPort)
   }
 
   def put(settings: SharedPreferences, intent: Intent) {
@@ -192,7 +184,9 @@ object Utils {
   def isServiceStarted(name: String, context: Context): Boolean = {
     import scala.collection.JavaConversions._
 
-    val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE).asInstanceOf[ActivityManager]
+    val activityManager = context
+      .getSystemService(Context.ACTIVITY_SERVICE)
+      .asInstanceOf[ActivityManager]
     val services = activityManager.getRunningServices(Integer.MAX_VALUE)
 
     for (service <- services) {

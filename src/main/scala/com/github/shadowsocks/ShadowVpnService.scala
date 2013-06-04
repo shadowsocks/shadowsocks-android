@@ -141,8 +141,9 @@ class ShadowVpnService extends VpnService {
         val cmd: String = (BASE +
           "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
           BASE +
-          "shadowsocks.pid").format(config.proxy, config.remotePort, config.localPort,
-          config.sitekey, config.encMethod)
+          "shadowsocks.pid")
+          .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
+          config.encMethod)
         Log.d(TAG, cmd)
         System.exec(cmd)
       }
@@ -188,7 +189,8 @@ class ShadowVpnService extends VpnService {
 
         // Resolve server address
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) && !InetAddressUtils.isIPv6Address(config.proxy)) {
+        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+          !InetAddressUtils.isIPv6Address(config.proxy)) {
           Utils.resolve(config.proxy, enableIPv6 = true) match {
             case Some(addr) =>
               config.proxy = addr
@@ -313,7 +315,8 @@ class ShadowVpnService extends VpnService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--pid %stun2socks.pid").format(localAddress.format(2), udpgw, config.localPort, fd, VPN_MTU, BASE)
+      + "--pid %stun2socks.pid")
+      .format(localAddress.format(2), udpgw, config.localPort, fd, VPN_MTU, BASE)
     Log.d(TAG, cmd)
     System.exec(cmd)
   }

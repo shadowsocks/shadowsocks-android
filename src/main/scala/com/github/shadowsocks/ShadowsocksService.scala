@@ -163,8 +163,9 @@ class ShadowsocksService extends Service {
         val cmd: String = (BASE +
           "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
           BASE +
-          "shadowsocks.pid").format(config.proxy, config.remotePort, config.localPort,
-          config.sitekey, config.encMethod)
+          "shadowsocks.pid")
+          .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
+          config.encMethod)
         Log.d(TAG, cmd)
         System.exec(cmd)
       }
@@ -217,7 +218,8 @@ class ShadowsocksService extends Service {
         killProcesses()
 
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) && !InetAddressUtils.isIPv6Address(config.proxy)) {
+        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+          !InetAddressUtils.isIPv6Address(config.proxy)) {
           Utils.resolve(config.proxy, enableIPv6 = true) match {
             case Some(a) =>
               config.proxy = a
