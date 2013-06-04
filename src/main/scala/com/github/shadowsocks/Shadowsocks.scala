@@ -65,6 +65,7 @@ import org.jraf.android.backport.switchwidget.Switch
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Uri, VpnService}
 import android.webkit.{WebViewClient, WebView}
+import android.app.backup.BackupManager
 
 object Shadowsocks {
 
@@ -513,6 +514,7 @@ class Shadowsocks
     super.onDestroy()
     Crouton.cancelAllCroutons()
     unregisterReceiver(receiver)
+    (new BackupManager(this)).dataChanged()
   }
 
   def reset() {

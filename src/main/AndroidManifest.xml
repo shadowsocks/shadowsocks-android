@@ -19,7 +19,11 @@
             android:name=".ShadowsocksApplication"
             android:hardwareAccelerated="true"
             android:icon="@drawable/ic_launcher"
+            android:backupAgent=".ShadowsocksBackupAgent"
             android:label="@string/app_name">
+
+        <meta-data android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg" />
 
         <activity
                 android:name=".Shadowsocks"
