@@ -2,7 +2,7 @@
 <resources>
   <!-- array category -->
 
-  <array name="enc_method_entry">
+  <string-array name="enc_method_entry">
     <item>TABLE</item>
     <item>RC4</item>
     <item>AES-128-CFB</item>
@@ -17,8 +17,9 @@
     <item>IDEA-CFB</item>
     <item>RC2-CFB</item>
     <item>SEED-CFB</item>
-  </array>
-  <array name="enc_method_value">
+  </string-array>
+
+  <string-array name="enc_method_value">
     <item>table</item>
     <item>rc4</item>
     <item>aes-128-cfb</item>
@@ -33,7 +34,7 @@
     <item>idea-cfb</item>
     <item>rc2-cfb</item>
     <item>seed-cfb</item>
-  </array>
+  </string-array>
 
   <string-array name="chn_list">
     <item>0.0.0.0/7</item>
