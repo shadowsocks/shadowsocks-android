@@ -19,26 +19,6 @@
   <string name="sitekey">Password</string>
   <string name="sitekey_summary">Password of your Shadowsocks server</string>
   <string name="enc_method">Encrypt Method</string>
-  <array name="enc_method_entry">
-    <item>TABLE</item>
-    <item>RC4</item>
-    <item>AES-128-CFB</item>
-    <item>AES-192-CFB</item>
-    <item>AES-256-CFB</item>
-    <item>BF-CFB</item>
-    <item>CAST5-CFB</item>
-    <item>DES-CFB</item>
-  </array>
-  <array name="enc_method_value">
-    <item>table</item>
-    <item>rc4</item>
-    <item>aes-128-cfb</item>
-    <item>aes-192-cfb</item>
-    <item>aes-256-cfb</item>
-    <item>bf-cfb</item>
-    <item>cast5-cfb</item>
-    <item>des-cfb</item>
-  </array>
 
   <!-- feature category -->
   <string name="feature_cat">Feature Settings</string>
