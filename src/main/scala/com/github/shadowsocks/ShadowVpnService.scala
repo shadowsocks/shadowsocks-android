@@ -307,6 +307,7 @@ class ShadowVpnService extends VpnService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
+      + "--loglevel 3 "
       + "--pid %stun2socks.pid")
       .format(localAddress.format(2), localAddress.format(1), config.localPort, fd, VPN_MTU, BASE)
     Log.d(TAG, cmd)
