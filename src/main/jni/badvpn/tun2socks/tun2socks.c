@@ -114,6 +114,7 @@ struct {
     int tun_fd;
     int tun_mtu;
     char *pid;
+    char *dnsgw;
 #else
     char *tundev;
 #endif
@@ -207,6 +208,11 @@ LinkedList1 tcp_clients;
 // number of clients
 int num_clients;
 
+#ifdef ANDROID
+// Address of dnsgw
+BAddr dnsgw;
+#endif
+
 static void terminate (void);
 static void print_help (const char *name);
 static void print_version (void);
@@ -218,6 +224,9 @@ static void lwip_init_job_hadler (void *unused);
 static void tcp_timer_handler (void *unused);
 static void device_error_handler (void *unused);
 static void device_read_handler_send (void *unused, uint8_t *data, int data_len);
+#ifdef ANDROID
+static int process_device_dns_packet (uint8_t *data, int data_len);
+#endif
 static int process_device_udp_packet (uint8_t *data, int data_len);
 static err_t netif_init_func (struct netif *netif);
 static err_t netif_output_func (struct netif *netif, struct pbuf *p, ip_addr_t *ipaddr);
@@ -563,6 +572,7 @@ void print_help (const char *name)
 #ifdef ANDROID
         "        [--tunfd <fd>]\n"
         "        [--tunmtu <mtu>]\n"
+        "        [--dnsgw <dns_gateway_address>]\n"
         "        [--pid <pid_file>]\n"
 #else
         "        [--tundev <name>]\n"
@@ -725,6 +735,14 @@ int parse_arguments (int argc, char *argv[])
             }
             i++;
         }
+        else if (!strcmp(arg, "--dnsgw")) {
+            if (1 >= argc - i) {
+                fprintf(stderr, "%s: requires an argument\n", arg);
+                return 0;
+            }
+            options.dnsgw = argv[i + 1];
+            i++;
+        }
         else if (!strcmp(arg, "--pid")) {
             if (1 >= argc - i) {
                 fprintf(stderr, "%s: requires an argument\n", arg);
@@ -878,7 +896,7 @@ int parse_arguments (int argc, char *argv[])
 int process_arguments (void)
 {
     ASSERT(!password_file_contents)
-    
+
     // resolve netif ipaddr
     if (!BIPAddr_Resolve(&netif_ipaddr, options.netif_ipaddr, 0)) {
         BLog(BLOG_ERROR, "netif ipaddr: BIPAddr_Resolve failed");
@@ -945,6 +963,20 @@ int process_arguments (void)
             return 0;
         }
     }
+
+#ifdef ANDROID
+    // resolve dnsgw addr
+    if (options.dnsgw) {
+        if (!BAddr_Parse2(&dnsgw, options.dnsgw, NULL, 0, 0)) {
+            BLog(BLOG_ERROR, "dnsgw addr: BAddr_Parse2 failed");
+            return 0;
+        }
+        if (dnsgw.type != BADDR_TYPE_IPV4) {
+            BLog(BLOG_ERROR, "dnsgw addr: must be an IPv4 address");
+            return 0;
+        }
+    }
+#endif
     
     return 1;
 }
@@ -1103,6 +1135,13 @@ void device_read_handler_send (void *unused, uint8_t *data, int data_len)
     
     // accept packet
     PacketPassInterface_Done(&device_read_interface);
+
+#ifdef ANDROID
+    // process DNS directly
+    if (process_device_dns_packet(data, data_len)) {
+        return;
+    }
+#endif
     
     // process UDP directly
     if (process_device_udp_packet(data, data_len)) {
@@ -1129,6 +1168,140 @@ void device_read_handler_send (void *unused, uint8_t *data, int data_len)
         pbuf_free(p);
     }
 }
+
+#ifdef ANDROID
+int process_device_dns_packet (uint8_t *data, int data_len)
+{
+    ASSERT(data_len >= 0)
+    
+    // do nothing if we don't have dnsgw
+    if (!options.dnsgw) {
+        goto fail;
+    }
+    
+    static BAddr local_addr;
+    static BAddr remote_addr;
+    static int init = 0;
+
+    int to_dns;
+    int from_dns;
+    int packet_length = 0;
+    
+    uint8_t ip_version = 0;
+    if (data_len > 0) {
+        ip_version = (data[0] >> 4);
+    }
+    
+    switch (ip_version) {
+        case 4: {
+            // ignore non-UDP packets
+            if (data_len < sizeof(struct ipv4_header) || data[offsetof(struct ipv4_header, protocol)] != IPV4_PROTOCOL_UDP) {
+                goto fail;
+            }
+            
+            // parse IPv4 header
+            struct ipv4_header ipv4_header;
+            if (!ipv4_check(data, data_len, &ipv4_header, &data, &data_len)) {
+                goto fail;
+            }
+            
+            // parse UDP
+            struct udp_header udp_header;
+            if (!udp_check(data, data_len, &udp_header, &data, &data_len)) {
+                goto fail;
+            }
+            
+            // verify UDP checksum
+            uint16_t checksum_in_packet = udp_header.checksum;
+            udp_header.checksum = 0;
+            uint16_t checksum_computed = udp_checksum(&udp_header, data, data_len, ipv4_header.source_address, ipv4_header.destination_address);
+            if (checksum_in_packet != checksum_computed) {
+                goto fail;
+            }
+
+            // to port 53 is considered a DNS packet
+            to_dns = udp_header.dest_port == hton16(53);
+
+            // from port 8153 is considered a DNS packet
+            from_dns = udp_header.source_port == dnsgw.ipv4.port;
+
+            // if not DNS packet, just bypass it.
+            if (!to_dns && !from_dns) {
+                goto fail;
+            }
+
+            // modify DNS packet
+            if (to_dns) {
+                BLog(BLOG_INFO, "UDP: to DNS %d bytes", data_len);
+
+                // construct addresses
+                if (!init) {
+                    init = 1;
+                    BAddr_InitIPv4(&local_addr, ipv4_header.source_address, udp_header.source_port);
+                    BAddr_InitIPv4(&remote_addr, ipv4_header.destination_address, udp_header.dest_port);
+                }
+
+                // build IP header
+                ipv4_header.destination_address = dnsgw.ipv4.ip;
+                ipv4_header.source_address = netif_ipaddr.ipv4;
+
+                // build UDP header
+                udp_header.dest_port = dnsgw.ipv4.port;
+
+            } else if (from_dns) {
+
+                // if not initialized
+                if (!init) {
+                    goto fail;
+                }
+
+                BLog(BLOG_INFO, "UDP: from DNS %d bytes", data_len);
+
+                // build IP header
+                ipv4_header.source_address = remote_addr.ipv4.ip;
+                ipv4_header.destination_address = local_addr.ipv4.ip;
+
+                // build UDP header
+                udp_header.source_port = remote_addr.ipv4.port;
+
+            }
+            
+            // update IPv4 header's checksum
+            ipv4_header.checksum = hton16(0);
+            ipv4_header.checksum = ipv4_checksum(&ipv4_header, NULL, 0);
+
+            // update UDP header's checksum
+            udp_header.checksum = hton16(0);
+            udp_header.checksum = udp_checksum(&udp_header, data, data_len,
+                    ipv4_header.source_address, ipv4_header.destination_address);
+
+            // write packet
+            memcpy(device_write_buf, &ipv4_header, sizeof(ipv4_header));
+            memcpy(device_write_buf + sizeof(ipv4_header), &udp_header, sizeof(udp_header));
+            memcpy(device_write_buf + sizeof(ipv4_header) + sizeof(udp_header), data, data_len);
+            packet_length = sizeof(ipv4_header) + sizeof(udp_header) + data_len;
+
+        } break;
+        
+        case 6: {
+            // TODO: support IPv6 DNS Gateway
+            goto fail;
+        } break;
+        
+        default: {
+            goto fail;
+        } break;
+    }
+    
+    // submit packet
+    BTap_Send(&device, device_write_buf, packet_length);
+    
+    return 1;
+    
+fail:
+    return 0;
+}
+#endif
 
 int process_device_udp_packet (uint8_t *data, int data_len)
 {

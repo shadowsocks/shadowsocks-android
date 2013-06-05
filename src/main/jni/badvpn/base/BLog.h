@@ -40,14 +40,6 @@
 #include <misc/debug.h>
 #include <base/BMutex.h>
 
-#ifdef ANDROID
-#include <android/log.h>
-
-#define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, "tun2socks", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "tun2socks", __VA_ARGS__))
-
-#endif
-
 // auto-generated channel numbers and number of channels
 #include <generated/blog_channels_defines.h>
 

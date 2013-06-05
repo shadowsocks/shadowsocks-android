@@ -50,6 +50,7 @@ import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
 import scala.Some
+import scala.concurrent.ops._
 
 object ShadowVpnService {
   def isServiceStarted(context: Context): Boolean = {
@@ -74,7 +75,6 @@ class ShadowVpnService extends VpnService {
   val PRIVATE_VLAN_172 = "172.30.254.%d"
 
   var conn: ParcelFileDescriptor = null
-  var udpgw: String = null
   var notificationManager: NotificationManager = null
   var receiver: BroadcastReceiver = null
   var apps: Array[ProxiedApp] = null
@@ -136,18 +136,20 @@ class ShadowVpnService extends VpnService {
   }
 
   def startShadowsocksDaemon() {
-    new Thread {
-      override def run() {
-        val cmd: String = (BASE +
-          "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-          BASE +
-          "shadowsocks.pid")
-          .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
-          config.encMethod)
-        Log.d(TAG, cmd)
-        System.exec(cmd)
-      }
-    }.start()
+    spawn {
+      val cmd: String = (BASE +
+        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+        BASE +
+        "shadowsocks.pid")
+        .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
+      Log.d(TAG, cmd)
+      System.exec(cmd)
+    }
+  }
+
+  def startDnsDaemon() {
+    val cmd: String = BASE + "pdnsd -c " + BASE + "pdnsd.conf"
+    Utils.runCommand(cmd)
   }
 
   def getVersionName: String = {
@@ -182,43 +184,33 @@ class ShadowVpnService extends VpnService {
 
     config = Extra.get(intent)
 
-    new Thread(new Runnable {
-      def run() {
 
-        killProcesses()
+    spawn {
+      killProcesses()
 
-        // Resolve server address
-        var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-          !InetAddressUtils.isIPv6Address(config.proxy)) {
-          Utils.resolve(config.proxy, enableIPv6 = true) match {
-            case Some(addr) =>
-              config.proxy = addr
-              resolved = true
-            case None => resolved = false
-          }
-        } else {
-          resolved = true
+      // Resolve server address
+      var resolved: Boolean = false
+      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+        !InetAddressUtils.isIPv6Address(config.proxy)) {
+        Utils.resolve(config.proxy, enableIPv6 = true) match {
+          case Some(addr) =>
+            config.proxy = addr
+            resolved = true
+          case None => resolved = false
         }
-
-        // Resolve UDP gateway
-        if (resolved) {
-          Utils.resolve("u.maxcdn.info", enableIPv6 = false) match {
-            case Some(host) => udpgw = host
-            case None => resolved = false
-          }
-        }
-
-        if (resolved && handleConnection) {
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 300)
-        } else {
-          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 300)
-          handler.sendEmptyMessageDelayed(MSG_STOP_SELF, 500)
-        }
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 300)
+      } else {
+        resolved = true
       }
-    }).start()
+
+      if (resolved && handleConnection) {
+        handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 300)
+      } else {
+        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+        handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 300)
+        handler.sendEmptyMessageDelayed(MSG_STOP_SELF, 500)
+      }
+      handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 300)
+    }
   }
 
   def waitForProcess(name: String): Boolean = {
@@ -258,7 +250,6 @@ class ShadowVpnService extends VpnService {
       .setMtu(VPN_MTU)
       .addAddress(localAddress.format(1), 24)
       .addDnsServer("8.8.8.8")
-      .addDnsServer("8.8.4.4")
 
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
@@ -310,19 +301,21 @@ class ShadowVpnService extends VpnService {
 
     val cmd = (BASE +
       "tun2socks --netif-ipaddr %s "
-      + "--udpgw-remote-server-addr %s:7300 "
+      // + "--udpgw-remote-server-addr %s:7300 "
+      + "--dnsgw  %s:8153 "
       + "--netif-netmask 255.255.255.0 "
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
       + "--pid %stun2socks.pid")
-      .format(localAddress.format(2), udpgw, config.localPort, fd, VPN_MTU, BASE)
+      .format(localAddress.format(2), localAddress.format(1), config.localPort, fd, VPN_MTU, BASE)
     Log.d(TAG, cmd)
     System.exec(cmd)
   }
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
+    startDnsDaemon()
     startShadowsocksDaemon()
     startVpn()
     true
@@ -384,11 +377,9 @@ class ShadowVpnService extends VpnService {
       unregisterReceiver(receiver)
       receiver = null
     }
-    new Thread {
-      override def run() {
-        killProcesses()
-      }
-    }.start()
+    spawn {
+      killProcesses()
+    }
     if (conn != null) {
       conn.close()
       conn = null
