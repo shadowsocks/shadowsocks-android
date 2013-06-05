@@ -209,8 +209,8 @@ LinkedList1 tcp_clients;
 int num_clients;
 
 #ifdef ANDROID
-// IP address of dnsgw
-BIPAddr dnsgw;
+// Address of dnsgw
+BAddr dnsgw;
 #endif
 
 static void terminate (void);
@@ -897,20 +897,6 @@ int process_arguments (void)
 {
     ASSERT(!password_file_contents)
 
-#ifdef ANDROID
-    // resolve dnsgw ipaddr
-    if (options.dnsgw) {
-        if (!BIPAddr_Resolve(&dnsgw, options.dnsgw, 0)) {
-            BLog(BLOG_ERROR, "dnsgw ipaddr: BIPAddr_Resolve failed");
-            return 0;
-        }
-        if (dnsgw.type != BADDR_TYPE_IPV4) {
-            BLog(BLOG_ERROR, "dnsgw ipaddr: must be an IPv4 address");
-            return 0;
-        }
-    }
-#endif
-    
     // resolve netif ipaddr
     if (!BIPAddr_Resolve(&netif_ipaddr, options.netif_ipaddr, 0)) {
         BLog(BLOG_ERROR, "netif ipaddr: BIPAddr_Resolve failed");
@@ -977,6 +963,20 @@ int process_arguments (void)
             return 0;
         }
     }
+
+#ifdef ANDROID
+    // resolve dnsgw ipaddr
+    if (options.dnsgw) {
+        if (!BAddr_Parse2(&dnsgw, options.dnsgw, NULL, 0, 0)) {
+            BLog(BLOG_ERROR, "dnsgw addr: BAddr_Parse2 failed");
+            return 0;
+        }
+        if (dnsgw.type != BADDR_TYPE_IPV4) {
+            BLog(BLOG_ERROR, "dnsgw addr: must be an IPv4 address");
+            return 0;
+        }
+    }
+#endif
     
     return 1;
 }
@@ -1227,11 +1227,12 @@ int process_device_dns_packet (uint8_t *data, int data_len)
             }
 
             // build IP header
-            ipv4_header.destination_address = dnsgw.ipv4;
+            ipv4_header.destination_address = dnsgw.ipv4.ip;
             ipv4_header.checksum = hton16(0);
             ipv4_header.checksum = ipv4_checksum(&ipv4_header, NULL, 0);
             
             // build UDP header
+            udp_header.dest_port = hton16(dnsgw.ipv4.port);
             udp_header.checksum = hton16(0);
             udp_header.checksum = udp_checksum(&udp_header, data, data_len,
                     ipv4_header.source_address, ipv4_header.destination_address);
