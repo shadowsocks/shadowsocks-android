@@ -75,7 +75,6 @@ class ShadowVpnService extends VpnService {
   val PRIVATE_VLAN_172 = "172.30.254.%d"
 
   var conn: ParcelFileDescriptor = null
-  var udpgw: String = null
   var notificationManager: NotificationManager = null
   var receiver: BroadcastReceiver = null
   var apps: Array[ProxiedApp] = null
@@ -203,14 +202,6 @@ class ShadowVpnService extends VpnService {
         resolved = true
       }
 
-      // Resolve UDP gateway
-      if (resolved) {
-        Utils.resolve("u.maxcdn.info", enableIPv6 = false) match {
-          case Some(host) => udpgw = host
-          case None => resolved = false
-        }
-      }
-
       if (resolved && handleConnection) {
         handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 300)
       } else {
@@ -259,7 +250,6 @@ class ShadowVpnService extends VpnService {
       .setMtu(VPN_MTU)
       .addAddress(localAddress.format(1), 24)
       .addDnsServer("8.8.8.8")
-      .addDnsServer("8.8.4.4")
 
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
@@ -312,13 +302,13 @@ class ShadowVpnService extends VpnService {
     val cmd = (BASE +
       "tun2socks --netif-ipaddr %s "
       // + "--udpgw-remote-server-addr %s:7300 "
-      + "--dnsgw 127.0.0.1:8153 "
+      + "--dnsgw  %s:8153 "
       + "--netif-netmask 255.255.255.0 "
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
       + "--pid %stun2socks.pid")
-      .format(localAddress.format(2), config.localPort, fd, VPN_MTU, BASE)
+      .format(localAddress.format(2), localAddress.format(1), config.localPort, fd, VPN_MTU, BASE)
     Log.d(TAG, cmd)
     System.exec(cmd)
   }

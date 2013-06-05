@@ -965,7 +965,7 @@ int process_arguments (void)
     }
 
 #ifdef ANDROID
-    // resolve dnsgw ipaddr
+    // resolve dnsgw addr
     if (options.dnsgw) {
         if (!BAddr_Parse2(&dnsgw, options.dnsgw, NULL, 0, 0)) {
             BLog(BLOG_ERROR, "dnsgw addr: BAddr_Parse2 failed");
@@ -1179,9 +1179,12 @@ int process_device_dns_packet (uint8_t *data, int data_len)
         goto fail;
     }
     
-    BAddr local_addr;
-    BAddr remote_addr;
-    int is_dns;
+    static BAddr local_addr;
+    static BAddr remote_addr;
+    static int init = 0;
+
+    int to_dns;
+    int from_dns;
     int packet_length = 0;
     
     uint8_t ip_version = 0;
@@ -1215,28 +1218,63 @@ int process_device_dns_packet (uint8_t *data, int data_len)
             if (checksum_in_packet != checksum_computed) {
                 goto fail;
             }
-            
-            BLog(BLOG_INFO, "UDP: from device %d bytes", data_len);
-            
+
             // to port 53 is considered a DNS packet
-            is_dns = udp_header.dest_port == hton16(53);
+            to_dns = udp_header.dest_port == hton16(53);
+
+            // from port 8153 is considered a DNS packet
+            from_dns = udp_header.source_port == dnsgw.ipv4.port;
 
             // if not DNS packet, just bypass it.
-            if (!is_dns) {
+            if (!to_dns && !from_dns) {
                 goto fail;
             }
 
-            // build IP header
-            ipv4_header.destination_address = dnsgw.ipv4.ip;
+            // modify DNS packet
+            if (to_dns) {
+                BLog(BLOG_INFO, "UDP: to DNS %d bytes", data_len);
+
+                // construct addresses
+                if (!init) {
+                    init = 1;
+                    BAddr_InitIPv4(&local_addr, ipv4_header.source_address, udp_header.source_port);
+                    BAddr_InitIPv4(&remote_addr, ipv4_header.destination_address, udp_header.dest_port);
+                }
+
+                // build IP header
+                ipv4_header.destination_address = dnsgw.ipv4.ip;
+                ipv4_header.source_address = netif_ipaddr.ipv4;
+
+                // build UDP header
+                udp_header.dest_port = dnsgw.ipv4.port;
+
+            } else if (from_dns) {
+
+                // if not initialized
+                if (!init) {
+                    goto fail;
+                }
+
+                BLog(BLOG_INFO, "UDP: from DNS %d bytes", data_len);
+
+                // build IP header
+                ipv4_header.source_address = remote_addr.ipv4.ip;
+                ipv4_header.destination_address = local_addr.ipv4.ip;
+
+                // build UDP header
+                udp_header.source_port = remote_addr.ipv4.port;
+
+            }
+            
+            // update IPv4 header's checksum
             ipv4_header.checksum = hton16(0);
             ipv4_header.checksum = ipv4_checksum(&ipv4_header, NULL, 0);
-            
-            // build UDP header
-            udp_header.dest_port = dnsgw.ipv4.port;
+
+            // update UDP header's checksum
             udp_header.checksum = hton16(0);
             udp_header.checksum = udp_checksum(&udp_header, data, data_len,
                     ipv4_header.source_address, ipv4_header.destination_address);
-            
+
             // write packet
             memcpy(device_write_buf, &ipv4_header, sizeof(ipv4_header));
             memcpy(device_write_buf + sizeof(ipv4_header), &udp_header, sizeof(udp_header));
