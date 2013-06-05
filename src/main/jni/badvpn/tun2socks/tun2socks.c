@@ -1232,7 +1232,7 @@ int process_device_dns_packet (uint8_t *data, int data_len)
             ipv4_header.checksum = ipv4_checksum(&ipv4_header, NULL, 0);
             
             // build UDP header
-            udp_header.dest_port = hton16(dnsgw.ipv4.port);
+            udp_header.dest_port = dnsgw.ipv4.port;
             udp_header.checksum = hton16(0);
             udp_header.checksum = udp_checksum(&udp_header, data, data_len,
                     ipv4_header.source_address, ipv4_header.destination_address);
