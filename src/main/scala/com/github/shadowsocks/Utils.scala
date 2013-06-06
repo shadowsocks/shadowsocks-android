@@ -53,6 +53,7 @@ import android.graphics.{Canvas, Bitmap}
 import android.app.ActivityManager
 
 object Key {
+  val isRoot = "isRoot"
   val update = "update"
   val proxyedApps = "proxyedApps"
 

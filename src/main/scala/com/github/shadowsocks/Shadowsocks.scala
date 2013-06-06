@@ -140,7 +140,7 @@ object Shadowsocks {
             val isGlobalProxy: Boolean = settings.getBoolean(Key.isGlobalProxy, false)
             pref.setEnabled(enabled && !isGlobalProxy)
           } else if (name == Key.isAutoConnect) {
-            pref.setEnabled(if (Shadowsocks.vpnEnabled == 1) false else true)
+            pref.setEnabled(settings.getBoolean(Key.isRoot, false))
           } else {
             pref.setEnabled(enabled)
           }
@@ -376,7 +376,7 @@ class Shadowsocks
         progressDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true, true)
       }
       spawn {
-        Utils.getRoot
+        settings.edit().putBoolean(Key.isRoot, Utils.getRoot).commit()
         val update = getSharedPreferences(Key.update, Context.MODE_WORLD_WRITEABLE)
         if (!update.getBoolean(getVersionName, false)) {
           update.edit.putBoolean(getVersionName, true).apply()
@@ -486,7 +486,7 @@ class Shadowsocks
           val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
           pref.setEnabled(enabled && !isGlobalProxy)
         } else if (name == Key.isAutoConnect) {
-          pref.setEnabled(if (Shadowsocks.vpnEnabled == 1) false else true)
+          pref.setEnabled(settings.getBoolean(Key.isRoot, false))
         } else {
           pref.setEnabled(enabled)
         }
