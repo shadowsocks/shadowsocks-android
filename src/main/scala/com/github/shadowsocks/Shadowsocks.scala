@@ -136,11 +136,13 @@ object Shadowsocks {
         val pref: Preference = findPreference(name)
         if (pref != null) {
           val settings = PreferenceManager.getDefaultSharedPreferences(getActivity)
-          if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
+          val status = getActivity.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
+          val isRoot = status.getBoolean(Key.isRoot, false)
+          if (name == Key.isAutoConnect || name == Key.isGlobalProxy) {
+            pref.setEnabled(isRoot)
+          } else if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
             val isGlobalProxy: Boolean = settings.getBoolean(Key.isGlobalProxy, false)
-            pref.setEnabled(enabled && !isGlobalProxy)
-          } else if (name == Key.isAutoConnect) {
-            pref.setEnabled(settings.getBoolean(Key.isRoot, false))
+            pref.setEnabled(enabled && isRoot && !isGlobalProxy)
           } else {
             pref.setEnabled(enabled)
           }
@@ -378,7 +380,7 @@ class Shadowsocks
         progressDialog = ProgressDialog.show(this, "", getString(R.string.initializing), true, true)
       }
       spawn {
-        settings.edit().putBoolean(Key.isRoot, Utils.getRoot).commit()
+        status.edit().putBoolean(Key.isRoot, Utils.getRoot).commit()
         if (!status.getBoolean(getVersionName, false)) {
           status.edit.putBoolean(getVersionName, true).apply()
           reset()
@@ -483,11 +485,12 @@ class Shadowsocks
     for (name <- Shadowsocks.FEATRUE_PREFS) {
       val pref: Preference = findPreference(name)
       if (pref != null) {
-        if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
-          val isGlobalProxy: Boolean = settings.getBoolean("isGlobalProxy", false)
-          pref.setEnabled(enabled && !isGlobalProxy)
-        } else if (name == Key.isAutoConnect) {
-          pref.setEnabled(settings.getBoolean(Key.isRoot, false))
+        val isRoot = status.getBoolean(Key.isRoot, false)
+        if (name == Key.isAutoConnect || name == Key.isGlobalProxy) {
+          pref.setEnabled(isRoot)
+        } else if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
+          val isGlobalProxy: Boolean = settings.getBoolean(Key.isGlobalProxy, false)
+          pref.setEnabled(enabled && isRoot && !isGlobalProxy)
         } else {
           pref.setEnabled(enabled)
         }
