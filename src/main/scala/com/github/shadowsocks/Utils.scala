@@ -54,7 +54,7 @@ import android.app.ActivityManager
 
 object Key {
   val isRoot = "isRoot"
-  val update = "update"
+  val status = "status"
   val proxyedApps = "proxyedApps"
 
   val isRunning = "isRunning"
@@ -325,30 +325,9 @@ object Utils {
    * @return The Property, or NULL if not found
    */
   def getSystemProperty(propName: String): String = {
-    var line: String = null
-    var input: BufferedReader = null
-    try {
-      val p: Process = Runtime.getRuntime.exec("getprop " + propName)
-      input = new BufferedReader(new InputStreamReader(p.getInputStream), 1024)
-      line = input.readLine
-      input.close()
-    } catch {
-      case ex: IOException => {
-        Log.e(TAG, "Unable to read sysprop " + propName, ex)
-        return null
-      }
-    } finally {
-      if (input != null) {
-        try {
-          input.close()
-        } catch {
-          case ex: IOException => {
-            Log.e(TAG, "Exception while closing InputStream", ex)
-          }
-        }
-      }
-    }
-    line
+    val p: Process = Runtime.getRuntime.exec("getprop " + propName)
+    val lines = scala.io.Source.fromInputStream(p.getInputStream).getLines()
+    if (lines.hasNext) lines.next() else null
   }
 
   /**
@@ -404,13 +383,13 @@ object Utils {
 
   def getAppIcon(c: Context, uid: Int): Drawable = {
     val pm: PackageManager = c.getPackageManager
-    var appIcon: Drawable = c.getResources.getDrawable(android.R.drawable.sym_def_app_icon)
+    val icon: Drawable = c.getResources.getDrawable(android.R.drawable.sym_def_app_icon)
     val packages: Array[String] = pm.getPackagesForUid(uid)
     if (packages != null) {
       if (packages.length >= 1) {
         try {
           val appInfo: ApplicationInfo = pm.getApplicationInfo(packages(0), 0)
-          appIcon = pm.getApplicationIcon(appInfo)
+          return pm.getApplicationIcon(appInfo)
         } catch {
           case e: PackageManager.NameNotFoundException => {
             Log.e(c.getPackageName, "No package found matching with the uid " + uid)
@@ -420,7 +399,7 @@ object Utils {
     } else {
       Log.e(c.getPackageName, "Package not found for uid " + uid)
     }
-    appIcon
+    icon
   }
 
   def getDataPath(ctx: Context): String = {

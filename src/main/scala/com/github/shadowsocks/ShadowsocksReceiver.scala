@@ -50,7 +50,7 @@ class ShadowsocksReceiver extends BroadcastReceiver {
 
   def onReceive(context: Context, intent: Intent) {
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    val update = context.getSharedPreferences(Key.update, Context.MODE_WORLD_READABLE)
+    val status = context.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
 
     if (intent.getAction == Action.UPDATE_STATE) {
       val state = intent.getIntExtra(Extra.STATE, State.INIT)
@@ -59,7 +59,7 @@ class ShadowsocksReceiver extends BroadcastReceiver {
         case State.CONNECTED => true
         case _ => false
       }
-      settings.edit.putBoolean(Key.isRunning, running).commit()
+      status.edit.putBoolean(Key.isRunning, running).commit()
       return
     }
 
@@ -72,7 +72,7 @@ class ShadowsocksReceiver extends BroadcastReceiver {
       }
     }
     val isAutoConnect: Boolean = settings.getBoolean(Key.isAutoConnect, false)
-    val isInstalled: Boolean = update.getBoolean(versionName, false)
+    val isInstalled: Boolean = status.getBoolean(versionName, false)
     if (isAutoConnect && isInstalled) {
       if (Utils.getRoot) {
         if (ShadowsocksService.isServiceStarted(context)) return

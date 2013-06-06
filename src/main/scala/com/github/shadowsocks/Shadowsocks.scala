@@ -209,6 +209,7 @@ class Shadowsocks
   private var switchButton: Switch = null
   private var progressDialog: ProgressDialog = null
   private var settings: SharedPreferences = null
+  private var status: SharedPreferences = null
   private var prepared = false
   private var state = State.INIT
   private var receiver: StateBroadcastReceiver = null
@@ -218,7 +219,7 @@ class Shadowsocks
       msg.what match {
         case MSG_CRASH_RECOVER =>
           Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
-          settings.edit().putBoolean(Key.isRunning, false).apply()
+          status.edit().putBoolean(Key.isRunning, false).commit()
         case MSG_INITIAL_FINISH =>
           clearDialog()
       }
@@ -367,6 +368,7 @@ class Shadowsocks
 
     switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
     settings = PreferenceManager.getDefaultSharedPreferences(this)
+    status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
     receiver = new StateBroadcastReceiver()
     registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
 
@@ -377,9 +379,8 @@ class Shadowsocks
       }
       spawn {
         settings.edit().putBoolean(Key.isRoot, Utils.getRoot).commit()
-        val update = getSharedPreferences(Key.update, Context.MODE_WORLD_WRITEABLE)
-        if (!update.getBoolean(getVersionName, false)) {
-          update.edit.putBoolean(getVersionName, true).apply()
+        if (!status.getBoolean(getVersionName, false)) {
+          status.edit.putBoolean(getVersionName, true).apply()
           reset()
         }
         handler.sendEmptyMessage(MSG_INITIAL_FINISH)
@@ -459,7 +460,7 @@ class Shadowsocks
         switchButton.setChecked(false)
         Crouton.cancelAllCroutons()
         setPreferenceEnabled(true)
-        if (settings.getBoolean(Key.isRunning, false)) {
+        if (status.getBoolean(Key.isRunning, false)) {
           spawn {
             crash_recovery()
             handler.sendEmptyMessage(MSG_CRASH_RECOVER)
