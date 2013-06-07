@@ -56,7 +56,12 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
+import java.util.{TimerTask, Timer}
+import android.net.TrafficStats
+import android.graphics._
 import scala.Some
+
+case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
 object ShadowsocksService {
   def isServiceStarted(context: Context): Boolean = {
@@ -95,9 +100,9 @@ class ShadowsocksService extends Service {
   val MSG_STOP_SELF = 4
   val MSG_VPN_ERROR = 5
 
-  val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
-  val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
-  val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
+  private val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
+  private val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
+  private val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
 
   var receiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
@@ -105,14 +110,18 @@ class ShadowsocksService extends Service {
   var hasRedirectSupport = false
   var apps: Array[ProxiedApp] = null
 
-  var mSetForeground: Method = null
-  var mStartForeground: Method = null
-  var mStopForeground: Method = null
-  var mSetForegroundArgs = new Array[AnyRef](1)
-  var mStartForegroundArgs = new Array[AnyRef](2)
-  var mStopForegroundArgs = new Array[AnyRef](1)
+  private var mSetForeground: Method = null
+  private var mStartForeground: Method = null
+  private var mStopForeground: Method = null
+  private var mSetForegroundArgs = new Array[AnyRef](1)
+  private var mStartForegroundArgs = new Array[AnyRef](2)
+  private var mStopForegroundArgs = new Array[AnyRef](1)
 
   private var state = State.INIT
+  private var last = new TrafficStat(TrafficStats.getTotalTxBytes,
+    TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+  private val timer = new Timer(true)
+  private val TIMER_INTERVAL = 10
 
   private def changeState(s: Int) {
     if (state != s) {
@@ -166,18 +175,6 @@ class ShadowsocksService extends Service {
           "shadowsocks.pid")
           .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
           config.encMethod)
-        Log.d(TAG, cmd)
-        System.exec(cmd)
-      }
-    }.start()
-  }
-
-  def startPolipoDaemon() {
-    new Thread {
-      override def run() {
-        val cmd: String = (BASE +
-          "polipo proxyPort=%d socksParentProxy=127.0.0.1:%d daemonise=true pidFile=\"%s\" logLevel=1 logFile=\"%s\"")
-          .format(config.localPort + 1, config.localPort, BASE + "polipo.pid", BASE + "polipo.log")
         Log.d(TAG, cmd)
         System.exec(cmd)
       }
@@ -300,14 +297,48 @@ class ShadowsocksService extends Service {
   }
 
   def notifyForegroundAlert(title: String, info: String) {
+    notifyForegroundAlert(title, info, -1)
+  }
+
+  def notifyForegroundAlert(title: String, info: String, rate: Int) {
     val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
     val closeIntent: Intent = new Intent(Action.CLOSE)
     val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
+
+    val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
+    if (rate >= 0) {
+      val bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth * 2,
+        icon.getIntrinsicHeight * 2, Bitmap.Config.ARGB_8888)
+      val r = rate.toString
+      val padding = bitmap.getHeight / 4
+      val size = bitmap.getHeight / 2
+      val canvas = new Canvas(bitmap)
+      val paint = new Paint()
+      paint.setColor(Color.WHITE)
+      paint.setTextSize(size)
+      val bounds = new Rect()
+      paint.getTextBounds(r, 0, r.length, bounds)
+      canvas.drawText(r, (bitmap.getWidth - bounds.width()) / 2,
+        bitmap.getHeight - padding, paint)
+      builder.setLargeIcon(bitmap)
+
+      if (rate < 1000) {
+        builder.setSmallIcon(R.drawable.ic_stat_speed, rate)
+      } else if (rate <= 10000) {
+        val mb = rate / 100 - 10 + 1000
+        builder.setSmallIcon(R.drawable.ic_stat_speed, mb)
+      } else {
+        builder.setSmallIcon(R.drawable.ic_stat_speed, 1091)
+      }
+
+    } else {
+      builder.setSmallIcon(R.drawable.ic_stat_shadowsocks)
+    }
+
     builder
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .setWhen(0)
       .setTicker(title)
       .setContentTitle(getString(R.string.app_name))
@@ -315,6 +346,7 @@ class ShadowsocksService extends Service {
       .setContentIntent(contentIntent)
       .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
       actionIntent)
+
     startForegroundCompat(1, builder.build)
   }
 
@@ -375,11 +407,29 @@ class ShadowsocksService extends Service {
       }
     }
     registerReceiver(receiver, filter)
+
+    // initialize timer
+    val task = new TimerTask {
+      def run() {
+        val now = new TrafficStat(TrafficStats.getTotalTxBytes,
+          TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+        val txRate = (now.tx - last.tx) / 1024 / TIMER_INTERVAL
+        val rxRate = (now.rx - last.rx) / 1024 / TIMER_INTERVAL
+        last = now
+        if (state == State.CONNECTED) {
+          Log.d(TAG, getString(R.string.service_status).format(txRate, rxRate))
+          notifyForegroundAlert(getString(R.string.forward_success),
+            getString(R.string.service_status).format(txRate, rxRate), txRate.toInt + rxRate.toInt)
+        }
+      }
+    }
+    timer.schedule(task, TIMER_INTERVAL*1000, TIMER_INTERVAL*1000)
   }
 
   /** Called when the activity is closed. */
   override def onDestroy() {
     changeState(State.STOPPED)
+    timer.cancel()
     EasyTracker.getTracker.setStartSession(false)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     stopForegroundCompat(1)
@@ -411,10 +461,6 @@ class ShadowsocksService extends Service {
     if (!waitForProcess("shadowsocks")) {
       sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
       sb ++= "killall -9 shadowsocks" ++= "\n"
-    }
-    if (!waitForProcess("polipo")) {
-      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`" ++= "\n"
-      sb ++= "killall -9 polipo" ++= "\n"
     }
     Utils.runCommand(sb.toString())
   }

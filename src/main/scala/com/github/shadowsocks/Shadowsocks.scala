@@ -282,11 +282,9 @@ class Shadowsocks
     sb.append(Utils.getIptables).append(" -t nat -F OUTPUT").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/polipo.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
     sb.append("killall -9 pdnsd").append("\n")
     sb.append("killall -9 shadowsocks").append("\n")
-    sb.append("killall -9 polipo").append("\n")
     sb.append("killall -9 tun2socks").append("\n")
     Utils.runCommand(sb.toString())
 
@@ -524,7 +522,6 @@ class Shadowsocks
       + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
       + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
       + "chmod 755 /data/data/com.github.shadowsocks/shadowsocks\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/polipo\n"
       + "chmod 755 /data/data/com.github.shadowsocks/tun2socks\n")
   }
 
