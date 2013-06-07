@@ -121,7 +121,7 @@ class ShadowsocksService extends Service {
   private var last = new TrafficStat(TrafficStats.getTotalTxBytes,
     TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
   private val timer = new Timer(true)
-  private val TIMER_INTERVAL = 10
+  private val TIMER_INTERVAL = 5
 
   private def changeState(s: Int) {
     if (state != s) {
