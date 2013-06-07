@@ -11,11 +11,11 @@
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
   <string name="proxy">Server</string>
-  <string name="proxy_summary">Hostname of your Shadowsocks server</string>
+  <string name="proxy_summary">Hostname / IP Address</string>
   <string name="remote_port">Remote Port</string>
-  <string name="remote_port_summary">Remote port of shadowsocks server.</string>
+  <string name="remote_port_summary">The port of your Shadowsocks server</string>
   <string name="port">Local Port</string>
-  <string name="port_summary">Local port listening on</string>
+  <string name="port_summary">The port of your Shadowsocks client</string>
   <string name="sitekey">Password</string>
   <string name="sitekey_summary">Password of your Shadowsocks server</string>
   <string name="enc_method">Encrypt Method</string>
