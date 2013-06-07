@@ -310,11 +310,10 @@ class ShadowsocksService extends Service {
 
     val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
     if (rate >= 0) {
-      val bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth * 2,
-        icon.getIntrinsicHeight * 2, Bitmap.Config.ARGB_8888)
+      val bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth * 4,
+        icon.getIntrinsicHeight * 4, Bitmap.Config.ARGB_8888)
       val r = rate.toString
-      val padding = bitmap.getHeight / 4
-      val size = bitmap.getHeight / 2
+      val size = bitmap.getHeight / 3
       val canvas = new Canvas(bitmap)
       val paint = new Paint()
       paint.setColor(Color.WHITE)
@@ -322,7 +321,7 @@ class ShadowsocksService extends Service {
       val bounds = new Rect()
       paint.getTextBounds(r, 0, r.length, bounds)
       canvas.drawText(r, (bitmap.getWidth - bounds.width()) / 2,
-        bitmap.getHeight - padding, paint)
+        bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
       builder.setLargeIcon(bitmap)
 
       if (rate < 1000) {

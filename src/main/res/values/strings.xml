@@ -44,7 +44,7 @@
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
   <string name="service_running">Running in the background.</string>
-  <string name="service_status" formatted="false">TX Rate: %d KB/s, RX Rate: %d KB/s</string>
+  <string name="service_status" formatted="false">Upload: %d KB/s, Download: %d KB/s</string>
   <string name="forward_fail">Shadowsocks failed to start.</string>
   <string name="service_stopped">Shadowsocks stopped.</string>
   <string name="forward_stop">Shadowsocks stopped.</string>
