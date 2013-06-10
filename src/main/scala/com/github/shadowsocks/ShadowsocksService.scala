@@ -229,7 +229,6 @@ class ShadowsocksService extends Service {
           resolved = true
         }
 
-        Log.d(TAG, "IPTABLES: " + Utils.getIptables)
         hasRedirectSupport = Utils.getHasRedirectSupport
 
         if (resolved && handleConnection) {
@@ -424,7 +423,6 @@ class ShadowsocksService extends Service {
           lastRxRate = rxRate
         }
         if (state == State.CONNECTED) {
-          Log.d(TAG, getString(R.string.service_status).format(txRate, rxRate))
           notifyForegroundAlert(getString(R.string.forward_success),
             getString(R.string.service_status).format(txRate, rxRate), txRate + rxRate)
         }
