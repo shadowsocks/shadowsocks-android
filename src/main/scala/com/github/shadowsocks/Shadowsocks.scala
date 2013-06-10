@@ -567,12 +567,7 @@ class Shadowsocks
   }
 
   def serviceStop() {
-    if (ShadowVpnService.isServiceStarted(this)) {
-      stopService(new Intent(this, classOf[ShadowVpnService]))
-    }
-    if (ShadowsocksService.isServiceStarted(this)) {
-      sendBroadcast(new Intent(Action.CLOSE))
-    }
+    sendBroadcast(new Intent(Action.CLOSE))
   }
 
   /** Called when connect button is clicked. */
