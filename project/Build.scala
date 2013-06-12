@@ -5,8 +5,8 @@ import org.scalasbt.androidplugin._
 import org.scalasbt.androidplugin.AndroidKeys._
 
 object App {
-  val version = "1.6.2"
-  val versionCode = 32
+  val version = "1.6.3"
+  val versionCode = 33
 }
 
 object General {

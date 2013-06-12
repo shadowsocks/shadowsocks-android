@@ -42,8 +42,7 @@ import android.content._
 import android.content.res.AssetManager
 import android.graphics.Typeface
 import android.os._
-import android.preference.Preference
-import android.preference.PreferenceManager
+import android.preference.{CheckBoxPreference, Preference, PreferenceManager}
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.CompoundButton
@@ -67,6 +66,7 @@ import android.net.{Uri, VpnService}
 import android.webkit.{WebViewClient, WebView}
 import android.app.backup.BackupManager
 import scala.concurrent.ops._
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 
 object Shadowsocks {
 
@@ -89,7 +89,7 @@ object Shadowsocks {
 
     private def setPreferenceEnabled() {
       val state = getActivity.asInstanceOf[Shadowsocks].state
-      val enabled: Boolean = state != State.CONNECTED && state != State.CONNECTING
+      val enabled = state != State.CONNECTED && state != State.CONNECTING
       for (name <- PROXY_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
@@ -125,7 +125,7 @@ object Shadowsocks {
     }
   }
 
-  class FeatureFragment extends UnifiedPreferenceFragment {
+  class FeatureFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener{
 
     var receiver: BroadcastReceiver = null
 
@@ -135,14 +135,11 @@ object Shadowsocks {
       for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
-          val settings = PreferenceManager.getDefaultSharedPreferences(getActivity)
           val status = getActivity.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
           val isRoot = status.getBoolean(Key.isRoot, false)
-          if (name == Key.isAutoConnect || name == Key.isGlobalProxy) {
-            pref.setEnabled(isRoot)
-          } else if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
-            val isGlobalProxy: Boolean = settings.getBoolean(Key.isGlobalProxy, false)
-            pref.setEnabled(enabled && isRoot && !isGlobalProxy)
+          if (Seq(Key.isAutoConnect, Key.isGlobalProxy,
+            Key.isBypassApps, Key.proxyedApps).contains(name)) {
+            pref.setEnabled(enabled && isRoot)
           } else {
             pref.setEnabled(enabled)
           }
@@ -175,6 +172,10 @@ object Shadowsocks {
     override def onPause() {
       super.onPause()
     }
+
+    def onSharedPreferenceChanged(prefs: SharedPreferences, key: String) {
+      if (key == Key.isGlobalProxy) setPreferenceEnabled()
+    }
   }
 
 }
@@ -203,7 +204,8 @@ object Typefaces {
 
 class Shadowsocks
   extends UnifiedSherlockPreferenceActivity
-  with CompoundButton.OnCheckedChangeListener {
+  with CompoundButton.OnCheckedChangeListener
+  with OnSharedPreferenceChangeListener {
 
   private val MSG_CRASH_RECOVER: Int = 1
   private val MSG_INITIAL_FINISH: Int = 2
@@ -268,11 +270,18 @@ class Shadowsocks
   private def copyFile(in: InputStream, out: OutputStream) {
     val buffer: Array[Byte] = new Array[Byte](1024)
     var read: Int = 0
-    while ((({
+    while ({
       read = in.read(buffer)
       read
-    })) != -1) {
+    } != -1) {
       out.write(buffer, 0, read)
+    }
+  }
+
+  def onSharedPreferenceChanged(prefs: SharedPreferences, key: String) {
+    if (key == Key.isGlobalProxy) {
+      val enabled = state != State.CONNECTED && state != State.CONNECTING
+      setPreferenceEnabled(enabled)
     }
   }
 
@@ -453,13 +462,13 @@ class Shadowsocks
           switchButton.setEnabled(false)
           Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
         }
-        setPreferenceEnabled(false)
+        setPreferenceEnabled(enabled = false)
         onStateChanged(State.CONNECTED, null)
       } else {
         switchButton.setEnabled(true)
         switchButton.setChecked(false)
         Crouton.cancelAllCroutons()
-        setPreferenceEnabled(true)
+        setPreferenceEnabled(enabled = true)
         if (status.getBoolean(Key.isRunning, false)) {
           spawn {
             crash_recovery()
@@ -474,21 +483,19 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
+    val isRoot = status.getBoolean(Key.isRoot, false)
     for (name <- Shadowsocks.PROXY_PREFS) {
-      val pref: Preference = findPreference(name)
+      val pref = findPreference(name)
       if (pref != null) {
         pref.setEnabled(enabled)
       }
     }
     for (name <- Shadowsocks.FEATRUE_PREFS) {
-      val pref: Preference = findPreference(name)
+      val pref = findPreference(name)
       if (pref != null) {
-        val isRoot = status.getBoolean(Key.isRoot, false)
-        if (name == Key.isAutoConnect || name == Key.isGlobalProxy) {
-          pref.setEnabled(isRoot)
-        } else if ((name == Key.isBypassApps) || (name == Key.proxyedApps)) {
-          val isGlobalProxy: Boolean = settings.getBoolean(Key.isGlobalProxy, false)
-          pref.setEnabled(enabled && isRoot && !isGlobalProxy)
+        if (Seq(Key.isAutoConnect, Key.isGlobalProxy,
+          Key.isBypassApps, Key.proxyedApps).contains(name)) {
+          pref.setEnabled(enabled && isRoot)
         } else {
           pref.setEnabled(enabled)
         }
@@ -511,7 +518,7 @@ class Shadowsocks
     super.onDestroy()
     Crouton.cancelAllCroutons()
     unregisterReceiver(receiver)
-    (new BackupManager(this)).dataChanged()
+    new BackupManager(this).dataChanged()
   }
 
   def reset() {
@@ -673,12 +680,12 @@ class Shadowsocks
             progressDialog = ProgressDialog
               .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
           }
-          setPreferenceEnabled(false)
+          setPreferenceEnabled(enabled = false)
         }
         case State.CONNECTED => {
           clearDialog()
           if (!switchButton.isChecked) switchButton.setChecked(true)
-          setPreferenceEnabled(false)
+          setPreferenceEnabled(enabled = false)
         }
         case State.STOPPED => {
           clearDialog()
@@ -697,7 +704,7 @@ class Shadowsocks
               .makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style)
               .show()
           }
-          setPreferenceEnabled(true)
+          setPreferenceEnabled(enabled = true)
         }
       }
       sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
