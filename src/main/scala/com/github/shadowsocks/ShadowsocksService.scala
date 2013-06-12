@@ -518,7 +518,9 @@ class ShadowsocksService extends Service {
       })
     }
     if (!config.isGlobalProxy) {
-      if (apps == null || apps.length <= 0) apps = AppManager.getProxiedApps(this)
+      if (apps == null || apps.length <= 0) {
+        apps = AppManager.getProxiedApps(this, config.proxiedAppString)
+      }
       val uidSet: mutable.HashSet[Int] = new mutable.HashSet[Int]
       for (app <- apps) {
         if (app.proxied) {

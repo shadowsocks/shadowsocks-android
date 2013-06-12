@@ -81,14 +81,10 @@ case class ListEntry(box: CheckBox, text: TextView, icon: ImageView)
 
 object AppManager {
 
-  val PREFS_KEY_PROXYED = "Proxyed"
-
   implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]) = new ObjectArrayTools(a)
 
-  def getProxiedApps(context: Context): Array[ProxiedApp] = {
+  def getProxiedApps(context: Context, proxiedAppString: String): Array[ProxiedApp] = {
 
-    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    val proxiedAppString = prefs.getString(PREFS_KEY_PROXYED, "")
     val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
     import scala.collection.JavaConversions._
@@ -125,7 +121,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
 
   def loadApps(context: Context): Array[ProxiedApp] = {
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    val proxiedAppString = prefs.getString(AppManager.PREFS_KEY_PROXYED, "")
+    val proxiedAppString = prefs.getString(Key.proxied, "")
     val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
     import scala.collection.JavaConversions._
@@ -267,7 +263,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
         proxiedApps += '|'
       })
     val edit: SharedPreferences.Editor = prefs.edit
-    edit.putString(AppManager.PREFS_KEY_PROXYED, proxiedApps.toString())
+    edit.putString(Key.proxied, proxiedApps.toString())
     edit.commit
   }
 

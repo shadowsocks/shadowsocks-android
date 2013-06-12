@@ -53,6 +53,8 @@ import android.graphics.{Canvas, Bitmap}
 import android.app.ActivityManager
 
 object Key {
+  val proxied = "Proxyed"
+
   val isRoot = "isRoot"
   val status = "status"
   val proxyedApps = "proxyedApps"
@@ -72,7 +74,8 @@ object Key {
 }
 
 case class Config(isGlobalProxy: Boolean, isGFWList: Boolean, isBypassApps: Boolean,
-  var proxy: String, sitekey: String, encMethod: String, remotePort: Int, localPort: Int)
+  var proxy: String, sitekey: String, encMethod: String, remotePort: Int,
+  localPort: Int, proxiedAppString: String)
 
 object State {
   val INIT = 0
@@ -116,9 +119,10 @@ object Extra {
     val encMethod = intent.getStringExtra(Key.encMethod)
     val remotePort = intent.getIntExtra(Key.remotePort, 1984)
     val localPort = intent.getIntExtra(Key.localPort, 1984)
+    val proxiedString = intent.getStringExtra(Key.proxied)
 
     new Config(isGlobalProxy, isGFWList, isBypassApps, proxy, sitekey, encMethod, remotePort,
-      localPort)
+      localPort, proxiedString)
   }
 
   def put(settings: SharedPreferences, intent: Intent) {
@@ -146,6 +150,7 @@ object Extra {
         1984
       }
     }
+    val proxiedAppString = settings.getString(Key.proxied, "")
 
     intent.putExtra(Key.isGlobalProxy, isGlobalProxy)
     intent.putExtra(Key.isGFWList, isGFWList)
@@ -156,6 +161,8 @@ object Extra {
     intent.putExtra(Key.encMethod, encMethod)
     intent.putExtra(Key.remotePort, remotePort)
     intent.putExtra(Key.localPort, localProt)
+
+    intent.putExtra(Key.proxied, proxiedAppString)
   }
 }
 
