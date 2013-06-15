@@ -46,7 +46,7 @@
     <item>42.0.0.0/7</item>
     <item>49.0.0.0/8</item>
     <item>58.0.0.0/7</item>
-    <item>60.0.0.0/7</item>
+    <item>60.0.0.0/8</item>
     <item>101.0.0.0/8</item>
     <item>103.0.0.0/8</item>
     <item>106.0.0.0/8</item>
@@ -202,6 +202,7 @@
     <item>61.201</item>
     <item>61.219</item>
     <item>61.238</item>
+    <item>61.244</item>
     <item>62.27</item>
     <item>62.77</item>
     <item>62.80</item>
