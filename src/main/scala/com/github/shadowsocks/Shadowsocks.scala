@@ -425,10 +425,6 @@ class Shadowsocks
       .add(0, 1, 1, R.string.about)
       .setIcon(android.R.drawable.ic_menu_info_details)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    menu
-      .add(0, 2, 2, R.string.donate)
-      .setIcon(android.R.drawable.ic_menu_info_details)
-      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     true
   }
 
@@ -454,10 +450,6 @@ class Shadowsocks
       case 1 => {
         EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
         showAbout()
-      }
-      case 2 => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "donate", getVersionName, 0L)
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.donate_address))))
       }
     }
     super.onOptionsItemSelected(item)
