@@ -44,10 +44,8 @@ import android.graphics.Typeface
 import android.os._
 import android.preference.{CheckBoxPreference, Preference, PreferenceManager}
 import android.util.Log
-import android.view.KeyEvent
-import android.widget.CompoundButton
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.{ViewParent, KeyEvent}
+import android.widget.{LinearLayout, CompoundButton, RelativeLayout, TextView}
 import com.actionbarsherlock.view.Menu
 import com.actionbarsherlock.view.MenuItem
 import com.google.analytics.tracking.android.EasyTracker
@@ -67,6 +65,7 @@ import android.webkit.{WebViewClient, WebView}
 import android.app.backup.BackupManager
 import scala.concurrent.ops._
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import com.google.ads.{AdRequest, AdSize, AdView}
 
 object Shadowsocks {
 
@@ -362,6 +361,8 @@ class Shadowsocks
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
 
+
+
     val switchLayout = getLayoutInflater
       .inflate(R.layout.layout_switch, null)
       .asInstanceOf[RelativeLayout]
@@ -380,6 +381,21 @@ class Shadowsocks
     status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
     receiver = new StateBroadcastReceiver()
     registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
+
+    if (settings.getString(Key.proxy, "") == "198.199.101.152") {
+      val adView = new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
+      val layoutView = {
+        def getLayoutView(view: ViewParent): LinearLayout = {
+          view match {
+            case layout: LinearLayout => layout
+            case _ => getLayoutView(view.getParent)
+          }
+        }
+        getLayoutView(getListView)
+      }
+      layoutView.addView(adView, 0)
+      adView.loadAd(new AdRequest)
+    }
 
     val init: Boolean = !Shadowsocks.isServiceStarted(this)
     if (init) {
