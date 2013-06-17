@@ -44,7 +44,7 @@ import android.graphics.Typeface
 import android.os._
 import android.preference.{CheckBoxPreference, Preference, PreferenceManager}
 import android.util.Log
-import android.view.{ViewParent, KeyEvent}
+import android.view.{ViewGroup, ViewParent, KeyEvent}
 import android.widget.{LinearLayout, CompoundButton, RelativeLayout, TextView}
 import com.actionbarsherlock.view.Menu
 import com.actionbarsherlock.view.MenuItem
@@ -384,17 +384,20 @@ class Shadowsocks
 
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
       val adView = new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
+      val rootView = findViewById(android.R.id.content).asInstanceOf[ViewParent]
       val layoutView = {
         def getLayoutView(view: ViewParent): LinearLayout = {
           view match {
             case layout: LinearLayout => layout
-            case _ => getLayoutView(view.getParent)
+            case _ => if (view != null) getLayoutView(view.getParent) else null
           }
         }
-        getLayoutView(getListView)
+        getLayoutView(rootView)
       }
-      layoutView.addView(adView, 0)
-      adView.loadAd(new AdRequest)
+      if (layoutView != null) {
+        layoutView.addView(adView, 0)
+        adView.loadAd(new AdRequest)
+      }
     }
 
     val init: Boolean = !Shadowsocks.isServiceStarted(this)
