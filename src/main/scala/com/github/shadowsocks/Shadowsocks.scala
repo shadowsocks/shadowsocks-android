@@ -44,10 +44,8 @@ import android.graphics.Typeface
 import android.os._
 import android.preference.{CheckBoxPreference, Preference, PreferenceManager}
 import android.util.Log
-import android.view.KeyEvent
-import android.widget.CompoundButton
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.{ViewGroup, ViewParent, KeyEvent}
+import android.widget.{LinearLayout, CompoundButton, RelativeLayout, TextView}
 import com.actionbarsherlock.view.Menu
 import com.actionbarsherlock.view.MenuItem
 import com.google.analytics.tracking.android.EasyTracker
@@ -67,6 +65,7 @@ import android.webkit.{WebViewClient, WebView}
 import android.app.backup.BackupManager
 import scala.concurrent.ops._
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import com.google.ads.{AdRequest, AdSize, AdView}
 
 object Shadowsocks {
 
@@ -362,6 +361,8 @@ class Shadowsocks
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
 
+
+
     val switchLayout = getLayoutInflater
       .inflate(R.layout.layout_switch, null)
       .asInstanceOf[RelativeLayout]
@@ -380,6 +381,24 @@ class Shadowsocks
     status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
     receiver = new StateBroadcastReceiver()
     registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
+
+    if (settings.getString(Key.proxy, "") == "198.199.101.152") {
+      val adView = new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
+      val rootView = findViewById(android.R.id.content).asInstanceOf[ViewParent]
+      val layoutView = {
+        def getLayoutView(view: ViewParent): LinearLayout = {
+          view match {
+            case layout: LinearLayout => layout
+            case _ => if (view != null) getLayoutView(view.getParent) else null
+          }
+        }
+        getLayoutView(rootView)
+      }
+      if (layoutView != null) {
+        layoutView.addView(adView, 0)
+        adView.loadAd(new AdRequest)
+      }
+    }
 
     val init: Boolean = !Shadowsocks.isServiceStarted(this)
     if (init) {
@@ -404,10 +423,6 @@ class Shadowsocks
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     menu
       .add(0, 1, 1, R.string.about)
-      .setIcon(android.R.drawable.ic_menu_info_details)
-      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    menu
-      .add(0, 2, 2, R.string.donate)
       .setIcon(android.R.drawable.ic_menu_info_details)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     true
@@ -435,10 +450,6 @@ class Shadowsocks
       case 1 => {
         EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
         showAbout()
-      }
-      case 2 => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "donate", getVersionName, 0L)
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.donate_address))))
       }
     }
     super.onOptionsItemSelected(item)
