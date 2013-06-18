@@ -130,7 +130,7 @@ object Extra {
     val isGFWList = settings.getBoolean(Key.isGFWList, false)
     val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
     val proxy = settings.getString(Key.proxy, "127.0.0.1") match {
-      case "198.199.101.152" => "s.maxcdn.info"
+      case "198.199.101.152" => "ss.maxcdn.info"
       case s: String => s
       case _ => "127.0.0.1"
     }
