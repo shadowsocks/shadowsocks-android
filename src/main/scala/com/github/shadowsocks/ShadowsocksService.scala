@@ -177,7 +177,7 @@ class ShadowsocksService extends Service {
           "shadowsocks.pid")
           .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
           config.encMethod)
-        Log.d(TAG, cmd)
+        if (BuildConfig.DEBUG) Log.d(TAG, cmd)
         System.exec(cmd)
       }
     }.start()
@@ -314,7 +314,7 @@ class ShadowsocksService extends Service {
       val bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth * 4,
         icon.getIntrinsicHeight * 4, Bitmap.Config.ARGB_8888)
       val r = rate.toString
-      val size = bitmap.getHeight / 3
+      val size = bitmap.getHeight / 4
       val canvas = new Canvas(bitmap)
       val paint = new Paint()
       paint.setColor(Color.WHITE)

@@ -130,7 +130,7 @@ object Extra {
     val isGFWList = settings.getBoolean(Key.isGFWList, false)
     val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
     val proxy = settings.getString(Key.proxy, "127.0.0.1") match {
-      case "198.199.101.152" => "ss.maxcdn.info"
+      case "198.199.101.152" => if (!BuildConfig.DEBUG) "ss.maxcdn.info" else "198.199.101.152"
       case s: String => s
       case _ => "127.0.0.1"
     }
@@ -298,7 +298,7 @@ object Utils {
           if (!addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
             val sAddr = addr.getHostAddress.toUpperCase
             if (InetAddressUtils.isIPv6Address(sAddr)) {
-              Log.d(TAG, "IPv6 address detected")
+              if (BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
               return true
             }
           }
@@ -409,18 +409,6 @@ object Utils {
     icon
   }
 
-  def getDataPath(ctx: Context): String = {
-    if (data_path == null) {
-      if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState) {
-        data_path = Environment.getExternalStorageDirectory.getAbsolutePath
-      } else {
-        data_path = ctx.getFilesDir.getAbsolutePath
-      }
-      Log.d(TAG, "Python Data Path: " + data_path)
-    }
-    data_path
-  }
-
   def getHasRedirectSupport: Boolean = {
     if (hasRedirectSupport == -1) initHasRedirectSupported()
     hasRedirectSupport == 1
@@ -495,7 +483,7 @@ object Utils {
   }
 
   def runCommand(command: String, timeout: Int): Boolean = {
-    Log.d(TAG, command)
+    if (BuildConfig.DEBUG) Log.d(TAG, command)
     runScript(command, null, timeout, asroot = false)
     true
   }
@@ -509,7 +497,7 @@ object Utils {
       Log.e(TAG, "Cannot get ROOT permission: " + root_shell)
       return false
     }
-    Log.d(TAG, command)
+    if (BuildConfig.DEBUG) Log.d(TAG, command)
     runScript(command, null, timeout, asroot = true)
     true
   }

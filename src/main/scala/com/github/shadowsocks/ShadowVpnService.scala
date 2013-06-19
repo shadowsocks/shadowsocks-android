@@ -142,7 +142,7 @@ class ShadowVpnService extends VpnService {
         BASE +
         "shadowsocks.pid")
         .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
-      Log.d(TAG, cmd)
+      if (BuildConfig.DEBUG) Log.d(TAG, cmd)
       System.exec(cmd)
     }
   }
@@ -310,7 +310,7 @@ class ShadowVpnService extends VpnService {
       + "--loglevel 3 "
       + "--pid %stun2socks.pid")
       .format(localAddress.format("2"), localAddress.format("1"), config.localPort, fd, VPN_MTU, BASE)
-    Log.d(TAG, cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
 
