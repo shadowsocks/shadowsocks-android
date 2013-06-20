@@ -60,6 +60,7 @@ import java.util.{TimerTask, Timer}
 import android.net.TrafficStats
 import android.graphics._
 import scala.Some
+import scala.concurrent.ops._
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
@@ -169,18 +170,16 @@ class ShadowsocksService extends Service {
   }
 
   def startShadowsocksDaemon() {
-    new Thread {
-      override def run() {
-        val cmd: String = (BASE +
-          "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-          BASE +
-          "shadowsocks.pid")
-          .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
-          config.encMethod)
-        if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-        System.exec(cmd)
-      }
-    }.start()
+    spawn {
+      val cmd: String = (BASE +
+        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+        BASE +
+        "shadowsocks.pid")
+        .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
+        config.encMethod)
+      if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+      System.exec(cmd)
+    }
   }
 
   def startDnsDaemon() {
@@ -211,38 +210,36 @@ class ShadowsocksService extends Service {
 
     config = Extra.get(intent)
 
-    new Thread(new Runnable {
-      def run() {
 
-        killProcesses()
+    spawn {
+      killProcesses()
 
-        var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-          !InetAddressUtils.isIPv6Address(config.proxy)) {
-          Utils.resolve(config.proxy, enableIPv6 = true) match {
-            case Some(a) =>
-              config.proxy = a
-              resolved = true
-            case None => resolved = false
-          }
-        } else {
-          resolved = true
+      var resolved: Boolean = false
+      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+        !InetAddressUtils.isIPv6Address(config.proxy)) {
+        Utils.resolve(config.proxy, enableIPv6 = true) match {
+          case Some(a) =>
+            config.proxy = a
+            resolved = true
+          case None => resolved = false
         }
-
-        hasRedirectSupport = Utils.getHasRedirectSupport
-
-        if (resolved && handleConnection) {
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running))
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
-        } else {
-          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-          stopSelf()
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
-        }
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 500)
+      } else {
+        resolved = true
       }
-    }).start()
+
+      hasRedirectSupport = Utils.getHasRedirectSupport
+
+      if (resolved && handleConnection) {
+        notifyForegroundAlert(getString(R.string.forward_success),
+          getString(R.string.service_running))
+        handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
+      } else {
+        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+        stopSelf()
+        handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
+      }
+      handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 500)
+    }
   }
 
   def startRedsocksDaemon() {
@@ -433,32 +430,36 @@ class ShadowsocksService extends Service {
 
   /** Called when the activity is closed. */
   override def onDestroy() {
+
+    // clean up context
     changeState(State.STOPPED)
     timer.cancel()
     EasyTracker.getTracker.setStartSession(false)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     stopForegroundCompat(1)
-    new Thread {
-      override def run() {
-        killProcesses()
-      }
-    }.start()
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
     }
+
+    // reset NAT
+    Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+    spawn {
+      killProcesses()
+    }
+
     super.onDestroy()
   }
 
   def killProcesses() {
-    Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
-
     val sb = new StringBuilder
+
     sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`" ++= "\n"
     sb ++= "killall -9 redsocks" ++= "\n"
     Utils.runRootCommand(sb.toString())
 
     sb.clear()
+
     if (!waitForProcess("pdnsd")) {
       sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`" ++= "\n"
       sb ++= "killall -9 pdnsd" ++= "\n"
