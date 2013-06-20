@@ -443,15 +443,14 @@ class ShadowsocksService extends Service {
     }
 
     // reset NAT
-    Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
-    spawn {
-      killProcesses()
-    }
+    killProcesses()
 
     super.onDestroy()
   }
 
   def killProcesses() {
+    Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+
     val sb = new StringBuilder
 
     sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`" ++= "\n"

@@ -372,14 +372,13 @@ class ShadowVpnService extends VpnService {
   }
 
   def destroy() {
+    killProcesses()
+
     changeState(State.STOPPED)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
-    }
-    spawn {
-      killProcesses()
     }
     if (conn != null) {
       conn.close()
