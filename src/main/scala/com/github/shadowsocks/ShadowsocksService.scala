@@ -119,8 +119,7 @@ class ShadowsocksService extends Service {
   private var mStopForegroundArgs = new Array[AnyRef](1)
 
   private var state = State.INIT
-  private var last = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
-    TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
+  private var last: TrafficStat = null
   private var lastTxRate = 0
   private var lastRxRate = 0
   private val timer = new Timer(true)
@@ -379,10 +378,10 @@ class ShadowsocksService extends Service {
       mStopForeground = getClass.getMethod("stopForeground", mStopForegroundSignature: _*)
     } catch {
       case e: NoSuchMethodException => {
-        mStartForeground = ({
+        mStartForeground = {
           mStopForeground = null
           mStopForeground
-        })
+        }
       }
     }
     try {
@@ -425,6 +424,8 @@ class ShadowsocksService extends Service {
         }
       }
     }
+    last = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
+      TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
     timer.schedule(task, TIMER_INTERVAL*1000, TIMER_INTERVAL*1000)
   }
 
