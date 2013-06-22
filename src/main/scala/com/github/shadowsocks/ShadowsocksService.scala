@@ -119,8 +119,8 @@ class ShadowsocksService extends Service {
   private var mStopForegroundArgs = new Array[AnyRef](1)
 
   private var state = State.INIT
-  private var last = new TrafficStat(TrafficStats.getTotalTxBytes,
-    TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+  private var last = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
+    TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
   private var lastTxRate = 0
   private var lastRxRate = 0
   private val timer = new Timer(true)
@@ -408,8 +408,8 @@ class ShadowsocksService extends Service {
     // initialize timer
     val task = new TimerTask {
       def run() {
-        val now = new TrafficStat(TrafficStats.getTotalTxBytes,
-          TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+        val now = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
+          TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
         val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
         val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
         last = now
