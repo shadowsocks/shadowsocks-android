@@ -5,17 +5,11 @@
 #ifndef OPENSSL_DOING_MAKEDEPEND
 
 
-#ifndef OPENSSL_NO_CAST
-# define OPENSSL_NO_CAST
-#endif
 #ifndef OPENSSL_NO_EC_NISTP_64_GCC_128
 # define OPENSSL_NO_EC_NISTP_64_GCC_128
 #endif
 #ifndef OPENSSL_NO_GMP
 # define OPENSSL_NO_GMP
-#endif
-#ifndef OPENSSL_NO_IDEA
-# define OPENSSL_NO_IDEA
 #endif
 #ifndef OPENSSL_NO_JPAKE
 # define OPENSSL_NO_JPAKE
@@ -34,9 +28,6 @@
 #endif
 #ifndef OPENSSL_NO_SCTP
 # define OPENSSL_NO_SCTP
-#endif
-#ifndef OPENSSL_NO_SEED
-# define OPENSSL_NO_SEED
 #endif
 #ifndef OPENSSL_NO_SHA0
 # define OPENSSL_NO_SHA0

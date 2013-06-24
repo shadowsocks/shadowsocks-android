@@ -166,6 +166,19 @@ local_src_files := \
 	buffer/buf_err.c \
 	buffer/buf_str.c \
 	buffer/buffer.c \
+    camellia/camellia.c \
+    camellia/cmll_cbc.c \
+	camellia/cmll_ctr.c \
+	camellia/cmll_ofb.c \
+    camellia/cmll_cfb.c \
+	camellia/cmll_ecb.c \
+	camellia/cmll_misc.c \
+	camellia/cmll_utl.c \
+	cast/c_cfb64.c \
+	cast/c_ecb.c \
+	cast/c_enc.c \
+	cast/c_ofb64.c \
+	cast/c_skey.c \
 	cmac/cmac.c \
 	cmac/cm_ameth.c \
 	cmac/cm_pmeth.c \
@@ -284,6 +297,7 @@ local_src_files := \
 	evp/digest.c \
 	evp/e_aes.c \
 	evp/e_bf.c \
+	evp/e_camellia.c \
 	evp/e_des.c \
 	evp/e_des3.c \
 	evp/e_null.c \
@@ -336,6 +350,13 @@ local_src_files := \
 	hmac/hm_ameth.c \
 	hmac/hm_pmeth.c \
 	hmac/hmac.c \
+	idea/i_cbc.c \
+	idea/i_cfb64.c \
+	idea/i_ecb.c \
+	idea/i_ofb64.c \
+	idea/i_skey.c \
+	idea/idea_spd.c \
+	idea/ideatest.c \
 	krb5/krb5_asn.c \
 	lhash/lh_stats.c \
 	lhash/lhash.c \
@@ -437,6 +458,11 @@ local_src_files := \
 	rsa/rsa_x931.c \
 	rsa/rsa_depr.c \
 	rsa/rsa_crpt.c \
+	seed/seed.c \
+	seed/seed_cbc.c \
+	seed/seed_cfb.c \
+	seed/seed_ecb.c \
+	seed/seed_ofb.c \
 	sha/sha1_one.c \
 	sha/sha1dgst.c \
 	sha/sha256.c \
