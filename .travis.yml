@@ -23,10 +23,6 @@ install:
 - gem install travis-artifacts
 before_script:
 - export JAVA_OPTS=-Xmx2048m
-- sudo dd if=/dev/zero of=swapfile bs=1024 count=1048576
-- sudo mkswap swapfile
-- sudo swapon swapfile
-- free -m
 script:
 - ./build-ndk.sh
 - wget https://raw.github.com/paulp/sbt-extras/master/sbt
