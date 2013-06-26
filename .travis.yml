@@ -21,8 +21,6 @@ before_install:
 - android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a
 install:
 - gem install travis-artifacts
-before_script:
-- export JAVA_OPTS=-Xmx2048m
 script:
 - ./build-ndk.sh
 - wget https://raw.github.com/paulp/sbt-extras/master/sbt
