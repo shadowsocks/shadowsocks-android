@@ -68,37 +68,41 @@ include $(BUILD_EXECUTABLE)
 ## obfsproxy
 ########################################################
 
-include $(CLEAR_VARS)
+# include $(CLEAR_VARS)
+# 
+# OBFSPROXY_SOURCES := container.c crypt.c external.c \
+# 	main.c managed.c network.c \
+# 	obfs_main.c protocol.c sha256.c \
+# 	socks.c status.c util.c \
+# 	protocols/dummy.c protocols/obfs2.c
+# 
+# LOCAL_STATIC_LIBRARIES := libevent libcrypto
+# 
+# LOCAL_MODULE := obfsproxy
+# LOCAL_SRC_FILES := $(addprefix obfsproxy/, $(OBFSPROXY_SOURCES))
+# LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/obfsproxy \
+# 	-I$(LOCAL_PATH)/libevent/include \
+# 	-I$(LOCAL_PATH)/libevent \
+# 	-I$(LOCAL_PATH)/openssl/include
+# 
+# include $(BUILD_EXECUTABLE)
 
-OBFSPROXY_SOURCES := container.c crypt.c external.c \
-	main.c managed.c network.c \
-	obfs_main.c protocol.c sha256.c \
-	socks.c status.c util.c \
-	protocols/dummy.c protocols/obfs2.c
+########################################################
+## polipo
+########################################################
 
-LOCAL_STATIC_LIBRARIES := libevent libcrypto
+# include $(CLEAR_VARS)
 
-LOCAL_MODULE := obfsproxy
-LOCAL_SRC_FILES := $(addprefix obfsproxy/, $(OBFSPROXY_SOURCES))
-LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/obfsproxy \
-	-I$(LOCAL_PATH)/libevent/include \
-	-I$(LOCAL_PATH)/libevent \
-	-I$(LOCAL_PATH)/openssl/include
-
-include $(BUILD_EXECUTABLE)
-
-include $(CLEAR_VARS)
-
-POLIPO_SOURCES := util.c event.c io.c chunk.c atom.c object.c log.c diskcache.c main.c \
-	config.c local.c http.c client.c server.c auth.c tunnel.c \
-	http_parse.c parse_time.c dns.c forbidden.c \
-	md5.c fts_compat.c socks.c mingw.c
-
-LOCAL_MODULE := polipo
-LOCAL_SRC_FILES := $(addprefix polipo/, $(POLIPO_SOURCES))
-LOCAL_CFLAGS := -O2 -g -DHAS_STDINT_H -DNO_DISK_CACHE -DNO_SYSLOG -I$(LOCAL_PATH)/polipo
-
-include $(BUILD_EXECUTABLE)
+# POLIPO_SOURCES := util.c event.c io.c chunk.c atom.c object.c log.c diskcache.c main.c \
+# 	config.c local.c http.c client.c server.c auth.c tunnel.c \
+# 	http_parse.c parse_time.c dns.c forbidden.c \
+# 	md5.c fts_compat.c socks.c mingw.c
+# 
+# LOCAL_MODULE := polipo
+# LOCAL_SRC_FILES := $(addprefix polipo/, $(POLIPO_SOURCES))
+# LOCAL_CFLAGS := -O2 -g -DHAS_STDINT_H -DNO_DISK_CACHE -DNO_SYSLOG -I$(LOCAL_PATH)/polipo
+# 
+# include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## pdnsd

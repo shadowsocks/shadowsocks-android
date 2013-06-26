@@ -7,14 +7,19 @@ before_install:
 - sudo apt-get install libx11-dev
 - sudo apt-get install g++-multilib
 - sudo apt-get install lib32z1-dev
+- export ARCH=`uname -m`
 - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
 - tar -zxf android-sdk_r21-linux.tgz
+- wget http://dl.google.com/android/ndk/android-ndk-r8e-linux-${ARCH}.tar.bz2
+- tar -zxf android-ndk-r8e-linux-${ARCH}.tar.bz2
+- export ANDROID_NDK_HOME=`pwd`/android-ndk-r8e
 - export ANDROID_HOME=`pwd`/android-sdk-linux
-- export PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+- export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
 - android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a
 install:
 - gem install travis-artifacts
 script:
+- ./build-ndk.sh
 - wget https://raw.github.com/paulp/sbt-extras/master/sbt
 - chmod u+x ./sbt
 - cp local.sbt.example local.sbt

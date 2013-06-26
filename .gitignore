@@ -24,17 +24,6 @@ local.sbt
 out/
 
 #NDK
-src/main/libs/armeabi/ip6tables
-src/main/libs/armeabi/iptables
-src/main/libs/armeabi/obfsproxy
-src/main/libs/armeabi/pdnsd
-src/main/libs/armeabi/polipo
-src/main/libs/armeabi/redsocks
-src/main/libs/armeabi/shadowsocks
-src/main/libs/x86/ip6tables
-src/main/libs/x86/iptables
-src/main/libs/x86/obfsproxy
-src/main/libs/x86/pdnsd
-src/main/libs/x86/polipo
-src/main/libs/x86/redsocks
-src/main/libs/x86/shadowsocks
+src/main/libs
+src/main/assets/arm
+src/main/assets/x86
