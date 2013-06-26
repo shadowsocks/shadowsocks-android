@@ -1,8 +1,8 @@
 import sbt._
 import sbt.Keys._
 
-import org.scalasbt.androidplugin._
-import org.scalasbt.androidplugin.AndroidKeys._
+import sbtandroid._
+import sbtandroid.AndroidKeys._
 
 object App {
   val version = "1.7.0"
