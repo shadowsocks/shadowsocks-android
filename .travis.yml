@@ -25,7 +25,6 @@ before_script:
 - export JAVA_OPTS=-Xmx2048m
 script:
 - ./build-ndk.sh
-- rm -rf ${ANDROID_NDK_HOME}
 - wget https://raw.github.com/paulp/sbt-extras/master/sbt
 - chmod u+x ./sbt
 - cp local.sbt.example local.sbt
