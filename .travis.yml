@@ -1,6 +1,6 @@
 language: scala
 jdk:
-- openjdk6
+- oraclejdk7
 scala:
 - 2.9.2
 before_install:
@@ -11,17 +11,18 @@ before_install:
 - sudo apt-get install g++-multilib
 - sudo apt-get install lib32z1-dev
 - export ARCH=`uname -m`
-- wget http://dl.google.com/android/android-sdk_r21-linux.tgz
-- tar xf android-sdk_r21-linux.tgz
+- wget http://dl.google.com/android/android-sdk_r22.0.1-linux.tgz
+- tar xf android-sdk_r22.0.1-linux.tgz
 - wget http://dl.google.com/android/ndk/android-ndk-r8e-linux-${ARCH}.tar.bz2
 - tar xf android-ndk-r8e-linux-${ARCH}.tar.bz2
-- export SBT_OPTS="-Xmx2G"
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r8e
 - export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
 - android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a
 install:
 - gem install travis-artifacts
+before_script:
+- export JAVA_OPTS=-Xmx2048m
 script:
 - ./build-ndk.sh
 - wget https://raw.github.com/paulp/sbt-extras/master/sbt
