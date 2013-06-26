@@ -48,10 +48,7 @@ import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.google.analytics.tracking.android.EasyTracker
-import java.io.BufferedReader
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.IOException
+import java.io._
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import org.apache.http.conn.util.InetAddressUtils
@@ -59,8 +56,8 @@ import scala.collection._
 import java.util.{TimerTask, Timer}
 import android.net.TrafficStats
 import android.graphics._
-import scala.Some
 import scala.concurrent.ops._
+import scala.Some
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
@@ -74,21 +71,7 @@ class ShadowsocksService extends Service {
 
   val TAG = "ShadowsocksService"
   val BASE = "/data/data/com.github.shadowsocks/"
-  val REDSOCKS_CONF = "base {" +
-    " log_debug = off;" +
-    " log_info = off;" +
-    " log = stderr;" +
-    " daemon = on;" +
-    " redirector = iptables;" +
-    "}" +
-    "redsocks {" +
-    " local_ip = 127.0.0.1;" +
-    " local_port = 8123;" +
-    " ip = 127.0.0.1;" +
-    " port = %d;" +
-    " type = socks5;" +
-    "}"
-  val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
+
   val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
   val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
@@ -169,20 +152,21 @@ class ShadowsocksService extends Service {
   }
 
   def startShadowsocksDaemon() {
-    spawn {
-      val cmd: String = (BASE +
-        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-        BASE +
-        "shadowsocks.pid")
-        .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
-        config.encMethod)
-      if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-      System.exec(cmd)
-    }
+    val cmd: String = (BASE +
+      "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+      BASE + "shadowsocks.pid")
+      .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
+      config.encMethod)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    System.exec(cmd)
   }
 
   def startDnsDaemon() {
     val cmd: String = BASE + "pdnsd -c " + BASE + "pdnsd.conf"
+    val conf: String = Config.PDNSD.format("127.0.0.1")
+    Config.printToFile(new File(BASE + "pdnsd.conf"))(p => {
+      p.println(conf)
+    })
     Utils.runCommand(cmd)
   }
 
@@ -242,9 +226,12 @@ class ShadowsocksService extends Service {
   }
 
   def startRedsocksDaemon() {
-    val conf = REDSOCKS_CONF.format(config.localPort)
+    val conf = Config.REDSOCKS.format(config.localPort)
     val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf".format(BASE, BASE, BASE)
-    Utils.runRootCommand("echo \"" + conf + "\" > " + BASE + "redsocks.conf\n" + cmd)
+    Config.printToFile(new File(BASE + "redsocks.conf"))(p => {
+      p.println(conf)
+    })
+    Utils.runRootCommand(cmd)
   }
 
   def waitForProcess(name: String): Boolean = {
@@ -426,7 +413,7 @@ class ShadowsocksService extends Service {
     }
     last = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
       TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
-    timer.schedule(task, TIMER_INTERVAL*1000, TIMER_INTERVAL*1000)
+    timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
   }
 
   /** Called when the activity is closed. */

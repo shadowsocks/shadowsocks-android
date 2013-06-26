@@ -62,7 +62,7 @@ class ShadowVpnService extends VpnService {
 
   val TAG = "ShadowVpnService"
   val BASE = "/data/data/com.github.shadowsocks/"
-  val SHADOWSOCKS_CONF = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
+
   val MSG_CONNECT_FINISH = 1
   val MSG_CONNECT_SUCCESS = 2
   val MSG_CONNECT_FAIL = 3
@@ -136,19 +136,21 @@ class ShadowVpnService extends VpnService {
   }
 
   def startShadowsocksDaemon() {
-    spawn {
-      val cmd: String = (BASE +
-        "shadowsocks -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-        BASE +
-        "shadowsocks.pid")
-        .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
-      if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-      System.exec(cmd)
-    }
+    val cmd: String = (BASE +
+      "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+      BASE +
+      "shadowsocks.pid")
+      .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    System.exec(cmd)
   }
 
   def startDnsDaemon() {
     val cmd: String = BASE + "pdnsd -c " + BASE + "pdnsd.conf"
+    val conf: String = Config.PDNSD.format("0.0.0.0")
+    Config.printToFile(new File(BASE + "pdnsd.conf"))(p => {
+      p.println(conf)
+    })
     Utils.runCommand(cmd)
   }
 
@@ -183,7 +185,6 @@ class ShadowVpnService extends VpnService {
     changeState(State.CONNECTING)
 
     config = Extra.get(intent)
-
 
     spawn {
       killProcesses()
@@ -232,6 +233,11 @@ class ShadowVpnService extends VpnService {
     !t.isAlive
   }
 
+  def getLocalAddress: String = Utils.getIPv4Address match {
+    case Some(ip) if ip.split('.')(0) == "172" => PRIVATE_VLAN_10
+    case _ => PRIVATE_VLAN_172
+  }
+
   def startVpn() {
 
     val address = config.proxy.split('.')
@@ -239,10 +245,7 @@ class ShadowVpnService extends VpnService {
     val prefix2 = address.slice(0, 2).mkString(".")
     val prefix3 = address.slice(0, 3).mkString(".")
 
-    val localAddress = Utils.getIPv4Address match {
-      case Some(ip) if ip.split('.')(0) == "172" => PRIVATE_VLAN_10
-      case _ => PRIVATE_VLAN_172
-    }
+    val localAddress = getLocalAddress
 
     val builder = new Builder()
     builder
@@ -301,7 +304,6 @@ class ShadowVpnService extends VpnService {
 
     val cmd = (BASE +
       "tun2socks --netif-ipaddr %s "
-      // + "--udpgw-remote-server-addr %s:7300 "
       + "--dnsgw  %s:8153 "
       + "--netif-netmask 255.255.255.0 "
       + "--socks-server-addr 127.0.0.1:%d "
@@ -316,9 +318,9 @@ class ShadowVpnService extends VpnService {
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
-    startDnsDaemon()
-    startShadowsocksDaemon()
     startVpn()
+    startShadowsocksDaemon()
+    startDnsDaemon()
     true
   }
 
@@ -404,6 +406,10 @@ class ShadowVpnService extends VpnService {
     if (!waitForProcess("tun2socks")) {
       sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`" ++= "\n"
       sb ++= "killall -9 tun2socks" ++= "\n"
+    }
+    if (!waitForProcess("pdnsd")) {
+      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`" ++= "\n"
+      sb ++= "killall -9 pdnsd" ++= "\n"
     }
     Utils.runCommand(sb.toString())
   }
