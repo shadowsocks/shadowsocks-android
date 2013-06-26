@@ -355,7 +355,6 @@ local_src_files := \
 	idea/i_ecb.c \
 	idea/i_ofb64.c \
 	idea/i_skey.c \
-	idea/idea_spd.c \
 	idea/ideatest.c \
 	krb5/krb5_asn.c \
 	lhash/lh_stats.c \

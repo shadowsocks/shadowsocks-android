@@ -9,9 +9,9 @@ before_install:
 - sudo apt-get install lib32z1-dev
 - export ARCH=`uname -m`
 - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
-- tar xvf android-sdk_r21-linux.tgz
+- tar xf android-sdk_r21-linux.tgz
 - wget http://dl.google.com/android/ndk/android-ndk-r8e-linux-${ARCH}.tar.bz2
-- tar xvf android-ndk-r8e-linux-${ARCH}.tar.bz2
+- tar xf android-ndk-r8e-linux-${ARCH}.tar.bz2
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r8e
 - export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
