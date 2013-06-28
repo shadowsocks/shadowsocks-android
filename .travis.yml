@@ -24,7 +24,9 @@ script:
 - wget https://raw.github.com/paulp/sbt-extras/master/sbt
 - chmod u+x ./sbt
 - cp local.sbt.example local.sbt
-- ./sbt clean android:package-debug
+- ./sbt clean
+- ./sbt android:package-debug | true
+- ./sbt android:package-debug
 after_success:
 - ./sbt deploy
 env:
