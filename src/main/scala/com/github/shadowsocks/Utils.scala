@@ -41,7 +41,6 @@ import android.content.{Intent, SharedPreferences, Context}
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.{BitmapDrawable, Drawable}
-import android.os.Environment
 import android.util.Log
 import java.io._
 import java.net.{UnknownHostException, InetAddress, NetworkInterface}
@@ -264,8 +263,9 @@ object Utils {
     val resolver = new SimpleResolver("8.8.8.8")
     resolver.setTimeout(5)
     lookup.setResolver(resolver)
-    val records = lookup.run()
-    if (records == null) return None
+    val result = lookup.run()
+    if (result == null) return None
+    val records = scala.util.Random.shuffle(result.toList)
     for (r <- records) {
       addrType match {
         case Type.A =>
@@ -426,8 +426,10 @@ object Utils {
   }
 
   def drawableToBitmap(drawable: Drawable): Bitmap = {
-    if (drawable.isInstanceOf[BitmapDrawable]) {
-      return drawable.asInstanceOf[BitmapDrawable].getBitmap
+    drawable match {
+      case d: BitmapDrawable =>
+        return d.getBitmap
+      case _ =>
     }
 
     val width = if (drawable.getIntrinsicWidth > 0) drawable.getIntrinsicWidth else 1

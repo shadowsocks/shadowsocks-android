@@ -42,9 +42,9 @@ import android.content._
 import android.content.res.AssetManager
 import android.graphics.Typeface
 import android.os._
-import android.preference.{CheckBoxPreference, Preference, PreferenceManager}
+import android.preference.{Preference, PreferenceManager}
 import android.util.Log
-import android.view.{ViewGroup, ViewParent, KeyEvent}
+import android.view.{ViewParent, KeyEvent}
 import android.widget.{LinearLayout, CompoundButton, RelativeLayout, TextView}
 import com.actionbarsherlock.view.Menu
 import com.actionbarsherlock.view.MenuItem
