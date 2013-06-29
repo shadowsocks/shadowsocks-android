@@ -260,7 +260,7 @@ object Utils {
 
   def resolve(host: String, addrType: Int): Option[String] = {
     val lookup = new Lookup(host, addrType)
-    val resolver = new SimpleResolver("8.8.8.8")
+    val resolver = new SimpleResolver("114.114.114.114")
     resolver.setTimeout(5)
     lookup.setResolver(resolver)
     val result = lookup.run()
