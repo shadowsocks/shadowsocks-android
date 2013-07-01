@@ -105,7 +105,7 @@ class ShadowsocksService extends Service {
   private var last: TrafficStat = null
   private var lastTxRate = 0
   private var lastRxRate = 0
-  private val timer = new Timer(true)
+  private var timer: Timer = null
   private val TIMER_INTERVAL = 1
 
   private def changeState(s: Int) {
@@ -193,6 +193,32 @@ class ShadowsocksService extends Service {
 
     config = Extra.get(intent)
 
+    if (config.isTrafficStat) {
+      // initialize timer
+      val task = new TimerTask {
+        def run() {
+          val now = new TrafficStat(TrafficStats.getTotalTxBytes,
+            TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+          val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
+          val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
+          last = now
+          if (lastTxRate == txRate && lastRxRate == rxRate) {
+            return
+          } else {
+            lastTxRate = txRate
+            lastRxRate = rxRate
+          }
+          if (state == State.CONNECTED) {
+            notifyForegroundAlert(getString(R.string.forward_success),
+              getString(R.string.service_status).format(txRate, rxRate), txRate + rxRate)
+          }
+        }
+      }
+      last = new TrafficStat(TrafficStats.getTotalTxBytes,
+        TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+      timer = new Timer(true)
+      timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
+    }
 
     spawn {
       killProcesses()
@@ -308,7 +334,9 @@ class ShadowsocksService extends Service {
         bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
       builder.setLargeIcon(bitmap)
 
-      if (rate < 1000) {
+      if (rate == 0) {
+        builder.setSmallIcon(R.drawable.ic_stat_shadowsocks)
+      } else if (rate < 1000) {
         builder.setSmallIcon(R.drawable.ic_stat_speed, rate)
       } else if (rate <= 10000) {
         val mb = rate / 100 - 10 + 1000
@@ -390,38 +418,19 @@ class ShadowsocksService extends Service {
       }
     }
     registerReceiver(receiver, filter)
-
-    // initialize timer
-    val task = new TimerTask {
-      def run() {
-        val now = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
-          TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
-        val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
-        val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
-        last = now
-        if (lastTxRate == txRate && lastRxRate == rxRate) {
-          return
-        } else {
-          lastTxRate = txRate
-          lastRxRate = rxRate
-        }
-        if (state == State.CONNECTED) {
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_status).format(txRate, rxRate), txRate + rxRate)
-        }
-      }
-    }
-    last = new TrafficStat(TrafficStats.getUidTxBytes(getApplicationInfo.uid),
-      TrafficStats.getUidRxBytes(getApplicationInfo.uid), java.lang.System.currentTimeMillis())
-    timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
   }
 
   /** Called when the activity is closed. */
   override def onDestroy() {
 
+    // reset timer
+    if (timer != null) {
+      timer.cancel()
+      timer = null
+    }
+
     // clean up context
     changeState(State.STOPPED)
-    timer.cancel()
     EasyTracker.getTracker.setStartSession(false)
     EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     stopForegroundCompat(1)

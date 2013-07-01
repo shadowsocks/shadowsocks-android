@@ -136,7 +136,7 @@ object Shadowsocks {
         if (pref != null) {
           val status = getActivity.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
           val isRoot = status.getBoolean(Key.isRoot, false)
-          if (Seq(Key.isAutoConnect, Key.isGlobalProxy,
+          if (Seq(Key.isAutoConnect, Key.isGlobalProxy, Key.isTrafficStat,
             Key.isBypassApps, Key.proxyedApps).contains(name)) {
             pref.setEnabled(enabled && isRoot)
           } else {
@@ -506,7 +506,7 @@ class Shadowsocks
     for (name <- Shadowsocks.FEATRUE_PREFS) {
       val pref = findPreference(name)
       if (pref != null) {
-        if (Seq(Key.isAutoConnect, Key.isGlobalProxy,
+        if (Seq(Key.isAutoConnect, Key.isGlobalProxy, Key.isTrafficStat,
           Key.isBypassApps, Key.proxyedApps).contains(name)) {
           pref.setEnabled(enabled && isRoot)
         } else {

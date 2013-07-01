@@ -29,6 +29,12 @@
     <intent android:action="com.github.shadowsocks.AppManager"/>
   </Preference>
   <CheckBoxPreference
+      android:key="isTrafficStat"
+      android:defaultValue="true"
+      android:summary="@string/traffic_stat_summary"
+      android:title="@string/traffic_stat">
+  </CheckBoxPreference>
+  <CheckBoxPreference
       android:key="isAutoConnect"
       android:summary="@string/auto_connect_summary"
       android:title="@string/auto_connect">

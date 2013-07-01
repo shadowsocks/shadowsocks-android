@@ -40,6 +40,8 @@
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
   <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
+  <string name="traffic_stat">Traffic Stats</string>
+  <string name="traffic_stat_summary">Show traffic stats on notification bar</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
