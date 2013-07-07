@@ -568,6 +568,7 @@ class Shadowsocks
         }
       }
       case _ => {
+        clearDialog()
         Log.e(Shadowsocks.TAG, "Failed to start VpnService")
       }
     }
