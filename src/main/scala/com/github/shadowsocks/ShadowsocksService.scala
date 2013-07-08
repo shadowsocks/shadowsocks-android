@@ -197,6 +197,7 @@ class ShadowsocksService extends Service {
       // initialize timer
       val task = new TimerTask {
         def run() {
+          val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
           val now = new TrafficStat(TrafficStats.getTotalTxBytes,
             TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
           val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
@@ -208,7 +209,7 @@ class ShadowsocksService extends Service {
             lastTxRate = txRate
             lastRxRate = rxRate
           }
-          if (state == State.CONNECTED) {
+          if (pm.isScreenOn && state == State.CONNECTED) {
             notifyForegroundAlert(getString(R.string.forward_success),
               getString(R.string.service_status).format(txRate, rxRate), txRate + rxRate)
           }
