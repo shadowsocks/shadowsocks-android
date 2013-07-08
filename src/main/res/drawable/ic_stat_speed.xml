@@ -2,7 +2,7 @@
 
 <level-list
     xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:drawable="@drawable/ic_stat_kb000" android:maxLevel="0"/>
+  <item android:drawable="@drawable/ic_stat_shadowsocks" android:maxLevel="0"/>
   <item android:drawable="@drawable/ic_stat_kb001" android:maxLevel="1"/>
   <item android:drawable="@drawable/ic_stat_kb002" android:maxLevel="2"/>
   <item android:drawable="@drawable/ic_stat_kb003" android:maxLevel="3"/>

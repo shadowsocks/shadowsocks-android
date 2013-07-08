@@ -335,9 +335,7 @@ class ShadowsocksService extends Service {
         bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
       builder.setLargeIcon(bitmap)
 
-      if (rate == 0) {
-        builder.setSmallIcon(R.drawable.ic_stat_shadowsocks)
-      } else if (rate < 1000) {
+      if (rate < 1000) {
         builder.setSmallIcon(R.drawable.ic_stat_speed, rate)
       } else if (rate <= 10000) {
         val mb = rate / 100 - 10 + 1000
