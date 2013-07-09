@@ -70,9 +70,9 @@ import com.google.ads.{AdRequest, AdSize, AdView}
 object Shadowsocks {
 
   val PREFS_NAME = "Shadowsocks"
-  val PROXY_PREFS = Array("proxy", "remotePort", "port", "sitekey", "encMethod")
-  val FEATRUE_PREFS = Array("isGFWList", "isGlobalProxy", "isBypassApps", "proxyedApps",
-    "isAutoConnect")
+  val PROXY_PREFS = Array(Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod)
+  val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.isBypassApps, Key.proxyedApps,
+    Key.isTrafficStat, Key.isAutoConnect)
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
 
