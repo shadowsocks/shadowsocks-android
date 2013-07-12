@@ -188,14 +188,18 @@ object Extra {
     val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
 
     val proxy = settings.getString(Key.proxy, "127.0.0.1") match {
-      case "198.199.101.152" => if (!BuildConfig.DEBUG) "ss.maxcdn.info" else "198.199.101.152"
+      case "198.199.101.152" => BuildConfig.SERVER
       case s: String => s
       case _ => "127.0.0.1"
     }
     val sitekey = settings.getString(Key.sitekey, "default")
     val encMethod = settings.getString(Key.encMethod, "table")
     val remotePort: Int = try {
-      Integer.valueOf(settings.getString(Key.remotePort, "1984"))
+      if (proxy == BuildConfig.SERVER) {
+        scala.util.Random.shuffle(Seq(20, 21, 23, 443)).toSeq(0)
+      } else {
+        Integer.valueOf(settings.getString(Key.remotePort, "1984"))
+      }
     } catch {
       case ex: NumberFormatException => {
         1984

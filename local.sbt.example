@@ -2,4 +2,4 @@ import sbtandroid.AndroidKeys._
 
 keyalias in Android := "travis"
 
-buildConfigDebug in Android := true
+publicServer in Android := "127.0.0.1"
