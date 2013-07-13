@@ -71,8 +71,7 @@ class ShadowVpnService extends VpnService {
 
   val VPN_MTU = 1500
 
-  val PRIVATE_VLAN_10 = "10.254.254.%s"
-  val PRIVATE_VLAN_172 = "172.30.254.%s"
+  val PRIVATE_VLAN = "26.26.26.%s"
 
   var conn: ParcelFileDescriptor = null
   var notificationManager: NotificationManager = null
@@ -233,11 +232,6 @@ class ShadowVpnService extends VpnService {
     !t.isAlive
   }
 
-  def getLocalAddress: String = Utils.getIPv4Address match {
-    case Some(ip) if ip.split('.')(0) == "172" => PRIVATE_VLAN_10
-    case _ => PRIVATE_VLAN_172
-  }
-
   def startVpn() {
 
     val address = config.proxy.split('.')
@@ -245,13 +239,11 @@ class ShadowVpnService extends VpnService {
     val prefix2 = address.slice(0, 2).mkString(".")
     val prefix3 = address.slice(0, 3).mkString(".")
 
-    val localAddress = getLocalAddress
-
     val builder = new Builder()
     builder
       .setSession(getString(R.string.app_name))
       .setMtu(VPN_MTU)
-      .addAddress(localAddress.format("1"), 24)
+      .addAddress(PRIVATE_VLAN.format("1"), 24)
       .addDnsServer("8.8.8.8")
 
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
@@ -267,7 +259,6 @@ class ShadowVpnService extends VpnService {
             if (prefix != prefix3) builder.addRoute(prefix + ".0", 24)
           }
         })
-      builder.addRoute("8.8.0.0", 16)
     } else {
       for (i <- 1 to 254) {
         if (i != 127 && i != 172 && i != 192 && i != 10 && i.toString != prefix1) {
@@ -278,9 +269,11 @@ class ShadowVpnService extends VpnService {
             if (prefix != prefix2) builder.addRoute(prefix + ".0.0", 16)
           }
         }
-        builder.addRoute("8.8.0.0", 16)
       }
     }
+
+    builder.addRoute("8.8.0.0", 16)
+    builder.addRoute("208.67.0.0", 16)
 
     try {
       conn = builder.establish()
@@ -311,7 +304,7 @@ class ShadowVpnService extends VpnService {
       + "--tunmtu %d "
       + "--loglevel 3 "
       + "--pid %stun2socks.pid")
-      .format(localAddress.format("2"), localAddress.format("1"), config.localPort, fd, VPN_MTU, BASE)
+      .format(PRIVATE_VLAN.format("2"), PRIVATE_VLAN.format("1"), config.localPort, fd, VPN_MTU, BASE)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
