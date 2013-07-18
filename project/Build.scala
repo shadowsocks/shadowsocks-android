@@ -6,7 +6,7 @@ import sbtandroid.AndroidKeys._
 
 object App {
   val version = "1.7.5"
-  val versionCode = 41
+  val versionCode = 42
 }
 
 object General {
