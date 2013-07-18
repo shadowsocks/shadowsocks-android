@@ -484,7 +484,6 @@ class ShadowsocksService extends Service {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
-    init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport " + 53))
     if (hasRedirectSupport) {
       init_sb
         .append(Utils.getIptables)
