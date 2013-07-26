@@ -106,7 +106,7 @@ class ShadowsocksService extends Service {
   private var lastTxRate = 0
   private var lastRxRate = 0
   private var timer: Timer = null
-  private val TIMER_INTERVAL = 1
+  private val TIMER_INTERVAL = 2
 
   private def changeState(s: Int) {
     if (state != s) {
