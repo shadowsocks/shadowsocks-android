@@ -13,9 +13,9 @@ before_install:
 - export ARCH=`uname -m`
 - wget http://dl.google.com/android/android-sdk_r21-linux.tgz
 - tar xf android-sdk_r21-linux.tgz
-- wget http://dl.google.com/android/ndk/android-ndk-r8e-linux-${ARCH}.tar.bz2
-- tar xf android-ndk-r8e-linux-${ARCH}.tar.bz2
-- export ANDROID_NDK_HOME=`pwd`/android-ndk-r8e
+- wget http://dl.google.com/android/ndk/android-ndk-r9-linux-${ARCH}.tar.bz2
+- tar xf android-ndk-r9-linux-${ARCH}.tar.bz2
+- export ANDROID_NDK_HOME=`pwd`/android-ndk-r9
 - export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
 - android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a
