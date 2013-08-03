@@ -418,6 +418,7 @@ class Shadowsocks
   }
 
   override def onCreateOptionsMenu(menu: Menu): Boolean = {
+    val isRoot = status.getBoolean(Key.isRoot, false)
     menu
       .add(0, 0, 0, R.string.recovery)
       .setIcon(android.R.drawable.ic_menu_revert)
@@ -426,10 +427,12 @@ class Shadowsocks
       .add(0, 1, 1, R.string.about)
       .setIcon(android.R.drawable.ic_menu_info_details)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    menu
-      .add(0, 2, 2, R.string.flush_dnscache)
-      .setIcon(android.R.drawable.ic_menu_revert)
-      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    if (isRoot || Build.VERSION.SDK_INT < 17) {
+      menu
+        .add(0, 2, 2, R.string.flush_dnscache)
+        .setIcon(android.R.drawable.ic_menu_revert)
+        .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    }
     true
   }
 
