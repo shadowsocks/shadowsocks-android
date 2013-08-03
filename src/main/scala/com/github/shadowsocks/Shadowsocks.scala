@@ -1,4 +1,5 @@
-/* Shadowsocks - A shadowsocks client for Android
+/*
+ * Shadowsocks - A shadowsocks client for Android
  * Copyright (C) 2012 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -124,7 +125,7 @@ object Shadowsocks {
     }
   }
 
-  class FeatureFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener{
+  class FeatureFragment extends UnifiedPreferenceFragment with OnSharedPreferenceChangeListener {
 
     var receiver: BroadcastReceiver = null
 
@@ -269,7 +270,7 @@ class Shadowsocks
   private def copyFile(in: InputStream, out: OutputStream) {
     val buffer: Array[Byte] = new Array[Byte](1024)
     var read: Int = 0
-    while ({
+    while ( {
       read = in.read(buffer)
       read
     } != -1) {
@@ -363,8 +364,6 @@ class Shadowsocks
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
 
-
-
     val switchLayout = getLayoutInflater
       .inflate(R.layout.layout_switch, null)
       .asInstanceOf[RelativeLayout]
@@ -427,6 +426,10 @@ class Shadowsocks
       .add(0, 1, 1, R.string.about)
       .setIcon(android.R.drawable.ic_menu_info_details)
       .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
+    menu
+      .add(0, 2, 2, R.string.flush_dnscache)
+      .setIcon(android.R.drawable.ic_menu_revert)
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     true
   }
 
@@ -452,6 +455,10 @@ class Shadowsocks
       case 1 => {
         EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
         showAbout()
+      }
+      case 2 => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, 0L)
+        flushDnsCache()
       }
     }
     super.onOptionsItemSelected(item)
@@ -555,6 +562,20 @@ class Shadowsocks
     serviceStop()
     spawn {
       reset()
+      h.sendEmptyMessage(0)
+    }
+  }
+
+  private def flushDnsCache() {
+    clearDialog()
+    progressDialog = ProgressDialog.show(this, "", getString(R.string.flushing), true, true)
+    val h: Handler = new Handler {
+      override def handleMessage(msg: Message) {
+        clearDialog()
+      }
+    }
+    spawn {
+      Utils.toggleAirplaneMode(getBaseContext)
       h.sendEmptyMessage(0)
     }
   }

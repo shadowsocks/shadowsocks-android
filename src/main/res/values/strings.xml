@@ -73,6 +73,7 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="donate">Donate</string>
   <string name="donate_address">http://buildbot.sinaapp.com/donate.html</string>
-
+  <string name="flush_dnscache">Flush DNS Cache</string>
+  <string name="flushing">Flushing</string>
 
 </resources>

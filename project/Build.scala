@@ -5,8 +5,8 @@ import sbtandroid._
 import sbtandroid.AndroidKeys._
 
 object App {
-  val version = "1.7.7"
-  val versionCode = 44
+  val version = "1.8.0"
+  val versionCode = 45
 }
 
 object General {

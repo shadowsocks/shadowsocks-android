@@ -1,5 +1,6 @@
-/* Shadowsocks - A shadowsocks client for Android
- * Copyright (C) 2012 <max.c.lv@gmail.com>
+/*
+ * Shadowsocks - A shadowsocks client for Android
+ * Copyright (C) 2013 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -277,7 +278,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
           appListView.setAdapter(adapter)
           appListView.setOnScrollListener(new AbsListView.OnScrollListener {
             def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
-              totalItemCount: Int) {
+                         totalItemCount: Int) {
               if (visible) {
                 val name: String = apps(firstVisibleItem).name
                 if (name != null && name.length > 1) {

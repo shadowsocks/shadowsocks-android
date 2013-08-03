@@ -1,4 +1,5 @@
-/* Shadowsocks - A shadowsocks client for Android
+/*
+ * Shadowsocks - A shadowsocks client for Android
  * Copyright (C) 2012 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -50,6 +51,8 @@ import org.xbill.DNS._
 import scala.Some
 import android.graphics.{Canvas, Bitmap}
 import android.app.ActivityManager
+import android.os.Build
+import android.provider.Settings
 
 object Config {
   val SHADOWSOCKS = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
@@ -100,7 +103,11 @@ object Config {
 
   def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
     val p = new java.io.PrintWriter(f)
-    try { op(p) } finally { p.close() }
+    try {
+      op(p)
+    } finally {
+      p.close()
+    }
   }
 }
 
@@ -251,6 +258,38 @@ object Utils {
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
+
+  // Blocked > 3 seconds
+  def toggleAirplaneMode(context: Context) {
+    if (Build.VERSION.SDK_INT >= 17) {
+      toggleAboveApiLevel17()
+    } else {
+      toggleBelowApiLevel17(context)
+    }
+  }
+
+  private def toggleAboveApiLevel17() {
+    // Android 4.2 and above
+    Utils.runRootCommand("settings put global airplane_mode_on 1\n"
+      + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true\n"
+      + "settings put global airplane_mode_on 0\n"
+      + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false\n"
+    )
+  }
+
+  private def toggleBelowApiLevel17(context: Context) {
+    // Android 4.2 below
+    Settings.System.putInt(context.getContentResolver, Settings.System.AIRPLANE_MODE_ON, 1)
+    val enableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+    enableIntent.putExtra("state", true)
+    context.sendBroadcast(enableIntent)
+    Thread.sleep(3000)
+
+    Settings.System.putInt(context.getContentResolver, Settings.System.AIRPLANE_MODE_ON, 0)
+    val disableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+    disableIntent.putExtra("state", false)
+    context.sendBroadcast(disableIntent)
+  }
 
   def isServiceStarted(name: String, context: Context): Boolean = {
     import scala.collection.JavaConversions._
