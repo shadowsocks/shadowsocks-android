@@ -196,7 +196,7 @@ object Extra {
     val encMethod = settings.getString(Key.encMethod, "table")
     val remotePort: Int = try {
       if (proxy == BuildConfig.SERVER) {
-        scala.util.Random.shuffle(Seq(20, 21, 23, 443)).toSeq(0)
+        scala.util.Random.shuffle(Seq(20, 21, 23)).toSeq(0)
       } else {
         Integer.valueOf(settings.getString(Key.remotePort, "1984"))
       }
