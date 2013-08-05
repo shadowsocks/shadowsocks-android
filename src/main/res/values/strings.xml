@@ -35,7 +35,7 @@
   <string name="proxied_apps">Individual Proxy</string>
   <string name="proxied_apps_summary">Set individual proxy for apps
   </string>
-  <string name="proxied_help">Select apps to use with Shadowsocks:</string>
+  <string name="proxied_help">Select Apps</string>
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
@@ -71,8 +71,6 @@
   <string name="recovery">Reset</string>
   <string name="about">About</string>
   <string name="about_title">Shadowsocks %s</string>
-  <string name="donate">Donate</string>
-  <string name="donate_address">http://buildbot.sinaapp.com/donate.html</string>
   <string name="flush_dnscache">Flush DNS Cache</string>
   <string name="flushing">Flushing</string>
 

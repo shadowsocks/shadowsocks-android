@@ -217,6 +217,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
 
   protected override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+    getSupportActionBar.setTitle(R.string.proxied_help)
     this.setContentView(R.layout.layout_apps)
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
