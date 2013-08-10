@@ -8,15 +8,15 @@
   <RelativeLayout
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
-      android:layout_marginBottom="10dp">
+      android:layout_marginTop="6dp"
+      android:layout_marginBottom="8dp">
     <TextView
         android:id="@+id/bypassLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:layout_marginLeft="16dp"
-        android:textSize="22sp"
+        android:textSize="18sp"
         android:text="@string/bypass_apps"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"/>
