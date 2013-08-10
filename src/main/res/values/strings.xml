@@ -35,7 +35,7 @@
   <string name="proxied_apps">Individual Proxy</string>
   <string name="proxied_apps_summary">Set individual proxy for apps
   </string>
-  <string name="proxied_help">Select Apps</string>
+  <string name="proxied_help">Individual Proxy</string>
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>

@@ -21,8 +21,12 @@
   </style>
 
   <!-- Variation on the Light theme that turns off the title -->
-  <style name="Theme.GAEProxy" parent="@style/Theme.Shadow">
+  <style name="Theme.Shadowsocks" parent="@style/Theme.Shadow">
     <item name="switchStyle">@style/Widget.Shadow.Switch</item>
+  </style>
+
+  <style name="Theme.AppManager" parent="@style/Theme.Shadow">
+    <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
   </style>
 
 

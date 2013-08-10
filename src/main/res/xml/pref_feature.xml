@@ -14,13 +14,6 @@
       android:summary="@string/auto_set_proxy_summary"
       android:title="@string/auto_set_proxy">
   </CheckBoxPreference>
-  <CheckBoxPreference
-      android:defaultValue="false"
-      android:dependency="isGlobalProxy"
-      android:key="isBypassApps"
-      android:summary="@string/bypass_apps_summary"
-      android:title="@string/bypass_apps">
-  </CheckBoxPreference>
   <Preference
       android:key="proxyedApps"
       android:dependency="isGlobalProxy"

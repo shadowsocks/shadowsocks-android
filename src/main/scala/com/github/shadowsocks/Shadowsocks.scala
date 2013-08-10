@@ -72,7 +72,7 @@ object Shadowsocks {
 
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array(Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod)
-  val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.isBypassApps, Key.proxyedApps,
+  val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps,
     Key.isTrafficStat, Key.isAutoConnect)
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
@@ -138,7 +138,7 @@ object Shadowsocks {
           val status = getActivity.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
           val isRoot = status.getBoolean(Key.isRoot, false)
           if (Seq(Key.isAutoConnect, Key.isGlobalProxy, Key.isTrafficStat,
-            Key.isBypassApps, Key.proxyedApps).contains(name)) {
+            Key.proxyedApps).contains(name)) {
             pref.setEnabled(enabled && isRoot)
           } else {
             pref.setEnabled(enabled)
@@ -517,7 +517,7 @@ class Shadowsocks
       val pref = findPreference(name)
       if (pref != null) {
         if (Seq(Key.isAutoConnect, Key.isGlobalProxy, Key.isTrafficStat,
-          Key.isBypassApps, Key.proxyedApps).contains(name)) {
+          Key.proxyedApps).contains(name)) {
           pref.setEnabled(enabled && isRoot)
         } else {
           pref.setEnabled(enabled)

@@ -33,7 +33,7 @@
         <activity
                 android:name=".Shadowsocks"
                 android:label="@string/app_name"
-                android:theme="@style/Theme.GAEProxy"
+                android:theme="@style/Theme.Shadowsocks"
                 android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -49,7 +49,7 @@
 
         <activity
                 android:name=".AppManager"
-                android:theme="@style/Theme.GAEProxy"
+                android:theme="@style/Theme.AppManager"
                 android:label="@string/app_name">
             <intent-filter>
                 <action android:name="com.github.shadowsocks.AppManager"/>

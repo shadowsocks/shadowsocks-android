@@ -69,6 +69,7 @@ import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import com.google.analytics.tracking.android.EasyTracker
+import org.jraf.android.backport.switchwidget.Switch
 
 case class ProxiedApp(uid: Int, name: String, var proxied: Boolean)
 
@@ -231,6 +232,15 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
         .imageDownloader(new AppIconDownloader(this))
         .build()
     ImageLoader.getInstance().init(config)
+
+    val bypassSwitch: Switch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
+    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
+    bypassSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener {
+      def onCheckedChanged(button: CompoundButton, checked: Boolean) {
+        prefs.edit().putBoolean(Key.isBypassApps, checked).commit()
+      }
+    })
+    bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
   }
 
   protected override def onResume() {
