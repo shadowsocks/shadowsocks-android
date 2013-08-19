@@ -95,6 +95,7 @@ class ShadowsocksService extends Service {
   var config: Config = null
   var hasRedirectSupport = false
   var apps: Array[ProxiedApp] = null
+  val uid = Process.myUid()
 
   private var mSetForeground: Method = null
   private var mStartForeground: Method = null
@@ -200,8 +201,8 @@ class ShadowsocksService extends Service {
       val task = new TimerTask {
         def run() {
           val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-          val now = new TrafficStat(TrafficStats.getTotalTxBytes,
-            TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+          val now = new TrafficStat(TrafficStats.getUidTxBytes(uid),
+            TrafficStats.getUidRxBytes(uid), java.lang.System.currentTimeMillis())
           val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
           val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
           last = now
@@ -213,12 +214,12 @@ class ShadowsocksService extends Service {
           }
           if (pm.isScreenOn && state == State.CONNECTED) {
             notifyForegroundAlert(getString(R.string.forward_success),
-              getString(R.string.service_status).format(txRate, rxRate), txRate + rxRate)
+              getString(R.string.service_status).format(math.max(txRate, rxRate)), math.max(txRate, rxRate))
           }
         }
       }
-      last = new TrafficStat(TrafficStats.getTotalTxBytes,
-        TrafficStats.getTotalRxBytes, java.lang.System.currentTimeMillis())
+      last = new TrafficStat(TrafficStats.getUidTxBytes(uid),
+        TrafficStats.getUidRxBytes(uid), java.lang.System.currentTimeMillis())
       timer = new Timer(true)
       timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
     }
