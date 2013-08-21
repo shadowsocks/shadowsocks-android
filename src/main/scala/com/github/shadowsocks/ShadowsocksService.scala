@@ -212,7 +212,7 @@ class ShadowsocksService extends Service {
             lastTxRate = txRate
             lastRxRate = rxRate
           }
-          if (pm.isScreenOn && state == State.CONNECTED) {
+          if ((pm.isScreenOn && state == State.CONNECTED) || (txRate == 0 && rxRate == 0)) {
             notifyForegroundAlert(getString(R.string.forward_success),
               getString(R.string.service_status).format(math.max(txRate, rxRate)), math.max(txRate, rxRate))
           }
