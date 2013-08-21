@@ -359,6 +359,24 @@ class Shadowsocks
     }
   }
 
+  def getLayoutView(view: ViewParent): LinearLayout = {
+    view match {
+      case layout: LinearLayout => layout
+      case _ => if (view != null) getLayoutView(view.getParent) else null
+    }
+  }
+
+  def initAdView() {
+    if (settings.getString(Key.proxy, "") == "198.199.101.152") {
+      val adView = new AdView(this, AdSize.BANNER, "a151becb8068b09")
+      val layoutView = getLayoutView(getListview.asInstanceOf[ViewParent])
+      if (layoutView != null) {
+        layoutView.addView(adView, 0)
+        adView.loadAd(new AdRequest)
+      }
+    }
+  }
+
   /** Called when the activity is first created. */
   override def onCreate(savedInstanceState: Bundle) {
     setHeaderRes(R.xml.shadowsocks_headers)
@@ -383,23 +401,7 @@ class Shadowsocks
     receiver = new StateBroadcastReceiver()
     registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
 
-    if (settings.getString(Key.proxy, "") == "198.199.101.152") {
-      val adView = new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
-      val rootView = findViewById(android.R.id.content).asInstanceOf[ViewParent]
-      val layoutView = {
-        def getLayoutView(view: ViewParent): LinearLayout = {
-          view match {
-            case layout: LinearLayout => layout
-            case _ => if (view != null) getLayoutView(view.getParent) else null
-          }
-        }
-        getLayoutView(rootView)
-      }
-      if (layoutView != null) {
-        layoutView.addView(adView, 0)
-        adView.loadAd(new AdRequest)
-      }
-    }
+    initAdView()
 
     val init: Boolean = !Shadowsocks.isServiceStarted(this)
     if (init) {
