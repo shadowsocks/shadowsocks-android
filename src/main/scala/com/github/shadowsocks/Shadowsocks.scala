@@ -369,7 +369,7 @@ class Shadowsocks
   def initAdView() {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
       val adView = new AdView(this, AdSize.BANNER, "a151becb8068b09")
-      val layoutView = getLayoutView(getListview.asInstanceOf[ViewParent])
+      val layoutView = getLayoutView(getListView.asInstanceOf[ViewParent])
       if (layoutView != null) {
         layoutView.addView(adView, 0)
         adView.loadAd(new AdRequest)
