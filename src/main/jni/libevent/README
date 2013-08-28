@@ -1,0 +1,198 @@
+0. BUILDING AND INSTALLATION (Briefly)
+
+$ ./configure
+$ make
+$ make verify   # (optional)
+$ sudo make install
+
+1. BUILDING AND INSTALLATION (In Depth)
+
+To build libevent, type
+
+$ ./configure && make
+
+     (If you got libevent from the git repository, you will
+      first need to run the included "autogen.sh" script in order to
+      generate the configure script.)
+
+You can run the regression tests by running
+
+$ make verify
+
+Install as root via
+
+# make install
+
+Before, reporting any problems, please run the regression tests.
+
+To enable the low-level tracing build the library as:
+
+   CFLAGS=-DUSE_DEBUG ./configure [...]
+
+Standard configure flags should work.  In particular, see:
+
+   --disable-shared          Only build static libraries
+   --prefix                  Install all files relative to this directory.
+
+
+The configure script also supports the following flags:
+
+   --enable-gcc-warnings     Enable extra compiler checking with GCC.
+   --disable-malloc-replacement
+                             Don't let applications replace our memory
+                             management functions
+   --disable-openssl         Disable support for OpenSSL encryption.
+   --disable-thread-support  Don't support multithreaded environments.
+
+2. USEFUL LINKS:
+
+For the latest released version of Libevent, see the official website at
+http://libevent.org/ .
+
+There's a pretty good work-in-progress manual up at
+   http://www.wangafu.net/~nickm/libevent-book/ .
+
+For the latest development versions of Libevent, access our Git repository
+via
+   "git clone git://levent.git.sourceforge.net/gitroot/levent/libevent"
+
+You can browse the git repository online at
+http://levent.git.sourceforge.net/git/gitweb-index.cgi .
+
+To report bugs, request features, or submit patches to Libevent,
+use the Sourceforge trackers at
+https://sourceforge.net/tracker/?group_id=50884 .
+
+There's also a libevent-users mailing list for talking about Libevent
+use and development: http://archives.seul.org/libevent/users/
+
+3. ACKNOWLEDGMENTS
+
+The following people have helped with suggestions, ideas, code or
+fixing bugs:
+
+  Arno Bakker
+  Alejo
+  Weston Andros Adamson
+  William Ahern
+  Ivan Andropov
+  Sergey Avseyev
+  Avi Bab
+  Gilad Benjamini
+  Stas Bekman
+  Joachim Bauch
+  Denis Bilenko
+  Julien Blache
+  Kevin Bowling
+  Tomash Brechko
+  Kelly Brock
+  Ralph Castain
+  Adrian Chadd
+  Lawnstein Chan
+  Shuo Chen
+  Ka-Hing Cheung
+  Andrew Cox
+  George Danchev
+  Andrew Danforth
+  Antony Dovgal
+  Ed Day
+  Christopher Davis
+  Mike Davis
+  Mihai Draghicioiu
+  Mark Ellzey
+  Shie Erlich
+  Leonid Evdokimov
+  Juan Pablo Fernandez
+  Christophe Fillot
+  Mike Frysinger
+  Remi Gacogne
+  Alexander von Gernler
+  Artur Grabowski
+  Sebastian Hahn
+  Dave Hart
+  Greg Hazel
+  Michael Herf
+  Savg He
+  Mark Heily
+  Greg Hewgill
+  Andrew Hochhaus
+  Aaron Hopkins
+  Tani Hosokawa
+  Jamie Iles
+  Claudio Jeker
+  Evan Jones
+  George Kadianakis
+  Phua Keat
+  Kevin Ko
+  Brian Koehmstedt
+  Marko Kreen
+  Valery Kyholodov
+  Ross Lagerwall
+  Scott Lamb
+  Christopher Layne
+  Adam Langley
+  Philip Lewis
+  Zhou Li
+  David Libenzi
+  Yan Lin
+  Moshe Litvin
+  Simon Liu
+  Mitchell Livingston
+  Hagne Mahre
+  Lubomir Marinov
+  Abilio Marques
+  Nick Mathewson
+  James Mansion
+  Nicholas Marriott
+  Andrey Matveev
+  Caitlin Mercer
+  Dagobert Michelsen
+  Mansour Moufid
+  Felix Nawothnig
+  Trond Norbye
+  Linus Nordberg
+  Richard Nyberg
+  Jon Oberheide
+  Phil Oleson
+  Dave Pacheco
+  Tassilo von Parseval
+  Catalin Patulea
+  Patrick Pelletier
+  Simon Perreault
+  Pierre Phaneuf
+  Ryan Phillips
+  Dimitre Piskyulev
+  Pavel Plesov
+  Jon Poland
+  Nate R
+  Robert Ransom
+  Bert JW Regeer
+  Peter Rosin
+  Maseeb Abdul Qadir
+  Wang Qin
+  Alex S
+  Hanna Schroeter
+  Ralf Schmitt
+  Mike Smellie
+  Kevin Springborn
+  Harlan Stenn
+  Steve Snyder
+  Dug Song
+  Dongsheng Song
+  Hannes Sowa
+  Ferenc Szalai
+  Brodie Thiesfield
+  Jason Toffaletti
+  Gisle Vanem
+  Bas Verhoeven
+  Constantine Verutin
+  Colin Watt
+  Zack Weinberg
+  Jardel Weyrich
+  Alex
+  Taral
+  propanbutan
+  mmadia
+
+
+If we have forgotten your name, please contact us.

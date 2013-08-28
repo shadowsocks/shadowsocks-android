@@ -1,0 +1,200 @@
+This tool allows you to redirect any TCP connection to SOCKS or HTTPS
+proxy using your firewall, so redirection is system-wide.
+
+Why is that useful? I can suggest following reasons:
+* you use tor[1] and don't want any TCP connection to leak.
+* you use DVB ISP and this ISP provides internet connectivity with some
+  special daemon that may be also called "Internet accelerator" and this
+  accelerator acts as proxy. Globax[2] is example of such an accelerator.
+
+Linux/iptables, OpenBSD/pf and FreeBSD/ipfw are supported.
+Linux/iptables is well-tested, other implementations may have bugs,
+your bugreports are welcome.
+
+Transocks[3] is alike project but it has noticable performance penality.
+
+Transsocks_ev[4] is alike project too, but it has no HTTPS-proxy support
+and does not support authentication.
+
+Several Android apps also use redsocks under-the-hood: ProxyDroid[5][6] and
+sshtunnel[7][8]. And that's over 100'000 downloads! Wow!
+
+[1] http://www.torproject.org
+[2] http://www.globax.biz
+[3] http://transocks.sourceforge.net/
+[4] http://oss.tiggerswelt.net/transocks_ev/
+[5] http://code.google.com/p/proxydroid/
+[6] https://market.android.com/details?id=org.proxydroid
+[7] http://code.google.com/p/sshtunnel/
+[8] https://market.android.com/details?id=org.sshtunnel
+
+
+Another related issue is DNS over TCP. Redsocks includes `dnstc' that is fake
+and really dumb DNS server that returns "truncated answer" to every query via
+UDP. RFC-compliant resolver should repeat same query via TCP in this case - so
+the request can be redirected using usual redsocks facilities.
+
+Known compliant resolvers are:
+ * bind9 (server)
+ * dig, nslookup (tools based on bind9 code)
+Known non-compliant resolvers are:
+ * eglibc resolver fails without any attempt to send request via TCP
+ * powerdns-recursor can't properly startup without UDP connectivity as it
+   can't load root hints
+
+On the other hand, DNS via TCP using bind9 may be painfully slow. If your bind9
+setup is really slow, you have at least two options: pdnsd[9] caching server
+can run in TCP-only mode, ttdnsd[10][11] has no cache but can be useful for same
+purpose.
+
+[9] http://www.phys.uu.nl/~rombouts/pdnsd.html
+[10] http://www.mulliner.org/collin/ttdnsd.php
+[11] https://gitweb.torproject.org/ioerror/ttdnsd.git
+
+
+Features
+========
+
+Redirect any TCP connection to SOCKS4, SOCKS5 or HTTPS (HTTP/CONNECT)
+proxy server.
+
+Login/password authentication is supported for SOCKS5/HTTPS connections.
+SOCKS4 supports only username, password is ignored. for HTTPS, currently
+only Basic and Digest scheme is supported.
+
+Redirect UDP packets via SOCKS5 proxy server. NB: UDP still goes via UDP, so
+you can't relay UDP via OpenSSH.
+
+Sends "truncated reply" as an answer to UDP DNS queries.
+
+Redirect any HTTP connection to proxy that does not support transparent
+proxying (e.g. old SQUID had broken `acl myport' for such connections).
+
+
+License
+=======
+
+All source code is licensed under Apache 2.0 license.
+You can get a copy at http://www.apache.org/licenses/LICENSE-2.0.html
+
+
+Packages
+========
+ * Archlinux: https://aur.archlinux.org/packages.php?ID=41765
+ * Debian: http://packages.debian.org/search?searchon=names&keywords=redsocks
+ * Gentoo (pentoo overlay): https://code.google.com/p/pentoo/source/browse/portage/trunk/net-proxy/redsocks
+ * Gentoo (theebuilds overlay): http://code.google.com/p/theebuilds/source/browse/trunk/net-misc/redsocks
+ * Gentoo (zugaina overlay): http://gpo.zugaina.org/net-proxy/redsocks
+ * Ubuntu: http://packages.ubuntu.com/search?searchon=names&keywords=redsocks
+
+
+Compilation
+===========
+
+libevent[5] is required.
+
+gcc and clang are supported right now, other compilers can be used
+but may require some code changes.
+
+Compilation is as easy as running `make', there is no `./configure' magic.
+
+GNU Make works, other implementations of make were not tested.
+
+[5] http://libevent.org/ || http://www.monkey.org/~provos/libevent/
+
+
+Running
+=======
+
+Program has following command-line options:
+ -c   sets proper path to config file ("./redsocks.conf" is default one)
+ -t   tests config file syntax
+ -p   set a file to write the getpid() into
+
+Following signals are understood:
+SIGUSR1 dumps list of connected clients to log
+SIGTERM and SIGINT terminates daemon, all active connections are closed
+
+You can see configuration file example in redsocks.conf.example
+
+
+iptables example
+================
+
+You have to build iptables with connection tracking and REDIRECT target.
+
+# Create new chain
+root# iptables -t nat -N REDSOCKS
+
+# Ignore LANs and some other reserved addresses.
+# See http://en.wikipedia.org/wiki/Reserved_IP_addresses#Reserved_IPv4_addresses
+# and http://tools.ietf.org/html/rfc5735 for full list of reserved networks.
+root# iptables -t nat -A REDSOCKS -d 0.0.0.0/8 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 10.0.0.0/8 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 169.254.0.0/16 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 172.16.0.0/12 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN
+root# iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN
+
+# Anything else should be redirected to port 12345
+root# iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports 12345
+
+# Any tcp connection made by `luser' should be redirected.
+root# iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner luser -j REDSOCKS
+
+# You can also control that in more precise way using `gid-owner` from
+# iptables.
+root# groupadd socksified
+root# usermod --append --groups socksified luser
+root# iptables -t nat -A OUTPUT -p tcp -m owner --gid-owner socksified -j REDSOCKS
+
+# Now you can launch your specific application with GID `socksified` and it
+# will be... socksified. See following commands (numbers may vary).
+# Note: you may have to relogin to apply `usermod` changes.
+luser$ id
+uid=1000(luser) gid=1000(luser) groups=1000(luser),1001(socksified)
+luser$ sg socksified -c id
+uid=1000(luser) gid=1001(socksified) groups=1000(luser),1001(socksified)
+luser$ sg socksified -c "firefox"
+
+# If you want to configure socksifying router, you should look at
+# doc/iptables-packet-flow.png and doc/iptables-packet-flow-ng.png
+# Note, you should have proper `local_ip' value to get external packets with
+# redsocks, default 127.0.0.1 will not go. See iptables(8) manpage regarding
+# REDIRECT target for details.
+# Depending on your network configuration iptables conf. may be as easy as:
+root# iptables -t nat -A PREROUTING --in-interface eth_int -p tcp -j REDSOCKS
+
+Note about GID-based redirection
+========
+Keep in mind, that changed GID affects filesystem permissions, so if your
+application creates some files, the files will be created with luser:socksified
+owner/group. So, if you're not the only user in the group `socksified` and your
+umask allows to create group-readable files and your directory permissions, and
+so on, blah-blah, etc. THEN you may expose your files to another user.
+Ok, you have been warned.
+
+Homepage
+========
+
+http://darkk.net.ru/redsocks/
+
+Mailing list: redsocks@librelist.com
+
+Mailing list also has archives[1].
+
+[1] http://librelist.com/browser/redsocks/
+
+
+TODO
+====
+
+Test OpenBSD (pf) and FreeBSD (ipfw) and write setup examples for those
+firewall types.
+
+
+Author
+======
+This program was written by Leonid Evdokimov <leon@darkk.net.ru>
