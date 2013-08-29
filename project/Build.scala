@@ -52,7 +52,7 @@ object AndroidBuild extends Build {
   val deploy = TaskKey[Unit]("deploy", "deploy to the build server")
 
   val deployTask = deploy := {
-    "./deploy target shadowsocks-" + App.version + ".apk" !;
+    "./deploy target shadowsocks-compile-" + App.version + ".apk" !;
     println("Deploy successfully")
   }
 

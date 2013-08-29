@@ -1,5 +1,5 @@
 import sbtandroid.AndroidKeys._
 
-keyalias in Android := "travis"
+keyalias := "travis"
 
-publicServer in Android := "127.0.0.1"
+publicServer := "127.0.0.1"
