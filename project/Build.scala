@@ -2,7 +2,7 @@ import sbt._
 import sbt.Keys._
 
 import sbtandroid._
-import sbtandroid.AndroidKeys._
+import sbtandroid.AndroidPlugin._
 
 object App {
   val version = "1.8.2"
@@ -17,7 +17,7 @@ object General {
     versionCode := App.versionCode,
     scalaVersion := "2.9.2",
     compileOrder := CompileOrder.JavaThenScala,
-    platformName in Android := "android-16",
+    platformName := "android-16",
     resolvers += "madeye-maven" at "http://madeye-maven-repository.googlecode.com/git",
     resolvers += "central-maven" at "http://repo.maven.apache.org/maven2"
   )
@@ -28,22 +28,23 @@ object General {
           "-keep interface com.actionbarsherlock.** { *; }",
           "-keep class org.jraf.android.backport.** { *; }",
           "-keep class com.github.shadowsocks.** { *; }",
-          "-keepattributes *Annotation*").mkString(" ")
+          "-keepattributes *Annotation*")
 
   val proguardSettings = Seq (
-    useProguard in Android := true,
-    proguardOption in Android := pgOptions
+    useProguard := true,
+    proguardOptions := pgOptions
+  )
+
+  val miscSettings = Seq (
+    cachePasswords := true,
+    publicServer := "127.0.0.1"
   )
 
   lazy val fullAndroidSettings =
     General.settings ++
-    AndroidProject.androidSettings ++
-    TypedResources.settings ++
+    AndroidPlugin.androidDefaults ++
     proguardSettings ++
-    AndroidManifestGenerator.settings ++
-    AndroidMarketPublish.settings ++ Seq (
-      cachePasswords in Android := true
-    )
+    miscSettings
 }
 
 object AndroidBuild extends Build {

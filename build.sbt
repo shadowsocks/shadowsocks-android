@@ -1,7 +1,3 @@
-javacOptions in Compile ++= Seq("-source", "1.6",  "-target", "1.6") 
-
-javacOptions in doc ++= Seq("-source", "1.6") 
-
 libraryDependencies ++= Seq(
   "com.google.android" % "support-v4" % "r12",
   "com.google.android.analytics" % "analytics" % "2.0beta4",
