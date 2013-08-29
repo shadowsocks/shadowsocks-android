@@ -1,4 +1,4 @@
-import sbtandroid.AndroidKeys._
+import sbtandroid.AndroidPlugin._
 
 keyalias := "travis"
 
