@@ -45,6 +45,7 @@ LOCAL_CFLAGS+=-D__ANDROID__
 MY_initext_func := $(addprefix xt_,${MY_pfx_build_mod})
 MY_GEN_INITEXT:= $(LOCAL_PATH)/gen_initext.c
 $(info $(shell \
+	if [ ! -e $(MY_GEN_INITEXT) ]; then \
 	echo "GEN initext.c"; \
 	echo "" >$(MY_GEN_INITEXT); \
 	for i in $(MY_initext_func); do \
@@ -57,7 +58,8 @@ $(info $(shell \
 		echo " ""lib$${i}_init();" >>$(MY_GEN_INITEXT); \
 		sed "s/_init(void)/lib$${i}_init(void)/" $(LOCAL_PATH)/lib$${i}.c > $(LOCAL_PATH)/gen_lib$${i}.c; \
 	done; \
-	echo "}" >>$(MY_GEN_INITEXT); ))
+	echo "}" >>$(MY_GEN_INITEXT); \
+	fi; ))
 
 MY_lib_sources:= \
 	$(patsubst %,gen_libxt_%.c,${MY_pfx_build_mod})
@@ -96,6 +98,7 @@ LOCAL_CFLAGS+=-D__ANDROID__
 MY_initext4_func  := $(addprefix ipt_,${MY_pf4_build_mod})
 MY_GEN_INITEXT4:= $(LOCAL_PATH)/gen_initext4.c
 $(info $(shell \
+	if [ ! -e $(MY_GEN_INITEXT4) ]; then \
 	echo "GEN initext4.c"; \
 	echo "" >$(MY_GEN_INITEXT4); \
 	for i in $(MY_initext4_func); do \
@@ -108,7 +111,8 @@ $(info $(shell \
 		echo " ""lib$${i}_init();" >>$(MY_GEN_INITEXT4); \
 		sed "s/_init(void)/lib$${i}_init(void)/" $(LOCAL_PATH)/lib$${i}.c > $(LOCAL_PATH)/gen_lib$${i}.c; \
 	done; \
-	echo "}" >>$(MY_GEN_INITEXT4); ))
+	echo "}" >>$(MY_GEN_INITEXT4); \
+	fi; ))
 
 MY_lib_sources:= \
 	$(patsubst %,gen_libipt_%.c,${MY_pf4_build_mod})
@@ -147,6 +151,7 @@ LOCAL_CFLAGS+=-D__ANDROID__
 MY_initext6_func := $(addprefix ip6t_,${MY_pf6_build_mod})
 MY_GEN_INITEXT6:= $(LOCAL_PATH)/gen_initext6.c
 $(info $(shell \
+	if [ ! -e $(MY_GEN_INITEXT6) ]; then \
 	echo "GEN initext6.c"; \
 	echo "" >$(MY_GEN_INITEXT6); \
 	for i in $(MY_initext6_func); do \
@@ -159,7 +164,8 @@ $(info $(shell \
 		echo " ""lib$${i}_init();" >>$(MY_GEN_INITEXT6); \
 		sed "s/_init(void)/lib$${i}_init(void)/" $(LOCAL_PATH)/lib$${i}.c > $(LOCAL_PATH)/gen_lib$${i}.c; \
 	done; \
-	echo "}" >>$(MY_GEN_INITEXT6); ))
+	echo "}" >>$(MY_GEN_INITEXT6); \
+	fi; ))
 
 MY_lib_sources:= \
 	$(patsubst %,gen_libip6t_%.c,${MY_pf6_build_mod})

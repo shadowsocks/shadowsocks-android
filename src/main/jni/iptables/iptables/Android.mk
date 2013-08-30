@@ -15,7 +15,6 @@ LOCAL_CFLAGS+=-DXTABLES_LIBDIR=\"xtables_libdir_not_used\"
 # Accommodate arm-eabi-4.4.3 tools that don't set __ANDROID__
 LOCAL_CFLAGS+=-D__ANDROID__
 
-LOCAL_LDFLAGS:=-version-info 6:0:0
 LOCAL_SRC_FILES:= \
 	xtables.c xtoptions.c
 
