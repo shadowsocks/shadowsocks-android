@@ -32,6 +32,8 @@
 #ifndef __LWIP_ARCH_H__
 #define __LWIP_ARCH_H__
 
+#include "arch/cc.h"
+
 #ifndef LITTLE_ENDIAN
 #define LITTLE_ENDIAN 1234
 #endif
@@ -39,8 +41,6 @@
 #ifndef BIG_ENDIAN
 #define BIG_ENDIAN 4321
 #endif
-
-#include "arch/cc.h"
 
 /** Temporary: define format string for size_t if not defined in cc.h */
 #ifndef SZT_F
