@@ -19,8 +19,8 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ### BUILD
 
-* Export ANDROID_HOME=/path/to/android-sdk
-* Export ANDROID_NDK_HOME=/path/to/android-ndk
+* Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
+* Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
 * Create `local.sbt` from `local.sbt.example` with your own key alias
