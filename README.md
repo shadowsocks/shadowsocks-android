@@ -13,23 +13,25 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 ### PREREQUISITES
 
 * JDK 1.6+
-* SBT 0.12.3+
+* SBT 0.12.4
 * Android SDK r21+
-* Android NDK r8d+
+* Android NDK r9+
 
 ### BUILD
 
+* Export ANDROID_HOME=/path/to/android-sdk
+* Export ANDROID_NDK_HOME=/path/to/android-ndk
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
 * Create `local.sbt` from `local.sbt.example` with your own key alias
 * Invoke the building like this
 
 ```bash
-    # Optional
+    # Build native binaries
     ./build-ndk.sh
 
-    # Build
-    sbt android:prepare-market
+    # Build the App
+    sbt clean release
 ```
 
 ### LICENSE
