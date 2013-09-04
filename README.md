@@ -2,6 +2,8 @@
 
 A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
+Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
+
 [![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=com.github.shadowsocks)
 
 ### TRAVIS CI STATUS
