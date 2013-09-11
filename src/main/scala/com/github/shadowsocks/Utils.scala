@@ -299,9 +299,11 @@ object Utils {
       .asInstanceOf[ActivityManager]
     val services = activityManager.getRunningServices(Integer.MAX_VALUE)
 
-    for (service <- services) {
-      if (service.service.getClassName == name) {
-        return true
+    if (services != null) {
+      for (service <- services) {
+        if (service.service.getClassName == name) {
+          return true
+        }
       }
     }
 
