@@ -200,10 +200,16 @@ object Extra {
       case _ => "127.0.0.1"
     }
     val sitekey = settings.getString(Key.sitekey, "default")
-    val encMethod = settings.getString(Key.encMethod, "table")
+    val encMethod =  {
+      if (proxy == BuildConfig.SERVER) {
+        BuildConfig.METHOD
+      } else {
+        settings.getString(Key.encMethod, "table")
+      }
+    }
     val remotePort: Int = try {
       if (proxy == BuildConfig.SERVER) {
-        scala.util.Random.shuffle(Seq(20, 21, 23)).toSeq(0)
+        scala.util.Random.shuffle(BuildConfig.PORTS.toSeq).toSeq(0)
       } else {
         Integer.valueOf(settings.getString(Key.remotePort, "1984"))
       }

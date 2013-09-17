@@ -3,3 +3,7 @@ import sbtandroid.AndroidPlugin._
 keyalias := "travis"
 
 publicServer := "127.0.0.1"
+
+publicPorts := "443"
+
+publicMethod := "rc4"
