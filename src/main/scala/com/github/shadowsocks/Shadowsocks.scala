@@ -45,7 +45,7 @@ import android.graphics.Typeface
 import android.os._
 import android.preference.{Preference, PreferenceManager}
 import android.util.Log
-import android.view.{ViewParent, KeyEvent}
+import android.view.{ViewGroup, Gravity, ViewParent, KeyEvent}
 import android.widget.{LinearLayout, CompoundButton, RelativeLayout, TextView}
 import com.actionbarsherlock.view.Menu
 import com.actionbarsherlock.view.MenuItem
@@ -67,6 +67,8 @@ import android.app.backup.BackupManager
 import scala.concurrent.ops._
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.google.ads.{AdRequest, AdSize, AdView}
+import net.simonvt.menudrawer.MenuDrawer
+import javax.swing.text.html.ListView
 
 object Shadowsocks {
 
@@ -212,11 +214,14 @@ class Shadowsocks
 
   private var switchButton: Switch = null
   private var progressDialog: ProgressDialog = null
-  private var settings: SharedPreferences = null
-  private var status: SharedPreferences = null
-  private var prepared = false
+
   private var state = State.INIT
-  private var receiver: StateBroadcastReceiver = null
+  private var prepared = false
+
+  lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
+  lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
+  lazy val receiver = new StateBroadcastReceiver
+  lazy val drawer = MenuDrawer.attach(this)
 
   private val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
@@ -366,7 +371,7 @@ class Shadowsocks
     }
   }
 
-  def initAdView() {
+  def initAdView(layoutResId: Int) {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
       val adView = {
         if (isSinglePane) {
@@ -375,7 +380,7 @@ class Shadowsocks
           new AdView(this, AdSize.BANNER, "a151becb8068b09")
         }
       }
-      val layoutView = getLayoutView(getListView.asInstanceOf[ViewParent])
+      val layoutView = findViewById(layoutResId).asInstanceOf[ViewGroup]
       if (layoutView != null) {
         layoutView.addView(adView, 0)
         adView.loadAd(new AdRequest)
@@ -383,10 +388,27 @@ class Shadowsocks
     }
   }
 
+  override def setContentView(layoutResId: Int) {
+    drawer.setContentView(layoutResId)
+    initAdView(layoutResId)
+    onContentChanged()
+  }
+
   /** Called when the activity is first created. */
   override def onCreate(savedInstanceState: Bundle) {
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
+
+    val menuView = new TextView(this)
+    menuView.setTextColor(0xFFFFFFFF)
+    menuView.setText("As the drawer opens, the drawer indicator icon becomes smaller.")
+    menuView.setGravity(Gravity.CENTER)
+    drawer.setMenuView(menuView)
+
+    // The drawable that replaces the up indicator in the action bar
+    drawer.setSlideDrawable(R.drawable.ic_drawer)
+    // Whether the previous drawable should be shown
+    drawer.setDrawerIndicatorEnabled(true)
 
     val switchLayout = getLayoutInflater
       .inflate(R.layout.layout_switch, null)
@@ -394,7 +416,7 @@ class Shadowsocks
     getSupportActionBar.setCustomView(switchLayout)
     getSupportActionBar.setDisplayShowTitleEnabled(false)
     getSupportActionBar.setDisplayShowCustomEnabled(true)
-    getSupportActionBar.setDisplayShowHomeEnabled(false)
+    // getSupportActionBar.setDisplayShowHomeEnabled(false)
 
     val title: TextView = switchLayout.findViewById(R.id.title).asInstanceOf[TextView]
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
@@ -402,12 +424,7 @@ class Shadowsocks
     title.setText(R.string.app_name)
 
     switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
-    settings = PreferenceManager.getDefaultSharedPreferences(this)
-    status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-    receiver = new StateBroadcastReceiver()
     registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
-
-    initAdView()
 
     val init: Boolean = !Shadowsocks.isServiceStarted(this)
     if (init) {
@@ -425,7 +442,7 @@ class Shadowsocks
     }
   }
 
-  override def onCreateOptionsMenu(menu: Menu): Boolean = {
+/*  override def onCreateOptionsMenu(menu: Menu): Boolean = {
     val isRoot = status.getBoolean(Key.isRoot, false)
     menu
       .add(0, 0, 0, R.string.recovery)
@@ -442,7 +459,7 @@ class Shadowsocks
         .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
     }
     true
-  }
+  }*/
 
   override def onKeyDown(keyCode: Int, event: KeyEvent): Boolean = {
     if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount == 0) {
@@ -459,6 +476,11 @@ class Shadowsocks
 
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
     item.getItemId match {
+      case android.R.id.home => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "home", getVersionName, 0L)
+        drawer.toggleMenu()
+        return true
+      }
       case 0 => {
         EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "reset", getVersionName, 0L)
         recovery()
