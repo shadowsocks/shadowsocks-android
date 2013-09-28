@@ -69,10 +69,11 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.google.ads.{AdRequest, AdSize, AdView}
 import net.simonvt.menudrawer.MenuDrawer
 
-import com.github.shadowsocks.database.{MenuAdapter, Item, Category}
+import com.github.shadowsocks.database._
 import scala.collection.mutable.ListBuffer
 import com.github.shadowsocks.database.Category
 import com.github.shadowsocks.database.Item
+import com.github.shadowsocks.database.Profile
 
 object Shadowsocks {
 
@@ -228,6 +229,7 @@ class Shadowsocks
   lazy val drawer = MenuDrawer.attach(this)
   lazy val listView = new ListView(this)
   lazy val menuAdapter = new MenuAdapter(this, getMenuList)
+  lazy val profileManager = getApplication.asInstanceOf[ShadowsocksApplication].profileManager
 
   private val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
@@ -446,8 +448,13 @@ class Shadowsocks
 
   }
 
+  def updateProfile(id: Int) {
+
+  }
+
   def getProfileList: List[Item] = {
-    List[Item]()
+    val list = profileManager.getAllProfiles getOrElse List[Profile]()
+    list.map(p => new Item(p.id, p.name, -1, updateProfile))
   }
 
   def getMenuList: List[Any] = {

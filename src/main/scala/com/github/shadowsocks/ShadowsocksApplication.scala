@@ -40,9 +40,14 @@ package com.github.shadowsocks
 
 import android.app.Application
 import com.google.analytics.tracking.android.EasyTracker
+import com.github.shadowsocks.database.{ProfileManager, DBHelper}
 
 class ShadowsocksApplication extends Application {
+  lazy val dbHelper = new DBHelper(this)
+  lazy val profileManager = new ProfileManager(dbHelper)
+
   override def onCreate() {
     EasyTracker.getInstance.setContext(this)
   }
+
 }
