@@ -46,7 +46,7 @@ import android.os._
 import android.preference.{Preference, PreferenceManager}
 import android.util.Log
 import android.view.{ViewGroup, Gravity, ViewParent, KeyEvent}
-import android.widget.{LinearLayout, CompoundButton, RelativeLayout, TextView}
+import android.widget._
 import com.actionbarsherlock.view.Menu
 import com.actionbarsherlock.view.MenuItem
 import com.google.analytics.tracking.android.EasyTracker
@@ -68,7 +68,11 @@ import scala.concurrent.ops._
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.google.ads.{AdRequest, AdSize, AdView}
 import net.simonvt.menudrawer.MenuDrawer
-import javax.swing.text.html.ListView
+
+import com.github.shadowsocks.database.{MenuAdapter, Item, Category}
+import scala.collection.mutable.ListBuffer
+import com.github.shadowsocks.database.Category
+import com.github.shadowsocks.database.Item
 
 object Shadowsocks {
 
@@ -222,6 +226,8 @@ class Shadowsocks
   lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
   lazy val receiver = new StateBroadcastReceiver
   lazy val drawer = MenuDrawer.attach(this)
+  lazy val listView = new ListView(this)
+  lazy val menuAdapter = new MenuAdapter(this, getMenuList)
 
   private val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
@@ -399,11 +405,8 @@ class Shadowsocks
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
 
-    val menuView = new TextView(this)
-    menuView.setTextColor(0xFFFFFFFF)
-    menuView.setText("As the drawer opens, the drawer indicator icon becomes smaller.")
-    menuView.setGravity(Gravity.CENTER)
-    drawer.setMenuView(menuView)
+    listView.setAdapter(menuAdapter)
+    drawer.setMenuView(listView)
 
     // The drawable that replaces the up indicator in the action bar
     drawer.setSlideDrawable(R.drawable.ic_drawer)
@@ -440,26 +443,44 @@ class Shadowsocks
         handler.sendEmptyMessage(MSG_INITIAL_FINISH)
       }
     }
+
   }
 
-/*  override def onCreateOptionsMenu(menu: Menu): Boolean = {
-    val isRoot = status.getBoolean(Key.isRoot, false)
-    menu
-      .add(0, 0, 0, R.string.recovery)
-      .setIcon(android.R.drawable.ic_menu_revert)
-      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    menu
-      .add(0, 1, 1, R.string.about)
-      .setIcon(android.R.drawable.ic_menu_info_details)
-      .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    if (isRoot || Build.VERSION.SDK_INT < 17) {
-      menu
-        .add(0, 2, 2, R.string.flush_dnscache)
-        .setIcon(android.R.drawable.ic_menu_revert)
-        .setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT)
-    }
-    true
-  }*/
+  def getProfileList: List[Item] = {
+    List[Item]()
+  }
+
+  def getMenuList: List[Any] = {
+
+    val buf = new ListBuffer[Any]()
+
+    buf += new Category("Profiles")
+
+    buf ++= getProfileList
+
+    buf += new Category("Settings")
+
+    buf += new Item(-1, getString(R.string.recovery), android.R.drawable.ic_menu_revert,
+      _ => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "reset", getVersionName, 0L)
+        recovery()
+      })
+
+    buf += new Item(-2, getString(R.string.flush_dnscache), android.R.drawable.ic_menu_delete,
+      _ => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, 0L)
+        flushDnsCache()
+      })
+
+    buf += new Item(-3, getString(R.string.about), android.R.drawable.ic_menu_info_details,
+      _ => {
+        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
+        showAbout()
+      })
+
+    buf.toList
+
+  }
 
   override def onKeyDown(keyCode: Int, event: KeyEvent): Boolean = {
     if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount == 0) {
@@ -480,18 +501,6 @@ class Shadowsocks
         EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "home", getVersionName, 0L)
         drawer.toggleMenu()
         return true
-      }
-      case 0 => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "reset", getVersionName, 0L)
-        recovery()
-      }
-      case 1 => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
-        showAbout()
-      }
-      case 2 => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, 0L)
-        flushDnsCache()
       }
     }
     super.onOptionsItemSelected(item)
