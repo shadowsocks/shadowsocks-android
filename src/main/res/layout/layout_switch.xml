@@ -9,8 +9,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:gravity="center_vertical"
-      android:layout_marginLeft="16dp"
-      android:textSize="28sp"
+      android:textSize="24sp"
       android:textColor="@color/title"
       android:text="@string/app_name"
       android:layout_alignParentLeft="true"
@@ -21,6 +20,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_alignParentRight="true"
+      android:layout_marginRight = "10dp"
       android:layout_centerVertical="true"/>
 
 </RelativeLayout>

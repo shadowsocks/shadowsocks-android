@@ -5,8 +5,8 @@ import sbtandroid._
 import sbtandroid.AndroidPlugin._
 
 object App {
-  val version = "1.8.3"
-  val versionCode = 48
+  val version = "1.9.0"
+  val versionCode = 50
 }
 
 object General {
@@ -28,6 +28,7 @@ object General {
           "-keep interface com.actionbarsherlock.** { *; }",
           "-keep class org.jraf.android.backport.** { *; }",
           "-keep class com.github.shadowsocks.** { *; }",
+          "-keep class * extends com.j256.ormlite.** { *; }",
           "-keepattributes *Annotation*")
 
   val proguardSettings = Seq (
@@ -36,8 +37,7 @@ object General {
   )
 
   val miscSettings = Seq (
-    cachePasswords := true,
-    publicServer := "127.0.0.1"
+    cachePasswords := true
   )
 
   lazy val fullAndroidSettings =

@@ -22,5 +22,7 @@
   <color name="grey1">#646464</color>
   <color name="grey2">#c8c8c8</color>
   <color name="grey3">#323232</color>
+  <color name="md__transparent">#00000000</color>
+  <color name="md__defaultBackground">#FF555555</color>
 
 </resources>

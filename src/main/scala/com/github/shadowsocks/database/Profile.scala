@@ -36,17 +36,57 @@
  *                              HERE BE DRAGONS
  *
  */
-package com.github.shadowsocks
 
-import android.app.Application
-import com.google.analytics.tracking.android.EasyTracker
-import com.github.shadowsocks.database.{ProfileManager, DBHelper}
+package com.github.shadowsocks.database
 
-class ShadowsocksApplication extends Application {
-  lazy val dbHelper = new DBHelper(this)
+import com.j256.ormlite.field.{DataType, DatabaseField}
 
-  override def onCreate() {
-    EasyTracker.getInstance.setContext(this)
-  }
+class Profile {
+  @DatabaseField(generatedId = true)
+  var id: Int = 0
 
+  @DatabaseField
+  var name: String = "Untitled"
+
+  @DatabaseField
+  var host: String = ""
+
+  @DatabaseField
+  var localPort: Int = 0
+
+  @DatabaseField
+  var remotePort: Int = 0
+
+  @DatabaseField
+  var password: String = ""
+
+  @DatabaseField
+  var method: String = ""
+
+  @DatabaseField
+  var date: String = ""
+
+  @DatabaseField
+  var upload: Int = 0
+
+  @DatabaseField
+  var download: Int = 0
+
+  @DatabaseField
+  var chnroute: Boolean = false
+
+  @DatabaseField
+  var global: Boolean = false
+
+  @DatabaseField
+  var bypass: Boolean = false
+
+  @DatabaseField
+  var traffic: Boolean = false
+
+  @DatabaseField(dataType = DataType.LONG_STRING)
+  var individual: String = ""
+
+  @DatabaseField(dataType = DataType.LONG_STRING)
+  var description: String = ""
 }
