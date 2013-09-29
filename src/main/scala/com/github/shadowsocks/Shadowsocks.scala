@@ -574,6 +574,7 @@ class Shadowsocks
         Shadowsocks.currentProfile = profileManager.reload(id)
         updatePreferenceScreen()
         menuAdapter.setActiveId(id)
+        menuAdapter.notifyDataSetChanged()
       }
     }, 600)
 
@@ -635,19 +636,6 @@ class Shadowsocks
     })
 
     buf.toList
-  }
-
-  override def onKeyDown(keyCode: Int, event: KeyEvent): Boolean = {
-    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount == 0) {
-      try {
-        finish()
-      } catch {
-        case ignore: Exception => {
-        }
-      }
-      return true
-    }
-    super.onKeyDown(keyCode, event)
   }
 
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
