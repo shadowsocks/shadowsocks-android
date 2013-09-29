@@ -49,10 +49,11 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
 import org.xbill.DNS._
 import scala.Some
-import android.graphics.{Canvas, Bitmap}
+import android.graphics._
 import android.app.ActivityManager
 import android.os.Build
 import android.provider.Settings
+import scala.Some
 
 object Config {
   val SHADOWSOCKS = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
@@ -112,10 +113,13 @@ object Config {
 }
 
 case class Config(isGlobalProxy: Boolean, isGFWList: Boolean, isBypassApps: Boolean, isTrafficStat: Boolean,
-                  var proxy: String, sitekey: String, encMethod: String, remotePort: Int,
+                  profileName: String, var proxy: String, sitekey: String, encMethod: String, remotePort: Int,
                   localPort: Int, proxiedAppString: String)
 
 object Key {
+  val profileId = "profileId"
+  val profileName = "profileName"
+
   val proxied = "Proxyed"
 
   val isRoot = "isRoot"
@@ -135,6 +139,11 @@ object Key {
   val encMethod = "encMethod"
   val remotePort = "remotePort"
   val localPort = "port"
+}
+
+object Scheme {
+  val APP = "app://"
+  val PROFILE = "profile://"
 }
 
 object State {
@@ -162,6 +171,7 @@ object Extra {
     edit.putBoolean(Key.isBypassApps, config.isBypassApps)
     edit.putBoolean(Key.isTrafficStat, config.isTrafficStat)
 
+    edit.putString(Key.profileName, config.profileName)
     edit.putString(Key.proxy, config.proxy)
     edit.putString(Key.sitekey, config.sitekey)
     edit.putString(Key.encMethod, config.encMethod)
@@ -177,6 +187,7 @@ object Extra {
     val isBypassApps = intent.getBooleanExtra(Key.isBypassApps, false)
     val isTrafficStat = intent.getBooleanExtra(Key.isTrafficStat, false)
 
+    val profileName = intent.getStringExtra(Key.profileName)
     val proxy = intent.getStringExtra(Key.proxy)
     val sitekey = intent.getStringExtra(Key.sitekey)
     val encMethod = intent.getStringExtra(Key.encMethod)
@@ -184,7 +195,7 @@ object Extra {
     val localPort = intent.getIntExtra(Key.localPort, 1984)
     val proxiedString = intent.getStringExtra(Key.proxied)
 
-    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, proxy, sitekey, encMethod, remotePort,
+    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, profileName, proxy, sitekey, encMethod, remotePort,
       localPort, proxiedString)
   }
 
@@ -194,6 +205,7 @@ object Extra {
     val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
     val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
 
+    val profileName = settings.getString(Key.profileName, "default")
     val proxy = settings.getString(Key.proxy, "127.0.0.1") match {
       case "198.199.101.152" => BuildConfig.SERVER
       case s: String => s
@@ -232,6 +244,7 @@ object Extra {
     intent.putExtra(Key.isBypassApps, isBypassApps)
     intent.putExtra(Key.isTrafficStat, isTrafficStat)
 
+    intent.putExtra(Key.profileName, profileName)
     intent.putExtra(Key.proxy, proxy)
     intent.putExtra(Key.sitekey, sitekey)
     intent.putExtra(Key.encMethod, encMethod)
@@ -264,6 +277,36 @@ object Utils {
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
+
+  /*
+     * round or floor depending on whether you are using offsets(floor) or
+     * widths(round)
+     */
+  def dpToPx (context: Context, dp: Float): Float = {
+    val density = context.getResources.getDisplayMetrics.density
+    dp * density
+  }
+
+  def pxToDp (context: Context, px: Float): Float = {
+    val density = context.getResources.getDisplayMetrics.density
+    px / density
+  }
+
+  def getBitmap(text: String, width: Int, height: Int, background: Int): Bitmap = {
+    val bitmap = Bitmap.createBitmap(width,
+      height, Bitmap.Config.ARGB_8888)
+    val size = bitmap.getHeight / 4
+    val canvas = new Canvas(bitmap)
+    canvas.drawColor(background)
+    val paint = new Paint()
+    paint.setColor(Color.WHITE)
+    paint.setTextSize(size)
+    val bounds = new Rect()
+    paint.getTextBounds(text, 0, text.length, bounds)
+    canvas.drawText(text, (bitmap.getWidth - bounds.width()) / 2,
+      bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
+    bitmap
+  }
 
   // Blocked > 3 seconds
   def toggleAirplaneMode(context: Context) {
