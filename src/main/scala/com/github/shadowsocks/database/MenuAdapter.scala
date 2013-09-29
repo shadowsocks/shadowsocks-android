@@ -70,8 +70,8 @@ class MenuAdapter(context: Context, var items: List[Any]) extends BaseAdapter {
     this.listener = listener
   }
 
-  def setActivePosition(activePosition: Int) {
-    this.activePosition = activePosition
+  def setActiveId(activeId: Int) {
+    this.activeId = activeId
   }
 
   @Override def getCount: Int = {
@@ -139,28 +139,26 @@ class MenuAdapter(context: Context, var items: List[Any]) extends BaseAdapter {
 
         v.setTag(R.id.mdItem, value)
 
+        if (value.id == activeId) {
+          if (listener != null) listener.onActiveViewChanged(v, position)
+        }
+
       case _ =>
     }
     v.setTag(R.id.mdActiveViewPosition, position)
 
-    if (position == activePosition) {
-      if (listener != null) listener.onActiveViewChanged(v, position)
-    }
 
     v
   }
 
   def updateList(list: List[Any], activeId: Int) {
     items = list
-    activePosition = items.indexWhere{
-      case item: Item => item.id == activeId
-      case _ => false
-    }
+    this.activeId = activeId
     notifyDataSetChanged()
   }
 
   private var listener: MenuAdapter.MenuListener = null
-  private var activePosition: Int = -1
+  private var activeId: Int = -1
 }
 
 

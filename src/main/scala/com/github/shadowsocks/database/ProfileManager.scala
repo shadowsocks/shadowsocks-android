@@ -91,19 +91,18 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     }
   }
 
-  def load(id: Int): Profile =  {
-
-    Log.d(Shadowsocks.TAG, id + " ")
-
+  def reload(id: Int): Profile = {
     save()
+    load(id)
+  }
+
+  def load(id: Int): Profile =  {
 
     val profile = getProfile(id) getOrElse {
       val p = new Profile()
       createOrUpdateProfile(p)
       p
     }
-
-    Log.d(Shadowsocks.TAG, "load " + profile.id + " " + profile.name)
 
     val edit = settings.edit()
     edit.putBoolean(Key.isGlobalProxy, profile.global)

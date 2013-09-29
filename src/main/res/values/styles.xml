@@ -23,6 +23,7 @@
   <!-- Variation on the Light theme that turns off the title -->
   <style name="Theme.Shadowsocks" parent="@style/Theme.Shadow">
     <item name="switchStyle">@style/Widget.Shadow.Switch</item>
+    <item name="menuDrawerStyle">@style/MenuDrawerStyle</item>
   </style>
 
   <style name="Theme.AppManager" parent="@style/Theme.Shadow">
@@ -60,5 +61,9 @@
     <item name="android:gravity">center_vertical</item>
   </style>
 
+  <style name="MenuDrawerStyle" parent="Widget.MenuDrawer">
+    <item name="mdActiveIndicator">@drawable/menu_arrow</item>
+    <item name="mdMenuSize">250dp</item>
+  </style>
 
 </resources>

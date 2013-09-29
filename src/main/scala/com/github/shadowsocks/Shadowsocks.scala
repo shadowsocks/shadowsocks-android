@@ -289,6 +289,9 @@ class Shadowsocks
   private val MSG_CRASH_RECOVER: Int = 1
   private val MSG_INITIAL_FINISH: Int = 2
 
+  private val STATE_MENUDRAWER = "com.github.shadowsocks.menuDrawer"
+  private val STATE_ACTIVE_VIEW_ID = "com.github.shadowsocks.activeViewId"
+
   private var switchButton: Switch = null
   private var progressDialog: ProgressDialog = null
 
@@ -483,6 +486,8 @@ class Shadowsocks
       profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse new Profile()
     }
 
+    menuAdapter.setActiveId(settings.getInt(Key.profileId, -1))
+    menuAdapter.setListener(this)
     listView.setAdapter(menuAdapter)
     drawer.setMenuView(listView)
 
@@ -522,8 +527,43 @@ class Shadowsocks
     }
   }
 
+  override def onRestoreInstanceState(inState: Bundle) {
+    super.onRestoreInstanceState(inState)
+    drawer.restoreState(inState.getParcelable(STATE_MENUDRAWER))
+  }
+
+  override def onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putParcelable(STATE_MENUDRAWER, drawer.saveState())
+    outState.putInt(STATE_ACTIVE_VIEW_ID, Shadowsocks.currentProfile.id)
+  }
+
+  override def onBackPressed() {
+    val drawerState = drawer.getDrawerState
+    if (drawerState == MenuDrawer.STATE_OPEN || drawerState == MenuDrawer.STATE_OPENING) {
+      drawer.closeMenu()
+      return
+    }
+    super.onBackPressed()
+  }
+
   override def onActiveViewChanged(v: View, pos: Int) {
     drawer.setActiveView(v, pos)
+  }
+
+  def addProfile(id: Int) {
+    drawer.closeMenu(true)
+
+    handler.postDelayed(new Runnable {
+      def run() {
+        Shadowsocks.currentProfile = profileManager.reload(id)
+        updatePreferenceScreen()
+        profileManager.save()
+        menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
+      }
+    }, 600)
+
+    if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
   }
 
   def updateProfile(id: Int) {
@@ -531,8 +571,9 @@ class Shadowsocks
 
     handler.postDelayed(new Runnable {
       def run() {
-        Shadowsocks.currentProfile = profileManager.load(id)
+        Shadowsocks.currentProfile = profileManager.reload(id)
         updatePreferenceScreen()
+        menuAdapter.setActiveId(id)
       }
     }, 600)
 
@@ -573,11 +614,7 @@ class Shadowsocks
 
     buf ++= getProfileList
 
-    buf += new Item(-1, getString(R.string.add_profile), android.R.drawable.ic_menu_add, _ => {
-      updateProfile(-1)
-      profileManager.save()
-      menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
-    })
+    buf += new Item(-1, getString(R.string.add_profile), android.R.drawable.ic_menu_add, addProfile)
 
     buf += new Category("Settings")
 
