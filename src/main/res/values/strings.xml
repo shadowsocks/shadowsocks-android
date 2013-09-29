@@ -10,6 +10,8 @@
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
+  <string name="profile">Profile</string>
+  <string name="profile_summary">Profile name</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP Address of your Shadowsocks server</string>
   <string name="remote_port">Remote Port</string>
@@ -73,5 +75,6 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="flush_dnscache">Flush DNS Cache</string>
   <string name="flushing">Flushing</string>
+  <string name="add_profile">Add Profile</string>
 
 </resources>

@@ -39,39 +39,39 @@
 
 package com.github.shadowsocks.database
 
-import android.content.{DialogInterface, Context}
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import com.github.shadowsocks.R
-import android.view.View.OnClickListener
+import com.github.shadowsocks.{Shadowsocks, R}
+import android.view.View.{OnLongClickListener, OnClickListener}
 
-case class Item(id: Int, title: String, iconRes: Int, action: Int => Unit)
+case class Item(id: Int, title: String, iconRes: Int,
+  click: Int => Unit, longClick: Int => Boolean = _ => false)
 
-case class Category (title: String)
+case class Category(title: String)
 
 object MenuAdapter {
 
   trait MenuListener {
-    def onActiveViewChanged(v: View)
+    def onActiveViewChanged(v: View, pos: Int)
   }
 
   val UNDEFINED = -1
   val CATEGORY = 0
   val ITEM = 1
-
 }
 
-class MenuAdapter (context: Context, var items: List[Any]) extends BaseAdapter {
+class MenuAdapter(context: Context, var items: List[Any]) extends BaseAdapter {
 
   def setListener(listener: MenuAdapter.MenuListener) {
-    mListener = listener
+    this.listener = listener
   }
 
   def setActivePosition(activePosition: Int) {
-    mActivePosition = activePosition
+    this.activePosition = activePosition
   }
 
   @Override def getCount: Int = {
@@ -121,32 +121,46 @@ class MenuAdapter (context: Context, var items: List[Any]) extends BaseAdapter {
         }
         val tv: TextView = v.asInstanceOf[TextView]
         tv.setText(value.title)
-        tv.setCompoundDrawablesWithIntrinsicBounds(value.iconRes, 0, 0, 0)
+        if (value.iconRes != -1) {
+          tv.setCompoundDrawablesWithIntrinsicBounds(value.iconRes, 0, 0, 0)
+        }
         tv.setOnClickListener(new OnClickListener {
           def onClick(view: View) {
             val item = view.getTag(R.id.mdItem).asInstanceOf[Item]
-            item.action(item.id)
+            item.click(item.id)
+          }
+        })
+        tv.setOnLongClickListener(new OnLongClickListener {
+          def onLongClick(view: View): Boolean = {
+            val item = view.getTag(R.id.mdItem).asInstanceOf[Item]
+            item.longClick(item.id)
           }
         })
 
         v.setTag(R.id.mdItem, value)
+
       case _ =>
     }
     v.setTag(R.id.mdActiveViewPosition, position)
 
-    if (position == mActivePosition) {
-      if (mListener != null) mListener.onActiveViewChanged(v)
+    if (position == activePosition) {
+      if (listener != null) listener.onActiveViewChanged(v, position)
     }
+
     v
   }
 
-  def updateList(list: List[Any]) {
+  def updateList(list: List[Any], activeId: Int) {
     items = list
+    activePosition = items.indexWhere{
+      case item: Item => item.id == activeId
+      case _ => false
+    }
     notifyDataSetChanged()
   }
 
-  private var mListener: MenuAdapter.MenuListener = null
-  private var mActivePosition: Int = 0
+  private var listener: MenuAdapter.MenuListener = null
+  private var activePosition: Int = -1
 }
 
 

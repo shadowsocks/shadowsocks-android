@@ -46,7 +46,7 @@ import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.j256.ormlite.dao.Dao
 
-class DBHelper(val context: Context) extends OrmLiteSqliteOpenHelper(context, "profile.db", null, 3) {
+class DBHelper(val context: Context) extends OrmLiteSqliteOpenHelper(context, "profile.db", null, 7) {
 
   lazy val profileDao:Dao[Profile,Int] = getDao(classOf[Profile])
 

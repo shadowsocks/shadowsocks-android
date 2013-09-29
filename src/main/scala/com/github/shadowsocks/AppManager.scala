@@ -109,7 +109,6 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
 
   val MSG_LOAD_START = 1
   val MSG_LOAD_FINISH = 2
-  val SCHEME = "app://"
   val STUB = android.R.drawable.sym_def_app_icon
 
   implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]) = new ObjectArrayTools(a)
@@ -184,7 +183,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
             .cacheOnDisc()
             .displayer(new FadeInBitmapDisplayer(300))
             .build()
-        ImageLoader.getInstance().displayImage("app://" + app.uid, entry.icon, options)
+        ImageLoader.getInstance().displayImage(Scheme.APP + app.uid, entry.icon, options)
 
         entry.text.setText(app.name)
         val box: CheckBox = entry.box
@@ -327,7 +326,7 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
     }
 
     override def getStreamFromOtherSource(imageUri: String, extra: AnyRef): InputStream = {
-      val uid = imageUri.substring(SCHEME.length).toInt
+      val uid = imageUri.substring(Scheme.APP.length).toInt
       val drawable = Utils.getAppIcon(getBaseContext, uid)
       val bitmap = Utils.drawableToBitmap(drawable)
 

@@ -42,14 +42,14 @@ package com.github.shadowsocks.database
 import com.j256.ormlite.field.{DataType, DatabaseField}
 
 class Profile {
-  @DatabaseField(id = true)
+  @DatabaseField(generatedId = true)
   var id: Int = 0
 
   @DatabaseField
-  var name: String = null
+  var name: String = "Untitled"
 
   @DatabaseField
-  var host: String = null
+  var host: String = ""
 
   @DatabaseField
   var localPort: Int = 0
@@ -58,13 +58,13 @@ class Profile {
   var remotePort: Int = 0
 
   @DatabaseField
-  var password: String = null
+  var password: String = ""
 
   @DatabaseField
-  var method: String = null
+  var method: String = ""
 
   @DatabaseField
-  var date: String = null
+  var date: String = ""
 
   @DatabaseField
   var upload: Int = 0
@@ -78,9 +78,15 @@ class Profile {
   @DatabaseField
   var global: Boolean = false
 
-  @DatabaseField(dataType = DataType.LONG_STRING)
-  var individual: String = null
+  @DatabaseField
+  var bypass: Boolean = false
+
+  @DatabaseField
+  var traffic: Boolean = false
 
   @DatabaseField(dataType = DataType.LONG_STRING)
-  var description: String = null
+  var individual: String = ""
+
+  @DatabaseField(dataType = DataType.LONG_STRING)
+  var description: String = ""
 }
