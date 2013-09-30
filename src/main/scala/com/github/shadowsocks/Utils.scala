@@ -157,6 +157,7 @@ object Action {
   val CLOSE = "com.github.shadowsocks.ACTION_SHUTDOWN"
   val UPDATE_STATE = "com.github.shadowsocks.ACTION_UPDATE_STATE"
   val UPDATE_FRAGMENT = "com.github.shadowsocks.ACTION_UPDATE_FRAGMENT"
+  val UPDATE_PREFS = "com.github.shadowsocks.ACTION_UPDATE_PREFS"
 }
 
 object Extra {

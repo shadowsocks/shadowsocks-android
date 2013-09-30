@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <com.github.shadowsocks.preferences.SummaryEditTextPreference
+  <com.github.shadowsocks.preferences.ProfileEditTextPreference
       android:defaultValue="Default"
       android:key="profileName"
       android:summary="@string/profile_summary"
       android:title="@string/profile">
-  </com.github.shadowsocks.preferences.SummaryEditTextPreference>
+  </com.github.shadowsocks.preferences.ProfileEditTextPreference>
   <com.github.shadowsocks.preferences.SummaryEditTextPreference
       android:defaultValue="198.199.101.152"
       android:key="proxy"

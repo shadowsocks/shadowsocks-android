@@ -56,6 +56,17 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     }
   }
 
+  def updateProfile(profile: Profile): Boolean = {
+    try {
+      dbHelper.profileDao.update(profile)
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(Shadowsocks.TAG, "addProfile", ex)
+        false
+    }
+  }
+
   def getProfile(id: Int): Option[Profile] = {
     try {
       dbHelper.profileDao.queryForId(id) match {
@@ -122,8 +133,10 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     profile
   }
 
-  def save() {
+  def save(): Profile = {
     val profile = new Profile()
+
+    profile.id = settings.getInt(Key.profileId, -1)
 
     profile.global = settings.getBoolean(Key.isGlobalProxy, false)
     profile.chnroute = settings.getBoolean(Key.isGFWList, false)
@@ -149,10 +162,8 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     }
     profile.individual = settings.getString(Key.proxied, "")
 
-    profile.id = settings.getInt(Key.profileId, -1)
+    updateProfile(profile)
 
-    Log.d(Shadowsocks.TAG, "save " + profile.id + " " + profile.name)
-
-    createOrUpdateProfile(profile)
+    profile
   }
 }

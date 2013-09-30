@@ -60,7 +60,6 @@ import android.net.{Uri, VpnService}
 import android.webkit.{WebViewClient, WebView}
 import android.app.backup.BackupManager
 import scala.concurrent.ops._
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import com.google.ads.{AdRequest, AdSize, AdView}
 import net.simonvt.menudrawer.MenuDrawer
 
@@ -72,7 +71,7 @@ import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
 import com.actionbarsherlock.view.MenuItem
-import com.github.shadowsocks.preferences.{PasswordEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
 import scala.Option
@@ -148,13 +147,19 @@ object Shadowsocks {
     pref.asInstanceOf[SummaryEditTextPreference].setText(value)
   }
 
+  def updateProfileEditTextPreference(pref: Preference, value: String) {
+    pref.asInstanceOf[ProfileEditTextPreference].resetSummary(value)
+    pref.asInstanceOf[ProfileEditTextPreference].setText(value)
+  }
+
+
   def updateCheckBoxPreference(pref: Preference, value: Boolean) {
     pref.asInstanceOf[CheckBoxPreference].setChecked(value)
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
     name match {
-      case Key.profileName => updateSummaryEditTextPreference(pref, profile.name)
+      case Key.profileName => updateProfileEditTextPreference(pref, profile.name)
       case Key.proxy => updateSummaryEditTextPreference(pref, profile.host)
       case Key.remotePort => updateSummaryEditTextPreference(pref, profile.remotePort.toString)
       case Key.localPort => updateSummaryEditTextPreference(pref, profile.localPort.toString)
@@ -283,7 +288,6 @@ object Shadowsocks {
 class Shadowsocks
   extends UnifiedSherlockPreferenceActivity
   with CompoundButton.OnCheckedChangeListener
-  with OnSharedPreferenceChangeListener
   with MenuAdapter.MenuListener{
 
   private val MSG_CRASH_RECOVER: Int = 1
@@ -300,7 +304,8 @@ class Shadowsocks
 
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-  lazy val receiver = new StateBroadcastReceiver
+  lazy val stateReceiver = new StateBroadcastReceiver
+  lazy val preferenceReceiver = new PreferenceBroadcastReceiver
   lazy val drawer = MenuDrawer.attach(this)
   lazy val menuAdapter = new MenuAdapter(this, getMenuList)
   lazy val listView = new ListView(this)
@@ -316,6 +321,16 @@ class Shadowsocks
           clearDialog()
       }
       super.handleMessage(msg)
+    }
+  }
+
+  private def showProgress(msg: String): Handler = {
+    clearDialog()
+    progressDialog = ProgressDialog.show(this, "", msg, true, false)
+    new Handler {
+      override def handleMessage(msg: Message) {
+        clearDialog()
+      }
     }
   }
 
@@ -366,13 +381,6 @@ class Shadowsocks
     }
   }
 
-  override def onSharedPreferenceChanged(prefs: SharedPreferences, key: String) {
-    if (key == Key.profileName) {
-      profileManager.save()
-      menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
-    }
-  }
-
   private def crash_recovery() {
     val sb = new StringBuilder
 
@@ -415,9 +423,7 @@ class Shadowsocks
   }
 
   def prepareStartService() {
-    clearDialog()
-    progressDialog = ProgressDialog
-      .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+    showProgress(getString(R.string.connecting))
     spawn {
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
@@ -509,7 +515,9 @@ class Shadowsocks
     title.setText(R.string.app_name)
 
     switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
-    registerReceiver(receiver, new IntentFilter(Action.UPDATE_STATE))
+
+    registerReceiver(stateReceiver, new IntentFilter(Action.UPDATE_STATE))
+    registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
     val init: Boolean = !Shadowsocks.isServiceStarted(this)
     if (init) {
@@ -554,12 +562,15 @@ class Shadowsocks
   def addProfile(id: Int) {
     drawer.closeMenu(true)
 
+    val h = showProgress(getString(R.string.loading))
+
     handler.postDelayed(new Runnable {
       def run() {
         Shadowsocks.currentProfile = profileManager.reload(id)
         updatePreferenceScreen()
         profileManager.save()
         menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
+        h.sendEmptyMessage(0)
       }
     }, 600)
 
@@ -569,12 +580,15 @@ class Shadowsocks
   def updateProfile(id: Int) {
     drawer.closeMenu(true)
 
+    val h = showProgress(getString(R.string.loading))
+
     handler.postDelayed(new Runnable {
       def run() {
         Shadowsocks.currentProfile = profileManager.reload(id)
         updatePreferenceScreen()
         menuAdapter.setActiveId(id)
         menuAdapter.notifyDataSetChanged()
+        h.sendEmptyMessage(0)
       }
     }, 600)
 
@@ -584,18 +598,25 @@ class Shadowsocks
   def delProfile(id: Int): Boolean = {
     drawer.closeMenu(true)
 
-    handler.postDelayed(new Runnable {
-      def run() {
-        profileManager.delProfile(id)
-        val profileId = {
-          val profiles = profileManager.getAllProfiles.getOrElse(List[Profile]())
-          if (profiles.isEmpty) -1 else profiles(0).id
+    new AlertDialog.Builder(this)
+      .setMessage(R.string.remove_profile)
+      .setCancelable(false)
+      .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+        override def onClick(dialog: DialogInterface, i: Int) = dialog.cancel()
+      })
+      .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        override def onClick(dialog: DialogInterface, i: Int) {
+          profileManager.delProfile(id)
+          val profileId = {
+            val profiles = profileManager.getAllProfiles.getOrElse(List[Profile]())
+            if (profiles.isEmpty) -1 else profiles(0).id
+          }
+          Shadowsocks.currentProfile = profileManager.load(profileId)
+          updatePreferenceScreen()
+          menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
+          dialog.dismiss()
         }
-        Shadowsocks.currentProfile = profileManager.load(profileId)
-        updatePreferenceScreen()
-        menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
-      }
-    }, 600)
+      }).create().show()
 
     if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
 
@@ -652,7 +673,6 @@ class Shadowsocks
   protected override def onPause() {
     super.onPause()
     prepared = false
-    settings.unregisterOnSharedPreferenceChangeListener(this)
   }
 
   protected override def onResume() {
@@ -687,7 +707,6 @@ class Shadowsocks
 
     switchButton.setOnCheckedChangeListener(this)
 
-    settings.registerOnSharedPreferenceChangeListener(this)
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
@@ -737,7 +756,8 @@ class Shadowsocks
   override def onDestroy() {
     super.onDestroy()
     Crouton.cancelAllCroutons()
-    unregisterReceiver(receiver)
+    unregisterReceiver(stateReceiver)
+    unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
   }
 
@@ -752,13 +772,8 @@ class Shadowsocks
   }
 
   private def recovery() {
-    clearDialog()
-    progressDialog = ProgressDialog.show(this, "", getString(R.string.recovering), true, true)
-    val h: Handler = new Handler {
-      override def handleMessage(msg: Message) {
-        clearDialog()
-      }
-    }
+    val h = showProgress(getString(R.string.recovering))
+
     serviceStop()
     spawn {
       reset()
@@ -767,13 +782,7 @@ class Shadowsocks
   }
 
   private def flushDnsCache() {
-    clearDialog()
-    progressDialog = ProgressDialog.show(this, "", getString(R.string.flushing), true, true)
-    val h: Handler = new Handler {
-      override def handleMessage(msg: Message) {
-        clearDialog()
-      }
-    }
+    val h = showProgress(getString(R.string.flushing))
     spawn {
       Utils.toggleAirplaneMode(getBaseContext)
       h.sendEmptyMessage(0)
@@ -942,6 +951,13 @@ class Shadowsocks
         }
       }
       if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+    }
+  }
+
+  class PreferenceBroadcastReceiver extends BroadcastReceiver {
+    override def onReceive(context: Context, intent: Intent) {
+      Shadowsocks.currentProfile = profileManager.save()
+      menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
     }
   }
 

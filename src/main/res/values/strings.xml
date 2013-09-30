@@ -68,6 +68,9 @@
   <string name="initializing">Initializing…</string>
   <string name="recovering">Reseting…</string>
   <string name="loading">Loading app list…</string>
+  <string name="yes">Yes</string>
+  <string name="no">No</string>
+  <string name="remove_profile">Remove this profile?</string>
 
   <!-- menu category -->
   <string name="recovery">Reset</string>
