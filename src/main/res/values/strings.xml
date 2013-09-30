@@ -67,7 +67,7 @@
   <string name="connecting">Connecting…</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Reseting…</string>
-  <string name="loading">Loading app list…</string>
+  <string name="loading">Loading…</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
   <string name="remove_profile">Remove this profile?</string>
