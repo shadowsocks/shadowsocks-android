@@ -529,6 +529,7 @@ class Shadowsocks
         if (!status.getBoolean(getVersionName, false)) {
           status.edit.putBoolean(getVersionName, true).apply()
           reset()
+          Shadowsocks.currentProfile = profileManager.create()
         }
         handler.sendEmptyMessage(MSG_INITIAL_FINISH)
       }
@@ -567,14 +568,20 @@ class Shadowsocks
     handler.postDelayed(new Runnable {
       def run() {
         Shadowsocks.currentProfile = profileManager.reload(id)
-        updatePreferenceScreen()
         profileManager.save()
         menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
+
+        if (!isSinglePane) {
+          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+        } else {
+          updatePreferenceScreen()
+        }
+
         h.sendEmptyMessage(0)
+
       }
     }, 600)
 
-    if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
   }
 
   def updateProfile(id: Int) {
@@ -585,21 +592,30 @@ class Shadowsocks
     handler.postDelayed(new Runnable {
       def run() {
         Shadowsocks.currentProfile = profileManager.reload(id)
-        updatePreferenceScreen()
         menuAdapter.setActiveId(id)
         menuAdapter.notifyDataSetChanged()
+
+        if (!isSinglePane) {
+          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+        } else {
+          updatePreferenceScreen()
+        }
+
         h.sendEmptyMessage(0)
       }
     }, 600)
 
-    if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
   }
 
   def delProfile(id: Int): Boolean = {
     drawer.closeMenu(true)
 
+    val profile = profileManager.getProfile(id)
+
+    if (!profile.isDefined) return false
+
     new AlertDialog.Builder(this)
-      .setMessage(R.string.remove_profile)
+      .setMessage(String.format(getString(R.string.remove_profile), profile.get.name))
       .setCancelable(false)
       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
         override def onClick(dialog: DialogInterface, i: Int) = dialog.cancel()
@@ -612,13 +628,17 @@ class Shadowsocks
             if (profiles.isEmpty) -1 else profiles(0).id
           }
           Shadowsocks.currentProfile = profileManager.load(profileId)
-          updatePreferenceScreen()
           menuAdapter.updateList(getMenuList, Shadowsocks.currentProfile.id)
+
+          if (!isSinglePane) {
+            sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+          } else {
+            updatePreferenceScreen()
+          }
+
           dialog.dismiss()
         }
       }).create().show()
-
-    if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
 
     true
   }
@@ -636,7 +656,7 @@ class Shadowsocks
 
     buf ++= getProfileList
 
-    buf += new Item(-1, getString(R.string.add_profile), android.R.drawable.ic_menu_add, addProfile)
+    buf += new Item(-400, getString(R.string.add_profile), android.R.drawable.ic_menu_add, addProfile)
 
     buf += new Category("Settings")
 

@@ -73,10 +73,10 @@ class Profile {
   var download: Int = 0
 
   @DatabaseField
-  var chnroute: Boolean = false
+  var chnroute: Boolean = true
 
   @DatabaseField
-  var global: Boolean = false
+  var global: Boolean = true
 
   @DatabaseField
   var bypass: Boolean = false

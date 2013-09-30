@@ -133,7 +133,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     profile
   }
 
-  def save(): Profile = {
+  private def loadFromPreferences: Profile = {
     val profile = new Profile()
 
     profile.id = settings.getInt(Key.profileId, -1)
@@ -162,8 +162,18 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     }
     profile.individual = settings.getString(Key.proxied, "")
 
-    updateProfile(profile)
+    profile
+  }
 
+  def save(): Profile = {
+    val profile = loadFromPreferences
+    updateProfile(profile)
+    profile
+  }
+
+  def create(): Profile = {
+    val profile = loadFromPreferences
+    createOrUpdateProfile(profile)
     profile
   }
 }

@@ -70,7 +70,7 @@
   <string name="loading">Loading…</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
-  <string name="remove_profile">Remove this profile?</string>
+  <string name="remove_profile">Remove this profile: %s ?</string>
 
   <!-- menu category -->
   <string name="recovery">Reset</string>
