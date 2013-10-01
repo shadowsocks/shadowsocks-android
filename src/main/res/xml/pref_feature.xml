@@ -32,6 +32,7 @@
       android:summary="@string/auto_connect_summary"
       android:title="@string/auto_connect">
   </CheckBoxPreference>
-
+  <Preference android:key="blank">
+  </Preference>
 
 </PreferenceScreen>

@@ -45,7 +45,7 @@ import android.graphics.{Color, Bitmap, Typeface}
 import android.os._
 import android.preference._
 import android.util.Log
-import android.view.{View, ViewGroup, ViewParent, KeyEvent}
+import android.view._
 import android.widget._
 import com.google.analytics.tracking.android.EasyTracker
 import de.keyboardsurfer.android.widget.crouton.Crouton
@@ -75,6 +75,9 @@ import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEd
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
 import scala.Option
+import android.view.ViewGroup.LayoutParams
+import com.github.shadowsocks.database.Item
+import com.github.shadowsocks.database.Category
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -460,18 +463,21 @@ class Shadowsocks
     }
   }
 
-  def initAdView(layoutResId: Int) {
+  def initAdView() {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
-      val adView = {
-        if (isSinglePane) {
-          new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
-        } else {
-          new AdView(this, AdSize.BANNER, "a151becb8068b09")
-        }
-      }
-      val layoutView = findViewById(layoutResId).asInstanceOf[ViewGroup]
+      val layoutView = drawer.getContentContainer
       if (layoutView != null) {
-        layoutView.addView(adView, 0)
+        val adView = {
+          if (isSinglePane) {
+            new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
+          } else {
+            new AdView(this, AdSize.BANNER, "a151becb8068b09")
+          }
+        }
+        val params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        params.gravity = Gravity.BOTTOM
+        adView.setLayoutParams(params)
+        layoutView.asInstanceOf[ViewGroup].addView(adView, 0)
         adView.loadAd(new AdRequest)
       }
     }
@@ -479,7 +485,7 @@ class Shadowsocks
 
   override def setContentView(layoutResId: Int) {
     drawer.setContentView(layoutResId)
-    initAdView(layoutResId)
+    initAdView()
     onContentChanged()
   }
 
@@ -496,7 +502,6 @@ class Shadowsocks
     menuAdapter.setListener(this)
     listView.setAdapter(menuAdapter)
     drawer.setMenuView(listView)
-
     // The drawable that replaces the up indicator in the action bar
     drawer.setSlideDrawable(R.drawable.ic_drawer)
     // Whether the previous drawable should be shown
