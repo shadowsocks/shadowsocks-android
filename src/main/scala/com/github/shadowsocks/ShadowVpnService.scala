@@ -53,6 +53,7 @@ import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
 import scala.Some
 import scala.concurrent.ops._
+import be.jvb.iptypes.{IpNetwork, IpAddress}
 
 object ShadowVpnService {
   def isServiceStarted(context: Context): Boolean = {
@@ -236,10 +237,15 @@ class ShadowVpnService extends VpnService {
 
   def startVpn() {
 
-    val address = config.proxy.split('.')
-    val prefix1 = address(0)
-    val prefix2 = address.slice(0, 2).mkString(".")
-    val prefix3 = address.slice(0, 3).mkString(".")
+
+    val proxy_address = new IpAddress(config.proxy)
+
+    val private_networks = Array[IpNetwork](
+      new IpNetwork("127.0.0.0/8"),
+      new IpNetwork("10.0.0.0/8"),
+      new IpNetwork("172.16.0.0/12"),
+      new IpNetwork("192.168.0.0/16")
+    )
 
     val builder = new Builder()
     builder
@@ -252,30 +258,32 @@ class ShadowVpnService extends VpnService {
       builder.addRoute("0.0.0.0", 0)
     } else if (config.isGFWList) {
       val gfwList = getResources.getStringArray(R.array.gfw_list)
-      gfwList.foreach(addr =>
-        if (addr != prefix2) {
-          builder.addRoute(addr + ".0.0", 16)
-        } else {
-          for (i <- 0 to 255) {
-            val prefix = Array(addr, i.toString).mkString(".")
-            if (prefix != prefix3) builder.addRoute(prefix + ".0", 24)
-          }
-        })
+      gfwList.foreach(addr => {
+       val network = new IpNetwork(addr)
+        if (!network.contains(proxy_address)) {
+          builder.addRoute(network.address.toString, network.mask.prefixLength)
+          Log.d(Shadowsocks.TAG, "add route: " + addr)
+        }
+      })
     } else {
       for (i <- 1 to 254) {
-        if (i != 127 && i != 172 && i != 192 && i != 10 && i.toString != prefix1) {
-          builder.addRoute(i + ".0.0.0", 8)
-        } else if (i.toString == prefix1) {
+        val network = new IpNetwork(i.toString + ".0.0.0/8")
+        if (!network.contains(proxy_address) &&
+          private_networks.forall(range => !network.contains(range))) {
+            builder.addRoute(i + ".0.0.0", 8)
+        } else {
           for (j <- 0 to 255) {
-            val prefix = Array(i.toString, j.toString).mkString(".")
-            if (prefix != prefix2) builder.addRoute(prefix + ".0.0", 16)
+            val subNetwork = new IpNetwork(i.toString + "." + j.toString + ".0.0/16")
+            if (!subNetwork.contains(proxy_address) &&
+              private_networks.forall(range => !range.overlaps(subNetwork))) {
+              builder.addRoute(subNetwork.address.toString, subNetwork.mask.prefixLength)
+            }
           }
         }
       }
     }
 
     builder.addRoute("8.8.0.0", 16)
-    builder.addRoute("208.67.0.0", 16)
 
     try {
       conn = builder.establish()
