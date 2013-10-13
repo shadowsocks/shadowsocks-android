@@ -49,7 +49,7 @@ import android.content.pm.PackageManager
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.google.analytics.tracking.android.EasyTracker
+import com.google.analytics.tracking.android.{Fields, MapBuilder, EasyTracker}
 import java.io._
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
@@ -224,6 +224,19 @@ class ShadowsocksService extends Service {
     }
 
     spawn {
+
+      if (config.proxy == "198.199.101.152") {
+        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        if (container == null) {
+          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+          stopSelf()
+          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
+          return
+        } else {
+          config = Config.getPublicConfig(container, config)
+        }
+      }
+
       killProcesses()
 
       var resolved: Boolean = false
@@ -374,8 +387,14 @@ class ShadowsocksService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    EasyTracker.getTracker.setStartSession(true)
-    EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
+
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "start", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "start")
+      .build())
+
     notificationManager = this
       .getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
@@ -422,8 +441,14 @@ class ShadowsocksService extends Service {
 
     // clean up context
     changeState(State.STOPPED)
-    EasyTracker.getTracker.setStartSession(false)
-    EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
+
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "stop", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "stop")
+      .build())
+
     stopForegroundCompat(1)
     if (receiver != null) {
       unregisterReceiver(receiver)

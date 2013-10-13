@@ -30,9 +30,9 @@ class IpAddressRange(val first: IpAddress, val last: IpAddress) extends Ordered[
     last.value - first.value + 1
   }
 
-  def addresses(): Stream[IpAddress] = {
+  def addresses: Stream[IpAddress] = {
     if (first < last) {
-      Stream.cons(first, new IpAddressRange(first + 1, last).addresses())
+      Stream.cons(first, new IpAddressRange(first + 1, last).addresses)
     } else {
       Stream.cons(first, Stream.empty)
     }

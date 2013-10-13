@@ -1,8 +1,8 @@
 libraryDependencies ++= Seq(
   "com.google.android" % "support-v4" % "r12",
-  "com.google.android.analytics" % "analytics" % "2.0beta4",
-  "dnsjava" % "dnsjava" % "2.1.5",
-  "com.google.android.admob" % "admob" % "6.3.1"
+  "com.google.android" % "analytics" % "3.01",
+  "com.google.android" % "admob" % "6.4.1",
+  "dnsjava" % "dnsjava" % "2.1.5"
 )
 
 libraryDependencies ++= Seq(

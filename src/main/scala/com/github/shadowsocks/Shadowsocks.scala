@@ -47,7 +47,7 @@ import android.preference._
 import android.util.Log
 import android.view._
 import android.widget._
-import com.google.analytics.tracking.android.EasyTracker
+import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
 import de.keyboardsurfer.android.widget.crouton.Crouton
 import de.keyboardsurfer.android.widget.crouton.Style
 import java.io._
@@ -78,6 +78,8 @@ import scala.Option
 import android.view.ViewGroup.LayoutParams
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
+import com.google.tagmanager.{Container, ContainerOpener, TagManager}
+import com.google.tagmanager.ContainerOpener.{Notifier, OpenType}
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -666,18 +668,21 @@ class Shadowsocks
     buf += new Category("Settings")
 
     buf += new Item(-100, getString(R.string.recovery), android.R.drawable.ic_menu_revert, _ => {
-      EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "reset", getVersionName, 0L)
+      EasyTracker.getInstance(this).send(
+        MapBuilder.createEvent(Shadowsocks.TAG, "reset", getVersionName, null).build())
       recovery()
     })
 
     buf +=
       new Item(-200, getString(R.string.flush_dnscache), android.R.drawable.ic_menu_delete, _ => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, 0L)
+        EasyTracker.getInstance(this).send(
+          MapBuilder.createEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, null).build())
         flushDnsCache()
       })
 
     buf += new Item(-300, getString(R.string.about), android.R.drawable.ic_menu_info_details, _ => {
-      EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "about", getVersionName, 0L)
+      EasyTracker.getInstance(this).send(
+        MapBuilder.createEvent(Shadowsocks.TAG, "about", getVersionName, null).build())
       showAbout()
     })
 
@@ -687,7 +692,8 @@ class Shadowsocks
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
     item.getItemId match {
       case android.R.id.home => {
-        EasyTracker.getTracker.sendEvent(Shadowsocks.TAG, "home", getVersionName, 0L)
+        EasyTracker.getInstance(this).send(
+          MapBuilder.createEvent(Shadowsocks.TAG, "home", getVersionName, null).build())
         drawer.toggleMenu()
         return true
       }
@@ -769,12 +775,12 @@ class Shadowsocks
 
   override def onStart() {
     super.onStart()
-    EasyTracker.getInstance.activityStart(this)
+    EasyTracker.getInstance(this).activityStart(this)
   }
 
   override def onStop() {
     super.onStop()
-    EasyTracker.getInstance.activityStop(this)
+    EasyTracker.getInstance(this).activityStop(this)
     clearDialog()
   }
 

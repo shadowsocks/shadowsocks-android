@@ -15,7 +15,7 @@ object General {
     name := "shadowsocks",
     version := App.version,
     versionCode := App.versionCode,
-    scalaVersion := "2.9.2",
+    scalaVersion := "2.10.3",
     compileOrder := CompileOrder.JavaThenScala,
     platformName := "android-16",
     resolvers += "madeye-maven" at "http://madeye-maven-repository.googlecode.com/git",

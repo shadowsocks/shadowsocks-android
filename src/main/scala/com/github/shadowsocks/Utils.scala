@@ -48,12 +48,12 @@ import java.net.{UnknownHostException, InetAddress, NetworkInterface}
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
 import org.xbill.DNS._
-import scala.Some
 import android.graphics._
 import android.app.ActivityManager
 import android.os.Build
 import android.provider.Settings
 import scala.Some
+import com.google.tagmanager.Container
 
 object Config {
   val SHADOWSOCKS = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
@@ -110,11 +110,21 @@ object Config {
       p.close()
     }
   }
+
+  def getPublicConfig(container: Container, config: Config): Config = {
+    val host = container.getString("host")
+    val port = util.Random.shuffle(container.getString("port").split(',').toSeq).toSeq(0).toInt
+    val method = container.getString("method")
+    val password = container.getString("password")
+
+    new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
+      config.profileName, host, password, method, port, config.localPort, config.proxiedAppString)
+  }
 }
 
-case class Config(isGlobalProxy: Boolean, isGFWList: Boolean, isBypassApps: Boolean, isTrafficStat: Boolean,
-                  profileName: String, var proxy: String, sitekey: String, encMethod: String, remotePort: Int,
-                  localPort: Int, proxiedAppString: String)
+case class Config(isGlobalProxy: Boolean, isGFWList: Boolean, isBypassApps: Boolean,
+  isTrafficStat: Boolean, profileName: String, var proxy: String, sitekey: String,
+  encMethod: String, remotePort: Int, localPort: Int, proxiedAppString: String)
 
 object Key {
   val profileId = "profileId"
@@ -196,8 +206,8 @@ object Extra {
     val localPort = intent.getIntExtra(Key.localPort, 1984)
     val proxiedString = intent.getStringExtra(Key.proxied)
 
-    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, profileName, proxy, sitekey, encMethod, remotePort,
-      localPort, proxiedString)
+    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, profileName, proxy, sitekey,
+      encMethod, remotePort, localPort, proxiedString)
   }
 
   def put(settings: SharedPreferences, intent: Intent) {
@@ -206,33 +216,20 @@ object Extra {
     val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
     val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
 
+
     val profileName = settings.getString(Key.profileName, "default")
-    val proxy = settings.getString(Key.proxy, "127.0.0.1") match {
-      case "198.199.101.152" => BuildConfig.SERVER
-      case s: String => s
-      case _ => "127.0.0.1"
-    }
+    val proxy = settings.getString(Key.proxy, "127.0.0.1")
     val sitekey = settings.getString(Key.sitekey, "default")
-    val encMethod =  {
-      if (proxy == BuildConfig.SERVER) {
-        BuildConfig.METHOD
-      } else {
-        settings.getString(Key.encMethod, "table")
-      }
-    }
+    val encMethod = settings.getString(Key.encMethod, "table")
     val remotePort: Int = try {
-      if (proxy == BuildConfig.SERVER) {
-        scala.util.Random.shuffle(BuildConfig.PORTS.toSeq).toSeq(0)
-      } else {
-        Integer.valueOf(settings.getString(Key.remotePort, "1984"))
-      }
+      settings.getString(Key.remotePort, "1984").toInt
     } catch {
       case ex: NumberFormatException => {
         1984
       }
     }
     val localProt: Int = try {
-      Integer.valueOf(settings.getString(Key.localPort, "1984"))
+      settings.getString(Key.localPort, "1984").toInt
     } catch {
       case ex: NumberFormatException => {
         1984
@@ -283,19 +280,18 @@ object Utils {
      * round or floor depending on whether you are using offsets(floor) or
      * widths(round)
      */
-  def dpToPx (context: Context, dp: Float): Float = {
+  def dpToPx(context: Context, dp: Float): Float = {
     val density = context.getResources.getDisplayMetrics.density
     dp * density
   }
 
-  def pxToDp (context: Context, px: Float): Float = {
+  def pxToDp(context: Context, px: Float): Float = {
     val density = context.getResources.getDisplayMetrics.density
     px / density
   }
 
   def getBitmap(text: String, width: Int, height: Int, background: Int): Bitmap = {
-    val bitmap = Bitmap.createBitmap(width,
-      height, Bitmap.Config.ARGB_8888)
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val size = bitmap.getHeight / 4
     val canvas = new Canvas(bitmap)
     canvas.drawColor(background)
@@ -304,7 +300,8 @@ object Utils {
     paint.setTextSize(size)
     val bounds = new Rect()
     paint.getTextBounds(text, 0, text.length, bounds)
-    canvas.drawText(text, (bitmap.getWidth - bounds.width()) / 2,
+    canvas
+      .drawText(text, (bitmap.getWidth - bounds.width()) / 2,
       bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
     bitmap
   }
@@ -323,8 +320,7 @@ object Utils {
     Utils.runRootCommand("settings put global airplane_mode_on 1\n"
       + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true\n"
       + "settings put global airplane_mode_on 0\n"
-      + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false\n"
-    )
+      + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false\n")
   }
 
   private def toggleBelowApiLevel17(context: Context) {
@@ -792,6 +788,7 @@ object Utils {
       }
     }
   }
+
 }
 
 

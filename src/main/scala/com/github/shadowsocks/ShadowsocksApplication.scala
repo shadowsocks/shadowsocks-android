@@ -39,14 +39,20 @@
 package com.github.shadowsocks
 
 import android.app.Application
-import com.google.analytics.tracking.android.EasyTracker
-import com.github.shadowsocks.database.{ProfileManager, DBHelper}
+import com.github.shadowsocks.database.DBHelper
+import com.google.tagmanager.{Container, ContainerOpener, TagManager}
+import com.google.tagmanager.ContainerOpener.{Notifier, OpenType}
 
 class ShadowsocksApplication extends Application {
   lazy val dbHelper = new DBHelper(this)
+  var tagContainer: Container = null
 
   override def onCreate() {
-    EasyTracker.getInstance.setContext(this)
+    val tm = TagManager.getInstance(this)
+    ContainerOpener.openContainer(tm, BuildConfig.CONTAINER_ID, OpenType.PREFER_FRESH, null, new Notifier {
+      override def containerAvailable(container: Container) {
+        tagContainer = container
+      }
+    })
   }
-
 }

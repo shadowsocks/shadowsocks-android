@@ -46,7 +46,7 @@ import android.content.pm.PackageManager
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.google.analytics.tracking.android.EasyTracker
+import com.google.analytics.tracking.android.{Fields, MapBuilder, EasyTracker}
 import java.io._
 import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
@@ -188,6 +188,19 @@ class ShadowVpnService extends VpnService {
     config = Extra.get(intent)
 
     spawn {
+
+      if (config.proxy == "198.199.101.152") {
+        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        if (container == null) {
+          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+          stopSelf()
+          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
+          return
+        } else {
+          config = Config.getPublicConfig(container, config)
+        }
+      }
+
       killProcesses()
 
       // Resolve server address
@@ -236,15 +249,10 @@ class ShadowVpnService extends VpnService {
 
   def startVpn() {
 
-
     val proxy_address = new IpAddress(config.proxy)
 
-    val private_networks = Array[IpNetwork](
-      new IpNetwork("127.0.0.0/8"),
-      new IpNetwork("10.0.0.0/8"),
-      new IpNetwork("172.16.0.0/12"),
-      new IpNetwork("192.168.0.0/16")
-    )
+    val private_networks = Array[IpNetwork](new IpNetwork("127.0.0.0/8"),
+      new IpNetwork("10.0.0.0/8"), new IpNetwork("172.16.0.0/12"), new IpNetwork("192.168.0.0/16"))
 
     val builder = new Builder()
     builder
@@ -258,10 +266,9 @@ class ShadowVpnService extends VpnService {
     } else if (config.isGFWList) {
       val gfwList = getResources.getStringArray(R.array.gfw_list)
       gfwList.foreach(addr => {
-       val network = new IpNetwork(addr)
+        val network = new IpNetwork(addr)
         if (!network.contains(proxy_address)) {
           builder.addRoute(network.address.toString, network.mask.prefixLength)
-          Log.d(Shadowsocks.TAG, "add route: " + addr)
         }
       })
     } else {
@@ -269,7 +276,7 @@ class ShadowVpnService extends VpnService {
         val network = new IpNetwork(i.toString + ".0.0.0/8")
         if (!network.contains(proxy_address) &&
           private_networks.forall(range => !network.contains(range))) {
-            builder.addRoute(i + ".0.0.0", 8)
+          builder.addRoute(i + ".0.0.0", 8)
         } else {
           for (j <- 0 to 255) {
             val subNetwork = new IpNetwork(i.toString + "." + j.toString + ".0.0/16")
@@ -313,7 +320,8 @@ class ShadowVpnService extends VpnService {
       + "--tunmtu %d "
       + "--loglevel 3 "
       + "--pid %stun2socks.pid")
-      .format(PRIVATE_VLAN.format("2"), PRIVATE_VLAN.format("1"), config.localPort, fd, VPN_MTU, BASE)
+      .format(PRIVATE_VLAN.format("2"), PRIVATE_VLAN.format("1"), config.localPort, fd, VPN_MTU,
+      BASE)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
@@ -357,8 +365,14 @@ class ShadowVpnService extends VpnService {
 
   override def onCreate() {
     super.onCreate()
-    EasyTracker.getTracker.setStartSession(true)
-    EasyTracker.getTracker.sendEvent(TAG, "start", getVersionName, 0L)
+
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "start", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "start")
+      .build())
+
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
 
@@ -379,7 +393,14 @@ class ShadowVpnService extends VpnService {
     killProcesses()
 
     changeState(State.STOPPED)
-    EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
+
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "stop", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "stop")
+      .build())
+
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
@@ -393,8 +414,6 @@ class ShadowVpnService extends VpnService {
 
   /** Called when the activity is closed. */
   override def onDestroy() {
-    EasyTracker.getTracker.setStartSession(false)
-    EasyTracker.getTracker.sendEvent(TAG, "stop", getVersionName, 0L)
     destroy()
     super.onDestroy()
   }

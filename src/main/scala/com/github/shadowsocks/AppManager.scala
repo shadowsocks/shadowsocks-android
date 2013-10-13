@@ -256,12 +256,12 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
 
   protected override def onStart() {
     super.onStart()
-    EasyTracker.getInstance.activityStart(this)
+    EasyTracker.getInstance(this).activityStart(this)
   }
 
   protected override def onStop() {
     super.onStop()
-    EasyTracker.getInstance.activityStop(this)
+    EasyTracker.getInstance(this).activityStop(this)
   }
 
   def saveAppSettings(context: Context) {
