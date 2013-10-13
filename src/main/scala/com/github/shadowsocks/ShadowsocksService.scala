@@ -158,10 +158,9 @@ class ShadowsocksService extends Service {
     val cmd: String = (BASE +
       "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
       BASE + "shadowsocks.pid")
-      .format(config.proxy, config.remotePort, config.localPort, config.sitekey,
-      config.encMethod)
+      .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    System.exec(cmd)
+    Utils.runCommand(cmd)
   }
 
   def startDnsDaemon() {
