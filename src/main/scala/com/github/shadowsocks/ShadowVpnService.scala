@@ -256,7 +256,7 @@ class ShadowVpnService extends VpnService {
 
     val builder = new Builder()
     builder
-      .setSession(getString(R.string.app_name))
+      .setSession(config.profileName)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.format("1"), 24)
       .addDnsServer("8.8.8.8")

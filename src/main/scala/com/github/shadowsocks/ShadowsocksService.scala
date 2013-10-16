@@ -256,7 +256,7 @@ class ShadowsocksService extends Service {
 
       if (resolved && handleConnection) {
         notifyForegroundAlert(getString(R.string.forward_success),
-          getString(R.string.service_running))
+          getString(R.string.service_running).format(config.profileName))
         handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
       } else {
         notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
