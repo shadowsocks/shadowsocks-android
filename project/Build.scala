@@ -5,8 +5,8 @@ import sbtandroid._
 import sbtandroid.AndroidPlugin._
 
 object App {
-  val version = "2.0.0"
-  val versionCode = 51
+  val version = "2.0.1"
+  val versionCode = 52
 }
 
 object General {
