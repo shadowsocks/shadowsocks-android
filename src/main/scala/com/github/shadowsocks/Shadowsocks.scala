@@ -48,8 +48,7 @@ import android.util.Log
 import android.view._
 import android.widget._
 import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
-import de.keyboardsurfer.android.widget.crouton.Crouton
-import de.keyboardsurfer.android.widget.crouton.Style
+import de.keyboardsurfer.android.widget.crouton.{Crouton, Style, Configuration}
 import java.io._
 import java.util.Hashtable
 import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment
@@ -714,10 +713,14 @@ class Shadowsocks
         if (ShadowVpnService.isServiceStarted(this)) {
           val style = new Style.Builder()
             .setBackgroundColorValue(Style.holoBlueLight)
-            .setDuration(Style.DURATION_INFINITE)
+            .build()
+          val config = new Configuration.Builder()
+            .setDuration(Configuration.DURATION_LONG)
             .build()
           switchButton.setEnabled(false)
-          Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+          Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style)
+            .setConfiguration(config)
+            .show()
         }
         setPreferenceEnabled(enabled = false)
         onStateChanged(State.CONNECTED, null)
@@ -878,9 +881,13 @@ class Shadowsocks
       startService(intent)
       val style = new Style.Builder()
         .setBackgroundColorValue(Style.holoBlueLight)
-        .setDuration(Style.DURATION_INFINITE)
         .build()
-      Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).show()
+      val config = new Configuration.Builder()
+        .setDuration(Configuration.DURATION_LONG)
+        .build()
+      Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style)
+        .setConfiguration(config)
+        .show()
       switchButton.setEnabled(false)
     } else {
       if (ShadowsocksService.isServiceStarted(this)) return false
@@ -972,10 +979,13 @@ class Shadowsocks
             Crouton.cancelAllCroutons()
             val style = new Style.Builder()
               .setBackgroundColorValue(Style.holoRedLight)
-              .setDuration(Style.DURATION_INFINITE)
+              .build()
+            val config = new Configuration.Builder()
+              .setDuration(Configuration.DURATION_LONG)
               .build()
             Crouton
               .makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style)
+              .setConfiguration(config)
               .show()
           }
           setPreferenceEnabled(enabled = true)

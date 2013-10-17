@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "de.keyboardsurfer.android.widget" % "crouton" % "1.7",
+  "de.keyboardsurfer.android.widget" % "crouton" % "1.8.1",
   "com.nostra13.universalimageloader" % "universal-image-loader" % "1.8.4",
   "com.j256.ormlite" % "ormlite-core" % "4.47",
   "com.j256.ormlite" % "ormlite-android" % "4.47"
