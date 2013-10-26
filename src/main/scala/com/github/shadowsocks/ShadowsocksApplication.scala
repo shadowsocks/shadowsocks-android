@@ -49,7 +49,7 @@ class ShadowsocksApplication extends Application {
 
   override def onCreate() {
     val tm = TagManager.getInstance(this)
-    ContainerOpener.openContainer(tm, BuildConfig.CONTAINER_ID, OpenType.PREFER_FRESH, null, new Notifier {
+    ContainerOpener.openContainer(tm, BuildConfig.CONTAINER_ID, OpenType.PREFER_NON_DEFAULT, null, new Notifier {
       override def containerAvailable(container: Container) {
         tagContainer = container
       }

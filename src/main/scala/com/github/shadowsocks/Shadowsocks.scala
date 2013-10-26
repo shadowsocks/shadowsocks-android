@@ -739,6 +739,9 @@ class Shadowsocks
       }
     }
 
+    val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+    if (container != null) container.refresh();
+
     switchButton.setOnCheckedChangeListener(this)
 
   }
