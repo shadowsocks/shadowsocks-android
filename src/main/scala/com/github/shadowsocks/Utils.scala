@@ -112,10 +112,14 @@ object Config {
   }
 
   def getPublicConfig(container: Container, config: Config): Config = {
-    val host = container.getString("host")
-    val port = util.Random.shuffle(container.getString("port").split(',').toSeq).toSeq(0).toInt
-    val method = container.getString("method")
-    val password = container.getString("password")
+    val list = container.getString("proxy_list")
+    val proxies = util.Random.shuffle(list.split('|').toSeq).toSeq
+    val proxy = proxies(0).split(':')
+
+    val host = proxy(0)
+    val port = proxy(1).toInt
+    val password = proxy(2)
+    val method = proxy(3)
 
     new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
       config.profileName, host, password, method, port, config.localPort, config.proxiedAppString)
