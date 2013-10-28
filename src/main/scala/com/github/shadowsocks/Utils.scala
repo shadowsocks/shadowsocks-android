@@ -111,6 +111,11 @@ object Config {
     }
   }
 
+  def refresh(context: Context) {
+    val container = context.getApplicationContext.asInstanceOf[ShadowsocksApplication].tagContainer
+    if (container != null) container.refresh()
+  }
+
   def getPublicConfig(container: Container, config: Config): Config = {
     val list = container.getString("proxy_list")
     val proxies = util.Random.shuffle(list.split('|').toSeq).toSeq

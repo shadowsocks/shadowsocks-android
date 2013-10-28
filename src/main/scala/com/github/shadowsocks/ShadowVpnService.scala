@@ -366,6 +366,8 @@ class ShadowVpnService extends VpnService {
   override def onCreate() {
     super.onCreate()
 
+    Config.refresh(this)
+
     EasyTracker
       .getInstance(this)
       .send(MapBuilder

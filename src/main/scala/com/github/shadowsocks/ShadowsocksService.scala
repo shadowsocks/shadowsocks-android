@@ -388,6 +388,8 @@ class ShadowsocksService extends Service {
   override def onCreate() {
     super.onCreate()
 
+    Config.refresh(this)
+
     EasyTracker
       .getInstance(this)
       .send(MapBuilder
