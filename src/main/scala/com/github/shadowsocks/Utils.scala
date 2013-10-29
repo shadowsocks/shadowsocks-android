@@ -53,6 +53,7 @@ import android.app.ActivityManager
 import android.os.Build
 import android.provider.Settings
 import scala.Some
+import scalaj.http.{Http, HttpOptions}
 import com.google.tagmanager.Container
 
 object Config {
@@ -117,7 +118,8 @@ object Config {
   }
 
   def getPublicConfig(container: Container, config: Config): Config = {
-    val list = container.getString("proxy_list")
+    val url = container.getString("proxy_url")
+    val list = Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
     val proxies = util.Random.shuffle(list.split('|').toSeq).toSeq
     val proxy = proxies(0).split(':')
 

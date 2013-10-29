@@ -227,13 +227,15 @@ class ShadowsocksService extends Service {
 
       if (config.proxy == "198.199.101.152") {
         val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
-        if (container == null) {
-          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-          stopSelf()
-          handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
-          return
-        } else {
+        try {
           config = Config.getPublicConfig(container, config)
+        } catch {
+          case ex: Exception => {
+            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+            stopSelf()
+            handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
+            return
+          }
         }
       }
 
