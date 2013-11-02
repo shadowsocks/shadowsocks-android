@@ -228,7 +228,7 @@ class ShadowsocksService extends Service {
       if (config.proxy == "198.199.101.152") {
         val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
         try {
-          config = Config.getPublicConfig(container, config)
+          config = Config.getPublicConfig(getBaseContext, container, config)
         } catch {
           case ex: Exception => {
             notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))

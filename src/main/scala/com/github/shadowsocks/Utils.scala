@@ -42,7 +42,7 @@ import android.content.{Intent, SharedPreferences, Context}
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.{BitmapDrawable, Drawable}
-import android.util.Log
+import android.util.{Base64, Log}
 import java.io._
 import java.net.{UnknownHostException, InetAddress, NetworkInterface}
 import org.apache.http.conn.util.InetAddressUtils
@@ -55,6 +55,7 @@ import android.provider.Settings
 import scala.Some
 import scalaj.http.{Http, HttpOptions}
 import com.google.tagmanager.Container
+import java.security.MessageDigest
 
 object Config {
   val SHADOWSOCKS = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
@@ -117,16 +118,21 @@ object Config {
     if (container != null) container.refresh()
   }
 
-  def getPublicConfig(container: Container, config: Config): Config = {
+  def getPublicConfig(context: Context, container: Container, config: Config): Config = {
     val url = container.getString("proxy_url")
-    val list = Http(url).option(HttpOptions.connTimeout(1000)).option(HttpOptions.readTimeout(5000)).asString
+    val sig = Utils.getSignature(context)
+    val list = Http(url)
+      .params("sig" -> sig)
+      .option(HttpOptions.connTimeout(1000))
+      .option(HttpOptions.readTimeout(5000))
+      .asString
     val proxies = util.Random.shuffle(list.split('|').toSeq).toSeq
     val proxy = proxies(0).split(':')
 
-    val host = proxy(0)
-    val port = proxy(1).toInt
-    val password = proxy(2)
-    val method = proxy(3)
+    val host = proxy(0).trim
+    val port = proxy(1).trim.toInt
+    val password = proxy(2).trim
+    val method = proxy(3).trim
 
     new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
       config.profileName, host, password, method, port, config.localPort, config.proxiedAppString)
@@ -286,6 +292,15 @@ object Utils {
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
+
+  def getSignature(context: Context): String = {
+    val info = context
+      .getPackageManager
+      .getPackageInfo(context.getPackageName, PackageManager.GET_SIGNATURES)
+    val mdg = MessageDigest.getInstance("SHA-1")
+    mdg.update(info.signatures(0).toByteArray)
+    new String(Base64.encode(mdg.digest, 0))
+  }
 
   /*
      * round or floor depending on whether you are using offsets(floor) or
