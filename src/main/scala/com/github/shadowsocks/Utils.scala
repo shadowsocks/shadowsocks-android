@@ -44,7 +44,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.util.{Base64, Log}
 import java.io._
-import java.net.{UnknownHostException, InetAddress, NetworkInterface}
+import java.net.{URLEncoder, UnknownHostException, InetAddress, NetworkInterface}
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection.mutable.ArrayBuffer
 import org.xbill.DNS._
@@ -121,7 +121,7 @@ object Config {
   def getPublicConfig(context: Context, container: Container, config: Config): Config = {
     val url = container.getString("proxy_url")
     val sig = Utils.getSignature(context)
-    val list = Http(url)
+    val list = Http.post(url)
       .params("sig" -> sig)
       .option(HttpOptions.connTimeout(1000))
       .option(HttpOptions.readTimeout(5000))
