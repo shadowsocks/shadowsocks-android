@@ -18,6 +18,6 @@
 -->
 
 <resources>
-  <color name="pressed_shadow">#CC0099CC</color>
-  <color name="title">#EEE</color>
+    <color name="pressed_shadow">#CC33B5E5</color>
+    <color name="title">#EEE</color>
 </resources>
