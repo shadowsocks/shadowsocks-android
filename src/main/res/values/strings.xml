@@ -2,6 +2,7 @@
 <resources>
 
   <string name="app_name">shadowsocks</string>
+  <string name="screen_name">ss</string>
 
   <!-- function category -->
   <string name="function_cat">Service Controller</string>
@@ -73,6 +74,8 @@
   <string name="remove_profile">Remove this profile: %s ?</string>
 
   <!-- menu category -->
+  <string name="profiles">Profiles</string>
+  <string name="settings">Settings</string>
   <string name="recovery">Reset</string>
   <string name="about">About</string>
   <string name="about_title">Shadowsocks %s</string>

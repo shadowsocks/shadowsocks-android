@@ -658,13 +658,13 @@ class Shadowsocks
 
     val buf = new ListBuffer[Any]()
 
-    buf += new Category("Profiles")
+    buf += new Category(getString(R.string.profiles))
 
     buf ++= getProfileList
 
     buf += new Item(-400, getString(R.string.add_profile), android.R.drawable.ic_menu_add, addProfile)
 
-    buf += new Category("Settings")
+    buf += new Category(getString(R.string.settings))
 
     buf += new Item(-100, getString(R.string.recovery), android.R.drawable.ic_menu_revert, _ => {
       EasyTracker.getInstance(this).send(
