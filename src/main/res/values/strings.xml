@@ -2,7 +2,7 @@
 <resources>
 
   <string name="app_name">shadowsocks</string>
-  <string name="screen_name">ss</string>
+  <string name="screen_name">shadowsocks</string>
 
   <!-- function category -->
   <string name="function_cat">Service Controller</string>
@@ -49,7 +49,7 @@
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
   <string name="service_running">Connected to %s.</string>
-  <string name="service_status" formatted="false">Current Speed: %d KB/s</string>
+  <string name="service_status" formatted="false">Current Rate: %d KB/s</string>
   <string name="forward_fail">Shadowsocks failed to start.</string>
   <string name="service_stopped">Shadowsocks stopped.</string>
   <string name="forward_stop">Shadowsocks stopped.</string>

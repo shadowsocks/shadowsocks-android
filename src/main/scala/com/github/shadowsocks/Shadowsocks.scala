@@ -514,11 +514,10 @@ class Shadowsocks
     getSupportActionBar.setCustomView(switchLayout)
     getSupportActionBar.setDisplayShowTitleEnabled(false)
     getSupportActionBar.setDisplayShowCustomEnabled(true)
-    // getSupportActionBar.setDisplayShowHomeEnabled(false)
+    getSupportActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
     val title: TextView = switchLayout.findViewById(R.id.title).asInstanceOf[TextView]
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
-    title.setText(R.string.app_name)
 
     switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
 

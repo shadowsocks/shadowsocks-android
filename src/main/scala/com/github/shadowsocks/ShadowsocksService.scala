@@ -358,7 +358,7 @@ class ShadowsocksService extends Service {
     builder
       .setWhen(0)
       .setTicker(title)
-      .setContentTitle(getString(R.string.screen_name))
+      .setContentTitle(getString(R.string.app_name))
       .setContentText(info)
       .setContentIntent(contentIntent)
       .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
@@ -376,7 +376,7 @@ class ShadowsocksService extends Service {
       .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .setWhen(0)
       .setTicker(title)
-      .setContentTitle(getString(R.string.screen_name))
+      .setContentTitle(getString(R.string.app_name))
       .setContentText(info)
       .setContentIntent(contentIntent)
       .setAutoCancel(true)

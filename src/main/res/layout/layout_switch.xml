@@ -11,7 +11,7 @@
       android:gravity="center_vertical"
       android:textSize="24sp"
       android:textColor="@color/title"
-      android:text="@string/app_name"
+      android:text="@string/screen_name"
       android:layout_alignParentLeft="true"
       android:layout_centerVertical="true"/>
 

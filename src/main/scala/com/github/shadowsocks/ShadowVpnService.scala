@@ -350,7 +350,7 @@ class ShadowVpnService extends VpnService {
       .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .setWhen(0)
       .setTicker(title)
-      .setContentTitle(getString(R.string.screen_name))
+      .setContentTitle(getString(R.string.app_name))
       .setContentText(info)
       .setContentIntent(contentIntent)
       .setAutoCancel(true)
