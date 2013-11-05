@@ -16,7 +16,7 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 * JDK 1.6+
 * SBT 0.12.4
-* Android SDK r21+
+* Android SDK r21+ ( with SDK Platform Android 4.1.2, API 16, revision 4 )
 * Android NDK r9+
 
 ### BUILD
@@ -34,6 +34,25 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
     # Build the App
     sbt clean release
+```
+
+#### BUILD ON Mac OS X (with HomeBrew)
+
+* Install Android SDK and NDK by run `brew install android-ndk android-sdk`
+* Add `export ANDROID_HOME=/usr/local/opt/android-sdk` to your .bashrc , then reopen the shell to loat it.
+* Run `android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a` to insall SDK Platform Android 4.1.2, API 16, revision 4.
+* Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
+* Put your key in ~/.keystore
+* Create `local.sbt` from `local.sbt.example` with your own key alias .
+* Invoke the building like this
+
+```bash
+    # Build native binaries
+    ./build-ndk.sh
+    
+    # Build the apk
+    sbt clean
+    sbt apk
 ```
 
 ### LICENSE
