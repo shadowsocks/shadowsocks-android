@@ -466,7 +466,7 @@ class Shadowsocks
 
   def initAdView() {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
-      val layoutView = drawer.getContentContainer
+      val layoutView = drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
       if (layoutView != null) {
         val adView = {
           if (isSinglePane) {
@@ -475,9 +475,6 @@ class Shadowsocks
             new AdView(this, AdSize.BANNER, "a151becb8068b09")
           }
         }
-        val params = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-        params.gravity = Gravity.BOTTOM
-        adView.setLayoutParams(params)
         layoutView.asInstanceOf[ViewGroup].addView(adView, 0)
         adView.loadAd(new AdRequest)
       }
