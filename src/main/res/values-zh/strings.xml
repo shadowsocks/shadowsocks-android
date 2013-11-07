@@ -37,7 +37,7 @@
   <string name="traffic_stat">流量统计</string>
   <string name="traffic_stat_summary">在通知栏上显示当前上下行速率</string>
   <string name="forward_success">后台服务已开始运行。</string>
-  <string name="service_running">已连接到 %s。</string>
+  <string name="service_running">已连接到「%s」</string>
   <string name="service_status" formatted="false">当前速率：%d KB/s</string>
   <string name="forward_fail">后台服务启动失败。</string>
   <string name="service_stopped">后台服务已停止。</string>
@@ -59,7 +59,7 @@
   <string name="no">否</string>
   <string name="profiles">配置文件</string>
   <string name="settings">设置选项</string>
-  <string name="remove_profile">删除此配置文件: %s?</string>
+  <string name="remove_profile">删除此配置文件「%s」?</string>
   <string name="recovery">重置</string>
   <string name="about">关于</string>
   <string name="about_title">影梭（shadowsocks）%s</string>

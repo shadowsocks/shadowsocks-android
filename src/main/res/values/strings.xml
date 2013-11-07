@@ -48,7 +48,7 @@
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
-  <string name="service_running">Connected to %s.</string>
+  <string name="service_running">Connected to "%s"</string>
   <string name="service_status" formatted="false">Current Rate: %d KB/s</string>
   <string name="forward_fail">Shadowsocks failed to start.</string>
   <string name="service_stopped">Shadowsocks stopped.</string>
@@ -71,7 +71,7 @@
   <string name="loading">Loading…</string>
   <string name="yes">Yes</string>
   <string name="no">No</string>
-  <string name="remove_profile">Remove this profile: %s ?</string>
+  <string name="remove_profile">Remove this profile "%s"?</string>
 
   <!-- menu category -->
   <string name="profiles">Profiles</string>
