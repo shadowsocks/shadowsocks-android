@@ -470,7 +470,7 @@ class Shadowsocks
         if (Build.VERSION.SDK_INT > 10) {
           drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
         } else {
-          drawer.getContentContainer.getParent
+          getLayoutView(drawer.getContentContainer.getParent)
         }
       }
       if (layoutView != null) {

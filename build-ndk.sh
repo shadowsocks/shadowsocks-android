@@ -1,5 +1,6 @@
 #!/bin/bash
 cd src/main
+ndk-build clean
 ndk-build
 mkdir -p assets/arm
 mkdir -p assets/x86
