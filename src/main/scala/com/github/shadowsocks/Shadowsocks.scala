@@ -466,7 +466,13 @@ class Shadowsocks
 
   def initAdView() {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
-      val layoutView = drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
+      val layoutView = {
+        if (Build.VERSION.SDK_INT > 10) {
+          drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
+        } else {
+          drawer.getContentContainer.getParent
+        }
+      }
       if (layoutView != null) {
         val adView = {
           if (isSinglePane) {
