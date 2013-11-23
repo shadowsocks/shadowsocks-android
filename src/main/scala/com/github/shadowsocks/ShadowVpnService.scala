@@ -274,18 +274,25 @@ class ShadowVpnService extends VpnService {
       })
     } else {
       for (i <- 1 to 254) {
-        val addr = i.toString + ".0.0.0"
-        val cidr = addr + "/8"
-        val net = new SubnetUtils(cidr).getInfo
-        if (!net.isInRange(proxy_address)) {
-          if (!InetAddress.getByName(addr).isSiteLocalAddress) builder.addRoute(addr, 8)
-        } else {
-          for (j <- 0 to 255) {
-            val addr = i.toString + "." + j.toString + ".0.0"
-            val cidr = addr + "/16"
-            val net = new SubnetUtils(cidr).getInfo
-            if (!net.isInRange(proxy_address)) {
-              if (!InetAddress.getByName(addr).isSiteLocalAddress) builder.addRoute(addr, 16)
+        if (i != 26 && i != 127) {
+          val addr = i.toString + ".0.0.0"
+          val cidr = addr + "/8"
+          val net = new SubnetUtils(cidr).getInfo
+
+          if (!net.isInRange(proxy_address)) {
+            if (!InetAddress.getByName(addr).isSiteLocalAddress) {
+              builder.addRoute(addr, 8)
+            }
+          } else {
+            for (j <- 0 to 255) {
+              val subAddr = i.toString + "." + j.toString + ".0.0"
+              val subCidr = subAddr + "/16"
+              val subNet = new SubnetUtils(subCidr).getInfo
+              if (!subNet.isInRange(proxy_address)) {
+                if (!InetAddress.getByName(subAddr).isSiteLocalAddress) {
+                  builder.addRoute(subAddr, 16)
+                }
+              }
             }
           }
         }
