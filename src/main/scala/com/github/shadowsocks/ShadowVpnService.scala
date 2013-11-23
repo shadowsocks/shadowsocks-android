@@ -53,7 +53,8 @@ import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
 import scala.Some
 import scala.concurrent.ops._
-import be.jvb.iptypes.{IpNetwork, IpAddress}
+import org.apache.commons.net.util.SubnetUtils
+import java.net.InetAddress
 
 object ShadowVpnService {
   def isServiceStarted(context: Context): Boolean = {
@@ -251,10 +252,7 @@ class ShadowVpnService extends VpnService {
 
   def startVpn() {
 
-    val proxy_address = new IpAddress(config.proxy)
-
-    val private_networks = Array[IpNetwork](new IpNetwork("127.0.0.0/8"),
-      new IpNetwork("10.0.0.0/8"), new IpNetwork("172.16.0.0/12"), new IpNetwork("192.168.0.0/16"))
+    val proxy_address = config.proxy
 
     val builder = new Builder()
     builder
@@ -267,24 +265,27 @@ class ShadowVpnService extends VpnService {
       builder.addRoute("0.0.0.0", 0)
     } else if (config.isGFWList) {
       val gfwList = getResources.getStringArray(R.array.gfw_list)
-      gfwList.foreach(addr => {
-        val network = new IpNetwork(addr)
-        if (!network.contains(proxy_address)) {
-          builder.addRoute(network.address.toString, network.mask.prefixLength)
+      gfwList.foreach(cidr => {
+        val net = new SubnetUtils(cidr).getInfo
+        if (!net.isInRange(proxy_address)) {
+          val addr = cidr.split('/')
+          builder.addRoute(addr(0), addr(1).toInt)
         }
       })
     } else {
       for (i <- 1 to 254) {
-        val network = new IpNetwork(i.toString + ".0.0.0/8")
-        if (!network.contains(proxy_address) &&
-          private_networks.forall(range => !network.contains(range))) {
-          builder.addRoute(i + ".0.0.0", 8)
+        val addr = i.toString + ".0.0.0"
+        val cidr = addr + "/8"
+        val net = new SubnetUtils(cidr).getInfo
+        if (!net.isInRange(proxy_address)) {
+          if (!InetAddress.getByName(addr).isSiteLocalAddress) builder.addRoute(addr, 8)
         } else {
           for (j <- 0 to 255) {
-            val subNetwork = new IpNetwork(i.toString + "." + j.toString + ".0.0/16")
-            if (!subNetwork.contains(proxy_address) &&
-              private_networks.forall(range => !range.overlaps(subNetwork))) {
-              builder.addRoute(subNetwork.address.toString, subNetwork.mask.prefixLength)
+            val addr = i.toString + "." + j.toString + ".0.0"
+            val cidr = addr + "/16"
+            val net = new SubnetUtils(cidr).getInfo
+            if (!net.isInRange(proxy_address)) {
+              if (!InetAddress.getByName(addr).isSiteLocalAddress) builder.addRoute(addr, 16)
             }
           }
         }

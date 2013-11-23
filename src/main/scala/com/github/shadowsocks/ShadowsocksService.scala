@@ -303,6 +303,8 @@ class ShadowsocksService extends Service {
     startDnsDaemon()
     startRedsocksDaemon()
     setupIptables
+    flushDNS()
+
     true
   }
 
@@ -494,6 +496,11 @@ class ShadowsocksService extends Service {
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
     handleCommand(intent)
     Service.START_STICKY
+  }
+
+  def flushDNS() {
+    Utils.runRootCommand("ndc resolver flushdefaultif\n"
+      + "ndc resolver flushif wlan0\n")
   }
 
   def setupIptables: Boolean = {

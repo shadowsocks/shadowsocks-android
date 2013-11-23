@@ -343,10 +343,14 @@ object Utils {
 
   private def toggleAboveApiLevel17() {
     // Android 4.2 and above
-    Utils.runRootCommand("settings put global airplane_mode_on 1\n"
-      + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true\n"
-      + "settings put global airplane_mode_on 0\n"
-      + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false\n")
+
+    Utils.runRootCommand("ndc resolver flushdefaultif\n"
+                       + "ndc resolver flushif wlan0\n")
+
+    //Utils.runRootCommand("settings put global airplane_mode_on 1\n"
+    //  + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true\n"
+    //  + "settings put global airplane_mode_on 0\n"
+    //  + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false\n")
   }
 
   private def toggleBelowApiLevel17(context: Context) {

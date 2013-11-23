@@ -3,7 +3,8 @@ libraryDependencies ++= Seq(
   "com.google.android" % "analytics" % "3.01",
   "com.google.android" % "admob" % "6.4.1",
   "dnsjava" % "dnsjava" % "2.1.5",
-  "org.scalaj" %% "scalaj-http" % "0.3.10"
+  "org.scalaj" %% "scalaj-http" % "0.3.10",
+  "commons-net" % "commons-net" % "3.3"
 )
 
 libraryDependencies ++= Seq(
