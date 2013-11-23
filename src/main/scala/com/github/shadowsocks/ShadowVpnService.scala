@@ -189,7 +189,6 @@ class ShadowVpnService extends VpnService {
     config = Extra.get(intent)
 
     spawn {
-
       if (config.proxy == "198.199.101.152") {
         val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
         try {
@@ -264,7 +263,13 @@ class ShadowVpnService extends VpnService {
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
     } else if (config.isGFWList) {
-      val gfwList = getResources.getStringArray(R.array.gfw_list)
+      val gfwList = {
+        if (Build.VERSION.SDK_INT == 19) {
+          getResources.getStringArray(R.array.simple_list)
+        } else {
+          getResources.getStringArray(R.array.gfw_list)
+        }
+      }
       gfwList.foreach(cidr => {
         val net = new SubnetUtils(cidr).getInfo
         if (!net.isInRange(proxy_address)) {
