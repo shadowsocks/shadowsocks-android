@@ -4,7 +4,7 @@ scala:
 before_install:
 - git clone https://github.com/madeye/android-plugin.git
 - pushd android-plugin
-- sbt -J-Xmx4g publish-local
+- sbt publish-local
 - popd
 - sudo apt-get update
 - sudo apt-get install libc6-dev-i386
@@ -28,10 +28,10 @@ install:
 script:
 - ./build-ndk.sh
 - cp local.sbt.example local.sbt
-- sbt -J-Xmx4g clean
-- sbt -J-Xmx4g apk
+- sbt clean
+- sbt apk
 after_success:
-- sbt -J-Xmx4g deploy
+- sbt deploy
 env:
   global:
   - "ARTIFACTS_AWS_REGION=ap-northeast-1"
