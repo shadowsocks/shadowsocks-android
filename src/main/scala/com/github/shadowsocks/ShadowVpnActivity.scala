@@ -45,6 +45,7 @@ import android.net.VpnService
 import android.content.Intent
 import android.util.Log
 import android.preference.PreferenceManager
+import com.github.shadowsocks.utils.Extra
 
 class ShadowVpnActivity extends Activity {
 

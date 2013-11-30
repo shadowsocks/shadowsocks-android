@@ -55,6 +55,9 @@ import scala.Some
 import scala.concurrent.ops._
 import org.apache.commons.net.util.SubnetUtils
 import java.net.InetAddress
+import com.github.shadowsocks.utils._
+import scala.Some
+import com.github.shadowsocks.ProxiedApp
 
 object ShadowVpnService {
   def isServiceStarted(context: Context): Boolean = {

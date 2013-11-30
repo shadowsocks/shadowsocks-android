@@ -60,6 +60,10 @@ import android.net.TrafficStats
 import android.graphics._
 import scala.concurrent.ops._
 import scala.Some
+import com.github.shadowsocks.utils._
+import scala.Some
+import com.github.shadowsocks.ProxiedApp
+import com.github.shadowsocks.TrafficStat
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 

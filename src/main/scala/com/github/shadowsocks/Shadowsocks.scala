@@ -69,6 +69,9 @@ import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
+import com.github.shadowsocks.utils._
+import com.github.shadowsocks.database.Item
+import com.github.shadowsocks.database.Category
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -290,7 +293,6 @@ class Shadowsocks
 
   // Flags
   val MSG_CRASH_RECOVER: Int = 1
-  val MSG_INITIAL_FINISH: Int = 2
   val STATE_MENUDRAWER = "com.github.shadowsocks.menuDrawer"
   val STATE_ACTIVE_VIEW_ID = "com.github.shadowsocks.activeViewId"
 
@@ -317,8 +319,6 @@ class Shadowsocks
         case MSG_CRASH_RECOVER =>
           Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
           status.edit().putBoolean(Key.isRunning, false).commit()
-        case MSG_INITIAL_FINISH =>
-          clearDialog()
       }
       super.handleMessage(msg)
     }

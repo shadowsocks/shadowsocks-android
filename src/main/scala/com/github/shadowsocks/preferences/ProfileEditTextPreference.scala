@@ -42,7 +42,7 @@ package com.github.shadowsocks.preferences
 import android.content.{Intent, Context}
 import android.preference.EditTextPreference
 import android.util.AttributeSet
-import com.github.shadowsocks.Action
+import com.github.shadowsocks.utils.Action
 
 class ProfileEditTextPreference(context: Context, attrs: AttributeSet, defStyle: Int)
   extends EditTextPreference(context, attrs, defStyle) {

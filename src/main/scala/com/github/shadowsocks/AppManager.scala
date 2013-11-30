@@ -70,6 +70,7 @@ import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader,
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import com.google.analytics.tracking.android.EasyTracker
 import org.jraf.android.backport.switchwidget.Switch
+import com.github.shadowsocks.utils.{Utils, Scheme, Key}
 
 case class ProxiedApp(uid: Int, name: String, var proxied: Boolean)
 

@@ -27,13 +27,11 @@ install:
 - gem install travis-artifacts
 script:
 - ./build-ndk.sh
-- wget https://raw.github.com/paulp/sbt-extras/master/sbt
-- chmod u+x ./sbt
 - cp local.sbt.example local.sbt
-- ./sbt clean
-- ./sbt apk
+- sbt clean
+- sbt apk
 after_success:
-- ./sbt deploy
+- sbt deploy
 env:
   global:
   - "ARTIFACTS_AWS_REGION=ap-northeast-1"
