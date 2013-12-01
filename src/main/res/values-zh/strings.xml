@@ -66,4 +66,11 @@
   <string name="flush_dnscache">刷新 DNS 缓存</string>
   <string name="flushing">刷新中...</string>
   <string name="add_profile">添加配置文件</string>
+
+  <!-- profile -->
+  <string-array name="add_profile_methods">
+    <item>扫描二维码</item>
+    <item>手动设置</item>
+  </string-array>
+
 </resources>

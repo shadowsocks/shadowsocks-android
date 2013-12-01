@@ -4,7 +4,8 @@ libraryDependencies ++= Seq(
   "com.google.android" % "admob" % "6.4.1",
   "dnsjava" % "dnsjava" % "2.1.5",
   "org.scalaj" %% "scalaj-http" % "0.3.10",
-  "commons-net" % "commons-net" % "3.3"
+  "commons-net" % "commons-net" % "3.3",
+  "com.google.zxing" % "android-integration" % "2.2"
 )
 
 libraryDependencies ++= Seq(

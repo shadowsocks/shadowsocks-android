@@ -72,6 +72,7 @@ import com.github.shadowsocks.database.Category
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
+import com.google.zxing.integration.android.IntentIntegrator
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -569,6 +570,50 @@ class Shadowsocks
     drawer.setActiveView(v, pos)
   }
 
+
+  def newProfile(id: Int) {
+
+    val builder = new AlertDialog.Builder(this)
+    builder.setTitle(R.string.add_profile)
+    .setItems(R.array.add_profile_methods, new DialogInterface.OnClickListener() {
+      def onClick(dialog: DialogInterface, which: Int) {
+        which match {
+          case 0 => {
+            val integrator = new IntentIntegrator(Shadowsocks.this)
+            integrator.initiateScan()
+          }
+          case 1 => addProfile(id)
+          case _ =>
+        }
+      }
+    })
+    builder.create().show()
+
+  }
+
+  def addProfile(profile: Profile) {
+    drawer.closeMenu(true)
+
+    val h = showProgress(getString(R.string.loading))
+
+    handler.postDelayed(new Runnable {
+      def run() {
+        currentProfile = profile
+        profileManager.createOrUpdateProfile(currentProfile)
+        profileManager.reload(currentProfile.id)
+        menuAdapter.updateList(getMenuList, currentProfile.id)
+
+        if (!isSinglePane) {
+          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+        } else {
+          updatePreferenceScreen()
+        }
+
+        h.sendEmptyMessage(0)
+      }
+    }, 600)
+  }
+
   def addProfile(id: Int) {
     drawer.closeMenu(true)
 
@@ -665,7 +710,7 @@ class Shadowsocks
     buf ++= getProfileList
 
     buf +=
-      new Item(-400, getString(R.string.add_profile), android.R.drawable.ic_menu_add, addProfile)
+      new Item(-400, getString(R.string.add_profile), android.R.drawable.ic_menu_add, newProfile)
 
     buf += new Category(getString(R.string.settings))
 
@@ -827,16 +872,24 @@ class Shadowsocks
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-    resultCode match {
-      case Activity.RESULT_OK => {
-        prepared = true
-        if (!serviceStart) {
-          switchButton.setChecked(false)
-        }
+    val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+    if (scanResult != null) {
+      ShadowParser.parse(scanResult.getContents) match {
+        case Some(profile) => addProfile(profile)
+        case _ => // ignore
       }
-      case _ => {
-        clearDialog()
-        Log.e(Shadowsocks.TAG, "Failed to start VpnService")
+    } else {
+      resultCode match {
+        case Activity.RESULT_OK => {
+          prepared = true
+          if (!serviceStart) {
+            switchButton.setChecked(false)
+          }
+        }
+        case _ => {
+          clearDialog()
+          Log.e(Shadowsocks.TAG, "Failed to start VpnService")
+        }
       }
     }
   }
