@@ -10,8 +10,8 @@ object Parser {
     try {
       Log.d(TAG, data)
       val uri = Uri.parse(data.trim)
-      if (uri.isOpaque && uri.getScheme == Scheme.SS) {
-        val encoded = data.replace(Scheme.SS + ":", "")
+      if (uri.getScheme == Scheme.SS) {
+        val encoded = data.replace(Scheme.SS + "://", "")
         val content = new String(Base64.decode(encoded, Base64.NO_PADDING), "UTF-8")
         val info = content.split('@')
         val encinfo = info(0).split(':')
