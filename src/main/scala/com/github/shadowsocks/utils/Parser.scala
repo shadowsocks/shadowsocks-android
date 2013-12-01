@@ -4,14 +4,14 @@ import com.github.shadowsocks.database.Profile
 import android.net.Uri
 import android.util.{Log, Base64}
 
-object ShadowParser {
+object Parser {
   val TAG = "ShadowParser"
   def parse (data: String): Option[Profile] = {
     try {
       Log.d(TAG, data)
       val uri = Uri.parse(data.trim)
-      if (uri.isOpaque && uri.getScheme == "shadow") {
-        val encoded = data.replace("shadow:", "")
+      if (uri.isOpaque && uri.getScheme == Scheme.SS) {
+        val encoded = data.replace(Scheme.SS + ":", "")
         val content = new String(Base64.decode(encoded, Base64.NO_PADDING), "UTF-8")
         val info = content.split('@')
         val encinfo = info(0).split(':')

@@ -46,6 +46,7 @@ import android.content.Intent
 import android.util.Log
 import android.preference.PreferenceManager
 import com.github.shadowsocks.utils.Extra
+import com.actionbarsherlock.app.SherlockActivity
 
 class ShadowVpnActivity extends Activity {
 

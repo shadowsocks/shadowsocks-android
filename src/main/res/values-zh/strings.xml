@@ -68,6 +68,7 @@
   <string name="add_profile">添加配置文件</string>
 
   <!-- profile -->
+  <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string-array name="add_profile_methods">
     <item>扫描二维码</item>
     <item>手动设置</item>

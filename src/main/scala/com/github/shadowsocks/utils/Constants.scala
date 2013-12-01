@@ -30,7 +30,7 @@ object Key {
 object Scheme {
   val APP = "app://"
   val PROFILE = "profile://"
-  val SHADOW = "shadow:"
+  val SS = "ss"
 }
 
 object State {

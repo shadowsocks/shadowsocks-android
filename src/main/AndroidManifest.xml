@@ -1,85 +1,97 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.github.shadowsocks">
+    package="com.github.shadowsocks">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.ACCESS_SUPERUSER"/>
+  <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
 
-    <uses-feature
-            android:name="android.hardware.touchscreen"
-            android:required="false"/>
+  <uses-feature
+      android:name="android.hardware.touchscreen"
+      android:required="false"/>
 
-    <uses-sdk
-            android:minSdkVersion="9"
-            android:targetSdkVersion="16"/>
+  <uses-sdk
+      android:minSdkVersion="9"
+      android:targetSdkVersion="16"/>
 
-    <application
-            android:name=".ShadowsocksApplication"
-            android:hardwareAccelerated="true"
-            android:icon="@drawable/ic_launcher"
-            android:backupAgent=".ShadowsocksBackupAgent"
-            android:label="@string/app_name">
+  <application
+      android:name=".ShadowsocksApplication"
+      android:hardwareAccelerated="true"
+      android:icon="@drawable/ic_launcher"
+      android:backupAgent=".ShadowsocksBackupAgent"
+      android:label="@string/app_name">
 
-        <meta-data android:name="com.google.android.backup.api_key"
-                   android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
+    <meta-data android:name="com.google.android.backup.api_key"
+        android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
 
-        <activity
-                android:name="com.google.ads.AdActivity"
-                android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+    <activity
+        android:name="com.google.ads.AdActivity"
+        android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
 
-        <activity
-                android:name=".Shadowsocks"
-                android:label="@string/app_name"
-                android:theme="@style/Theme.Shadowsocks"
-                android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+    <activity
+        android:name=".Shadowsocks"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.Shadowsocks"
+        android:launchMode="singleTask">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN"/>
+        <category android:name="android.intent.category.LAUNCHER"/>
+      </intent-filter>
+    </activity>
 
-        <activity
-                android:name=".ShadowVpnActivity"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"
-                android:launchMode="singleTask">
-        </activity>
+    <activity
+        android:name=".ParserActivity"
+        android:theme="@style/PopupTheme"
+        android:launchMode="singleTask">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="ss"/>
+      </intent-filter>
+    </activity>
 
-        <activity
-                android:name=".AppManager"
-                android:theme="@style/Theme.AppManager"
-                android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="com.github.shadowsocks.AppManager"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
+    <activity
+        android:name=".ShadowVpnActivity"
+        android:theme="@style/PopupTheme"
+        android:launchMode="singleTask">
+    </activity>
 
-        <service
-                android:name=".ShadowsocksService"
-                android:process=":proxy"
-                android:exported="false"/>
+    <activity
+        android:name=".AppManager"
+        android:theme="@style/Theme.AppManager"
+        android:label="@string/app_name">
+      <intent-filter>
+        <action android:name="com.github.shadowsocks.AppManager"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
 
-        <service
-                android:name=".ShadowVpnService"
-                android:label="@string/app_name"
-                android:process=":vpn"
-                android:permission="android.permission.BIND_VPN_SERVICE"
-                android:exported="false">
-            <intent-filter>
-                <action android:name="android.net.VpnService"/>
-            </intent-filter>
-        </service>
+    <service
+        android:name=".ShadowsocksService"
+        android:process=":proxy"
+        android:exported="false"/>
 
-        <receiver android:name=".ShadowsocksReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="com.github.shadowsocks.ACTION_UPDATE_STATE"/>
-            </intent-filter>
-        </receiver>
+    <service
+        android:name=".ShadowVpnService"
+        android:label="@string/app_name"
+        android:process=":vpn"
+        android:permission="android.permission.BIND_VPN_SERVICE"
+        android:exported="false">
+      <intent-filter>
+        <action android:name="android.net.VpnService"/>
+      </intent-filter>
+    </service>
 
-    </application>
+    <receiver android:name=".ShadowsocksReceiver">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED"/>
+        <action android:name="com.github.shadowsocks.ACTION_UPDATE_STATE"/>
+      </intent-filter>
+    </receiver>
+
+  </application>
 
 </manifest>

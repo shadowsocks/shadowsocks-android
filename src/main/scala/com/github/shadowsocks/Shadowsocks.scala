@@ -579,10 +579,20 @@ class Shadowsocks
       def onClick(dialog: DialogInterface, which: Int) {
         which match {
           case 0 => {
-            val integrator = new IntentIntegrator(Shadowsocks.this)
-            integrator.initiateScan()
+            dialog.dismiss()
+            val h = showProgress(getString(R.string.loading))
+            h.postDelayed(new Runnable() {
+              def run() {
+                val integrator = new IntentIntegrator(Shadowsocks.this)
+                integrator.initiateScan()
+                h.sendEmptyMessage(0)
+              }
+            }, 600)
           }
-          case 1 => addProfile(id)
+          case 1 => {
+            dialog.dismiss()
+            addProfile(id)
+          }
           case _ =>
         }
       }
@@ -874,7 +884,7 @@ class Shadowsocks
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
     if (scanResult != null) {
-      ShadowParser.parse(scanResult.getContents) match {
+      Parser.parse(scanResult.getContents) match {
         case Some(profile) => addProfile(profile)
         case _ => // ignore
       }

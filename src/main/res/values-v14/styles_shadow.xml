@@ -19,6 +19,15 @@
 
 <resources>
 
+  <style name="PopupTheme" parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar">
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowSoftInputMode">stateAlwaysHidden</item>
+    <item name="android:windowActionModeOverlay">true</item>
+    <item name="android:windowIsTranslucent">true</item>
+  </style>
+
+
     <style name="Theme.Shadow" parent="@style/Theme.Sherlock.Light.DarkActionBar">
         <item name="android:actionBarItemBackground">@drawable/selectable_background_shadow</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Shadow</item>

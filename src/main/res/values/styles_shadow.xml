@@ -19,7 +19,20 @@
 
 <resources>
 
-    <style name="Theme.Shadow" parent="@style/Theme.Sherlock.Light.DarkActionBar">
+  <style name="PopupTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
+    <item name="android:windowFrame">@null</item>
+    <item name="android:windowIsFloating">false</item>
+    <item name="android:windowContentOverlay">@null</item>
+    <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    <item name="android:windowSoftInputMode">stateAlwaysHidden</item>
+    <item name="android:windowActionModeOverlay">true</item>
+    <item name="android:colorBackgroundCacheHint">@null</item>
+    <item name="android:windowCloseOnTouchOutside">true</item>
+    <item name="android:windowIsTranslucent">true</item>
+    <item name="windowContentOverlay">@null</item>
+  </style>
+
+  <style name="Theme.Shadow" parent="@style/Theme.Sherlock.Light.DarkActionBar">
         <item name="actionBarItemBackground">@drawable/selectable_background_shadow</item>
         <item name="popupMenuStyle">@style/PopupMenu.Shadow</item>
         <item name="dropDownListViewStyle">@style/DropDownListView.Shadow</item>
@@ -30,7 +43,7 @@
         <item name="actionModeSplitBackground">@drawable/cab_background_bottom_shadow</item>
         <item name="actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Shadow</item>
 
-                <!-- Light.DarkActionBar specific -->
+         <!-- Light.DarkActionBar specific -->
         <item name="actionBarWidgetTheme">@style/Theme.Shadow.Widget</item>
 
     </style>
