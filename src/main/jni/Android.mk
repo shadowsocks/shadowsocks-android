@@ -136,6 +136,8 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_LDLIBS := -ldl -llog
 
+LOCAL_STATIC_LIBRARIES := cpufeatures
+
 include $(BUILD_SHARED_LIBRARY)
 
 ########################################################
@@ -241,3 +243,5 @@ iptables_subdirs := $(addprefix $(LOCAL_PATH)/iptables/,$(addsuffix /Android.mk,
 	))
 include $(iptables_subdirs)
 
+# Import cpufeatures
+$(call import-module,android/cpufeatures)

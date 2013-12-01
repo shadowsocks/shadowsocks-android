@@ -283,31 +283,6 @@ object Utils {
   }
 
   /**
-   * Get the ABI of the device
-   * @return The ABI of the device, or ARM_ABI if not found
-   */
-  def getABI: String = {
-    val prop = getSystemProperty(ABI_PROP)
-    prop match {
-      case abi if abi.toLowerCase.contains(ARM_ABI) => ARM_ABI
-      case abi if abi.toLowerCase.contains(X86_ABI) => X86_ABI
-      case _ => ARM_ABI
-    }
-  }
-
-  /**
-   * Returns a SystemProperty
-   *
-   * @param propName The Property to retrieve
-   * @return The Property, or NULL if not found
-   */
-  def getSystemProperty(propName: String): String = {
-    val p: Process = Runtime.getRuntime.exec("getprop " + propName)
-    val lines = scala.io.Source.fromInputStream(p.getInputStream).getLines()
-    if (lines.hasNext) lines.next() else null
-  }
-
-  /**
    * Check the system's iptables
    * Default to use the app's iptables
    */

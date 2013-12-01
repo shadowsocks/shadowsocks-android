@@ -5,12 +5,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cpu-features.h>
 
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
 
-void Java_com_github_shadowsocks_Node_exec(JNIEnv *env, jobject thiz, jstring cmd) {
+jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
+  AndroidCpuFamily family = android_getCpuFamily();
+  const char *abi;
+
+  if (family == ANDROID_CPU_FAMILY_X86) {
+    abi = "x86";
+  } else if (family == ANDROID_CPU_FAMILY_MIPS) {
+    abi = "mips";
+  } else if (family == ANDROID_CPU_FAMILY_ARM) {
+    abi = "arm";
+  }
+  return env->NewStringUTF(abi);
+}
+
+void Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring cmd) {
     const char *str  = env->GetStringUTFChars(cmd, 0);
     setenv("LD_LIBRARY_PATH", "/vendor/lib:/system/lib", 1);
     setegid(getgid());
@@ -23,7 +38,9 @@ static const char *classPathName = "com/github/shadowsocks/System";
 
 static JNINativeMethod method_table[] = {
     { "exec", "(Ljava/lang/String;)V",
-        (void*) Java_com_github_shadowsocks_Node_exec }
+        (void*) Java_com_github_shadowsocks_system_exec },
+    { "getABI", "()Ljava/lang/String;",
+        (void*) Java_com_github_shadowsocks_system_getabi }
 };
 
 /*

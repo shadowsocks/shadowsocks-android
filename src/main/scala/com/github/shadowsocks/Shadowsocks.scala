@@ -800,7 +800,7 @@ class Shadowsocks
 
   def reset() {
     crash_recovery()
-    copyAssets(Utils.getABI)
+    copyAssets(System.getABI)
     Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
       + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
       + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
