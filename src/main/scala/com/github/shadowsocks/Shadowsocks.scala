@@ -392,6 +392,7 @@ class Shadowsocks
     sb.append("killall -9 shadowsocks").append("\n")
     sb.append("killall -9 tun2socks").append("\n")
     sb.append("rm /data/data/com.github.shadowsocks/pdnsd.conf").append("\n")
+    sb.append("rm /data/data/com.github.shadowsocks/pdnsd.cache").append("\n")
     Utils.runCommand(sb.toString())
 
     sb.clear()
