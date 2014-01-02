@@ -8,4 +8,7 @@
 
   <!--Enable automatic exception tracking-->
   <bool name="ga_reportUncaughtExceptions">true</bool>
+
+  <!-- Set a session timeout period of 1 week -->
+  <integer name="ga_sessionTimeout">604800</integer>
 </resources>
