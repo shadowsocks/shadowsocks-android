@@ -87,7 +87,7 @@
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string-array name="add_profile_methods">
     <item>Scan QR code</item>
-    <item>Manually Setting</item>
+    <item>Manual Settings</item>
   </string-array>
 
 </resources>
