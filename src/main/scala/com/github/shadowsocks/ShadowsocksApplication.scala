@@ -42,9 +42,13 @@ import android.app.Application
 import com.github.shadowsocks.database.DBHelper
 import com.google.tagmanager.{Container, ContainerOpener, TagManager}
 import com.google.tagmanager.ContainerOpener.{Notifier, OpenType}
+import com.google.tagmanager.Container.FunctionCallMacroHandler
+import java.util
+import com.github.shadowsocks.utils.Utils
 
 class ShadowsocksApplication extends Application {
   lazy val dbHelper = new DBHelper(this)
+  lazy val SIG_FUNC = "getSignature"
   var tagContainer: Container = null
 
   override def onCreate() {
@@ -52,6 +56,14 @@ class ShadowsocksApplication extends Application {
     ContainerOpener.openContainer(tm, BuildConfig.CONTAINER_ID, OpenType.PREFER_NON_DEFAULT, null, new Notifier {
       override def containerAvailable(container: Container) {
         tagContainer = container
+        container.registerFunctionCallMacroHandler(SIG_FUNC, new FunctionCallMacroHandler {
+          def getValue(functionName: String, parameters: util.Map[String, AnyRef]): AnyRef = {
+            if (functionName == SIG_FUNC) {
+              Utils.getSignature(getApplicationContext)
+            }
+            null
+          }
+        })
       }
     })
   }
