@@ -51,13 +51,11 @@ import java.io._
 import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
-import scala.Some
 import scala.concurrent.ops._
 import org.apache.commons.net.util.SubnetUtils
 import java.net.InetAddress
 import com.github.shadowsocks.utils._
 import scala.Some
-import com.github.shadowsocks.ProxiedApp
 
 object ShadowVpnService {
   def isServiceStarted(context: Context): Boolean = {
@@ -68,7 +66,6 @@ object ShadowVpnService {
 class ShadowVpnService extends VpnService {
 
   val TAG = "ShadowVpnService"
-  val BASE = "/data/data/com.github.shadowsocks/"
 
   val MSG_CONNECT_FINISH = 1
   val MSG_CONNECT_SUCCESS = 2
@@ -114,7 +111,6 @@ class ShadowVpnService extends VpnService {
         case MSG_VPN_ERROR =>
           if (msg.obj != null) changeState(State.STOPPED, msg.obj.asInstanceOf[String])
         case MSG_STOP_SELF =>
-          destroy()
           stopSelf()
         case _ =>
       }
@@ -124,7 +120,7 @@ class ShadowVpnService extends VpnService {
 
   def getPid(name: String): Int = {
     try {
-      val reader: BufferedReader = new BufferedReader(new FileReader(BASE + name + ".pid"))
+      val reader: BufferedReader = new BufferedReader(new FileReader(Path.BASE + name + ".pid"))
       val line = reader.readLine
       return Integer.valueOf(line)
     } catch {
@@ -142,18 +138,18 @@ class ShadowVpnService extends VpnService {
   }
 
   def startShadowsocksDaemon() {
-    val cmd: String = (BASE +
+    val cmd: String = (Path.BASE +
       "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-      BASE + "shadowsocks.pid")
+      Path.BASE + "shadowsocks.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
 
   def startDnsDaemon() {
-    val cmd: String = BASE + "pdnsd -c " + BASE + "pdnsd.conf"
+    val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     val conf: String = Config.PDNSD.format("0.0.0.0")
-    Config.printToFile(new File(BASE + "pdnsd.conf"))(p => {
+    Config.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
     })
     Utils.runCommand(cmd)
@@ -329,7 +325,7 @@ class ShadowVpnService extends VpnService {
 
     val fd = conn.getFd
 
-    val cmd = (BASE +
+    val cmd = (Path.BASE +
       "tun2socks --netif-ipaddr %s "
       + "--dnsgw  %s:8153 "
       + "--netif-netmask 255.255.255.0 "
@@ -339,7 +335,7 @@ class ShadowVpnService extends VpnService {
       + "--loglevel 3 "
       + "--pid %stun2socks.pid")
       .format(PRIVATE_VLAN.format("2"), PRIVATE_VLAN.format("1"), config.localPort, fd, VPN_MTU,
-      BASE)
+      Path.BASE)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
@@ -402,14 +398,13 @@ class ShadowVpnService extends VpnService {
     filter.addAction(Action.CLOSE)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
-        destroy()
         stopSelf()
       }
     }
     registerReceiver(receiver, filter)
   }
 
-  def destroy() {
+  override def onDestroy() {
     killProcesses()
 
     changeState(State.STOPPED)
@@ -425,16 +420,14 @@ class ShadowVpnService extends VpnService {
       unregisterReceiver(receiver)
       receiver = null
     }
+
     if (conn != null) {
       conn.close()
       conn = null
     }
-    notificationManager.cancel(1)
-  }
 
-  /** Called when the activity is closed. */
-  override def onDestroy() {
-    destroy()
+    notificationManager.cancel(1)
+
     super.onDestroy()
   }
 
@@ -464,7 +457,4 @@ class ShadowVpnService extends VpnService {
     Service.START_STICKY
   }
 
-  override def onRevoke() {
-    stopSelf()
-  }
 }

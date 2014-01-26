@@ -2,6 +2,10 @@ package com.github.shadowsocks.utils
 
 import android.content.{Intent, SharedPreferences}
 
+object Path {
+  val BASE = "/data/data/com.github.shadowsocks/"
+}
+
 object Key {
   val profileId = "profileId"
   val profileName = "profileName"

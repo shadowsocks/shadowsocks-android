@@ -57,13 +57,10 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import java.util.{TimerTask, Timer}
 import android.net.TrafficStats
-import android.graphics._
 import scala.concurrent.ops._
-import scala.Some
 import com.github.shadowsocks.utils._
 import scala.Some
-import com.github.shadowsocks.ProxiedApp
-import com.github.shadowsocks.TrafficStat
+import android.graphics.Color
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
@@ -76,7 +73,6 @@ object ShadowsocksService {
 class ShadowsocksService extends Service {
 
   val TAG = "ShadowsocksService"
-  val BASE = "/data/data/com.github.shadowsocks/"
 
   val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
   val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
@@ -141,7 +137,7 @@ class ShadowsocksService extends Service {
 
   def getPid(name: String): Int = {
     try {
-      val reader: BufferedReader = new BufferedReader(new FileReader(BASE + name + ".pid"))
+      val reader: BufferedReader = new BufferedReader(new FileReader(Path.BASE + name + ".pid"))
       val line = reader.readLine
       return Integer.valueOf(line)
     } catch {
@@ -159,18 +155,18 @@ class ShadowsocksService extends Service {
   }
 
   def startShadowsocksDaemon() {
-    val cmd: String = (BASE +
+    val cmd: String = (Path.BASE +
       "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-      BASE + "shadowsocks.pid")
+      Path.BASE + "shadowsocks.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     Utils.runCommand(cmd)
   }
 
   def startDnsDaemon() {
-    val cmd: String = BASE + "pdnsd -c " + BASE + "pdnsd.conf"
+    val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     val conf: String = Config.PDNSD.format("127.0.0.1")
-    Config.printToFile(new File(BASE + "pdnsd.conf"))(p => {
+    Config.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
     })
     Utils.runCommand(cmd)
@@ -275,8 +271,8 @@ class ShadowsocksService extends Service {
 
   def startRedsocksDaemon() {
     val conf = Config.REDSOCKS.format(config.localPort)
-    val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf".format(BASE, BASE, BASE)
-    Config.printToFile(new File(BASE + "redsocks.conf"))(p => {
+    val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf".format(Path.BASE, Path.BASE, Path.BASE)
+    Config.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
     Utils.runRootCommand(cmd)

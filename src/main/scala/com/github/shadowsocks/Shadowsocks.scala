@@ -355,7 +355,7 @@ class Shadowsocks
           } else {
             in = assetManager.open(file)
           }
-          out = new FileOutputStream("/data/data/com.github.shadowsocks/" + file)
+          out = new FileOutputStream(Path.BASE + file)
           copyFile(in, out)
           in.close()
           in = null
