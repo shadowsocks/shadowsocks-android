@@ -78,6 +78,8 @@ class ShadowsocksService extends Service {
   val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123\n"
+  val CMD_IPTABLES_REDIRECT_DNS = " -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to "
+  val CMD_IPTABLES_DNAT_DNS = " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:"
   val DNS_PORT = 8153
 
   val MSG_CONNECT_FINISH = 1
@@ -512,19 +514,7 @@ class ShadowsocksService extends Service {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
-    if (hasRedirectSupport) {
-      init_sb
-        .append(Utils.getIptables)
-        .append(" -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to ")
-        .append(DNS_PORT)
-        .append("\n")
-    } else {
-      init_sb
-        .append(Utils.getIptables)
-        .append(" -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:")
-        .append(DNS_PORT)
-        .append("\n")
-    }
+
     if (config.isGFWList) {
       val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
       for (item <- chn_list) {
@@ -550,11 +540,20 @@ class ShadowsocksService extends Service {
       }
       for (uid <- uidSet) {
         if (!config.isBypassApps) {
-          http_sb.append((if (hasRedirectSupport) {
-            Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
-          } else {
-            Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
-          }).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          http_sb.append(
+            (if (hasRedirectSupport) {
+                Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
+            } else {
+                Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
+            }).replace("-t nat", "-t nat -m owner --uid-owner " + uid)
+            )
+          init_sb.append(
+            (if (hasRedirectSupport) {
+                Utils.getIptables + CMD_IPTABLES_REDIRECT_DNS + DNS_PORT + '\n'
+            } else {
+                Utils.getIptables + CMD_IPTABLES_DNAT_DNS + DNS_PORT + '\n'
+            }).replace("-t nat", "-t nat -m owner --uid-owner " + uid)
+            )
         } else {
           init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
         }
