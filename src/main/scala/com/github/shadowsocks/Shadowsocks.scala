@@ -67,12 +67,11 @@ import scala.collection.mutable.ListBuffer
 import com.github.shadowsocks.database.Profile
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEditTextPreference, SummaryEditTextPreference}
-import com.github.shadowsocks.database.Item
-import com.github.shadowsocks.database.Category
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
 import com.google.zxing.integration.android.IntentIntegrator
+import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -103,10 +102,9 @@ object Typefaces {
           val t: Typeface = Typeface.createFromAsset(c.getAssets, assetPath)
           cache.put(assetPath, t)
         } catch {
-          case e: Exception => {
+          case e: Exception =>
             Log.e(TAG, "Could not get typeface '" + assetPath + "' because " + e.getMessage)
             return null
-          }
         }
       }
       return cache.get(assetPath)
@@ -131,8 +129,7 @@ object Shadowsocks {
   // Flags
   var vpnEnabled = -1
 
-  // Help functions
-
+  // Helper functions
   def updateListPreference(pref: Preference, value: String) {
     pref.setSummary(value)
     pref.asInstanceOf[ListPreference].setValue(value)
@@ -172,10 +169,6 @@ object Shadowsocks {
     }
   }
 
-  def isServiceStarted(context: Context): Boolean = {
-    ShadowsocksService.isServiceStarted(context) || ShadowVpnService.isServiceStarted(context)
-  }
-
   class ProxyFragment extends UnifiedPreferenceFragment {
 
     var receiver: BroadcastReceiver = null
@@ -194,8 +187,8 @@ object Shadowsocks {
     private def updatePreferenceScreen() {
       for (name <- Shadowsocks.PROXY_PREFS) {
         val pref = findPreference(name)
-        Shadowsocks.updatePreference(pref, name,
-          getActivity.asInstanceOf[Shadowsocks].currentProfile)
+        Shadowsocks
+          .updatePreference(pref, name, getActivity.asInstanceOf[Shadowsocks].currentProfile)
       }
     }
 
@@ -252,8 +245,8 @@ object Shadowsocks {
     private def updatePreferenceScreen() {
       for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref = findPreference(name)
-        Shadowsocks.updatePreference(pref, name,
-          getActivity.asInstanceOf[Shadowsocks].currentProfile)
+        Shadowsocks
+          .updatePreference(pref, name, getActivity.asInstanceOf[Shadowsocks].currentProfile)
       }
     }
 
@@ -304,9 +297,61 @@ class Shadowsocks
   var prepared = false
   var currentProfile = new Profile
 
+  // Services
+  var currentServiceName = classOf[ShadowsocksNatService].getName
+  var bgService: IShadowsocksService = null
+  val callback = new IShadowsocksServiceCallback.Stub {
+    override def stateChanged(state: Int, msg: String) {
+      onStateChanged(state, msg)
+    }
+  }
+  val connection = new ServiceConnection {
+    override def onServiceConnected(name: ComponentName, service: IBinder) {
+      // Initialize the background service
+      bgService = IShadowsocksService.Stub.asInterface(service)
+      try {
+        bgService.registerCallback(callback)
+      } catch {
+        case ignored: RemoteException => // Nothing
+      }
+      // Update the UI
+      switchButton.setEnabled(true)
+      if (State.isAvailable(bgService.getState)) {
+        if (status.getBoolean(Key.isRunning, false)) {
+          spawn {
+            crash_recovery()
+            handler.sendEmptyMessage(MSG_CRASH_RECOVER)
+          }
+        }
+        Crouton.cancelAllCroutons()
+        onStateChanged(State.STOPPED, null)
+        setPreferenceEnabled(enabled = true)
+      } else {
+        if (bgService.getMode == Mode.VPN) {
+          val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
+          val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
+          Crouton
+            .makeText(Shadowsocks.this, R.string.vpn_status, style)
+            .setConfiguration(config)
+            .show()
+          switchButton.setEnabled(false)
+        }
+        switchButton.setChecked(true)
+        onStateChanged(State.CONNECTED, null)
+        setPreferenceEnabled(enabled = false)
+      }
+      // set the listener
+      switchButton.setOnCheckedChangeListener(Shadowsocks.this)
+    }
+
+    override def onServiceDisconnected(name: ComponentName) {
+      switchButton.setEnabled(false)
+      bgService = null
+    }
+  }
+
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-  lazy val stateReceiver = new StateBroadcastReceiver
   lazy val preferenceReceiver = new PreferenceBroadcastReceiver
   lazy val drawer = MenuDrawer.attach(this)
   lazy val menuAdapter = new MenuAdapter(this, getMenuList)
@@ -341,9 +386,8 @@ class Shadowsocks
     try {
       files = assetManager.list(path)
     } catch {
-      case e: IOException => {
+      case e: IOException =>
         Log.e(Shadowsocks.TAG, e.getMessage)
-      }
     }
     if (files != null) {
       for (file <- files) {
@@ -363,9 +407,8 @@ class Shadowsocks
           out.close()
           out = null
         } catch {
-          case ex: Exception => {
+          case ex: Exception =>
             Log.e(Shadowsocks.TAG, ex.getMessage)
-          }
         }
       }
     }
@@ -409,9 +452,8 @@ class Shadowsocks
       val pi: PackageInfo = getPackageManager.getPackageInfo(getPackageName, 0)
       version = pi.versionName
     } catch {
-      case e: PackageManager.NameNotFoundException => {
+      case e: PackageManager.NameNotFoundException =>
         version = "Package name not found"
-      }
     }
     version
   }
@@ -445,12 +487,10 @@ class Shadowsocks
   def onCheckedChanged(compoundButton: CompoundButton, checked: Boolean) {
     if (compoundButton eq switchButton) {
       checked match {
-        case true => {
+        case true =>
           prepareStartService()
-        }
-        case false => {
+        case false =>
           serviceStop()
-        }
       }
     }
   }
@@ -494,13 +534,24 @@ class Shadowsocks
   /** Called when the activity is first created. */
   override def onCreate(savedInstanceState: Bundle) {
 
-    // Initialize preference
+    // Initialize the preference
     setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
 
-    // Initialize profile
+    // Initialize the profile
     currentProfile = {
       profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse currentProfile
+    }
+
+    // Update the profile
+    if (!status.getBoolean(getVersionName, false)) {
+      val h = showProgress(getString(R.string.initializing))
+      status.edit.putBoolean(getVersionName, true).apply()
+      spawn {
+        reset()
+        currentProfile = profileManager.create()
+        h.sendEmptyMessage(0)
+      }
     }
 
     // Initialize drawer
@@ -527,23 +578,19 @@ class Shadowsocks
     getSupportActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
 
     // Register broadcast receiver
-    registerReceiver(stateReceiver, new IntentFilter(Action.UPDATE_STATE))
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
-    // Update status
-    if (!Shadowsocks.isServiceStarted(this)) {
-      spawn {
-        status.edit.putBoolean(Key.isRoot, Utils.getRoot).apply()
-      }
-      if (!status.getBoolean(getVersionName, false)) {
-        val h = showProgress(getString(R.string.initializing))
-        status.edit.putBoolean(getVersionName, true).apply()
-        spawn {
-          reset()
-          currentProfile = profileManager.create()
-          h.sendEmptyMessage(0)
+    // Bind to the service
+    spawn {
+      status.edit.putBoolean(Key.isRoot, Utils.getRoot).apply()
+      handler.post(new Runnable {
+        override def run() {
+          val isRoot = status.getBoolean(Key.isRoot, false)
+          val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+          bindService(new Intent(s.getName), connection, Context.BIND_AUTO_CREATE)
+          startService(new Intent(Shadowsocks.this, s))
         }
-      }
+      })
     }
   }
 
@@ -571,15 +618,15 @@ class Shadowsocks
     drawer.setActiveView(v, pos)
   }
 
-
   def newProfile(id: Int) {
 
     val builder = new AlertDialog.Builder(this)
-    builder.setTitle(R.string.add_profile)
-    .setItems(R.array.add_profile_methods, new DialogInterface.OnClickListener() {
+    builder
+      .setTitle(R.string.add_profile)
+      .setItems(R.array.add_profile_methods, new DialogInterface.OnClickListener() {
       def onClick(dialog: DialogInterface, which: Int) {
         which match {
-          case 0 => {
+          case 0 =>
             dialog.dismiss()
             val h = showProgress(getString(R.string.loading))
             h.postDelayed(new Runnable() {
@@ -589,17 +636,14 @@ class Shadowsocks
                 h.sendEmptyMessage(0)
               }
             }, 600)
-          }
-          case 1 => {
+          case 1 =>
             dialog.dismiss()
             addProfile(id)
-          }
           case _ =>
         }
       }
     })
     builder.create().show()
-
   }
 
   def addProfile(profile: Profile) {
@@ -737,7 +781,7 @@ class Shadowsocks
         EasyTracker
           .getInstance(this)
           .send(
-          MapBuilder.createEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, null).build())
+            MapBuilder.createEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, null).build())
         flushDnsCache()
       })
 
@@ -753,10 +797,9 @@ class Shadowsocks
 
   override def onOptionsItemSelected(item: com.actionbarsherlock.view.MenuItem): Boolean = {
     item.getItemId match {
-      case android.R.id.home => {
+      case android.R.id.home =>
         drawer.toggleMenu()
         return true
-      }
     }
     super.onOptionsItemSelected(item)
   }
@@ -768,38 +811,7 @@ class Shadowsocks
 
   protected override def onResume() {
     super.onResume()
-    if (!prepared) {
-      if (Shadowsocks.isServiceStarted(this)) {
-        switchButton.setChecked(true)
-        if (ShadowVpnService.isServiceStarted(this)) {
-          val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
-          val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
-          switchButton.setEnabled(false)
-          Crouton
-            .makeText(Shadowsocks.this, R.string.vpn_status, style)
-            .setConfiguration(config)
-            .show()
-        }
-        setPreferenceEnabled(enabled = false)
-        onStateChanged(State.CONNECTED, null)
-      } else {
-        switchButton.setEnabled(true)
-        switchButton.setChecked(false)
-        Crouton.cancelAllCroutons()
-        setPreferenceEnabled(enabled = true)
-        if (status.getBoolean(Key.isRunning, false)) {
-          spawn {
-            crash_recovery()
-            handler.sendEmptyMessage(MSG_CRASH_RECOVER)
-          }
-        }
-        onStateChanged(State.STOPPED, null)
-      }
-    }
-
-    switchButton.setOnCheckedChangeListener(this)
-
-    Config.refresh(this)
+    ConfigUtils.refresh(this)
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
@@ -848,8 +860,11 @@ class Shadowsocks
 
   override def onDestroy() {
     super.onDestroy()
+    if (bgService != null) {
+      bgService.unregisterCallback(callback)
+      unbindService(connection)
+    }
     Crouton.cancelAllCroutons()
-    unregisterReceiver(stateReceiver)
     unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
   }
@@ -891,16 +906,14 @@ class Shadowsocks
       }
     } else {
       resultCode match {
-        case Activity.RESULT_OK => {
+        case Activity.RESULT_OK =>
           prepared = true
           if (!serviceStart) {
             switchButton.setChecked(false)
           }
-        }
-        case _ => {
+        case _ =>
           clearDialog()
           Log.e(Shadowsocks.TAG, "Failed to start VpnService")
-        }
       }
     }
   }
@@ -918,7 +931,7 @@ class Shadowsocks
   }
 
   def serviceStop() {
-    sendBroadcast(new Intent(Action.CLOSE))
+    if (bgService != null) bgService.stop()
   }
 
   /** Called when connect button is clicked. */
@@ -935,26 +948,20 @@ class Shadowsocks
         return false
       }
     } catch {
-      case ex: Exception => {
+      case ex: Exception =>
         this.showDialog(getString(R.string.port_alert))
         return false
-      }
     }
 
+    if (bgService == null) return false
+
+    bgService.start(ConfigUtils.load(settings))
+
     if (isVpnEnabled) {
-      if (ShadowVpnService.isServiceStarted(this)) return false
-      val intent: Intent = new Intent(this, classOf[ShadowVpnService])
-      Extra.put(settings, intent)
-      startService(intent)
       val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
       val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
       Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).setConfiguration(config).show()
       switchButton.setEnabled(false)
-    } else {
-      if (ShadowsocksService.isServiceStarted(this)) return false
-      val intent: Intent = new Intent(this, classOf[ShadowsocksService])
-      Extra.put(settings, intent)
-      startService(intent)
     }
     true
   }
@@ -974,9 +981,8 @@ class Shadowsocks
     try {
       versionName = getPackageManager.getPackageInfo(getPackageName, 0).versionName
     } catch {
-      case ex: PackageManager.NameNotFoundException => {
+      case ex: PackageManager.NameNotFoundException =>
         versionName = ""
-      }
     }
 
     new AlertDialog.Builder(this)
@@ -1014,58 +1020,51 @@ class Shadowsocks
   }
 
   def onStateChanged(s: Int, m: String) {
-    if (state != s) {
-      state = s
-      state match {
-        case State.CONNECTING => {
-          if (progressDialog == null) {
-            progressDialog = ProgressDialog
-              .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+    handler.post(new Runnable {
+      override def run() {
+        if (state != s) {
+          state = s
+          state match {
+            case State.CONNECTING =>
+              if (progressDialog == null) {
+                progressDialog = ProgressDialog
+                  .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+              }
+              setPreferenceEnabled(enabled = false)
+            case State.CONNECTED =>
+              clearDialog()
+              if (!switchButton.isChecked) switchButton.setChecked(true)
+              setPreferenceEnabled(enabled = false)
+            case State.STOPPED =>
+              clearDialog()
+              if (switchButton.isChecked) {
+                switchButton.setEnabled(true)
+                switchButton.setChecked(false)
+                Crouton.cancelAllCroutons()
+              }
+              if (m != null) {
+                Crouton.cancelAllCroutons()
+                val style = new Style.Builder().setBackgroundColorValue(Style.holoRedLight).build()
+                val config = new Configuration.Builder()
+                  .setDuration(Configuration.DURATION_LONG)
+                  .build()
+                Crouton
+                  .makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style)
+                  .setConfiguration(config)
+                  .show()
+              }
+              setPreferenceEnabled(enabled = true)
           }
-          setPreferenceEnabled(enabled = false)
-        }
-        case State.CONNECTED => {
-          clearDialog()
-          if (!switchButton.isChecked) switchButton.setChecked(true)
-          setPreferenceEnabled(enabled = false)
-        }
-        case State.STOPPED => {
-          clearDialog()
-          if (switchButton.isChecked) {
-            switchButton.setEnabled(true)
-            switchButton.setChecked(false)
-            Crouton.cancelAllCroutons()
-          }
-          if (m != null) {
-            Crouton.cancelAllCroutons()
-            val style = new Style.Builder().setBackgroundColorValue(Style.holoRedLight).build()
-            val config = new Configuration.Builder()
-              .setDuration(Configuration.DURATION_LONG)
-              .build()
-            Crouton
-              .makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style)
-              .setConfiguration(config)
-              .show()
-          }
-          setPreferenceEnabled(enabled = true)
+          if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         }
       }
-      if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
-    }
+    })
   }
 
   class PreferenceBroadcastReceiver extends BroadcastReceiver {
     override def onReceive(context: Context, intent: Intent) {
       currentProfile = profileManager.save()
       menuAdapter.updateList(getMenuList, currentProfile.id)
-    }
-  }
-
-  class StateBroadcastReceiver extends BroadcastReceiver {
-    override def onReceive(context: Context, intent: Intent) {
-      val state = intent.getIntExtra(Extra.STATE, State.INIT)
-      val message = intent.getStringExtra(Extra.MESSAGE)
-      onStateChanged(state, message)
     }
   }
 

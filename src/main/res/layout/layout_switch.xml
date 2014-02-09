@@ -17,6 +17,7 @@
 
   <org.jraf.android.backport.switchwidget.Switch
       android:id="@+id/switchButton"
+      android:enabled="false"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_alignParentRight="true"

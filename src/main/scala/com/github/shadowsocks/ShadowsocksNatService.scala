@@ -57,34 +57,22 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import java.util.{TimerTask, Timer}
 import android.net.TrafficStats
-import scala.concurrent.ops._
 import com.github.shadowsocks.utils._
 import scala.Some
 import android.graphics.Color
+import com.github.shadowsocks.aidl.Config
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
-object ShadowsocksService {
-  def isServiceStarted(context: Context): Boolean = {
-    Utils.isServiceStarted("com.github.shadowsocks.ShadowsocksService", context)
-  }
-}
+class ShadowsocksNatService extends Service with BaseService {
 
-class ShadowsocksService extends Service {
-
-  val TAG = "ShadowsocksService"
+  val TAG = "ShadowsocksNatService"
 
   val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN\n"
   val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123\n"
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123\n"
   val DNS_PORT = 8153
-
-  val MSG_CONNECT_FINISH = 1
-  val MSG_CONNECT_SUCCESS = 2
-  val MSG_CONNECT_FAIL = 3
-  val MSG_STOP_SELF = 4
-  val MSG_VPN_ERROR = 5
 
   private val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
   private val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
@@ -104,54 +92,23 @@ class ShadowsocksService extends Service {
   private var mStartForegroundArgs = new Array[AnyRef](2)
   private var mStopForegroundArgs = new Array[AnyRef](1)
 
-  private var state = State.INIT
   private var last: TrafficStat = null
   private var lastTxRate = 0
   private var lastRxRate = 0
   private var timer: Timer = null
   private val TIMER_INTERVAL = 2
 
-  private def changeState(s: Int) {
-    if (state != s) {
-      state = s
-      val intent = new Intent(Action.UPDATE_STATE)
-      intent.putExtra(Extra.STATE, state)
-      sendBroadcast(intent)
-    }
-  }
-
   val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
       msg.what match {
-        case MSG_CONNECT_SUCCESS =>
+        case Msg.CONNECT_SUCCESS =>
           changeState(State.CONNECTED)
-        case MSG_CONNECT_FAIL =>
+        case Msg.CONNECT_FAIL =>
           changeState(State.STOPPED)
-        case MSG_STOP_SELF =>
-          stopSelf()
         case _ =>
       }
       super.handleMessage(msg)
     }
-  }
-
-  def getPid(name: String): Int = {
-    try {
-      val reader: BufferedReader = new BufferedReader(new FileReader(Path.BASE + name + ".pid"))
-      val line = reader.readLine
-      return Integer.valueOf(line)
-    } catch {
-      case e: FileNotFoundException => {
-        Log.e(TAG, "Cannot open pid file: " + name)
-      }
-      case e: IOException => {
-        Log.e(TAG, "Cannot read pid file: " + name)
-      }
-      case e: NumberFormatException => {
-        Log.e(TAG, "Invalid pid", e)
-      }
-    }
-    -1
   }
 
   def startShadowsocksDaemon() {
@@ -165,8 +122,8 @@ class ShadowsocksService extends Service {
 
   def startDnsDaemon() {
     val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    val conf: String = Config.PDNSD.format("127.0.0.1")
-    Config.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+    val conf: String = ConfigUtils.PDNSD.format("127.0.0.1")
+    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
     })
     Utils.runCommand(cmd)
@@ -178,101 +135,17 @@ class ShadowsocksService extends Service {
       val pi: PackageInfo = getPackageManager.getPackageInfo(getPackageName, 0)
       version = pi.versionName
     } catch {
-      case e: PackageManager.NameNotFoundException => {
+      case e: PackageManager.NameNotFoundException =>
         version = "Package name not found"
-      }
     }
     version
   }
 
-  def handleCommand(intent: Intent) {
-    if (intent == null) {
-      stopSelf()
-      return
-    }
-
-    changeState(State.CONNECTING)
-
-    config = Extra.get(intent)
-
-    if (config.isTrafficStat) {
-      // initialize timer
-      val task = new TimerTask {
-        def run() {
-          val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-          val now = new TrafficStat(TrafficStats.getUidTxBytes(uid),
-            TrafficStats.getUidRxBytes(uid), java.lang.System.currentTimeMillis())
-          val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
-          val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
-          last = now
-          if (lastTxRate == txRate && lastRxRate == rxRate) {
-            return
-          } else {
-            lastTxRate = txRate
-            lastRxRate = rxRate
-          }
-          if ((pm.isScreenOn && state == State.CONNECTED) || (txRate == 0 && rxRate == 0)) {
-            notifyForegroundAlert(getString(R.string.forward_success),
-              getString(R.string.service_status).format(math.max(txRate, rxRate)), math.max(txRate, rxRate))
-          }
-        }
-      }
-      last = new TrafficStat(TrafficStats.getUidTxBytes(uid),
-        TrafficStats.getUidRxBytes(uid), java.lang.System.currentTimeMillis())
-      timer = new Timer(true)
-      timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
-    }
-
-    spawn {
-
-      if (config.proxy == "198.199.101.152") {
-        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
-        try {
-          config = Config.getPublicConfig(getBaseContext, container, config)
-        } catch {
-          case ex: Exception => {
-            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-            stopSelf()
-            handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
-            return
-          }
-        }
-      }
-
-      killProcesses()
-
-      var resolved: Boolean = false
-      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-        !InetAddressUtils.isIPv6Address(config.proxy)) {
-        Utils.resolve(config.proxy, enableIPv6 = true) match {
-          case Some(a) =>
-            config.proxy = a
-            resolved = true
-          case None => resolved = false
-        }
-      } else {
-        resolved = true
-      }
-
-      hasRedirectSupport = Utils.getHasRedirectSupport
-
-      if (resolved && handleConnection) {
-        notifyForegroundAlert(getString(R.string.forward_success),
-          getString(R.string.service_running).format(config.profileName))
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 500)
-      } else {
-        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-        stopSelf()
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
-      }
-      handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 500)
-    }
-  }
-
   def startRedsocksDaemon() {
-    val conf = Config.REDSOCKS.format(config.localPort)
-    val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf".format(Path.BASE, Path.BASE, Path.BASE)
-    Config.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
+    val conf = ConfigUtils.REDSOCKS.format(config.localPort)
+    val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf"
+      .format(Path.BASE, Path.BASE, Path.BASE)
+    ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
     Utils.runRootCommand(cmd)
@@ -291,14 +164,14 @@ class ShadowsocksService extends Service {
     try {
       t.join(300)
     } catch {
-      case ignored: InterruptedException => {
-      }
+      case ignored: InterruptedException =>
     }
     !t.isAlive
   }
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
+
     startShadowsocksDaemon()
     startDnsDaemon()
     startRedsocksDaemon()
@@ -308,21 +181,14 @@ class ShadowsocksService extends Service {
     true
   }
 
-  def initSoundVibrateLights(notification: Notification) {
-    notification.sound = null
-    notification.defaults |= Notification.DEFAULT_LIGHTS
-  }
-
   def invokeMethod(method: Method, args: Array[AnyRef]) {
     try {
       method.invoke(this, mStartForegroundArgs: _*)
     } catch {
-      case e: InvocationTargetException => {
+      case e: InvocationTargetException =>
         Log.w(TAG, "Unable to invoke method", e)
-      }
-      case e: IllegalAccessException => {
+      case e: IllegalAccessException =>
         Log.w(TAG, "Unable to invoke method", e)
-      }
     }
   }
 
@@ -340,8 +206,9 @@ class ShadowsocksService extends Service {
 
     val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
     if (rate >= 0) {
-      val bitmap =Utils.getBitmap(rate.toString, icon.getIntrinsicWidth * 4,
-        icon.getIntrinsicHeight * 4, Color.TRANSPARENT)
+      val bitmap = Utils
+        .getBitmap(rate.toString, icon.getIntrinsicWidth * 4, icon.getIntrinsicHeight * 4,
+          Color.TRANSPARENT)
       builder.setLargeIcon(bitmap)
 
       if (rate < 1000) {
@@ -352,7 +219,6 @@ class ShadowsocksService extends Service {
       } else {
         builder.setSmallIcon(R.drawable.ic_stat_speed, 1091)
       }
-
     } else {
       builder.setSmallIcon(R.drawable.ic_stat_shadowsocks)
     }
@@ -364,7 +230,7 @@ class ShadowsocksService extends Service {
       .setContentText(info)
       .setContentIntent(contentIntent)
       .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
-      actionIntent)
+        actionIntent)
 
     startForegroundCompat(1, builder.build)
   }
@@ -386,20 +252,17 @@ class ShadowsocksService extends Service {
   }
 
   def onBind(intent: Intent): IBinder = {
-    null
+    if (classOf[ShadowsocksNatService].getName equals intent.getAction) {
+      binder
+    } else {
+      null
+    }
   }
 
   override def onCreate() {
     super.onCreate()
 
-    Config.refresh(this)
-
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "start", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "start")
-      .build())
+    ConfigUtils.refresh(this)
 
     notificationManager = this
       .getSystemService(Context.NOTIFICATION_SERVICE)
@@ -408,63 +271,19 @@ class ShadowsocksService extends Service {
       mStartForeground = getClass.getMethod("startForeground", mStartForegroundSignature: _*)
       mStopForeground = getClass.getMethod("stopForeground", mStopForegroundSignature: _*)
     } catch {
-      case e: NoSuchMethodException => {
+      case e: NoSuchMethodException =>
         mStartForeground = {
           mStopForeground = null
           mStopForeground
         }
-      }
     }
     try {
       mSetForeground = getClass.getMethod("setForeground", mSetForegroundSignature: _*)
     } catch {
-      case e: NoSuchMethodException => {
+      case e: NoSuchMethodException =>
         throw new IllegalStateException(
           "OS doesn't have Service.startForeground OR Service.setForeground!")
-      }
     }
-
-    // register close receiver
-    val filter = new IntentFilter()
-    filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Action.CLOSE)
-    receiver = new BroadcastReceiver() {
-      def onReceive(p1: Context, p2: Intent) {
-        stopSelf()
-      }
-    }
-    registerReceiver(receiver, filter)
-  }
-
-  /** Called when the activity is closed. */
-  override def onDestroy() {
-
-    // reset timer
-    if (timer != null) {
-      timer.cancel()
-      timer = null
-    }
-
-    // clean up context
-    changeState(State.STOPPED)
-
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "stop", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "stop")
-      .build())
-
-    stopForegroundCompat(1)
-    if (receiver != null) {
-      unregisterReceiver(receiver)
-      receiver = null
-    }
-
-    // reset NAT
-    killProcesses()
-
-    super.onDestroy()
   }
 
   def killProcesses() {
@@ -489,12 +308,7 @@ class ShadowsocksService extends Service {
     Utils.runCommand(sb.toString())
   }
 
-  override def onStart(intent: Intent, startId: Int) {
-    handleCommand(intent)
-  }
-
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    handleCommand(intent)
     Service.START_STICKY
   }
 
@@ -593,12 +407,10 @@ class ShadowsocksService extends Service {
       try {
         mStopForeground.invoke(this, mStopForegroundArgs: _*)
       } catch {
-        case e: InvocationTargetException => {
+        case e: InvocationTargetException =>
           Log.w(TAG, "Unable to invoke stopForeground", e)
-        }
-        case e: IllegalAccessException => {
+        case e: IllegalAccessException =>
           Log.w(TAG, "Unable to invoke stopForeground", e)
-        }
       }
       return
     }
@@ -606,4 +418,135 @@ class ShadowsocksService extends Service {
     mSetForegroundArgs(0) = boolean2Boolean(x = false)
     invokeMethod(mSetForeground, mSetForegroundArgs)
   }
+
+  override def startRunner(c: Config) {
+
+    var config = c
+
+    // register close receiver
+    val filter = new IntentFilter()
+    filter.addAction(Intent.ACTION_SHUTDOWN)
+    filter.addAction(Action.CLOSE)
+    receiver = new BroadcastReceiver() {
+      def onReceive(p1: Context, p2: Intent) {
+        stopRunner()
+      }
+    }
+    registerReceiver(receiver, filter)
+
+    // start tracker
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "start", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "start")
+      .build())
+
+    changeState(State.CONNECTING)
+
+    if (config.isTrafficStat) {
+      // initialize timer
+      val task = new TimerTask {
+        def run() {
+          val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
+          val now = new
+              TrafficStat(TrafficStats.getUidTxBytes(uid), TrafficStats.getUidRxBytes(uid),
+                java.lang.System.currentTimeMillis())
+          val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
+          val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
+          last = now
+          if (lastTxRate == txRate && lastRxRate == rxRate) {
+            return
+          } else {
+            lastTxRate = txRate
+            lastRxRate = rxRate
+          }
+          if ((pm.isScreenOn && state == State.CONNECTED) || (txRate == 0 && rxRate == 0)) {
+            notifyForegroundAlert(getString(R.string.forward_success),
+              getString(R.string.service_status).format(math.max(txRate, rxRate)),
+              math.max(txRate, rxRate))
+          }
+        }
+      }
+      last = new TrafficStat(TrafficStats.getUidTxBytes(uid), TrafficStats.getUidRxBytes(uid),
+        java.lang.System.currentTimeMillis())
+      timer = new Timer(true)
+      timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
+    }
+
+    if (config.proxy == "198.199.101.152") {
+      val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+      try {
+        config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
+      } catch {
+        case ex: Exception =>
+          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+          stopRunner()
+          handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+          return
+      }
+    }
+
+    killProcesses()
+
+    var resolved: Boolean = false
+    if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+      !InetAddressUtils.isIPv6Address(config.proxy)) {
+      Utils.resolve(config.proxy, enableIPv6 = true) match {
+        case Some(a) =>
+          config.proxy = a
+          resolved = true
+        case None => resolved = false
+      }
+    } else {
+      resolved = true
+    }
+
+    hasRedirectSupport = Utils.getHasRedirectSupport
+
+    if (resolved && handleConnection) {
+      notifyForegroundAlert(getString(R.string.forward_success),
+        getString(R.string.service_running).format(config.profileName))
+      handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 500)
+    } else {
+      notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+      stopRunner()
+      handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+    }
+    handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 500)
+  }
+
+  override def stopRunner() {
+
+    // change the state
+    changeState(State.STOPPED)
+
+    // stop the tracker
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "stop", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "stop")
+      .build())
+
+    // reset timer
+    if (timer != null) {
+      timer.cancel()
+      timer = null
+    }
+
+    // clean up context
+    stopForegroundCompat(1)
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null
+    }
+
+    // reset NAT
+    killProcesses()
+  }
+
+  override def getTag = TAG
+
+  override def getServiceMode = Mode.NAT
 }

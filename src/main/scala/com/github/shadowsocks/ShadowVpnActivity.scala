@@ -40,15 +40,27 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.os.Bundle
+import android.os.{IBinder, Bundle}
 import android.net.VpnService
-import android.content.Intent
+import android.content.{ComponentName, ServiceConnection, Intent}
 import android.util.Log
 import android.preference.PreferenceManager
-import com.github.shadowsocks.utils.Extra
-import com.actionbarsherlock.app.SherlockActivity
+import com.github.shadowsocks.utils._
+import com.github.shadowsocks.aidl.IShadowsocksService
 
 class ShadowVpnActivity extends Activity {
+
+  // Services
+  var bgService: IShadowsocksService = null
+  val connection = new ServiceConnection {
+    override def onServiceConnected(name: ComponentName, service: IBinder) {
+      bgService = IShadowsocksService.Stub.asInterface(service)
+    }
+
+    override def onServiceDisconnected(name: ComponentName) {
+      bgService = null
+    }
+  }
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -62,14 +74,12 @@ class ShadowVpnActivity extends Activity {
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     resultCode match {
-      case Activity.RESULT_OK => {
-        val intent: Intent = new Intent(this, classOf[ShadowVpnService])
-        Extra.put(PreferenceManager.getDefaultSharedPreferences(this), intent)
-        startService(intent)
-      }
-      case _ => {
+      case Activity.RESULT_OK =>
+        if (bgService != null) {
+          bgService.start(ConfigUtils.load(PreferenceManager.getDefaultSharedPreferences(this)))
+        }
+      case _ =>
         Log.e(Shadowsocks.TAG, "Failed to start VpnService")
-      }
     }
     finish()
   }
