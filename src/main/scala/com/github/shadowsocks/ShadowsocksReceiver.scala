@@ -54,34 +54,17 @@ class ShadowsocksReceiver extends BroadcastReceiver {
     val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
     val status = context.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
 
-    if (intent.getAction == Action.UPDATE_STATE) {
-      val state = intent.getIntExtra(Extra.STATE, State.INIT)
-      val running = state match {
-        case State.CONNECTING => true
-        case State.CONNECTED => true
-        case _ => false
-      }
-      status.edit.putBoolean(Key.isRunning, running).commit()
-      return
-    }
-
     var versionName: String = null
     try {
       versionName = context.getPackageManager.getPackageInfo(context.getPackageName, 0).versionName
     } catch {
-      case e: PackageManager.NameNotFoundException => {
+      case e: PackageManager.NameNotFoundException =>
         versionName = "NONE"
-      }
     }
     val isAutoConnect: Boolean = settings.getBoolean(Key.isAutoConnect, false)
     val isInstalled: Boolean = status.getBoolean(versionName, false)
     if (isAutoConnect && isInstalled) {
-      if (Utils.getRoot) {
-        if (ShadowsocksService.isServiceStarted(context)) return
-        val intent: Intent = new Intent(context, classOf[ShadowsocksService])
-        Extra.put(settings, intent)
-        context.startService(intent)
-      }
+      context.startActivity(new Intent(context, classOf[ShadowsocksRunnerActivity]))
     }
   }
 }

@@ -1,11 +1,12 @@
 package com.github.shadowsocks.utils
 
-import android.content.Context
+import android.content.{Intent, SharedPreferences, Context}
 import com.github.shadowsocks.ShadowsocksApplication
 import com.google.tagmanager.Container
 import scalaj.http.{HttpOptions, Http}
+import com.github.shadowsocks.aidl.Config
 
-object Config {
+object ConfigUtils {
   val SHADOWSOCKS = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
   val REDSOCKS = "base {" +
     " log_debug = off;" +
@@ -83,10 +84,35 @@ object Config {
     val method = proxy(3).trim
 
     new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
-      config.profileName, host, password, method, port, config.localPort, config.proxiedAppString)
+      config.profileName, host, password, method, config.proxiedAppString, port, config.localPort)
+  }
+
+  def load(settings: SharedPreferences): Config = {
+    val isGlobalProxy = settings.getBoolean(Key.isGlobalProxy, false)
+    val isGFWList = settings.getBoolean(Key.isGFWList, false)
+    val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
+    val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
+
+    val profileName = settings.getString(Key.profileName, "default")
+    val proxy = settings.getString(Key.proxy, "127.0.0.1")
+    val sitekey = settings.getString(Key.sitekey, "default")
+    val encMethod = settings.getString(Key.encMethod, "table")
+    val remotePort: Int = try {
+      settings.getString(Key.remotePort, "1984").toInt
+    } catch {
+      case ex: NumberFormatException =>
+        1984
+    }
+    val localPort: Int = try {
+      settings.getString(Key.localPort, "1984").toInt
+    } catch {
+      case ex: NumberFormatException =>
+        1984
+    }
+    val proxiedAppString = settings.getString(Key.proxied, "")
+
+    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, profileName, proxy, sitekey,
+      encMethod, proxiedAppString, remotePort, localPort)
+
   }
 }
-
-case class Config(isGlobalProxy: Boolean, isGFWList: Boolean, isBypassApps: Boolean,
-  isTrafficStat: Boolean, profileName: String, var proxy: String, sitekey: String,
-  encMethod: String, remotePort: Int, localPort: Int, proxiedAppString: String)

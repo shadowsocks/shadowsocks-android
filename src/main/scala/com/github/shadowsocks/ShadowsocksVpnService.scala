@@ -56,22 +56,11 @@ import org.apache.commons.net.util.SubnetUtils
 import java.net.InetAddress
 import com.github.shadowsocks.utils._
 import scala.Some
+import com.github.shadowsocks.aidl.{IShadowsocksService, Config}
 
-object ShadowVpnService {
-  def isServiceStarted(context: Context): Boolean = {
-    Utils.isServiceStarted("com.github.shadowsocks.ShadowVpnService", context)
-  }
-}
+class ShadowsocksVpnService extends VpnService with BaseService {
 
-class ShadowVpnService extends VpnService {
-
-  val TAG = "ShadowVpnService"
-
-  val MSG_CONNECT_FINISH = 1
-  val MSG_CONNECT_SUCCESS = 2
-  val MSG_CONNECT_FAIL = 3
-  val MSG_STOP_SELF = 5
-  val MSG_VPN_ERROR = 6
+  val TAG = "ShadowsocksVpnService"
 
   val VPN_MTU = 1500
 
@@ -83,58 +72,19 @@ class ShadowVpnService extends VpnService {
   var apps: Array[ProxiedApp] = null
   var config: Config = null
 
-  private var state = State.INIT
-  private var message: String = null
-
-  def changeState(s: Int) {
-    changeState(s, null)
-  }
-
-  def changeState(s: Int, m: String) {
-    if (state != s) {
-      state = s
-      if (m != null) message = m
-      val intent = new Intent(Action.UPDATE_STATE)
-      intent.putExtra(Extra.STATE, state)
-      intent.putExtra(Extra.MESSAGE, message)
-      sendBroadcast(intent)
-    }
-  }
-
   val handler: Handler = new Handler {
     override def handleMessage(msg: Message) {
       msg.what match {
-        case MSG_CONNECT_SUCCESS =>
+        case Msg.CONNECT_SUCCESS =>
           changeState(State.CONNECTED)
-        case MSG_CONNECT_FAIL =>
+        case Msg.CONNECT_FAIL =>
           changeState(State.STOPPED)
-        case MSG_VPN_ERROR =>
+        case Msg.VPN_ERROR =>
           if (msg.obj != null) changeState(State.STOPPED, msg.obj.asInstanceOf[String])
-        case MSG_STOP_SELF =>
-          stopSelf()
         case _ =>
       }
       super.handleMessage(msg)
     }
-  }
-
-  def getPid(name: String): Int = {
-    try {
-      val reader: BufferedReader = new BufferedReader(new FileReader(Path.BASE + name + ".pid"))
-      val line = reader.readLine
-      return Integer.valueOf(line)
-    } catch {
-      case e: FileNotFoundException => {
-        Log.e(TAG, "Cannot open pid file: " + name)
-      }
-      case e: IOException => {
-        Log.e(TAG, "Cannot read pid file: " + name)
-      }
-      case e: NumberFormatException => {
-        Log.e(TAG, "Invalid pid", e)
-      }
-    }
-    -1
   }
 
   def startShadowsocksDaemon() {
@@ -148,8 +98,8 @@ class ShadowVpnService extends VpnService {
 
   def startDnsDaemon() {
     val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    val conf: String = Config.PDNSD.format("0.0.0.0")
-    Config.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+    val conf: String = ConfigUtils.PDNSD.format("0.0.0.0")
+    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
     })
     Utils.runCommand(cmd)
@@ -161,72 +111,10 @@ class ShadowVpnService extends VpnService {
       val pi: PackageInfo = getPackageManager.getPackageInfo(getPackageName, 0)
       version = pi.versionName
     } catch {
-      case e: PackageManager.NameNotFoundException => {
+      case e: PackageManager.NameNotFoundException =>
         version = "Package name not found"
-      }
     }
     version
-  }
-
-  def handleCommand(intent: Intent) {
-
-    if (intent == null) {
-      stopSelf()
-      return
-    }
-
-    if (VpnService.prepare(this) != null) {
-      val i = new Intent(this, classOf[ShadowVpnActivity])
-      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      startActivity(i)
-      stopSelf()
-      return
-    }
-
-    changeState(State.CONNECTING)
-
-    config = Extra.get(intent)
-
-    spawn {
-      if (config.proxy == "198.199.101.152") {
-        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
-        try {
-          config = Config.getPublicConfig(getBaseContext, container, config)
-        } catch {
-          case ex: Exception => {
-            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-            stopSelf()
-            handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 500)
-            return
-          }
-        }
-      }
-
-      killProcesses()
-
-      // Resolve server address
-      var resolved: Boolean = false
-      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-        !InetAddressUtils.isIPv6Address(config.proxy)) {
-        Utils.resolve(config.proxy, enableIPv6 = true) match {
-          case Some(addr) =>
-            config.proxy = addr
-            resolved = true
-          case None => resolved = false
-        }
-      } else {
-        resolved = true
-      }
-
-      if (resolved && handleConnection) {
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_SUCCESS, 300)
-      } else {
-        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-        handler.sendEmptyMessageDelayed(MSG_CONNECT_FAIL, 300)
-        handler.sendEmptyMessageDelayed(MSG_STOP_SELF, 500)
-      }
-      handler.sendEmptyMessageDelayed(MSG_CONNECT_FINISH, 300)
-    }
   }
 
   def waitForProcess(name: String): Boolean = {
@@ -242,8 +130,7 @@ class ShadowVpnService extends VpnService {
     try {
       t.join(300)
     } catch {
-      case ignored: InterruptedException => {
-      }
+      case ignored: InterruptedException =>
     }
     !t.isAlive
   }
@@ -308,18 +195,17 @@ class ShadowVpnService extends VpnService {
     try {
       conn = builder.establish()
     } catch {
-      case ex: IllegalStateException => {
+      case ex: IllegalStateException =>
         val msg = new Message()
-        msg.what = MSG_VPN_ERROR
+        msg.what = Msg.VPN_ERROR
         msg.obj = ex.getMessage
         handler.sendMessage(msg)
         conn = null
-      }
       case ex: Exception => conn = null
     }
 
     if (conn == null) {
-      stopSelf()
+      stopRunner()
       return
     }
 
@@ -335,7 +221,7 @@ class ShadowVpnService extends VpnService {
       + "--loglevel 3 "
       + "--pid %stun2socks.pid")
       .format(PRIVATE_VLAN.format("2"), PRIVATE_VLAN.format("1"), config.localPort, fd, VPN_MTU,
-      Path.BASE)
+        Path.BASE)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
@@ -346,11 +232,6 @@ class ShadowVpnService extends VpnService {
     startShadowsocksDaemon()
     startDnsDaemon()
     true
-  }
-
-  def initSoundVibrateLights(notification: Notification) {
-    notification.sound = null
-    notification.defaults |= Notification.DEFAULT_LIGHTS
   }
 
   def notifyAlert(title: String, info: String) {
@@ -373,6 +254,8 @@ class ShadowVpnService extends VpnService {
     val action = intent.getAction
     if (VpnService.SERVICE_INTERFACE == action) {
       return super.onBind(intent)
+    } else if (classOf[ShadowsocksVpnService].getName == action) {
+      return binder
     }
     null
   }
@@ -380,55 +263,11 @@ class ShadowVpnService extends VpnService {
   override def onCreate() {
     super.onCreate()
 
-    Config.refresh(this)
-
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "start", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "start")
-      .build())
+    ConfigUtils.refresh(this)
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
 
-    // register close receiver
-    val filter = new IntentFilter()
-    filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Action.CLOSE)
-    receiver = new BroadcastReceiver {
-      def onReceive(p1: Context, p2: Intent) {
-        stopSelf()
-      }
-    }
-    registerReceiver(receiver, filter)
-  }
-
-  override def onDestroy() {
-    killProcesses()
-
-    changeState(State.STOPPED)
-
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "stop", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "stop")
-      .build())
-
-    if (receiver != null) {
-      unregisterReceiver(receiver)
-      receiver = null
-    }
-
-    if (conn != null) {
-      conn.close()
-      conn = null
-    }
-
-    notificationManager.cancel(1)
-
-    super.onDestroy()
   }
 
   def killProcesses() {
@@ -448,13 +287,117 @@ class ShadowVpnService extends VpnService {
     Utils.runCommand(sb.toString())
   }
 
-  override def onStart(intent: Intent, startId: Int) {
-    handleCommand(intent)
-  }
-
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    handleCommand(intent)
     Service.START_STICKY
   }
 
+  override def startRunner(c: Config) {
+
+    config = c
+
+    // ensure the VPNService is prepared
+    if (VpnService.prepare(this) != null) {
+      val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
+      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      startActivity(i)
+      return
+    }
+
+    // start the tracker
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "start", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "start")
+      .build())
+
+    // register close receiver
+    val filter = new IntentFilter()
+    filter.addAction(Intent.ACTION_SHUTDOWN)
+    receiver = new BroadcastReceiver {
+      def onReceive(p1: Context, p2: Intent) {
+        stopRunner()
+      }
+    }
+    registerReceiver(receiver, filter)
+
+    changeState(State.CONNECTING)
+
+    spawn {
+      if (config.proxy == "198.199.101.152") {
+        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        try {
+          config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
+        } catch {
+          case ex: Exception =>
+            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+            stopRunner()
+            handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+            return
+        }
+      }
+
+      // reset the context
+      killProcesses()
+
+      // Resolve the server address
+      var resolved: Boolean = false
+      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+        !InetAddressUtils.isIPv6Address(config.proxy)) {
+        Utils.resolve(config.proxy, enableIPv6 = true) match {
+          case Some(addr) =>
+            config.proxy = addr
+            resolved = true
+          case None => resolved = false
+        }
+      } else {
+        resolved = true
+      }
+
+      if (resolved && handleConnection) {
+        handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 300)
+      } else {
+        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+        handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 300)
+        stopRunner()
+      }
+      handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 300)
+    }
+  }
+
+  override def stopRunner() {
+
+    // channge the state
+    changeState(State.STOPPED)
+
+    // stop the tracker
+    EasyTracker
+      .getInstance(this)
+      .send(MapBuilder
+      .createEvent(TAG, "stop", getVersionName, 0L)
+      .set(Fields.SESSION_CONTROL, "stop")
+      .build())
+
+    // clean up the context
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null
+    }
+
+    // reset VPN
+    killProcesses()
+
+    // close connections
+    if (conn != null) {
+      conn.close()
+      conn = null
+    }
+
+    // reset notifications
+    notificationManager.cancel(1)
+  }
+
+  override def getTag = TAG
+  override def getServiceMode = Mode.VPN
+  override def getContext = getBaseContext
 }

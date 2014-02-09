@@ -40,36 +40,73 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.os.Bundle
+import android.os.{IBinder, Bundle}
 import android.net.VpnService
-import android.content.Intent
+import android.content.{Context, ComponentName, ServiceConnection, Intent}
 import android.util.Log
 import android.preference.PreferenceManager
-import com.github.shadowsocks.utils.Extra
-import com.actionbarsherlock.app.SherlockActivity
+import com.github.shadowsocks.utils._
+import com.github.shadowsocks.aidl.IShadowsocksService
 
-class ShadowVpnActivity extends Activity {
+class ShadowsocksRunnerActivity extends Activity {
+
+  lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
+  lazy val isRoot = Utils.getRoot
+
+  // Services
+  var bgService: IShadowsocksService = null
+  val connection = new ServiceConnection {
+    override def onServiceConnected(name: ComponentName, service: IBinder) {
+      bgService = IShadowsocksService.Stub.asInterface(service)
+      if (!isRoot) {
+        val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
+        if (intent != null) {
+          startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
+        } else {
+          onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+        }
+      } else {
+        bgService.start(ConfigUtils.load(settings))
+      }
+    }
+    override def onServiceDisconnected(name: ComponentName) {
+      bgService = null
+    }
+  }
+
+  def attachService() {
+    if (bgService == null) {
+      val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      bindService(new Intent(s.getName), connection, Context.BIND_AUTO_CREATE)
+      startService(new Intent(this, s))
+    }
+  }
+
+  def deattachService() {
+    if (bgService != null) {
+      unbindService(connection)
+      bgService = null
+    }
+  }
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    val intent = VpnService.prepare(this)
-    if (intent != null) {
-      startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
-    } else {
-      onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
-    }
+    attachService()
+  }
+
+  override def onDestroy() {
+    super.onDestroy()
+    deattachService()
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     resultCode match {
-      case Activity.RESULT_OK => {
-        val intent: Intent = new Intent(this, classOf[ShadowVpnService])
-        Extra.put(PreferenceManager.getDefaultSharedPreferences(this), intent)
-        startService(intent)
-      }
-      case _ => {
+      case Activity.RESULT_OK =>
+        if (bgService != null) {
+          bgService.start(ConfigUtils.load(settings))
+        }
+      case _ =>
         Log.e(Shadowsocks.TAG, "Failed to start VpnService")
-      }
     }
     finish()
   }
