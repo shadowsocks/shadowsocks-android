@@ -324,24 +324,12 @@ class Shadowsocks
           }
         }
         Crouton.cancelAllCroutons()
-        onStateChanged(State.STOPPED, null)
         setPreferenceEnabled(enabled = true)
       } else {
-        if (bgService.getMode == Mode.VPN) {
-          val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
-          val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
-          Crouton
-            .makeText(Shadowsocks.this, R.string.vpn_status, style)
-            .setConfiguration(config)
-            .show()
-          switchButton.setEnabled(false)
-        }
         changeSwitch(checked = true)
-        onStateChanged(bgService.getState, null)
         setPreferenceEnabled(enabled = false)
       }
-      // set the listener
-      switchButton.setOnCheckedChangeListener(Shadowsocks.this)
+      state = bgService.getState
     }
 
     override def onServiceDisconnected(name: ComponentName) {
@@ -371,6 +359,7 @@ class Shadowsocks
   }
 
   private def changeSwitch (checked: Boolean) {
+    switchButton.setOnCheckedChangeListener(null)
     switchButton.setChecked(checked)
     if (switchButton.isEnabled) {
       switchButton.setEnabled(false)
@@ -378,6 +367,7 @@ class Shadowsocks
         override def run() { switchButton.setEnabled(true) }
       }, 1000)
     }
+    switchButton.setOnCheckedChangeListener(this)
   }
 
   private def showProgress(msg: String): Handler = {
@@ -604,6 +594,16 @@ class Shadowsocks
     // Register broadcast receiver
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
+    // Bind to the service
+    spawn {
+      val isRoot = Utils.getRoot
+      handler.post(new Runnable {
+        override def run() {
+          status.edit.putBoolean(Key.isRoot, isRoot).commit()
+          attachService()
+        }
+      })
+    }
   }
 
   def attachService() {
@@ -835,22 +835,25 @@ class Shadowsocks
 
   protected override def onPause() {
     super.onPause()
-    deattachService()
+    switchButton.setOnCheckedChangeListener(null)
     prepared = false
   }
 
   protected override def onResume() {
     super.onResume()
-    // Bind to the service
-    spawn {
-      val isRoot = Utils.getRoot
-      handler.post(new Runnable {
-        override def run() {
-          status.edit.putBoolean(Key.isRoot, isRoot).commit()
-          attachService()
-        }
-      })
+    if (bgService != null) {
+      bgService.getState match {
+        case State.CONNECTED =>
+          changeSwitch(checked = true)
+        case State.CONNECTING =>
+          changeSwitch(checked = true)
+        case _ =>
+          changeSwitch(checked = false)
+      }
+      state = bgService.getState
     }
+    // set the listener
+    switchButton.setOnCheckedChangeListener(Shadowsocks.this)
     ConfigUtils.refresh(this)
   }
 
@@ -900,6 +903,7 @@ class Shadowsocks
 
   override def onDestroy() {
     super.onDestroy()
+    deattachService()
     Crouton.cancelAllCroutons()
     unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
@@ -917,7 +921,6 @@ class Shadowsocks
 
   private def recovery() {
     val h = showProgress(getString(R.string.recovering))
-
     serviceStop()
     spawn {
       reset()
@@ -1066,15 +1069,12 @@ class Shadowsocks
               setPreferenceEnabled(enabled = false)
             case State.CONNECTED =>
               clearDialog()
-              if (!switchButton.isChecked) changeSwitch(checked = true)
+              changeSwitch(checked = true)
               setPreferenceEnabled(enabled = false)
             case State.STOPPED =>
               clearDialog()
-              if (switchButton.isChecked) {
-                switchButton.setEnabled(true)
-                changeSwitch(checked = false)
-                Crouton.cancelAllCroutons()
-              }
+              changeSwitch(checked = false)
+              Crouton.cancelAllCroutons()
               if (m != null) {
                 Crouton.cancelAllCroutons()
                 val style = new Style.Builder().setBackgroundColorValue(Style.holoRedLight).build()

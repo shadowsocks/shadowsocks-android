@@ -550,6 +550,6 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   override def getTag = TAG
-
   override def getServiceMode = Mode.NAT
+  override def getContext = getBaseContext
 }

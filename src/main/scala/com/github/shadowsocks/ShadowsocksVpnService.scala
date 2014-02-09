@@ -399,5 +399,5 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def getTag = TAG
   override def getServiceMode = Mode.VPN
-
+  override def getContext = getBaseContext
 }

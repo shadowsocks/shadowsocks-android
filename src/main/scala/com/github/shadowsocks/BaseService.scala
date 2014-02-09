@@ -1,11 +1,12 @@
 package com.github.shadowsocks
 
-import android.os.RemoteCallbackList
+import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.{Path, State}
 import java.io.{IOException, FileNotFoundException, FileReader, BufferedReader}
 import android.util.Log
 import android.app.Notification
+import android.content.Context
 
 trait BaseService {
 
@@ -43,20 +44,26 @@ trait BaseService {
   def stopRunner()
   def getServiceMode: Int
   def getTag: String
+  def getContext: Context
 
   def changeState(s: Int) {
     changeState(s, null)
   }
 
   protected def changeState(s: Int, msg: String) {
-    if (state != s) {
-      val n = callbacks.beginBroadcast()
-      for (i <- 0 to n -1) {
-        callbacks.getBroadcastItem(i).stateChanged(s, msg)
+    val handler = new Handler(getContext.getMainLooper)
+    handler.post(new Runnable {
+      override def run() {
+        if (state != s) {
+          val n = callbacks.beginBroadcast()
+          for (i <- 0 to n -1) {
+            callbacks.getBroadcastItem(i).stateChanged(s, msg)
+          }
+          callbacks.finishBroadcast()
+          state = s
+        }
       }
-      callbacks.finishBroadcast()
-      state = s
-    }
+    })
   }
 
   def getPid(name: String): Int = {
