@@ -336,8 +336,8 @@ class Shadowsocks
             .show()
           switchButton.setEnabled(false)
         }
-        switchButton.setChecked(true)
-        onStateChanged(State.CONNECTED, null)
+        changeSwitch(checked = true)
+        onStateChanged(bgService.getState, null)
         setPreferenceEnabled(enabled = false)
       }
       // set the listener
@@ -367,6 +367,16 @@ class Shadowsocks
           status.edit().putBoolean(Key.isRunning, false).commit()
       }
       super.handleMessage(msg)
+    }
+  }
+
+  private def changeSwitch (checked: Boolean) {
+    switchButton.setChecked(checked)
+    if (switchButton.isEnabled) {
+      switchButton.setEnabled(false)
+      handler.postDelayed(new Runnable {
+        override def run() { switchButton.setEnabled(true) }
+      }, 1000)
     }
   }
 
@@ -458,12 +468,21 @@ class Shadowsocks
     version
   }
 
-  private def isTextEmpty(s: String, msg: String): Boolean = {
+  def isTextEmpty(s: String, msg: String): Boolean = {
     if (s == null || s.length <= 0) {
-      showDialog(msg)
+      Crouton.makeText(this, msg, Style.ALERT).show()
       return true
     }
     false
+  }
+
+  def cancelStart() {
+    handler.postDelayed(new Runnable {
+      override def run() {
+        clearDialog()
+        changeSwitch(checked = false)
+      }
+    }, 1000)
   }
 
   def prepareStartService() {
@@ -478,7 +497,7 @@ class Shadowsocks
         }
       } else {
         if (!serviceStart) {
-          switchButton.setChecked(false)
+          cancelStart()
         }
       }
     }
@@ -491,6 +510,12 @@ class Shadowsocks
           prepareStartService()
         case false =>
           serviceStop()
+      }
+      if (switchButton.isEnabled) {
+        switchButton.setEnabled(false)
+        handler.postDelayed(new Runnable {
+          override def run() { switchButton.setEnabled(true) }
+        }, 1000)
       }
     }
   }
@@ -920,11 +945,10 @@ class Shadowsocks
         case Activity.RESULT_OK =>
           prepared = true
           if (!serviceStart) {
-            switchButton.setChecked(false)
+            cancelStart()
           }
         case _ =>
-          clearDialog()
-          switchButton.setChecked(false)
+          cancelStart()
           Log.e(Shadowsocks.TAG, "Failed to start VpnService")
       }
     }
@@ -946,24 +970,35 @@ class Shadowsocks
     if (bgService != null) bgService.stop()
   }
 
-  /** Called when connect button is clicked. */
-  def serviceStart: Boolean = {
+  def checkText(key: String): Boolean = {
+    val text = settings.getString(key, "")
+    !isTextEmpty(text, getString(R.string.proxy_empty))
+  }
 
-    val proxy = settings.getString(Key.proxy, "")
-    if (isTextEmpty(proxy, getString(R.string.proxy_empty))) return false
-    val portText = settings.getString(Key.localPort, "")
-    if (isTextEmpty(portText, getString(R.string.port_empty))) return false
+  def checkNumber(key: String): Boolean = {
+    val text = settings.getString(key, "")
+    if (isTextEmpty(text, getString(R.string.port_empty))) return false
     try {
-      val port: Int = Integer.valueOf(portText)
+      val port: Int = Integer.valueOf(text)
       if (port <= 1024) {
-        this.showDialog(getString(R.string.port_alert))
+        Crouton.makeText(this, R.string.port_alert, Style.ALERT).show()
         return false
       }
     } catch {
       case ex: Exception =>
-        this.showDialog(getString(R.string.port_alert))
+        Crouton.makeText(this, R.string.port_alert, Style.ALERT).show()
         return false
     }
+    true
+  }
+
+  /** Called when connect button is clicked. */
+  def serviceStart: Boolean = {
+
+    if (!checkText(Key.proxy)) return false
+    if (!checkText(Key.sitekey)) return false
+    if (!checkNumber(Key.localPort)) return false
+    if (!checkNumber(Key.remotePort)) return false
 
     if (bgService == null) return false
 
@@ -973,7 +1008,7 @@ class Shadowsocks
       val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
       val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
       Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).setConfiguration(config).show()
-      switchButton.setEnabled(false)
+      changeSwitch(checked = false)
     }
     true
   }
@@ -1010,20 +1045,6 @@ class Shadowsocks
       .show()
   }
 
-  private def showDialog(msg: String) {
-    val builder: AlertDialog.Builder = new AlertDialog.Builder(this)
-    builder
-      .setMessage(msg)
-      .setCancelable(false)
-      .setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener {
-      def onClick(dialog: DialogInterface, id: Int) {
-        dialog.cancel()
-      }
-    })
-    val alert: AlertDialog = builder.create
-    alert.show()
-  }
-
   def clearDialog() {
     if (progressDialog != null) {
       progressDialog.dismiss()
@@ -1045,13 +1066,13 @@ class Shadowsocks
               setPreferenceEnabled(enabled = false)
             case State.CONNECTED =>
               clearDialog()
-              if (!switchButton.isChecked) switchButton.setChecked(true)
+              if (!switchButton.isChecked) changeSwitch(checked = true)
               setPreferenceEnabled(enabled = false)
             case State.STOPPED =>
               clearDialog()
               if (switchButton.isChecked) {
                 switchButton.setEnabled(true)
-                switchButton.setChecked(false)
+                changeSwitch(checked = false)
                 Crouton.cancelAllCroutons()
               }
               if (m != null) {
