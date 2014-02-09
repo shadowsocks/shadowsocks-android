@@ -57,6 +57,7 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import java.util.{TimerTask, Timer}
 import android.net.TrafficStats
+import scala.concurrent.ops._
 import com.github.shadowsocks.utils._
 import scala.Some
 import android.graphics.Color
@@ -208,7 +209,7 @@ class ShadowsocksNatService extends Service with BaseService {
     if (rate >= 0) {
       val bitmap = Utils
         .getBitmap(rate.toString, icon.getIntrinsicWidth * 4, icon.getIntrinsicHeight * 4,
-          Color.TRANSPARENT)
+        Color.TRANSPARENT)
       builder.setLargeIcon(bitmap)
 
       if (rate < 1000) {
@@ -421,7 +422,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def startRunner(c: Config) {
 
-    var config = c
+    config = c
 
     // register close receiver
     val filter = new IntentFilter()
@@ -474,46 +475,48 @@ class ShadowsocksNatService extends Service with BaseService {
       timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
     }
 
-    if (config.proxy == "198.199.101.152") {
-      val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
-      try {
-        config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
-      } catch {
-        case ex: Exception =>
-          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-          stopRunner()
-          handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
-          return
+    spawn {
+      if (config.proxy == "198.199.101.152") {
+        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        try {
+          config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
+        } catch {
+          case ex: Exception =>
+            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+            stopRunner()
+            handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+            return
+        }
       }
-    }
 
-    killProcesses()
+      killProcesses()
 
-    var resolved: Boolean = false
-    if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-      !InetAddressUtils.isIPv6Address(config.proxy)) {
-      Utils.resolve(config.proxy, enableIPv6 = true) match {
-        case Some(a) =>
-          config.proxy = a
-          resolved = true
-        case None => resolved = false
+      var resolved: Boolean = false
+      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+        !InetAddressUtils.isIPv6Address(config.proxy)) {
+        Utils.resolve(config.proxy, enableIPv6 = true) match {
+          case Some(a) =>
+            config.proxy = a
+            resolved = true
+          case None => resolved = false
+        }
+      } else {
+        resolved = true
       }
-    } else {
-      resolved = true
-    }
 
-    hasRedirectSupport = Utils.getHasRedirectSupport
+      hasRedirectSupport = Utils.getHasRedirectSupport
 
-    if (resolved && handleConnection) {
-      notifyForegroundAlert(getString(R.string.forward_success),
-        getString(R.string.service_running).format(config.profileName))
-      handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 500)
-    } else {
-      notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-      stopRunner()
-      handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+      if (resolved && handleConnection) {
+        notifyForegroundAlert(getString(R.string.forward_success),
+          getString(R.string.service_running).format(config.profileName))
+        handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 500)
+      } else {
+        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+        stopRunner()
+        handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+      }
+      handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 500)
     }
-    handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 500)
   }
 
   override def stopRunner() {

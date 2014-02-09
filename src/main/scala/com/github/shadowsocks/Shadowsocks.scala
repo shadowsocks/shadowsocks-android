@@ -531,7 +531,6 @@ class Shadowsocks
     onContentChanged()
   }
 
-  /** Called when the activity is first created. */
   override def onCreate(savedInstanceState: Bundle) {
 
     // Initialize the preference
@@ -580,17 +579,22 @@ class Shadowsocks
     // Register broadcast receiver
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
-    // Bind to the service
-    spawn {
-      status.edit.putBoolean(Key.isRoot, Utils.getRoot).apply()
-      handler.post(new Runnable {
-        override def run() {
-          val isRoot = status.getBoolean(Key.isRoot, false)
-          val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
-          bindService(new Intent(s.getName), connection, Context.BIND_AUTO_CREATE)
-          startService(new Intent(Shadowsocks.this, s))
-        }
-      })
+  }
+
+  def attachService() {
+    if (bgService == null) {
+      val isRoot = status.getBoolean(Key.isRoot, false)
+      val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      bindService(new Intent(s.getName), connection, Context.BIND_AUTO_CREATE)
+      startService(new Intent(Shadowsocks.this, s))
+    }
+  }
+
+  def deattachService() {
+    if (bgService != null) {
+      bgService.unregisterCallback(callback)
+      unbindService(connection)
+      bgService = null
     }
   }
 
@@ -806,11 +810,22 @@ class Shadowsocks
 
   protected override def onPause() {
     super.onPause()
+    deattachService()
     prepared = false
   }
 
   protected override def onResume() {
     super.onResume()
+    // Bind to the service
+    spawn {
+      val isRoot = Utils.getRoot
+      handler.post(new Runnable {
+        override def run() {
+          status.edit.putBoolean(Key.isRoot, isRoot).commit()
+          attachService()
+        }
+      })
+    }
     ConfigUtils.refresh(this)
   }
 
@@ -860,10 +875,6 @@ class Shadowsocks
 
   override def onDestroy() {
     super.onDestroy()
-    if (bgService != null) {
-      bgService.unregisterCallback(callback)
-      unbindService(connection)
-    }
     Crouton.cancelAllCroutons()
     unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
@@ -913,6 +924,7 @@ class Shadowsocks
           }
         case _ =>
           clearDialog()
+          switchButton.setChecked(false)
           Log.e(Shadowsocks.TAG, "Failed to start VpnService")
       }
     }
@@ -921,7 +933,7 @@ class Shadowsocks
   def isVpnEnabled: Boolean = {
     if (Shadowsocks.vpnEnabled < 0) {
       Shadowsocks.vpnEnabled = if (Build.VERSION.SDK_INT
-        >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !Utils.getRoot) {
+        >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !status.getBoolean(Key.isRoot, false)) {
         1
       } else {
         0

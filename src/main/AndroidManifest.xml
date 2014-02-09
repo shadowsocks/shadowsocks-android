@@ -54,7 +54,7 @@
     </activity>
 
     <activity
-        android:name=".ShadowVpnActivity"
+        android:name=".ShadowsocksRunnerActivity"
         android:theme="@style/PopupTheme"
         android:launchMode="singleTask">
     </activity>

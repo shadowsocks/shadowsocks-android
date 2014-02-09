@@ -51,11 +51,12 @@ import java.io._
 import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
+import scala.concurrent.ops._
 import org.apache.commons.net.util.SubnetUtils
 import java.net.InetAddress
 import com.github.shadowsocks.utils._
 import scala.Some
-import com.github.shadowsocks.aidl.Config
+import com.github.shadowsocks.aidl.{IShadowsocksService, Config}
 
 class ShadowsocksVpnService extends VpnService with BaseService {
 
@@ -266,6 +267,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
+
   }
 
   def killProcesses() {
@@ -291,11 +293,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def startRunner(c: Config) {
 
-    var config = c
+    config = c
 
     // ensure the VPNService is prepared
     if (VpnService.prepare(this) != null) {
-      val i = new Intent(this, classOf[ShadowVpnActivity])
+      val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       startActivity(i)
       return
@@ -321,44 +323,46 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     changeState(State.CONNECTING)
 
-    if (config.proxy == "198.199.101.152") {
-      val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
-      try {
-        config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
-      } catch {
-        case ex: Exception =>
-          notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-          stopRunner()
-          handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
-          return
+    spawn {
+      if (config.proxy == "198.199.101.152") {
+        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        try {
+          config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
+        } catch {
+          case ex: Exception =>
+            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+            stopRunner()
+            handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+            return
+        }
       }
-    }
 
-    // reset the context
-    killProcesses()
+      // reset the context
+      killProcesses()
 
-    // Resolve the server address
-    var resolved: Boolean = false
-    if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-      !InetAddressUtils.isIPv6Address(config.proxy)) {
-      Utils.resolve(config.proxy, enableIPv6 = true) match {
-        case Some(addr) =>
-          config.proxy = addr
-          resolved = true
-        case None => resolved = false
+      // Resolve the server address
+      var resolved: Boolean = false
+      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+        !InetAddressUtils.isIPv6Address(config.proxy)) {
+        Utils.resolve(config.proxy, enableIPv6 = true) match {
+          case Some(addr) =>
+            config.proxy = addr
+            resolved = true
+          case None => resolved = false
+        }
+      } else {
+        resolved = true
       }
-    } else {
-      resolved = true
-    }
 
-    if (resolved && handleConnection) {
-      handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 300)
-    } else {
-      notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-      handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 300)
-      stopRunner()
+      if (resolved && handleConnection) {
+        handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 300)
+      } else {
+        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+        handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 300)
+        stopRunner()
+      }
+      handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 300)
     }
-    handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 300)
   }
 
   override def stopRunner() {
@@ -394,6 +398,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def getTag = TAG
-
   override def getServiceMode = Mode.VPN
+
 }
