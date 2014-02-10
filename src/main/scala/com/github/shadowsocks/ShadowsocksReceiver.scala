@@ -64,7 +64,9 @@ class ShadowsocksReceiver extends BroadcastReceiver {
     val isAutoConnect: Boolean = settings.getBoolean(Key.isAutoConnect, false)
     val isInstalled: Boolean = status.getBoolean(versionName, false)
     if (isAutoConnect && isInstalled) {
-      context.startActivity(new Intent(context, classOf[ShadowsocksRunnerActivity]))
+      val intent = new Intent(context, classOf[ShadowsocksRunnerActivity])
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
     }
   }
 }

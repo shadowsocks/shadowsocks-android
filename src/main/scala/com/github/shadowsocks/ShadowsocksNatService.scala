@@ -253,7 +253,7 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def onBind(intent: Intent): IBinder = {
-    if (classOf[ShadowsocksNatService].getName equals intent.getAction) {
+    if (Action.SERVICE == intent.getAction) {
       binder
     } else {
       null

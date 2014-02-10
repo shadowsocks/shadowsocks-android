@@ -73,9 +73,6 @@
         android:name=".ShadowsocksNatService"
         android:process=":proxy"
         android:exported="false">
-      <intent-filter>
-        <action android:name="com.github.shadowsocks.ShadowsocksNatService"/>
-      </intent-filter>
     </service>
 
     <service
@@ -85,7 +82,6 @@
         android:permission="android.permission.BIND_VPN_SERVICE"
         android:exported="false">
       <intent-filter>
-        <action android:name="com.github.shadowsocks.ShadowsocksVpnService"/>
         <action android:name="android.net.VpnService"/>
       </intent-filter>
     </service>

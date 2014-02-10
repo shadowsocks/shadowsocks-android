@@ -254,7 +254,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val action = intent.getAction
     if (VpnService.SERVICE_INTERFACE == action) {
       return super.onBind(intent)
-    } else if (classOf[ShadowsocksVpnService].getName == action) {
+    } else if (Action.SERVICE == action) {
       return binder
     }
     null

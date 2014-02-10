@@ -77,7 +77,9 @@ class ShadowsocksRunnerActivity extends Activity {
   def attachService() {
     if (bgService == null) {
       val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
-      bindService(new Intent(s.getName), connection, Context.BIND_AUTO_CREATE)
+      val intent = new Intent(this, s)
+      intent.setAction(Action.SERVICE)
+      bindService(intent, connection, Context.BIND_AUTO_CREATE)
       startService(new Intent(this, s))
     }
   }

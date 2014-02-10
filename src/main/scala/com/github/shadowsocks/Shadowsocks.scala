@@ -610,8 +610,10 @@ class Shadowsocks
     if (bgService == null) {
       val isRoot = status.getBoolean(Key.isRoot, false)
       val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
-      bindService(new Intent(s.getName), connection, Context.BIND_AUTO_CREATE)
-      startService(new Intent(Shadowsocks.this, s))
+      val intent = new Intent(this, s)
+      intent.setAction(Action.SERVICE)
+      bindService(intent, connection, Context.BIND_AUTO_CREATE)
+      startService(new Intent(this, s))
     }
   }
 

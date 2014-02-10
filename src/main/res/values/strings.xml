@@ -55,7 +55,7 @@
   <string name="forward_stop">Shadowsocks stopped.</string>
   <string name="service_failed">Please check your network status and try again.</string>
   <string name="stop">Stop the service</string>
-  <string name="vpn_status">You can only disable the VPN service through the notification bar.</string>
+  <string name="vpn_status">Recommend to disable the VPN service through the notification bar.</string>
   <string name="vpn_error">Unable to start VPN service: "%s". It seems to be a compatibility issue with your device. Please consider using ROOT mode instead.</string>
 
   <!-- alert category -->
