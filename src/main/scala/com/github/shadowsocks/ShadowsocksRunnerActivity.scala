@@ -67,6 +67,7 @@ class ShadowsocksRunnerActivity extends Activity {
         }
       } else {
         bgService.start(ConfigUtils.load(settings))
+        finish()
       }
     }
     override def onServiceDisconnected(name: ComponentName) {

@@ -55,7 +55,7 @@
 
     <activity
         android:name=".ShadowsocksRunnerActivity"
-        android:theme="@style/PopupTheme"
+        android:theme="@android:style/Theme.NoDisplay"
         android:launchMode="singleTask">
     </activity>
 

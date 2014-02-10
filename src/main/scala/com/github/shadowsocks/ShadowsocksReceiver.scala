@@ -66,6 +66,7 @@ class ShadowsocksReceiver extends BroadcastReceiver {
     if (isAutoConnect && isInstalled) {
       val intent = new Intent(context, classOf[ShadowsocksRunnerActivity])
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
       context.startActivity(intent)
     }
   }
