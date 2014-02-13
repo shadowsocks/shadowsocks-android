@@ -317,12 +317,6 @@ class Shadowsocks
       // Update the UI
       switchButton.setEnabled(true)
       if (State.isAvailable(bgService.getState)) {
-        if (status.getBoolean(Key.isRunning, false)) {
-          spawn {
-            crash_recovery()
-            handler.sendEmptyMessage(MSG_CRASH_RECOVER)
-          }
-        }
         Crouton.cancelAllCroutons()
         setPreferenceEnabled(enabled = true)
       } else {
@@ -347,16 +341,7 @@ class Shadowsocks
   lazy val profileManager =
     new ProfileManager(settings, getApplication.asInstanceOf[ShadowsocksApplication].dbHelper)
 
-  private val handler: Handler = new Handler {
-    override def handleMessage(msg: Message) {
-      msg.what match {
-        case MSG_CRASH_RECOVER =>
-          Crouton.makeText(Shadowsocks.this, R.string.crash_alert, Style.ALERT).show()
-          status.edit().putBoolean(Key.isRunning, false).commit()
-      }
-      super.handleMessage(msg)
-    }
-  }
+  val handler = new Handler()
 
   private def changeSwitch (checked: Boolean) {
     switchButton.setOnCheckedChangeListener(null)
