@@ -1,6 +1,6 @@
 /*
  * Shadowsocks - A shadowsocks client for Android
- * Copyright (C) 2013 <max.c.lv@gmail.com>
+ * Copyright (C) 2014 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
  *                              HERE BE DRAGONS
  *
  */
+
 package com.github.shadowsocks
 
 import android.app.Application
