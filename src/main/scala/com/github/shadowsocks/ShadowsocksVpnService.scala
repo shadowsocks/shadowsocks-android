@@ -117,24 +117,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     version
   }
 
-  def waitForProcess(name: String): Boolean = {
-    val pid: Int = getPid(name)
-    if (pid == -1) return false
-    Exec.hangupProcessGroup(-pid)
-    val t: Thread = new Thread {
-      override def run() {
-        Exec.waitFor(-pid)
-      }
-    }
-    t.start()
-    try {
-      t.join(300)
-    } catch {
-      case ignored: InterruptedException =>
-    }
-    !t.isAlive
-  }
-
   def startVpn() {
 
     val proxy_address = config.proxy
@@ -272,18 +254,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def killProcesses() {
     val sb = new StringBuilder
-    if (!waitForProcess("shadowsocks")) {
-      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
-      sb ++= "killall -9 shadowsocks" ++= "\n"
-    }
-    if (!waitForProcess("tun2socks")) {
-      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`" ++= "\n"
-      sb ++= "killall -9 tun2socks" ++= "\n"
-    }
-    if (!waitForProcess("pdnsd")) {
-      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`" ++= "\n"
-      sb ++= "killall -9 pdnsd" ++= "\n"
-    }
+
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "shadowsocks.pid`" ++= "\n"
+    sb ++= "killall -9 shadowsocks" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "tun2socks.pid`" ++= "\n"
+    sb ++= "killall -9 tun2socks" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
+    sb ++= "killall -9 pdnsd" ++= "\n"
+
     Utils.runCommand(sb.toString())
   }
 

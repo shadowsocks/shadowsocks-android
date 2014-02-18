@@ -1,6 +1,6 @@
 /*
  * Shadowsocks - A shadowsocks client for Android
- * Copyright (C) 2014 <max.c.lv@gmail.com>
+ * Copyright (C) 2013 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,11 @@ import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 import com.j256.ormlite.dao.Dao
 
-class DBHelper(val context: Context) extends OrmLiteSqliteOpenHelper(context, "profile.db", null, 7) {
+object DBHelper {
+  val PROFILE = "profile.db"
+}
+
+class DBHelper(val context: Context) extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 7) {
 
   lazy val profileDao:Dao[Profile,Int] = getDao(classOf[Profile])
 
@@ -55,9 +59,7 @@ class DBHelper(val context: Context) extends OrmLiteSqliteOpenHelper(context, "p
   }
 
   def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int, newVersion: Int) {
-    if (newVersion != oldVersion) {
-      TableUtils.dropTable(connectionSource, classOf[Profile], true)
-      onCreate(database, connectionSource)
-    }
+    TableUtils.dropTable(connectionSource, classOf[Profile], true)
+    onCreate(database, connectionSource)
   }
 }

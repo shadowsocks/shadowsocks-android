@@ -152,24 +152,6 @@ class ShadowsocksNatService extends Service with BaseService {
     Utils.runRootCommand(cmd)
   }
 
-  def waitForProcess(name: String): Boolean = {
-    val pid: Int = getPid(name)
-    if (pid == -1) return false
-    Exec.hangupProcessGroup(-pid)
-    val t: Thread = new Thread {
-      override def run() {
-        Exec.waitFor(-pid)
-      }
-    }
-    t.start()
-    try {
-      t.join(300)
-    } catch {
-      case ignored: InterruptedException =>
-    }
-    !t.isAlive
-  }
-
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
 
@@ -292,20 +274,17 @@ class ShadowsocksNatService extends Service with BaseService {
 
     val sb = new StringBuilder
 
-    sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "redsocks.pid`" ++= "\n"
     sb ++= "killall -9 redsocks" ++= "\n"
     Utils.runRootCommand(sb.toString())
 
     sb.clear()
 
-    if (!waitForProcess("pdnsd")) {
-      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`" ++= "\n"
-      sb ++= "killall -9 pdnsd" ++= "\n"
-    }
-    if (!waitForProcess("shadowsocks")) {
-      sb ++= "kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`" ++= "\n"
-      sb ++= "killall -9 shadowsocks" ++= "\n"
-    }
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
+    sb ++= "killall -9 pdnsd" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "shadowsocks.pid`" ++= "\n"
+    sb ++= "killall -9 shadowsocks" ++= "\n"
+
     Utils.runCommand(sb.toString())
   }
 

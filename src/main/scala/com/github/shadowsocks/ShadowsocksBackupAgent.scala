@@ -1,6 +1,6 @@
 /*
  * Shadowsocks - A shadowsocks client for Android
- * Copyright (C) 2014 <max.c.lv@gmail.com>
+ * Copyright (C) 2013 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,7 @@ package com.github.shadowsocks
 
 import android.app.backup.{FileBackupHelper, SharedPreferencesBackupHelper, BackupAgentHelper}
 import android.content.Context
-
-case class DbBackupHelper(context: Context, dbName: String)
-  extends FileBackupHelper(context, context.getDatabasePath(dbName).getAbsolutePath)
+import com.github.shadowsocks.database.DBHelper
 
 class ShadowsocksBackupAgent extends BackupAgentHelper {
 
@@ -60,6 +58,6 @@ class ShadowsocksBackupAgent extends BackupAgentHelper {
   override def onCreate() {
     val helper = new SharedPreferencesBackupHelper(this, PREFS_DISPLAY)
     addHelper(MY_PREFS_BACKUP_KEY, helper)
-    addHelper(DATABASE, new DbBackupHelper(this, "profile.db"))
+    addHelper(DATABASE, new FileBackupHelper(this, "../databases/" + DBHelper.PROFILE))
   }
 }

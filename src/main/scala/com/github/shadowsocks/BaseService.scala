@@ -105,22 +105,6 @@ trait BaseService {
     })
   }
 
-  def getPid(name: String): Int = {
-    try {
-      val reader: BufferedReader = new BufferedReader(new FileReader(Path.BASE + name + ".pid"))
-      val line = reader.readLine
-      return Integer.valueOf(line)
-    } catch {
-      case e: FileNotFoundException =>
-        Log.e(getTag, "Cannot open pid file: " + name)
-      case e: IOException =>
-        Log.e(getTag, "Cannot read pid file: " + name)
-      case e: NumberFormatException =>
-        Log.e(getTag, "Invalid pid", e)
-    }
-    -1
-  }
-
   def initSoundVibrateLights(notification: Notification) {
     notification.sound = null
   }
