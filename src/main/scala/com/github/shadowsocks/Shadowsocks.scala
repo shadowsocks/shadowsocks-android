@@ -965,12 +965,12 @@ class Shadowsocks
     !isTextEmpty(text, getString(R.string.proxy_empty))
   }
 
-  def checkNumber(key: String): Boolean = {
+  def checkNumber(key: String, low: Boolean): Boolean = {
     val text = settings.getString(key, "")
     if (isTextEmpty(text, getString(R.string.port_empty))) return false
     try {
       val port: Int = Integer.valueOf(text)
-      if (port <= 1024) {
+      if (!low && port <= 1024) {
         Crouton.makeText(this, R.string.port_alert, Style.ALERT).show()
         return false
       }
@@ -987,8 +987,8 @@ class Shadowsocks
 
     if (!checkText(Key.proxy)) return false
     if (!checkText(Key.sitekey)) return false
-    if (!checkNumber(Key.localPort)) return false
-    if (!checkNumber(Key.remotePort)) return false
+    if (!checkNumber(Key.localPort, low = false)) return false
+    if (!checkNumber(Key.remotePort, low = true)) return false
 
     if (bgService == null) return false
 
