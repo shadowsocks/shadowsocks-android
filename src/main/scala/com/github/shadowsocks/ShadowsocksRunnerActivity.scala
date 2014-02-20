@@ -39,10 +39,10 @@
 
 package com.github.shadowsocks
 
-import android.app.Activity
-import android.os.{IBinder, Bundle}
+import android.app.{Activity, KeyguardManager}
+import android.os.{IBinder, Bundle, Handler}
 import android.net.VpnService
-import android.content.{Context, ComponentName, ServiceConnection, Intent}
+import android.content._
 import android.util.Log
 import android.preference.PreferenceManager
 import com.github.shadowsocks.utils._
@@ -53,25 +53,40 @@ class ShadowsocksRunnerActivity extends Activity {
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val isRoot = Utils.getRoot
 
+  val handler = new Handler()
+  val receiver = new BroadcastReceiver() {
+    override def onReceive(context: Context, intent: Intent) {
+      if (intent.getAction == Intent.ACTION_USER_PRESENT) {
+        attachService()
+      }
+    }
+  }
+
   // Services
   var bgService: IShadowsocksService = null
   val connection = new ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
-      if (!isRoot) {
-        val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
-        if (intent != null) {
-          startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
-        } else {
-          onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
-        }
-      } else {
-        bgService.start(ConfigUtils.load(settings))
-        finish()
-      }
+      handler.postDelayed(new Runnable() {
+        override def run() = startBackgroundService()
+      }, 1000)
     }
     override def onServiceDisconnected(name: ComponentName) {
       bgService = null
+    }
+  }
+
+  def startBackgroundService() {
+    if (!isRoot) {
+      val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
+      if (intent != null) {
+        startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
+      } else {
+        onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+      }
+    } else {
+      bgService.start(ConfigUtils.load(settings))
+      finish()
     }
   }
 
@@ -94,12 +109,20 @@ class ShadowsocksRunnerActivity extends Activity {
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    attachService()
+    val km = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
+    val locked = km.inKeyguardRestrictedInputMode
+    if (locked) {
+      val filter = new IntentFilter(Intent.ACTION_USER_PRESENT)
+      registerReceiver(receiver, filter)
+    } else {
+      attachService()
+    }
   }
 
   override def onDestroy() {
     super.onDestroy()
     deattachService()
+    unregisterReceiver(receiver)
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
