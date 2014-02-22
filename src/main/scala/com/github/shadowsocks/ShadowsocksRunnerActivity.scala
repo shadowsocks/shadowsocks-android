@@ -40,7 +40,7 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, KeyguardManager}
-import android.os.{IBinder, Bundle, Handler}
+import android.os._
 import android.net.VpnService
 import android.content._
 import android.util.Log
@@ -51,7 +51,6 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 class ShadowsocksRunnerActivity extends Activity {
 
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
-  lazy val isRoot = Utils.getRoot
 
   val handler = new Handler()
   val receiver = new BroadcastReceiver() {
@@ -62,8 +61,6 @@ class ShadowsocksRunnerActivity extends Activity {
     }
   }
 
-  // Services
-  var bgService: IShadowsocksService = null
   val connection = new ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
@@ -76,8 +73,25 @@ class ShadowsocksRunnerActivity extends Activity {
     }
   }
 
+  // Variables
+  var vpnEnabled = -1
+  var bgService: IShadowsocksService = null
+
+  def isVpnEnabled: Boolean = {
+    if (vpnEnabled < 0) {
+      vpnEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH 
+        && !Utils.getRoot) {
+        1
+      } else {
+        0
+      }
+    }
+    if (vpnEnabled == 1) true else false
+  }
+
+
   def startBackgroundService() {
-    if (!isRoot) {
+    if (isVpnEnabled) {
       val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
       if (intent != null) {
         startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
@@ -92,7 +106,7 @@ class ShadowsocksRunnerActivity extends Activity {
 
   def attachService() {
     if (bgService == null) {
-      val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      val s = if (!isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)

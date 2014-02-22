@@ -126,9 +126,6 @@ object Shadowsocks {
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
 
-  // Flags
-  var vpnEnabled = -1
-
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
     pref.setSummary(value)
@@ -296,6 +293,7 @@ class Shadowsocks
   var state = State.INIT
   var prepared = false
   var currentProfile = new Profile
+  var vpnEnabled = -1
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
@@ -593,8 +591,7 @@ class Shadowsocks
 
   def attachService() {
     if (bgService == null) {
-      val isRoot = status.getBoolean(Key.isRoot, false)
-      val s = if (isRoot) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      val s = if (!isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
@@ -945,15 +942,15 @@ class Shadowsocks
   }
 
   def isVpnEnabled: Boolean = {
-    if (Shadowsocks.vpnEnabled < 0) {
-      Shadowsocks.vpnEnabled = if (Build.VERSION.SDK_INT
+    if (vpnEnabled < 0) {
+      vpnEnabled = if (Build.VERSION.SDK_INT
         >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !status.getBoolean(Key.isRoot, false)) {
         1
       } else {
         0
       }
     }
-    if (Shadowsocks.vpnEnabled == 1) true else false
+    if (vpnEnabled == 1) true else false
   }
 
   def serviceStop() {
