@@ -53,14 +53,6 @@ class ShadowsocksRunnerActivity extends Activity {
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
 
   val handler = new Handler()
-  val receiver = new BroadcastReceiver() {
-    override def onReceive(context: Context, intent: Intent) {
-      if (intent.getAction == Intent.ACTION_USER_PRESENT) {
-        attachService()
-      }
-    }
-  }
-
   val connection = new ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
@@ -76,6 +68,7 @@ class ShadowsocksRunnerActivity extends Activity {
   // Variables
   var vpnEnabled = -1
   var bgService: IShadowsocksService = null
+  var receiver:BroadcastReceiver = null
 
   def isVpnEnabled: Boolean = {
     if (vpnEnabled < 0) {
@@ -127,6 +120,13 @@ class ShadowsocksRunnerActivity extends Activity {
     val locked = km.inKeyguardRestrictedInputMode
     if (locked) {
       val filter = new IntentFilter(Intent.ACTION_USER_PRESENT)
+      receiver = new BroadcastReceiver() {
+        override def onReceive(context: Context, intent: Intent) {
+          if (intent.getAction == Intent.ACTION_USER_PRESENT) {
+            attachService()
+          }
+        }
+      }
       registerReceiver(receiver, filter)
     } else {
       attachService()
@@ -136,7 +136,10 @@ class ShadowsocksRunnerActivity extends Activity {
   override def onDestroy() {
     super.onDestroy()
     deattachService()
-    unregisterReceiver(receiver)
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null;
+    }
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
