@@ -326,6 +326,11 @@ class Shadowsocks
 
     override def onServiceDisconnected(name: ComponentName) {
       switchButton.setEnabled(false)
+      try {
+        bgService.unregisterCallback(callback)
+      } catch {
+        case ignored: RemoteException => // Nothing
+      }
       bgService = null
     }
   }

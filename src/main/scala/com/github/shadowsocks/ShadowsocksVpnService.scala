@@ -252,6 +252,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   }
 
+  override def onRevoke() {
+    stopRunner()
+  }
+
   def killProcesses() {
     val sb = new StringBuilder
 
@@ -373,6 +377,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     // reset notifications
     notificationManager.cancel(1)
+
+    // stop the service if no callback registered
+    if (callbackCount == 0) {
+      stopSelf()
+    }
+  }
+
+  override def stopBackgroundService() {
+    stopRunner()
+    stopSelf()
   }
 
   override def getTag = TAG

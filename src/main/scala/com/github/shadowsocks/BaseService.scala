@@ -50,6 +50,7 @@ import android.content.Context
 trait BaseService {
 
   var state = State.INIT
+  var callbackCount = 0
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
 
@@ -63,11 +64,20 @@ trait BaseService {
     }
 
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null ) callbacks.unregister(cb)
+      if (cb != null ) {
+        callbacks.unregister(cb)
+        callbackCount -= 1
+      }
+      if (callbackCount == 0 && state != State.CONNECTING && state != State.CONNECTED) {
+        stopBackgroundService()
+      }
     }
 
     override def registerCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null) callbacks.register(cb)
+      if (cb != null) {
+        callbacks.register(cb)
+        callbackCount += 1
+      }
     }
 
     override def stop() {
@@ -79,6 +89,7 @@ trait BaseService {
     }
   }
 
+  def stopBackgroundService()
   def startRunner(config: Config)
   def stopRunner()
   def getServiceMode: Int
