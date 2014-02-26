@@ -606,7 +606,11 @@ class Shadowsocks
 
   def deattachService() {
     if (bgService != null) {
-      bgService.unregisterCallback(callback)
+      try {
+        bgService.unregisterCallback(callback)
+      } catch {
+        case ignored: RemoteException => // Nothing
+      }
       unbindService(connection)
       bgService = null
     }
