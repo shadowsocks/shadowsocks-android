@@ -99,18 +99,7 @@ class ShadowsocksNatService extends Service with BaseService {
   private var timer: Timer = null
   private val TIMER_INTERVAL = 2
 
-  val handler: Handler = new Handler {
-    override def handleMessage(msg: Message) {
-      msg.what match {
-        case Msg.CONNECT_SUCCESS =>
-          changeState(State.CONNECTED)
-        case Msg.CONNECT_FAIL =>
-          changeState(State.STOPPED)
-        case _ =>
-      }
-      super.handleMessage(msg)
-    }
-  }
+  val handler: Handler = new Handler()
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
@@ -463,7 +452,7 @@ class ShadowsocksNatService extends Service with BaseService {
           case ex: Exception =>
             notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
             stopRunner()
-            handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+            changeState(State.STOPPED)
             return
         }
       }
@@ -488,13 +477,12 @@ class ShadowsocksNatService extends Service with BaseService {
       if (resolved && handleConnection) {
         notifyForegroundAlert(getString(R.string.forward_success),
           getString(R.string.service_running).format(config.profileName))
-        handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 500)
+        changeState(State.CONNECTED)
       } else {
         notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
         stopRunner()
-        handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+        changeState(State.STOPPED)
       }
-      handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 500)
     }
   }
 

@@ -106,8 +106,9 @@ trait BaseService {
       override def run() {
         if (state != s) {
           val n = callbacks.beginBroadcast()
+          val m = if (msg != null) msg.substring(0, 64) else null
           for (i <- 0 to n - 1) {
-            callbacks.getBroadcastItem(i).stateChanged(s, msg.substring(0, 64))
+            callbacks.getBroadcastItem(i).stateChanged(s, m)
           }
           callbacks.finishBroadcast()
           state = s

@@ -72,20 +72,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var apps: Array[ProxiedApp] = null
   var config: Config = null
 
-  val handler: Handler = new Handler {
-    override def handleMessage(msg: Message) {
-      msg.what match {
-        case Msg.CONNECT_SUCCESS =>
-          changeState(State.CONNECTED)
-        case Msg.CONNECT_FAIL =>
-          changeState(State.STOPPED)
-        case Msg.VPN_ERROR =>
-          if (msg.obj != null) changeState(State.STOPPED, msg.obj.asInstanceOf[String])
-        case _ =>
-      }
-      super.handleMessage(msg)
-    }
-  }
+  val handler: Handler = new Handler()
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
@@ -178,10 +165,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = builder.establish()
     } catch {
       case ex: IllegalStateException =>
-        val msg = new Message()
-        msg.what = Msg.VPN_ERROR
-        msg.obj = ex.getMessage
-        handler.sendMessage(msg)
+        changeState(State.STOPPED, ex.getMessage)
         conn = null
       case ex: Exception => conn = null
     }
@@ -314,7 +298,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
           case ex: Exception =>
             notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
             stopRunner()
-            handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 500)
+            changeState(State.STOPPED)
             return
         }
       }
@@ -337,13 +321,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
 
       if (resolved && handleConnection) {
-        handler.sendEmptyMessageDelayed(Msg.CONNECT_SUCCESS, 300)
+        changeState(State.CONNECTED)
       } else {
         notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-        handler.sendEmptyMessageDelayed(Msg.CONNECT_FAIL, 300)
+        changeState(State.STOPPED)
         stopRunner()
       }
-      handler.sendEmptyMessageDelayed(Msg.CONNECT_FINISH, 300)
     }
   }
 
