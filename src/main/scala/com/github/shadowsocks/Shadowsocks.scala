@@ -417,10 +417,12 @@ class Shadowsocks
     val sb = new StringBuilder
 
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
+    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`").append("\n")
+    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
     sb.append("killall -9 pdnsd").append("\n")
-    sb.append("killall -9 shadowsocks").append("\n")
+    sb.append("killall -9 ss-local").append("\n")
+    sb.append("killall -9 ss-tunnel").append("\n")
     sb.append("killall -9 tun2socks").append("\n")
     sb.append("rm /data/data/com.github.shadowsocks/pdnsd.conf").append("\n")
     sb.append("rm /data/data/com.github.shadowsocks/pdnsd.cache").append("\n")
@@ -908,7 +910,8 @@ class Shadowsocks
     Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
       + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
       + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/shadowsocks\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/ss-local\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/ss-tunnel\n"
       + "chmod 755 /data/data/com.github.shadowsocks/tun2socks\n")
   }
 

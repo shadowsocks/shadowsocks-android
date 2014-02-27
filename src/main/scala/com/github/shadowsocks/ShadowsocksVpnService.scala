@@ -84,11 +84,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsDaemon() {
-    val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    val conf: String = ConfigUtils.PDNSD.format("0.0.0.0")
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-      p.println(conf)
-    })
+    val cmd = (Path.BASE +
+      "ss-tunnel -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
+      Path.BASE + "ss-local.pid")
+      .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
+    // val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    // val conf: String = ConfigUtils.PDNSD.format("0.0.0.0")
+    // ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+    //   p.println(conf)
+    // })
     Utils.runCommand(cmd)
   }
 
@@ -243,12 +247,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def killProcesses() {
     val sb = new StringBuilder
 
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "shadowsocks.pid`" ++= "\n"
-    sb ++= "killall -9 shadowsocks" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-local.pid`" ++= "\n"
+    sb ++= "killall -9 ss-local" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-tunnel.pid`" ++= "\n"
+    sb ++= "killall -9 ss-tunnel" ++= "\n"
     sb ++= "kill -9 `cat " ++= Path.BASE ++= "tun2socks.pid`" ++= "\n"
     sb ++= "killall -9 tun2socks" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
-    sb ++= "killall -9 pdnsd" ++= "\n"
+    // sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
+    // sb ++= "killall -9 pdnsd" ++= "\n"
 
     Utils.runCommand(sb.toString())
   }

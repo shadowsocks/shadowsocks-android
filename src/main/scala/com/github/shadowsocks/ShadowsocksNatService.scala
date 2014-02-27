@@ -102,20 +102,24 @@ class ShadowsocksNatService extends Service with BaseService {
   val handler: Handler = new Handler()
 
   def startShadowsocksDaemon() {
-    val cmd: String = (Path.BASE +
-      "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-      Path.BASE + "shadowsocks.pid")
+    val cmd = (Path.BASE +
+      "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+      Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     Utils.runCommand(cmd)
   }
 
   def startDnsDaemon() {
-    val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    val conf: String = ConfigUtils.PDNSD.format("127.0.0.1")
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-      p.println(conf)
-    })
+    val cmd = (Path.BASE +
+      "ss-tunnel -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
+      Path.BASE + "ss-local.pid")
+      .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
+    // val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    // val conf = ConfigUtils.PDNSD.format("127.0.0.1")
+    // ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+    //   p.println(conf)
+    // })
     Utils.runCommand(cmd)
   }
 
@@ -271,8 +275,10 @@ class ShadowsocksNatService extends Service with BaseService {
 
     sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
     sb ++= "killall -9 pdnsd" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "shadowsocks.pid`" ++= "\n"
-    sb ++= "killall -9 shadowsocks" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-local.pid`" ++= "\n"
+    sb ++= "killall -9 ss-local" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-tunnel.pid`" ++= "\n"
+    sb ++= "killall -9 ss-tunnel" ++= "\n"
 
     Utils.runCommand(sb.toString())
   }
