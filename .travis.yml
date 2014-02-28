@@ -35,7 +35,7 @@ after_success:
 - sbt deploy
 env:
   global:
-  - "ARTIFACTS_AWS_REGION=ap-northeast-1"
-  - "ARTIFACTS_S3_BUCKET=travis-ci"
+  - "ARTIFACTS_AWS_REGION=us-east-1"
+  - "ARTIFACTS_S3_BUCKET=travis-nightly"
   - secure: "GkAdnMh07id2VKhpCW16lE73A0LK2Jsk3hzkFvdx76JKW8FjLgaimLJ2T/+i\nxFfDw8XBinLE09dqg8JxSNS6JbLHLcav8P3yJIlzFh1NqfJABU9U4I8atb6P\nITSdSo9nb3LX6sB8SOU0nqXb5U+nj7jiekQqiBhmEmu6iDmMtfU="
   - secure: "eCh5BjCFccp+sB/FIrjsmxJU4475D4qiWvDV++khcIHLel6lgUjDX18ImBlJ\n+IdiCKxvR6EpRDV1Cs4gJ2jZEAV0PbojQMoQOXbs1FLggM8RRq/Re1qWQFq7\nWkBRjjr8w8ddjJZHRo459cTUvgvD7krhp07coabAnEahDaGWSUo="
