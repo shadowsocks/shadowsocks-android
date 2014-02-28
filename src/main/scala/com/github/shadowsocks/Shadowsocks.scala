@@ -122,7 +122,7 @@ object Shadowsocks {
   val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey,
     Key.encMethod)
   val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
-    Key.isAutoConnect)
+    Key.isUdpDns, Key.isAutoConnect)
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
 
@@ -162,6 +162,7 @@ object Shadowsocks {
       case Key.isGFWList => updateCheckBoxPreference(pref, profile.chnroute)
       case Key.isGlobalProxy => updateCheckBoxPreference(pref, profile.global)
       case Key.isTrafficStat => updateCheckBoxPreference(pref, profile.traffic)
+      case Key.isUdpDns => updateCheckBoxPreference(pref, profile.udpdns)
       case _ =>
     }
   }
@@ -417,10 +418,12 @@ class Shadowsocks
     val sb = new StringBuilder
 
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/shadowsocks.pid`").append("\n")
+    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`").append("\n")
+    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`").append("\n")
     sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
     sb.append("killall -9 pdnsd").append("\n")
-    sb.append("killall -9 shadowsocks").append("\n")
+    sb.append("killall -9 ss-local").append("\n")
+    sb.append("killall -9 ss-tunnel").append("\n")
     sb.append("killall -9 tun2socks").append("\n")
     sb.append("rm /data/data/com.github.shadowsocks/pdnsd.conf").append("\n")
     sb.append("rm /data/data/com.github.shadowsocks/pdnsd.cache").append("\n")
@@ -908,7 +911,8 @@ class Shadowsocks
     Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
       + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
       + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/shadowsocks\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/ss-local\n"
+      + "chmod 755 /data/data/com.github.shadowsocks/ss-tunnel\n"
       + "chmod 755 /data/data/com.github.shadowsocks/tun2socks\n")
   }
 

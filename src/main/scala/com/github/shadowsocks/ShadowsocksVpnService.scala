@@ -76,19 +76,26 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
-      "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-      Path.BASE + "shadowsocks.pid")
+      "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+      Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
 
   def startDnsDaemon() {
-    val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    val conf: String = ConfigUtils.PDNSD.format("0.0.0.0")
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-      p.println(conf)
-    })
+    val cmd = if (config.isUdpDns) {
+      (Path.BASE +
+        "ss-tunnel -b 0.0.0.0 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
+        Path.BASE + "ss-tunnel.pid")
+        .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
+    } else {
+      val conf = ConfigUtils.PDNSD.format("0.0.0.0")
+      ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+        p.println(conf)
+      })
+      Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    }
     Utils.runCommand(cmd)
   }
 
@@ -243,12 +250,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def killProcesses() {
     val sb = new StringBuilder
 
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "shadowsocks.pid`" ++= "\n"
-    sb ++= "killall -9 shadowsocks" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-local.pid`" ++= "\n"
+    sb ++= "killall -9 ss-local" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-tunnel.pid`" ++= "\n"
+    sb ++= "killall -9 ss-tunnel" ++= "\n"
     sb ++= "kill -9 `cat " ++= Path.BASE ++= "tun2socks.pid`" ++= "\n"
     sb ++= "killall -9 tun2socks" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
-    sb ++= "killall -9 pdnsd" ++= "\n"
+    // sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
+    // sb ++= "killall -9 pdnsd" ++= "\n"
 
     Utils.runCommand(sb.toString())
   }

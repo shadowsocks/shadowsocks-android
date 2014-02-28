@@ -84,6 +84,9 @@ class Profile {
   @DatabaseField
   var traffic: Boolean = false
 
+  @DatabaseField
+  var udpdns: Boolean = false
+
   @DatabaseField(dataType = DataType.LONG_STRING)
   var individual: String = ""
 

@@ -84,7 +84,8 @@ object ConfigUtils {
     val method = proxy(3).trim
 
     new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
-      config.profileName, host, password, method, config.proxiedAppString, port, config.localPort)
+      config.isUdpDns, config.profileName, host, password, method, config.proxiedAppString, port,
+      config.localPort)
   }
 
   def load(settings: SharedPreferences): Config = {
@@ -92,6 +93,7 @@ object ConfigUtils {
     val isGFWList = settings.getBoolean(Key.isGFWList, false)
     val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
     val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
+    val isUdpDns = settings.getBoolean(Key.isUdpDns, false)
 
     val profileName = settings.getString(Key.profileName, "default")
     val proxy = settings.getString(Key.proxy, "127.0.0.1")
@@ -111,7 +113,7 @@ object ConfigUtils {
     }
     val proxiedAppString = settings.getString(Key.proxied, "")
 
-    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, profileName, proxy, sitekey,
+    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, isUdpDns, profileName, proxy, sitekey,
       encMethod, proxiedAppString, remotePort, localPort)
 
   }
