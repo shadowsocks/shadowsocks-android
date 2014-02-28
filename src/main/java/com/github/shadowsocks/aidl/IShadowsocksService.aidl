@@ -7,8 +7,8 @@ interface IShadowsocksService {
   int getMode();
   int getState();
 
-  void registerCallback(IShadowsocksServiceCallback cb);
-  void unregisterCallback(IShadowsocksServiceCallback cb);
+  oneway void registerCallback(IShadowsocksServiceCallback cb);
+  oneway void unregisterCallback(IShadowsocksServiceCallback cb);
 
   oneway void start(in Config config);
   oneway void stop();
