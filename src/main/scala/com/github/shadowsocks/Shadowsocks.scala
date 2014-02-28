@@ -122,7 +122,7 @@ object Shadowsocks {
   val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey,
     Key.encMethod)
   val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
-    Key.isAutoConnect)
+    Key.isUdpDns, Key.isAutoConnect)
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
 
@@ -162,6 +162,7 @@ object Shadowsocks {
       case Key.isGFWList => updateCheckBoxPreference(pref, profile.chnroute)
       case Key.isGlobalProxy => updateCheckBoxPreference(pref, profile.global)
       case Key.isTrafficStat => updateCheckBoxPreference(pref, profile.traffic)
+      case Key.isUdpDns => updateCheckBoxPreference(pref, profile.udpdns)
       case _ =>
     }
   }

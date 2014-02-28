@@ -111,15 +111,19 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def startDnsDaemon() {
-    val cmd = (Path.BASE +
-      "ss-tunnel -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
-      Path.BASE + "ss-local.pid")
-      .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
-    // val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    // val conf = ConfigUtils.PDNSD.format("127.0.0.1")
-    // ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-    //   p.println(conf)
-    // })
+    val cmd = if (config.isUdpDns) {
+      (Path.BASE +
+        "ss-tunnel -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
+        Path.BASE + "ss-local.pid")
+        .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
+    } else {
+      val conf = ConfigUtils.PDNSD.format("127.0.0.1")
+      ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+         p.println(conf)
+      })
+      Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    }
+
     Utils.runCommand(cmd)
   }
 

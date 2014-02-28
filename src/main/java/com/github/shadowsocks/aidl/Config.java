@@ -9,6 +9,7 @@ public class Config implements Parcelable {
   public boolean isGFWList = true;
   public boolean isBypassApps = false;
   public boolean isTrafficStat = false;
+  public boolean isUdpDns = false;
 
   public String profileName = "Untitled";
   public String proxy = "127.0.0.1";
@@ -20,24 +21,24 @@ public class Config implements Parcelable {
   public int remotePort = 1984;
   public int localPort = 1080;
 
-  public static final Parcelable.Creator<Config> CREATOR = new
-      Parcelable.Creator<Config>() {
-        public Config createFromParcel(Parcel in) {
-          return new Config(in);
-        }
+  public static final Parcelable.Creator<Config> CREATOR = new Parcelable.Creator<Config>() {
+    public Config createFromParcel(Parcel in) {
+      return new Config(in);
+    }
 
-        public Config[] newArray(int size) {
-          return new Config[size];
-        }
-      };
+    public Config[] newArray(int size) {
+      return new Config[size];
+    }
+  };
 
   public Config(boolean isGlobalProxy, boolean isGFWList, boolean isBypassApps,
-      boolean isTrafficStat, String profileName, String proxy, String sitekey, String encMethod,
-      String proxiedAppString, int remotePort, int localPort) {
+      boolean isTrafficStat, boolean isUdpDns, String profileName, String proxy, String sitekey,
+      String encMethod, String proxiedAppString, int remotePort, int localPort) {
     this.isGlobalProxy = isGlobalProxy;
     this.isGFWList = isGFWList;
     this.isBypassApps = isBypassApps;
     this.isTrafficStat = isTrafficStat;
+    this.isUdpDns = isUdpDns;
     this.profileName = profileName;
     this.proxy = proxy;
     this.sitekey = sitekey;
@@ -56,6 +57,7 @@ public class Config implements Parcelable {
     isGFWList = in.readInt() == 1;
     isBypassApps = in.readInt() == 1;
     isTrafficStat = in.readInt() == 1;
+    isUdpDns = in.readInt() == 1;
     profileName = in.readString();
     proxy = in.readString();
     sitekey = in.readString();
@@ -70,10 +72,11 @@ public class Config implements Parcelable {
   }
 
   @Override public void writeToParcel(Parcel out, int flags) {
-    out.writeInt(isGlobalProxy ? 1: 0);
-    out.writeInt(isGFWList ? 1: 0);
-    out.writeInt(isBypassApps ? 1: 0);
-    out.writeInt(isTrafficStat ? 1: 0);
+    out.writeInt(isGlobalProxy ? 1 : 0);
+    out.writeInt(isGFWList ? 1 : 0);
+    out.writeInt(isBypassApps ? 1 : 0);
+    out.writeInt(isTrafficStat ? 1 : 0);
+    out.writeInt(isUdpDns ? 1 : 0);
     out.writeString(profileName);
     out.writeString(proxy);
     out.writeString(sitekey);
@@ -81,6 +84,5 @@ public class Config implements Parcelable {
     out.writeString(proxiedAppString);
     out.writeInt(remotePort);
     out.writeInt(localPort);
-
   }
 }

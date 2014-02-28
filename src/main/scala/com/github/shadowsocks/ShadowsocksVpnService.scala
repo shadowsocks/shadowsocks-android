@@ -76,23 +76,26 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
-      "shadowsocks -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
-      Path.BASE + "shadowsocks.pid")
+      "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+      Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
 
   def startDnsDaemon() {
-    val cmd = (Path.BASE +
-      "ss-tunnel -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
-      Path.BASE + "ss-local.pid")
-      .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
-    // val cmd: String = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    // val conf: String = ConfigUtils.PDNSD.format("0.0.0.0")
-    // ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-    //   p.println(conf)
-    // })
+    val cmd = if (config.isUdpDns) {
+      (Path.BASE +
+        "ss-tunnel -b 0.0.0.0 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
+        Path.BASE + "ss-tunnel.pid")
+        .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
+    } else {
+      val conf = ConfigUtils.PDNSD.format("0.0.0.0")
+      ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+        p.println(conf)
+      })
+      Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    }
     Utils.runCommand(cmd)
   }
 
