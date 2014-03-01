@@ -107,7 +107,11 @@ trait BaseService {
         if (state != s) {
           val n = callbacks.beginBroadcast()
           for (i <- 0 to n - 1) {
-            callbacks.getBroadcastItem(i).stateChanged(s, msg)
+            try {
+              callbacks.getBroadcastItem(i).stateChanged(s, msg)
+            } catch {
+              case _: Exception => // Ignore
+            }
           }
           callbacks.finishBroadcast()
           state = s

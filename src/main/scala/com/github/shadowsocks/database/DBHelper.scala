@@ -50,20 +50,24 @@ object DBHelper {
   val PROFILE = "profile.db"
 }
 
-class DBHelper(val context: Context) extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 8) {
+class DBHelper(val context: Context)
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 8) {
 
-  lazy val profileDao:Dao[Profile,Int] = getDao(classOf[Profile])
+  lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
 
   def onCreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
     TableUtils.createTable(connectionSource, classOf[Profile])
   }
 
-  def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int, newVersion: Int) {
-    if (oldVersion < 8) {
-      profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN udpdns INTEGER;")
-    } else {
-      TableUtils.dropTable(connectionSource, classOf[Profile], true)
+  def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int,
+    newVersion: Int) {
+    if (oldVersion != newVersion) {
+      if (oldVersion < 8) {
+        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
+      } else {
+        profileDao.executeRaw("DROP TABLE IF EXISTS 'profile';")
+        onCreate(database, connectionSource)
+      }
     }
-    onCreate(database, connectionSource)
   }
 }
