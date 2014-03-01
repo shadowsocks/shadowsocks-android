@@ -256,8 +256,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     sb ++= "killall -9 ss-tunnel" ++= "\n"
     sb ++= "kill -9 `cat " ++= Path.BASE ++= "tun2socks.pid`" ++= "\n"
     sb ++= "killall -9 tun2socks" ++= "\n"
-    // sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
-    // sb ++= "killall -9 pdnsd" ++= "\n"
+    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
+    sb ++= "killall -9 pdnsd" ++= "\n"
 
     Utils.runCommand(sb.toString())
   }
