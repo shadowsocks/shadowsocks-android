@@ -45,7 +45,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import com.github.shadowsocks.{Shadowsocks, R}
+import com.github.shadowsocks.{R}
 import android.view.View.{OnLongClickListener, OnClickListener}
 
 case class Item(id: Int, title: String, iconRes: Int,

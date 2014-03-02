@@ -38,25 +38,22 @@
  */
 package com.github.shadowsocks.utils
 
-import android.content.{Intent, SharedPreferences, Context}
+import android.content.{Intent, Context}
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.util.{Base64, Log}
 import java.io._
-import java.net.{URLEncoder, UnknownHostException, InetAddress, NetworkInterface}
+import java.net.{UnknownHostException, InetAddress, NetworkInterface}
 import org.apache.http.conn.util.InetAddressUtils
-import scala.collection.mutable.ArrayBuffer
 import org.xbill.DNS._
 import android.graphics._
 import android.app.ActivityManager
 import android.os.Build
 import android.provider.Settings
 import scala.Some
-import scalaj.http.{Http, HttpOptions}
-import com.google.tagmanager.Container
 import java.security.MessageDigest
-import com.github.shadowsocks.{BuildConfig, Exec, ShadowsocksApplication}
+import com.github.shadowsocks.{BuildConfig}
 
 
 object Utils {

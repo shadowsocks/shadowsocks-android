@@ -39,9 +39,6 @@
 
 package com.github.shadowsocks.utils
 
-import android.content.{Intent, SharedPreferences}
-import com.github.shadowsocks.aidl.Config
-
 object Executable {
   val REDSOCKS = "redsocks"
   val PDNSD = "pdnsd"
