@@ -50,7 +50,6 @@ import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.google.analytics.tracking.android.{Fields, MapBuilder, EasyTracker}
-import java.io._
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import org.apache.http.conn.util.InetAddressUtils
@@ -62,6 +61,8 @@ import com.github.shadowsocks.utils._
 import scala.Some
 import android.graphics.Color
 import com.github.shadowsocks.aidl.Config
+import scala.collection.mutable.ArrayBuffer
+import java.io.File
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
@@ -107,7 +108,7 @@ class ShadowsocksNatService extends Service with BaseService {
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Utils.runCommand(cmd)
+    System.exec(cmd)
   }
 
   def startDnsDaemon() {
@@ -123,8 +124,8 @@ class ShadowsocksNatService extends Service with BaseService {
       })
       Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     }
-
-    Utils.runCommand(cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    System.exec(cmd)
   }
 
   def getVersionName: String = {
@@ -146,7 +147,7 @@ class ShadowsocksNatService extends Service with BaseService {
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
-    Utils.runRootCommand(cmd)
+    Console.runRootCommand(cmd)
   }
 
   /** Called when the activity is first created. */
@@ -267,24 +268,25 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def killProcesses() {
-    Utils.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+    Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
 
-    val sb = new StringBuilder
+    val ab = new ArrayBuffer[String]
 
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "redsocks.pid`" ++= "\n"
-    sb ++= "killall -9 redsocks" ++= "\n"
-    Utils.runRootCommand(sb.toString())
+    ab.append("kill -9 `cat " + Path.BASE +"redsocks.pid`")
+    ab.append("killall -9 redsocks")
 
-    sb.clear()
+    Console.runRootCommand(ab.toArray)
 
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
-    sb ++= "killall -9 pdnsd" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-local.pid`" ++= "\n"
-    sb ++= "killall -9 ss-local" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-tunnel.pid`" ++= "\n"
-    sb ++= "killall -9 ss-tunnel" ++= "\n"
+    ab.clear()
 
-    Utils.runCommand(sb.toString())
+    ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
+    ab.append("killall -9 ss-local")
+    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
+    ab.append("killall -9 ss-tunnel")
+    ab.append("kill -9 `cat " + Path.BASE + "pdnsd.pid`")
+    ab.append("killall -9 pdnsd")
+
+    Console.runRootCommand(ab.toArray)
   }
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
@@ -292,8 +294,7 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def flushDNS() {
-    Utils.runRootCommand("ndc resolver flushdefaultif\n"
-      + "ndc resolver flushif wlan0\n")
+    Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
   }
 
   def setupIptables: Boolean = {
@@ -354,9 +355,9 @@ class ShadowsocksNatService extends Service with BaseService {
       }
     }
     val init_rules: String = init_sb.toString()
-    Utils.runRootCommand(init_rules, 30 * 1000)
+    Console.runRootCommand(init_rules)
     val redt_rules: String = http_sb.toString()
-    Utils.runRootCommand(redt_rules)
+    Console.runRootCommand(redt_rules)
     true
   }
 

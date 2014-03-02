@@ -42,6 +42,15 @@ package com.github.shadowsocks.utils
 import android.content.{Intent, SharedPreferences}
 import com.github.shadowsocks.aidl.Config
 
+object Executable {
+  val REDSOCKS = "redsocks"
+  val PDNSD = "pdnsd"
+  val SS_LOCAL = "ss-local"
+  val SS_TUNNEL = "ss-tunnel"
+  val IPTABLES = "iptables"
+  val TUN2SOCKS = "tun2socks"
+}
+
 object Msg {
   val CONNECT_FINISH = 1
   val CONNECT_SUCCESS = 2

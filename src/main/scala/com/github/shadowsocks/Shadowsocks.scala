@@ -49,7 +49,6 @@ import android.view._
 import android.widget._
 import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
 import de.keyboardsurfer.android.widget.crouton.{Crouton, Style, Configuration}
-import java.io._
 import java.util.Hashtable
 import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment
 import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity
@@ -63,7 +62,7 @@ import com.google.ads.{AdRequest, AdSize, AdView}
 import net.simonvt.menudrawer.MenuDrawer
 
 import com.github.shadowsocks.database._
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import com.github.shadowsocks.database.Profile
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEditTextPreference, SummaryEditTextPreference}
@@ -72,6 +71,11 @@ import com.github.shadowsocks.database.Item
 import com.github.shadowsocks.database.Category
 import com.google.zxing.integration.android.IntentIntegrator
 import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
+import java.io._
+import scala.Some
+import com.github.shadowsocks.database.Item
+import com.github.shadowsocks.database.Category
+import com.github.shadowsocks.utils.Console
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -118,13 +122,17 @@ object Typefaces {
 object Shadowsocks {
 
   // Constants
+  val TAG = "Shadowsocks"
+  val REQUEST_CONNECT = 1
+
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey,
     Key.encMethod)
   val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
     Key.isUdpDns, Key.isAutoConnect)
-  val TAG = "Shadowsocks"
-  val REQUEST_CONNECT = 1
+
+  val EXECUTABLES = Array(Executable.IPTABLES, Executable.PDNSD, Executable.REDSOCKS,
+    Executable.SS_LOCAL, Executable.SS_TUNNEL, Executable.TUN2SOCKS)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -415,26 +423,28 @@ class Shadowsocks
   }
 
   private def crash_recovery() {
-    val sb = new StringBuilder
+    val ab = new ArrayBuffer[String]
 
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`").append("\n")
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`").append("\n")
-    sb.append("killall -9 pdnsd").append("\n")
-    sb.append("killall -9 ss-local").append("\n")
-    sb.append("killall -9 ss-tunnel").append("\n")
-    sb.append("killall -9 tun2socks").append("\n")
-    sb.append("rm /data/data/com.github.shadowsocks/pdnsd.conf").append("\n")
-    sb.append("rm /data/data/com.github.shadowsocks/pdnsd.cache").append("\n")
-    Utils.runCommand(sb.toString())
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`")
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`")
+    ab.append("killall -9 pdnsd")
+    ab.append("killall -9 ss-local")
+    ab.append("killall -9 ss-tunnel")
+    ab.append("killall -9 tun2socks")
+    ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
+    ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
 
-    sb.clear()
-    sb.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`").append("\n")
-    sb.append("killall -9 redsocks").append("\n")
-    sb.append("rm /data/data/com.github.shadowsocks/redsocks.conf").append("\n")
-    sb.append(Utils.getIptables).append(" -t nat -F OUTPUT").append("\n")
-    Utils.runRootCommand(sb.toString())
+    Console.runCommand(ab.toArray)
+
+    ab.clear()
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
+    ab.append("killall -9 redsocks")
+    ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
+    ab.append(Utils.getIptables + " -t nat -F OUTPUT")
+
+    Console.runRootCommand(ab.toArray)
   }
 
   private def getVersionName: String = {
@@ -587,7 +597,7 @@ class Shadowsocks
 
     // Bind to the service
     spawn {
-      val isRoot = Utils.getRoot
+      val isRoot = Console.isRoot
       handler.post(new Runnable {
         override def run() {
           status.edit.putBoolean(Key.isRoot, isRoot).commit()
@@ -908,12 +918,12 @@ class Shadowsocks
   def reset() {
     crash_recovery()
     copyAssets(System.getABI)
-    Utils.runCommand("chmod 755 /data/data/com.github.shadowsocks/iptables\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/redsocks\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/pdnsd\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/ss-local\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/ss-tunnel\n"
-      + "chmod 755 /data/data/com.github.shadowsocks/tun2socks\n")
+
+    val ab = new ArrayBuffer[String]
+    for (executable <- Shadowsocks.EXECUTABLES) {
+      ab.append("chmod 755 " + Path.BASE + executable)
+    }
+    Console.runCommand(ab.toArray)
   }
 
   private def recovery() {

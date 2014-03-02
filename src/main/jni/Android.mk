@@ -131,21 +131,6 @@ LOCAL_LDLIBS := -llog
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## termExec
-########################################################
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE:= exec
-
-LOCAL_SRC_FILES:= \
-	   termExec.cpp
-
-LOCAL_LDLIBS := -ldl -llog
-
-include $(BUILD_SHARED_LIBRARY)
-
-########################################################
 ## system
 ########################################################
 

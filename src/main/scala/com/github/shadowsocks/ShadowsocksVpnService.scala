@@ -47,7 +47,6 @@ import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.google.analytics.tracking.android.{Fields, MapBuilder, EasyTracker}
-import java.io._
 import android.net.VpnService
 import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
@@ -57,6 +56,8 @@ import java.net.InetAddress
 import com.github.shadowsocks.utils._
 import scala.Some
 import com.github.shadowsocks.aidl.{IShadowsocksService, Config}
+import scala.collection.mutable.ArrayBuffer
+import java.io.File
 
 class ShadowsocksVpnService extends VpnService with BaseService {
 
@@ -96,7 +97,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       })
       Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     }
-    Utils.runCommand(cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    System.exec(cmd)
   }
 
   def getVersionName: String = {
@@ -248,18 +250,18 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
-    val sb = new StringBuilder
+    val ab = new ArrayBuffer[String]
 
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-local.pid`" ++= "\n"
-    sb ++= "killall -9 ss-local" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "ss-tunnel.pid`" ++= "\n"
-    sb ++= "killall -9 ss-tunnel" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "tun2socks.pid`" ++= "\n"
-    sb ++= "killall -9 tun2socks" ++= "\n"
-    sb ++= "kill -9 `cat " ++= Path.BASE ++= "pdnsd.pid`" ++= "\n"
-    sb ++= "killall -9 pdnsd" ++= "\n"
+    ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
+    ab.append("killall -9 ss-local")
+    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
+    ab.append("killall -9 ss-tunnel")
+    ab.append("kill -9 `cat " + Path.BASE + "tun2socks.pid`")
+    ab.append("killall -9 tun2socks")
+    ab.append("kill -9 `cat " + Path.BASE + "pdnsd.pid`")
+    ab.append("killall -9 pdnsd")
 
-    Utils.runCommand(sb.toString())
+    Console.runCommand(ab.toArray)
   }
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {

@@ -134,8 +134,7 @@ object Utils {
   private def toggleAboveApiLevel17() {
     // Android 4.2 and above
 
-    Utils.runRootCommand("ndc resolver flushdefaultif\n"
-                       + "ndc resolver flushif wlan0\n")
+    Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
 
     //Utils.runRootCommand("settings put global airplane_mode_on 1\n"
     //  + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true\n"
@@ -207,22 +206,19 @@ object Utils {
   def resolve(host: String, enableIPv6: Boolean): Option[String] = {
     if (enableIPv6 && Utils.isIPv6Support) {
       resolve(host, Type.AAAA) match {
-        case Some(addr) => {
+        case Some(addr) =>
           return Some(addr)
-        }
         case None =>
       }
     }
     resolve(host, Type.A) match {
-      case Some(addr) => {
+      case Some(addr) =>
         return Some(addr)
-      }
       case None =>
     }
     resolve(host) match {
-      case Some(addr) => {
+      case Some(addr) =>
         return Some(addr)
-      }
       case None =>
     }
     None
@@ -248,9 +244,8 @@ object Utils {
         }
       }
     } catch {
-      case ex: Exception => {
+      case ex: Exception =>
         Log.e(TAG, "Failed to get interfaces' addresses.", ex)
-      }
     }
     None
   }
@@ -276,9 +271,8 @@ object Utils {
         }
       }
     } catch {
-      case ex: Exception => {
+      case ex: Exception =>
         Log.e(TAG, "Failed to get interfaces' addresses.", ex)
-      }
     }
     false
   }
@@ -289,23 +283,20 @@ object Utils {
    */
   def checkIptables() {
 
-    if (!Utils.getRoot) {
+    if (!Console.isRoot) {
       iptables = DEFAULT_IPTABLES
       return
     }
 
     iptables = DEFAULT_IPTABLES
 
-    var lines: String = null
     var compatible: Boolean = false
     var version: Boolean = false
 
-    val sb = new StringBuilder
-    val command = iptables + " --version\n" + iptables + " -L -t nat -n\n" + "exit\n"
-    val exitcode = runScript(command, sb, 10 * 1000, asroot = true)
-    if (exitcode == TIME_OUT) return
+    val command = Array(iptables + " --version", iptables + " -L -t nat -n")
+    val lines = Console.runRootCommand(command)
+    if (lines == null) return
 
-    lines = sb.toString()
     if (lines.contains("OUTPUT")) {
       compatible = true
     }
@@ -346,9 +337,8 @@ object Utils {
           val appInfo: ApplicationInfo = pm.getApplicationInfo(packages(0), 0)
           return pm.getApplicationIcon(appInfo)
         } catch {
-          case e: PackageManager.NameNotFoundException => {
+          case e: PackageManager.NameNotFoundException =>
             Log.e(c.getPackageName, "No package found matching with the uid " + uid)
-          }
         }
       }
     } else {
@@ -367,25 +357,16 @@ object Utils {
     iptables
   }
 
-  def getShell: String = {
-    if (shell == null) {
-      shell = DEFAULT_SHELL
-      if (!new File(shell).exists) shell = "sh"
-    }
-    shell
-  }
-
   def initHasRedirectSupported() {
-    if (!Utils.getRoot) return
+    if (!Console.isRoot) return
     hasRedirectSupport = 1
 
     val sb = new StringBuilder
     val command = Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 54 -j REDIRECT --to 8154"
-    val exitcode: Int = runScript(command, sb, 10 * 1000, asroot = true)
-    val lines = sb.toString()
+    val lines = Console.runRootCommand(command)
 
-    Utils.runRootCommand(command.replace("-A", "-D"))
-    if (exitcode == TIME_OUT) return
+    Console.runRootCommand(command.replace("-A", "-D"))
+    if (lines == null) return
     if (lines.contains("No chain/target/match")) {
       hasRedirectSupport = 0
     }
@@ -394,196 +375,11 @@ object Utils {
   def isInitialized: Boolean = {
     initialized match {
       case true => true
-      case _ => {
+      case _ =>
         initialized = true
         false
-      }
     }
   }
-
-  def getRoot: Boolean = {
-    if (isRoot != -1) return isRoot == 1
-    if (new File(DEFAULT_ROOT).exists) {
-      root_shell = DEFAULT_ROOT
-    } else if (new File(ALTERNATIVE_ROOT).exists) {
-      root_shell = ALTERNATIVE_ROOT
-    } else {
-      root_shell = "su"
-    }
-    val sb = new StringBuilder
-    val command: String = "id\n"
-    val exitcode: Int = runScript(command, sb, 10 * 1000, asroot = true)
-    if (exitcode == TIME_OUT) {
-      return false
-    }
-    val lines = sb.toString()
-    if (lines.contains("uid=0")) {
-      isRoot = 1
-    } else {
-      if (rootTries >= 1) isRoot = 0
-      rootTries += 1
-    }
-    isRoot == 1
-  }
-
-  def runCommand(command: String): Boolean = {
-    runCommand(command, 10 * 1000)
-  }
-
-  def runCommand(command: String, timeout: Int): Boolean = {
-    if (BuildConfig.DEBUG) Log.d(TAG, command)
-    runScript(command, null, timeout, asroot = false)
-    true
-  }
-
-  def runRootCommand(command: String): Boolean = {
-    runRootCommand(command, 10 * 1000)
-  }
-
-  def runRootCommand(command: String, timeout: Int): Boolean = {
-    if (!Utils.getRoot) {
-      Log.e(TAG, "Cannot get ROOT permission: " + root_shell)
-      return false
-    }
-    if (BuildConfig.DEBUG) Log.d(TAG, command)
-    runScript(command, null, timeout, asroot = true)
-    true
-  }
-
-  def runScript(script: String, result: StringBuilder, timeout: Long, asroot: Boolean): Int = {
-    val runner: Utils.ScriptRunner = new Utils.ScriptRunner(script, result, asroot)
-    runner.start()
-    try {
-      if (timeout > 0) {
-        runner.join(timeout)
-      } else {
-        runner.join()
-      }
-      if (runner.isAlive) {
-        runner.destroy()
-        runner.join(1000)
-        return TIME_OUT
-      }
-    } catch {
-      case ex: InterruptedException => {
-        return TIME_OUT
-      }
-    }
-    runner.exitcode
-  }
-
-  /**
-   * Internal thread used to execute scripts (as root or not).
-   * Creates a new script runner.
-   *
-   * @param scripts script to run
-   * @param result result output
-   * @param asroot if true, executes the script as root
-   */
-  class ScriptRunner(val scripts: String, val result: StringBuilder, val asroot: Boolean)
-    extends Thread {
-
-    var exitcode: Int = -1
-    val pid: Array[Int] = new Array[Int](1)
-    var pipe: FileDescriptor = null
-
-    override def destroy() {
-      if (pid(0) != -1) {
-        Exec.hangupProcessGroup(pid(0))
-        pid(0) = -1
-      }
-      if (pipe != null) {
-        Exec.close(pipe)
-        pipe = null
-      }
-    }
-
-    def createSubprocess(processId: Array[Int], cmd: String): FileDescriptor = {
-      val args = parse(cmd)
-      val arg0 = args(0)
-      Exec
-        .createSubprocess(if (result != null) 1 else 0, arg0, args, null, scripts + "\nexit\n",
-        processId)
-    }
-
-    def parse(cmd: String): Array[String] = {
-      val PLAIN = 0
-      val INQUOTE = 2
-      val SKIP = 3
-
-      var state = PLAIN
-      val result: ArrayBuffer[String] = new ArrayBuffer[String]
-      val builder = new StringBuilder()
-
-      cmd foreach {
-        ch => {
-          state match {
-            case PLAIN => {
-              ch match {
-                case c if Character.isWhitespace(c) => {
-                  result += builder.toString
-                  builder.clear()
-                }
-                case '"' => state = INQUOTE
-                case _ => builder += ch
-              }
-            }
-            case INQUOTE => {
-              ch match {
-                case '\\' => state = SKIP
-                case '"' => state = PLAIN
-                case _ => builder += ch
-              }
-            }
-            case SKIP => {
-              builder += ch
-              state = INQUOTE
-            }
-          }
-        }
-      }
-
-      if (builder.length > 0) {
-        result += builder.toString
-      }
-      result.toArray
-    }
-
-    override def run() {
-      pid(0) = -1
-      try {
-        if (this.asroot) {
-          pipe = createSubprocess(pid, root_shell)
-        } else {
-          pipe = createSubprocess(pid, getShell)
-        }
-        if (pid(0) != -1) {
-          exitcode = Exec.waitFor(pid(0))
-        }
-        if (result == null || pipe == null) return
-        val stdout: InputStream = new FileInputStream(pipe)
-        val buf = new Array[Byte](8192)
-        var read: Int = 0
-        while (stdout.available > 0) {
-          read = stdout.read(buf)
-          result.append(new String(buf, 0, read))
-        }
-      } catch {
-        case ex: Exception => {
-          Log.e(TAG, "Cannot execute command", ex)
-          if (result != null) result.append("\n").append(ex)
-        }
-      } finally {
-        if (pipe != null) {
-          Exec.close(pipe)
-        }
-        if (pid(0) != -1) {
-          Exec.hangupProcessGroup(pid(0))
-        }
-      }
-    }
-  }
-
 }
 
 
