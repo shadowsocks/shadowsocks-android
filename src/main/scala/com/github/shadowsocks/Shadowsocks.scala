@@ -322,7 +322,7 @@ class Shadowsocks
         case ignored: RemoteException => // Nothing
       }
       // Update the UI
-      switchButton.setEnabled(true)
+      if (switchButton != null) switchButton.setEnabled(true)
       if (State.isAvailable(bgService.getState)) {
         Crouton.cancelAllCroutons()
         setPreferenceEnabled(enabled = true)
@@ -334,9 +334,9 @@ class Shadowsocks
     }
 
     override def onServiceDisconnected(name: ComponentName) {
-      switchButton.setEnabled(false)
+      if (switchButton != null) switchButton.setEnabled(false)
       try {
-        bgService.unregisterCallback(callback)
+        if (bgService != null) bgService.unregisterCallback(callback)
       } catch {
         case ignored: RemoteException => // Nothing
       }
