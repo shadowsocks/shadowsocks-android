@@ -72,7 +72,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var receiver: BroadcastReceiver = null
   var apps: Array[ProxiedApp] = null
   var config: Config = null
-  var dns = Utils.getDNS
 
   val handler: Handler = new Handler()
 
@@ -92,7 +91,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
-      val conf = ConfigUtils.PDNSD.format("0.0.0.0", getString(R.string.exclude), dns)
+      val conf = ConfigUtils.PDNSD.format("0.0.0.0", getString(R.string.exclude), Utils.getDNS)
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
         p.println(conf)
       })
@@ -116,12 +115,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def isByass(util: SubnetUtils): Boolean = {
     val info = util.getInfo
-    info.isInRange(config.proxy) || info.isInRange("114.114.114.114") || info.isInRange(dns)
+    info.isInRange(config.proxy) || info.isInRange("114.114.114.114") || info.isInRange(Utils.getDNS)
   }
 
   def startVpn() {
-
-    dns = Utils.getDNS
 
     val builder = new Builder()
     builder
