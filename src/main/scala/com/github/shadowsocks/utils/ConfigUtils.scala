@@ -86,7 +86,7 @@ object ConfigUtils {
 	  |
       |server {
       | label = "china-servers";
-      | ip = %s, 114.114.114.114, 114.114.115.115;
+      | ip = 114.114.114.114, 114.114.115.115;
       | timeout = 5;
       |}
       |

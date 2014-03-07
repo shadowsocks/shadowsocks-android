@@ -91,7 +91,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
-      val conf = ConfigUtils.PDNSD.format("0.0.0.0", getString(R.string.exclude), System.getDNS1)
+      val conf = ConfigUtils.PDNSD.format("0.0.0.0", getString(R.string.exclude))
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
         p.println(conf)
       })
