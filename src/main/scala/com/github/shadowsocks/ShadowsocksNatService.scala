@@ -118,7 +118,7 @@ class ShadowsocksNatService extends Service with BaseService {
         Path.BASE + "ss-local.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
-      val conf = ConfigUtils.PDNSD.format("127.0.0.1", getString(R.string.exclude));
+      val conf = ConfigUtils.PDNSD.format("127.0.0.1")
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
@@ -302,17 +302,10 @@ class ShadowsocksNatService extends Service with BaseService {
     val http_sb = new ArrayBuffer[String]
     init_sb.append(Utils.getIptables + " -t nat -F OUTPUT")
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
-
-    // Bypass proxy servers
     if (!InetAddressUtils.isIPv6Address(config.proxy.toUpperCase)) {
-      init_sb.append(cmd_bypass.replace("0.0.0.0", config.proxy))
+      init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
-
-    // Bypass DNS servers
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
-    init_sb.append(cmd_bypass.replace("0.0.0.0", "114.114.114.114"))
-    init_sb.append(cmd_bypass.replace("0.0.0.0", "114.114.115.115"))
-
     if (hasRedirectSupport) {
       init_sb
         .append(Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to "

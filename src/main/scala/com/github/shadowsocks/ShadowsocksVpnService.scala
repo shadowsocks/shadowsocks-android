@@ -91,7 +91,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
-      val conf = ConfigUtils.PDNSD.format("0.0.0.0", getString(R.string.exclude))
+      val conf = ConfigUtils.PDNSD.format("0.0.0.0")
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
         p.println(conf)
       })
@@ -113,12 +113,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     version
   }
 
-  def isByass(info: SubnetUtils.SubnetInfo): Boolean = {
-     info.isInRange(config.proxy) || info.isInRange("114.114.114.114")
-       || info.isInRange("114.114.115.115")
-  }
-
   def startVpn() {
+
+    val proxy_address = config.proxy
 
     val builder = new Builder()
     builder
@@ -139,7 +136,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
       gfwList.foreach(cidr => {
         val net = new SubnetUtils(cidr).getInfo
-        if (!isByass(net)) {
+        if (!net.isInRange(proxy_address)) {
           val addr = cidr.split('/')
           builder.addRoute(addr(0), addr(1).toInt)
         }
@@ -151,7 +148,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
           val cidr = addr + "/8"
           val net = new SubnetUtils(cidr).getInfo
 
-          if (!isByass(net)) {
+          if (!net.isInRange(proxy_address)) {
             if (!InetAddress.getByName(addr).isSiteLocalAddress) {
               builder.addRoute(addr, 8)
             }
@@ -160,7 +157,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
               val subAddr = i.toString + "." + j.toString + ".0.0"
               val subCidr = subAddr + "/16"
               val subNet = new SubnetUtils(subCidr).getInfo
-              if (!isByass(subNet)) {
+              if (!subNet.isInRange(proxy_address)) {
                 if (!InetAddress.getByName(subAddr).isSiteLocalAddress) {
                   builder.addRoute(subAddr, 16)
                 }
