@@ -53,7 +53,7 @@ import android.os.Build
 import android.provider.Settings
 import scala.Some
 import java.security.MessageDigest
-import com.github.shadowsocks.{BuildConfig}
+import com.github.shadowsocks.{BuildConfig, System}
 
 
 object Utils {
@@ -79,6 +79,15 @@ object Utils {
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
+
+  def getDNS(): String = {
+    val dns1 = System.getDNS1
+    if (dns1 != null && !dns1.isEmpty && InetAddressUtils.isIPv4Address(dns1)) {
+      dns1
+    } else {
+      "114.114.114.114"
+    }
+  }
 
   def getSignature(context: Context): String = {
     val info = context

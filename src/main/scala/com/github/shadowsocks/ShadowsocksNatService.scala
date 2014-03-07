@@ -118,7 +118,7 @@ class ShadowsocksNatService extends Service with BaseService {
         Path.BASE + "ss-local.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
-      val conf = ConfigUtils.PDNSD.format("127.0.0.1", getString(R.string.exclude), System.getDNS1);
+      val conf = ConfigUtils.PDNSD.format("127.0.0.1", getString(R.string.exclude), Utils.getDNS);
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
@@ -310,8 +310,8 @@ class ShadowsocksNatService extends Service with BaseService {
 
     // Bypass DNS servers
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
+    init_sb.append(cmd_bypass.replace("0.0.0.0", Utils.getDNS))
     init_sb.append(cmd_bypass.replace("0.0.0.0", "114.114.114.114"))
-    init_sb.append(cmd_bypass.replace("0.0.0.0", "114.114.115.115"))
 
     if (hasRedirectSupport) {
       init_sb
