@@ -77,7 +77,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -u -f " +
+      "ss-local -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -u -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
@@ -85,18 +85,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsDaemon() {
-    val cmd = if (config.isUdpDns) {
-      (Path.BASE +
-        "ss-tunnel -b 0.0.0.0 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
-        Path.BASE + "ss-tunnel.pid")
-        .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
-    } else {
-      val conf = ConfigUtils.PDNSD.format("0.0.0.0")
-      ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-        p.println(conf)
-      })
-      Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    }
+    val conf = ConfigUtils.PDNSD.format("0.0.0.0")
+    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+      p.println(conf)
+    })
+    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
@@ -192,7 +185,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--loglevel 5 "
+      + "--loglevel 3 "
       + "--pid %stun2socks.pid")
       .format(PRIVATE_VLAN.format("2"), config.localPort, fd, VPN_MTU, Path.BASE)
 
@@ -260,8 +253,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
     ab.append("killall -9 ss-local")
-    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
-    ab.append("killall -9 ss-tunnel")
     ab.append("kill -9 `cat " + Path.BASE + "tun2socks.pid`")
     ab.append("killall -9 tun2socks")
     ab.append("kill -9 `cat " + Path.BASE + "pdnsd.pid`")

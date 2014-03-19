@@ -33,7 +33,7 @@
 
 #include <generated/blog_channel_SocksUdpGwClient.h>
 
-#ifdef BADVPN_SOCKS_UDP_RELAY
+#ifdef ANDROID
 
 #include <misc/socks_proto.h>
 #define CONNECTION_UDP_BUFFER_SIZE 1
@@ -49,7 +49,7 @@ static void udpgw_handler_received (SocksUdpGwClient *o, BAddr local_addr, BAddr
 
 #endif
 
-#ifdef BADVPN_SOCKS_UDP_RELAY
+#ifdef ANDROID
 static void dgram_handler (SocksUdpGwClient_connection *o, int event);
 static void dgram_handler_received (SocksUdpGwClient_connection *o, uint8_t *data, int data_len);
 static int conaddr_comparator (void *unused, SocksUdpGwClient_conaddr *v1, SocksUdpGwClient_conaddr *v2);
@@ -485,7 +485,7 @@ int SocksUdpGwClient_Init (SocksUdpGwClient *o, int udp_mtu, int max_connections
 {
     // see asserts in UdpGwClient_Init
     ASSERT(!BAddr_IsInvalid(&socks_server_addr))
-#ifndef BADVPN_SOCKS_UDP_RELAY
+#ifndef ANDROID
     ASSERT(remote_udpgw_addr.type == BADDR_TYPE_IPV4 || remote_udpgw_addr.type == BADDR_TYPE_IPV6)
 #endif
     
@@ -499,7 +499,7 @@ int SocksUdpGwClient_Init (SocksUdpGwClient *o, int udp_mtu, int max_connections
     o->user = user;
     o->handler_received = handler_received;
     
-#ifdef BADVPN_SOCKS_UDP_RELAY
+#ifdef ANDROID
     // compute MTUs
     o->udpgw_mtu = udpgw_compute_mtu(o->udp_mtu);
     o->max_connections = max_connections;
@@ -544,7 +544,7 @@ void SocksUdpGwClient_Free (SocksUdpGwClient *o)
 {
     DebugObject_Free(&o->d_obj);
     
-#ifdef BADVPN_SOCKS_UDP_RELAY
+#ifdef ANDROID
     // free connections
     while (!LinkedList1_IsEmpty(&o->connections_list)) {
         SocksUdpGwClient_connection *con = UPPER_OBJECT(LinkedList1_GetFirst(&o->connections_list), SocksUdpGwClient_connection, connections_list_node);
@@ -569,7 +569,7 @@ void SocksUdpGwClient_SubmitPacket (SocksUdpGwClient *o, BAddr local_addr, BAddr
     DebugObject_Access(&o->d_obj);
     // see asserts in UdpGwClient_SubmitPacket
     
-#ifdef BADVPN_SOCKS_UDP_RELAY
+#ifdef ANDROID
     ASSERT(local_addr.type == BADDR_TYPE_IPV4 || local_addr.type == BADDR_TYPE_IPV6)
     ASSERT(remote_addr.type == BADDR_TYPE_IPV4 || remote_addr.type == BADDR_TYPE_IPV6)
     ASSERT(data_len >= 0)
