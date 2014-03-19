@@ -77,7 +77,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
+      "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -u -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
@@ -186,18 +186,24 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val fd = conn.getFd
 
-    val cmd = (Path.BASE +
+    var cmd = (Path.BASE +
       "tun2socks --netif-ipaddr %s "
-      + "--dnsgw  %s:8153 "
       + "--netif-netmask 255.255.255.0 "
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--loglevel 3 "
+      + "--loglevel 5 "
       + "--pid %stun2socks.pid")
-      .format(PRIVATE_VLAN.format("2"), PRIVATE_VLAN.format("1"), config.localPort, fd, VPN_MTU,
-        Path.BASE)
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+      .format(PRIVATE_VLAN.format("2"), config.localPort, fd, VPN_MTU, Path.BASE)
+
+    if (config.isUdpDns)
+      cmd += " --enable-udprelay"
+    else
+      cmd += " --dnsgw %s:8153".format(PRIVATE_VLAN.format("1"))
+
+    if (BuildConfig.DEBUG)
+      Log.d(TAG, cmd)
+
     System.exec(cmd)
   }
 
@@ -205,7 +211,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def handleConnection: Boolean = {
     startVpn()
     startShadowsocksDaemon()
-    startDnsDaemon()
+    if (!config.isUdpDns) startDnsDaemon()
     true
   }
 
