@@ -290,7 +290,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     filter.addAction(Intent.ACTION_SHUTDOWN)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
-        stopRunner()
+        spawn {
+          stopRunner()
+        }
       }
     }
     registerReceiver(receiver, filter)

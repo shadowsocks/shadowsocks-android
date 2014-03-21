@@ -409,7 +409,9 @@ class ShadowsocksNatService extends Service with BaseService {
     filter.addAction(Action.CLOSE)
     receiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
-        stopRunner()
+        spawn {
+          stopRunner()
+        }
       }
     }
     registerReceiver(receiver, filter)
