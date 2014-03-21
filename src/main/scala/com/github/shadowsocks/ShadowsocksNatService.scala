@@ -317,6 +317,11 @@ class ShadowsocksNatService extends Service with BaseService {
         + DNS_PORT)
     }
     if (config.isGFWList) {
+
+      // Bypass Google Video
+      init_sb.append(cmd_bypass.replace("0.0.0.0", "74.125.0.0/16"))
+      init_sb.append(cmd_bypass.replace("0.0.0.0", "173.194.0.0/16"))
+
       val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
       for (item <- chn_list) {
         init_sb.append(cmd_bypass.replace("0.0.0.0", item))
