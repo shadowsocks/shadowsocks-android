@@ -67,8 +67,8 @@
   <string name="flushing">刷新中...</string>
   <string name="add_profile">添加配置文件</string>
 
-  <string name="udp_dns">DNS转发</string>
-  <string name="udp_dns_summary">向远程服务器转发UDP协议的DNS请求</string>
+  <string name="udp_dns">UDP 转发</string>
+  <string name="udp_dns_summary">由远程服务器转发 UDP 协议的 DNS 请求</string>
 
   <!-- profile -->
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
