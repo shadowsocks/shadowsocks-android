@@ -78,8 +78,49 @@ object ConfigUtils {
       |}
       |
       |server {
-      | label = "root-servers";
-      | ip = 8.8.8.8, 8.8.4.4, 208.67.222.222, 208.67.220.220;
+      | label = "google-servers";
+      | ip = 8.8.8.8, 8.8.4.4;
+      | timeout = 5;
+      |}
+      |
+      |rr {
+      | name=localhost;
+      | reverse=on;
+      | a=127.0.0.1;
+      | owner=localhost;
+      | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+    """.stripMargin
+
+  val PDNSD_BYPASS =
+    """
+      |global {
+      | perm_cache = 2048;
+      | cache_dir = "/data/data/com.github.shadowsocks";
+      | server_ip = %s;
+      | server_port = 8153;
+      | query_method = tcp_only;
+      | run_ipv4 = on;
+      | min_ttl = 15m;
+      | max_ttl = 1w;
+      | timeout = 10;
+      | daemon = on;
+      | pid_file = "/data/data/com.github.shadowsocks/pdnsd.pid";
+      |}
+      |
+      |server {
+      | label = "china-servers";
+      | ip = 114.114.114.114, 114.114.115.115;
+      | uptest = none;
+      | preset = on;
+      | include = %s;
+      | policy = excluded;
+      | timeout = 3;
+      |}
+      |
+      |server {
+      | label = "google-servers";
+      | ip = 8.8.8.8, 8.8.4.4;
       | timeout = 5;
       |}
       |

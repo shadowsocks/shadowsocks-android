@@ -118,7 +118,12 @@ class ShadowsocksNatService extends Service with BaseService {
         Path.BASE + "ss-local.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
-      val conf = ConfigUtils.PDNSD.format("127.0.0.1")
+      val conf = {
+        if (config.isGFWList)
+          ConfigUtils.PDNSD_BYPASS.format("127.0.0.1", getString(R.string.exclude))
+        else
+          ConfigUtils.PDNSD.format("127.0.0.1")
+      }
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
@@ -306,6 +311,11 @@ class ShadowsocksNatService extends Service with BaseService {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
+    if (config.isGFWList) {
+      // Bypass DNS in China
+      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.114.114"))
+      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.115.115"))
+    }
     if (hasRedirectSupport) {
       init_sb
         .append(Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to "

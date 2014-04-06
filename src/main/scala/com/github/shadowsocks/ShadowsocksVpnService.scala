@@ -75,6 +75,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   val handler: Handler = new Handler()
 
+  def isByass(net: SubnetUtils): Boolean = {
+    val info = net.getInfo
+    info.isInRange(config.proxy) || info.isInRange("114.114.114.114") || info.isInRange("114.114.115.115")
+  }
+
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
       "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -u -f " +
@@ -85,7 +90,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsDaemon() {
-    val conf = ConfigUtils.PDNSD.format("0.0.0.0")
+    val conf = {
+      if (config.isGFWList)
+        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", getString(R.string.exclude))
+      else
+        ConfigUtils.PDNSD.format("0.0.0.0")
+    }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
     })
@@ -108,8 +118,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startVpn() {
 
-    val proxy_address = config.proxy
-
     val builder = new Builder()
     builder
       .setSession(config.profileName)
@@ -128,8 +136,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         }
       }
       gfwList.foreach(cidr => {
-        val net = new SubnetUtils(cidr).getInfo
-        if (!net.isInRange(proxy_address)) {
+        val net = new SubnetUtils(cidr)
+        if (!isByass(net)) {
           val addr = cidr.split('/')
           builder.addRoute(addr(0), addr(1).toInt)
         }
@@ -139,9 +147,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         if (i != 26 && i != 127) {
           val addr = i.toString + ".0.0.0"
           val cidr = addr + "/8"
-          val net = new SubnetUtils(cidr).getInfo
+          val net = new SubnetUtils(cidr)
 
-          if (!net.isInRange(proxy_address)) {
+          if (!isByass(net)) {
             if (!InetAddress.getByName(addr).isSiteLocalAddress) {
               builder.addRoute(addr, 8)
             }
@@ -149,8 +157,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
             for (j <- 0 to 255) {
               val subAddr = i.toString + "." + j.toString + ".0.0"
               val subCidr = subAddr + "/16"
-              val subNet = new SubnetUtils(subCidr).getInfo
-              if (!subNet.isInRange(proxy_address)) {
+              val subNet = new SubnetUtils(subCidr)
+              if (!isByass(subNet)) {
                 if (!InetAddress.getByName(subAddr).isSiteLocalAddress) {
                   builder.addRoute(subAddr, 16)
                 }
