@@ -22,7 +22,7 @@ before_install:
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r9d
 - export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-- echo "y" | android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a
+- echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-16 --no-ui --no-https -a
 install:
 - gem install --version 0.8.9 faraday
 - gem install travis-artifacts
