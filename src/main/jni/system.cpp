@@ -6,10 +6,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <cpu-features.h>
+#include <sys/system_properties.h>
 
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
+
+jstring Java_com_github_shadowsocks_system_getdns1(JNIEnv *env, jobject thiz) {
+    char dns1[PROP_VALUE_MAX];
+    __system_property_get("net.dns1", dns1);
+    return env->NewStringUTF(dns1);
+}
 
 jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
   AndroidCpuFamily family = android_getCpuFamily();
@@ -45,7 +52,9 @@ static JNINativeMethod method_table[] = {
     { "exec", "(Ljava/lang/String;)V",
         (void*) Java_com_github_shadowsocks_system_exec },
     { "getABI", "()Ljava/lang/String;",
-        (void*) Java_com_github_shadowsocks_system_getabi }
+        (void*) Java_com_github_shadowsocks_system_getabi },
+    { "getDNS1", "()Ljava/lang/String;",
+        (void*) Java_com_github_shadowsocks_system_getdns1 }
 };
 
 /*

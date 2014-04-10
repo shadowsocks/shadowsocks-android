@@ -120,7 +120,7 @@ class ShadowsocksNatService extends Service with BaseService {
     } else {
       val conf = {
         if (config.isGFWList)
-          ConfigUtils.PDNSD_BYPASS.format("127.0.0.1", getString(R.string.exclude))
+          ConfigUtils.PDNSD_BYPASS.format("127.0.0.1", System.getDNS1, getString(R.string.exclude))
         else
           ConfigUtils.PDNSD.format("127.0.0.1")
       }
@@ -313,8 +313,8 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
     if (config.isGFWList) {
       // Bypass DNS in China
+      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + System.getDNS1))
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.114.114"))
-      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.115.115"))
     }
     if (hasRedirectSupport) {
       init_sb

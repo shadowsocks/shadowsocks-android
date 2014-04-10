@@ -110,12 +110,12 @@ object ConfigUtils {
       |
       |server {
       | label = "china-servers";
-      | ip = 114.114.114.114, 114.114.115.115;
+      | ip = %s, 114.114.114.114;
       | uptest = none;
       | preset = on;
       | include = %s;
       | policy = excluded;
-      | timeout = 3;
+      | timeout = 2;
       |}
       |
       |server {

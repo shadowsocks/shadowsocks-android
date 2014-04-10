@@ -45,4 +45,5 @@ public class System {
 
   public static native void exec(String cmd);
   public static native String getABI();
+  public static native String getDNS1();
 }
