@@ -80,11 +80,11 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/*.c)
+PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
 
 LOCAL_MODULE    := pdnsd
 LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
+LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd/src -I$(LOCAL_PATH)/pdnsd-inc
 
 include $(BUILD_EXECUTABLE)
 

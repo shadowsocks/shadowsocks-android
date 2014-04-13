@@ -115,7 +115,7 @@ object ConfigUtils {
       | preset = on;
       | include = %s;
       | policy = excluded;
-      | timeout = 3;
+      | timeout = 2;
       |}
       |
       |server {

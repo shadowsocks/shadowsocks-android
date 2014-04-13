@@ -263,8 +263,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     ab.append("killall -9 ss-local")
     ab.append("kill -9 `cat " + Path.BASE + "tun2socks.pid`")
     ab.append("killall -9 tun2socks")
-    ab.append("kill -9 `cat " + Path.BASE + "pdnsd.pid`")
-    ab.append("killall -9 pdnsd")
+    ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
+    ab.append("killall -15 pdnsd")
 
     Console.runCommand(ab.toArray)
   }

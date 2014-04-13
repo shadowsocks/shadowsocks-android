@@ -104,9 +104,11 @@
  * default: native; others: gdbm */
 #define CACHE_DBM DBM_NATIVE
 
+#define CONFDIR "/data/data/com.github.shadowsocks"
+
 #define CACHEDIR "/data/data/com.github.shadowsocks"
 
-#define TEMPDIR "/tmp";
+#define TEMPDIR "/data/data/com.github.shadowsocks/cache";
 
 /* This is for various debugging facilities that produce debug output and
  * double-check some values. You can enable debug messages with the -g option.
@@ -148,13 +150,16 @@
 /* #undef SOCKET_LOCKING */
 
 /* Default TCP timeout when receiving queries */
-#define TCP_TIMEOUT 30
+#define TCP_TIMEOUT 5
 
 /* Allow subsequent TCP queries on one connection? */
 /* #undef TCP_SUBSEQ */
 
 /* Default value for parallel query number */
-#define PAR_QUERIES   2
+#define PAR_QUERIES   4
+
+/* Maximum number of IP addresses used per nameserver obtained from NS records. */
+#define MAXNAMESERVIPS 3
 
 /* These are the possible targets. Normally no need to touch these
  * definitions. */

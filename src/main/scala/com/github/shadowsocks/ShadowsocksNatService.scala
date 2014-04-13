@@ -288,8 +288,8 @@ class ShadowsocksNatService extends Service with BaseService {
     ab.append("killall -9 ss-local")
     ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
     ab.append("killall -9 ss-tunnel")
-    ab.append("kill -9 `cat " + Path.BASE + "pdnsd.pid`")
-    ab.append("killall -9 pdnsd")
+    ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
+    ab.append("killall -15 pdnsd")
 
     Console.runRootCommand(ab.toArray)
   }
