@@ -115,7 +115,7 @@ class ShadowsocksNatService extends Service with BaseService {
     val cmd = if (config.isUdpDns) {
       (Path.BASE +
         "ss-tunnel -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -L 8.8.8.8:53 -u -f " +
-        Path.BASE + "ss-local.pid")
+        Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
       val conf = {
