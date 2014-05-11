@@ -85,7 +85,7 @@ class ShadowsocksNatService extends Service with BaseService {
   var config: Config = null
   var hasRedirectSupport = false
   var apps: Array[ProxiedApp] = null
-  val uid = Process.myUid()
+  val myUid = Process.myUid()
 
   private var mSetForeground: Method = null
   private var mStartForeground: Method = null
@@ -103,10 +103,18 @@ class ShadowsocksNatService extends Service with BaseService {
   val handler: Handler = new Handler()
 
   def startShadowsocksDaemon() {
-    val cmd = (Path.BASE +
+    if (config.isGFWList) {
+      val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list_full)
+      ConfigUtils.printToFile(new File(Path.BASE + "chn.acl"))(p => {
+        chn_list.foreach(item => p.println(item))
+      })
+    }
+
+    val args = (Path.BASE +
       "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
+    val cmd =  if (config.isGFWList) args + " --acl " + Path.BASE + "chn.acl" else args
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
@@ -130,7 +138,7 @@ class ShadowsocksNatService extends Service with BaseService {
       Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     }
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    System.exec(cmd)
+    Console.runRootCommand(cmd)
   }
 
   def getVersionName: String = {
@@ -279,19 +287,18 @@ class ShadowsocksNatService extends Service with BaseService {
 
     ab.append("kill -9 `cat " + Path.BASE +"redsocks.pid`")
     ab.append("killall -9 redsocks")
-
-    Console.runRootCommand(ab.toArray)
-
-    ab.clear()
-
-    ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-    ab.append("killall -9 ss-local")
     ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
     ab.append("killall -9 ss-tunnel")
     ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
     ab.append("killall -15 pdnsd")
 
     Console.runRootCommand(ab.toArray)
+    ab.clear()
+
+    ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
+    ab.append("killall -9 ss-local")
+
+    Console.runCommand(ab.toArray)
   }
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
@@ -305,12 +312,16 @@ class ShadowsocksNatService extends Service with BaseService {
   def setupIptables: Boolean = {
     val init_sb = new ArrayBuffer[String]
     val http_sb = new ArrayBuffer[String]
+
     init_sb.append(Utils.getIptables + " -t nat -F OUTPUT")
+
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
     if (!InetAddressUtils.isIPv6Address(config.proxy.toUpperCase)) {
       init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
+    init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + myUid))
+
     if (config.isGFWList) {
       // Bypass DNS in China
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.114.114"))
@@ -325,12 +336,6 @@ class ShadowsocksNatService extends Service with BaseService {
         .append(Utils.getIptables
         + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:"
         + DNS_PORT)
-    }
-    if (config.isGFWList) {
-      val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
-      for (item <- chn_list) {
-        init_sb.append(cmd_bypass.replace("0.0.0.0", item))
-      }
     }
     if (config.isGlobalProxy || config.isBypassApps) {
       http_sb.append(if (hasRedirectSupport) {
@@ -437,7 +442,7 @@ class ShadowsocksNatService extends Service with BaseService {
         def run() {
           val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
           val now = new
-              TrafficStat(TrafficStats.getUidTxBytes(uid), TrafficStats.getUidRxBytes(uid),
+              TrafficStat(TrafficStats.getUidTxBytes(myUid), TrafficStats.getUidRxBytes(myUid),
                 java.lang.System.currentTimeMillis())
           val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
           val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
@@ -455,7 +460,7 @@ class ShadowsocksNatService extends Service with BaseService {
           }
         }
       }
-      last = new TrafficStat(TrafficStats.getUidTxBytes(uid), TrafficStats.getUidRxBytes(uid),
+      last = new TrafficStat(TrafficStats.getUidTxBytes(myUid), TrafficStats.getUidRxBytes(myUid),
         java.lang.System.currentTimeMillis())
       timer = new Timer(true)
       timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)

@@ -1,6 +1,3 @@
 [submodule "src/main/jni/shadowsocks"]
 	path = src/main/jni/shadowsocks
 	url = https://github.com/madeye/shadowsocks-libev.git
-[submodule "src/main/jni/pdnsd"]
-	path = src/main/jni/pdnsd
-	url = https://git.gitorious.org/pdnsd/pdnsd.git

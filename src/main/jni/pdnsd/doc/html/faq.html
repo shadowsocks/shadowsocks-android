@@ -1,0 +1,412 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>The pdnsd FAQ</title>
+    <meta http-equiv="Content-type" content="text/html; charset=ISO-8859-1">
+    <style type="text/css">
+      <!--
+      .small { font-family:helvetica; font-size:small; text-align:center; }
+      // -->
+    </style>
+  </head>
+
+  <body bgcolor="#EEEEEE">
+    <!--notext(-->
+    <table width="100%">
+      <tr>
+	<td> <span class="small">
+	    <a href="index.html">pdnsd Homepage</a>
+	  </span></td>
+	<td> <span class="small">
+	    <a href="faq.html">pdnsd FAQ</a>
+	  </span></td>
+	<td> <span class="small">
+	    <a href="doc.html">Documentation</a>
+	  </span></td>
+	<td> <span class="small">
+	    <a href="../../COPYING">GNU GPL (pdnsd's License)</a>
+	  </span> </td>
+	<td><span class="small">
+	    <a href="dl.html">Download Section</a>
+	  </span></td>
+      </tr>
+    </table>
+    <!--)notext-->
+    <h1>The pdnsd FAQ</h1>
+    <a name="q001"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  There are complete and well-tested name servers around, such as the BIND.
+	  These do also perform caching. Why should I use pdnsd?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  pdnsd does not aim to be a complete name server implementation, such as the
+	  BIND. It is optimized for caching, and you can only specify a small subset of all
+	  dns record types pdnsd knows in your local &quot;zone&quot; definitions.
+	  This of course reduces the code size drastically, and such the memory footprint.
+	  There are some features especially interesting for dialin networks, ordinary
+	  (non-server) internet hosts and computers that are often not connected to
+	  to their network, e.g. notebooks (I originally wrote this program for use
+	  with my notebook).
+	  These features are:
+	  <ul>
+	    <li> permanent disk cache (useful for frequent power-offs/reboots)
+	    <li> usually smaller memory footprint (depends on cache size) (see next question)
+	    <li> offline-detection prevents hangs (e.g. the typical hang on startup of some
+	      Netscape Navigator versions if not dialled in)
+	    <li> better control about timeouts (also to prevent hangs)
+	    <li> better control over the cache
+	    <li> better run-time control
+	  </ul>
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q002"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  When I look at the process size with ps, top, gtop, or a similar tool, I see
+	  some processes with a total size well above 3.5 MB. This is much more than
+	  e.g. BIND named (about 1.4 MB). Why?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  Really, it is not.
+	  pdnsd uses multithreading, not multiprocessing. That means that the processes
+	  share most of their process space. In the LinuxThreads library
+	  or NPTL (Native Posix Thread Libary),
+	  which are used by pdnsd on Linux, in fact the total process address space is shared
+	  (although the processes have different stacks, these are in one process
+	  address space). You may check this by looking at the at the process sizes of
+	  the  pdnsd threads: all should be the same. The effective size that pdnsd
+	  occupies is thus the size of any of the processes, not the sum of those.
+	  So, pdnsd with empty cache occupies about 800 kB, and the maximum size
+	  should be about the cache size plus this size (in fact, ca 5-10% more).
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q003"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  What do I need the status control (option -s) for?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  It enables you to do some things you might or might not need. With it, you can:
+	  <ul>
+	    <li> query pdnsd's settings at runtime to debug configuration files and
+	      see which servers are regarded to be available
+	    <li> mark servers as available or unavailable, or force a status retest - very
+	      handy if you want to control which servers pdnsd queries, e.g for muliple
+	      dial-up accounts
+	    <li> delete, invalidate or add DNS records - useful e.g. when you want to build
+	      records for dynamically assigned IP addresses or domain names
+	    <li> reload pdnsd's configuration file without restarting pdnsd
+	    <li> print information about the contents of pdnsd's cache.
+	  </ul>
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q004"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  What do I need local records (rr- and source-sections in the config file) for?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  Some resolver programs, e.g. nslookup, want to look up the name of the
+	  server they are using before doing anything else. This option is for defining
+	  a PTR record for your IP such that those programs get an answer even if the
+	  name server you are caching is not available or does not offer these records.
+	  By extension, you may also define A and SOA records. This allows you to build
+	  very small zones without having to use a &quot;big&quot; name server. It is NOT
+	  intended to replace such a complete server in anything but VERY small
+	  networks. Alternatively, you may start a named on another host or on the
+	  same host on another port and cache it with pdnsd in addition to other (more
+	  distant) name servers.
+	  <br>
+	  The <code>source</code> section allows you to let pdnsd read in your
+	  <code>/etc/hosts</code> file on startup and serve its contents. This file is used by your local
+	  resolver before it even  tries the name servers and usually contains
+	  fully-qualified domain names (FQDNs) for all of the internet addresses your host has.
+	  If you source this file, you usually won't need any additional <code>rr</code> sections. Sourcing it also allows
+	  other hosts (eg. in your local network) to access the names defined in your
+	  hosts file. You can of course just add other hosts in your local network to the
+	  servers <code>hosts</code> file, thus making them known to your server's resolver
+	  and pdnsd (if you sourced that file).
+	  <br>
+	  If you don't know what this answer was all about, you should just take the
+	  source section in the sample config file that comes with pdnsd, copy it
+	  into your config file and forget about it.
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q005"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  When compiling, I get an error message like <br><i>Please define __BYTE_ORDER to
+	  be __LITTLE_ENDIAN or __BIG_ENDIAN</i><br> What's up?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  Normally, this macros should be defined in your C library's header files.
+	  There are two different methods, most C libraries support both (and pdnsd
+	  honors both): either <code>__BYTE_ORDER</code> is set to <code>__LITTLE_ENDIAN</code>
+	  or <code>__BIG_ENDIAN</code>, or <code>__LITTLE_ENDIAN</code> or <code>__BIG_ENDIAN</code>
+	  are directly defined as macros.
+	  <br>
+	  Linux glibc, for example, does set those macros correctly. Never mind. You just have to know
+	  whether your machine is little-endian or big-endian, this means wheter your
+	  machine saves the least significant byte of a word or double-word first in memory (little-endian) or
+	  the most significant first (big-endian).
+	  All intel x86 and Alpha machines are little-endian, for example, while SPARC
+	  and PowerPC architectures are big-endian.
+	  If your machine is little-endian, add the following line to your config.h:
+	  <br><code>
+	    #define __BYTE_ORDER __LITTLE_ENDIAN
+	  </code><br>
+	  Likewise, if your machines byte order is big-endian:
+	  <br><code>
+	    #define __BYTE_ORDER __BIG_ENDIAN
+	  </code><br>
+	  Pathological byte orders like pdp-endian are not yet supported really;
+	  However, for the place the endianess is needed, <code>__LITTLE_ENDIAN</code> should do
+	  (it deals only with 16 bits; for all other occurances, ntoh[sl]/hton[sl] is used).
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q007"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  At startup, I get a warning saying:<br>
+	  <i>
+	    Uptest command [...] will implicitly be executed as root
+	  </i> <br>
+	  What does that mean?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  This warning only occurs if you use the <code>uptest=exec</code> option in your
+	  configuration. It means that the uptest command is run as root
+	  because pdnsd is running as root, and this was not explicitely specified.
+	  The idea is that it may introduce security holes (in the programs being run)
+	  when they run as root, and so they shouldn't do that if possible.
+	  You can specify the user that shall run the command by appending its name
+	  comma-separated as string to the <code>uptest_cmd</code> line: <br>
+	  <code>
+	    uptest_cmd=&quot;&lt;your command&gt;&quot;,&quot;&lt;user&gt;&quot;;
+	  </code> <br>
+	  If it is correctly running as root, just append the user string <code>&quot;root&quot;</code> to
+	  the command and the warning will not occur again.
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q008"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  I cannot run my <code>uptest_cmd</code> command as root (it says <i>permission denied</i>),
+	  although the pdnsd executable is setuid root. Why?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  pdnsd will drop privileges gained through setuid/setgid before executing the
+	  uptest commands (you shouldn't set the pdnsd executable setuid/setgid anyway).
+	  The reason is clear: if you install the pdnsd
+	  executable as setuid root and this wouln't be done, any user could execute
+	  shellcode with root privileges using that option!
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q009"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  At startup, I get an error saying:<br>
+	  <i>
+	    Bad config file permissions: the file must be only writeable by the user
+	  </i><br>
+	  Why is that?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  pdnsd has an option (<code>uptest=exec</code>) that allows the execution of arbitrary
+	  shell code (for testing whether an interface is up). This must be
+	  of course secured against unauthorized use. One of these
+	  protection is the one that produces the error message: if you routinely run
+	  pdnsd, e.g. at system startup, and your config file is editable for others,
+	  someone could change it and insert shell code that is executed in the next
+	  pdnsd run -- with your user privileges! To prevent this, pdnsd will exit if the config file is writeable
+	  by others than the owner.
+	  To get rid of this message, just do <br>
+	  <code>
+	    chmod go-w &lt;filename&gt;
+	  </code><br>
+	  on your config
+	  file (for the default file: <code>chmod go-w /etc/pdnsd.conf</code>).
+	  You should also check that the ownership is set correct.
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q010"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  <code>serve_aliases</code> does not seem to work.
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  Some resolvers (e.g. of the glibc 2.1) seem sometimes not to look up unmodified names, but the names with
+	  an entry of the search path already appended. Since pdnsd will serve short names with this
+	  option anyway, you can delete the search an domain options from your /etc/resolv.conf. This is reported to
+	  work in some cases.
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q011"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+     <tr>
+        <td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  Some queries for domains that have many records (e.g. www.gmx.de) fail mysteriously.
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  pdnsd versions prior to 1.1.0 had the tcp server thread disabled by default. Most resolvers
+	  repeat their query using tcp when they receive a truncated answer (the answer is truncated
+	  when it exceeds a length of 512 bytes). You need to recompile pdnsd with the option
+	  <code>--enable-tcp-server</code> to fix this.
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q012"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+     <tr>
+        <td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  I am behind some kind of firewall. In the configuration file
+	  I have only listed addresses of name servers on the local (ISP's) network,
+	  but pdnsd is slow and DNS queries frequently time out.
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  In some cases pdnsd will not consider the answer of the local name server
+	  authoritative enough, and will try to get answers from the name servers listed in the
+	  authority section of the reply message. If pdnsd is behind a firewall that blocks the
+	  UDP reply packets from remote name servers, pdnsd will wait in vain for a reply.
+	  One solution is to set <a href="doc.html#proxyonly"><code>proxy_only=on</code></a>
+	  in the servers sections of the configuration file.
+	  This will prevent pdnsd from querying name servers that are not listed in the configuration
+	  file.
+	  Another solution that can be tried is specifying
+	  <a href="doc.html#querymethod"><code>query_method=tcp_only</code></a>
+	  in the global section of the configuration file, because a firewall that blocks
+	  UDP packets from outside might still allow outgoing TCP connections to port 53.
+	</td>
+      </tr>
+    </table>
+    <hr>
+    <a name="q013"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+     <tr>
+        <td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	  Is pdnsd vulnerable to DNS cache poisoning as described in
+	  <a href="http://www.kb.cert.org/vuls/id/800113">CERT vulnerability note VU#800113</a>?
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	  Short answer: Yes.<br>
+	  Somewhat longer answer: The problem is not so much that pdnsd's implementation is flawed
+	  but rather that the DNS protocol currently being used is fundamentally flawed from
+	  a security viewpoint. As long as a more secure protocol is not in place,
+	  all that the developers of pdnsd can do is to try to tweak the current implementation
+	  to make it as difficult as possible for an attacker to succeed.<br>
+	  From version 1.2.7 onwards, the default for the <code>query_port_start</code> option
+	  is 1024, which means that the pdnsd resolver will randomly select source ports
+	  in the range 1024-65535. (In previous versions the default was to let the kernel select
+	  the source ports, which will often result in a more or less predictable sequence of ports.)
+	  It also helps to use a good quality source of random numbers. On platforms where this is
+	  supported, it is preferable to configure with <code>--with-random-device=/dev/urandom</code>.
+	  There is still more that can be done to make pdnsd less vulnerable, but this remains
+	  (as of this writing) a work in progress.
+	  <br>
+	  Please note that pdnsd was designed for small (private) networks, and that it is generally
+	  not recommended to let untrusted users access pdnsd.
+	</td>
+      </tr>
+    </table>
+<!--<hr>
+    <a name="q014"></a>
+    <table width="100%" cellspacing=1 cellpadding=7>
+     <tr>
+        <td bgcolor="#FFCCFF"><b>Q:</b></td>
+	<td bgcolor="#CCFFFF">
+	</td>
+      </tr>
+      <tr>
+	<td bgcolor="#FFCCFF"><b>A:</b></td>
+	<td bgcolor="#DDFFEE">
+	</td>
+      </tr>
+    </table>-->
+    <hr>
+    <address><a href="mailto:tmoestl@gmx.net">Thomas Moestl</a>
+      and <a href="mailto:p.a.rombouts@home.nl">Paul Rombouts</a>
+    </address>
+    <br>
+    <p>
+      <i>Last revised: 18 August 2008 by Paul Rombouts</i>
+    </p>
+  </body>
+</html>
+

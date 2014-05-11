@@ -1,0 +1,38 @@
+# This file was written by Paul Rombouts.
+# Because pdnsd currently has a very idiosyncratic method of building documentation
+# I prefer to keep the actual build rules outside of the Makefiles an ordinary user
+# would use to compile pdnsd and therefore I have put them into separate 'doc_makefile's.
+# 
+# To rebuild pdnsd docs after you have modified something that other files depend on,
+# run 'make -f doc_makefile doc' in the doc/ directory.
+# This makefile is also invoked when you build a pdnsd distribution tarball
+# using 'make dist' in the toplevel pdnsd source directory.
+#
+# If anyone thinks there is a much more elegant method for building the pdnsd docs
+# using a conventional autoconf/automake process, please let me know.
+
+versionfile = ../version
+
+doc: pdnsd-ctl.8 pdnsd.conf.5.in html txt
+.PHONY: pdnsd-ctl.8 doc html txt clean
+
+pdnsd-ctl.8:
+	@pver=`cat $(versionfile)` && \
+	mver=`perl -e 'while(<>) {if(/^\s*\.TH(?:\s+(?:"[^"]*"|[^"\s]+)){3}\s+"pdnsd\s+([^"]*)"/) {print "$$1\n";exit 0}} \
+	               die "Cannot find version in $$ARGV\n"' $@` && { \
+	  test "$$mver" = "$$pver" || { \
+	    perl -p -i.makesave -e 's/^(\s*\.TH(?:\s+(?:"[^"]*"|[^"\s]+)){3}\s+"pdnsd\s+)[^"]*(")/$${1}'"$$pver"'$${2}/' $@ && \
+	    echo "Updated version in $@: $$mver -> $$pver"; \
+	  }; \
+	}
+
+pdnsd.conf.5.in: html/doc.html html2confman.pl 
+	perl html2confman.pl $< > $@
+
+html txt:
+	@cd $@ && $(MAKE) -f doc_makefile
+
+clean:
+	@rm -fv pdnsd.conf.5.in
+	@cd html && $(MAKE) -f doc_makefile clean
+	@cd txt && $(MAKE) -f doc_makefile clean

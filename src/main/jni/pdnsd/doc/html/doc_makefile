@@ -1,0 +1,23 @@
+
+versionfile = ../../version
+arch = i686
+arch2 = x86_64
+extver = _sl6
+system = Scientific Linux 6.2 system
+
+doc: dl.html
+.PHONY: doc clean
+
+# If the existing dl.html contains '???', then certain packages were missing
+# during the previous build and dl.html needs to be built again.
+ifneq ($(shell grep -F -l -e '???' dl.html),)
+.PHONY: dl.html
+endif
+
+dl.html: %.html: %.html.in htmlsubst.pl $(versionfile)
+	perl htmlsubst.pl version=`cat $(versionfile)` \
+	baseurl='http://members.home.nl/p.a.rombouts/pdnsd/' \
+	arch=$(arch) arch2=$(arch2) extver=$(extver) system="$(system)" $< > $@
+
+clean:
+	@rm -fv dl.html

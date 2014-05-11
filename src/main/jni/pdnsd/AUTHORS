@@ -1,0 +1,58 @@
+Most of pdnsd was written by Thomas Moestl (tmoestl@gmx.net).
+In the "par" versions large parts of the code have been revised
+and several features have been added by Paul Rombouts.
+
+Small parts of this program are based on code that  was taken from nmap (IP 
+checksumming), the isdn4k-utils (ippp interface uptest), glibc 2.1.2 (some
+definitions for kernel 2.2.x missing in 2.0 glibcs) and FreeBSD
+(SIZEOF_ADDR_IFREQ in netdev.c).
+nmap was written by Fyodor. The insd4k-utils were written by Fritz Elfert and
+others. The GNU C library (glibc) is copyright by the Free Software 
+Foundation.
+
+The following people have contributed code:
+Andrew M. Bishop	contributed support for server labels
+Carsten Block	        contributed 'configure'-able rc scripts
+Stephan Boettcher	contributed the SCHEME= option.
+P.J. Bostley		contributed patches to get pdnsd working on
+			alpha
+Frank Elsner		contributed rc script fixes
+Christian Engstler	contributed patches for SuSE compatability
+Bjoern Fischer		contributed code to make pdnsd leave the case of names
+			in the cache unchanged
+Torben Janssen		contributed RedHat rc scripts
+Olaf Kirch		contributed a security fix for the run_as()
+			function
+Bernd Leibing		contributed fixes to the spec file.
+Sourav K. Mandal	contributed the autoconf/automake code, gdbm
+			caching facility and many suggestions
+Markus Mohr		contributed Debian rc scripts
+Alexandre Nunes		contributed autoconf fixes
+Wolfgang Ocker		contributed the server_ip option
+Soenke J. Peters	contributed patches and suggestions for RedHat 
+			compatability
+Roman Shterenzon	contributed many helpful hints and patches for
+			FreeBSD compatability.
+Andreas Steinmetz	contributed the code for the query_port_start and
+			query_port_end options (which I changed slightly,
+			so blame any breakage on me ;)
+Marko Stolle		contributed the contrib/pdnsd_update.pl script that
+			makes pdnsd usable in a DHCP setup.
+Lyonel Vincent		extended the serve_aliases option to support an
+			arbitrary number of aliases
+Paul Wagland		contributed a patches for bind9-compatability
+			and for some memory leaks on error paths.
+Sverker Wiberg		contributed IPv6 build fixes
+Michael Wiedmann	contributed the pdnsd-ctl.8 man page.
+Ron Yorston		contributed the dev-uptest for Linux ppp dial-
+			on-demand devices
+Nikita V. Youshchenko	contributed extensions to the "if" uptest
+Mahesh T. Pai		contributed the pdnsd.8 man page.
+Nikola Kotur		contributed the Slackware start-up script.
+Kiyo Kelvin Lee		contributed a patch for Cygwin support.
+Rodney Brown		contributed a patch for Darwin (Apple Mac OS X) support.
+Jan-Marek Glogowski	contributed a patch implementing the "use_nss" option.
+
+Please look into the THANKS file for people who helped me in various ways on
+this project.
+If this list is incomplete, pease drop me a mail!

@@ -138,7 +138,7 @@ PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
 
 LOCAL_MODULE    := pdnsd
 LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd/src -I$(LOCAL_PATH)/pdnsd-inc
+LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 
 include $(BUILD_EXECUTABLE)
 
