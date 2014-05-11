@@ -1,0 +1,99 @@
+# This file is part of the pdnsd package.
+
+# This file contains information about the RR types implemented in pdnsd
+# and is used for generating rr_types.h.
+# It was derived from the following source: http://www.bind9.net/dns-parameters
+#
+# After making modifications to this file the file rr_types.h should be regenerated!
+#
+# Info about the format of this file:
+#   Blank lines and lines starting with '#' are ignored, all other lines
+#   are assumed to define an RR type. Lines starting with '+' define most
+#   frequently used types. An RR type preceded by a '-' will not be cached
+#   by pdnsd. The next two fields are interpreted as the name and the value
+#   of the RR type, resp. A subsequent word in parenthesis will be interpreted a
+#   class name (used for conflict resolution). Remaining fields are ignored.
+#
+# Adding or removing an initial '+' can be done safely without requiring
+# changes to the source code (other than regenerating rr_types.h).
+#
+# If you are sure that you will never use certain RR types you can disable
+# caching for them and make pdnsd slightly more efficient by placing a
+# '-' sign in front of the lines that define those types.
+# For a list of obsolete RR types see e.g.
+#   http://en.wikipedia.org/wiki/List_of_DNS_record_types .
+# Note that some RR types are essential for pdnsd; these are currently:
+#   A, NS, CNAME, SOA, PTR, MX and (if you want IPv6 support) AAAA.
+# Disabling caching for these types will cause pdnsd to fail to compile
+# or cause a fatal run-time error.
+#
+# Removing a '-' sign to enable caching can be risky if the support in
+# the pdnsd code is missing or inadequate, so only do this if you really know
+# what you are doing. SPF records are supported, however, so it should be safe
+# to enable caching for them.
+
+# RR TYPE      Value (class) and meaning                      Reference
+# -----------  ---------------------------------------------  ---------
++ A            1 (RECORD) a host address                      [RFC 1035]
++ NS           2 an authoritative name server                 [RFC 1035]
+  MD           3 a mail destination (Obsolete - use MX)       [RFC 1035]
+  MF           4 a mail forwarder (Obsolete - use MX)         [RFC 1035]
++ CNAME        5 (ALIAS) the canonical name for an alias      [RFC 1035]
++ SOA          6 marks the start of a zone of authority       [RFC 1035]
+  MB           7 a mailbox domain name (EXPERIMENTAL)         [RFC 1035]
+  MG           8 a mail group member (EXPERIMENTAL)           [RFC 1035]
+  MR           9 a mail rename domain name (EXPERIMENTAL)     [RFC 1035]
+  NULL         10 a null RR (EXPERIMENTAL)                    [RFC 1035]
+  WKS          11 (RECORD) a well known service description   [RFC 1035]
++ PTR          12 (PTR) a domain name pointer                 [RFC 1035]
+  HINFO        13 (RECORD) host information                   [RFC 1035]
+  MINFO        14 mailbox or mail list information            [RFC 1035]
++ MX           15 mail exchange                               [RFC 1035]
++ TXT          16 text strings                                [RFC 1035]
+  RP           17 (RECORD) for Responsible Person             [RFC 1183]
+  AFSDB        18 (RECORD) for AFS Data Base location         [RFC 1183][RFC 5864]
+  X25          19 (RECORD) for X.25 PSDN address              [RFC 1183]
+  ISDN         20 (RECORD) for ISDN address                   [RFC 1183]
+  RT           21 (RECORD) for Route Through                  [RFC 1183]
+  NSAP         22 (RECORD) for NSAP address, NSAP style A record [RFC 1706]
+  NSAP-PTR     23 (PTR) for domain name pointer, NSAP style   [RFC 1348]
+  SIG          24 for security signature                      [RFC 4034][RFC 3755][RFC 2535]
+  KEY          25 for security key                            [RFC 4034][RFC 3755][RFC 2535]
+  PX           26 X.400 mail mapping information              [RFC 2163]
+  GPOS         27 (RECORD) Geographical Position              [RFC 1712]
++ AAAA         28 (RECORD) IP6 Address                        [RFC 3596]
+  LOC          29 (RECORD) Location Information               [RFC 1876]
+  NXT          30 Next Domain - OBSOLETE                      [RFC 3755][RFC 2535]
+  EID          31 (RECORD) Endpoint Identifier                [Patton]
+  NIMLOC       32 (RECORD) Nimrod Locator                     [Patton]
+  SRV          33 (RECORD) Server Selection                   [RFC 2782]
+  ATMA         34 (RECORD) ATM Address                        [ATMDOC]
+  NAPTR        35 (RECORD) Naming Authority Pointer           [RFC 2915][RFC 2168][RFC 3403]
+  KX           36 (RECORD) Key Exchanger                      [RFC 2230]
+  CERT         37 (RECORD) CERT                               [RFC 4398]
+- A6           38 A6 (Experimental)                           [RFC 3226][RFC 2874]
+- DNAME        39 (ALIAS) DNAME                               [RFC 2672]
+- SINK         40 SINK                                        [Eastlake]
+- OPT          41 OPT                                         [RFC 2671]
+  APL          42 APL                                         [RFC 3123]
+  DS           43 Delegation Signer                           [RFC 4034][RFC 3658]
+  SSHFP        44 SSH Key Fingerprint                         [RFC 4255]
+  IPSECKEY     45 IPSECKEY                                    [RFC 4025]
+  RRSIG        46 RRSIG                                       [RFC 4034][RFC 3755]
+  NSEC         47 NSEC                                        [RFC 4034][RFC 3755]
+  DNSKEY       48 DNSKEY                                      [RFC 4034][RFC 3755]
+  DHCID        49 DHCID                                       [RFC 4701]
+  NSEC3        50 NSEC3                                       [RFC 5155]
+  NSEC3PARAM   51 NSEC3PARAM                                  [RFC 5155]
+# Unassigned   52-54
+- HIP          55 Host Identity Protocol                      [RFC 5205]
+- NINFO        56 NINFO                                       [Reid]
+- RKEY         57 RKEY                                        [Reid]
+- TALINK       58 Trust Anchor LINK                           [Wijngaards]
+# Unassigned   59-98
+- SPF          99 Sender Policy Framework                     [RFC 4408]
+- UINFO        100                                            [IANA-Reserved]
+- UID          101                                            [IANA-Reserved]
+- GID          102                                            [IANA-Reserved]
+- UNSPEC       103                                            [IANA-Reserved]
+# Unassigned   104-248

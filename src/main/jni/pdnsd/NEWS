@@ -1,0 +1,324 @@
+Version 1.2.9a fixes a bug in the 1.2.9 release that causes a build failure when
+pdnsd is configured with --enable-strict-rfc2181. Unless you use this option to
+compile pdnsd, there is no need to upgrade from 1.2.9 to 1.2.9a.
+
+Version 1.2.9 has support for many additional RR types, in particular those
+needed for DNSSEC (though no support for the DNSSEC protocol itself yet in
+pdnsd). Caching data structures are now more efficient when they only store the
+most commonly used RR types. Fine-grained configurability over which RR-types
+are cache-able. Pdnsd now has support for EDNS (Extension mechanisms for DNS),
+although its usefulness is currently limited to enabling UDP messages larger
+than 512 bytes. Defining local TXT records in the configuration file is now
+supported.  A new configuration option provides a fix in case the query uptest
+fails due to remote servers ignoring empty queries. Several bugs have been fixed
+including a UDP socket descriptor leak that affected the FreeBSD platform, and
+an IPv6 port binding bug.
+
+Version 1.2.8 implements support for automatic discovery of root servers.
+There are also some improvements in the resolver and a new default setting for
+the neg_rrs_pol configuration option.
+
+Version 1.2.7-par fixes some security problems. It contains a fix for a
+"dangling pointer" bug that could cause pdnsd to crash when it received a long
+reply. It also addresses some of the issues raised in the CERT vulnerability
+note VU#800113 by making the default of query_port_start equal to 1024, thereby
+ensuring that source ports are randomly selected by the pdnsd resolver in the
+range 1024-65535. This release also fixes problems with compiling pdnsd for the
+ARM architecture and for the Darwin platform (Max OS X).  There are a number of
+(minor) new features. pdnsd now supports "include" files, essentially
+configuration files that only contain definitions for local records. It is now
+possible to define interactively, using pdnsd-ctl, any local record that can be
+defined in a configuration file.
+
+Version 1.2.6-par has an upgraded license: GPL version 3.
+A bug has been fixed which which caused pdnsd to handle NXDOMAIN replies
+inefficiently when configured with neg_domain_pol=on.  Also the code for the
+ping test has been fixed, which was broken for 64-bit systems.  A new option
+randomize_servers can be used to give each server in a section of the
+configuration file an equal chance of being queried.  The new options reject,
+reject_policy and reject_recursively make it possible to check for the presence
+of certain IP addresses in the replies of name servers and to correct some types
+of unwanted replies or to censor these IP addresses.
+The pdnsd-ctl 'add a' and 'add aaaa' commands now allow multiple IP addresses to
+be specified for the same name. There are some further improvements to pdnsd's
+recursive resolver.
+
+Version 1.2.5-par introduces a new query method: udp_tcp. With this method a UDP
+query is tried first and, if the UDP answer is truncated, the query is repeated
+using TCP, which is the behaviour that seems to be recommended by the DNS
+standards. There is a new configuration option use_nss, which can be turned off
+to prevent lengthy timeouts and stalls in certain situations. A bug has been
+fixed which could cause pdnsd to crash if debug output was generated before the
+debug output stream was properly initialized.
+
+In version 1.2.4-par a memory leak and a minor buffer-overflow problem have been
+fixed. There is now a fix for some situations that would previously cause pdnsd
+to exit prematurely (such as ACPI S3 sleep or trying to attach strace to pdnsd).
+Time intervals specified in the configuration file can now be expressed in
+minutes, hours, days and weeks as well as seconds. Support for Apple Mac OS X
+v10.4 Tiger has been improved. The "pdnsd-ctl status" command now also provides
+some information about the status of the running threads. There are some further
+improvements in the debugging information provided by pdnsd.
+TCP-query support is now compiled in by default (but can still be disabled using
+the configure option --disable-tcp-queries).
+
+In version 1.2.3-par the "pdnsd-ctl empty-cache" command can be provided with an
+include/exclude list, allowing the user to specify a selection of names to be
+removed, instead of emptying the cache completely.
+Additional improvements: pdnsd should now remain responsive while executing the
+"pdnsd-ctl empty-cache" command. With the query_method=tcp_udp option pdnsd will
+now also try a UDP query after a TCP connection times out, which should allow
+pdnsd to resolve the same names with query_method=tcp_udp as with
+query_method=udp_only, although perhaps with an occasional delay.
+"pdnsd-ctl config" or "pdnsd-ctl server" commands should now run without delays,
+even if pdnsd is performing ping or query uptests at the time. A problem with
+resolving certain names using root servers has been fixed.
+
+Version 1.2.2-par has a number of important portability improvements. A bug has
+been fixed that prevented pdnsd from compiling successfully on some 64 bit
+architectures. The code for determining endianness (most significant or least
+significant byte first) should now be more portable. This release has
+(experimental) support for the Darwin (Apple Mac OS X) platform. On Linux
+systems, the configure script will now try to detect automatically whether the
+system implements the Native POSIX Thread Library, but the method used may not
+necessarily be foolproof. In addition, the debug features have been improved and
+should make it easier to find out why pdnsd considers some queries or replies
+malformed.
+
+Version 1.2.1-par has improved support for non-Linux platforms. This release has
+(experimental) support for the Cygwin platform, and should also fix some
+compilation glitches that have been reported by FreeBSD users.
+
+Version 1.2-par is a new and improved version of pdnsd! Most of the changes
+effect the internal workings of pdnsd, but there are also a number of
+interesting new features (well, I think they are interesting). Among the bugs
+fixed are two rather nasty ones which involve the handling of NXT and NAPTR
+records and which can cause pdnsd to crash or abort. The new features include a
+new server availability test which can be specified with uptest=query, support
+for reading the DNS configuration from resolv.conf files, a new option for
+optimizing the use of root servers, a new option that makes defining local
+records for reverse resolving easier, support for defining wildcard records, a
+new pdnsd-ctl command for reloading the config file without restarting pdnsd,
+and a new pdnsd-ctl command for dumping information about the names stored in
+the cache.
+The documentation has also been updated: there is now a pdnsd.conf man page. For
+a more complete list of the changes I'll have to refer you to README.par and the
+ChangeLog.
+
+Version 1.1.11a-par contains a fix for FreeBSD users that bypasses a problem
+with the macro ENONET, which can cause a compilation failure when it is
+undefined. Linux users will notice no difference between 1.1.11a-par and
+1.1.11-par.
+
+Version 1.1.11-par has a rather large number of small changes, which are rather
+difficult to summarize. Among the bugs fixed are a race condition in the cache
+lookup code, a flaw in the code that caused a busy spin when a remote server
+answered with "Not Implemented", and problems with the -4 and -6 command-line
+options. Among the improvements are an alternative sorting algorithm which
+should allow pdnsd to start up faster when reading a large cache file from disk,
+automatic mapping of IPv4 to IPv6 addresses when running in IPv6 mode, somewhat
+more efficient memory use, better compression of the replies and changes in the
+parallel querying algorithm that should improve the chances of catching a reply
+from a remote server.  For a more complete list of the changes I'll have to
+refer you to README.par and the ChangeLog.
+
+Version 1.1.10-par has a new parser for configuration files, completely
+rewritten from scratch in C. The main advantages are: (f)lex and yacc/bison are
+no longer needed to build pdnsd, more informative error messages instead of
+merely "parse error", and string literals no longer need to be enclosed in
+quotes in most cases.  Furthermore, a bug has been fixed that caused incorrect
+IPV6-type PTR records to be generated when sourcing /etc/hosts like files.
+There have been other small changes, more details can be found in the ChangeLog.
+
+Version 1.1.9-par adds some missing pieces to the documentation (the pdnsd
+manual and the man page for pdnsd-ctl). The changes to the code consist mostly
+of optimizations, removal of some size limits due to fixed-size buffers, and
+some cleaning up. I've also tried to make the error responses of pdnsd-ctl more
+helpful.  More details can be found in the ChangeLog.
+
+Version 1.1.8b1-par8 introduces a "delegation-only" feature that may be useful
+for blocking Verisign's Sitefinder. The parser for the configuration file now
+tolerates domain names missing a dot at the end. I have provided alternative
+implementations for some GNU extensions that I used in an effort to make the
+code more portable. In particular, the code should build on FreeBSD again. More
+details can be found in the README.par file.
+
+Version 1.1.8b1-par7 fixing a number of bugs. I have also reworked some of the
+code for adding and removing entries in the cache in an effort to improve
+efficiency and stability. More details can be found in the ChangeLog.
+
+Version 1.1.8b1-par6 introduces some further code cleanup. In addition the
+documentation has been revised.
+
+Version 1.1.8b1-par5 fixes a troublesome allocation size error that has been
+discovered in Thomas Moestl's code. In practice this bug only wastes memory but
+it could also potentially lead to memory corruption. Upgrading is
+recommended. More details can be found in the ChangeLog.
+
+Version 1.1.8b1-par4 has been released.  Due to incompatibilities between
+various implementations of the pthread library on Linux systems, problems can
+occur with signal handling in pdnsd. The usual symptom is failure by pdnsd to
+save the cache to disk, and /var/cache/pdnsd/pdnsd.cache remaining empty. If you
+experience this kind of trouble, try reconfiguring with different values for the
+new --with-thread-lib option. The allowable values are described in the
+documentation.
+
+pdnsd is no longer maintained by Thomas Moestl: I have not had time to maintain
+pdnsd for quite a while now, and have been very slow to respond to issues, or
+did not respond at all. It is time that I officially announce that pdnsd is no
+longer actively maintained; I apologize to all those who reported bugs or asked
+questions without receiving any reply. However, Paul A. Rombouts has published a
+patch set against the last released version at
+http://www.phys.uu.nl/~rombouts/pdnsd.html, which cleans up a lot of code fixes
+many bugs.
+
+Version 1.1.7a fixes a reversed assertion that would cause pdnsd to terminate
+if used with the ping uptest. No other changes were made.
+
+Version 1.1.7 fixes some problems that might be remotely exploitable to
+gain access as the user pdnsd runs as (an unprivileged user by default). To do
+this, an attacker needs to control a name server that is queried by pdnsd, and
+send a malicious reply to such a query. Upgrading is strongly recommended!
+There are also minor bug fixes and stability improvements.
+
+Version 1.1.6 adds the query_port_start and query_port_end options (contributed
+by Andreas Steinmetz), that allow confining the ports pdnsd uses for outgoing
+queries to a certain range. It also fixes numerous bugs, one of which could
+cause pdnsd to hang; update is therefore recommended.
+
+Version 1.1.5 contains a fix for a security bug that would allow local users
+that are allowed to use pdnsd-ctl on a running pdnsd server to execute
+arbitrary code as the user that pdnsd runs as (or on Linux, when strict_setuid
+is not enabled, as the user that started pdnsd). The danger of this is usually
+quite limited; the status socket is not enabled by default, it's default
+permissions do only allow the user pdnsd runs as to use the socket,
+strict_setuid is enabled by default and pdnsd runs as an unprivileged user.
+There is also a new configure option, --enable-underscores, that will make
+pdnsd allow underscores in domain names. Furthermore, the SRV record handling
+has been fixed to allow underscores in any case (this was not allowed
+previously, but is required by the RFC). SOA records are not put in the
+answer section any more if no answers are found (this violates the RFC's).
+It may be put in the authority section in a later version.
+There are also various bugfixes in this release.
+Upgrade is recommended.
+
+Version 1.1.4 fixes various smaller bugs, and should also improve the cache
+write performance especially for larger caches.	There are also two new
+features: servers can now be given a label (using the label server option)
+which can be used to identify them for the pdnsd-ctl server command
+(contributed by Andrew M. Bishop), and local records can be marked to make
+the domain record authoritative in pdnsd's cache (which means that pdnsd will
+assume that records that are not present in the cache for that domain are
+non-existent); this is on by default now, and can be controlled using the new
+authrec server option).
+
+Version 1.1.3 added contrib/ and had a lot of robustness fixes.
+This release addresses a security hole that affects only Linux systems. Due to
+a bug in glibc, pdnsd could crash during a port scan. This release contains
+a workaround for this, as well as a fix for a deadlock under heavy load 
+conditions. It also fixes a possible problem that could be triggered by 
+malicious servers, and contains numerous bug fixes.
+A script, contributed by Marko Stolle, makes pdnsd useful in a DHCP setup.
+pdnsd also preservers the case of names in the cache, and should work much
+better on alpha machines (thanks for the contributions by Bjoern Fischer 
+and P.J. Bostley that made this possible). New types were dded for rr 
+sections and pdnsd-ctl.
+Upgrade is recommended.
+
+Version 1.1.2 has a fix for a bug that could cause SERVFAIL to be 
+returned when NXDOMAIN would be appropriate. The bug surfaced only when
+pdnsd queried name servers with a behaviour different from BIND's in the
+NXDOMAIN case, e.g. pdnsd querying another pdnsd or e.g. djbdns. 
+
+Version 1.1.1 fixes a possible race condition in status socket creation.
+This race might be used by a local attacker to change the access 
+permissions of a certain file in /tmp. The risk of this is probably 
+negligible. The default setup uses a non-privileged user, default mode 
+0600, and the status socket is disabled normally, so this should be 
+relatively safe. I don't see any possibility to exploit this, it is
+more of a paranoia fix.
+There are also some other minor fixes and documentation improvements. 
+Upgrade is recommended. 
+
+Version 1.1.0 introduces negative cacheing, pdnsd-ctl enhancements and
+a much improved FreeBSD support. The cache file format has changed from
+prior releases. Some configuration defaults have changed, too.
+
+Version 1.0.15 is mostly a bugfix release. It also has a new option:
+randomize_recs in the global section.
+
+Version 1.0.14 has a fix in icmp.c that will make it build properly
+on FreeBSD and older Linux systems.
+
+Version 1.0.13 has some code cleanup, a fix for the Debian rc install,
+and a security fix (contributed by Olaf Kirch): when changing
+user and group id, pdnsd did not drop supplementary group IDs that
+the original user was member of.
+
+Version 1.0.12 is a bugfix release and contains some security
+enhancements. There are also inclusion/exclusion lists for servers
+(new options include=, exclude=, policy= in the server
+section).
+
+Version 1.0.11 fixes two bugs that might be used for denial-of-service
+attacks, upgrading is recommended.
+
+Versions 1.0.9 and 1.0.10 are bugfix releases.
+
+Version 1.0.8 introduces special linux ppp device support contributed
+by Ron Yorston, and has some bugfixes.
+
+Version 1.0.7 introduces autoconf support, many new config file options and
+the new pdnsd-ctl run-time configuration program.
+
+Version 1.0.6 has another set of bugfixes, in addition to higher compile-
+time configurability and UDP query support. It also contains Debian rc
+scripts contributed by Markus Mohr.
+
+Version 1.0.5 has some bugfixes and the new "server_ip" option 
+contributed by Wolfgang Ocker.
+
+Version 1.0.4 introduces the new options run_as, strict_setuid and
+paranoid. These new options are optional security enhancements.
+
+Versions 1.0.1, 1.0.2 and 1.0.3 are bugfix releases.
+
+Version 1.0.0 has a lot of changes compared to the 0.9.x tree, but much of 
+them "under the hood":
+- IPv6 support (experimental; compile- and run-time configurable)
+- FreeBSD (and such hopefully *BSD) support
+- better rfc2181 compatability
+- new options:
+  - serve_aliases in source section
+  - linkdown_kluge in global section 
+  - max_ttl in global section 
+- cache-code reorganization, only one unified hash (of variable depth)
+- Optimizations & cleanups
+- Automatic deps (only interesting for developers ;-)
+
+Version 0.9.11 fixes a locally exploitable security hole (the cache file was
+world writeable by default). Please see ChangeLog.old for details.
+
+Version 0.9.10 fixes some bugs and improves build on Red Hat.
+
+Version 0.9.9 contains the rc scripts for Red Hat Linux contributed by Torben 
+Janssen, in addition to code cleanups and bugfixes.
+The meaning of the option -v has changed in this release.
+There is also a new config file option "lean_query" that is on by default. It 
+is an optimization, so please look in the docs when updating whether you want 
+it switched on or not.
+
+When compiling versions after 0.9.8, you will probably get more
+compiler warningsthan before. This is because the C compiler settings
+have been made stricter.
+
+Version 0.9.8 fixes a minor bug some build problems with glibc2.0 systems.
+
+The versions 0.9.6 and 0.9.7 are bugfix releases.
+
+Version 0.9.5 introduces uptest=exec, and a modified config file syntax (cache
+sizes are now specified in kB).
+
+Version 0.9.4 was the first to be released to the public. For information on 
+changes, see ChangeLog.
+

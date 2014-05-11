@@ -44,6 +44,70 @@ LOCAL_CFLAGS := -O2 -g -I$(LOCAL_PATH)/libevent \
 include $(BUILD_STATIC_LIBRARY)
 
 ########################################################
+## libipset
+########################################################
+
+include $(CLEAR_VARS)
+
+bdd_src = bdd/assignments.c bdd/basics.c bdd/bdd-iterator.c bdd/expanded.c \
+		  		  bdd/reachable.c bdd/read.c bdd/write.c
+map_src = map/allocation.c map/inspection.c map/ipv4_map.c map/ipv6_map.c \
+		  		  map/storage.c
+set_src = set/allocation.c set/inspection.c set/ipv4_set.c set/ipv6_set.c \
+		  		  set/iterator.c set/storage.c
+
+IPSET_SOURCE := general.c $(bdd_src) $(map_src) $(set_src)
+
+LOCAL_MODULE := libipset
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks/libipset/include \
+				-I$(LOCAL_PATH)/shadowsocks/libcork/include
+
+LOCAL_SRC_FILES := $(addprefix shadowsocks/libipset/,$(IPSET_SOURCE))
+
+include $(BUILD_STATIC_LIBRARY)
+
+########################################################
+## libcork
+########################################################
+
+include $(CLEAR_VARS)
+
+cli_src := cli/commands.c
+core_src := core/allocator.c core/error.c core/gc.c \
+			core/hash.c core/ip-address.c core/mempool.c \
+			core/timestamp.c core/u128.c
+ds_src := ds/array.c ds/bitset.c ds/buffer.c ds/dllist.c \
+		  ds/file-stream.c ds/hash-table.c ds/managed-buffer.c \
+		  ds/ring-buffer.c ds/slice.c
+posix_src := posix/directory-walker.c posix/env.c posix/exec.c \
+			 posix/files.c posix/process.c posix/subprocess.c
+pthreads_src := pthreads/thread.c
+
+CORK_SOURCE := $(cli_src) $(core_src) $(ds_src) $(posix_src) $(pthreads_src)
+
+LOCAL_MODULE := libcork
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks/libcork/include \
+				-DCORK_API=CORK_LOCAL
+
+LOCAL_SRC_FILES := $(addprefix shadowsocks/libcork/,$(CORK_SOURCE))
+
+include $(BUILD_STATIC_LIBRARY)
+
+########################################################
+## libev 
+########################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libev
+LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H
+LOCAL_SRC_FILES := \
+	libev/ev.c \
+	libev/event.c 
+
+include $(BUILD_STATIC_LIBRARY)
+
+########################################################
 ## redsocks
 ########################################################
 
@@ -70,21 +134,11 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := libev
-LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H
-LOCAL_SRC_FILES := \
-	libev/ev.c \
-	libev/event.c 
-
-include $(BUILD_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-
 PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
 
 LOCAL_MODULE    := pdnsd
 LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd/src -I$(LOCAL_PATH)/pdnsd-inc
+LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 
 include $(BUILD_EXECUTABLE)
 
@@ -94,16 +148,18 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
+SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c acl.c 
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
 					-I$(LOCAL_PATH)/libev/ \
-					-I$(LOCAL_PATH)/openssl/include 
+					-I$(LOCAL_PATH)/openssl/include  \
+					-I$(LOCAL_PATH)/shadowsocks/libcork/include \
+					-I$(LOCAL_PATH)/shadowsocks/libipset/include
 
-LOCAL_STATIC_LIBRARIES := libev libcrypto
+LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork
 
 LOCAL_LDLIBS := -llog
 

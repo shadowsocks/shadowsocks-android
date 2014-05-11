@@ -1,0 +1,20 @@
+- Implement a reference counter to ensure that newly entered records are not
+  purged immediately (really needed?)
+- Perhaps do a two-step form of recursive query: first query those servers we
+  have got cached, then (if unsuccessful) look the others up and query again.
+  The impact of this optimisation may not be very big, because all sane servers
+  give A records for NS records if possible.
+- Test for compatibility on other Unix-like Systems other than the BSDs and
+  Linux; rewrite the functions in netdev.c and icmp.c for those OSs if
+  necessary. Also try to get compatibility for other compilers than gcc.
+- Write an install rule for the Slackware start-up script.
+- Update the FAQ.
+- Implement DNSSEC support. Since version 1.2.9, pdnsd is able to cache the RR
+  types necessary for DNSSEC, but the resolver is not yet security aware.
+- Implement a lookup table (hash table) for queries in progress. This would
+  enable a thread that is resolving a query that is already being handled by
+  another thread to wait for that other thread to finish and copy its result
+  rather than independently query remote servers. It is very common for
+  resolvers to resend UDP queries if they don't get a reply within a timeout
+  period and if the answer is not yet cached, this will result in multiple
+  threads duplicating each others work in the current implementation.
