@@ -102,8 +102,16 @@ class ShadowsocksNatService extends Service with BaseService {
 
   val handler: Handler = new Handler()
 
+  def isACLEnabled: Boolean = {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+        true
+      } else {
+        false
+      }
+  }
+
   def startShadowsocksDaemon() {
-    if (config.isGFWList) {
+    if (isACLEnabled && config.isGFWList) {
       val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list_full)
       ConfigUtils.printToFile(new File(Path.BASE + "chn.acl"))(p => {
         chn_list.foreach(item => p.println(item))
@@ -114,7 +122,7 @@ class ShadowsocksNatService extends Service with BaseService {
       "ss-local -b 127.0.0.1 -s \"%s\" -p \"%d\" -l \"%d\" -k \"%s\" -m \"%s\" -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
-    val cmd =  if (config.isGFWList) args + " --acl " + Path.BASE + "chn.acl" else args
+    val cmd =  if (config.isGFWList && isACLEnabled) args + " --acl " + Path.BASE + "chn.acl" else args
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     System.exec(cmd)
   }
@@ -326,6 +334,14 @@ class ShadowsocksNatService extends Service with BaseService {
       // Bypass DNS in China
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.114.114"))
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.115.115"))
+
+      if (!isACLEnabled)
+      {
+        val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
+        for (item <- chn_list) {
+          init_sb.append(cmd_bypass.replace("0.0.0.0", item))
+        }
+      }
     }
     if (hasRedirectSupport) {
       init_sb
