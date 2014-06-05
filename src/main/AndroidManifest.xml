@@ -16,7 +16,7 @@
 
   <uses-sdk
       android:minSdkVersion="9"
-      android:targetSdkVersion="16"/>
+      android:targetSdkVersion="19"/>
 
   <application
       android:name=".ShadowsocksApplication"
