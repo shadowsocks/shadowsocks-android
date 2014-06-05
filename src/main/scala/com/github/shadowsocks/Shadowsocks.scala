@@ -58,7 +58,7 @@ import android.net.{Uri, VpnService}
 import android.webkit.{WebViewClient, WebView}
 import android.app.backup.BackupManager
 import scala.concurrent.ops._
-import com.google.ads.{AdRequest, AdSize, AdView}
+import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import net.simonvt.menudrawer.MenuDrawer
 
 import com.github.shadowsocks.database._

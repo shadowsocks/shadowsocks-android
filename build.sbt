@@ -1,7 +1,16 @@
+import android.Keys._
+
+import android.Dependencies.{apklib,aar}
+
+android.Plugin.androidBuild
+
+platformTarget in Android := "android-16"
+
+name := "shadowsocks"
+
 libraryDependencies ++= Seq(
-  "com.google.android" % "support-v4" % "r12",
+  "com.google.android" % "support-v4" % "18.0.0",
   "com.google.android" % "analytics" % "3.01",
-  "com.google.android" % "admob" % "6.4.1",
   "dnsjava" % "dnsjava" % "2.1.5",
   "org.scalaj" %% "scalaj-http" % "0.3.10",
   "commons-net" % "commons-net" % "3.3",
@@ -9,10 +18,11 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.actionbarsherlock" % "actionbarsherlock" % "4.4.0" artifacts(Artifact("actionbarsherlock", "apklib", "apklib")),
-  "net.saik0.android.unifiedpreference" % "unifiedpreference" % "0.0.2" artifacts(Artifact("unifiedpreference", "apklib", "apklib")),
-  "org.jraf" % "android-switch-backport" % "1.0" artifacts(Artifact("android-switch-backport", "apklib", "apklib")),
-  "net.simonvt.menudrawer" % "menudrawer" % "3.0.4" artifacts(Artifact("menudrawer", "apklib", "apklib"))
+  apklib("com.actionbarsherlock" % "actionbarsherlock" % "4.4.0"), 
+  apklib("net.saik0.android.unifiedpreference" % "unifiedpreference" % "0.0.2"),
+  apklib("org.jraf" % "android-switch-backport" % "1.0"),
+  apklib("net.simonvt.menudrawer" % "menudrawer" % "3.0.4"),
+  "com.google.android.gms" % "play-services" % "4.4.52"
 )
 
 libraryDependencies ++= Seq(
