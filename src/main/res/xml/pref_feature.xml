@@ -26,7 +26,7 @@
     android:defaultValue="true"
     android:summary="@string/traffic_stat_summary"
     android:title="@string/traffic_stat">
-</CheckBoxPreference>
+  </CheckBoxPreference>
   <CheckBoxPreference
       android:key="isUdpDns"
       android:defaultValue="false"

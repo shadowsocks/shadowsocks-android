@@ -50,8 +50,8 @@ import android.widget._
 import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
 import de.keyboardsurfer.android.widget.crouton.{Crouton, Style, Configuration}
 import java.util.Hashtable
-import net.saik0.android.unifiedpreference.UnifiedPreferenceFragment
-import net.saik0.android.unifiedpreference.UnifiedSherlockPreferenceActivity
+import android.preference.PreferenceFragment
+import com.actionbarsherlock.app.SherlockPreferenceActivity
 import org.jraf.android.backport.switchwidget.Switch
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Uri, VpnService}
@@ -175,7 +175,7 @@ object Shadowsocks {
     }
   }
 
-  class ProxyFragment extends UnifiedPreferenceFragment {
+  class ProxyFragment extends PreferenceFragment {
 
     var receiver: BroadcastReceiver = null
 
@@ -200,6 +200,7 @@ object Shadowsocks {
 
     override def onCreate(bundle: Bundle) {
       super.onCreate(bundle)
+      addPreferencesFromResource(R.xml.pref_proxy)
       val filter = new IntentFilter()
       filter.addAction(Action.UPDATE_FRAGMENT)
       receiver = new BroadcastReceiver {
@@ -226,7 +227,7 @@ object Shadowsocks {
     }
   }
 
-  class FeatureFragment extends UnifiedPreferenceFragment {
+  class FeatureFragment extends PreferenceFragment {
 
     var receiver: BroadcastReceiver = null
 
@@ -258,6 +259,7 @@ object Shadowsocks {
 
     override def onCreate(bundle: Bundle) {
       super.onCreate(bundle)
+      addPreferencesFromResource(R.xml.pref_feature)
       val filter = new IntentFilter()
       filter.addAction(Action.UPDATE_FRAGMENT)
       receiver = new BroadcastReceiver {
@@ -287,7 +289,7 @@ object Shadowsocks {
 }
 
 class Shadowsocks
-  extends UnifiedSherlockPreferenceActivity
+  extends SherlockPreferenceActivity
   with CompoundButton.OnCheckedChangeListener
   with MenuAdapter.MenuListener {
 
@@ -547,11 +549,22 @@ class Shadowsocks
     onContentChanged()
   }
 
+  override def onBuildHeaders(target: java.util.List[PreferenceActivity.Header]) {
+    loadHeadersFromResource(R.xml.shadowsocks_headers, target);
+  }
+
+  def isSinglePane: Boolean = {
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
+  }
+
   override def onCreate(savedInstanceState: Bundle) {
 
-    // Initialize the preference
-    setHeaderRes(R.xml.shadowsocks_headers)
     super.onCreate(savedInstanceState)
+
+    if (isSinglePane) {
+      // Load the legacy preferences headers
+      addPreferencesFromResource(R.xml.pref_all);
+    }
 
     // Initialize the profile
     currentProfile = {
