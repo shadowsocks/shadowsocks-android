@@ -10,6 +10,8 @@ name := "shadowsocks"
 
 compileOrder in Compile := CompileOrder.JavaThenScala
 
+resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
+
 libraryDependencies ++= Seq(
   "com.google.android" % "analytics" % "3.01",
   "dnsjava" % "dnsjava" % "2.1.5",
@@ -19,9 +21,9 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  apklib("org.jraf" % "android-switch-backport" % "1.0"),
-  apklib("net.simonvt.menudrawer" % "menudrawer" % "3.0.4"),
-  apklib("com.actionbarsherlock" % "actionbarsherlock" % "4.4.0"), 
+  aar("com.actionbarsherlock" % "actionbarsherlock" % "4.4.0") exclude("com.google.android", "support-v4"),
+  "net.simonvt.menudrawer" % "menudrawer" % "3.0.6",
+  "org.jraf" % "android-switch-backport" % "1.3.1",
   "com.google.android.gms" % "play-services" % "4.4.52",
   "com.android.support" % "support-v4" % "19.1.0"
 )
@@ -40,4 +42,6 @@ proguardOptions in Android ++= Seq("-keep class android.support.v4.app.** { *; }
           "-keep class org.jraf.android.backport.** { *; }",
           "-keep class com.github.shadowsocks.** { *; }",
           "-keep class * extends com.j256.ormlite.** { *; }",
-          "-keepattributes *Annotation*")
+          "-keepattributes *Annotation*",
+          "-dontwarn org.xbill.**",
+          "-dontwarn com.actionbarsherlock.**")

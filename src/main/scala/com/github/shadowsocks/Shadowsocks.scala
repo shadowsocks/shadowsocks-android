@@ -44,7 +44,7 @@ import android.content.res.AssetManager
 import android.graphics.{Color, Bitmap, Typeface}
 import android.os._
 import android.preference._
-import android.util.Log
+import android.util.{Log, DisplayMetrics}
 import android.view._
 import android.widget._
 import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
@@ -297,6 +297,7 @@ class Shadowsocks
   val MSG_CRASH_RECOVER: Int = 1
   val STATE_MENUDRAWER = "com.github.shadowsocks.menuDrawer"
   val STATE_ACTIVE_VIEW_ID = "com.github.shadowsocks.activeViewId"
+  var singlePane: Int = -1
 
   // Variables
   var switchButton: Switch = null
@@ -356,6 +357,20 @@ class Shadowsocks
     new ProfileManager(settings, getApplication.asInstanceOf[ShadowsocksApplication].dbHelper)
 
   val handler = new Handler()
+
+  def isSinglePane: Boolean = {
+    if (singlePane == -1) {
+      val metrics = new DisplayMetrics()
+      getWindowManager().getDefaultDisplay().getMetrics(metrics)
+      val widthPixels = metrics.widthPixels
+      val scaleFactor = metrics.density
+      val widthDp = widthPixels / scaleFactor 
+
+      singlePane = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB ||
+        widthPixels <= 720) 1 else 0
+    }
+    singlePane == 1
+  }
 
   private def changeSwitch (checked: Boolean) {
     switchButton.setOnCheckedChangeListener(null)
@@ -530,15 +545,15 @@ class Shadowsocks
         }
       }
       if (layoutView != null) {
-        val adView = {
-          if (isSinglePane) {
-            new AdView(this, AdSize.SMART_BANNER, "a151becb8068b09")
-          } else {
-            new AdView(this, AdSize.BANNER, "a151becb8068b09")
-          }
+        val adView = new AdView(this)
+        adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
+        if (isSinglePane) {
+          adView.setAdSize(AdSize.SMART_BANNER) 
+        } else {
+          adView.setAdSize(AdSize.BANNER) 
         }
         layoutView.asInstanceOf[ViewGroup].addView(adView, 0)
-        adView.loadAd(new AdRequest)
+        adView.loadAd(new AdRequest.Builder().build())
       }
     }
   }
@@ -551,10 +566,6 @@ class Shadowsocks
 
   override def onBuildHeaders(target: java.util.List[PreferenceActivity.Header]) {
     loadHeadersFromResource(R.xml.shadowsocks_headers, target);
-  }
-
-  def isSinglePane: Boolean = {
-    Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
   }
 
   override def onCreate(savedInstanceState: Bundle) {

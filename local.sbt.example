@@ -1,5 +1,0 @@
-import sbtandroid.AndroidPlugin._
-
-keyalias := "travis"
-
-containerId := "GTM-XXXX"
