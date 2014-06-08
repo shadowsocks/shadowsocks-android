@@ -52,6 +52,11 @@ class ProfileEditTextPreference(context: Context, attrs: AttributeSet, defStyle:
     mDefaultSummary = getSummary
   }
 
+  override def setText(text: String) {
+    super.setText(text)
+    setSummary(text)
+  }
+
   override def setSummary(summary: CharSequence) {
     if (summary.toString.isEmpty) {
       super.setSummary(mDefaultSummary)

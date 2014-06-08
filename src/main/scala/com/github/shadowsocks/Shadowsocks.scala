@@ -50,7 +50,6 @@ import android.widget._
 import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
 import de.keyboardsurfer.android.widget.crouton.{Crouton, Style, Configuration}
 import java.util.Hashtable
-import android.preference.PreferenceFragment
 import com.actionbarsherlock.app.SherlockPreferenceActivity
 import org.jraf.android.backport.switchwidget.Switch
 import android.content.pm.{PackageInfo, PackageManager}
@@ -172,77 +171,6 @@ object Shadowsocks {
       case _ =>
     }
   }
-
-  class SettingsFragment extends PreferenceFragment {
-
-    var receiver: BroadcastReceiver = null
-
-    private def setPreferenceEnabled() {
-      val state = getActivity.asInstanceOf[Shadowsocks].state
-      val enabled = state != State.CONNECTED && state != State.CONNECTING
-      for (name <- PROXY_PREFS) {
-        val pref: Preference = findPreference(name)
-        if (pref != null) {
-          pref.setEnabled(enabled)
-        }
-      }
-      for (name <- Shadowsocks.FEATRUE_PREFS) {
-        val pref: Preference = findPreference(name)
-        if (pref != null) {
-          val status = getActivity.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-          val isRoot = status.getBoolean(Key.isRoot, false)
-          if (Seq(Key.isGlobalProxy, Key.isTrafficStat, Key.proxyedApps)
-            .contains(name)) {
-            pref.setEnabled(enabled && isRoot)
-          } else {
-            pref.setEnabled(enabled)
-          }
-        }
-      }
-    }
-
-    private def updatePreferenceScreen() {
-      for (name <- Shadowsocks.PROXY_PREFS) {
-        val pref = findPreference(name)
-        Shadowsocks
-          .updatePreference(pref, name, getActivity.asInstanceOf[Shadowsocks].currentProfile)
-      }
-      for (name <- Shadowsocks.FEATRUE_PREFS) {
-        val pref = findPreference(name)
-        Shadowsocks
-          .updatePreference(pref, name, getActivity.asInstanceOf[Shadowsocks].currentProfile)
-      }
-    }
-
-    override def onCreate(bundle: Bundle) {
-      super.onCreate(bundle)
-      addPreferencesFromResource(R.xml.pref_all)
-      val filter = new IntentFilter()
-      filter.addAction(Action.UPDATE_FRAGMENT)
-      receiver = new BroadcastReceiver {
-        def onReceive(p1: Context, p2: Intent) {
-          setPreferenceEnabled()
-          updatePreferenceScreen()
-        }
-      }
-      getActivity.getApplicationContext.registerReceiver(receiver, filter)
-    }
-
-    override def onDestroy() {
-      super.onDestroy()
-      getActivity.getApplicationContext.unregisterReceiver(receiver)
-    }
-
-    override def onResume() {
-      super.onResume()
-      setPreferenceEnabled()
-    }
-
-    override def onPause() {
-      super.onPause()
-    }
-  }
-
 }
 
 class Shadowsocks
@@ -315,10 +243,6 @@ class Shadowsocks
 
   val handler = new Handler()
 
-  def isFallbackPref: Boolean = {
-    Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
-  }
-
   def isSinglePane: Boolean = {
     if (singlePane == -1) {
       val metrics = new DisplayMetrics()
@@ -327,8 +251,7 @@ class Shadowsocks
       val scaleFactor = metrics.density
       val widthDp = widthPixels / scaleFactor
 
-      singlePane = if (widthDp <= 720) 1
-      else 0
+      singlePane = if (widthDp <= 720) 1 else 0
     }
     singlePane == 1
   }
@@ -503,7 +426,11 @@ class Shadowsocks
   def initAdView() {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
       val layoutView = {
+        if (Build.VERSION.SDK_INT > 10) {
+          drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
+        } else {
           getLayoutView(drawer.getContentContainer.getParent)
+        }
       }
       if (layoutView != null) {
         val adView = new AdView(this)
@@ -525,15 +452,7 @@ class Shadowsocks
 
     super.onCreate(savedInstanceState)
 
-    if (isFallbackPref) {
-      // Load the legacy preferences headers
-      addPreferencesFromResource(R.xml.pref_all)
-    } else {
-      // Display the fragment as the main content.
-      getFragmentManager.beginTransaction()
-        .replace(android.R.id.content, new Shadowsocks.SettingsFragment())
-        .commit()
-    }
+    addPreferencesFromResource(R.xml.pref_all)
 
     // Initialize the profile
     currentProfile = {
@@ -678,11 +597,7 @@ class Shadowsocks
         profileManager.reload(currentProfile.id)
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        if (!isFallbackPref) {
-          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
-        } else {
-          updatePreferenceScreen()
-        }
+        updatePreferenceScreen()
 
         h.sendEmptyMessage(0)
       }
@@ -700,11 +615,7 @@ class Shadowsocks
         profileManager.save()
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        if (!isFallbackPref) {
-          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
-        } else {
-          updatePreferenceScreen()
-        }
+        updatePreferenceScreen()
 
         h.sendEmptyMessage(0)
       }
@@ -722,11 +633,7 @@ class Shadowsocks
         menuAdapter.setActiveId(id)
         menuAdapter.notifyDataSetChanged()
 
-        if (!isFallbackPref) {
-          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
-        } else {
-          updatePreferenceScreen()
-        }
+        updatePreferenceScreen()
 
         h.sendEmptyMessage(0)
       }
@@ -756,11 +663,7 @@ class Shadowsocks
         currentProfile = profileManager.load(profileId)
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        if (!isFallbackPref) {
-          sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
-        } else {
-          updatePreferenceScreen()
-        }
+        sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
 
         dialog.dismiss()
       }
@@ -1080,7 +983,6 @@ class Shadowsocks
               }
               setPreferenceEnabled(enabled = true)
           }
-          if (!isFallbackPref) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         }
       }
     })
