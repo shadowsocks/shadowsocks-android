@@ -10,13 +10,11 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 [![Build Status](https://secure.travis-ci.org/shadowsocks/shadowsocks-android.png)](http://travis-ci.org/shadowsocks/shadowsocks-android)
 
-[Nightly Builds](http://buildbot.sinaapp.com)
-
 ### PREREQUISITES
 
 * JDK 1.6+
-* SBT 0.12.4
-* Android SDK r21+ ( with SDK Platform Android 4.1.2, API 16, revision 4 )
+* SBT 0.12.3
+* Android SDK r21+
 * Android NDK r9+
 
 ### BUILD
@@ -25,7 +23,7 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
-* Create `local.sbt` from `local.sbt.example` with your own key alias
+* Create `local.properties` from `local.properties.example` with your own key alias
 * Invoke the building like this
 
 ```bash
@@ -33,17 +31,17 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
     ./build-ndk.sh
 
     # Build the App
-    sbt clean release
+    sbt clean android:package-release
 ```
 
-#### BUILD ON Mac OS X (with HomeBrew)
+#### BUILD on Mac OS X (with HomeBrew)
 
 * Install Android SDK and NDK by run `brew install android-ndk android-sdk`
 * Add `export ANDROID_HOME=/usr/local/opt/android-sdk` to your .bashrc , then reopen the shell to loat it.
-* Run `android update sdk --filter tools,platform-tools,android-16 --no-ui --no-https -a` to insall SDK Platform Android 4.1.2, API 16, revision 4.
+* Run `echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-19,extra-google-m2repository,extra-android-m2repository --no-ui --no-https -a`
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
-* Create `local.sbt` from `local.sbt.example` with your own key alias .
+* Create `local.properties` from `local.properties.example` with your own key alias .
 * Invoke the building like this
 
 ```bash
@@ -51,13 +49,12 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
     ./build-ndk.sh
     
     # Build the apk
-    sbt clean
-    sbt apk
+    sbt clean android:package-release
 ```
 
 ### LICENSE
 
-Copyright (C) 2013 Max Lv <max.c.lv@gmail.com>
+Copyright (C) 2014 Max Lv <max.c.lv@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

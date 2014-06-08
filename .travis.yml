@@ -2,10 +2,6 @@ language: scala
 scala:
 - 2.10.3
 before_install:
-- git clone https://github.com/madeye/android-plugin.git
-- pushd android-plugin
-- sbt publish-local
-- popd
 - sudo apt-get update
 - sudo apt-get install libc6-dev-i386
 - sudo apt-get install lib32ncurses5-dev
@@ -22,17 +18,16 @@ before_install:
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r9d
 - export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-- echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-16 --no-ui --no-https -a
+- echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-19,extra-google-m2repository,extra-android-m2repository --no-ui --no-https -a
 install:
 - gem install --version 0.8.9 faraday
 - gem install travis-artifacts
 script:
 - ./build-ndk.sh
-- cp local.sbt.example local.sbt
-- sbt clean
-- sbt apk
+- cp local.properties.example local.properties
+- sbt clean android:package-release
 after_success:
-- sbt deploy
+- ./deploy target/android-bin shadowsocks-release.apk
 env:
   global:
   - "ARTIFACTS_AWS_REGION=us-east-1"
