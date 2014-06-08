@@ -12,6 +12,8 @@ compileOrder in Compile := CompileOrder.JavaThenScala
 
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
+resolvers += "madeye private releases" at "http://madeye-maven-repository.googlecode.com/git/"
+
 libraryDependencies ++= Seq(
   "com.google.android" % "analytics" % "3.01",
   "dnsjava" % "dnsjava" % "2.1.5",
