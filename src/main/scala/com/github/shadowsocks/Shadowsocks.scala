@@ -67,8 +67,6 @@ import com.github.shadowsocks.database.Profile
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
-import com.github.shadowsocks.database.Item
-import com.github.shadowsocks.database.Category
 import com.google.zxing.integration.android.IntentIntegrator
 import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
 import java.io._
@@ -175,7 +173,7 @@ object Shadowsocks {
     }
   }
 
-  class ProxyFragment extends PreferenceFragment {
+  class SettingsFragment extends PreferenceFragment {
 
     var receiver: BroadcastReceiver = null
 
@@ -188,52 +186,6 @@ object Shadowsocks {
           pref.setEnabled(enabled)
         }
       }
-    }
-
-    private def updatePreferenceScreen() {
-      for (name <- Shadowsocks.PROXY_PREFS) {
-        val pref = findPreference(name)
-        Shadowsocks
-          .updatePreference(pref, name, getActivity.asInstanceOf[Shadowsocks].currentProfile)
-      }
-    }
-
-    override def onCreate(bundle: Bundle) {
-      super.onCreate(bundle)
-      addPreferencesFromResource(R.xml.pref_proxy)
-      val filter = new IntentFilter()
-      filter.addAction(Action.UPDATE_FRAGMENT)
-      receiver = new BroadcastReceiver {
-        def onReceive(p1: Context, p2: Intent) {
-          setPreferenceEnabled()
-          updatePreferenceScreen()
-        }
-      }
-      getActivity.getApplicationContext.registerReceiver(receiver, filter)
-    }
-
-    override def onDestroy() {
-      super.onDestroy()
-      getActivity.getApplicationContext.unregisterReceiver(receiver)
-    }
-
-    override def onResume() {
-      super.onResume()
-      setPreferenceEnabled()
-    }
-
-    override def onPause() {
-      super.onPause()
-    }
-  }
-
-  class FeatureFragment extends PreferenceFragment {
-
-    var receiver: BroadcastReceiver = null
-
-    private def setPreferenceEnabled() {
-      val state = getActivity.asInstanceOf[Shadowsocks].state
-      val enabled: Boolean = state != State.CONNECTED && state != State.CONNECTING
       for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref: Preference = findPreference(name)
         if (pref != null) {
@@ -250,6 +202,11 @@ object Shadowsocks {
     }
 
     private def updatePreferenceScreen() {
+      for (name <- Shadowsocks.PROXY_PREFS) {
+        val pref = findPreference(name)
+        Shadowsocks
+          .updatePreference(pref, name, getActivity.asInstanceOf[Shadowsocks].currentProfile)
+      }
       for (name <- Shadowsocks.FEATRUE_PREFS) {
         val pref = findPreference(name)
         Shadowsocks
@@ -259,7 +216,7 @@ object Shadowsocks {
 
     override def onCreate(bundle: Bundle) {
       super.onCreate(bundle)
-      addPreferencesFromResource(R.xml.pref_feature)
+      addPreferencesFromResource(R.xml.pref_all)
       val filter = new IntentFilter()
       filter.addAction(Action.UPDATE_FRAGMENT)
       receiver = new BroadcastReceiver {
@@ -358,27 +315,33 @@ class Shadowsocks
 
   val handler = new Handler()
 
+  def isFallbackPref: Boolean = {
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
+  }
+
   def isSinglePane: Boolean = {
     if (singlePane == -1) {
       val metrics = new DisplayMetrics()
-      getWindowManager().getDefaultDisplay().getMetrics(metrics)
+      getWindowManager.getDefaultDisplay.getMetrics(metrics)
       val widthPixels = metrics.widthPixels
       val scaleFactor = metrics.density
-      val widthDp = widthPixels / scaleFactor 
+      val widthDp = widthPixels / scaleFactor
 
-      singlePane = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB ||
-        widthPixels <= 720) 1 else 0
+      singlePane = if (widthDp <= 720) 1
+      else 0
     }
     singlePane == 1
   }
 
-  private def changeSwitch (checked: Boolean) {
+  private def changeSwitch(checked: Boolean) {
     switchButton.setOnCheckedChangeListener(null)
     switchButton.setChecked(checked)
     if (switchButton.isEnabled) {
       switchButton.setEnabled(false)
       handler.postDelayed(new Runnable {
-        override def run() { switchButton.setEnabled(true) }
+        override def run() {
+          switchButton.setEnabled(true)
+        }
       }, 1000)
     }
     switchButton.setOnCheckedChangeListener(this)
@@ -522,7 +485,9 @@ class Shadowsocks
       if (switchButton.isEnabled) {
         switchButton.setEnabled(false)
         handler.postDelayed(new Runnable {
-          override def run() { switchButton.setEnabled(true) }
+          override def run() {
+            switchButton.setEnabled(true)
+          }
         }, 1000)
       }
     }
@@ -538,20 +503,12 @@ class Shadowsocks
   def initAdView() {
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
       val layoutView = {
-        if (Build.VERSION.SDK_INT > 10) {
-          drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
-        } else {
           getLayoutView(drawer.getContentContainer.getParent)
-        }
       }
       if (layoutView != null) {
         val adView = new AdView(this)
         adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-        if (isSinglePane) {
-          adView.setAdSize(AdSize.SMART_BANNER) 
-        } else {
-          adView.setAdSize(AdSize.BANNER) 
-        }
+        adView.setAdSize(AdSize.SMART_BANNER)
         layoutView.asInstanceOf[ViewGroup].addView(adView, 0)
         adView.loadAd(new AdRequest.Builder().build())
       }
@@ -564,17 +521,18 @@ class Shadowsocks
     onContentChanged()
   }
 
-  override def onBuildHeaders(target: java.util.List[PreferenceActivity.Header]) {
-    loadHeadersFromResource(R.xml.shadowsocks_headers, target);
-  }
-
   override def onCreate(savedInstanceState: Bundle) {
 
     super.onCreate(savedInstanceState)
 
-    if (isSinglePane) {
+    if (isFallbackPref) {
       // Load the legacy preferences headers
-      addPreferencesFromResource(R.xml.pref_all);
+      addPreferencesFromResource(R.xml.pref_all)
+    } else {
+      // Display the fragment as the main content.
+      getFragmentManager.beginTransaction()
+        .replace(android.R.id.content, new Shadowsocks.SettingsFragment())
+        .commit()
     }
 
     // Initialize the profile
@@ -602,6 +560,9 @@ class Shadowsocks
     drawer.setSlideDrawable(R.drawable.ic_drawer)
     // Whether the previous drawable should be shown
     drawer.setDrawerIndicatorEnabled(true)
+    if (!isSinglePane) {
+      drawer.openMenu(false)
+    }
 
     // Initialize action bar
     val switchLayout = getLayoutInflater
@@ -717,7 +678,7 @@ class Shadowsocks
         profileManager.reload(currentProfile.id)
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        if (!isSinglePane) {
+        if (!isFallbackPref) {
           sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         } else {
           updatePreferenceScreen()
@@ -739,7 +700,7 @@ class Shadowsocks
         profileManager.save()
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        if (!isSinglePane) {
+        if (!isFallbackPref) {
           sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         } else {
           updatePreferenceScreen()
@@ -761,7 +722,7 @@ class Shadowsocks
         menuAdapter.setActiveId(id)
         menuAdapter.notifyDataSetChanged()
 
-        if (!isSinglePane) {
+        if (!isFallbackPref) {
           sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         } else {
           updatePreferenceScreen()
@@ -795,7 +756,7 @@ class Shadowsocks
         currentProfile = profileManager.load(profileId)
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        if (!isSinglePane) {
+        if (!isFallbackPref) {
           sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         } else {
           updatePreferenceScreen()
@@ -1119,7 +1080,7 @@ class Shadowsocks
               }
               setPreferenceEnabled(enabled = true)
           }
-          if (!isSinglePane) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+          if (!isFallbackPref) sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
         }
       }
     })
