@@ -1,9 +1,9 @@
 #!/bin/bash
 ndk-build clean
 ndk-build
-mkdir -p assets/armeabi
-mkdir -p assets/armeabi-v7a
-mkdir -p assets/x86
+mkdir -p src/main/assets/armeabi
+mkdir -p src/main/assets/armeabi-v7a
+mkdir -p src/main/assets/x86
 for app in ip6tables iptables pdnsd redsocks ss-local ss-tunnel tun2socks
 do
     mv libs/armeabi/$app src/main/assets/armeabi/
