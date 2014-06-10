@@ -23,10 +23,12 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
-* Create `local.properties` from `local.properties.example` with your own key alias
+* Create `local.properties` from `local.properties.example` with your own key information
 * Invoke the building like this
 
 ```bash
+    git submodule update --init
+    
     # Build native binaries
     ./build-ndk.sh
 
@@ -37,14 +39,16 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 #### BUILD on Mac OS X (with HomeBrew)
 
 * Install Android SDK and NDK by run `brew install android-ndk android-sdk`
-* Add `export ANDROID_HOME=/usr/local/opt/android-sdk` to your .bashrc , then reopen the shell to loat it.
+* Add `export ANDROID_HOME=/usr/local/Cellar/android-sdk/$version` to your .bashrc , then reopen the shell to loat it.
 * Run `echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-19,extra-google-m2repository,extra-android-m2repository --no-ui --no-https -a`
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
-* Create `local.properties` from `local.properties.example` with your own key alias .
+* Create `local.properties` from `local.properties.example` with your own key information .
 * Invoke the building like this
 
 ```bash
+    git submodule update --init
+
     # Build native binaries
     ./build-ndk.sh
     
