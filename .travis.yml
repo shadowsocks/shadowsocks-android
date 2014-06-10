@@ -24,7 +24,7 @@ install:
 - gem install travis-artifacts
 script:
 - ./build-ndk.sh
-- cp local.properties.example local.properties
+- cp local.properties.travis local.properties
 - sbt clean android:package-release
 after_success:
 - ./deploy target/android-bin shadowsocks-release.apk
