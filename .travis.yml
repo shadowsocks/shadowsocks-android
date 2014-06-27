@@ -18,7 +18,8 @@ before_install:
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r9d
 - export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-- echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-19,extra-google-m2repository,extra-android-m2repository --no-ui --no-https -a
+- echo -e "y\ny\ny" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-19,extra-google-m2repository,extra-android-m2repository --no-ui --no-https -a
+- ln -s $ANDROID_HOME/build-tools/20.0.0/zipalign $ANDROID_HOME/tools/
 install:
 - gem install --version 0.8.9 faraday
 - gem install travis-artifacts
