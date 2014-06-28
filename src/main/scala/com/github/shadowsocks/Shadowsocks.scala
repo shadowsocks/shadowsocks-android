@@ -38,41 +38,37 @@
  */
 package com.github.shadowsocks
 
+import java.util
+import java.io.{OutputStream, InputStream, ByteArrayInputStream, ByteArrayOutputStream, IOException, FileOutputStream}
+
+import android.app.backup.BackupManager
 import android.app.{Activity, AlertDialog, ProgressDialog}
 import android.content._
+import android.content.pm.{PackageInfo, PackageManager}
 import android.content.res.AssetManager
-import android.graphics.{Color, Bitmap, Typeface}
+import android.graphics.{Bitmap, Color, Typeface}
+import android.net.{Uri, VpnService}
 import android.os._
 import android.preference._
-import android.util.{Log, DisplayMetrics}
+import android.util.{DisplayMetrics, Log}
 import android.view._
+import android.webkit.{WebView, WebViewClient}
 import android.widget._
-import com.google.analytics.tracking.android.{MapBuilder, EasyTracker}
-import de.keyboardsurfer.android.widget.crouton.{Crouton, Style, Configuration}
-import java.util.Hashtable
 import com.actionbarsherlock.app.SherlockPreferenceActivity
-import org.jraf.android.backport.switchwidget.Switch
-import android.content.pm.{PackageInfo, PackageManager}
-import android.net.{Uri, VpnService}
-import android.webkit.{WebViewClient, WebView}
-import android.app.backup.BackupManager
-import scala.concurrent.ops._
-import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
-import net.simonvt.menudrawer.MenuDrawer
-
+import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import com.github.shadowsocks.database.Profile
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import com.github.shadowsocks.preferences.{ProfileEditTextPreference, PasswordEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences.{PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
+import com.google.analytics.tracking.android.{EasyTracker, MapBuilder}
+import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import com.google.zxing.integration.android.IntentIntegrator
-import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
-import java.io._
-import scala.Some
-import com.github.shadowsocks.database.Item
-import com.github.shadowsocks.database.Category
-import com.github.shadowsocks.utils.Console
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader
+import de.keyboardsurfer.android.widget.crouton.{Configuration, Crouton, Style}
+import net.simonvt.menudrawer.MenuDrawer
+import org.jraf.android.backport.switchwidget.Switch
+
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.concurrent.ops._
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -113,7 +109,7 @@ object Typefaces {
   }
 
   private final val TAG = "Typefaces"
-  private final val cache = new Hashtable[String, Typeface]
+  private final val cache = new util.Hashtable[String, Typeface]
 }
 
 object Shadowsocks {
@@ -128,8 +124,8 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val EXECUTABLES = Array(Executable.IPTABLES, Executable.PDNSD, Executable.REDSOCKS,
-    Executable.SS_LOCAL, Executable.SS_TUNNEL, Executable.TUN2SOCKS)
+  val SYSTEM_EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS,Executable.SS_TUNNEL)
+  val EXECUTABLES = Array(Executable.IPTABLES) ++ SYSTEM_EXECUTABLES
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -427,7 +423,7 @@ class Shadowsocks
     if (settings.getString(Key.proxy, "") == "198.199.101.152") {
       val layoutView = {
         if (Build.VERSION.SDK_INT > 10) {
-          drawer.getContentContainer.asInstanceOf[ViewGroup].getChildAt(0)
+          drawer.getContentContainer.getChildAt(0)
         } else {
           getLayoutView(drawer.getContentContainer.getParent)
         }
@@ -803,9 +799,30 @@ class Shadowsocks
     new BackupManager(this).dataChanged()
   }
 
+  def copyToSystem() {
+    val ab = new ArrayBuffer[String]
+    ab.append("mount -o rw,remount -t yaffs2 /dev/block/mtdblock3 /system")
+    for (executable <- Shadowsocks.SYSTEM_EXECUTABLES) {
+      ab.append("cp %s%s /system/bin/".format(Path.BASE, executable))
+    }
+    ab.append("mount -o ro,remount -t yaffs2 /dev/block/mtdblock3 /system")
+    Console.runRootCommand(ab.toArray)
+
+  }
+
   def reset() {
+
     crash_recovery()
-    copyAssets(System.getABI)
+
+    if (Build.VERSION.SDK_INT >= 16) {
+      copyAssets("api-16/" + System.getABI)
+    } else {
+      copyAssets(System.getABI)
+    }
+
+    if (Build.VERSION.SDK_INT >= 20) {
+      copyToSystem()
+    }
 
     val ab = new ArrayBuffer[String]
     for (executable <- Shadowsocks.EXECUTABLES) {

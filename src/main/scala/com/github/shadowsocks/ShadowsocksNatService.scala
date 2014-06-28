@@ -118,10 +118,14 @@ class ShadowsocksNatService extends Service with BaseService {
       })
     }
 
-    val args = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -f " +
+    val raw_args = ("ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
+    val args = if (Build.VERSION.SDK_INT >= 20) {
+      raw_args
+    } else {
+      Path.BASE + raw_args
+    }
     val cmd =  if (config.isGFWList && isACLEnabled) args + " --acl " + Path.BASE + "chn.acl" else args
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
@@ -129,9 +133,8 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def startDnsDaemon() {
-    val cmd = if (config.isUdpDns) {
-      (Path.BASE +
-        "ss-tunnel -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k '%s' -m '%s' -L 8.8.8.8:53 -u -f " +
+    val args = if (config.isUdpDns) {
+      ("ss-tunnel -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k '%s' -m '%s' -L 8.8.8.8:53 -u -f " +
         Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
@@ -144,7 +147,13 @@ class ShadowsocksNatService extends Service with BaseService {
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
-      Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+      "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    }
+
+    val cmd = if (Build.VERSION.SDK_INT >= 20) {
+      args
+    } else {
+      Path.BASE + args
     }
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     Console.runRootCommand(cmd)
@@ -164,11 +173,16 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.format(config.localPort)
-    val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf"
-      .format(Path.BASE, Path.BASE, Path.BASE)
+    val args = "redsocks -p %sredsocks.pid -c %sredsocks.conf"
+      .format(Path.BASE, Path.BASE)
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
+    val cmd = if (Build.VERSION.SDK_INT >= 20) {
+      args
+    } else {
+      Path.BASE + args
+    }
     Console.runRootCommand(cmd)
   }
 
