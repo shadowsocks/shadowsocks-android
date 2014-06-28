@@ -801,6 +801,8 @@ class Shadowsocks
     ab.append("mount -o rw,remount -t yaffs2 /dev/block/mtdblock3 /system")
     for (executable <- Shadowsocks.EXECUTABLES) {
       ab.append("cp %s%s /system/bin/".format(Path.BASE, executable))
+      ab.append("chmod 755 /system/bin/" + executable)
+      ab.append("chown root:shell /system/bin/" + executable)
     }
     ab.append("mount -o ro,remount -t yaffs2 /dev/block/mtdblock3 /system")
     Console.runRootCommand(ab.toArray)
@@ -826,6 +828,7 @@ class Shadowsocks
       ab.append("chmod 755 " + Path.BASE + executable)
     }
     Console.runCommand(ab.toArray)
+
   }
 
   private def recovery() {

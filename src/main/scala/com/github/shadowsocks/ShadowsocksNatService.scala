@@ -151,7 +151,7 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     val cmd = if (Build.VERSION.SDK_INT >= 20) {
-      args
+      "system/bin/" + args
     } else {
       Path.BASE + args
     }
@@ -185,7 +185,7 @@ class ShadowsocksNatService extends Service with BaseService {
       p.println(conf)
     })
     val cmd = if (Build.VERSION.SDK_INT >= 20) {
-      args
+      "system/bin/" + args
     } else {
       Path.BASE + args
     }
@@ -195,10 +195,10 @@ class ShadowsocksNatService extends Service with BaseService {
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
 
-    startShadowsocksDaemon()
     startDnsDaemon()
     startRedsocksDaemon()
-    setupIptables
+    startShadowsocksDaemon()
+    setupIptables()
     flushDNS()
 
     true
