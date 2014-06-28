@@ -124,8 +124,7 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val SYSTEM_EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS,Executable.SS_TUNNEL)
-  val EXECUTABLES = Array(Executable.IPTABLES) ++ SYSTEM_EXECUTABLES
+  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -329,8 +328,6 @@ class Shadowsocks
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`")
     ab.append("killall -9 pdnsd")
-    ab.append("killall -9 ss-local")
-    ab.append("killall -9 ss-tunnel")
     ab.append("killall -9 tun2socks")
     ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
     ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
@@ -802,7 +799,7 @@ class Shadowsocks
   def copyToSystem() {
     val ab = new ArrayBuffer[String]
     ab.append("mount -o rw,remount -t yaffs2 /dev/block/mtdblock3 /system")
-    for (executable <- Shadowsocks.SYSTEM_EXECUTABLES) {
+    for (executable <- Shadowsocks.EXECUTABLES) {
       ab.append("cp %s%s /system/bin/".format(Path.BASE, executable))
     }
     ab.append("mount -o ro,remount -t yaffs2 /dev/block/mtdblock3 /system")

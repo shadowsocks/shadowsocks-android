@@ -134,7 +134,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startDnsDaemon() {
     val args = if (config.isUdpDns) {
-      ("ss-tunnel -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k '%s' -m '%s' -L 8.8.8.8:53 -u -f " +
+      ("ss-tunnel -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -L 8.8.8.8:53 -u -f " +
         Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
@@ -155,8 +155,14 @@ class ShadowsocksNatService extends Service with BaseService {
     } else {
       Path.BASE + args
     }
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runRootCommand(cmd)
+
+    if (config.isUdpDns) {
+      Core.sstunnel(cmd.split(" "))
+    } else {
+      Console.runRootCommand(cmd)
+    }
   }
 
   def getVersionName: String = {
@@ -308,10 +314,11 @@ class ShadowsocksNatService extends Service with BaseService {
 
     val ab = new ArrayBuffer[String]
 
+    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
+
     ab.append("kill -9 `cat " + Path.BASE +"redsocks.pid`")
     ab.append("killall -9 redsocks")
-    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
-    ab.append("killall -9 ss-tunnel")
+
     ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
     ab.append("killall -15 pdnsd")
 
@@ -319,7 +326,6 @@ class ShadowsocksNatService extends Service with BaseService {
     ab.clear()
 
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-    ab.append("killall -9 ss-local")
 
     Console.runCommand(ab.toArray)
   }

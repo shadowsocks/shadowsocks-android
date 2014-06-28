@@ -41,11 +41,13 @@ package com.github.shadowsocks;
 public class Core {
   static {
     java.lang.System.loadLibrary("ss-local-jni");
+    java.lang.System.loadLibrary("ss-tunnel-jni");
     java.lang.System.loadLibrary("tun2socks-jni");
     java.lang.System.loadLibrary("pdnsd-jni");
   }
 
   public static native void sslocal(String[] cmd);
+  public static native void sstunnel(String[] cmd);
   public static native void tun2socks(String[] cmd);
   public static native void pdnsd(String[] cmd);
 }
