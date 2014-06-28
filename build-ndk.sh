@@ -4,7 +4,7 @@ ndk-build
 mkdir -p src/main/assets/armeabi
 mkdir -p src/main/assets/armeabi-v7a
 mkdir -p src/main/assets/x86
-for app in ip6tables iptables pdnsd redsocks ss-local ss-tunnel tun2socks
+for app in ip6tables iptables pdnsd redsocks ss-tunnel
 do
     mv libs/armeabi/$app src/main/assets/armeabi/
     mv libs/armeabi-v7a/$app src/main/assets/armeabi-v7a/

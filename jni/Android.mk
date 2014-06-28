@@ -143,16 +143,30 @@ LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## shadowsocks local
+## pdnsd library
+########################################################
+
+include $(CLEAR_VARS)
+
+PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c) main-jni.cpp
+
+LOCAL_MODULE    := pdnsd-jni
+LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
+LOCAL_CFLAGS    := -Wall -O2 -DPDNSD_JNI -I$(LOCAL_PATH)/pdnsd
+
+include $(BUILD_SHARED_LIBRARY)
+
+########################################################
+## shadowsocks local library
 ########################################################
 
 include $(CLEAR_VARS)
 
 SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c acl.c 
 
-LOCAL_MODULE    := ss-local
-LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
+LOCAL_MODULE    := ss-local-jni
+LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES)) main-jni.cpp
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DSSLOCAL_JNI \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
 					-I$(LOCAL_PATH)/libev/ \
 					-I$(LOCAL_PATH)/openssl/include  \
@@ -163,7 +177,7 @@ LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork
 
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_LIBRARY)
 
 ########################################################
 ## shadowsocks tunnel
@@ -204,7 +218,7 @@ LOCAL_STATIC_LIBRARIES := cpufeatures
 include $(BUILD_SHARED_LIBRARY)
 
 ########################################################
-## tun2socks
+## tun2socks-library
 ########################################################
 
 include $(CLEAR_VARS)
@@ -214,6 +228,7 @@ LOCAL_CFLAGS += -DBADVPN_THREADWORK_USE_PTHREAD -DBADVPN_LINUX -DBADVPN_BREACTOR
 LOCAL_CFLAGS += -DBADVPN_USE_SELFPIPE -DBADVPN_USE_EPOLL
 LOCAL_CFLAGS += -DBADVPN_LITTLE_ENDIAN -DBADVPN_THREAD_SAFE
 LOCAL_CFLAGS += -DNDEBUG -DANDROID
+LOCAL_CFLAGS += -DTUN2SOCKS_JNI
 
 LOCAL_C_INCLUDES:= \
         $(LOCAL_PATH)/badvpn/lwip/src/include/ipv4 \
@@ -283,13 +298,13 @@ TUN2SOCKS_SOURCES := \
         tun2socks/SocksUdpGwClient.c \
         udpgw_client/UdpGwClient.c
 
-LOCAL_MODULE := tun2socks
+LOCAL_MODULE := tun2socks-jni
 
 LOCAL_LDLIBS := -ldl -llog
 
-LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES))
+LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES)) main-jni.cpp
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_LIBRARY)
 
 # OpenSSL
 openssl_subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \

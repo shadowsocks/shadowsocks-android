@@ -119,12 +119,13 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     val args = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k ''%s' -m '%s' -f " +
+      "ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     val cmd =  if (config.isGFWList && isACLEnabled) args + " --acl " + Path.BASE + "chn.acl" else args
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runCommand(cmd)
+
+    Core.sslocal(cmd.split(" "))
   }
 
   def startDnsDaemon() {

@@ -82,11 +82,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k '%s' -m '%s' -u -f " +
+      "ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -u -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    System.exec(cmd)
+    Core.sslocal(cmd.split(" "))
   }
 
   def startDnsDaemon() {
@@ -101,7 +101,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     })
     val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    System.exec(cmd)
+    Core.pdnsd(cmd.split(" "))
   }
 
   def getVersionName: String = {
@@ -202,10 +202,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     else
       cmd += " --dnsgw %s:8153".format(PRIVATE_VLAN.format("1"))
 
-    if (BuildConfig.DEBUG)
-      Log.d(TAG, cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    System.exec(cmd)
+    Core.tun2socks(cmd.split(" "))
   }
 
   /** Called when the activity is first created. */
@@ -260,11 +259,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val ab = new ArrayBuffer[String]
 
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-    ab.append("killall -9 ss-local")
     ab.append("kill -9 `cat " + Path.BASE + "tun2socks.pid`")
-    ab.append("killall -9 tun2socks")
     ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
-    ab.append("killall -15 pdnsd")
 
     Console.runCommand(ab.toArray)
   }

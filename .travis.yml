@@ -11,8 +11,8 @@ before_install:
 - sudo apt-get install ccache
 - export NDK_CCACHE=ccache
 - export ARCH=`uname -m`
-- wget http://dl.google.com/android/android-sdk_r22.6.2-linux.tgz
-- tar xf android-sdk_r22.6.2-linux.tgz
+- wget http://dl.google.com/android/android-sdk_r23-linux.tgz
+- tar xf android-sdk_r23-linux.tgz
 - wget http://dl.google.com/android/ndk/android-ndk-r9d-linux-${ARCH}.tar.bz2
 - tar xf android-ndk-r9d-linux-${ARCH}.tar.bz2
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r9d
