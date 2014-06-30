@@ -338,7 +338,7 @@ class ShadowsocksNatService extends Service with BaseService {
     Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
   }
 
-  def setupIptables: Boolean = {
+  def setupIptables() = {
     val init_sb = new ArrayBuffer[String]
     val http_sb = new ArrayBuffer[String]
 
@@ -405,7 +405,6 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     Console.runRootCommand(init_sb.toArray)
     Console.runRootCommand(http_sb.toArray)
-    true
   }
 
   /**
