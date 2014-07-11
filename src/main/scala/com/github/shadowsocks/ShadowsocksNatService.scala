@@ -151,7 +151,7 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     val cmd = if (Build.VERSION.SDK_INT >= 20) {
-      "system/bin/" + args
+      "/system/bin/" + args
     } else {
       Path.BASE + args
     }
@@ -185,7 +185,7 @@ class ShadowsocksNatService extends Service with BaseService {
       p.println(conf)
     })
     val cmd = if (Build.VERSION.SDK_INT >= 20) {
-      "system/bin/" + args
+      "/system/bin/" + args
     } else {
       Path.BASE + args
     }
@@ -315,16 +315,14 @@ class ShadowsocksNatService extends Service with BaseService {
     val ab = new ArrayBuffer[String]
 
     ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
-
     ab.append("kill -9 `cat " + Path.BASE +"redsocks.pid`")
     ab.append("killall -9 redsocks")
-
     ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
     ab.append("killall -15 pdnsd")
 
     Console.runRootCommand(ab.toArray)
-    ab.clear()
 
+    ab.clear()
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
 
     Console.runCommand(ab.toArray)

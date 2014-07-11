@@ -327,8 +327,6 @@ class Shadowsocks
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`")
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`")
-    ab.append("killall -9 pdnsd")
-    ab.append("killall -9 tun2socks")
     ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
     ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
 
@@ -336,7 +334,6 @@ class Shadowsocks
 
     ab.clear()
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
-    ab.append("killall -9 redsocks")
     ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
     ab.append(Utils.getIptables + " -t nat -F OUTPUT")
 
