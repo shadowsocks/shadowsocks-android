@@ -310,9 +310,12 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_NOT_STICKY
+    Service.START_STICKY
   }
 
+  override def onTaskRemoved(intent: Intent) {
+    stopRunner()
+  }
 
   def killProcesses() {
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")

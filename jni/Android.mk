@@ -183,22 +183,22 @@ include $(BUILD_SHARED_LIBRARY)
 ## shadowsocks tunnel
 ########################################################
 
-include $(CLEAR_VARS)
-
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
-
-LOCAL_MODULE    := ss-tunnel
-LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
-					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
-					-I$(LOCAL_PATH)/libev/ \
-					-I$(LOCAL_PATH)/openssl/include 
-
-LOCAL_STATIC_LIBRARIES := libev libcrypto
-
-LOCAL_LDLIBS := -llog
-
-include $(BUILD_EXECUTABLE)
+# include $(CLEAR_VARS)
+#
+# SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
+#
+# LOCAL_MODULE    := ss-tunnel
+# LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
+# LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
+# 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
+# 					-I$(LOCAL_PATH)/libev/ \
+# 					-I$(LOCAL_PATH)/openssl/include 
+#
+# LOCAL_STATIC_LIBRARIES := libev libcrypto
+#
+# LOCAL_LDLIBS := -llog
+#
+# include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## shadowsocks tunnel library
