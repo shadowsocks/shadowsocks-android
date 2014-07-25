@@ -52,12 +52,12 @@ import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
 import scala.concurrent.ops._
 import org.apache.commons.net.util.SubnetUtils
-import java.net.InetAddress
 import com.github.shadowsocks.utils._
 import scala.Some
 import com.github.shadowsocks.aidl.{IShadowsocksService, Config}
 import scala.collection.mutable.ArrayBuffer
 import java.io.File
+import java.net.InetAddress
 
 class ShadowsocksVpnService extends VpnService with BaseService {
 
@@ -118,8 +118,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startVpn() {
 
+    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
+    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val configIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
+
     val builder = new Builder()
     builder
+      .setConfigureIntent(configIntent)
       .setSession(config.profileName)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.format("1"), 24)
@@ -265,10 +270,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Console.runCommand(ab.toArray)
   }
 
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_STICKY
-  }
-
   override def startRunner(c: Config) {
 
     config = c
@@ -383,7 +384,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def stopBackgroundService() {
     stopRunner()
-    stopSelf()
   }
 
   override def getTag = TAG

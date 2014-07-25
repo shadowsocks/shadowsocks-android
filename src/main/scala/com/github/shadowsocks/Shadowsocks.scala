@@ -507,7 +507,7 @@ class Shadowsocks
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      startService(new Intent(this, s))
+      if (!isVpnEnabled) startService(new Intent(this, s))
     }
   }
 
@@ -518,9 +518,9 @@ class Shadowsocks
       } catch {
         case ignored: RemoteException => // Nothing
       }
-      unbindService(connection)
       bgService = null
     }
+    unbindService(connection)
   }
 
   override def onRestoreInstanceState(inState: Bundle) {
