@@ -309,6 +309,11 @@ class ShadowsocksNatService extends Service with BaseService {
     }
   }
 
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
+    Service.START_NOT_STICKY
+  }
+
+
   def killProcesses() {
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
 
@@ -326,10 +331,6 @@ class ShadowsocksNatService extends Service with BaseService {
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
 
     Console.runCommand(ab.toArray)
-  }
-
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_STICKY
   }
 
   def flushDNS() {
@@ -453,9 +454,7 @@ class ShadowsocksNatService extends Service with BaseService {
     filter.addAction(Action.CLOSE)
     receiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
-        spawn {
-          stopRunner()
-        }
+        stopRunner()
       }
     }
     registerReceiver(receiver, filter)
@@ -580,7 +579,6 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def stopBackgroundService() {
     stopRunner()
-    stopSelf()
   }
 
   override def getTag = TAG

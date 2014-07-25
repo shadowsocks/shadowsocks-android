@@ -253,7 +253,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
+  }
 
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
+    Service.START_NOT_STICKY
   }
 
   override def onRevoke() {
@@ -295,9 +298,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     filter.addAction(Intent.ACTION_SHUTDOWN)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
-        spawn {
-          stopRunner()
-        }
+        stopRunner()
       }
     }
     registerReceiver(receiver, filter)

@@ -507,7 +507,7 @@ class Shadowsocks
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      if (!isVpnEnabled) startService(new Intent(this, s))
+      startService(new Intent(this, s))
     }
   }
 
