@@ -1,4 +1,6 @@
 language: scala
+jdk:
+- openjdk6
 scala:
 - 2.9.2
 before_install:
