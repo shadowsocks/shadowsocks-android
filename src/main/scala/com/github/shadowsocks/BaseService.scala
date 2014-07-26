@@ -49,8 +49,8 @@ import android.content.Context
 
 trait BaseService {
 
-  var state = State.INIT
-  var callbackCount = 0
+  @volatile var state = State.INIT
+  @volatile var callbackCount = 0
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
 
@@ -105,15 +105,17 @@ trait BaseService {
     handler.post(new Runnable {
       override def run() {
         if (state != s) {
-          val n = callbacks.beginBroadcast()
-          for (i <- 0 to n - 1) {
-            try {
-              callbacks.getBroadcastItem(i).stateChanged(s, msg)
-            } catch {
-              case _: Exception => // Ignore
+          if (callbackCount > 0) {
+            val n = callbacks.beginBroadcast()
+            for (i <- 0 to n - 1) {
+              try {
+                callbacks.getBroadcastItem(i).stateChanged(s, msg)
+              } catch {
+                case _: Exception => // Ignore
+              }
             }
+            callbacks.finishBroadcast()
           }
-          callbacks.finishBroadcast()
           state = s
         }
       }

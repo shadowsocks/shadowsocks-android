@@ -118,19 +118,23 @@ class ShadowsocksNatService extends Service with BaseService {
       })
     }
 
-    val args = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k ''%s' -m '%s' -f " +
+    val raw_args = ("ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
+    val args = if (Build.VERSION.SDK_INT >= 20) {
+      raw_args
+    } else {
+      Path.BASE + raw_args
+    }
     val cmd =  if (config.isGFWList && isACLEnabled) args + " --acl " + Path.BASE + "chn.acl" else args
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runCommand(cmd)
+
+    Core.sslocal(cmd.split(" "))
   }
 
   def startDnsDaemon() {
-    val cmd = if (config.isUdpDns) {
-      (Path.BASE +
-        "ss-tunnel -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k '%s' -m '%s' -L 8.8.8.8:53 -u -f " +
+    val args = if (config.isUdpDns) {
+      ("ss-tunnel -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -L 8.8.8.8:53 -u -f " +
         Path.BASE + "ss-tunnel.pid")
         .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
     } else {
@@ -143,10 +147,22 @@ class ShadowsocksNatService extends Service with BaseService {
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
-      Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+      "pdnsd -c " + Path.BASE + "pdnsd.conf"
     }
+
+    val cmd = if (Build.VERSION.SDK_INT >= 20) {
+      "/system/bin/" + args
+    } else {
+      Path.BASE + args
+    }
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runRootCommand(cmd)
+
+    if (config.isUdpDns) {
+      Core.sstunnel(cmd.split(" "))
+    } else {
+      Console.runRootCommand(cmd)
+    }
   }
 
   def getVersionName: String = {
@@ -163,21 +179,26 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.format(config.localPort)
-    val cmd = "%sredsocks -p %sredsocks.pid -c %sredsocks.conf"
-      .format(Path.BASE, Path.BASE, Path.BASE)
+    val args = "redsocks -p %sredsocks.pid -c %sredsocks.conf"
+      .format(Path.BASE, Path.BASE)
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
+    val cmd = if (Build.VERSION.SDK_INT >= 20) {
+      "/system/bin/" + args
+    } else {
+      Path.BASE + args
+    }
     Console.runRootCommand(cmd)
   }
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
 
-    startShadowsocksDaemon()
     startDnsDaemon()
     startRedsocksDaemon()
-    setupIptables
+    startShadowsocksDaemon()
+    setupIptables()
     flushDNS()
 
     true
@@ -288,36 +309,38 @@ class ShadowsocksNatService extends Service with BaseService {
     }
   }
 
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
+    Service.START_STICKY
+  }
+
+  override def onTaskRemoved(intent: Intent) {
+    stopRunner()
+  }
+
   def killProcesses() {
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
 
     val ab = new ArrayBuffer[String]
 
+    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
     ab.append("kill -9 `cat " + Path.BASE +"redsocks.pid`")
     ab.append("killall -9 redsocks")
-    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
-    ab.append("killall -9 ss-tunnel")
     ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
     ab.append("killall -15 pdnsd")
 
     Console.runRootCommand(ab.toArray)
-    ab.clear()
 
+    ab.clear()
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-    ab.append("killall -9 ss-local")
 
     Console.runCommand(ab.toArray)
-  }
-
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_STICKY
   }
 
   def flushDNS() {
     Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
   }
 
-  def setupIptables: Boolean = {
+  def setupIptables() = {
     val init_sb = new ArrayBuffer[String]
     val http_sb = new ArrayBuffer[String]
 
@@ -384,7 +407,6 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     Console.runRootCommand(init_sb.toArray)
     Console.runRootCommand(http_sb.toArray)
-    true
   }
 
   /**
@@ -435,9 +457,7 @@ class ShadowsocksNatService extends Service with BaseService {
     filter.addAction(Action.CLOSE)
     receiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
-        spawn {
-          stopRunner()
-        }
+        stopRunner()
       }
     }
     registerReceiver(receiver, filter)
@@ -562,7 +582,6 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def stopBackgroundService() {
     stopRunner()
-    stopSelf()
   }
 
   override def getTag = TAG

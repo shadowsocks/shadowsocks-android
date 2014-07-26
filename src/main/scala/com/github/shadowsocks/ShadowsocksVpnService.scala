@@ -52,12 +52,12 @@ import org.apache.http.conn.util.InetAddressUtils
 import android.os.Message
 import scala.concurrent.ops._
 import org.apache.commons.net.util.SubnetUtils
-import java.net.InetAddress
 import com.github.shadowsocks.utils._
 import scala.Some
 import com.github.shadowsocks.aidl.{IShadowsocksService, Config}
 import scala.collection.mutable.ArrayBuffer
 import java.io.File
+import java.net.InetAddress
 
 class ShadowsocksVpnService extends VpnService with BaseService {
 
@@ -82,11 +82,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
     val cmd: String = (Path.BASE +
-      "ss-local -b 127.0.0.1 -s '%s' -p '%d' -l '%d' -k '%s' -m '%s' -u -f " +
+      "ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -u -f " +
       Path.BASE + "ss-local.pid")
       .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    System.exec(cmd)
+    Core.sslocal(cmd.split(" "))
   }
 
   def startDnsDaemon() {
@@ -101,7 +101,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     })
     val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    System.exec(cmd)
+    Core.pdnsd(cmd.split(" "))
   }
 
   def getVersionName: String = {
@@ -118,8 +118,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startVpn() {
 
+    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
+    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val configIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
+
     val builder = new Builder()
     builder
+      .setConfigureIntent(configIntent)
       .setSession(config.profileName)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.format("1"), 24)
@@ -202,10 +207,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     else
       cmd += " --dnsgw %s:8153".format(PRIVATE_VLAN.format("1"))
 
-    if (BuildConfig.DEBUG)
-      Log.d(TAG, cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    System.exec(cmd)
+    Core.tun2socks(cmd.split(" "))
   }
 
   /** Called when the activity is first created. */
@@ -249,7 +253,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
+  }
 
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
+    Service.START_STICKY
+  }
+
+  override def onTaskRemoved(intent: Intent) {
+    stopRunner()
   }
 
   override def onRevoke() {
@@ -260,17 +271,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val ab = new ArrayBuffer[String]
 
     ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-    ab.append("killall -9 ss-local")
     ab.append("kill -9 `cat " + Path.BASE + "tun2socks.pid`")
-    ab.append("killall -9 tun2socks")
     ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
-    ab.append("killall -15 pdnsd")
 
     Console.runCommand(ab.toArray)
-  }
-
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_STICKY
   }
 
   override def startRunner(c: Config) {
@@ -298,9 +302,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     filter.addAction(Intent.ACTION_SHUTDOWN)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
-        spawn {
-          stopRunner()
-        }
+        stopRunner()
       }
     }
     registerReceiver(receiver, filter)
@@ -387,7 +389,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def stopBackgroundService() {
     stopRunner()
-    stopSelf()
   }
 
   override def getTag = TAG
