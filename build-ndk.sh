@@ -16,8 +16,8 @@ do
     mv libs/armeabi-v7a/$app src/main/assets/armeabi-v7a/
     mv libs/x86/$app src/main/assets/x86/
 done
-rm -rf src/main/libs
-mv libs src/main/
+rm -rf src/main/jni
+mv libs src/main/jni
 
 # Target 16
 cp jni/Application.mk.16 jni/Application.mk
