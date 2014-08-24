@@ -220,12 +220,12 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def notifyForegroundAlert(title: String, info: String, rate: Int) {
-    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-    val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent: Intent = new Intent(Action.CLOSE)
-    val actionIntent: PendingIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
-    val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
+    val openIntent = new Intent(this, classOf[Shadowsocks])
+    openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
+    val closeIntent = new Intent(Action.CLOSE)
+    val actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
+    val builder = new NotificationCompat.Builder(this)
 
     val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
     if (rate >= 0) {
@@ -307,14 +307,6 @@ class ShadowsocksNatService extends Service with BaseService {
         throw new IllegalStateException(
           "OS doesn't have Service.startForeground OR Service.setForeground!")
     }
-  }
-
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_STICKY
-  }
-
-  override def onTaskRemoved(intent: Intent) {
-    stopRunner()
   }
 
   def killProcesses() {
@@ -564,13 +556,6 @@ class ShadowsocksNatService extends Service with BaseService {
       timer = null
     }
 
-    // clean up context
-    stopForegroundCompat(1)
-    if (receiver != null) {
-      unregisterReceiver(receiver)
-      receiver = null
-    }
-
     // reset NAT
     killProcesses()
 
@@ -578,6 +563,13 @@ class ShadowsocksNatService extends Service with BaseService {
     if (callbackCount == 0) {
       stopSelf()
     }
+
+    // clean up context
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null
+    }
+    stopForegroundCompat(1)
   }
 
   override def stopBackgroundService() {

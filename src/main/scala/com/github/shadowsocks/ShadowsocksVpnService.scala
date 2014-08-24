@@ -118,8 +118,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startVpn() {
 
-    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    val openIntent = new Intent(this, classOf[Shadowsocks])
+    openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
     val configIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
 
     val builder = new Builder()
@@ -221,10 +221,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def notifyAlert(title: String, info: String) {
-    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
+    val openIntent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-    val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
+    val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
+    val builder = new NotificationCompat.Builder(this)
     builder
       .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .setWhen(0)
@@ -253,14 +253,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
-  }
-
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
-    Service.START_STICKY
-  }
-
-  override def onTaskRemoved(intent: Intent) {
-    stopRunner()
   }
 
   override def onRevoke() {
@@ -363,12 +355,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .set(Fields.SESSION_CONTROL, "stop")
       .build())
 
-    // clean up the context
-    if (receiver != null) {
-      unregisterReceiver(receiver)
-      receiver = null
-    }
-
     // reset VPN
     killProcesses()
 
@@ -378,13 +364,28 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    // reset notifications
-    notificationManager.cancel(1)
-
     // stop the service if no callback registered
     if (callbackCount == 0) {
       stopSelf()
     }
+
+    // clean up the context
+    if (receiver != null) {
+      unregisterReceiver(receiver)
+      receiver = null
+    }
+
+    // reset notifications
+    notificationManager.cancel(1)
+  }
+
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int =
+  {
+    Service.START_STICKY
+  }
+
+  override def onTaskRemoved(intent: Intent) {
+    stopRunner()
   }
 
   override def stopBackgroundService() {
