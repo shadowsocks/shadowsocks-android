@@ -118,13 +118,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startVpn() {
 
-    val openIntent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-    val configIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-
     val builder = new Builder()
     builder
-      .setConfigureIntent(configIntent)
       .setSession(config.profileName)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.format("1"), 24)
@@ -221,9 +216,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def notifyAlert(title: String, info: String) {
-    val openIntent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-    val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
     val builder = new NotificationCompat.Builder(this)
     builder
       .setSmallIcon(R.drawable.ic_stat_shadowsocks)
@@ -231,7 +223,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setTicker(title)
       .setContentTitle(getString(R.string.app_name))
       .setContentText(info)
-      .setContentIntent(contentIntent)
       .setAutoCancel(true)
     notificationManager.notify(1, builder.build)
   }

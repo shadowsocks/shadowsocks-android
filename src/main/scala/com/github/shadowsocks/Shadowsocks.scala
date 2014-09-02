@@ -919,7 +919,6 @@ class Shadowsocks
     if (isVpnEnabled) {
       val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
       val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
-      Crouton.makeText(Shadowsocks.this, R.string.vpn_status, style).setConfiguration(config).show()
       changeSwitch(checked = false)
     }
     true
