@@ -370,15 +370,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     notificationManager.cancel(1)
   }
 
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int =
-  {
-    Service.START_STICKY
-  }
-
-  override def onTaskRemoved(intent: Intent) {
-    stopRunner()
-  }
-
   override def stopBackgroundService() {
     stopRunner()
   }
