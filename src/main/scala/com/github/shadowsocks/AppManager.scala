@@ -206,8 +206,19 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     saveAppSettings(this)
   }
 
+  override def onDestroy() {
+    super.onDestroy()
+    if (handler != null) {
+      handler.removeCallbacksAndMessages(null)
+      handler = null
+    }
+  }
+
   protected override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+
+    handler = new Handler()
+
     getActionBar.setTitle(R.string.proxied_help)
     this.setContentView(R.layout.layout_apps)
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
@@ -237,10 +248,10 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     super.onResume()
     new Thread {
       override def run() {
-        handler.sendEmptyMessage(MSG_LOAD_START)
+        handler.post(loadStartRunnable)
         appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
         if (!appsLoaded) loadApps()
-        handler.sendEmptyMessage(MSG_LOAD_FINISH)
+        handler.post(loadFinishRunnable)
       }
     }.start()
   }
@@ -259,45 +270,45 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     edit.commit
   }
 
-  val handler: Handler = new Handler {
-    override def handleMessage(msg: Message) {
-      msg.what match {
-        case MSG_LOAD_START =>
-          progressDialog = ProgressDialog
-            .show(AppManager.this, "", getString(R.string.loading), true, true)
-        case MSG_LOAD_FINISH =>
-          appListView.setAdapter(adapter)
-          appListView.setOnScrollListener(new AbsListView.OnScrollListener {
-            def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
-                         totalItemCount: Int) {
-              if (visible) {
-                val name: String = apps(firstVisibleItem).name
-                if (name != null && name.length > 1) {
-                  overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
-                } else {
-                  overlay.setText("*")
-                }
-                overlay.setVisibility(View.VISIBLE)
-              }
-            }
-
-            def onScrollStateChanged(view: AbsListView, scrollState: Int) {
-              visible = true
-              if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-                overlay.setVisibility(View.INVISIBLE)
-              }
-            }
-
-            var visible = false
-          })
-          if (progressDialog != null) {
-            progressDialog.dismiss()
-            progressDialog = null
-          }
-      }
-      super.handleMessage(msg)
+  val loadStartRunnable = new Runnable {
+    override def run() {
+      progressDialog = ProgressDialog
+        .show(AppManager.this, "", getString(R.string.loading), true, true)
     }
   }
+
+  val loadFinishRunnable = new Runnable {
+    override def run() = {
+      appListView.setAdapter(adapter)
+      appListView.setOnScrollListener(new AbsListView.OnScrollListener {
+        def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
+                     totalItemCount: Int) {
+          if (visible) {
+            val name: String = apps(firstVisibleItem).name
+            if (name != null && name.length > 1) {
+              overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
+            } else {
+              overlay.setText("*")
+            }
+            overlay.setVisibility(View.VISIBLE)
+          }
+        }
+        def onScrollStateChanged(view: AbsListView, scrollState: Int) {
+          visible = true
+          if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+            overlay.setVisibility(View.INVISIBLE)
+          }
+        }
+        var visible = false
+      })
+      if (progressDialog != null) {
+        progressDialog.dismiss()
+        progressDialog = null
+      }
+    }
+  }
+
+  var handler: Handler = null
 
   class AppIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
     extends BaseImageDownloader(context, connectTimeout, readTimeout) {

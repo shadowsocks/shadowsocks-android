@@ -67,6 +67,7 @@ import net.simonvt.menudrawer.MenuDrawer
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.ops._
+import scala.ref.WeakReference
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -236,7 +237,7 @@ class Shadowsocks
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
-  val handler = new Handler()
+  var handler: Handler = null
 
   def isSinglePane: Boolean = {
     if (singlePane == -1) {
@@ -441,6 +442,8 @@ class Shadowsocks
   override def onCreate(savedInstanceState: Bundle) {
 
     super.onCreate(savedInstanceState)
+
+    handler = new Handler()
 
     addPreferencesFromResource(R.xml.pref_all)
 
@@ -797,6 +800,10 @@ class Shadowsocks
     Crouton.cancelAllCroutons()
     unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
+    if (handler != null) {
+      handler.removeCallbacksAndMessages(null)
+      handler = null
+    }
   }
 
   def copyToSystem() {

@@ -24,3 +24,4 @@ script:
 - ./build-ndk.sh
 - cp local.properties.travis local.properties
 - sbt android:package-release
+- exit 0
