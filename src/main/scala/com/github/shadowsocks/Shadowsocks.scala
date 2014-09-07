@@ -225,17 +225,18 @@ class Shadowsocks
     }
   }
 
-  lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
-  lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-  lazy val preferenceReceiver = new PreferenceBroadcastReceiver
-  lazy val drawer = MenuDrawer.attach(this)
-  lazy val menuAdapter = new MenuAdapter(this, getMenuList)
-  lazy val listView = new ListView(this)
-  lazy val profileManager =
+  private lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
+  private lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
+  private lazy val preferenceReceiver = new PreferenceBroadcastReceiver
+  private lazy val drawer = MenuDrawer.attach(this)
+  private lazy val menuAdapter = new MenuAdapter(this, getMenuList)
+  private lazy val listView = new ListView(this)
+  private lazy val profileManager =
     new ProfileManager(settings, getApplication.asInstanceOf[ShadowsocksApplication].dbHelper)
 
-  private lazy val handler = new Handler()
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
+
+  val handler = new Handler()
 
   def isSinglePane: Boolean = {
     if (singlePane == -1) {
@@ -518,8 +519,8 @@ class Shadowsocks
         case ignored: RemoteException => // Nothing
       }
       bgService = null
+      unbindService(connection)
     }
-    unbindService(connection)
   }
 
   override def onRestoreInstanceState(inState: Bundle) {

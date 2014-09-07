@@ -39,30 +39,26 @@
 
 package com.github.shadowsocks
 
-import android.app.Notification
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import java.io.File
+import java.lang.reflect.{InvocationTargetException, Method}
+import java.util.{Timer, TimerTask}
+
+import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
+import android.content.pm.{PackageInfo, PackageManager}
+import android.graphics.Color
+import android.net.TrafficStats
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Method
+import com.github.shadowsocks.aidl.Config
+import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.HitBuilders
 import org.apache.http.conn.util.InetAddressUtils
+
 import scala.collection._
-import java.util.{TimerTask, Timer}
-import android.net.TrafficStats
-import scala.concurrent.ops._
-import com.github.shadowsocks.utils._
-import scala.Some
-import android.graphics.Color
-import com.github.shadowsocks.aidl.Config
 import scala.collection.mutable.ArrayBuffer
-import java.io.File
+import scala.concurrent.ops._
 
 case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
@@ -275,6 +271,7 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def onBind(intent: Intent): IBinder = {
+    Log.d(TAG, "onBind")
     if (Action.SERVICE == intent.getAction) {
       binder
     } else {

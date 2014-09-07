@@ -39,19 +39,16 @@
 
 package com.github.shadowsocks
 
+import java.util
 import java.util.concurrent.TimeUnit
 
 import android.app.Application
 import com.github.shadowsocks.database.DBHelper
-import com.google.android.gms.analytics.{GoogleAnalytics, Tracker}
+import com.github.shadowsocks.utils.Utils
+import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.Container.FunctionCallMacroCallback
-import com.google.android.gms.tagmanager.{ContainerHolder, TagManager, Container}
-import com.google.tagmanager.{Container, ContainerOpener, TagManager}
-import com.google.tagmanager.ContainerOpener.{Notifier, OpenType}
-import com.google.tagmanager.Container.FunctionCallMacroHandler
-import java.util
-import com.github.shadowsocks.utils.Utils
+import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 
 class ShadowsocksApplication extends Application {
   lazy val dbHelper = new DBHelper(this)
@@ -64,7 +61,7 @@ class ShadowsocksApplication extends Application {
     val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
     val callback = new ResultCallback[ContainerHolder] {
       override def onResult(holder: ContainerHolder): Unit = {
-        if (!containerHolder.getStatus.isSuccess) {
+        if (!holder.getStatus.isSuccess) {
           return
         }
         containerHolder = holder

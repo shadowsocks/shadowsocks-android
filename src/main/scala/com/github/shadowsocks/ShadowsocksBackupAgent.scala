@@ -39,8 +39,7 @@
 
 package com.github.shadowsocks
 
-import android.app.backup.{FileBackupHelper, SharedPreferencesBackupHelper, BackupAgentHelper}
-import android.content.Context
+import android.app.backup.{BackupAgentHelper, FileBackupHelper, SharedPreferencesBackupHelper}
 import com.github.shadowsocks.database.DBHelper
 
 class ShadowsocksBackupAgent extends BackupAgentHelper {

@@ -20,6 +20,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
         android:exitFadeDuration="@android:integer/config_mediumAnimTime" >
     <item android:state_pressed="false" android:state_focused="true" android:drawable="@drawable/list_focused_shadow" />
-    <item android:state_pressed="true" android:drawable="@drawable/pressed_background_shadow" />
+    <item android:state_pressed="true" android:drawable="@drawable/list_pressed_shadow" />
     <item android:drawable="@android:color/transparent" />
 </selector>
