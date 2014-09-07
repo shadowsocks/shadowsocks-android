@@ -54,18 +54,16 @@ import android.util.{DisplayMetrics, Log}
 import android.view._
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
-import com.actionbarsherlock.app.SherlockPreferenceActivity
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.preferences.{PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
-import com.google.analytics.tracking.android.{EasyTracker, MapBuilder}
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
+import com.google.android.gms.analytics.HitBuilders
 import com.google.zxing.integration.android.IntentIntegrator
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import de.keyboardsurfer.android.widget.crouton.{Configuration, Crouton, Style}
 import net.simonvt.menudrawer.MenuDrawer
-import org.jraf.android.backport.switchwidget.Switch
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.ops._
@@ -169,7 +167,7 @@ object Shadowsocks {
 }
 
 class Shadowsocks
-  extends SherlockPreferenceActivity
+  extends PreferenceActivity
   with CompoundButton.OnCheckedChangeListener
   with MenuAdapter.MenuListener {
 
@@ -236,7 +234,8 @@ class Shadowsocks
   lazy val profileManager =
     new ProfileManager(settings, getApplication.asInstanceOf[ShadowsocksApplication].dbHelper)
 
-  val handler = new Handler()
+  private lazy val handler = new Handler()
+  private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
   def isSinglePane: Boolean = {
     if (singlePane == -1) {
@@ -481,10 +480,10 @@ class Shadowsocks
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
-    getSupportActionBar.setCustomView(switchLayout)
-    getSupportActionBar.setDisplayShowTitleEnabled(false)
-    getSupportActionBar.setDisplayShowCustomEnabled(true)
-    getSupportActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
+    getActionBar.setCustomView(switchLayout)
+    getActionBar.setDisplayShowTitleEnabled(false)
+    getActionBar.setDisplayShowCustomEnabled(true)
+    getActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
 
     // Register broadcast receiver
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
@@ -683,32 +682,40 @@ class Shadowsocks
     buf += new Category(getString(R.string.settings))
 
     buf += new Item(-100, getString(R.string.recovery), android.R.drawable.ic_menu_revert, _ => {
-      EasyTracker
-        .getInstance(this)
-        .send(MapBuilder.createEvent(Shadowsocks.TAG, "reset", getVersionName, null).build())
+      // send event
+      application.tracker.send(new HitBuilders.EventBuilder()
+        .setCategory(Shadowsocks.TAG)
+        .setAction("reset")
+        .setLabel(getVersionName)
+        .build())
       recovery()
     })
 
     buf +=
       new Item(-200, getString(R.string.flush_dnscache), android.R.drawable.ic_menu_delete, _ => {
-        EasyTracker
-          .getInstance(this)
-          .send(
-            MapBuilder.createEvent(Shadowsocks.TAG, "flush_dnscache", getVersionName, null).build())
+        // send event
+        application.tracker.send(new HitBuilders.EventBuilder()
+          .setCategory(Shadowsocks.TAG)
+          .setAction("flush_dnscache")
+          .setLabel(getVersionName)
+          .build())
         flushDnsCache()
       })
 
     buf += new Item(-300, getString(R.string.about), android.R.drawable.ic_menu_info_details, _ => {
-      EasyTracker
-        .getInstance(this)
-        .send(MapBuilder.createEvent(Shadowsocks.TAG, "about", getVersionName, null).build())
+      // send event
+      application.tracker.send(new HitBuilders.EventBuilder()
+        .setCategory(Shadowsocks.TAG)
+        .setAction("about")
+        .setLabel(getVersionName)
+        .build())
       showAbout()
     })
 
     buf.toList
   }
 
-  override def onOptionsItemSelected(item: com.actionbarsherlock.view.MenuItem): Boolean = {
+  override def onOptionsItemSelected(item: MenuItem): Boolean = {
     item.getItemId match {
       case android.R.id.home =>
         drawer.toggleMenu()
@@ -776,12 +783,10 @@ class Shadowsocks
 
   override def onStart() {
     super.onStart()
-    EasyTracker.getInstance(this).activityStart(this)
   }
 
   override def onStop() {
     super.onStop()
-    EasyTracker.getInstance(this).activityStop(this)
     clearDialog()
   }
 

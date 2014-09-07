@@ -49,9 +49,9 @@ import android.content.pm.PackageManager
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.google.analytics.tracking.android.{Fields, MapBuilder, EasyTracker}
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import com.google.android.gms.analytics.HitBuilders
 import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import java.util.{TimerTask, Timer}
@@ -100,7 +100,7 @@ class ShadowsocksNatService extends Service with BaseService {
   private var timer: Timer = null
   private val TIMER_INTERVAL = 2
 
-  val handler: Handler = new Handler()
+  private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
   def isACLEnabled: Boolean = {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -454,12 +454,12 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     registerReceiver(receiver, filter)
 
-    // start tracker
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "start", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "start")
+
+    // send event
+    application.tracker.send(new HitBuilders.EventBuilder()
+      .setCategory(TAG)
+      .setAction("start")
+      .setLabel(getVersionName)
       .build())
 
     changeState(State.CONNECTING)
@@ -496,9 +496,9 @@ class ShadowsocksNatService extends Service with BaseService {
 
     spawn {
       if (config.proxy == "198.199.101.152") {
-        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        val holder = application.containerHolder
         try {
-          config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
+          config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
             notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
@@ -542,12 +542,11 @@ class ShadowsocksNatService extends Service with BaseService {
     // change the state
     changeState(State.STOPPED)
 
-    // stop the tracker
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "stop", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "stop")
+    // send event
+    application.tracker.send(new HitBuilders.EventBuilder()
+      .setCategory(TAG)
+      .setAction("stop")
+      .setLabel(getVersionName)
       .build())
 
     // reset timer

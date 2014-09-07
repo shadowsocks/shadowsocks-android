@@ -39,8 +39,14 @@
 
 package com.github.shadowsocks
 
+import java.util.concurrent.TimeUnit
+
 import android.app.Application
 import com.github.shadowsocks.database.DBHelper
+import com.google.android.gms.analytics.{GoogleAnalytics, Tracker}
+import com.google.android.gms.common.api.ResultCallback
+import com.google.android.gms.tagmanager.Container.FunctionCallMacroCallback
+import com.google.android.gms.tagmanager.{ContainerHolder, TagManager, Container}
 import com.google.tagmanager.{Container, ContainerOpener, TagManager}
 import com.google.tagmanager.ContainerOpener.{Notifier, OpenType}
 import com.google.tagmanager.Container.FunctionCallMacroHandler
@@ -50,15 +56,21 @@ import com.github.shadowsocks.utils.Utils
 class ShadowsocksApplication extends Application {
   lazy val dbHelper = new DBHelper(this)
   lazy val SIG_FUNC = "getSignature"
-  var tagContainer: Container = null
+  var containerHolder: ContainerHolder = null
+  lazy val tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
 
   override def onCreate() {
     val tm = TagManager.getInstance(this)
-    ContainerOpener.openContainer(tm, "GTM-NT8WS8", OpenType.PREFER_NON_DEFAULT, null, new Notifier {
-      override def containerAvailable(container: Container) {
-        tagContainer = container
-        container.registerFunctionCallMacroHandler(SIG_FUNC, new FunctionCallMacroHandler {
-          def getValue(functionName: String, parameters: util.Map[String, AnyRef]): AnyRef = {
+    val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
+    val callback = new ResultCallback[ContainerHolder] {
+      override def onResult(holder: ContainerHolder): Unit = {
+        if (!containerHolder.getStatus.isSuccess) {
+          return
+        }
+        containerHolder = holder
+        val container = holder.getContainer
+        container.registerFunctionCallMacroCallback(SIG_FUNC, new FunctionCallMacroCallback {
+          override def getValue(functionName: String, parameters: util.Map[String, AnyRef]): AnyRef = {
             if (functionName == SIG_FUNC) {
               Utils.getSignature(getApplicationContext)
             }
@@ -66,6 +78,7 @@ class ShadowsocksApplication extends Application {
           }
         })
       }
-    })
+    }
+    pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
   }
 }

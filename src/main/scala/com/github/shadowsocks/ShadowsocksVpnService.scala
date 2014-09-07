@@ -39,25 +39,24 @@
 
 package com.github.shadowsocks
 
+import java.io.File
+import java.net.InetAddress
+
 import android.app._
 import android.content._
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
+import android.content.pm.{PackageInfo, PackageManager}
+import android.net.VpnService
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-import com.google.analytics.tracking.android.{Fields, MapBuilder, EasyTracker}
-import android.net.VpnService
-import org.apache.http.conn.util.InetAddressUtils
-import android.os.Message
-import scala.concurrent.ops._
-import org.apache.commons.net.util.SubnetUtils
+import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
-import scala.Some
-import com.github.shadowsocks.aidl.{IShadowsocksService, Config}
+import com.google.android.gms.analytics.HitBuilders
+import org.apache.commons.net.util.SubnetUtils
+import org.apache.http.conn.util.InetAddressUtils
+
 import scala.collection.mutable.ArrayBuffer
-import java.io.File
-import java.net.InetAddress
+import scala.concurrent.ops._
 
 class ShadowsocksVpnService extends VpnService with BaseService {
 
@@ -73,7 +72,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var apps: Array[ProxiedApp] = null
   var config: Config = null
 
-  val handler: Handler = new Handler()
+  private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
@@ -272,12 +271,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       return
     }
 
-    // start the tracker
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "start", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "start")
+    // send event
+    application.tracker.send(new HitBuilders.EventBuilder()
+      .setCategory(TAG)
+      .setAction("start")
+      .setLabel(getVersionName)
       .build())
 
     // register close receiver
@@ -294,9 +292,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     spawn {
       if (config.proxy == "198.199.101.152") {
-        val container = getApplication.asInstanceOf[ShadowsocksApplication].tagContainer
+        val holder = getApplication.asInstanceOf[ShadowsocksApplication].containerHolder
         try {
-          config = ConfigUtils.getPublicConfig(getBaseContext, container, config)
+          config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
             notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
@@ -338,12 +336,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // channge the state
     changeState(State.STOPPED)
 
-    // stop the tracker
-    EasyTracker
-      .getInstance(this)
-      .send(MapBuilder
-      .createEvent(TAG, "stop", getVersionName, 0L)
-      .set(Fields.SESSION_CONTROL, "stop")
+    // send event
+    application.tracker.send(new HitBuilders.EventBuilder()
+      .setCategory(TAG)
+      .setAction("stop")
+      .setLabel(getVersionName)
       .build())
 
     // reset VPN

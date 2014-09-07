@@ -68,7 +68,6 @@ import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
-import com.google.analytics.tracking.android.EasyTracker
 import org.jraf.android.backport.switchwidget.Switch
 import com.github.shadowsocks.utils.{Utils, Scheme, Key}
 
@@ -253,16 +252,6 @@ class AppManager extends SherlockActivity with OnCheckedChangeListener with OnCl
         handler.sendEmptyMessage(MSG_LOAD_FINISH)
       }
     }.start()
-  }
-
-  protected override def onStart() {
-    super.onStart()
-    EasyTracker.getInstance(this).activityStart(this)
-  }
-
-  protected override def onStop() {
-    super.onStop()
-    EasyTracker.getInstance(this).activityStop(this)
   }
 
   def saveAppSettings(context: Context) {

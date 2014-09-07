@@ -15,10 +15,11 @@
       android:required="false"/>
 
   <uses-sdk
-      android:minSdkVersion="9"
+      android:minSdkVersion="14"
       android:targetSdkVersion="19"/>
 
   <application
+      android:allowBackup="true"
       android:name=".ShadowsocksApplication"
       android:hardwareAccelerated="true"
       android:icon="@drawable/ic_launcher"

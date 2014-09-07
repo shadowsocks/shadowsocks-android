@@ -41,7 +41,7 @@ package com.github.shadowsocks.utils
 
 import android.content.{SharedPreferences, Context}
 import com.github.shadowsocks.ShadowsocksApplication
-import com.google.tagmanager.Container
+import com.google.android.gms.tagmanager.Container
 import scalaj.http.{HttpOptions, Http}
 import com.github.shadowsocks.aidl.Config
 
@@ -143,8 +143,8 @@ object ConfigUtils {
   }
 
   def refresh(context: Context) {
-    val container = context.getApplicationContext.asInstanceOf[ShadowsocksApplication].tagContainer
-    if (container != null) container.refresh()
+    val holder = context.getApplicationContext.asInstanceOf[ShadowsocksApplication].containerHolder
+    if (holder != null) holder.refresh()
   }
 
   def getPublicConfig(context: Context, container: Container, config: Config): Config = {

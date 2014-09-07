@@ -138,7 +138,7 @@ class ShadowsocksRunnerActivity extends Activity {
     deattachService()
     if (receiver != null) {
       unregisterReceiver(receiver)
-      receiver = null;
+      receiver = null
     }
   }
 

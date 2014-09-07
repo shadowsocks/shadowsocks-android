@@ -16,18 +16,9 @@
 
 <resources>
 
-  <style name="Widget.Shadow.Switch" parent="@style/Widget.Holo.CompoundButton.Switch">
-    <item name="switchTextAppearance">@android:style/TextAppearance.Small.Inverse</item>
-  </style>
-
   <!-- Variation on the Light theme that turns off the title -->
   <style name="Theme.Shadowsocks" parent="@style/Theme.Shadow">
-    <item name="switchStyle">@style/Widget.Shadow.Switch</item>
     <item name="menuDrawerStyle">@style/MenuDrawerStyle</item>
-  </style>
-
-  <style name="Theme.AppManager" parent="@style/Theme.Shadow">
-    <item name="switchStyle">@style/Widget.Holo.Light.CompoundButton.Switch</item>
   </style>
 
   <style name="MenuDrawer"/>

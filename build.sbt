@@ -15,7 +15,6 @@ resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 resolvers += "madeye private releases" at "http://madeye-maven-repository.googlecode.com/git/"
 
 libraryDependencies ++= Seq(
-  "com.google.android" % "analytics" % "3.01",
   "dnsjava" % "dnsjava" % "2.1.5",
   "org.scalaj" %% "scalaj-http" % "0.3.10",
   "commons-net" % "commons-net" % "3.3",
@@ -23,10 +22,8 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  aar("com.actionbarsherlock" % "actionbarsherlock" % "4.4.0") exclude("com.google.android", "support-v4"),
   "net.simonvt.menudrawer" % "menudrawer" % "3.0.6",
-  "org.jraf" % "android-switch-backport" % "1.3.1",
-  "com.google.android.gms" % "play-services" % "4.4.52",
+  "com.google.android.gms" % "play-services" % "5.2.08",
   "com.android.support" % "support-v4" % "19.1.0"
 )
 
