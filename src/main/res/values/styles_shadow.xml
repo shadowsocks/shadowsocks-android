@@ -29,16 +29,16 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_shadow</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_shadow</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Shadow</item>
-
-        <!-- Light.DarkActionBar specific -->
+        
+                <!-- Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.Shadow.Widget</item>
 
     </style>
 
     <style name="ActionBar.Solid.Shadow" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@drawable/ab_solid_shadow</item>
+        <item name="android:background">@drawable/ab_background_textured_shadow</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_shadow</item>
-        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_shadow</item>
+        <item name="android:backgroundSplit">@drawable/ab_background_textured_shadow</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Shadow</item>
     </style>
 
@@ -48,7 +48,7 @@
     </style>
 
     <style name="PopupMenu.Shadow" parent="@android:style/Widget.Holo.ListPopupWindow">
-        <item name="android:popupBackground">@drawable/menu_dropdown_panel_shadow</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_shadow</item>	
     </style>
 
     <style name="DropDownListView.Shadow" parent="@android:style/Widget.Holo.ListView.DropDown">
@@ -64,11 +64,11 @@
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_shadow</item>
         <item name="android:dropDownSelector">@drawable/selectable_background_shadow</item>
     </style>
-
+    
     <style name="ProgressBar.Shadow" parent="@android:style/Widget.Holo.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_shadow</item>
     </style>
-
+    
     <style name="ActionButton.CloseMode.Shadow" parent="@android:style/Widget.Holo.ActionButton.CloseMode">
         <item name="android:background">@drawable/btn_cab_done_shadow</item>
     </style>
