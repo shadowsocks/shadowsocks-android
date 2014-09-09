@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "net.simonvt.menudrawer" % "menudrawer" % "3.0.6",
-  "com.google.android.gms" % "play-services" % "5.2.08",
+  "com.google.android.gms" % "play-services" % "5.0.89",
   "com.android.support" % "support-v4" % "19.1.0"
 )
 
