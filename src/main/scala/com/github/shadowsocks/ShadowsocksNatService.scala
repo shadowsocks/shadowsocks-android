@@ -565,6 +565,7 @@ class ShadowsocksNatService extends Service with BaseService {
       unregisterReceiver(receiver)
       receiver = null
     }
+
     stopForegroundCompat(1)
   }
 

@@ -213,6 +213,8 @@ class Shadowsocks
         setPreferenceEnabled(enabled = false)
       }
       state = bgService.getState
+      // set the listener
+      switchButton.setOnCheckedChangeListener(Shadowsocks.this)
     }
 
     override def onServiceDisconnected(name: ComponentName) {
@@ -746,9 +748,9 @@ class Shadowsocks
           changeSwitch(checked = false)
       }
       state = bgService.getState
+      // set the listener
+      switchButton.setOnCheckedChangeListener(Shadowsocks.this)
     }
-    // set the listener
-    switchButton.setOnCheckedChangeListener(Shadowsocks.this)
     ConfigUtils.refresh(this)
   }
 
