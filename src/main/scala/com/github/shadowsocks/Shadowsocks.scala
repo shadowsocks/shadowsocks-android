@@ -825,11 +825,7 @@ class Shadowsocks
 
     crash_recovery()
 
-    if (Build.VERSION.SDK_INT >= 16) {
-      copyAssets("api-16/" + System.getABI)
-    } else {
-      copyAssets(System.getABI)
-    }
+    copyAssets(System.getABI)
 
     if (Build.VERSION.SDK_INT >= 20) {
       copyToSystem()
