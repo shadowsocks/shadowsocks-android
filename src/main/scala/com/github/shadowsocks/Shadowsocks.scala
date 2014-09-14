@@ -928,8 +928,6 @@ class Shadowsocks
     bgService.start(ConfigUtils.load(settings))
 
     if (isVpnEnabled) {
-      val style = new Style.Builder().setBackgroundColorValue(Style.holoBlueLight).build()
-      val config = new Configuration.Builder().setDuration(Configuration.DURATION_LONG).build()
       changeSwitch(checked = false)
     }
     true
@@ -995,7 +993,6 @@ class Shadowsocks
               changeSwitch(checked = false)
               Crouton.cancelAllCroutons()
               if (m != null) {
-                Crouton.cancelAllCroutons()
                 val style = new Style.Builder().setBackgroundColorValue(Style.holoRedLight).build()
                 val config = new Configuration.Builder()
                   .setDuration(Configuration.DURATION_LONG)

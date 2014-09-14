@@ -214,18 +214,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     true
   }
 
-  def notifyAlert(title: String, info: String) {
-    val builder = new NotificationCompat.Builder(this)
-    builder
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-      .setWhen(0)
-      .setTicker(title)
-      .setContentTitle(getString(R.string.app_name))
-      .setContentText(info)
-      .setAutoCancel(true)
-    notificationManager.notify(1, builder.build)
-  }
-
   override def onBind(intent: Intent): IBinder = {
     val action = intent.getAction
     if (VpnService.SERVICE_INTERFACE == action) {
@@ -297,36 +285,37 @@ class ShadowsocksVpnService extends VpnService with BaseService {
           config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
-            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+            changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
-            changeState(State.STOPPED)
-            return
+            config = null
         }
       }
 
-      // reset the context
-      killProcesses()
+      if (config != null) {
 
-      // Resolve the server address
-      var resolved: Boolean = false
-      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-        !InetAddressUtils.isIPv6Address(config.proxy)) {
-        Utils.resolve(config.proxy, enableIPv6 = true) match {
-          case Some(addr) =>
-            config.proxy = addr
-            resolved = true
-          case None => resolved = false
+        // reset the context
+        killProcesses()
+
+        // Resolve the server address
+        var resolved: Boolean = false
+        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+          !InetAddressUtils.isIPv6Address(config.proxy)) {
+          Utils.resolve(config.proxy, enableIPv6 = true) match {
+            case Some(addr) =>
+              config.proxy = addr
+              resolved = true
+            case None => resolved = false
+          }
+        } else {
+          resolved = true
         }
-      } else {
-        resolved = true
-      }
 
-      if (resolved && handleConnection) {
-        changeState(State.CONNECTED)
-      } else {
-        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-        changeState(State.STOPPED)
-        stopRunner()
+        if (resolved && handleConnection) {
+          changeState(State.CONNECTED)
+        } else {
+          changeState(State.STOPPED, getString(R.string.service_failed))
+          stopRunner()
+        }
       }
     }
   }
@@ -362,9 +351,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       unregisterReceiver(receiver)
       receiver = null
     }
-
-    // reset notifications
-    notificationManager.cancel(1)
   }
 
   override def stopBackgroundService() {

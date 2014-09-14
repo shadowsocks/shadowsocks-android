@@ -254,22 +254,6 @@ class ShadowsocksNatService extends Service with BaseService {
     startForegroundCompat(1, builder.build)
   }
 
-  def notifyAlert(title: String, info: String) {
-    val openIntent: Intent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-    val contentIntent: PendingIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val builder: NotificationCompat.Builder = new NotificationCompat.Builder(this)
-    builder
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-      .setWhen(0)
-      .setTicker(title)
-      .setContentTitle(getString(R.string.app_name))
-      .setContentText(info)
-      .setContentIntent(contentIntent)
-      .setAutoCancel(true)
-    notificationManager.notify(1, builder.build)
-  }
-
   def onBind(intent: Intent): IBinder = {
     Log.d(TAG, "onBind")
     if (Action.SERVICE == intent.getAction) {
@@ -492,44 +476,46 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     spawn {
+
       if (config.proxy == "198.199.101.152") {
         val holder = application.containerHolder
         try {
           config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
-            notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
+            changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
-            changeState(State.STOPPED)
-            return
+            config = null
         }
       }
 
-      killProcesses()
+      if (config != null) {
 
-      var resolved: Boolean = false
-      if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-        !InetAddressUtils.isIPv6Address(config.proxy)) {
-        Utils.resolve(config.proxy, enableIPv6 = true) match {
-          case Some(a) =>
-            config.proxy = a
-            resolved = true
-          case None => resolved = false
+        killProcesses()
+
+        var resolved: Boolean = false
+        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
+          !InetAddressUtils.isIPv6Address(config.proxy)) {
+          Utils.resolve(config.proxy, enableIPv6 = true) match {
+            case Some(a) =>
+              config.proxy = a
+              resolved = true
+            case None => resolved = false
+          }
+        } else {
+          resolved = true
         }
-      } else {
-        resolved = true
-      }
 
-      hasRedirectSupport = Utils.getHasRedirectSupport
+        hasRedirectSupport = Utils.getHasRedirectSupport
 
-      if (resolved && handleConnection) {
-        notifyForegroundAlert(getString(R.string.forward_success),
-          getString(R.string.service_running).format(config.profileName))
-        changeState(State.CONNECTED)
-      } else {
-        notifyAlert(getString(R.string.forward_fail), getString(R.string.service_failed))
-        stopRunner()
-        changeState(State.STOPPED)
+        if (resolved && handleConnection) {
+          notifyForegroundAlert(getString(R.string.forward_success),
+            getString(R.string.service_running).format(config.profileName))
+          changeState(State.CONNECTED)
+        } else {
+          changeState(State.STOPPED, getString(R.string.service_failed))
+          stopRunner()
+        }
       }
     }
   }

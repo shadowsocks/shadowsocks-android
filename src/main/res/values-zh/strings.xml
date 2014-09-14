@@ -44,7 +44,7 @@
   <string name="forward_stop">后台服务已停止。</string>
   <string name="service_failed">请检查你的网络状态后并重试。</string>
   <string name="stop">停止服务</string>
-  <string name="vpn_error">无法启动 VPN 服务：\"%s\"。看来和你的设备存在兼容性问题，请使用 Root 模式。</string>
+  <string name="vpn_error">无法启动服务：\"%s\"。</string>
   <string name="ok_iknow">确定</string>
   <string name="port_alert">端口号应大于1024</string>
   <string name="port_empty">端口号不能为空</string>
