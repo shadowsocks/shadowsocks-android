@@ -57,7 +57,10 @@ object Console {
         .open(new OnCommandResultListener {
         override def onCommandResult(commandCode: Int, exitCode: Int,
           output: util.List[String]) {
-          if (exitCode < 0) shell = null
+          if (exitCode < 0) {
+            shell.close()
+            shell = null
+          }
         }
       })
     }
@@ -82,8 +85,9 @@ object Console {
     if (shell == null) {
       openShell()
     }
-    shell.addCommand(commands)
-    shell.waitForIdle()
+    val ts = shell
+    ts.addCommand(commands)
+    ts.waitForIdle()
   }
 
   def runRootCommand(command: String): String = runRootCommand(Array(command))
@@ -95,11 +99,13 @@ object Console {
     if (rootShell == null) {
       openRootShell()
     }
+    val ts = rootShell
     val sb = new StringBuilder
-    rootShell.addCommand(commands, 0, new OnCommandResultListener {
+    ts.addCommand(commands, 0, new OnCommandResultListener {
       override def onCommandResult(commandCode: Int, exitCode: Int,
         output: util.List[String]) {
         if (exitCode < 0) {
+          rootShell.close()
           rootShell = null
         } else {
           import scala.collection.JavaConversions._
@@ -107,7 +113,7 @@ object Console {
         }
       }
     })
-    if (rootShell.waitForIdle()) sb.toString()
+    if (ts.waitForIdle()) sb.toString()
     else null
   }
 
