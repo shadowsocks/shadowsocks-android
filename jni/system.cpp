@@ -21,11 +21,11 @@ jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
   } else if (family == ANDROID_CPU_FAMILY_MIPS) {
     abi = "mips";
   } else if (family == ANDROID_CPU_FAMILY_ARM) {
-    if (features & ANDROID_CPU_ARM_FEATURE_ARMv7) {
-      abi = "armeabi-v7a";
-    } else {
-      abi = "armeabi";
-    }
+    // if (features & ANDROID_CPU_ARM_FEATURE_ARMv7) {
+    abi = "armeabi-v7a";
+    // } else {
+    //   abi = "armeabi";
+    // }
   }
   return env->NewStringUTF(abi);
 }
