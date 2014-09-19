@@ -114,25 +114,40 @@ class ShadowsocksNatService extends Service with BaseService {
       })
     }
 
-    val raw_args = ("ss-local -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -f " +
-      Path.BASE + "ss-local.pid")
-      .format(config.proxy, config.remotePort, config.localPort, config.sitekey, config.encMethod)
-    val args = if (Build.VERSION.SDK_INT >= 20) {
-      raw_args
-    } else {
-      Path.BASE + raw_args
-    }
-    val cmd =  if (config.isGFWList && isACLEnabled) args + " --acl " + Path.BASE + "chn.acl" else args
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    val cmd = new ArrayBuffer[String]
+    cmd += ("ss-local"
+          , "-b" , "127.0.0.1"
+          , "-s" , config.proxy
+          , "-p" , config.remotePort.toString
+          , "-l" , config.localPort.toString
+          , "-k" , config.sitekey
+          , "-m" , config.encMethod
+          , "-f" , (Path.BASE + "ss-local.pid"))
 
-    Core.sslocal(cmd.split(" "))
+    if (config.isGFWList && isACLEnabled) {
+      cmd += "--acl"
+      cmd += (Path.BASE + "chn.acl")
+    }
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    Core.sslocal(cmd.toArray)
   }
 
   def startDnsDaemon() {
-    val args = if (config.isUdpDns) {
-      ("ss-tunnel -b 127.0.0.1 -s %s -p %d -l %d -k %s -m %s -L 8.8.8.8:53 -u -f " +
-        Path.BASE + "ss-tunnel.pid")
-        .format(config.proxy, config.remotePort, 8153, config.sitekey, config.encMethod)
+    if (config.isUdpDns) {
+      val cmd = new ArrayBuffer[String]
+      cmd += ("ss-tunnel" , "-u"
+            , "-b" , "127.0.0.1"
+            , "-l" , "8153" 
+            , "-L" , "8.8.8.8:53"
+            , "-s" , config.proxy
+            , "-p" , config.remotePort.toString
+            , "-k" , config.sitekey
+            , "-m" , config.encMethod
+            , "-f" , (Path.BASE + "ss-tunnel.pid"))
+      if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+      Core.sstunnel(cmd.toArray)
     } else {
       val conf = {
         if (config.isGFWList)
@@ -143,20 +158,15 @@ class ShadowsocksNatService extends Service with BaseService {
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
-      "pdnsd -c " + Path.BASE + "pdnsd.conf"
-    }
 
-    val cmd = if (Build.VERSION.SDK_INT >= 20) {
-      "/system/bin/" + args
-    } else {
-      Path.BASE + args
-    }
+      val args = "pdnsd -c " + Path.BASE + "pdnsd.conf"
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-
-    if (config.isUdpDns) {
-      Core.sstunnel(cmd.split(" "))
-    } else {
+      val cmd = if (Build.VERSION.SDK_INT >= 20) {
+        "/system/bin/" + args
+      } else {
+        Path.BASE + args
+      }
+      if (BuildConfig.DEBUG) Log.d(TAG, cmd)
       Console.runRootCommand(cmd)
     }
   }
