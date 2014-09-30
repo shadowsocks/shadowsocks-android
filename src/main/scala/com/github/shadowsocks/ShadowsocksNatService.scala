@@ -235,10 +235,6 @@ class ShadowsocksNatService extends Service with BaseService {
 
     val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
     if (rate >= 0) {
-      val bitmap = Utils
-        .getBitmap(rate.toString, icon.getIntrinsicWidth * 4, icon.getIntrinsicHeight * 4,
-        Color.TRANSPARENT)
-      builder.setLargeIcon(bitmap)
 
       if (rate < 1000) {
         builder.setSmallIcon(R.drawable.ic_stat_speed, rate)
