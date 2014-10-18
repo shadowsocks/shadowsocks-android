@@ -95,10 +95,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val conf = {
-      if (config.isGFWList)
-        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", getString(R.string.exclude))
-      else
-        ConfigUtils.PDNSD.format("0.0.0.0")
+      ConfigUtils.PDNSD.format("0.0.0.0")
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)

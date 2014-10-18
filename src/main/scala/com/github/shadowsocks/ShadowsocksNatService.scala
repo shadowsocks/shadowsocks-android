@@ -150,10 +150,7 @@ class ShadowsocksNatService extends Service with BaseService {
       Core.sstunnel(cmd.toArray)
     } else {
       val conf = {
-        if (config.isGFWList)
-          ConfigUtils.PDNSD_BYPASS.format("127.0.0.1", getString(R.string.exclude))
-        else
-          ConfigUtils.PDNSD.format("127.0.0.1")
+        ConfigUtils.PDNSD.format("127.0.0.1")
       }
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
@@ -325,10 +322,6 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + myUid))
 
     if (config.isGFWList) {
-      // Bypass DNS in China
-      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.114.114"))
-      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 114.114.115.115"))
-
       if (!isACLEnabled)
       {
         val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
