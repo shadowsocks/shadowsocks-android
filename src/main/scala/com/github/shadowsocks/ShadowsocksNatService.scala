@@ -160,12 +160,8 @@ class ShadowsocksNatService extends Service with BaseService {
       })
 
       val args = "pdnsd -c " + Path.BASE + "pdnsd.conf"
+      val cmd =  Path.BASE + args
 
-      val cmd = if (Build.VERSION.SDK_INT >= 20) {
-        "/system/bin/" + args
-      } else {
-        Path.BASE + args
-      }
       if (BuildConfig.DEBUG) Log.d(TAG, cmd)
       Console.runRootCommand(cmd)
     }
@@ -190,11 +186,7 @@ class ShadowsocksNatService extends Service with BaseService {
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
-    val cmd = if (Build.VERSION.SDK_INT >= 20) {
-      "/system/bin/" + args
-    } else {
-      Path.BASE + args
-    }
+    val cmd = Path.BASE + args
     Console.runRootCommand(cmd)
   }
 

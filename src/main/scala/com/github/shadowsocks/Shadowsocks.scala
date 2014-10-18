@@ -827,10 +827,6 @@ class Shadowsocks
 
     copyAssets(System.getABI)
 
-    if (Build.VERSION.SDK_INT >= 20) {
-      copyToSystem()
-    }
-
     val ab = new ArrayBuffer[String]
     for (executable <- Shadowsocks.EXECUTABLES) {
       ab.append("chmod 755 " + Path.BASE + executable)
