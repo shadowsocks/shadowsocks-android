@@ -55,6 +55,7 @@ import com.google.android.gms.analytics.HitBuilders
 import org.apache.commons.net.util.SubnetUtils
 import org.apache.http.conn.util.InetAddressUtils
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ops._
 
@@ -65,6 +66,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val VPN_MTU = 1500
 
   val PRIVATE_VLAN = "26.26.26.%s"
+
+  val AF_INET6 = 10
 
   var conn: ParcelFileDescriptor = null
   var notificationManager: NotificationManager = null
@@ -88,7 +91,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
             , "-l" , config.localPort.toString
             , "-k" , config.sitekey
             , "-m" , config.encMethod
-            , "-f" , (Path.BASE + "ss-local.pid"))
+            , "-f" , Path.BASE + "ss-local.pid")
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     Core.sslocal(cmd.toArray)
   }
@@ -126,11 +129,36 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .addAddress(PRIVATE_VLAN.format("1"), 24)
       .addDnsServer("8.8.8.8")
 
+    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+      builder.allowFamily(AF_INET6)
+
+      if (config.isBypassApps) {
+        builder.addDisallowedApplication(this.getPackageName)
+      }
+
+      if (!config.isGlobalProxy) {
+        val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
+        val uidSet: mutable.HashSet[String] = new mutable.HashSet[String]
+        for (app <- apps) {
+          if (app.proxied) {
+            uidSet.add(app.name)
+          }
+        }
+        for (uid <- uidSet) {
+          if (!config.isBypassApps) {
+            builder.addAllowedApplication(uid)
+          } else {
+            builder.addDisallowedApplication(uid)
+          }
+        }
+      }
+    }
+
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
     } else if (config.isGFWList) {
       val gfwList = {
-        if (Build.VERSION.SDK_INT == 19) {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
           getResources.getStringArray(R.array.simple_list)
         } else {
           getResources.getStringArray(R.array.gfw_list)

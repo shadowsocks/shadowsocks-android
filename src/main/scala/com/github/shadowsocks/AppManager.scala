@@ -89,8 +89,9 @@ object AppManager {
       case a => {
         val uid = a.uid
         val userName = uid.toString
+        val packageName = a.packageName
         val proxied = proxiedApps.binarySearch(userName) >= 0
-        new ProxiedApp(uid, userName, proxied)
+        new ProxiedApp(uid, packageName, proxied)
       }
     }.toArray
   }
