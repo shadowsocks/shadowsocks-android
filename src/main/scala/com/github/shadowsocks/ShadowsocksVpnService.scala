@@ -76,7 +76,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
-    info.isInRange(config.proxy) || info.isInRange("114.114.114.114") || info.isInRange("114.114.115.115")
+    info.isInRange(config.proxy)
   }
 
   def startShadowsocksDaemon() {
@@ -144,7 +144,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         }
       })
     } else {
-      for (i <- 1 to 254) {
+      for (i <- 1 to 223) {
         if (i != 26 && i != 127) {
           val addr = i.toString + ".0.0.0"
           val cidr = addr + "/8"
