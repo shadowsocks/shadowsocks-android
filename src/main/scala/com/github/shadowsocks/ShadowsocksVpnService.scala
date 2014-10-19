@@ -67,8 +67,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   val PRIVATE_VLAN = "26.26.26.%s"
 
-  val AF_INET6 = 10
-
   var conn: ParcelFileDescriptor = null
   var notificationManager: NotificationManager = null
   var receiver: BroadcastReceiver = null
@@ -130,8 +128,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .addDnsServer("8.8.8.8")
 
     if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
-      builder.allowFamily(AF_INET6)
-
       if (!config.isGlobalProxy) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
         val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
