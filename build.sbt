@@ -4,7 +4,7 @@ import android.Dependencies.{apklib,aar}
 
 android.Plugin.androidBuild
 
-platformTarget in Android := "android-19"
+platformTarget in Android := "android-21"
 
 name := "shadowsocks"
 

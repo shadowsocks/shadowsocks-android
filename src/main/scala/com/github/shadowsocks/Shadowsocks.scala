@@ -755,7 +755,6 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
-    val isRoot = status.getBoolean(Key.isRoot, false)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = findPreference(name)
       if (pref != null) {
@@ -767,7 +766,7 @@ class Shadowsocks
       if (pref != null) {
         if (Seq(Key.isGlobalProxy, Key.isTrafficStat, Key.proxyedApps)
           .contains(name)) {
-          pref.setEnabled(enabled && isRoot)
+          pref.setEnabled(enabled && !isVpnEnabled)
         } else {
           pref.setEnabled(enabled)
         }
@@ -875,8 +874,8 @@ class Shadowsocks
 
   def isVpnEnabled: Boolean = {
     if (vpnEnabled < 0) {
-      vpnEnabled = if (Build.VERSION.SDK_INT
-        >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !status.getBoolean(Key.isRoot, false)) {
+      vpnEnabled = if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP
+        || !status.getBoolean(Key.isRoot, false)) {
         1
       } else {
         0
