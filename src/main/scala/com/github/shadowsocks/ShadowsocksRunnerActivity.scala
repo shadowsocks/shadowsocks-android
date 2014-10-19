@@ -72,8 +72,8 @@ class ShadowsocksRunnerActivity extends Activity {
 
   def isVpnEnabled: Boolean = {
     if (vpnEnabled < 0) {
-      vpnEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH 
-        && !Console.isRoot) {
+      vpnEnabled = if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP
+        || !Console.isRoot) {
         1
       } else {
         0
