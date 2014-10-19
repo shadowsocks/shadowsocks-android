@@ -132,24 +132,24 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
       builder.allowFamily(AF_INET6)
 
-      if (config.isBypassApps) {
-        builder.addDisallowedApplication(this.getPackageName)
-      }
-
       if (!config.isGlobalProxy) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
-        val uidSet: mutable.HashSet[String] = new mutable.HashSet[String]
+        val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
         for (app <- apps) {
           if (app.proxied) {
-            uidSet.add(app.name)
+            pkgSet.add(app.name)
           }
         }
-        for (uid <- uidSet) {
+        for (pkg <- pkgSet) {
           if (!config.isBypassApps) {
-            builder.addAllowedApplication(uid)
+            builder.addAllowedApplication(pkg)
           } else {
-            builder.addDisallowedApplication(uid)
+            builder.addDisallowedApplication(pkg)
           }
+        }
+
+        if (!config.isBypassApps) {
+          builder.addAllowedApplication(this.getPackageName)
         }
       }
     }
