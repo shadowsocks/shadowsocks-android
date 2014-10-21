@@ -123,7 +123,7 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS)
+  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.IPTABLES)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -496,7 +496,7 @@ class Shadowsocks
 
     // Bind to the service
     spawn {
-      val isRoot = Console.isRoot
+      val isRoot = Build.VERSION.SDK_INT != Build.VERSION_CODES.LOLLIPOP && Console.isRoot
       handler.post(new Runnable {
         override def run() {
           status.edit.putBoolean(Key.isRoot, isRoot).commit()
