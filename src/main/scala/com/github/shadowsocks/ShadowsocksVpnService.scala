@@ -75,12 +75,28 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
+  def isACLEnabled: Boolean = {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      true
+    } else {
+      false
+    }
+  }
+
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
     info.isInRange(config.proxy)
   }
 
   def startShadowsocksDaemon() {
+
+    if (isACLEnabled && config.isGFWList) {
+      val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list_full)
+      ConfigUtils.printToFile(new File(Path.BASE + "chn.acl"))(p => {
+        chn_list.foreach(item => p.println(item))
+      })
+    }
+
     val cmd = new ArrayBuffer[String]
     cmd += ("ss-local" , "-u"
             , "-b" , "127.0.0.1"
@@ -90,13 +106,34 @@ class ShadowsocksVpnService extends VpnService with BaseService {
             , "-k" , config.sitekey
             , "-m" , config.encMethod
             , "-f" , Path.BASE + "ss-local.pid")
+
+    if (config.isGFWList && isACLEnabled) {
+      cmd += "--acl"
+      cmd += (Path.BASE + "chn.acl")
+    }
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     Core.sslocal(cmd.toArray)
   }
 
+  def startDnsTunnel() = {
+    val cmd = new ArrayBuffer[String]
+    cmd += ("ss-tunnel"
+      , "-b" , "127.0.0.1"
+      , "-l" , "8163"
+      , "-L" , "8.8.8.8:53"
+      , "-s" , config.proxy
+      , "-p" , config.remotePort.toString
+      , "-k" , config.sitekey
+      , "-m" , config.encMethod
+      , "-f" , Path.BASE + "ss-tunnel.pid")
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+    Core.sstunnel(cmd.toArray)
+  }
+
   def startDnsDaemon() {
     val conf = {
-      ConfigUtils.PDNSD.format("0.0.0.0")
+      ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
@@ -144,15 +181,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
           }
         }
 
-        if (!config.isBypassApps) {
-          builder.addAllowedApplication(this.getPackageName)
+        if (config.isBypassApps) {
+          builder.addDisallowedApplication(this.getPackageName)
         }
+      } else {
+        builder.addDisallowedApplication(this.getPackageName)
       }
     }
 
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
-    } else if (config.isGFWList) {
+    } else if (!isACLEnabled && config.isGFWList) {
       val gfwList = {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
           getResources.getStringArray(R.array.simple_list)
@@ -168,24 +207,28 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         }
       })
     } else {
-      for (i <- 1 to 223) {
-        if (i != 26 && i != 127) {
-          val addr = i.toString + ".0.0.0"
-          val cidr = addr + "/8"
-          val net = new SubnetUtils(cidr)
+      if (isACLEnabled) {
+        builder.addRoute("0.0.0.0", 0)
+      } else {
+        for (i <- 1 to 223) {
+          if (i != 26 && i != 127) {
+            val addr = i.toString + ".0.0.0"
+            val cidr = addr + "/8"
+            val net = new SubnetUtils(cidr)
 
-          if (!isByass(net)) {
-            if (!InetAddress.getByName(addr).isSiteLocalAddress) {
-              builder.addRoute(addr, 8)
-            }
-          } else {
-            for (j <- 0 to 255) {
-              val subAddr = i.toString + "." + j.toString + ".0.0"
-              val subCidr = subAddr + "/16"
-              val subNet = new SubnetUtils(subCidr)
-              if (!isByass(subNet)) {
-                if (!InetAddress.getByName(subAddr).isSiteLocalAddress) {
-                  builder.addRoute(subAddr, 16)
+            if (!isByass(net)) {
+              if (!InetAddress.getByName(addr).isSiteLocalAddress) {
+                builder.addRoute(addr, 8)
+              }
+            } else {
+              for (j <- 0 to 255) {
+                val subAddr = i.toString + "." + j.toString + ".0.0"
+                val subCidr = subAddr + "/16"
+                val subNet = new SubnetUtils(subCidr)
+                if (!isByass(subNet)) {
+                  if (!InetAddress.getByName(subAddr).isSiteLocalAddress) {
+                    builder.addRoute(subAddr, 16)
+                  }
                 }
               }
             }
@@ -236,7 +279,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def handleConnection: Boolean = {
     startVpn()
     startShadowsocksDaemon()
-    if (!config.isUdpDns) startDnsDaemon()
+    if (!config.isUdpDns) {
+      startDnsDaemon()
+      startDnsTunnel()
+    }
     true
   }
 
@@ -264,13 +310,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
-    val ab = new ArrayBuffer[String]
-
-    ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-    ab.append("kill -9 `cat " + Path.BASE + "tun2socks.pid`")
-    ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
-
-    Console.runCommand(ab.toArray)
+    for (task <- Array("ss-local", "ss-tunnel", "tun2socks", "pdnsd")) {
+      try {
+        val pid = scala.io.Source.fromFile(Path.BASE + task + ".pid").mkString.trim.toInt
+        Process.killProcess(pid)
+        Log.d(TAG, "kill pid: " + pid)
+      } catch {
+        case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
+      }
+    }
   }
 
   override def startRunner(c: Config) {

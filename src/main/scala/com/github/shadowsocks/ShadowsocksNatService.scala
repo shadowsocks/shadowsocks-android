@@ -46,7 +46,6 @@ import java.util.{Timer, TimerTask}
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.graphics.Color
 import android.net.TrafficStats
 import android.os._
 import android.support.v4.app.NotificationCompat

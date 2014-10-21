@@ -92,6 +92,38 @@ object ConfigUtils {
       |}
     """.stripMargin
 
+  val PDNSD_LOCAL =
+    """
+      |global {
+      | perm_cache = 2048;
+      | cache_dir = "/data/data/com.github.shadowsocks";
+      | server_ip = %s;
+      | server_port = 8153;
+      | query_method = tcp_only;
+      | run_ipv4 = on;
+      | min_ttl = 15m;
+      | max_ttl = 1w;
+      | timeout = 10;
+      | daemon = on;
+      | pid_file = "/data/data/com.github.shadowsocks/pdnsd.pid";
+      |}
+      |
+      |server {
+      | label = "local";
+      | ip = 127.0.0.1;
+      | port = %d;
+      | timeout = 5;
+      |}
+      |
+      |rr {
+      | name=localhost;
+      | reverse=on;
+      | a=127.0.0.1;
+      | owner=localhost;
+      | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+    """.stripMargin
+
   val PDNSD_BYPASS =
     """
       |global {
