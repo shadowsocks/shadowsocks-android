@@ -5,8 +5,8 @@ function try () {
 }
 
 # Build
-try ndk-build clean
-try ndk-build
+try $ANDROID_NDK_HOME/ndk-build clean
+try $ANDROID_NDK_HOME/ndk-build
 
 # copy executables
 rm -rf src/main/assets/armeabi-v7a
