@@ -3,12 +3,8 @@ scala:
 - 2.10.4
 before_install:
 - sudo apt-get update
-- sudo apt-get install libc6-dev-i386
-- sudo apt-get install lib32ncurses5-dev
-- sudo apt-get install libx11-dev
-- sudo apt-get install g++-multilib
-- sudo apt-get install lib32z1-dev
-- sudo apt-get install ccache
+install:
+- sudo apt-get install -y libc6-dev-i386 lib32ncurses5-dev libx11-dev g++-multilib lib32z1-dev ccache
 - export NDK_CCACHE=ccache
 - export ARCH=`uname -m`
 - wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz
