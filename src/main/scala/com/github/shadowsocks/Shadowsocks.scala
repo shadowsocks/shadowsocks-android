@@ -335,12 +335,14 @@ class Shadowsocks
 
     Console.runCommand(ab.toArray)
 
-    ab.clear()
-    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
-    ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
-    ab.append(Utils.getIptables + " -t nat -F OUTPUT")
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      ab.clear()
+      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
+      ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
+      ab.append(Utils.getIptables + " -t nat -F OUTPUT")
 
-    Console.runRootCommand(ab.toArray)
+      Console.runRootCommand(ab.toArray)
+    }
   }
 
   private def getVersionName: String = {
