@@ -46,7 +46,6 @@ import java.util.{Timer, TimerTask}
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.TrafficStats
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
@@ -58,8 +57,6 @@ import org.apache.http.conn.util.InetAddressUtils
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ops._
-
-case class TrafficStat(tx: Long, rx: Long, timestamp: Long)
 
 class ShadowsocksNatService extends Service with BaseService {
 
@@ -89,7 +86,6 @@ class ShadowsocksNatService extends Service with BaseService {
   private var mStartForegroundArgs = new Array[AnyRef](2)
   private var mStopForegroundArgs = new Array[AnyRef](1)
 
-  private var last: TrafficStat = null
   private var lastTxRate = 0
   private var lastRxRate = 0
   private var timer: Timer = null
@@ -210,10 +206,6 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def notifyForegroundAlert(title: String, info: String) {
-    notifyForegroundAlert(title, info, -1)
-  }
-
-  def notifyForegroundAlert(title: String, info: String, rate: Int) {
     val openIntent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
     val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
@@ -222,19 +214,6 @@ class ShadowsocksNatService extends Service with BaseService {
     val builder = new NotificationCompat.Builder(this)
 
     val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
-    if (rate >= 0) {
-
-      if (rate < 1000) {
-        builder.setSmallIcon(R.drawable.ic_stat_speed, rate)
-      } else if (rate <= 10000) {
-        val mb = rate / 100 - 10 + 1000
-        builder.setSmallIcon(R.drawable.ic_stat_speed, mb)
-      } else {
-        builder.setSmallIcon(R.drawable.ic_stat_speed, 1091)
-      }
-    } else {
-      builder.setSmallIcon(R.drawable.ic_stat_shadowsocks)
-    }
 
     builder
       .setWhen(0)
@@ -434,36 +413,6 @@ class ShadowsocksNatService extends Service with BaseService {
       .build())
 
     changeState(State.CONNECTING)
-
-    if (config.isTrafficStat) {
-      // initialize timer
-      val task = new TimerTask {
-        def run() {
-          val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-          val now = new
-              TrafficStat(TrafficStats.getUidTxBytes(myUid), TrafficStats.getUidRxBytes(myUid),
-                java.lang.System.currentTimeMillis())
-          val txRate = ((now.tx - last.tx) / 1024 / TIMER_INTERVAL).toInt
-          val rxRate = ((now.rx - last.rx) / 1024 / TIMER_INTERVAL).toInt
-          last = now
-          if (lastTxRate == txRate && lastRxRate == rxRate) {
-            return
-          } else {
-            lastTxRate = txRate
-            lastRxRate = rxRate
-          }
-          if ((pm.isScreenOn && state == State.CONNECTED) || (txRate == 0 && rxRate == 0)) {
-            notifyForegroundAlert(getString(R.string.forward_success),
-              getString(R.string.service_status).format(math.max(txRate, rxRate)),
-              math.max(txRate, rxRate))
-          }
-        }
-      }
-      last = new TrafficStat(TrafficStats.getUidTxBytes(myUid), TrafficStats.getUidRxBytes(myUid),
-        java.lang.System.currentTimeMillis())
-      timer = new Timer(true)
-      timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
-    }
 
     spawn {
 

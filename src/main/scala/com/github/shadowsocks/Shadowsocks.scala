@@ -120,7 +120,7 @@ object Shadowsocks {
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey,
     Key.encMethod)
-  val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, Key.isTrafficStat,
+  val FEATRUE_PREFS = Array(Key.isGFWList, Key.isGlobalProxy, Key.proxyedApps, 
     Key.isUdpDns, Key.isAutoConnect)
 
   val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.IPTABLES)
@@ -160,7 +160,6 @@ object Shadowsocks {
       case Key.encMethod => updateListPreference(pref, profile.method)
       case Key.isGFWList => updateCheckBoxPreference(pref, profile.chnroute)
       case Key.isGlobalProxy => updateCheckBoxPreference(pref, profile.global)
-      case Key.isTrafficStat => updateCheckBoxPreference(pref, profile.traffic)
       case Key.isUdpDns => updateCheckBoxPreference(pref, profile.udpdns)
       case _ =>
     }
@@ -766,7 +765,7 @@ class Shadowsocks
     for (name <- Shadowsocks.FEATRUE_PREFS) {
       val pref = findPreference(name)
       if (pref != null) {
-        if (Seq(Key.isGlobalProxy, Key.isTrafficStat, Key.proxyedApps)
+        if (Seq(Key.isGlobalProxy, Key.proxyedApps)
           .contains(name)) {
           pref.setEnabled(enabled && (!isVpnEnabled || Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP))
         } else {

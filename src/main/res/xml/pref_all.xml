@@ -69,12 +69,6 @@
             <intent android:action="com.github.shadowsocks.AppManager"/>
         </Preference>
         <CheckBoxPreference
-                android:key="isTrafficStat"
-                android:defaultValue="true"
-                android:summary="@string/traffic_stat_summary"
-                android:title="@string/traffic_stat">
-        </CheckBoxPreference>
-        <CheckBoxPreference
                 android:key="isUdpDns"
                 android:defaultValue="false"
                 android:summary="@string/udp_dns_summary"
