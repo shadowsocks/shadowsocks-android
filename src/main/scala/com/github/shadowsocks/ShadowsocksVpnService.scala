@@ -75,7 +75,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
-  def isACLEnabled: Boolean = {
+  def isLollipopOrAbove: Boolean = {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       true
     } else {
@@ -90,7 +90,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
 
-    if (isACLEnabled && config.isGFWList) {
+    if (isLollipopOrAbove && config.isGFWList) {
       val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list_full)
       ConfigUtils.printToFile(new File(Path.BASE + "chn.acl"))(p => {
         chn_list.foreach(item => p.println(item))
@@ -107,7 +107,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
             , "-m" , config.encMethod
             , "-f" , Path.BASE + "ss-local.pid")
 
-    if (config.isGFWList && isACLEnabled) {
+    if (config.isGFWList && isLollipopOrAbove) {
       cmd += "--acl"
       cmd += (Path.BASE + "chn.acl")
     }
@@ -133,7 +133,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val conf = {
-      ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
+      if (isLollipopOrAbove) {
+        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", getString(R.string.exclude), 8163)
+      } else {
+        ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
+      }
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
       p.println(conf)
@@ -164,7 +168,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .addAddress(PRIVATE_VLAN.format("1"), 24)
       .addDnsServer("8.8.8.8")
 
-    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP) {
+    if (isLollipopOrAbove) {
       if (!config.isGlobalProxy) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
         val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
@@ -191,7 +195,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
-    } else if (!isACLEnabled && config.isGFWList) {
+    } else if (!isLollipopOrAbove && config.isGFWList) {
       val gfwList = {
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
           getResources.getStringArray(R.array.simple_list)
@@ -207,7 +211,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         }
       })
     } else {
-      if (isACLEnabled) {
+      if (isLollipopOrAbove) {
         builder.addRoute("0.0.0.0", 0)
       } else {
         for (i <- 1 to 223) {

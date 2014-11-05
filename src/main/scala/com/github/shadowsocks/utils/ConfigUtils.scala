@@ -142,7 +142,7 @@ object ConfigUtils {
       |
       |server {
       | label = "china-servers";
-      | ip = 114.114.114.114, 114.114.115.115;
+      | ip = 114.114.114.114, 223.5.5.5;
       | uptest = none;
       | preset = on;
       | include = %s;
@@ -151,8 +151,9 @@ object ConfigUtils {
       |}
       |
       |server {
-      | label = "google-servers";
-      | ip = 8.8.8.8, 8.8.4.4;
+      | label = "local-server";
+      | ip = 127.0.0.1;
+      | port = %d;
       | timeout = 5;
       |}
       |
