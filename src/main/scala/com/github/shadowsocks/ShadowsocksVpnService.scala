@@ -212,7 +212,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       })
     } else {
       if (isLollipopOrAbove) {
-        builder.addRoute("0.0.0.0", 0)
+        val privateList = getResources.getStringArray(R.array.private_list)
+        privateList.foreach(cidr => {
+          val addr = cidr.split('/')
+          builder.addRoute(addr(0), addr(1).toInt)
+        })
       } else {
         for (i <- 1 to 223) {
           if (i != 26 && i != 127) {
