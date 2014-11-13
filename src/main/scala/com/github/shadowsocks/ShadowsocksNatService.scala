@@ -213,8 +213,6 @@ class ShadowsocksNatService extends Service with BaseService {
     val actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
     val builder = new NotificationCompat.Builder(this)
 
-    val icon = getResources.getDrawable(R.drawable.ic_stat_shadowsocks)
-
     builder
       .setWhen(0)
       .setTicker(title)
