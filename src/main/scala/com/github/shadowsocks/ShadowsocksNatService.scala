@@ -221,6 +221,7 @@ class ShadowsocksNatService extends Service with BaseService {
       .setContentTitle(getString(R.string.app_name))
       .setContentText(info)
       .setContentIntent(contentIntent)
+      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
         actionIntent)
 
