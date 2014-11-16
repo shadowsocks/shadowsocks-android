@@ -68,6 +68,7 @@ object Key {
   val isRoot = "isRoot"
   val status = "status"
   val proxyedApps = "proxyedApps"
+  val route = "route"
 
   val isRunning = "isRunning"
   val isAutoConnect = "isAutoConnect"
@@ -109,4 +110,10 @@ object Action {
   val CLOSE = "com.github.shadowsocks.CLOSE"
   val UPDATE_FRAGMENT = "com.github.shadowsocks.ACTION_UPDATE_FRAGMENT"
   val UPDATE_PREFS = "com.github.shadowsocks.ACTION_UPDATE_PREFS"
+}
+
+object Route {
+  val ALL = "all"
+  val BYPASS_LAN = "bypass-lan"
+  val BYPASS_CHN = "bypass-china"
 }

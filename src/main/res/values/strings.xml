@@ -32,6 +32,8 @@
   <string name="auto_set_gfwlist">CHN Route</string>
   <string name="auto_set_gfwlist_summary">Bypass all sites located in China
   </string>
+  <string name="route_list">Route</string>
+  <string name="route_list_summary">Bypass IP addresses in the route list</string>
   <string name="auto_set_proxy">Global Proxy</string>
   <string name="auto_set_proxy_summary">Set up system-wide proxy
   </string>

@@ -38,7 +38,36 @@
     <item>seed-cfb</item>
   </string-array>
 
-  <string-array name="private_list">
+  <string-array name="route_entry">
+    <item>All</item>
+    <item>Bypass LAN</item>
+    <item>Bypass LAN &amp; China</item>
+  </string-array>
+
+  <string-array name="route_value">
+    <item>all</item>
+    <item>bypass-lan</item>
+    <item>bypass-china</item>
+  </string-array>
+
+  <string-array name="private_route">
+    <item>0.0.0.0/8</item>
+    <item>10.0.0.0/8</item>
+    <item>100.64.0.0/10</item>
+    <item>127.0.0.0/8</item>
+    <item>169.254.0.0/16</item>
+    <item>172.16.0.0/12</item>
+    <item>192.0.0.0/29</item>
+    <item>192.0.2.0/24</item>
+    <item>192.88.99.0/24</item>
+    <item>192.168.0.0/16</item>
+    <item>198.18.0.0/15</item>
+    <item>198.51.100.0/24</item>
+    <item>203.0.113.0/24</item>
+    <item>224.0.0.0/3</item>
+  </string-array>
+
+  <string-array name="bypass_private_route">
     <item>1.0.0.0/8</item>
     <item>2.0.0.0/7</item>
     <item>4.0.0.0/6</item>
@@ -162,7 +191,10 @@
     <item>208.0.0.0/4</item>
   </string-array>
 
-  <string-array name="chn_list_full">
+  <string-array name="chn_route_full">
+    <item>10.0.0.0/8</item>
+    <item>172.16.0.0/12</item>
+    <item>192.168.0.0/16</item>
     <item>1.0.1.0/24</item>
     <item>1.0.2.0/23</item>
     <item>1.0.8.0/21</item>
@@ -222,7 +254,6 @@
     <item>1.192.0.0/13</item>
     <item>1.202.0.0/15</item>
     <item>1.204.0.0/14</item>
-    <item>10.0.0.0/8</item>
     <item>14.0.0.0/21</item>
     <item>14.0.12.0/22</item>
     <item>14.1.0.0/22</item>
@@ -1924,7 +1955,6 @@
     <item>171.116.0.0/14</item>
     <item>171.120.0.0/13</item>
     <item>171.208.0.0/12</item>
-    <item>172.16.0.0/12</item>
     <item>175.0.0.0/12</item>
     <item>175.16.0.0/13</item>
     <item>175.24.0.0/14</item>
@@ -2028,7 +2058,6 @@
     <item>183.184.0.0/13</item>
     <item>183.192.0.0/10</item>
     <item>192.124.154.0/24</item>
-    <item>192.168.0.0/16</item>
     <item>192.188.170.0/24</item>
     <item>202.0.100.0/23</item>
     <item>202.0.122.0/23</item>
@@ -3970,9 +3999,8 @@
     <item>223.255.252.0/23</item>
   </string-array>
 
-  <string-array name="chn_list">
+  <string-array name="chn_route">
     <item>0.0.0.0/7</item>
-    <item>10.0.0.0/8</item>
     <item>14.0.0.0/8</item>
     <item>27.0.0.0/8</item>
     <item>36.0.0.0/8</item>
@@ -4017,7 +4045,7 @@
     <item>220.0.0.0/6</item>
   </string-array>
 
-  <string-array name="gfw_list">
+  <string-array name="gfw_route">
     <item>1.0.0.0/23</item>
     <item>1.0.4.0/22</item>
     <item>1.0.16.0/20</item>
@@ -8507,7 +8535,7 @@
     <item>223.255.254.0/23</item>
   </string-array>
 
-  <string-array name="simple_list">
+  <string-array name="simple_route">
     <item>1.0.0.0/15</item>
     <item>1.2.0.0/16</item>
     <item>1.4.0.0/14</item>

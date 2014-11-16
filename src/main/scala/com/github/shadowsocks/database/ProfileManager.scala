@@ -77,7 +77,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(Shadowsocks.TAG, "getProfile", ex)
-        return None
+        None
     }
   }
 
@@ -130,6 +130,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     edit.putString(Key.localPort, profile.localPort.toString)
     edit.putString(Key.proxied, profile.individual)
     edit.putInt(Key.profileId, profile.id)
+    edit.putString(Key.route, profile.route)
     edit.commit()
 
     profile
@@ -149,19 +150,18 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     profile.host = settings.getString(Key.proxy, "127.0.0.1")
     profile.password = settings.getString(Key.sitekey, "default")
     profile.method = settings.getString(Key.encMethod, "table")
+    profile.route = settings.getString(Key.route, "all")
     profile.remotePort = try {
       Integer.valueOf(settings.getString(Key.remotePort, "1984"))
     } catch {
-      case ex: NumberFormatException => {
+      case ex: NumberFormatException =>
         1984
-      }
     }
     profile.localPort = try {
       Integer.valueOf(settings.getString(Key.localPort, "1984"))
     } catch {
-      case ex: NumberFormatException => {
+      case ex: NumberFormatException =>
         1984
-      }
     }
     profile.individual = settings.getString(Key.proxied, "")
 

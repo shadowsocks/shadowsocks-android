@@ -14,6 +14,7 @@ public class Config implements Parcelable {
   public String profileName = "Untitled";
   public String proxy = "127.0.0.1";
   public String sitekey = "null";
+  public String route = "all";
 
   public String encMethod = "rc4";
   public String proxiedAppString = "";
@@ -33,7 +34,7 @@ public class Config implements Parcelable {
 
   public Config(boolean isGlobalProxy, boolean isGFWList, boolean isBypassApps,
       boolean isTrafficStat, boolean isUdpDns, String profileName, String proxy, String sitekey,
-      String encMethod, String proxiedAppString, int remotePort, int localPort) {
+      String encMethod, String proxiedAppString, String route, int remotePort, int localPort) {
     this.isGlobalProxy = isGlobalProxy;
     this.isGFWList = isGFWList;
     this.isBypassApps = isBypassApps;
@@ -44,6 +45,7 @@ public class Config implements Parcelable {
     this.sitekey = sitekey;
     this.encMethod = encMethod;
     this.proxiedAppString = proxiedAppString;
+    this.route = route;
     this.remotePort = remotePort;
     this.localPort = localPort;
   }
@@ -63,6 +65,7 @@ public class Config implements Parcelable {
     sitekey = in.readString();
     encMethod = in.readString();
     proxiedAppString = in.readString();
+    route = in.readString();
     remotePort = in.readInt();
     localPort = in.readInt();
   }
@@ -82,6 +85,7 @@ public class Config implements Parcelable {
     out.writeString(sitekey);
     out.writeString(encMethod);
     out.writeString(proxiedAppString);
+    out.writeString(route);
     out.writeInt(remotePort);
     out.writeInt(localPort);
   }

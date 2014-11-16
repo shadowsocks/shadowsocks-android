@@ -48,12 +48,14 @@
     <PreferenceCategory
             android:title="@string/feature_cat">
 
-        <CheckBoxPreference
-                android:defaultValue="true"
-                android:key="isGFWList"
-                android:summary="@string/auto_set_gfwlist_summary"
-                android:title="@string/auto_set_gfwlist">
-        </CheckBoxPreference>
+        <com.github.shadowsocks.preferences.SummaryListPreference
+                android:defaultValue="all"
+                android:key="route"
+                android:entries="@array/route_entry"
+                android:entryValues="@array/route_value"
+                android:summary="@string/route_list_summary"
+                android:title="@string/route_list">
+        </com.github.shadowsocks.preferences.SummaryListPreference>
         <CheckBoxPreference
                 android:defaultValue="true"
                 android:key="isGlobalProxy"

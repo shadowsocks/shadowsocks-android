@@ -67,6 +67,9 @@ class Profile {
   var date: String = ""
 
   @DatabaseField
+  var route: String = ""
+
+  @DatabaseField
   var upload: Int = 0
 
   @DatabaseField

@@ -25,6 +25,8 @@
   <string name="dns_proxy_summary">重定向 DNS 查询到远程服务器</string>
   <string name="auto_set_gfwlist">国内路由</string>
   <string name="auto_set_gfwlist_summary">绕过所有位于中国的网站</string>
+  <string name="route_list">路由</string>
+  <string name="route_list_summary">绕过指定路由列表中的地址</string>
   <string name="auto_set_proxy">全局代理</string>
   <string name="auto_set_proxy_summary">设置系统代理</string>
   <string name="proxied_apps">局部代理</string>
@@ -74,6 +76,12 @@
   <string-array name="add_profile_methods">
     <item>扫描二维码</item>
     <item>手动设置</item>
+  </string-array>
+
+  <string-array name="route_entry">
+    <item>全局</item>
+    <item>绕过局域网地址</item>
+    <item>绕过局域网及中国大陆地址</item>
   </string-array>
 
 </resources>

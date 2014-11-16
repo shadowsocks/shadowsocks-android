@@ -198,7 +198,7 @@ object ConfigUtils {
     val method = proxy(3).trim
 
     new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
-      config.isUdpDns, config.profileName, host, password, method, config.proxiedAppString, port,
+      config.isUdpDns, config.profileName, host, password, method, config.proxiedAppString, config.route, port,
       config.localPort)
   }
 
@@ -213,6 +213,8 @@ object ConfigUtils {
     val proxy = settings.getString(Key.proxy, "127.0.0.1")
     val sitekey = settings.getString(Key.sitekey, "default")
     val encMethod = settings.getString(Key.encMethod, "table")
+    val route = settings.getString(Key.route, "all")
+
     val remotePort: Int = try {
       settings.getString(Key.remotePort, "1984").toInt
     } catch {
@@ -228,6 +230,6 @@ object ConfigUtils {
     val proxiedAppString = settings.getString(Key.proxied, "")
 
     new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, isUdpDns, profileName, proxy,
-      sitekey, encMethod, proxiedAppString, remotePort, localPort)
+      sitekey, encMethod, proxiedAppString, route, remotePort, localPort)
   }
 }

@@ -93,19 +93,14 @@ class ShadowsocksNatService extends Service with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
-  def isACLEnabled: Boolean = {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-        true
-      } else {
-        false
-      }
-  }
-
   def startShadowsocksDaemon() {
-    if (isACLEnabled && config.isGFWList) {
-      val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list_full)
-      ConfigUtils.printToFile(new File(Path.BASE + "chn.acl"))(p => {
-        chn_list.foreach(item => p.println(item))
+    if (config.route != Route.ALL) {
+      val acl: Array[String] = config.route match {
+        case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
+        case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
+      }
+      ConfigUtils.printToFile(new File(Path.BASE + "acl.list"))(p => {
+        acl.foreach(item => p.println(item))
       })
     }
 
@@ -117,11 +112,11 @@ class ShadowsocksNatService extends Service with BaseService {
           , "-l" , config.localPort.toString
           , "-k" , config.sitekey
           , "-m" , config.encMethod
-          , "-f" , (Path.BASE + "ss-local.pid"))
+          , "-f" , Path.BASE + "ss-local.pid")
 
-    if (config.isGFWList && isACLEnabled) {
+    if (config.route != Route.ALL) {
       cmd += "--acl"
-      cmd += (Path.BASE + "chn.acl")
+      cmd += (Path.BASE + "acl.list")
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
@@ -140,7 +135,7 @@ class ShadowsocksNatService extends Service with BaseService {
             , "-p" , config.remotePort.toString
             , "-k" , config.sitekey
             , "-m" , config.encMethod
-            , "-f" , (Path.BASE + "ss-tunnel.pid"))
+            , "-f" , Path.BASE + "ss-tunnel.pid")
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
       Core.sstunnel(cmd.toArray)
     } else {
@@ -298,15 +293,6 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + myUid))
 
-    if (config.isGFWList) {
-      if (!isACLEnabled)
-      {
-        val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list)
-        for (item <- chn_list) {
-          init_sb.append(cmd_bypass.replace("0.0.0.0", item))
-        }
-      }
-    }
     if (hasRedirectSupport) {
       init_sb
         .append(Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to "

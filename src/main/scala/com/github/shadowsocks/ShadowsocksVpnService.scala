@@ -64,7 +64,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
 
   val VPN_MTU = 1500
-
   val PRIVATE_VLAN = "26.26.26.%s"
 
   var conn: ParcelFileDescriptor = null
@@ -88,28 +87,47 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     info.isInRange(config.proxy)
   }
 
+  def isPrivateA(a: Int): Boolean = {
+    if (a == 10 || a == 192 || a == 172) {
+      true
+    } else {
+      false
+    }
+  }
+
+  def isPrivateB(a: Int, b: Int): Boolean = {
+    if (a == 10 || (a == 192 && b == 168) || (a == 172 && b >= 16 && b < 32)) {
+      true
+    } else {
+      false
+    }
+  }
+
   def startShadowsocksDaemon() {
 
-    if (isLollipopOrAbove && config.isGFWList) {
-      val chn_list: Array[String] = getResources.getStringArray(R.array.chn_list_full)
-      ConfigUtils.printToFile(new File(Path.BASE + "chn.acl"))(p => {
-        chn_list.foreach(item => p.println(item))
+    if (isLollipopOrAbove && config.route != Route.ALL) {
+      val acl: Array[String] = config.route match {
+        case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
+        case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
+      }
+      ConfigUtils.printToFile(new File(Path.BASE + "acl.list"))(p => {
+        acl.foreach(item => p.println(item))
       })
     }
 
     val cmd = new ArrayBuffer[String]
-    cmd += ("ss-local" , "-u"
-            , "-b" , "127.0.0.1"
-            , "-s" , config.proxy
-            , "-p" , config.remotePort.toString
-            , "-l" , config.localPort.toString
-            , "-k" , config.sitekey
-            , "-m" , config.encMethod
-            , "-f" , Path.BASE + "ss-local.pid")
+    cmd +=("ss-local", "-u"
+      , "-b", "127.0.0.1"
+      , "-s", config.proxy
+      , "-p", config.remotePort.toString
+      , "-l", config.localPort.toString
+      , "-k", config.sitekey
+      , "-m", config.encMethod
+      , "-f", Path.BASE + "ss-local.pid")
 
-    if (config.isGFWList && isLollipopOrAbove) {
+    if (isLollipopOrAbove && config.route != Route.ALL) {
       cmd += "--acl"
-      cmd += (Path.BASE + "chn.acl")
+      cmd += (Path.BASE + "acl.list")
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
@@ -118,15 +136,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsTunnel() = {
     val cmd = new ArrayBuffer[String]
-    cmd += ("ss-tunnel"
-      , "-b" , "127.0.0.1"
-      , "-l" , "8163"
-      , "-L" , "8.8.8.8:53"
-      , "-s" , config.proxy
-      , "-p" , config.remotePort.toString
-      , "-k" , config.sitekey
-      , "-m" , config.encMethod
-      , "-f" , Path.BASE + "ss-tunnel.pid")
+    cmd +=("ss-tunnel"
+      , "-b", "127.0.0.1"
+      , "-l", "8163"
+      , "-L", "8.8.8.8:53"
+      , "-s", config.proxy
+      , "-p", config.remotePort.toString
+      , "-k", config.sitekey
+      , "-m", config.encMethod
+      , "-f", Path.BASE + "ss-tunnel.pid")
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     Core.sstunnel(cmd.toArray)
   }
@@ -195,52 +213,76 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
-    } else if (!isLollipopOrAbove && config.isGFWList) {
-      val gfwList = {
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
-          getResources.getStringArray(R.array.simple_list)
-        } else {
-          getResources.getStringArray(R.array.gfw_list)
-        }
-      }
-      gfwList.foreach(cidr => {
-        val net = new SubnetUtils(cidr)
-        if (!isByass(net)) {
-          val addr = cidr.split('/')
-          builder.addRoute(addr(0), addr(1).toInt)
-        }
-      })
     } else {
-      if (isLollipopOrAbove) {
-        val privateList = getResources.getStringArray(R.array.private_list)
-        privateList.foreach(cidr => {
-          val addr = cidr.split('/')
-          builder.addRoute(addr(0), addr(1).toInt)
-        })
-      } else {
-        for (i <- 1 to 223) {
-          if (i != 26 && i != 127) {
-            val addr = i.toString + ".0.0.0"
-            val cidr = addr + "/8"
-            val net = new SubnetUtils(cidr)
+      if (!isLollipopOrAbove) {
+        config.route match {
+          case Route.ALL =>
+            for (i <- 1 to 223) {
+              if (i != 26 && i != 127) {
+                val addr = i.toString + ".0.0.0"
+                val cidr = addr + "/8"
+                val net = new SubnetUtils(cidr)
 
-            if (!isByass(net)) {
-              if (!InetAddress.getByName(addr).isSiteLocalAddress) {
-                builder.addRoute(addr, 8)
-              }
-            } else {
-              for (j <- 0 to 255) {
-                val subAddr = i.toString + "." + j.toString + ".0.0"
-                val subCidr = subAddr + "/16"
-                val subNet = new SubnetUtils(subCidr)
-                if (!isByass(subNet)) {
-                  if (!InetAddress.getByName(subAddr).isSiteLocalAddress) {
-                    builder.addRoute(subAddr, 16)
+                if (!isByass(net)) {
+                  builder.addRoute(addr, 8)
+                } else {
+                  for (j <- 0 to 255) {
+                    val subAddr = i.toString + "." + j.toString + ".0.0"
+                    val subCidr = subAddr + "/16"
+                    val subNet = new SubnetUtils(subCidr)
+                    if (!isByass(subNet)) {
+                      builder.addRoute(subAddr, 16)
+                    }
                   }
                 }
               }
             }
-          }
+          case Route.BYPASS_LAN =>
+            for (i <- 1 to 223) {
+              if (i != 26 && i != 127) {
+                val addr = i.toString + ".0.0.0"
+                val cidr = addr + "/8"
+                val net = new SubnetUtils(cidr)
+
+                if (!isByass(net) && !isPrivateA(i)) {
+                  builder.addRoute(addr, 8)
+                } else {
+                  for (j <- 0 to 255) {
+                    val subAddr = i.toString + "." + j.toString + ".0.0"
+                    val subCidr = subAddr + "/16"
+                    val subNet = new SubnetUtils(subCidr)
+                    if (!isByass(subNet) && !isPrivateB(i, j)) {
+                      builder.addRoute(subAddr, 16)
+                    }
+                  }
+                }
+              }
+            }
+          case Route.BYPASS_CHN =>
+            val list = {
+              if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+                getResources.getStringArray(R.array.simple_route)
+              } else {
+                getResources.getStringArray(R.array.gfw_route)
+              }
+            }
+            list.foreach(cidr => {
+              val net = new SubnetUtils(cidr)
+              if (!isByass(net)) {
+                val addr = cidr.split('/')
+                builder.addRoute(addr(0), addr(1).toInt)
+              }
+            })
+        }
+      } else {
+        if (config.route == Route.ALL) {
+          builder.addRoute("0.0.0.0", 0)
+        } else {
+          val privateList = getResources.getStringArray(R.array.bypass_private_route)
+          privateList.foreach(cidr => {
+            val addr = cidr.split('/')
+            builder.addRoute(addr(0), addr(1).toInt)
+          })
         }
       }
     }
@@ -440,6 +482,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def getTag = TAG
+
   override def getServiceMode = Mode.VPN
+
   override def getContext = getBaseContext
 }
