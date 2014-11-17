@@ -48,7 +48,11 @@ class SummaryListPreference(context: Context, attrs: AttributeSet)
 
   override def setValue(text: String) {
     super.setValue(text)
-    setSummary(getEntry)
+    val entry = getEntry
+    if (entry != null)
+      setSummary(entry)
+    else
+      setSummary(text)
   }
 
   override def setSummary(summary: CharSequence) {
