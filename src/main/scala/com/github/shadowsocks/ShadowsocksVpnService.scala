@@ -74,14 +74,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
-  def isLollipopOrAbove: Boolean = {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      true
-    } else {
-      false
-    }
-  }
-
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
     info.isInRange(config.proxy)
@@ -105,7 +97,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
 
-    if (isLollipopOrAbove && config.route != Route.ALL) {
+    if (Utils.isLollipopOrAbove && config.route != Route.ALL) {
       val acl: Array[String] = config.route match {
         case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
         case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
@@ -125,7 +117,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-m", config.encMethod
       , "-f", Path.BASE + "ss-local.pid")
 
-    if (isLollipopOrAbove && config.route != Route.ALL) {
+    if (Utils.isLollipopOrAbove && config.route != Route.ALL) {
       cmd += "--acl"
       cmd += (Path.BASE + "acl.list")
     }
@@ -151,7 +143,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val conf = {
-      if (isLollipopOrAbove) {
+      if (Utils.isLollipopOrAbove) {
         ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", getString(R.string.exclude), 8163)
       } else {
         ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
@@ -186,7 +178,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .addAddress(PRIVATE_VLAN.format("1"), 24)
       .addDnsServer("8.8.8.8")
 
-    if (isLollipopOrAbove) {
+    if (Utils.isLollipopOrAbove) {
       if (!config.isGlobalProxy) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
         val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
@@ -214,7 +206,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (InetAddressUtils.isIPv6Address(config.proxy)) {
       builder.addRoute("0.0.0.0", 0)
     } else {
-      if (!isLollipopOrAbove) {
+      if (!Utils.isLollipopOrAbove) {
         config.route match {
           case Route.ALL =>
             for (i <- 1 to 223) {

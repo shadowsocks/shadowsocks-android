@@ -80,6 +80,14 @@ object Utils {
   var data_path: String = null
   var rootTries = 0
 
+  def isLollipopOrAbove: Boolean = {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      true
+    } else {
+      false
+    }
+  }
+
   def getSignature(context: Context): String = {
     val info = context
       .getPackageManager
