@@ -52,22 +52,22 @@ class Profile {
   var host: String = ""
 
   @DatabaseField
-  var localPort: Int = 0
+  var localPort: Int = 1080
 
   @DatabaseField
-  var remotePort: Int = 0
+  var remotePort: Int = 8338
 
   @DatabaseField
   var password: String = ""
 
   @DatabaseField
-  var method: String = ""
+  var method: String = "rc4"
 
   @DatabaseField
   var date: String = ""
 
   @DatabaseField
-  var route: String = ""
+  var route: String = "all"
 
   @DatabaseField
   var upload: Int = 0
