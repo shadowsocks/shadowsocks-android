@@ -334,14 +334,12 @@ class Shadowsocks
 
     Console.runCommand(ab.toArray)
 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      ab.clear()
-      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
-      ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
-      ab.append(Utils.getIptables + " -t nat -F OUTPUT")
+    ab.clear()
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
+    ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
+    ab.append(Utils.getIptables + " -t nat -F OUTPUT")
 
-      Console.runRootCommand(ab.toArray)
-    }
+    Console.runRootCommand(ab.toArray)
   }
 
   private def getVersionName: String = {
@@ -497,7 +495,7 @@ class Shadowsocks
 
     // Bind to the service
     spawn {
-      val isRoot = Build.VERSION.SDK_INT != Build.VERSION_CODES.LOLLIPOP && Console.isRoot
+      val isRoot = Console.isRoot
       handler.post(new Runnable {
         override def run() {
           status.edit.putBoolean(Key.isRoot, isRoot).commit()
@@ -767,7 +765,7 @@ class Shadowsocks
       if (pref != null) {
         if (Seq(Key.isGlobalProxy, Key.proxyedApps)
           .contains(name)) {
-          pref.setEnabled(enabled && (!isVpnEnabled || Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP))
+          pref.setEnabled(enabled && !isVpnEnabled)
         } else {
           pref.setEnabled(enabled)
         }
@@ -875,8 +873,7 @@ class Shadowsocks
 
   def isVpnEnabled: Boolean = {
     if (vpnEnabled < 0) {
-      vpnEnabled = if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP
-        || !status.getBoolean(Key.isRoot, false)) {
+      vpnEnabled = if (!status.getBoolean(Key.isRoot, false)) {
         1
       } else {
         0

@@ -63,7 +63,6 @@ class ShadowsocksNatService extends Service with BaseService {
   val TAG = "ShadowsocksNatService"
 
   val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN"
-  val CMD_IPTABLES_REDIRECT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " + "-j REDIRECT --to 8123"
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
   val DNS_PORT = 8153
@@ -75,7 +74,6 @@ class ShadowsocksNatService extends Service with BaseService {
   var receiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
   var config: Config = null
-  var hasRedirectSupport = false
   var apps: Array[ProxiedApp] = null
   val myUid = Process.myUid()
 
@@ -293,22 +291,10 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + myUid))
 
-    if (hasRedirectSupport) {
-      init_sb
-        .append(Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to "
-        + DNS_PORT)
-    } else {
-      init_sb
-        .append(Utils.getIptables
-        + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:"
-        + DNS_PORT)
-    }
+    init_sb.append(Utils.getIptables
+      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + DNS_PORT)
     if (config.isGlobalProxy || config.isBypassApps) {
-      http_sb.append(if (hasRedirectSupport) {
-        Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
-      } else {
-        Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
-      })
+      http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (!config.isGlobalProxy) {
       if (apps == null || apps.length <= 0) {
@@ -322,11 +308,7 @@ class ShadowsocksNatService extends Service with BaseService {
       }
       for (uid <- uidSet) {
         if (!config.isBypassApps) {
-          http_sb.append((if (hasRedirectSupport) {
-            Utils.getIptables + CMD_IPTABLES_REDIRECT_ADD_SOCKS
-          } else {
-            Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS
-          }).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
         } else {
           init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
         }
@@ -429,8 +411,6 @@ class ShadowsocksNatService extends Service with BaseService {
         } else {
           resolved = true
         }
-
-        hasRedirectSupport = Utils.getHasRedirectSupport
 
         if (resolved && handleConnection) {
           notifyForegroundAlert(getString(R.string.forward_success),
