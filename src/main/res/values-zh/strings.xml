@@ -29,9 +29,9 @@
   <string name="route_list_summary">绕过指定路由列表中的地址</string>
   <string name="auto_set_proxy">全局代理</string>
   <string name="auto_set_proxy_summary">设置系统代理</string>
-  <string name="proxied_apps">局部代理</string>
+  <string name="proxied_apps">分应用代理</string>
   <string name="proxied_apps_summary">为应用程序分别设置代理</string>
-  <string name="proxied_help">局部代理</string>
+  <string name="proxied_help">分应用代理</string>
   <string name="bypass_apps">绕行模式</string>
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自动连接</string>
@@ -69,7 +69,7 @@
   <string name="add_profile">添加配置文件</string>
 
   <string name="udp_dns">UDP 转发</string>
-  <string name="udp_dns_summary">由远程服务器转发 UDP 协议的 DNS 请求</string>
+  <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>
 
   <!-- profile -->
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
