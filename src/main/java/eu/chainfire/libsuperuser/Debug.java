@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2013 Jorrit "Chainfire" Jongma
+ * Copyright (C) 2012-2014 Jorrit "Chainfire" Jongma
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.chainfire.libsuperuser;
 
 import android.os.Looper;
 import android.util.Log;
+
 import com.github.shadowsocks.BuildConfig;
 
 /**

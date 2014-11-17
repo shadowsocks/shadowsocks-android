@@ -780,7 +780,7 @@ static int redsocks_init_instance(redsocks_instance *instance)
 	int on = 1;
 	int fd = -1;
 
-	fd = socket(AF_INET, SOCK_STREAM, 0);
+	fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
 		log_errno(LOG_ERR, "socket");
 		goto fail;

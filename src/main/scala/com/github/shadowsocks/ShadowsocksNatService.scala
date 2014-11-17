@@ -137,18 +137,27 @@ class ShadowsocksNatService extends Service with BaseService {
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
       Core.sstunnel(cmd.toArray)
     } else {
-      val conf = {
-        ConfigUtils.PDNSD.format("127.0.0.1")
-      }
+      val cmdBuf = new ArrayBuffer[String]
+      cmdBuf += ("ss-tunnel"
+        , "-b", "127.0.0.1"
+        , "-l", "8163"
+        , "-L", "8.8.8.8:53"
+        , "-s", config.proxy
+        , "-p", config.remotePort.toString
+        , "-k", config.sitekey
+        , "-m", config.encMethod
+        , "-f", Path.BASE + "ss-tunnel.pid")
+      if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
+      Core.sstunnel(cmdBuf.toArray)
+
+      val conf = ConfigUtils
+        .PDNSD_BYPASS.format("127.0.0.1", getString(R.string.exclude), 8163)
       ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
          p.println(conf)
       })
-
-      val args = "pdnsd -c " + Path.BASE + "pdnsd.conf"
-      val cmd =  Path.BASE + args
-
+      val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
       if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-      Console.runRootCommand(cmd)
+      Core.pdnsd(cmd.split(" "))
     }
   }
 
@@ -172,7 +181,7 @@ class ShadowsocksNatService extends Service with BaseService {
       p.println(conf)
     })
     val cmd = Path.BASE + args
-    Console.runRootCommand(cmd)
+    Console.runCommand(cmd)
   }
 
   /** Called when the activity is first created. */
