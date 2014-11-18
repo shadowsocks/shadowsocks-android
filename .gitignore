@@ -29,7 +29,6 @@ src/main/assets/armeabi
 src/main/assets/armeabi-v7a
 src/main/assets/x86
 src/main/assets/api-16/
-src/main/jni
 jni/Application.mk
 obj
 libs
