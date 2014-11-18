@@ -175,13 +175,14 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.format(config.localPort)
-    val args = "redsocks -p %sredsocks.pid -c %sredsocks.conf"
+    val cmd = "redsocks -p %sredsocks.pid -c %sredsocks.conf"
       .format(Path.BASE, Path.BASE)
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
-    val cmd = Path.BASE + args
-    Console.runCommand(cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+
+    Core.redsocks(cmd.split(" "))
   }
 
   /** Called when the activity is first created. */

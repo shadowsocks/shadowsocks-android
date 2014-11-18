@@ -29,9 +29,6 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 ```bash
     git submodule update --init
     
-    # Build native binaries
-    ./build-ndk.sh
-
     # Build the App
     sbt clean android:package-release
 ```
@@ -40,7 +37,8 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 * Install Android SDK and NDK by run `brew install android-ndk android-sdk`
 * Add `export ANDROID_HOME=/usr/local/Cellar/android-sdk/$version` to your .bashrc , then reopen the shell to load it.
-* Run `echo "y" | android update sdk --filter tools,platform-tools,build-tools-19.0.3,android-19,extra-google-m2repository,extra-android-m2repository --no-ui --no-https -a`
+* echo "y" | android update sdk --filter tools,platform-tools,build-tools-21.0.1,android-21,extra-google-m2repository --no-ui --no-https -a
+* echo "y" | android update sdk --filter extra-android-m2repository --no-ui --no-https -a
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
 * Create `local.properties` from `local.properties.example` with your own key information .
@@ -49,9 +47,6 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 ```bash
     git submodule update --init
 
-    # Build native binaries
-    ./build-ndk.sh
-    
     # Build the apk
     sbt clean android:package-release
 ```
