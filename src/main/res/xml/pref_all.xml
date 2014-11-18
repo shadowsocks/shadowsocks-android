@@ -17,12 +17,14 @@
                 android:title="@string/proxy">
         </com.github.shadowsocks.preferences.SummaryEditTextPreference>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                android:inputType="number"
                 android:defaultValue="443"
                 android:key="remotePort"
                 android:summary="@string/remote_port_summary"
                 android:title="@string/remote_port">
         </com.github.shadowsocks.preferences.SummaryEditTextPreference>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                android:inputType="number"
                 android:defaultValue="1080"
                 android:key="port"
                 android:summary="@string/port_summary"
