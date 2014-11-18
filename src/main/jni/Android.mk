@@ -120,27 +120,13 @@ REDSOCKS_SOURCES := base.c dnstc.c http-connect.c \
 
 LOCAL_STATIC_LIBRARIES := libevent
 
-LOCAL_MODULE := redsocks
-LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES))
+LOCAL_MODULE := redsocks-jni
+LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES)) main-jni.cpp
 LOCAL_CFLAGS := -O2 -std=gnu99 -g -I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
 	-I$(LOCAL_PATH)/libevent
 
-include $(BUILD_EXECUTABLE)
-
-########################################################
-## pdnsd
-########################################################
-
-include $(CLEAR_VARS)
-
-PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
-
-LOCAL_MODULE    := pdnsd
-LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
-
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_LIBRARY)
 
 ########################################################
 ## pdnsd library
@@ -182,23 +168,6 @@ include $(BUILD_SHARED_LIBRARY)
 ########################################################
 ## shadowsocks tunnel
 ########################################################
-
-# include $(CLEAR_VARS)
-#
-# SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
-#
-# LOCAL_MODULE    := ss-tunnel
-# LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
-# LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
-# 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
-# 					-I$(LOCAL_PATH)/libev/ \
-# 					-I$(LOCAL_PATH)/openssl/include 
-#
-# LOCAL_STATIC_LIBRARIES := libev libcrypto
-#
-# LOCAL_LDLIBS := -llog
-#
-# include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## shadowsocks tunnel library

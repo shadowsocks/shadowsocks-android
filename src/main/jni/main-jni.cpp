@@ -47,6 +47,8 @@ jint Java_com_github_shadowsocks_Core_pdnsd(JNIEnv *env, jobject thiz, jobjectAr
 jint Java_com_github_shadowsocks_Core_sslocal(JNIEnv *env, jobject thiz, jobjectArray argv) {
 #elif defined(SSTUNNEL_JNI)
 jint Java_com_github_shadowsocks_Core_sstunnel(JNIEnv *env, jobject thiz, jobjectArray argv) {
+#elif defined(REDSOCKS_JNI)
+jint Java_com_github_shadowsocks_Core_redsocks(JNIEnv *env, jobject thiz, jobjectArray argv) {
 #elif defined(TUN2SOCKS_JNI)
 jint Java_com_github_shadowsocks_Core_tun2socks(JNIEnv *env, jobject thiz, jobjectArray argv) {
 #else

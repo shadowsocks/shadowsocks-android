@@ -44,10 +44,12 @@ public class Core {
     java.lang.System.loadLibrary("ss-tunnel-jni");
     java.lang.System.loadLibrary("tun2socks-jni");
     java.lang.System.loadLibrary("pdnsd-jni");
+    java.lang.System.loadLibrary("redsocks-jni");
   }
 
   public static native void sslocal(String[] cmd);
   public static native void sstunnel(String[] cmd);
   public static native void tun2socks(String[] cmd);
   public static native void pdnsd(String[] cmd);
+  public static native void redsocks(String[] cmd);
 }
