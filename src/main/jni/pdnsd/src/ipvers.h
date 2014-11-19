@@ -151,7 +151,9 @@ __cmsg_nxthdr (struct msghdr *__mhdr, struct cmsghdr *__cmsg) __THROW
 
 /* This is the IPv6 flowid that we pass on to the IPv6 protocol stack. This value was not currently defined
  * at the time of writing. Should this change, define a appropriate flowinfo here. */
+#ifndef IPV6_FLOWINFO
 #define IPV6_FLOWINFO 0
+#endif
 
 /* There does not seem to be a function/macro to generate IPv6-mapped IPv4-Adresses. So here comes mine.
  * Pass an in_addr* and an in6_addr* */

@@ -219,7 +219,9 @@
 #define HAVE_FCNTL_H 1
 
 /* Define to 1 if you have the `getline' function. */
-//#define HAVE_GETLINE 1
+#if defined(__aarch64__) || defined(__x86_64__)
+#define HAVE_GETLINE 1
+#endif
 
 /* Define to 1 if you have the `getpwnam_r' function. */
 //#define HAVE_GETPWNAM_R 1
@@ -282,7 +284,9 @@
 #define HAVE_STDLIB_H 1
 
 /* Define to 1 if you have the `stpcpy' function. */
-//#define HAVE_STPCPY 1
+#if defined(__aarch64__) || defined(__x86_64__)
+#define HAVE_STPCPY 1
+#endif
 
 /* Define to 1 if you have the `stpncpy' function. */
 //#define HAVE_STPNCPY 1

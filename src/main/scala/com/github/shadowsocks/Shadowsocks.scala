@@ -830,14 +830,6 @@ class Shadowsocks
 
     crash_recovery()
 
-    copyAssets(System.getABI)
-
-    val ab = new ArrayBuffer[String]
-    for (executable <- Shadowsocks.EXECUTABLES) {
-      ab.append("chmod 755 " + Path.BASE + executable)
-    }
-    Console.runCommand(ab.toArray)
-
   }
 
   private def recovery() {

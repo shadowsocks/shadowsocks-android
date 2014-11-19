@@ -24,10 +24,12 @@
 /* #undef _EVENT_DISABLE_THREAD_SUPPORT */
 
 /* Define to 1 if you have the `arc4random' function. */
+#if !defined(__aarch64__) && !defined(__x86_64__)
 #define _EVENT_HAVE_ARC4RANDOM 1
+#endif
 
 /* Define to 1 if you have the `arc4random_buf' function. */
-/* #undef _EVENT_HAVE_ARC4RANDOM_BUF */
+#define _EVENT_HAVE_ARC4RANDOM_BUF
 
 /* Define to 1 if you have the <arpa/inet.h> header file. */
 #define _EVENT_HAVE_ARPA_INET_H 1
@@ -262,7 +264,7 @@
 /* #undef _EVENT_HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY */
 
 /* Define to 1 if you have the `sysctl' function. */
-#define _EVENT_HAVE_SYSCTL 1
+// #define _EVENT_HAVE_SYSCTL 1
 
 /* Define to 1 if you have the <sys/devpoll.h> header file. */
 /* #undef _EVENT_HAVE_SYS_DEVPOLL_H */
@@ -301,7 +303,7 @@
 #define _EVENT_HAVE_SYS_STAT_H 1
 
 /* Define to 1 if you have the <sys/sysctl.h> header file. */
-#define _EVENT_HAVE_SYS_SYSCTL_H 1
+//#define _EVENT_HAVE_SYS_SYSCTL_H 1
 
 /* Define to 1 if you have the <sys/time.h> header file. */
 #define _EVENT_HAVE_SYS_TIME_H 1
