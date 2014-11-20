@@ -329,10 +329,12 @@ class Shadowsocks
   private def crash_recovery() {
     val ab = new ArrayBuffer[String]
 
-    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`")
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
     ab.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`")
+
+    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
+    ab.append("rm /data/data/com.github.shadowsocks/pdnsd.pid")
     ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
     ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
 
@@ -340,9 +342,16 @@ class Shadowsocks
 
     if (!Utils.isLollipopOrAbove) {
       ab.clear()
+
       ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
       ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
       ab.append("rm /data/data/com.github.shadowsocks/redsocks.pid")
+
+      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
+      ab.append("rm /data/data/com.github.shadowsocks/pdnsd.pid")
+      ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
+      ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
+
       ab.append(Utils.getIptables + " -t nat -F OUTPUT")
 
       Console.runRootCommand(ab.toArray)
