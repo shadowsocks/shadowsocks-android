@@ -70,6 +70,61 @@
 
 #include <generated/blog_channel_tun2socks.h>
 
+#ifdef ANDROID
+#include <structure/BAVL.h>
+BAVL connections_tree;
+typedef struct {
+    BAddr local_addr;
+    BAddr remote_addr;
+    uint16_t port;
+    int count;
+    BAVLNode connections_tree_node;
+} Connection;
+
+static int conaddr_comparator (void *unused, uint16_t *v1, uint16_t *v2)
+{
+    if (*v1 == *v2) return 0;
+    else if (*v1 > *v2) return 1;
+    else return -1;
+}
+
+static Connection * find_connection (uint16_t port)
+{
+    BAVLNode *tree_node = BAVL_LookupExact(&connections_tree, &port);
+    if (!tree_node) {
+        return NULL;
+    }
+
+    return UPPER_OBJECT(tree_node, Connection, connections_tree_node);
+}
+
+static void remove_connection (Connection *con)
+{
+    con->count -= 1;
+    if (con->count <= 0)
+    {
+        BAVL_Remove(&connections_tree, &con->connections_tree_node);
+        free(con);
+    }
+}
+
+static void insert_connection (BAddr local_addr, BAddr remote_addr, uint16_t port)
+{
+   Connection * con = find_connection(port);
+   if (con != NULL)
+       con->count += 1;
+   else
+   {
+       Connection * tmp = (Connection *)malloc(sizeof(Connection));
+       tmp->local_addr = local_addr;
+       tmp->remote_addr = remote_addr;
+       tmp->port = port;
+       tmp->count = 1;
+       BAVL_Insert(&connections_tree, &tmp->connections_tree_node, NULL);
+   }
+}
+#endif
+
 #define LOGGER_STDOUT 1
 #define LOGGER_SYSLOG 2
 
@@ -1199,8 +1254,6 @@ int process_device_dns_packet (uint8_t *data, int data_len)
         goto fail;
     }
     
-    static BAddr local_addr;
-    static BAddr remote_addr;
     static int init = 0;
 
     int to_dns;
@@ -1257,9 +1310,13 @@ int process_device_dns_packet (uint8_t *data, int data_len)
                 // construct addresses
                 if (!init) {
                     init = 1;
-                    BAddr_InitIPv4(&local_addr, ipv4_header.source_address, udp_header.source_port);
-                    BAddr_InitIPv4(&remote_addr, ipv4_header.destination_address, udp_header.dest_port);
+                    BAVL_Init(&connections_tree, OFFSET_DIFF(Connection, port, connections_tree_node), (BAVL_comparator)conaddr_comparator, NULL);
                 }
+                BAddr local_addr;
+                BAddr remote_addr;
+                BAddr_InitIPv4(&local_addr, ipv4_header.source_address, udp_header.source_port);
+                BAddr_InitIPv4(&remote_addr, ipv4_header.destination_address, udp_header.dest_port);
+                insert_connection(local_addr, remote_addr, udp_header.source_port);
 
                 // build IP header
                 ipv4_header.destination_address = dnsgw.ipv4.ip;
@@ -1277,13 +1334,23 @@ int process_device_dns_packet (uint8_t *data, int data_len)
 
                 BLog(BLOG_INFO, "UDP: from DNS %d bytes", data_len);
 
-                // build IP header
-                ipv4_header.source_address = remote_addr.ipv4.ip;
-                ipv4_header.destination_address = local_addr.ipv4.ip;
+                Connection * con = find_connection(udp_header.dest_port);
+                if (con != NULL)
+                {
+                    // build IP header
+                    ipv4_header.source_address = con->remote_addr.ipv4.ip;
+                    ipv4_header.destination_address = con->local_addr.ipv4.ip;
 
-                // build UDP header
-                udp_header.source_port = remote_addr.ipv4.port;
+                    // build UDP header
+                    udp_header.source_port = con->remote_addr.ipv4.port;
 
+                    remove_connection(con);
+
+                }
+                else
+                {
+                    goto fail;
+                }
             }
             
             // update IPv4 header's checksum
