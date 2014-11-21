@@ -100,8 +100,8 @@ static int rc4_hmac_md5_init_key(EVP_CIPHER_CTX *ctx,
 	return 1;
 	}
 
+// Disable asm for Android x86_64
 #if	!defined(OPENSSL_NO_ASM) &&	( \
-	defined(__x86_64)	|| defined(__x86_64__)	|| \
 	defined(_M_AMD64)	|| defined(_M_X64)	|| \
 	defined(__INTEL__)		) && \
 	!(defined(__APPLE__) && defined(__MACH__))
