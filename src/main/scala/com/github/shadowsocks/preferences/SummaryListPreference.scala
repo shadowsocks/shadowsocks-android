@@ -56,7 +56,7 @@ class SummaryListPreference(context: Context, attrs: AttributeSet)
   }
 
   override def setSummary(summary: CharSequence) {
-    if (summary.toString.isEmpty) {
+    if (summary == null || summary.toString.isEmpty) {
       super.setSummary("")
     } else {
       super.setSummary(summary)

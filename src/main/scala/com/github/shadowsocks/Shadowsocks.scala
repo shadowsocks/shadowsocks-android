@@ -128,11 +128,6 @@ object Shadowsocks {
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
     pref.asInstanceOf[ListPreference].setValue(value)
-    val entry = pref.asInstanceOf[ListPreference].getEntry
-    if (entry != null)
-      pref.setSummary(entry)
-    else
-      pref.setSummary(value)
   }
 
   def updatePasswordEditTextPreference(pref: Preference, value: String) {
