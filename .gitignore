@@ -1,7 +1,6 @@
 classes
 bin
 gen
-obj
 target
 local.properties
 .classpath
@@ -30,5 +29,3 @@ src/main/assets/armeabi-v7a
 src/main/assets/x86
 src/main/assets/api-16/
 jni/Application.mk
-obj
-libs
