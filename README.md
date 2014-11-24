@@ -28,6 +28,9 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 ```bash
     git submodule update --init
+
+    # Build native binaries
+    ./build.sh
     
     # Build the App
     sbt clean android:package-release
@@ -46,6 +49,9 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 ```bash
     git submodule update --init
+
+    # Build native binaries
+    ./build.sh
 
     # Build the apk
     sbt clean android:package-release

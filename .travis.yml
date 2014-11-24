@@ -18,5 +18,6 @@ install:
 - echo "y" | android update sdk --filter extra-android-m2repository --no-ui --no-https -a
 script:
 - cp local.properties.travis local.properties
+- ./build.sh
 - sbt android:package-release
 - exit 0

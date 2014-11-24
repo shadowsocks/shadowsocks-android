@@ -40,7 +40,7 @@ package com.github.shadowsocks;
 
 public class Tun2Socks {
   static {
-    java.lang.System.loadLibrary("tun2socks-jni");
+    java.lang.System.loadLibrary("tun2socks");
   }
 
   public static native void start(String[] cmd);

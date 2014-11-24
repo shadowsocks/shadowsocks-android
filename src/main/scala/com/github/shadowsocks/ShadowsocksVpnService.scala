@@ -45,7 +45,7 @@ import java.net.InetAddress
 import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.{VpnService, LocalSocket, LocalSocketAddress}
+import android.net.{LocalServerSocket, VpnService, LocalSocket, LocalSocketAddress}
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
@@ -322,23 +322,25 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Console.runCommand(cmd)
+    Tun2Socks.start(cmd.split(" "))
+  }
 
-    Thread.sleep(300)
-
-    // try  {
-      val localSocket = new LocalSocket()
-      localSocket.setFileDescriptorsForSend(Array(conn.getFileDescriptor))
-      val localAddr = new LocalSocketAddress("tun2socks")
-      localSocket.connect(localAddr)
-      val output = localSocket.getOutputStream
-      output.write(1)
-      output.flush()
-      output.close()
-      localSocket.close()
-    // } catch {
-    //   case ex: Exception => // Ignored
-    // }
+  def startTunFdServer() {
+    spawn {
+      val fdServer = new LocalServerSocket("tun2socks")
+      try  {
+        val localSocket = fdServer.accept()
+        localSocket.setFileDescriptorsForSend(Array(conn.getFileDescriptor))
+        val output = localSocket.getOutputStream
+        output.write(1)
+        output.flush()
+        output.close()
+        localSocket.close()
+        fdServer.close()
+      } catch {
+        case ex: Exception => Log.e(TAG, "Exception", ex) // Ignored
+      }
+    }
   }
 
   /** Called when the activity is first created. */
