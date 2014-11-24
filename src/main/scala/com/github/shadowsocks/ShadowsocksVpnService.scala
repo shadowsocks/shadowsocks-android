@@ -45,7 +45,7 @@ import java.net.InetAddress
 import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.VpnService
+import android.net.{VpnService, LocalSocket, LocalSocketAddress}
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
@@ -322,19 +322,33 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    spawn {
-      Tun2Socks.start(cmd.split(" "))
-    }
+    Console.runCommand(cmd)
+
+    Thread.sleep(300)
+
+    // try  {
+      val localSocket = new LocalSocket()
+      localSocket.setFileDescriptorsForSend(Array(conn.getFileDescriptor))
+      val localAddr = new LocalSocketAddress("tun2socks")
+      localSocket.connect(localAddr)
+      val output = localSocket.getOutputStream
+      output.write(1)
+      output.flush()
+      output.close()
+      localSocket.close()
+    // } catch {
+    //   case ex: Exception => // Ignored
+    // }
   }
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
-    startVpn()
     startShadowsocksDaemon()
     if (!config.isUdpDns) {
       startDnsDaemon()
       startDnsTunnel()
     }
+    startVpn()
     true
   }
 
@@ -362,7 +376,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd")) {
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "tun2socks")) {
       try {
         val pid = scala.io.Source.fromFile(Path.BASE + task + ".pid").mkString.trim.toInt
         Process.killProcess(pid)
@@ -371,7 +385,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
       }
     }
-    Tun2Socks.stop();
   }
 
   override def startRunner(c: Config) {

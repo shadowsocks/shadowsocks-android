@@ -18,6 +18,7 @@
 
   <application
       android:allowBackup="true"
+      android:debuggable="true"
       android:name=".ShadowsocksApplication"
       android:hardwareAccelerated="true"
       android:icon="@drawable/ic_launcher"

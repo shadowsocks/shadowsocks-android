@@ -123,7 +123,7 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.route, Key.isGlobalProxy, Key.proxyedApps,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL)
+  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {

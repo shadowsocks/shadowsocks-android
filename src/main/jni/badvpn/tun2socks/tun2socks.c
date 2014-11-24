@@ -71,6 +71,7 @@
 #include <generated/blog_channel_tun2socks.h>
 
 #ifdef ANDROID
+#include <sys/un.h>
 #include <structure/BAVL.h>
 BAVL connections_tree;
 typedef struct {
@@ -143,6 +144,94 @@ static void tcp_remove(struct tcp_pcb* pcb_list)
         pcb = pcb->next;
         tcp_abort(pcb2);
     }
+}
+
+ssize_t
+sock_fd_write(int sock, void *buf, ssize_t buflen, int fd)
+{
+    ssize_t     size;
+    struct msghdr   msg;
+    struct iovec    iov;
+    union {
+        struct cmsghdr  cmsghdr;
+        char        control[CMSG_SPACE(sizeof (int))];
+    } cmsgu;
+    struct cmsghdr  *cmsg;
+
+    iov.iov_base = buf;
+    iov.iov_len = buflen;
+
+    msg.msg_name = NULL;
+    msg.msg_namelen = 0;
+    msg.msg_iov = &iov;
+    msg.msg_iovlen = 1;
+
+    if (fd != -1) {
+        msg.msg_control = cmsgu.control;
+        msg.msg_controllen = sizeof(cmsgu.control);
+
+        cmsg = CMSG_FIRSTHDR(&msg);
+        cmsg->cmsg_len = CMSG_LEN(sizeof (int));
+        cmsg->cmsg_level = SOL_SOCKET;
+        cmsg->cmsg_type = SCM_RIGHTS;
+
+        *((int *) CMSG_DATA(cmsg)) = fd;
+    } else {
+        msg.msg_control = NULL;
+        msg.msg_controllen = 0;
+    }
+
+    size = sendmsg(sock, &msg, 0);
+
+    if (size < 0)
+        perror ("sendmsg");
+    return size;
+}
+
+ssize_t
+sock_fd_read(int sock, void *buf, ssize_t bufsize, int *fd)
+{
+    ssize_t     size;
+
+    if (fd) {
+        struct msghdr   msg;
+        struct iovec    iov;
+        union {
+            struct cmsghdr  cmsghdr;
+            char        control[CMSG_SPACE(sizeof (int))];
+        } cmsgu;
+        struct cmsghdr  *cmsg;
+
+        iov.iov_base = buf;
+        iov.iov_len = bufsize;
+
+        msg.msg_name = NULL;
+        msg.msg_namelen = 0;
+        msg.msg_iov = &iov;
+        msg.msg_iovlen = 1;
+        msg.msg_control = cmsgu.control;
+        msg.msg_controllen = sizeof(cmsgu.control);
+        size = recvmsg (sock, &msg, 0);
+        if (size < 0) {
+            perror ("recvmsg");
+            return -1;
+        }
+        cmsg = CMSG_FIRSTHDR(&msg);
+        if (cmsg && cmsg->cmsg_len == CMSG_LEN(sizeof(int))) {
+            if (cmsg->cmsg_level != SOL_SOCKET) {
+                return -1;
+            }
+            if (cmsg->cmsg_type != SCM_RIGHTS) {
+                return -1;
+            }
+
+            *fd = *((int *) CMSG_DATA(cmsg));
+        } else {
+            *fd = -1;
+            return -1;
+        }
+    }
+    return size;
 }
 
 #endif
@@ -381,6 +470,72 @@ static void daemonize(const char* path) {
     close(STDOUT_FILENO);
     close(STDERR_FILENO);
 }
+
+int
+recv_tun_fd (void)
+{
+    int s_fd, c_fd, fd_to_read;
+    struct sockaddr_un addr;
+    socklen_t addr_len;
+    char buf[16];
+
+    s_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (s_fd < 0) {
+        BLog(BLOG_ERROR, "Error to create local socket");
+        return -1;
+    }
+
+    BLog(BLOG_NOTICE, "Create socket");
+
+    addr_len = sizeof(struct sockaddr_un);
+    memset(&addr, 0, addr_len);
+    addr.sun_family = AF_UNIX;
+    snprintf(addr.sun_path + 1, 14, "tun2socks");
+
+    if (bind(s_fd, (struct sockaddr *) &addr, addr_len) != 0)
+    {
+        BLog(BLOG_ERROR, "Error to bind local socket");
+        close(s_fd);
+        return -1;
+    }
+
+    BLog(BLOG_NOTICE, "Bind socket");
+
+    if (listen(s_fd, 5) != 0)
+    {
+        BLog(BLOG_ERROR, "Error to listen on local socket");
+        close(s_fd);
+        return -1;
+    }
+
+    BLog(BLOG_NOTICE, "Listen on socket");
+
+    if ((c_fd = accept(s_fd, (struct sockaddr *)&addr, &addr_len)) != -1)
+    {
+        char buf[1];
+
+        BLog(BLOG_NOTICE, "Accept a connection");
+
+        read(c_fd, buf, 1);
+        sock_fd_read(c_fd, buf, sizeof(buf), &fd_to_read);
+
+        buf[0] = 0;
+        write(c_fd, buf, 1);
+        close(c_fd);
+    }
+    else
+    {
+        BLog(BLOG_ERROR, "Error to accept socket");
+        close(s_fd);
+        return -1;
+    }
+
+    close(s_fd);
+
+    if (fd_to_read == 0) return -1;
+    options.tun_fd = fd_to_read;
+}
+
 #endif
 
 int main (int argc, char **argv)
@@ -436,8 +591,25 @@ int main (int argc, char **argv)
             BLog_SetChannelLoglevel(i, options.loglevel);
         }
     }
-    
+
     BLog(BLOG_NOTICE, "initializing "GLOBAL_PRODUCT_NAME" "PROGRAM_NAME" "GLOBAL_VERSION);
+
+#ifdef ANDROID
+    if (options.pid) {
+        daemonize(options.pid);
+    }
+
+    BLog(BLOG_NOTICE, "Receiving the tun fd");
+
+    // Wait to recevie tun fd
+    if (recv_tun_fd() == -1) {
+        BLog(BLOG_ERROR, "Failed to recv tun fd");
+        return -1;
+    }
+
+    BLog(BLOG_NOTICE, "Received the tun fd successfully");
+
+#endif
     
     // clear password contents pointer
     password_file_contents = NULL;
@@ -563,12 +735,6 @@ int main (int argc, char **argv)
     // init number of clients
     num_clients = 0;
 
-#if 0
-    if (options.pid) {
-        daemonize(options.pid);
-    }
-#endif
-    
     // enter event loop
     BLog(BLOG_NOTICE, "entering event loop");
     BReactor_Exec(&ss);
