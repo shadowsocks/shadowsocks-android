@@ -12,6 +12,8 @@ compileOrder in Compile := CompileOrder.JavaThenScala
 
 ndkJavah in Android := List()
 
+ndkBuild in Android := List()
+
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
 resolvers += "madeye private releases" at "http://madeye-maven-repository.googlecode.com/git/"

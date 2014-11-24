@@ -123,6 +123,28 @@ static void insert_connection (BAddr local_addr, BAddr remote_addr, uint16_t por
        BAVL_Insert(&connections_tree, &tmp->connections_tree_node, NULL);
    }
 }
+
+static void free_connections()
+{
+    while (!BAVL_IsEmpty(&connections_tree)) {
+        Connection *con = UPPER_OBJECT(BAVL_GetLast(&connections_tree), Connection, connections_tree_node);
+        BAVL_Remove(&connections_tree, &con->connections_tree_node);
+    }
+}
+
+static void tcp_remove(struct tcp_pcb* pcb_list)
+{
+    struct tcp_pcb *pcb = pcb_list;
+    struct tcp_pcb *pcb2;
+
+    while(pcb != NULL)
+    {
+        pcb2 = pcb;
+        pcb = pcb->next;
+        tcp_abort(pcb2);
+    }
+}
+
 #endif
 
 #define LOGGER_STDOUT 1
@@ -266,9 +288,11 @@ int num_clients;
 #ifdef ANDROID
 // Address of dnsgw
 BAddr dnsgw;
+void terminate (void);
+#else
+static void terminate (void);
 #endif
 
-static void terminate (void);
 static void print_help (const char *name);
 static void print_version (void);
 static int parse_arguments (int argc, char *argv[]);
@@ -386,12 +410,6 @@ int main (int argc, char **argv)
         return 0;
     }
 
-#ifdef ANDROID
-    if (options.pid) {
-        daemonize(options.pid);
-    }
-#endif
-    
     // initialize logger
     switch (options.logger) {
         case LOGGER_STDOUT:
@@ -544,6 +562,12 @@ int main (int argc, char **argv)
     
     // init number of clients
     num_clients = 0;
+
+#if 0
+    if (options.pid) {
+        daemonize(options.pid);
+    }
+#endif
     
     // enter event loop
     BLog(BLOG_NOTICE, "entering event loop");
@@ -571,6 +595,14 @@ int main (int argc, char **argv)
     
     BReactor_RemoveTimer(&ss, &tcp_timer);
     BFree(device_write_buf);
+
+#ifdef ANDROID
+    tcp_remove(tcp_bound_pcbs);
+    tcp_remove(tcp_active_pcbs);
+    tcp_remove(tcp_tw_pcbs);
+    free_connections();
+#endif
+
 fail5:
     BPending_Free(&lwip_init_job);
     if (options.udpgw_remote_server_addr) {

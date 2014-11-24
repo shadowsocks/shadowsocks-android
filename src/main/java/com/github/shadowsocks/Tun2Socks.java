@@ -1,5 +1,5 @@
 /* Shadowsocks - A shadowsocks client for Android
- * Copyright (C) 2012 <max.c.lv@gmail.com>
+ * Copyright (C) 2014 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,18 +38,11 @@
 
 package com.github.shadowsocks;
 
-public class Core {
+public class Tun2Socks {
   static {
-    java.lang.System.loadLibrary("ss-local-jni");
-    java.lang.System.loadLibrary("ss-tunnel-jni");
     java.lang.System.loadLibrary("tun2socks-jni");
-    java.lang.System.loadLibrary("pdnsd-jni");
-    java.lang.System.loadLibrary("redsocks-jni");
   }
 
-  public static native void sslocal(String[] cmd);
-  public static native void sstunnel(String[] cmd);
-  public static native void tun2socks(String[] cmd);
-  public static native void pdnsd(String[] cmd);
-  public static native void redsocks(String[] cmd);
+  public static native void start(String[] cmd);
+  public static native void stop();
 }

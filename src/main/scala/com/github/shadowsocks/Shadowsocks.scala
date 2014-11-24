@@ -123,7 +123,7 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.route, Key.isGlobalProxy, Key.proxyedApps,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.IPTABLES)
+  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -833,6 +833,14 @@ class Shadowsocks
   def reset() {
 
     crash_recovery()
+
+    copyAssets(System.getABI)
+
+    val ab = new ArrayBuffer[String]
+    for (executable <- Shadowsocks.EXECUTABLES) {
+      ab.append("chmod 755 " + Path.BASE + executable)
+    }
+    Console.runCommand(ab.toArray)
 
   }
 

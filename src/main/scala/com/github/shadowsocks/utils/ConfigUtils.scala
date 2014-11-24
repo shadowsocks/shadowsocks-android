@@ -46,7 +46,7 @@ import scalaj.http.{HttpOptions, Http}
 import com.github.shadowsocks.aidl.Config
 
 object ConfigUtils {
-  val SHADOWSOCKS = "{\"server\": [%s], \"server_port\": %d, \"local_port\": %d, \"password\": %s, \"timeout\": %d}"
+  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
   val REDSOCKS = "base {" +
     " log_debug = off;" +
     " log_info = off;" +

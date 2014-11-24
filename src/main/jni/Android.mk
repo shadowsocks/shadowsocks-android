@@ -120,13 +120,13 @@ REDSOCKS_SOURCES := base.c dnstc.c http-connect.c \
 
 LOCAL_STATIC_LIBRARIES := libevent
 
-LOCAL_MODULE := redsocks-jni
-LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES)) main-jni.cpp
-LOCAL_CFLAGS := -O2 -std=gnu99 -DREDSOCKS_JNI -I$(LOCAL_PATH)/redsocks \
+LOCAL_MODULE := redsocks
+LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES)) 
+LOCAL_CFLAGS := -O2 -std=gnu99 -I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
 	-I$(LOCAL_PATH)/libevent
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## pdnsd library
@@ -134,13 +134,13 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c) main-jni.cpp
+PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
 
-LOCAL_MODULE    := pdnsd-jni
+LOCAL_MODULE    := pdnsd
 LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -Wall -O2 -DPDNSD_JNI -I$(LOCAL_PATH)/pdnsd
+LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## shadowsocks local library
@@ -150,9 +150,9 @@ include $(CLEAR_VARS)
 
 SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c acl.c 
 
-LOCAL_MODULE    := ss-local-jni
-LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES)) main-jni.cpp
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DSSLOCAL_JNI \
+LOCAL_MODULE    := ss-local
+LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
 					-I$(LOCAL_PATH)/libev/ \
 					-I$(LOCAL_PATH)/openssl/include  \
@@ -163,22 +163,18 @@ LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork
 
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## shadowsocks tunnel
-########################################################
-
-########################################################
-## shadowsocks tunnel library
 ########################################################
 
 include $(CLEAR_VARS)
 
 SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
 
-LOCAL_MODULE    := ss-tunnel-jni
-LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES)) main-jni.cpp
+LOCAL_MODULE    := ss-tunnel
+LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
 					-I$(LOCAL_PATH)/libev/ \
@@ -188,7 +184,7 @@ LOCAL_STATIC_LIBRARIES := libev libcrypto
 
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)
 
 ########################################################
 ## system
@@ -292,7 +288,7 @@ LOCAL_MODULE := tun2socks-jni
 
 LOCAL_LDLIBS := -ldl -llog
 
-LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES)) main-jni.cpp
+LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES)) tun2socks-jni.cpp
 
 include $(BUILD_SHARED_LIBRARY)
 

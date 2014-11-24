@@ -102,14 +102,17 @@ class ShadowsocksNatService extends Service with BaseService {
       })
     }
 
+    val conf = ConfigUtils
+      .SHADOWSOCKS.format(config.proxy, config.remotePort, config.localPort,
+        config.sitekey, config.encMethod, 10)
+    ConfigUtils.printToFile(new File(Path.BASE + "ss-local.json"))(p => {
+      p.println(conf)
+    })
+
     val cmd = new ArrayBuffer[String]
-    cmd += ("ss-local"
+    cmd += (Path.BASE + "ss-local"
           , "-b" , "127.0.0.1"
-          , "-s" , config.proxy
-          , "-p" , config.remotePort.toString
-          , "-l" , config.localPort.toString
-          , "-k" , config.sitekey
-          , "-m" , config.encMethod
+          , "-c" , Path.BASE + "ss-local.json"
           , "-f" , Path.BASE + "ss-local.pid")
 
     if (config.route != Route.ALL) {
@@ -118,47 +121,57 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-
-    Core.sslocal(cmd.toArray)
+    Console.runCommand(cmd.mkString(" "))
   }
 
-  def startDnsDaemon() {
+  def startTunnel() {
     if (config.isUdpDns) {
+      val conf = ConfigUtils
+        .SHADOWSOCKS.format(config.proxy, config.remotePort, 8153,
+          config.sitekey, config.encMethod, 10)
+      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel.json"))(p => {
+        p.println(conf)
+      })
       val cmd = new ArrayBuffer[String]
-      cmd += ("ss-tunnel" , "-u"
+      cmd += (Path.BASE + "ss-tunnel" , "-u"
             , "-b" , "127.0.0.1"
             , "-l" , "8153" 
             , "-L" , "8.8.8.8:53"
-            , "-s" , config.proxy
-            , "-p" , config.remotePort.toString
-            , "-k" , config.sitekey
-            , "-m" , config.encMethod
+            , "-c" , Path.BASE + "ss-tunnel.json"
             , "-f" , Path.BASE + "ss-tunnel.pid")
-      if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-      Core.sstunnel(cmd.toArray)
-    } else {
-      val cmdBuf = new ArrayBuffer[String]
-      cmdBuf += ("ss-tunnel"
-        , "-b", "127.0.0.1"
-        , "-l", "8163"
-        , "-L", "8.8.8.8:53"
-        , "-s", config.proxy
-        , "-p", config.remotePort.toString
-        , "-k", config.sitekey
-        , "-m", config.encMethod
-        , "-f", Path.BASE + "ss-tunnel.pid")
-      if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
-      Core.sstunnel(cmdBuf.toArray)
 
+      if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+      Console.runCommand(cmd.mkString(" "))
+    } else {
       val conf = ConfigUtils
-        .PDNSD_BYPASS.format("127.0.0.1", getString(R.string.exclude), 8163)
-      ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
-         p.println(conf)
+        .SHADOWSOCKS.format(config.proxy, config.remotePort, 8163,
+          config.sitekey, config.encMethod, 10)
+      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel.json"))(p => {
+        p.println(conf)
       })
-      val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
-      if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-      Core.pdnsd(cmd.split(" "))
+      val cmdBuf = new ArrayBuffer[String]
+      cmdBuf += (Path.BASE + "ss-tunnel"
+        , "-b" , "127.0.0.1"
+        , "-l" , "8163"
+        , "-L" , "8.8.8.8:53"
+        , "-c" , Path.BASE + "ss-tunnel.json"
+        , "-f" , Path.BASE + "ss-tunnel.pid")
+
+      if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
+      Console.runCommand(cmdBuf.mkString(" "))
     }
+  }
+
+  def startDnsDaemon() {
+    val conf = ConfigUtils
+      .PDNSD_BYPASS.format("127.0.0.1", getString(R.string.exclude), 8163)
+    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+       p.println(conf)
+    })
+    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    Console.runCommand(cmd)
   }
 
   def getVersionName: String = {
@@ -175,20 +188,21 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.format(config.localPort)
-    val cmd = "redsocks -p %sredsocks.pid -c %sredsocks.conf"
+    val cmd = Path.BASE + "redsocks -p %sredsocks.pid -c %sredsocks.conf"
       .format(Path.BASE, Path.BASE)
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
       p.println(conf)
     })
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Core.redsocks(cmd.split(" "))
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    Console.runCommand(cmd);
   }
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
 
-    startDnsDaemon()
+    startTunnel()
+    if (!config.isUdpDns) startDnsDaemon()
     startRedsocksDaemon()
     startShadowsocksDaemon()
     setupIptables()
@@ -266,22 +280,16 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def killProcesses() {
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
+      try {
+        val pid = scala.io.Source.fromFile(Path.BASE + task + ".pid").mkString.trim.toInt
+        Process.killProcess(pid)
+        Log.d(TAG, "kill pid: " + pid)
+      } catch {
+        case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
+      }
+    }
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
-
-    val ab = new ArrayBuffer[String]
-
-    ab.append("kill -9 `cat " + Path.BASE + "ss-tunnel.pid`")
-    ab.append("kill -9 `cat " + Path.BASE +"redsocks.pid`")
-    ab.append("killall -9 redsocks")
-    ab.append("kill -15 `cat " + Path.BASE + "pdnsd.pid`")
-    ab.append("killall -15 pdnsd")
-
-    Console.runRootCommand(ab.toArray)
-
-    ab.clear()
-    ab.append("kill -9 `cat " + Path.BASE + "ss-local.pid`")
-
-    Console.runCommand(ab.toArray)
   }
 
   def flushDNS() {

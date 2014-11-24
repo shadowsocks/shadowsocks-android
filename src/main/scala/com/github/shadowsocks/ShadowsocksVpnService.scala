@@ -107,14 +107,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       })
     }
 
+    val conf = ConfigUtils
+      .SHADOWSOCKS.format(config.proxy, config.remotePort, config.localPort,
+        config.sitekey, config.encMethod, 10)
+    ConfigUtils.printToFile(new File(Path.BASE + "ss-local.json"))(p => {
+      p.println(conf)
+    })
+
     val cmd = new ArrayBuffer[String]
-    cmd +=("ss-local", "-u"
+    cmd +=(Path.BASE + "ss-local", "-u"
       , "-b", "127.0.0.1"
-      , "-s", config.proxy
-      , "-p", config.remotePort.toString
-      , "-l", config.localPort.toString
-      , "-k", config.sitekey
-      , "-m", config.encMethod
+      , "-c", Path.BASE + "ss-local.json"
       , "-f", Path.BASE + "ss-local.pid")
 
     if (Utils.isLollipopOrAbove && config.route != Route.ALL) {
@@ -123,22 +126,26 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    Core.sslocal(cmd.toArray)
+    Console.runCommand(cmd.mkString(" "))
   }
 
   def startDnsTunnel() = {
+    val conf = ConfigUtils
+      .SHADOWSOCKS.format(config.proxy, config.remotePort, 8163,
+        config.sitekey, config.encMethod, 10)
+    ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel.json"))(p => {
+      p.println(conf)
+    })
     val cmd = new ArrayBuffer[String]
-    cmd +=("ss-tunnel"
+    cmd +=(Path.BASE + "ss-tunnel"
       , "-b", "127.0.0.1"
       , "-l", "8163"
       , "-L", "8.8.8.8:53"
-      , "-s", config.proxy
-      , "-p", config.remotePort.toString
-      , "-k", config.sitekey
-      , "-m", config.encMethod
+      , "-c", Path.BASE + "ss-tunnel.json"
       , "-f", Path.BASE + "ss-tunnel.pid")
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    Core.sstunnel(cmd.toArray)
+    Console.runCommand(cmd.mkString(" "))
   }
 
   def startDnsDaemon() {
@@ -153,8 +160,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
     val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Core.pdnsd(cmd.split(" "))
+    Console.runCommand(cmd)
   }
 
   def getVersionName: String = {
@@ -314,7 +322,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Core.tun2socks(cmd.split(" "))
+    spawn {
+      Tun2Socks.start(cmd.split(" "))
+    }
   }
 
   /** Called when the activity is first created. */
@@ -352,7 +362,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
-    for (task <- Array("ss-local", "ss-tunnel", "tun2socks", "pdnsd")) {
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd")) {
       try {
         val pid = scala.io.Source.fromFile(Path.BASE + task + ".pid").mkString.trim.toInt
         Process.killProcess(pid)
@@ -361,6 +371,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
       }
     }
+    Tun2Socks.stop();
   }
 
   override def startRunner(c: Config) {
