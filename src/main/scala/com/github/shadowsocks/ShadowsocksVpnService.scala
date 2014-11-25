@@ -322,25 +322,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Tun2Socks.start(cmd.split(" "))
-  }
-
-  def startTunFdServer() {
-    spawn {
-      val fdServer = new LocalServerSocket("tun2socks")
-      try  {
-        val localSocket = fdServer.accept()
-        localSocket.setFileDescriptorsForSend(Array(conn.getFileDescriptor))
-        val output = localSocket.getOutputStream
-        output.write(1)
-        output.flush()
-        output.close()
-        localSocket.close()
-        fdServer.close()
-      } catch {
-        case ex: Exception => Log.e(TAG, "Exception", ex) // Ignored
-      }
-    }
+    System.exec(cmd);
   }
 
   /** Called when the activity is first created. */
