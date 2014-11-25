@@ -402,13 +402,6 @@ int main (int argc, char **argv)
         goto fail0;
     }
 
-    if (options.fake_proc) {
-        // Fake process name to cheat on Lollipop
-        strcpy(argv[0], "com.github.shadowsocks");
-        prctl(PR_SET_NAME, "com.github.shadowsocks");
-    }
-
-
     // handle --help and --version
     if (options.help) {
         print_version();
@@ -668,7 +661,6 @@ void print_help (const char *name)
         "        [--loglevel <0-5/none/error/warning/notice/info/debug>]\n"
         "        [--channel-loglevel <channel-name> <0-5/none/error/warning/notice/info/debug>] ...\n"
 #ifdef ANDROID
-        "        [--fake-proc]\n"
         "        [--tunfd <fd>]\n"
         "        [--tunmtu <mtu>]\n"
         "        [--dnsgw <dns_gateway_address>]\n"
@@ -818,9 +810,6 @@ int parse_arguments (int argc, char *argv[])
             i += 2;
         }
 #ifdef ANDROID
-        else if (!strcmp(arg, "--fake-proc")) {
-            options.fake_proc = 1;
-        }
         else if (!strcmp(arg, "--tunfd")) {
             if (1 >= argc - i) {
                 fprintf(stderr, "%s: requires an argument\n", arg);

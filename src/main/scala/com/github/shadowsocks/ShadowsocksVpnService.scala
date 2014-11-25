@@ -320,13 +320,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     else
       cmd += " --dnsgw %s:8153".format(PRIVATE_VLAN.format("1"))
 
-    if (Utils.isLollipopOrAbove) {
-      cmd += " --fake-proc";
-    }
-
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    System.exec(cmd);
+    Tun2Socks.start(cmd.split(" "))
   }
 
   /** Called when the activity is first created. */
