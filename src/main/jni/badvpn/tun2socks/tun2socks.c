@@ -192,6 +192,7 @@ struct {
 #ifdef ANDROID
     int tun_fd;
     int tun_mtu;
+    int fake_proc;
     char *pid;
     char *dnsgw;
 #else
@@ -391,10 +392,6 @@ int main (int argc, char **argv)
         return 1;
     }
 
-    // Fake process name to cheat on Lollipop
-    strcpy(argv[0], "com.github.shadowsocks");
-    prctl(PR_SET_NAME, "com.github.shadowsocks");
-
     // open standard streams
     open_standard_streams();
 
@@ -404,6 +401,13 @@ int main (int argc, char **argv)
         print_help(argv[0]);
         goto fail0;
     }
+
+    if (options.fake_proc) {
+        // Fake process name to cheat on Lollipop
+        strcpy(argv[0], "com.github.shadowsocks");
+        prctl(PR_SET_NAME, "com.github.shadowsocks");
+    }
+
 
     // handle --help and --version
     if (options.help) {
@@ -664,6 +668,7 @@ void print_help (const char *name)
         "        [--loglevel <0-5/none/error/warning/notice/info/debug>]\n"
         "        [--channel-loglevel <channel-name> <0-5/none/error/warning/notice/info/debug>] ...\n"
 #ifdef ANDROID
+        "        [--fake-proc]\n"
         "        [--tunfd <fd>]\n"
         "        [--tunmtu <mtu>]\n"
         "        [--dnsgw <dns_gateway_address>]\n"
@@ -718,6 +723,7 @@ int parse_arguments (int argc, char *argv[])
 #ifdef ANDROID
     options.tun_fd = -1;
     options.tun_mtu = 1500;
+    options.fake_proc = 0;
     options.pid = NULL;
 #else
     options.tundev = NULL;
@@ -812,6 +818,9 @@ int parse_arguments (int argc, char *argv[])
             i += 2;
         }
 #ifdef ANDROID
+        else if (!strcmp(arg, "--fake-proc")) {
+            options.fake_proc = 1;
+        }
         else if (!strcmp(arg, "--tunfd")) {
             if (1 >= argc - i) {
                 fprintf(stderr, "%s: requires an argument\n", arg);
