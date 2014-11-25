@@ -216,27 +216,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     } else {
       if (!Utils.isLollipopOrAbove) {
         config.route match {
-          case Route.ALL =>
-            for (i <- 1 to 223) {
-              if (i != 26 && i != 127) {
-                val addr = i.toString + ".0.0.0"
-                val cidr = addr + "/8"
-                val net = new SubnetUtils(cidr)
-
-                if (!isByass(net)) {
-                  builder.addRoute(addr, 8)
-                } else {
-                  for (j <- 0 to 255) {
-                    val subAddr = i.toString + "." + j.toString + ".0.0"
-                    val subCidr = subAddr + "/16"
-                    val subNet = new SubnetUtils(subCidr)
-                    if (!isByass(subNet)) {
-                      builder.addRoute(subAddr, 16)
-                    }
-                  }
-                }
-              }
-            }
           case Route.BYPASS_LAN =>
             for (i <- 1 to 223) {
               if (i != 26 && i != 127) {
@@ -273,6 +252,27 @@ class ShadowsocksVpnService extends VpnService with BaseService {
                 builder.addRoute(addr(0), addr(1).toInt)
               }
             })
+          case _ =>
+            for (i <- 1 to 223) {
+              if (i != 26 && i != 127) {
+                val addr = i.toString + ".0.0.0"
+                val cidr = addr + "/8"
+                val net = new SubnetUtils(cidr)
+
+                if (!isByass(net)) {
+                  builder.addRoute(addr, 8)
+                } else {
+                  for (j <- 0 to 255) {
+                    val subAddr = i.toString + "." + j.toString + ".0.0"
+                    val subCidr = subAddr + "/16"
+                    val subNet = new SubnetUtils(subCidr)
+                    if (!isByass(subNet)) {
+                      builder.addRoute(subAddr, 16)
+                    }
+                  }
+                }
+              }
+            }
         }
       } else {
         if (config.route == Route.ALL) {
