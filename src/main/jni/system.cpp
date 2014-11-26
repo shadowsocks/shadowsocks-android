@@ -32,9 +32,6 @@ jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
 
 void Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring cmd) {
     const char *str  = env->GetStringUTFChars(cmd, 0);
-    setenv("LD_LIBRARY_PATH", "/vendor/lib:/system/lib", 1);
-    setegid(getgid());
-    seteuid(getuid());
     system(str);
     env->ReleaseStringUTFChars(cmd, str);
 }
@@ -47,6 +44,8 @@ static JNINativeMethod method_table[] = {
     { "getABI", "()Ljava/lang/String;",
         (void*) Java_com_github_shadowsocks_system_getabi }
 };
+
+
 
 /*
  * Register several native methods for one class.
