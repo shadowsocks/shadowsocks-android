@@ -151,7 +151,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsDaemon() {
     val conf = {
       if (Utils.isLollipopOrAbove) {
-        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", getString(R.string.exclude), 8163)
+        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", 8153, getString(R.string.exclude), 8163)
       } else {
         ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
       }

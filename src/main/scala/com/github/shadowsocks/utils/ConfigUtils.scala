@@ -130,7 +130,7 @@ object ConfigUtils {
       | perm_cache = 2048;
       | cache_dir = "/data/data/com.github.shadowsocks";
       | server_ip = %s;
-      | server_port = 8153;
+      | server_port = %d;
       | query_method = tcp_only;
       | run_ipv4 = on;
       | min_ttl = 15m;

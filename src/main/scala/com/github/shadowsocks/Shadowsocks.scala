@@ -123,7 +123,7 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.route, Key.isGlobalProxy, Key.proxyedApps,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
+  val EXECUTABLES = Array(Executable.IPTABLES, Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -335,21 +335,24 @@ class Shadowsocks
 
     Console.runCommand(ab.toArray)
 
-    if (!Utils.isLollipopOrAbove) {
+    {
       ab.clear()
 
       ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
       ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
       ab.append("rm /data/data/com.github.shadowsocks/redsocks.pid")
 
+      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
+      ab.append("rm /data/data/com.github.shadowsocks/ss-tunnel.conf")
+      ab.append("rm /data/data/com.github.shadowsocks/ss-tunnel.pid")
+
       ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
       ab.append("rm /data/data/com.github.shadowsocks/pdnsd.pid")
       ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
       ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
 
-      ab.append(Utils.getIptables + " -t nat -F OUTPUT")
-
       Console.runRootCommand(ab.toArray)
+      Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
     }
   }
 
@@ -506,7 +509,7 @@ class Shadowsocks
 
     // Bind to the service
     spawn {
-      val isRoot = !Utils.isLollipopOrAbove && Console.isRoot
+      val isRoot = Console.isRoot
       handler.post(new Runnable {
         override def run() {
           status.edit.putBoolean(Key.isRoot, isRoot).commit()
@@ -776,7 +779,7 @@ class Shadowsocks
       if (pref != null) {
         if (Seq(Key.isGlobalProxy, Key.proxyedApps)
           .contains(name)) {
-          pref.setEnabled(enabled && (Utils.isLollipopOrAbove || !isVpnEnabled))
+          pref.setEnabled(enabled && (!isVpnEnabled))
         } else {
           pref.setEnabled(enabled)
         }

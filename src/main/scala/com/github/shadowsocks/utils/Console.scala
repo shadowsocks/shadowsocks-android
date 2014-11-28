@@ -45,36 +45,21 @@ import java.util
 
 object Console {
 
-  private var shell: Shell.Interactive = null
-  private var rootShell: Shell.Interactive = null
-
-  private def openShell() {
-    if (shell == null) {
-      val builder = new Builder()
-      shell = builder
-        .useSH()
-        .setWatchdogTimeout(10)
-        .open(new OnCommandResultListener {
-        override def onCommandResult(commandCode: Int, exitCode: Int,
-          output: util.List[String]) {
-          if (exitCode < 0) {
-            shell.close()
-            shell = null
-          }
-        }
-      })
-    }
+  private def openShell(): Shell.Interactive = {
+    val builder = new Builder()
+    builder
+      .useSH()
+      .setWatchdogTimeout(10)
+      .open()
   }
 
-  private def openRootShell() {
-    if (rootShell == null) {
-      val builder = new Builder()
-      rootShell = builder
-        .setShell(SU.shell(0, "u:r:untrusted_app:s0"))
-        .setWantSTDERR(true)
-        .setWatchdogTimeout(10)
-        .open()
-    }
+  private def openRootShell(context: String): Shell.Interactive = {
+    val builder = new Builder()
+    builder
+      .setShell(SU.shell(0, context))
+      .setWantSTDERR(true)
+      .setWatchdogTimeout(10)
+      .open()
   }
 
   def runCommand(command: String) {
@@ -82,39 +67,48 @@ object Console {
   }
 
   def runCommand(commands: Array[String]) {
-    if (shell == null) {
-      openShell()
-    }
-    val ts = shell
-    ts.addCommand(commands)
-    ts.waitForIdle()
+    val shell = openShell()
+    shell.addCommand(commands, 0, new OnCommandResultListener {
+      override def onCommandResult(commandCode: Int, exitCode: Int,
+                                   output: util.List[String]) {
+        if (exitCode < 0) {
+          shell.close()
+        }
+      }
+    })
+    shell.waitForIdle()
+    shell.close()
   }
 
   def runRootCommand(command: String): String = runRootCommand(Array(command))
+  def runRootCommand(command: String, context: String): String = runRootCommand(Array(command), context)
+  def runRootCommand(commands: Array[String]): String = runRootCommand(commands, "u:r:init_shell:s0")
 
-  def runRootCommand(commands: Array[String]): String = {
+  def runRootCommand(commands: Array[String], context: String): String = {
     if (!isRoot) {
       return null
     }
-    if (rootShell == null) {
-      openRootShell()
-    }
-    val ts = rootShell
+    val shell = openRootShell(context)
     val sb = new StringBuilder
-    ts.addCommand(commands, 0, new OnCommandResultListener {
+    shell.addCommand(commands, 0, new OnCommandResultListener {
       override def onCommandResult(commandCode: Int, exitCode: Int,
         output: util.List[String]) {
         if (exitCode < 0) {
-          rootShell.close()
-          rootShell = null
+          shell.close()
         } else {
           import scala.collection.JavaConversions._
           output.foreach(line => sb.append(line).append('\n'))
         }
       }
     })
-    if (ts.waitForIdle()) sb.toString()
-    else null
+    if (shell.waitForIdle()) {
+      shell.close()
+      sb.toString()
+    }
+    else {
+      shell.close()
+      null
+    }
   }
 
   def isRoot: Boolean = SU.available()
