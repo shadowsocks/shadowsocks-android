@@ -41,7 +41,6 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
-import java.util.Timer
 
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
@@ -85,11 +84,6 @@ class ShadowsocksNatService extends Service with BaseService {
   private var mSetForegroundArgs = new Array[AnyRef](1)
   private var mStartForegroundArgs = new Array[AnyRef](2)
   private var mStopForegroundArgs = new Array[AnyRef](1)
-
-  private var lastTxRate = 0
-  private var lastRxRate = 0
-  private var timer: Timer = null
-  private val TIMER_INTERVAL = 2
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
@@ -543,12 +537,6 @@ class ShadowsocksNatService extends Service with BaseService {
       .setLabel(getVersionName)
       .build())
 
-    // reset timer
-    if (timer != null) {
-      timer.cancel()
-      timer = null
-    }
-
     // reset NAT
     killProcesses()
 
@@ -564,7 +552,7 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   override def stopBackgroundService() {
-    stopRunner()
+    stopSelf()
   }
 
   override def getTag = TAG

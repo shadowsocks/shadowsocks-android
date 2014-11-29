@@ -775,7 +775,7 @@ class Shadowsocks
       if (pref != null) {
         if (Seq(Key.isGlobalProxy, Key.proxyedApps)
           .contains(name)) {
-          pref.setEnabled(enabled && (!isVpnEnabled))
+          pref.setEnabled(enabled && (Utils.isLollipopOrAbove || !isVpnEnabled))
         } else {
           pref.setEnabled(enabled)
         }

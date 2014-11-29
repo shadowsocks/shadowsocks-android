@@ -479,7 +479,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def stopBackgroundService() {
-    stopRunner()
+    stopSelf()
   }
 
   override def getTag = TAG
