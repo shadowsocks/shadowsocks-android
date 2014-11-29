@@ -123,7 +123,7 @@ object Shadowsocks {
   val FEATRUE_PREFS = Array(Key.route, Key.isGlobalProxy, Key.proxyedApps,
     Key.isUdpDns, Key.isAutoConnect)
 
-  val EXECUTABLES = Array(Executable.IPTABLES, Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
+  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
 
   // Helper functions
   def updateListPreference(pref: Preference, value: String) {
@@ -261,7 +261,7 @@ class Shadowsocks
         override def run() {
           switchButton.setEnabled(true)
         }
-      }, 1000)
+      }, 2000)
     }
     switchButton.setOnCheckedChangeListener(this)
   }
@@ -322,38 +322,34 @@ class Shadowsocks
   }
 
   private def crash_recovery() {
-    val ab = new ArrayBuffer[String]
+    val cmd = new ArrayBuffer[String]()
 
-    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-local.pid`")
-    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
-    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/tun2socks.pid`")
-
-    ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
-    ab.append("rm /data/data/com.github.shadowsocks/pdnsd.pid")
-    ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
-    ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
-
-    Console.runCommand(ab.toArray)
-
-    {
-      ab.clear()
-
-      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/redsocks.pid`")
-      ab.append("rm /data/data/com.github.shadowsocks/redsocks.conf")
-      ab.append("rm /data/data/com.github.shadowsocks/redsocks.pid")
-
-      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/ss-tunnel.pid`")
-      ab.append("rm /data/data/com.github.shadowsocks/ss-tunnel.conf")
-      ab.append("rm /data/data/com.github.shadowsocks/ss-tunnel.pid")
-
-      ab.append("kill -9 `cat /data/data/com.github.shadowsocks/pdnsd.pid`")
-      ab.append("rm /data/data/com.github.shadowsocks/pdnsd.pid")
-      ab.append("rm /data/data/com.github.shadowsocks/pdnsd.conf")
-      ab.append("rm /data/data/com.github.shadowsocks/pdnsd.cache")
-
-      Console.runRootCommand(ab.toArray)
-      Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
+      cmd.append("chmod 666 %s%s-nat.pid".format(Path.BASE, task))
+      cmd.append("chmod 666 %s%s-vpn.pid".format(Path.BASE, task))
     }
+    Console.runRootCommand(cmd.toArray)
+    cmd.clear()
+
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
+      try {
+        val pid_nat = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
+        val pid_vpn = scala.io.Source.fromFile(Path.BASE + task + "-vpn.pid").mkString.trim.toInt
+        cmd.append("kill -9 %d".format(pid_nat))
+        cmd.append("kill -9 %d".format(pid_vpn))
+        Process.killProcess(pid_nat)
+        Process.killProcess(pid_vpn)
+      } catch {
+        case e: Throwable => Log.e(Shadowsocks.TAG, "unable to kill " + task, e)
+      }
+      cmd.append("rm -f %s%s-nat.pid".format(Path.BASE, task))
+      cmd.append("rm -f %s%s-nat.conf".format(Path.BASE, task))
+      cmd.append("rm -f %s%s-vpn.pid".format(Path.BASE, task))
+      cmd.append("rm -f %s%s-vpn.conf".format(Path.BASE, task))
+    }
+    Console.runCommand(cmd.toArray)
+    Console.runRootCommand(cmd.toArray)
+    Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
   }
 
   private def getVersionName: String = {

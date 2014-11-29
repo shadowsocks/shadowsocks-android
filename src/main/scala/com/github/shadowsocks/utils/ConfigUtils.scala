@@ -137,7 +137,7 @@ object ConfigUtils {
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = on;
-      | pid_file = "/data/data/com.github.shadowsocks/pdnsd.pid";
+      | pid_file = "%s";
       |}
       |
       |server {

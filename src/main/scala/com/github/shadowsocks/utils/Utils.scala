@@ -68,8 +68,8 @@ object Utils {
   val DEFAULT_SHELL: String = "/system/bin/sh"
   val DEFAULT_ROOT: String = "/system/bin/su"
   val ALTERNATIVE_ROOT: String = "/system/xbin/su"
-  val DEFAULT_IPTABLES: String = "/data/data/com.github.shadowsocks/iptables"
-  val ALTERNATIVE_IPTABLES: String = "/system/bin/iptables"
+  val DEFAULT_IPTABLES: String = "/system/bin/iptables"
+  val ALTERNATIVE_IPTABLES: String = "/data/data/com.github.shadowsocks/iptables"
   val TIME_OUT: Int = -99
   var initialized: Boolean = false
   var hasRedirectSupport: Int = -1

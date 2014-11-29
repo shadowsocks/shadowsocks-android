@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.shadowsocks"
-    android:versionCode="87"
-    android:versionName="2.4.7">
+    android:versionCode="88"
+    android:versionName="2.5.0">
 
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -74,6 +74,7 @@
 
     <service
         android:name=".ShadowsocksNatService"
+        android:process=":nat"
         android:exported="false">
     </service>
 

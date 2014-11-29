@@ -41,15 +41,14 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
-import java.util.{Timer, TimerTask}
+import java.util.Timer
 
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.ConnectivityManager
+import android.net.{Network, ConnectivityManager}
 import android.os._
 import android.support.v4.app.NotificationCompat
-import android.support.v4.net.ConnectivityManagerCompat
 import android.util.Log
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
@@ -94,7 +93,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
-  def setDns(dns: String) {
+  def setDnsForAllNetwork(dns: String) {
     val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
     val networks = manager.getAllNetworks
     val cmdBuf = new ArrayBuffer[String]()
@@ -108,18 +107,31 @@ class ShadowsocksNatService extends Service with BaseService {
     Console.runRootCommand(cmdBuf.toArray)
   }
 
-  def initConnectionReceiver() {
-    val filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-    conReceiver = new BroadcastReceiver {
-      override def onReceive(context: Context, intent: Intent): Unit = {
-        setDns("127.0.0.1")
-      }
-    }
-    registerReceiver(conReceiver, filter)
+  def setupDns() = {
+    setDnsForAllNetwork("127.0.0.1")
   }
 
   def resetDns() = {
-    setDns("8.8.8.8 208.67.222.222 114.114.114.114")
+    setDnsForAllNetwork("8.8.8.8 208.67.222.222 114.114.114.114")
+  }
+
+  def destroyConnectionReceiver() {
+    if (conReceiver != null) {
+      unregisterReceiver(conReceiver)
+      conReceiver = null
+    }
+    resetDns()
+  }
+
+  def initConnectionReceiver() {
+    setupDns()
+    val filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+    conReceiver = new BroadcastReceiver {
+      override def onReceive(context: Context, intent: Intent) = {
+        setupDns()
+      }
+    }
+    registerReceiver(conReceiver, filter)
   }
 
   def startShadowsocksDaemon() {
@@ -136,15 +148,15 @@ class ShadowsocksNatService extends Service with BaseService {
     val conf = ConfigUtils
       .SHADOWSOCKS.format(config.proxy, config.remotePort, config.localPort,
         config.sitekey, config.encMethod, 10)
-    ConfigUtils.printToFile(new File(Path.BASE + "ss-local.json"))(p => {
+    ConfigUtils.printToFile(new File(Path.BASE + "ss-local-nat.conf"))(p => {
       p.println(conf)
     })
 
     val cmd = new ArrayBuffer[String]
     cmd += (Path.BASE + "ss-local"
           , "-b" , "127.0.0.1"
-          , "-c" , Path.BASE + "ss-local.json"
-          , "-f" , Path.BASE + "ss-local.pid")
+          , "-c" , Path.BASE + "ss-local-nat.conf"
+          , "-f" , Path.BASE + "ss-local-nat.pid")
 
     if (config.route != Route.ALL) {
       cmd += "--acl"
@@ -160,15 +172,15 @@ class ShadowsocksNatService extends Service with BaseService {
       val conf = ConfigUtils
         .SHADOWSOCKS.format(config.proxy, config.remotePort, 8153,
           config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel.json"))(p => {
+      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
       cmd += (Path.BASE + "ss-tunnel" , "-u"
             , "-b" , "127.0.0.1"
             , "-L" , "8.8.8.8:53"
-            , "-c" , Path.BASE + "ss-tunnel.json"
-            , "-f" , Path.BASE + "ss-tunnel.pid")
+            , "-c" , Path.BASE + "ss-tunnel-nat.conf"
+            , "-f" , Path.BASE + "ss-tunnel-nat.pid")
 
       if (Utils.isLollipopOrAbove) {
         cmd += ("-l" , "53")
@@ -188,7 +200,7 @@ class ShadowsocksNatService extends Service with BaseService {
       val conf = ConfigUtils
         .SHADOWSOCKS.format(config.proxy, config.remotePort, 8163,
           config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel.json"))(p => {
+      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
@@ -196,8 +208,8 @@ class ShadowsocksNatService extends Service with BaseService {
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel.json"
-        , "-f" , Path.BASE + "ss-tunnel.pid")
+        , "-c" , Path.BASE + "ss-tunnel-nat.conf"
+        , "-f" , Path.BASE + "ss-tunnel-nat.pid")
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
       Console.runCommand(cmdBuf.mkString(" "))
@@ -207,15 +219,15 @@ class ShadowsocksNatService extends Service with BaseService {
   def startDnsDaemon() {
     val conf = if (Utils.isLollipopOrAbove) {
       ConfigUtils
-        .PDNSD_BYPASS.format("127.0.0.1", 53, getString(R.string.exclude), 8163)
+        .PDNSD_BYPASS.format("127.0.0.1", 53, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
     } else {
       ConfigUtils
-        .PDNSD_BYPASS.format("127.0.0.1", 8153, getString(R.string.exclude), 8163)
+        .PDNSD_BYPASS.format("127.0.0.1", 8153, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
     }
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
-    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd-nat.conf"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
@@ -241,9 +253,9 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.format(config.localPort)
-    val cmd = Path.BASE + "redsocks -p %sredsocks.pid -c %sredsocks.conf"
+    val cmd = Path.BASE + "redsocks -p %sredsocks-nat.pid -c %sredsocks-nat.conf"
       .format(Path.BASE, Path.BASE)
-    ConfigUtils.printToFile(new File(Path.BASE + "redsocks.conf"))(p => {
+    ConfigUtils.printToFile(new File(Path.BASE + "redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
@@ -334,17 +346,25 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def killProcesses() {
     val cmd = new ArrayBuffer[String]()
+
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
+      cmd.append("chmod 666 %s%s-nat.pid".format(Path.BASE, task))
+    }
+    Console.runRootCommand(cmd.toArray)
+    cmd.clear()
+
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
       try {
-        val pid = scala.io.Source.fromFile(Path.BASE + task + ".pid").mkString.trim.toInt
-        Process.killProcess(pid)
+        val pid = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
         cmd.append("kill -9 %d".format(pid))
-        cmd.append("rm -rf %s%s.pid", Path.BASE, task)
-        Log.d(TAG, "kill pid: " + pid)
+        Process.killProcess(pid)
       } catch {
         case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
       }
+      cmd.append("rm -f %s%s-nat.pid".format(Path.BASE, task))
+      cmd.append("rm -f %s%s-nat.conf".format(Path.BASE, task))
     }
+
     Console.runRootCommand(cmd.toArray)
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
   }
@@ -507,8 +527,14 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def stopRunner() {
 
-    // change the state
-    changeState(State.STOPPED)
+    // clean up recevier
+    if (closeReceiver != null) {
+      unregisterReceiver(closeReceiver)
+      closeReceiver = null
+    }
+    if (Utils.isLollipopOrAbove) {
+      destroyConnectionReceiver()
+    }
 
     // send event
     application.tracker.send(new HitBuilders.EventBuilder()
@@ -531,20 +557,10 @@ class ShadowsocksNatService extends Service with BaseService {
       stopSelf()
     }
 
-    // clean up recevier
-    if (closeReceiver != null) {
-      unregisterReceiver(closeReceiver)
-      closeReceiver = null
-    }
-    if (Utils.isLollipopOrAbove) {
-      if (conReceiver != null) {
-        unregisterReceiver(conReceiver)
-        conReceiver = null
-      }
-      resetDns()
-    }
-
     stopForegroundCompat(1)
+
+    // change the state
+    changeState(State.STOPPED)
   }
 
   override def stopBackgroundService() {

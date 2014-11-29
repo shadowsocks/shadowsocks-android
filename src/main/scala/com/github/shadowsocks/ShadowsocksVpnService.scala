@@ -40,14 +40,12 @@
 package com.github.shadowsocks
 
 import java.io.File
-import java.net.InetAddress
 
 import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.{LocalServerSocket, VpnService, LocalSocket, LocalSocketAddress}
+import android.net.VpnService
 import android.os._
-import android.support.v4.app.NotificationCompat
 import android.util.Log
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
@@ -110,15 +108,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val conf = ConfigUtils
       .SHADOWSOCKS.format(config.proxy, config.remotePort, config.localPort,
         config.sitekey, config.encMethod, 10)
-    ConfigUtils.printToFile(new File(Path.BASE + "ss-local.json"))(p => {
+    ConfigUtils.printToFile(new File(Path.BASE + "ss-local-vpn.conf"))(p => {
       p.println(conf)
     })
 
     val cmd = new ArrayBuffer[String]
     cmd +=(Path.BASE + "ss-local", "-u"
       , "-b", "127.0.0.1"
-      , "-c", Path.BASE + "ss-local.json"
-      , "-f", Path.BASE + "ss-local.pid")
+      , "-c", Path.BASE + "ss-local-vpn.conf"
+      , "-f", Path.BASE + "ss-local-vpn.pid")
 
     if (Utils.isLollipopOrAbove && config.route != Route.ALL) {
       cmd += "--acl"
@@ -133,7 +131,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val conf = ConfigUtils
       .SHADOWSOCKS.format(config.proxy, config.remotePort, 8163,
         config.sitekey, config.encMethod, 10)
-    ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel.json"))(p => {
+    ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
     val cmd = new ArrayBuffer[String]
@@ -141,8 +139,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-b", "127.0.0.1"
       , "-l", "8163"
       , "-L", "8.8.8.8:53"
-      , "-c", Path.BASE + "ss-tunnel.json"
-      , "-f", Path.BASE + "ss-tunnel.pid")
+      , "-c", Path.BASE + "ss-tunnel-vpn.conf"
+      , "-f", Path.BASE + "ss-tunnel-vpn.pid")
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     Console.runCommand(cmd.mkString(" "))
@@ -151,15 +149,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsDaemon() {
     val conf = {
       if (Utils.isLollipopOrAbove) {
-        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", 8153, getString(R.string.exclude), 8163)
+        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", 8153, Path.BASE + "pdnsd-vpn.pid", getString(R.string.exclude), 8163)
       } else {
         ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
       }
     }
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd.conf"))(p => {
+    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-vpn.conf"))(p => {
       p.println(conf)
     })
-    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd.conf"
+    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd-vpn.conf"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     Console.runCommand(cmd)
@@ -312,7 +310,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--tunfd %d "
       + "--tunmtu %d "
       + "--loglevel 3 "
-      + "--pid %stun2socks.pid")
+      + "--pid %stun2socks-vpn.pid")
       .format(PRIVATE_VLAN.format("2"), config.localPort, fd, VPN_MTU, Path.BASE)
 
     if (config.isUdpDns)
@@ -321,12 +319,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       cmd += " --dnsgw %s:8153".format(PRIVATE_VLAN.format("1"))
 
     if (Utils.isLollipopOrAbove) {
-      cmd += " --fake-proc";
+      cmd += " --fake-proc"
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    System.exec(cmd);
+    System.exec(cmd)
   }
 
   /** Called when the activity is first created. */
@@ -366,9 +364,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def killProcesses() {
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "tun2socks")) {
       try {
-        val pid = scala.io.Source.fromFile(Path.BASE + task + ".pid").mkString.trim.toInt
+        val pid = scala.io.Source.fromFile(Path.BASE + task + "-vpn.pid").mkString.trim.toInt
         Process.killProcess(pid)
-        Log.d(TAG, "kill pid: " + pid)
       } catch {
         case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
       }
