@@ -340,7 +340,7 @@ class Shadowsocks
         Process.killProcess(pid_nat)
         Process.killProcess(pid_vpn)
       } catch {
-        case e: Throwable => Log.e(Shadowsocks.TAG, "unable to kill " + task, e)
+        case e: Throwable => Log.e(Shadowsocks.TAG, "unable to kill " + task)
       }
       cmd.append("rm -f %s%s-nat.pid".format(Path.BASE, task))
       cmd.append("rm -f %s%s-nat.conf".format(Path.BASE, task))
@@ -1006,6 +1006,11 @@ class Shadowsocks
                   .show()
               }
               setPreferenceEnabled(enabled = true)
+            case State.STOPPING =>
+              if (progressDialog == null) {
+                progressDialog = ProgressDialog
+                  .show(Shadowsocks.this, "", getString(R.string.stopping), true, true)
+              }
           }
         }
       }

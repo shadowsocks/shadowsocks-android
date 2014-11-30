@@ -354,7 +354,7 @@ class ShadowsocksNatService extends Service with BaseService {
         cmd.append("kill -9 %d".format(pid))
         Process.killProcess(pid)
       } catch {
-        case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
+        case e: Throwable => Log.e(TAG, "unable to kill " + task)
       }
       cmd.append("rm -f %s%s-nat.pid".format(Path.BASE, task))
       cmd.append("rm -f %s%s-nat.conf".format(Path.BASE, task))

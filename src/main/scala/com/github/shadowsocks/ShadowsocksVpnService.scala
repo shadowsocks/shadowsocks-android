@@ -368,7 +368,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val pid = scala.io.Source.fromFile(Path.BASE + task + "-vpn.pid").mkString.trim.toInt
         Process.killProcess(pid)
       } catch {
-        case e: Throwable => Log.e(TAG, "unable to kill " + task, e)
+        case e: Throwable => Log.e(TAG, "unable to kill " + task)
       }
     }
   }
