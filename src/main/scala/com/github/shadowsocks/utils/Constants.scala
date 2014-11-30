@@ -101,7 +101,8 @@ object State {
   val INIT = 0
   val CONNECTING = 1
   val CONNECTED = 2
-  val STOPPED = 3
+  val STOPPING = 3
+  val STOPPED = 4
   def isAvailable(state: Int): Boolean = state != CONNECTED && state != CONNECTING
 }
 

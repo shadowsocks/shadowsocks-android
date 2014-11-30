@@ -81,11 +81,15 @@ trait BaseService {
     }
 
     override def stop() {
-      stopRunner()
+      if (state != State.CONNECTING && state != State.STOPPING) {
+        stopRunner()
+      }
     }
 
     override def start(config: Config) {
-      startRunner(config)
+      if (state != State.CONNECTING && state != State.STOPPING) {
+        startRunner(config)
+      }
     }
   }
 

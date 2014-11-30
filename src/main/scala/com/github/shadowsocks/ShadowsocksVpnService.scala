@@ -47,6 +47,7 @@ import android.content.pm.{PackageInfo, PackageManager}
 import android.net.VpnService
 import android.os._
 import android.util.Log
+import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.HitBuilders
@@ -190,7 +191,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
         for (app <- apps) {
           if (app.proxied) {
-            pkgSet.add(app.name)
+            pkgSet.add(app.packageName)
           }
         }
         for (pkg <- pkgSet) {
@@ -396,6 +397,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     filter.addAction(Intent.ACTION_SHUTDOWN)
     receiver = new BroadcastReceiver {
       def onReceive(p1: Context, p2: Intent) {
+        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
         stopRunner()
       }
     }
@@ -448,7 +450,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   override def stopRunner() {
 
     // channge the state
-    changeState(State.STOPPED)
+    changeState(State.STOPPING)
 
     // send event
     application.tracker.send(new HitBuilders.EventBuilder()
@@ -476,6 +478,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       unregisterReceiver(receiver)
       receiver = null
     }
+
+    // channge the state
+    changeState(State.STOPPED)
   }
 
   override def stopBackgroundService() {

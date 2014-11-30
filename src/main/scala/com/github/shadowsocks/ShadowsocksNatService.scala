@@ -49,6 +49,7 @@ import android.net.{Network, ConnectivityManager}
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.HitBuilders
@@ -459,6 +460,7 @@ class ShadowsocksNatService extends Service with BaseService {
     filter.addAction(Action.CLOSE)
     closeReceiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
+        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
         stopRunner()
       }
     }
@@ -520,6 +522,9 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   override def stopRunner() {
+
+    // channge the state
+    changeState(State.STOPPING)
 
     // clean up recevier
     if (closeReceiver != null) {

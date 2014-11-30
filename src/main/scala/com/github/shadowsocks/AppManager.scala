@@ -46,7 +46,6 @@ import android.content.pm.PackageManager
 import android.graphics.{Bitmap, PixelFormat}
 import android.os.Bundle
 import android.os.Handler
-import android.os.Message
 import android.preference.PreferenceManager
 import android.view.View
 import android.view.View.OnClickListener
@@ -62,7 +61,9 @@ import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader,
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import com.github.shadowsocks.utils.{Utils, Scheme, Key}
 
-case class ProxiedApp(uid: Int, name: String, var proxied: Boolean)
+import scala.language.implicitConversions
+
+case class ProxiedApp(uid: Int, name: String, packageName: String, var proxied: Boolean)
 
 class ObjectArrayTools[T <: AnyRef](a: Array[T]) {
   def binarySearch(key: T) = {
@@ -74,7 +75,7 @@ case class ListEntry(box: CheckBox, text: TextView, icon: ImageView)
 
 object AppManager {
 
-  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]) = new ObjectArrayTools(a)
+  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
 
   def getProxiedApps(context: Context, proxiedAppString: String): Array[ProxiedApp] = {
 
@@ -86,13 +87,13 @@ object AppManager {
     val appList = packageManager.getInstalledApplications(0)
 
     appList.filter(_.uid >= 10000).map {
-      case a => {
+      case a =>
         val uid = a.uid
         val userName = uid.toString
+        val name = packageManager.getApplicationLabel(a).toString
         val packageName = a.packageName
         val proxied = proxiedApps.binarySearch(userName) >= 0
-        new ProxiedApp(uid, packageName, proxied)
-      }
+        new ProxiedApp(uid, name, packageName, proxied)
     }.toArray
   }
 }
@@ -103,7 +104,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
   val MSG_LOAD_FINISH = 2
   val STUB = android.R.drawable.sym_def_app_icon
 
-  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]) = new ObjectArrayTools(a)
+  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
 
   var apps: Array[ProxiedApp] = null
   var appListView: ListView = null
@@ -129,8 +130,9 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         val uid = a.uid
         val userName = uid.toString
         val name = packageManager.getApplicationLabel(a).toString
+        val packageName = a.packageName
         val proxied = (proxiedApps binarySearch userName) >= 0
-        new ProxiedApp(uid, name, proxied)
+        new ProxiedApp(uid, name, packageName, proxied)
     }.toArray
   }
 
@@ -175,7 +177,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
             .cacheOnDisc()
             .displayer(new FadeInBitmapDisplayer(300))
             .build()
-        ImageLoader.getInstance().displayImage(Scheme.APP + app.uid, entry.icon, options)
+        ImageLoader.getInstance().displayImage(Scheme.APP + app.packageName, entry.icon, options)
 
         entry.text.setText(app.name)
         val box: CheckBox = entry.box
@@ -319,8 +321,8 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     }
 
     override def getStreamFromOtherSource(imageUri: String, extra: AnyRef): InputStream = {
-      val uid = imageUri.substring(Scheme.APP.length).toInt
-      val drawable = Utils.getAppIcon(getBaseContext, uid)
+      val packageName = imageUri.substring(Scheme.APP.length)
+      val drawable = Utils.getAppIcon(getBaseContext, packageName)
       val bitmap = Utils.drawableToBitmap(drawable)
 
       val os = new ByteArrayOutputStream()

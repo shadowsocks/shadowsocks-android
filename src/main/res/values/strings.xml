@@ -57,6 +57,7 @@
   <string name="forward_stop">Shadowsocks stopped.</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="stop">Stop the service</string>
+  <string name="stopping">Shutting down Shadowsocks</string>
   <string name="vpn_error">Error: \"%s\".</string>
 
   <!-- alert category -->

@@ -332,6 +332,16 @@ object Utils {
     bitmap
   }
 
+  def getAppIcon(c: Context, packageName: String): Drawable = {
+    val pm: PackageManager = c.getPackageManager
+    val icon: Drawable = c.getResources.getDrawable(android.R.drawable.sym_def_app_icon)
+    try {
+      pm.getApplicationIcon(packageName)
+    } catch {
+      case e: PackageManager.NameNotFoundException => icon
+    }
+  }
+
   def getAppIcon(c: Context, uid: Int): Drawable = {
     val pm: PackageManager = c.getPackageManager
     val icon: Drawable = c.getResources.getDrawable(android.R.drawable.sym_def_app_icon)
