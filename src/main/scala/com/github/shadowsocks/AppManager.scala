@@ -61,6 +61,7 @@ import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader,
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import com.github.shadowsocks.utils.{Utils, Scheme, Key}
 
+import scala.concurrent.ops._
 import scala.language.implicitConversions
 
 case class ProxiedApp(uid: Int, name: String, packageName: String, var proxied: Boolean)
@@ -245,18 +246,17 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
       }
     })
     bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
+
+    appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
   }
 
   protected override def onResume() {
     super.onResume()
-    new Thread {
-      override def run() {
-        handler.post(loadStartRunnable)
-        appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
-        if (!appsLoaded) loadApps()
-        handler.post(loadFinishRunnable)
-      }
-    }.start()
+    spawn {
+      handler.post(loadStartRunnable)
+      if (!appsLoaded) loadApps()
+      handler.post(loadFinishRunnable)
+    }
   }
 
   def saveAppSettings(context: Context) {
