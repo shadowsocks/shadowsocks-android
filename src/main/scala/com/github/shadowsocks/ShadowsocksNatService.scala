@@ -107,7 +107,7 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def resetDns() = {
-    setDnsForAllNetwork("8.8.8.8 208.67.222.222 114.114.114.114")
+    setDnsForAllNetwork("114.114.114.114 8.8.8.8 208.67.222.222")
   }
 
   def destroyConnectionReceiver() {
@@ -486,6 +486,7 @@ class ShadowsocksNatService extends Service with BaseService {
           config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
+            Log.e(TAG, ex.getMessage)
             changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
             config = null
