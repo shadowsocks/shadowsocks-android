@@ -73,7 +73,7 @@ class ShadowsocksNatService extends Service with BaseService {
   private val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
 
   var closeReceiver: BroadcastReceiver = null
-  var conReceiver: BroadcastReceiver = null
+  var connReceiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
   var config: Config = null
   var apps: Array[ProxiedApp] = null
@@ -110,23 +110,41 @@ class ShadowsocksNatService extends Service with BaseService {
     setDnsForAllNetwork("114.114.114.114 8.8.8.8 208.67.222.222")
   }
 
+  def flushDns() {
+    if (Utils.isLollipopOrAbove) {
+      val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+      val networks = manager.getAllNetworks
+      val cmdBuf = new ArrayBuffer[String]()
+      networks.foreach(network => {
+        val networkInfo = manager.getNetworkInfo(network)
+        if (networkInfo.isAvailable) {
+          val netId = network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
+          cmdBuf.append("ndc resolver flushnet %d".format(netId))
+        }
+      })
+      Console.runRootCommand(cmdBuf.toArray)
+    } else {
+      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+    }
+  }
+
+
   def destroyConnectionReceiver() {
-    if (conReceiver != null) {
-      unregisterReceiver(conReceiver)
-      conReceiver = null
+    if (connReceiver != null) {
+      unregisterReceiver(connReceiver)
+      connReceiver = null
     }
     resetDns()
   }
 
   def initConnectionReceiver() {
-    setupDns()
     val filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-    conReceiver = new BroadcastReceiver {
+    connReceiver = new BroadcastReceiver {
       override def onReceive(context: Context, intent: Intent) = {
         setupDns()
       }
     }
-    registerReceiver(conReceiver, filter)
+    registerReceiver(connReceiver, filter)
   }
 
   def startShadowsocksDaemon() {
@@ -266,7 +284,6 @@ class ShadowsocksNatService extends Service with BaseService {
     startRedsocksDaemon()
     startShadowsocksDaemon()
     setupIptables()
-    flushDNS()
 
     true
   }
@@ -364,10 +381,6 @@ class ShadowsocksNatService extends Service with BaseService {
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
   }
 
-  def flushDNS() {
-    Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
-  }
-
   def setupIptables() = {
     val init_sb = new ArrayBuffer[String]
     val http_sb = new ArrayBuffer[String]
@@ -454,6 +467,9 @@ class ShadowsocksNatService extends Service with BaseService {
 
     config = c
 
+    // register connection receiver
+    if (Utils.isLollipopOrAbove) initConnectionReceiver()
+
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
@@ -465,9 +481,6 @@ class ShadowsocksNatService extends Service with BaseService {
       }
     }
     registerReceiver(closeReceiver, filter)
-
-    // register connection receiver
-    if (Utils.isLollipopOrAbove) initConnectionReceiver()
 
     // send event
     application.tracker.send(new HitBuilders.EventBuilder()
@@ -486,7 +499,6 @@ class ShadowsocksNatService extends Service with BaseService {
           config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
-            Log.e(TAG, ex.getMessage)
             changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
             config = null
@@ -495,7 +507,12 @@ class ShadowsocksNatService extends Service with BaseService {
 
       if (config != null) {
 
+        // Clean up
         killProcesses()
+
+        // Set DNS
+        if (Utils.isLollipopOrAbove) setupDns()
+        flushDns()
 
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(config.proxy) &&
