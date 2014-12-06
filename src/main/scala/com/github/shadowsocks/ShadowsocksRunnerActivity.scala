@@ -50,7 +50,8 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 
 class ShadowsocksRunnerActivity extends Activity {
 
-  lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
+  private lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
+  private lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
 
   val handler = new Handler()
   val connection = new ServiceConnection {
@@ -72,10 +73,10 @@ class ShadowsocksRunnerActivity extends Activity {
 
   def isVpnEnabled: Boolean = {
     if (vpnEnabled < 0) {
-      vpnEnabled = if (!Console.isRoot) {
-        1
-      } else {
+      vpnEnabled = if ((!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot) {
         0
+      } else {
+        1
       }
     }
     if (vpnEnabled == 1) true else false

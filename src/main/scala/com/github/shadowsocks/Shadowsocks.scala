@@ -51,6 +51,7 @@ import android.net.{Uri, VpnService}
 import android.os._
 import android.preference._
 import android.util.{DisplayMetrics, Log}
+import android.view.View.OnLongClickListener
 import android.view._
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
@@ -499,13 +500,30 @@ class Shadowsocks
     getActionBar.setDisplayShowTitleEnabled(false)
     getActionBar.setDisplayShowCustomEnabled(true)
     getActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
+    title.setOnLongClickListener(new OnLongClickListener {
+      override def onLongClick(v: View): Boolean = {
+        if (Utils.isLollipopOrAbove && bgService != null
+          && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
+          val natEnabled = status.getBoolean(Key.isNAT, false)
+          status.edit().putBoolean(Key.isNAT, !natEnabled).commit()
+          if (!natEnabled) {
+            Toast.makeText(getBaseContext, R.string.enable_nat, Toast.LENGTH_LONG).show()
+          } else {
+            Toast.makeText(getBaseContext, R.string.disable_nat, Toast.LENGTH_LONG).show()
+          }
+          true
+        } else {
+          false
+        }
+      }
+    })
 
     // Register broadcast receiver
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
     // Bind to the service
     spawn {
-      val isRoot = Console.isRoot
+      val isRoot = (!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot
       handler.post(new Runnable {
         override def run() {
           status.edit.putBoolean(Key.isRoot, isRoot).commit()

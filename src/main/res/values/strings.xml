@@ -59,6 +59,8 @@
   <string name="stop">Stop the service</string>
   <string name="stopping">Shutting down...</string>
   <string name="vpn_error">Error: \"%s\".</string>
+  <string name="enable_nat">Turn on NAT mode.</string>
+  <string name="disable_nat">Turn off NAT mode.</string>
 
   <!-- alert category -->
   <string name="ok_iknow">OK</string>

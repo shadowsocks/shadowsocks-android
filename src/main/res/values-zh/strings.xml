@@ -69,6 +69,9 @@
   <string name="flushing">刷新中...</string>
   <string name="add_profile">添加配置文件</string>
 
+  <string name="enable_nat">启用 NAT 模式.</string>
+  <string name="disable_nat">禁用 NAT 模式.</string>
+
   <string name="udp_dns">UDP 转发</string>
   <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>
 

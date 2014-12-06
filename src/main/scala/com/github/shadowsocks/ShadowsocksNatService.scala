@@ -117,7 +117,7 @@ class ShadowsocksNatService extends Service with BaseService {
     val cmdBuf = new ArrayBuffer[String]()
     networks.foreach(network => {
       val networkInfo = manager.getNetworkInfo(network)
-      if (networkInfo.isAvailable) {
+      if (networkInfo.isConnected) {
         val netId = getNetId(network)
         val curDnsList = manager.getLinkProperties(network).getDnsServers
         if (curDnsList != null) {
@@ -507,7 +507,7 @@ class ShadowsocksNatService extends Service with BaseService {
     filter.addAction(Action.CLOSE)
     closeReceiver = new BroadcastReceiver() {
       def onReceive(p1: Context, p2: Intent) {
-        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
+        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT).show()
         stopRunner()
       }
     }
