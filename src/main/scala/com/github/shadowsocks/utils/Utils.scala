@@ -181,20 +181,24 @@ object Utils {
   }
 
   def resolve(host: String, addrType: Int): Option[String] = {
-    val lookup = new Lookup(host, addrType)
-    val resolver = new SimpleResolver("114.114.114.114")
-    resolver.setTimeout(5)
-    lookup.setResolver(resolver)
-    val result = lookup.run()
-    if (result == null) return None
-    val records = scala.util.Random.shuffle(result.toList)
-    for (r <- records) {
-      addrType match {
-        case Type.A =>
-          return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
-        case Type.AAAA =>
-          return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
+    try {
+      val lookup = new Lookup(host, addrType)
+      val resolver = new SimpleResolver("114.114.114.114")
+      resolver.setTimeout(5)
+      lookup.setResolver(resolver)
+      val result = lookup.run()
+      if (result == null) return None
+      val records = scala.util.Random.shuffle(result.toList)
+      for (r <- records) {
+        addrType match {
+          case Type.A =>
+            return Some(r.asInstanceOf[ARecord].getAddress.getHostAddress)
+          case Type.AAAA =>
+            return Some(r.asInstanceOf[AAAARecord].getAddress.getHostAddress)
+        }
       }
+    } catch {
+      case e: Exception => None
     }
     None
   }

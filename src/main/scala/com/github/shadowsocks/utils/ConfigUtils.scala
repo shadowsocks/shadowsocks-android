@@ -42,7 +42,7 @@ package com.github.shadowsocks.utils
 import android.content.{SharedPreferences, Context}
 import com.github.shadowsocks.ShadowsocksApplication
 import com.google.android.gms.tagmanager.Container
-import scalaj.http.{HttpOptions, Http}
+import com.github.kevinsawicki.http.HttpRequest
 import com.github.shadowsocks.aidl.Config
 
 object ConfigUtils {
@@ -183,12 +183,12 @@ object ConfigUtils {
   def getPublicConfig(context: Context, container: Container, config: Config): Config = {
     val url = container.getString("proxy_url")
     val sig = Utils.getSignature(context)
-    val list = Http
+    val list = HttpRequest
       .post(url)
-      .params("sig" -> sig)
-      .option(HttpOptions.connTimeout(1000))
-      .option(HttpOptions.readTimeout(5000))
-      .asString
+      .connectTimeout(2000)
+      .readTimeout(2000)
+      .send("sig="+sig)
+      .body
     val proxies = util.Random.shuffle(list.split('|').toSeq).toSeq
     val proxy = proxies(0).split(':')
 

@@ -20,7 +20,7 @@ resolvers += "madeye private releases" at "http://madeye-maven-repository.google
 
 libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.5",
-  "org.scalaj" %% "scalaj-http" % "0.3.10",
+  "com.github.kevinsawicki" % "http-request" % "5.6",
   "commons-net" % "commons-net" % "3.3",
   "com.google.zxing" % "android-integration" % "2.2"
 )
