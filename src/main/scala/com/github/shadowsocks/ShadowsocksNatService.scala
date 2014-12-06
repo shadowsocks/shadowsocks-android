@@ -41,6 +41,8 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
+import java.net.InetAddress
+import java.util
 
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
@@ -48,7 +50,7 @@ import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Network, ConnectivityManager}
 import android.os._
 import android.support.v4.app.NotificationCompat
-import android.util.Log
+import android.util.{SparseArray, Log}
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
@@ -88,6 +90,23 @@ class ShadowsocksNatService extends Service with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
+  private val dnsAddressCache = new SparseArray[String]
+
+  def restoreDnsForAllNetwork() {
+    val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+    val networks = manager.getAllNetworks
+    val cmdBuf = new ArrayBuffer[String]()
+    networks.foreach(network => {
+      val netId = DnsUtils.getNetId(network)
+      val oldDns = dnsAddressCache.get(netId)
+      if (oldDns != null) {
+        cmdBuf.append("ndc resolver setnetdns %d \"\" %s".format(netId, oldDns))
+        dnsAddressCache.remove(netId)
+      }
+    })
+    if (cmdBuf.nonEmpty) Console.runRootCommand(cmdBuf.toArray)
+  }
+
   def setDnsForAllNetwork(dns: String) {
     val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
     val networks = manager.getAllNetworks
@@ -95,19 +114,33 @@ class ShadowsocksNatService extends Service with BaseService {
     networks.foreach(network => {
       val networkInfo = manager.getNetworkInfo(network)
       if (networkInfo.isAvailable) {
-        val netId = network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
-        cmdBuf.append("ndc resolver setnetdns %d \"\" %s".format(netId, dns))
+        val netId = DnsUtils.getNetId(network)
+        try {
+          val curDnsList = DnsUtils.getDnsServers(manager, network)
+          if (curDnsList != null) {
+            import scala.collection.JavaConverters._
+            val curDns = curDnsList.asScala.map(ip => ip.getHostAddress).mkString(" ")
+            if (curDns != dns) {
+              dnsAddressCache.put(netId, curDns)
+              cmdBuf.append("ndc resolver setnetdns %d \"\" %s".format(netId, dns))
+            }
+          }
+        } catch {
+          case ex: Exception =>
+            cmdBuf.append("ndc resolver setnetdns %d \"\" %s".format(netId, dns))
+            Log.e(TAG, "Unable to get DNS info", ex)
+        }
       }
     })
-    Console.runRootCommand(cmdBuf.toArray)
+    if (cmdBuf.nonEmpty) Console.runRootCommand(cmdBuf.toArray)
   }
 
-  def setupDns() = {
+  def setupDns() {
     setDnsForAllNetwork("127.0.0.1")
   }
 
-  def resetDns() = {
-    setDnsForAllNetwork("8.8.8.8 208.67.222.222 114.114.114.114")
+  def resetDns() {
+    restoreDnsForAllNetwork()
   }
 
   def destroyConnectionReceiver() {
