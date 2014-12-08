@@ -138,7 +138,7 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def resetDns() = {
-    setDnsForAllNetwork("114.114.114.114 8.8.8.8 208.67.222.222")
+    restoreDnsForAllNetwork()
   }
 
   def flushDns() {
@@ -541,10 +541,6 @@ class ShadowsocksNatService extends Service with BaseService {
         // Clean up
         killProcesses()
 
-        // Set DNS
-        if (Utils.isLollipopOrAbove) setupDns()
-        flushDns()
-
         var resolved: Boolean = false
         if (!InetAddressUtils.isIPv4Address(config.proxy) &&
           !InetAddressUtils.isIPv6Address(config.proxy)) {
@@ -559,6 +555,11 @@ class ShadowsocksNatService extends Service with BaseService {
         }
 
         if (resolved && handleConnection) {
+
+          // Set DNS
+          if (Utils.isLollipopOrAbove) setupDns()
+          flushDns()
+
           notifyForegroundAlert(getString(R.string.forward_success),
             getString(R.string.service_running).format(config.profileName))
           changeState(State.CONNECTED)
