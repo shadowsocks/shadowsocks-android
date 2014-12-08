@@ -114,9 +114,12 @@ class ShadowsocksNatService extends Service with BaseService {
   def setDnsForAllNetwork(dns: String) {
     val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
     val networks = manager.getAllNetworks
+    if (networks == null) return
+
     val cmdBuf = new ArrayBuffer[String]()
     networks.foreach(network => {
       val networkInfo = manager.getNetworkInfo(network)
+      if (networkInfo == null) return
       if (networkInfo.isConnected) {
         val netId = getNetId(network)
         val curDnsList = manager.getLinkProperties(network).getDnsServers
