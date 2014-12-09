@@ -69,7 +69,6 @@ import net.simonvt.menudrawer.MenuDrawer
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.ops._
-import scala.ref.WeakReference
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -674,7 +673,7 @@ class Shadowsocks
     if (!profile.isDefined) return false
 
     new AlertDialog.Builder(this)
-      .setMessage(String.formatLocal(Locale.ENGLISH, getString(R.string.remove_profile), profile.get.name))
+      .setMessage(String.format(Locale.ENGLISH, getString(R.string.remove_profile), profile.get.name))
       .setCancelable(false)
       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
       override def onClick(dialog: DialogInterface, i: Int) = dialog.cancel()

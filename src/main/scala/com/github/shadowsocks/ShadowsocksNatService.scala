@@ -41,8 +41,6 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
-import java.net.InetAddress
-import java.util
 import java.util.Locale
 
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
