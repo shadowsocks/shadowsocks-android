@@ -593,6 +593,9 @@ class Shadowsocks
             h.postDelayed(new Runnable() {
               def run() {
                 val integrator = new IntentIntegrator(Shadowsocks.this)
+                val list = IntentIntegrator.TARGET_ALL_KNOWN
+                list.add("tw.com.quickmark")
+                integrator.setTargetApplications(list)
                 integrator.initiateScan()
                 h.sendEmptyMessage(0)
               }
