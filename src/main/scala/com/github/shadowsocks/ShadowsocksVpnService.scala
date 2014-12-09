@@ -40,6 +40,7 @@
 package com.github.shadowsocks
 
 import java.io.File
+import java.util.Locale
 
 import android.app._
 import android.content._
@@ -107,7 +108,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     val conf = ConfigUtils
-      .SHADOWSOCKS.format(config.proxy, config.remotePort, config.localPort,
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
         config.sitekey, config.encMethod, 10)
     ConfigUtils.printToFile(new File(Path.BASE + "ss-local-vpn.conf"))(p => {
       p.println(conf)
@@ -130,7 +131,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsTunnel() = {
     val conf = ConfigUtils
-      .SHADOWSOCKS.format(config.proxy, config.remotePort, 8163,
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
         config.sitekey, config.encMethod, 10)
     ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
@@ -150,9 +151,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsDaemon() {
     val conf = {
       if (Utils.isLollipopOrAbove) {
-        ConfigUtils.PDNSD_BYPASS.format("0.0.0.0", 8153, Path.BASE + "pdnsd-vpn.pid", getString(R.string.exclude), 8163)
+        ConfigUtils.PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153, Path.BASE + "pdnsd-vpn.pid", getString(R.string.exclude), 8163)
       } else {
-        ConfigUtils.PDNSD_LOCAL.format("0.0.0.0", 8163)
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "0.0.0.0", 8163)
       }
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-vpn.conf"))(p => {
@@ -182,7 +183,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     builder
       .setSession(config.profileName)
       .setMtu(VPN_MTU)
-      .addAddress(PRIVATE_VLAN.format("1"), 24)
+      .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
       .addDnsServer("8.8.8.8")
 
     if (Utils.isLollipopOrAbove) {
@@ -312,12 +313,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--tunmtu %d "
       + "--loglevel 3 "
       + "--pid %stun2socks-vpn.pid")
-      .format(PRIVATE_VLAN.format("2"), config.localPort, fd, VPN_MTU, Path.BASE)
+      .formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"), config.localPort, fd, VPN_MTU, Path.BASE)
 
     if (config.isUdpDns)
       cmd += " --enable-udprelay"
     else
-      cmd += " --dnsgw %s:8153".format(PRIVATE_VLAN.format("1"))
+      cmd += " --dnsgw %s:8153".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"))
 
     if (Utils.isLollipopOrAbove) {
       cmd += " --fake-proc"

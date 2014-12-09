@@ -43,6 +43,7 @@ import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
 import java.net.InetAddress
 import java.util
+import java.util.Locale
 
 import android.app.{Notification, NotificationManager, PendingIntent, Service}
 import android.content._
@@ -104,7 +105,7 @@ class ShadowsocksNatService extends Service with BaseService {
       val netId = getNetId(network)
       val oldDns = dnsAddressCache.get(netId)
       if (oldDns != null) {
-        cmdBuf.append("ndc resolver setnetdns %d \"\" %s".format(netId, oldDns))
+        cmdBuf.append("ndc resolver setnetdns %d \"\" %s".formatLocal(Locale.ENGLISH, netId, oldDns))
         dnsAddressCache.remove(netId)
       }
     })
@@ -128,7 +129,7 @@ class ShadowsocksNatService extends Service with BaseService {
           val curDns = curDnsList.asScala.map(ip => ip.getHostAddress).mkString(" ")
           if (curDns != dns) {
             dnsAddressCache.put(netId, curDns)
-            cmdBuf.append("ndc resolver setnetdns %d \"\" %s".format(netId, dns))
+            cmdBuf.append("ndc resolver setnetdns %d \"\" %s".formatLocal(Locale.ENGLISH, netId, dns))
           }
         }
       }
@@ -153,7 +154,7 @@ class ShadowsocksNatService extends Service with BaseService {
         val networkInfo = manager.getNetworkInfo(network)
         if (networkInfo.isAvailable) {
           val netId = network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
-          cmdBuf.append("ndc resolver flushnet %d".format(netId))
+          cmdBuf.append("ndc resolver flushnet %d".formatLocal(Locale.ENGLISH, netId))
         }
       })
       Console.runRootCommand(cmdBuf.toArray)
@@ -193,7 +194,7 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     val conf = ConfigUtils
-      .SHADOWSOCKS.format(config.proxy, config.remotePort, config.localPort,
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
         config.sitekey, config.encMethod, 10)
     ConfigUtils.printToFile(new File(Path.BASE + "ss-local-nat.conf"))(p => {
       p.println(conf)
@@ -217,7 +218,7 @@ class ShadowsocksNatService extends Service with BaseService {
   def startTunnel() {
     if (config.isUdpDns) {
       val conf = ConfigUtils
-        .SHADOWSOCKS.format(config.proxy, config.remotePort, 8153,
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8153,
           config.sitekey, config.encMethod, 10)
       ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
         p.println(conf)
@@ -245,7 +246,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     } else {
       val conf = ConfigUtils
-        .SHADOWSOCKS.format(config.proxy, config.remotePort, 8163,
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
           config.sitekey, config.encMethod, 10)
       ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
         p.println(conf)
@@ -266,10 +267,10 @@ class ShadowsocksNatService extends Service with BaseService {
   def startDnsDaemon() {
     val conf = if (Utils.isLollipopOrAbove) {
       ConfigUtils
-        .PDNSD_BYPASS.format("127.0.0.1", 53, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
+        .PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "127.0.0.1", 53, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
     } else {
       ConfigUtils
-        .PDNSD_BYPASS.format("127.0.0.1", 8153, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
+        .PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
        p.println(conf)
@@ -299,9 +300,9 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def startRedsocksDaemon() {
-    val conf = ConfigUtils.REDSOCKS.format(config.localPort)
+    val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, config.localPort)
     val cmd = Path.BASE + "redsocks -p %sredsocks-nat.pid -c %sredsocks-nat.conf"
-      .format(Path.BASE, Path.BASE)
+      .formatLocal(Locale.ENGLISH, Path.BASE, Path.BASE)
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks-nat.conf"))(p => {
       p.println(conf)
     })
@@ -394,7 +395,7 @@ class ShadowsocksNatService extends Service with BaseService {
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
-      cmd.append("chmod 666 %s%s-nat.pid".format(Path.BASE, task))
+      cmd.append("chmod 666 %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
     Console.runRootCommand(cmd.toArray)
     cmd.clear()
@@ -402,13 +403,13 @@ class ShadowsocksNatService extends Service with BaseService {
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
       try {
         val pid = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
-        cmd.append("kill -9 %d".format(pid))
+        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid))
         Process.killProcess(pid)
       } catch {
         case e: Throwable => Log.e(TAG, "unable to kill " + task)
       }
-      cmd.append("rm -f %s%s-nat.pid".format(Path.BASE, task))
-      cmd.append("rm -f %s%s-nat.conf".format(Path.BASE, task))
+      cmd.append("rm -f %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("rm -f %s%s-nat.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
 
     Console.runRootCommand(cmd.toArray)
@@ -564,7 +565,7 @@ class ShadowsocksNatService extends Service with BaseService {
           flushDns()
 
           notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).format(config.profileName))
+            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName))
           changeState(State.CONNECTED)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))

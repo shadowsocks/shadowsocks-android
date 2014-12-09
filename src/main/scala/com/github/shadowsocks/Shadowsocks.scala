@@ -40,6 +40,7 @@ package com.github.shadowsocks
 
 import java.util
 import java.io.{OutputStream, InputStream, ByteArrayInputStream, ByteArrayOutputStream, IOException, FileOutputStream}
+import java.util.Locale
 
 import android.app.backup.BackupManager
 import android.app.{Activity, AlertDialog, ProgressDialog}
@@ -326,8 +327,8 @@ class Shadowsocks
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
-      cmd.append("chmod 666 %s%s-nat.pid".format(Path.BASE, task))
-      cmd.append("chmod 666 %s%s-vpn.pid".format(Path.BASE, task))
+      cmd.append("chmod 666 %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("chmod 666 %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
     Console.runRootCommand(cmd.toArray)
     cmd.clear()
@@ -336,17 +337,17 @@ class Shadowsocks
       try {
         val pid_nat = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
         val pid_vpn = scala.io.Source.fromFile(Path.BASE + task + "-vpn.pid").mkString.trim.toInt
-        cmd.append("kill -9 %d".format(pid_nat))
-        cmd.append("kill -9 %d".format(pid_vpn))
+        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid_nat))
+        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid_vpn))
         Process.killProcess(pid_nat)
         Process.killProcess(pid_vpn)
       } catch {
         case e: Throwable => Log.e(Shadowsocks.TAG, "unable to kill " + task)
       }
-      cmd.append("rm -f %s%s-nat.pid".format(Path.BASE, task))
-      cmd.append("rm -f %s%s-nat.conf".format(Path.BASE, task))
-      cmd.append("rm -f %s%s-vpn.pid".format(Path.BASE, task))
-      cmd.append("rm -f %s%s-vpn.conf".format(Path.BASE, task))
+      cmd.append("rm -f %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("rm -f %s%s-nat.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("rm -f %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("rm -f %s%s-vpn.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
     Console.runCommand(cmd.toArray)
     Console.runRootCommand(cmd.toArray)
@@ -673,7 +674,7 @@ class Shadowsocks
     if (!profile.isDefined) return false
 
     new AlertDialog.Builder(this)
-      .setMessage(String.format(getString(R.string.remove_profile), profile.get.name))
+      .setMessage(String.formatLocal(Locale.ENGLISH, getString(R.string.remove_profile), profile.get.name))
       .setCancelable(false)
       .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
       override def onClick(dialog: DialogInterface, i: Int) = dialog.cancel()
@@ -841,7 +842,7 @@ class Shadowsocks
     val ab = new ArrayBuffer[String]
     ab.append("mount -o rw,remount -t yaffs2 /dev/block/mtdblock3 /system")
     for (executable <- Shadowsocks.EXECUTABLES) {
-      ab.append("cp %s%s /system/bin/".format(Path.BASE, executable))
+      ab.append("cp %s%s /system/bin/".formatLocal(Locale.ENGLISH, Path.BASE, executable))
       ab.append("chmod 755 /system/bin/" + executable)
       ab.append("chown root:shell /system/bin/" + executable)
     }
@@ -977,7 +978,7 @@ class Shadowsocks
     }
 
     new AlertDialog.Builder(this)
-      .setTitle(getString(R.string.about_title).format(versionName))
+      .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, versionName))
       .setCancelable(false)
       .setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener() {
       override def onClick(dialog: DialogInterface, id: Int) {
@@ -1022,7 +1023,7 @@ class Shadowsocks
                   .setDuration(Configuration.DURATION_LONG)
                   .build()
                 Crouton
-                  .makeText(Shadowsocks.this, getString(R.string.vpn_error).format(m), style)
+                  .makeText(Shadowsocks.this, getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), style)
                   .setConfiguration(config)
                   .show()
               }
