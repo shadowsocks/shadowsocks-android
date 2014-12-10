@@ -688,7 +688,7 @@ class Shadowsocks
         currentProfile = profileManager.load(profileId)
         menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        sendBroadcast(new Intent(Action.UPDATE_FRAGMENT))
+        updatePreferenceScreen()
 
         dialog.dismiss()
       }
