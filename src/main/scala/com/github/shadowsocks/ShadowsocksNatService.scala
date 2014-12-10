@@ -228,19 +228,11 @@ class ShadowsocksNatService extends Service with BaseService {
             , "-c" , Path.BASE + "ss-tunnel-nat.conf"
             , "-f" , Path.BASE + "ss-tunnel-nat.pid")
 
-      if (Utils.isLollipopOrAbove) {
-        cmd += ("-l" , "53")
-      } else {
-        cmd += ("-l" , "8153")
-      }
+      cmd += ("-l" , "8153")
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-      if (Utils.isLollipopOrAbove) {
-        Console.runRootCommand(cmd.mkString(" "))
-      } else {
-        Console.runCommand(cmd.mkString(" "))
-      }
+      Console.runCommand(cmd.mkString(" "))
 
     } else {
       val conf = ConfigUtils
@@ -263,13 +255,8 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def startDnsDaemon() {
-    val conf = if (Utils.isLollipopOrAbove) {
-      ConfigUtils
-        .PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "127.0.0.1", 53, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
-    } else {
-      ConfigUtils
+    val conf = ConfigUtils
         .PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
-    }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
@@ -277,11 +264,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    if (Utils.isLollipopOrAbove) {
-      Console.runRootCommand(cmd)
-    } else {
-      Console.runCommand(cmd)
-    }
+    Console.runCommand(cmd)
 
   }
 
@@ -428,10 +411,8 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
-    if (!Utils.isLollipopOrAbove) {
-      init_sb.append(Utils.getIptables
-        + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + DNS_PORT)
-    }
+    init_sb.append(Utils.getIptables
+      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + DNS_PORT)
 
     if (config.isGlobalProxy || config.isBypassApps) {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
@@ -500,9 +481,6 @@ class ShadowsocksNatService extends Service with BaseService {
 
     config = c
 
-    // register connection receiver
-    if (Utils.isLollipopOrAbove) initConnectionReceiver()
-
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
@@ -559,7 +537,6 @@ class ShadowsocksNatService extends Service with BaseService {
         if (resolved && handleConnection) {
 
           // Set DNS
-          if (Utils.isLollipopOrAbove) setupDns()
           flushDns()
 
           notifyForegroundAlert(getString(R.string.forward_success),
@@ -582,9 +559,6 @@ class ShadowsocksNatService extends Service with BaseService {
     if (closeReceiver != null) {
       unregisterReceiver(closeReceiver)
       closeReceiver = null
-    }
-    if (Utils.isLollipopOrAbove) {
-      destroyConnectionReceiver()
     }
 
     // send event

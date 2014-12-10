@@ -847,7 +847,6 @@ class Shadowsocks
     }
     ab.append("mount -o ro,remount -t yaffs2 /dev/block/mtdblock3 /system")
     Console.runRootCommand(ab.toArray)
-
   }
 
   def reset() {
