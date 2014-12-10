@@ -187,6 +187,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .addDnsServer("8.8.8.8")
 
     if (Utils.isLollipopOrAbove) {
+
+      builder.allowFamily(android.system.OsConstants.AF_INET6)
+
       if (!config.isGlobalProxy) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
         val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
