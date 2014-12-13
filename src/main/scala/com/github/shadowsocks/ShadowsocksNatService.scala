@@ -332,6 +332,7 @@ class ShadowsocksNatService extends Service with BaseService {
       .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
         actionIntent)
+      .setPriority(NotificationCompat.PRIORITY_MIN)
 
     startForegroundCompat(1, builder.build)
   }
