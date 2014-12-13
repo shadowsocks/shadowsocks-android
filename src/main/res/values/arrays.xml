@@ -18,6 +18,8 @@
     <item>IDEA-CFB</item>
     <item>RC2-CFB</item>
     <item>SEED-CFB</item>
+    <item>SALSA20</item>
+    <item>CHACHA20</item>
   </string-array>
 
   <string-array name="enc_method_value">
@@ -36,6 +38,8 @@
     <item>idea-cfb</item>
     <item>rc2-cfb</item>
     <item>seed-cfb</item>
+    <item>salsa20</item>
+    <item>chacha20</item>
   </string-array>
 
   <string-array name="route_entry">
