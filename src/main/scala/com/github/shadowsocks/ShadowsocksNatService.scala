@@ -402,6 +402,7 @@ class ShadowsocksNatService extends Service with BaseService {
     val init_sb = new ArrayBuffer[String]
     val http_sb = new ArrayBuffer[String]
 
+    init_sb.append("ulimit -n 4096")
     init_sb.append(Utils.getIptables + " -t nat -F OUTPUT")
 
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
