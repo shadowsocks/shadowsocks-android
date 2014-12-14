@@ -67,7 +67,6 @@ class ShadowsocksNatService extends Service with BaseService {
   val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN"
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
-  val DNS_PORT = 8153
 
   private val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
   private val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
@@ -222,11 +221,12 @@ class ShadowsocksNatService extends Service with BaseService {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
-      cmd += (Path.BASE + "ss-tunnel" , "-u"
-            , "-b" , "127.0.0.1"
-            , "-L" , "8.8.8.8:53"
-            , "-c" , Path.BASE + "ss-tunnel-nat.conf"
-            , "-f" , Path.BASE + "ss-tunnel-nat.pid")
+      cmd += (Path.BASE + "ss-tunnel"
+        , "-u"
+        , "-b" , "127.0.0.1"
+        , "-L" , "8.8.8.8:53"
+        , "-c" , Path.BASE + "ss-tunnel-nat.conf"
+        , "-f" , Path.BASE + "ss-tunnel-nat.pid")
 
       cmd += ("-l" , "8153")
 
@@ -243,6 +243,7 @@ class ShadowsocksNatService extends Service with BaseService {
       })
       val cmdBuf = new ArrayBuffer[String]
       cmdBuf += (Path.BASE + "ss-tunnel"
+        , "-u"
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
         , "-L" , "8.8.8.8:53"
@@ -255,8 +256,16 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def startDnsDaemon() {
-    val conf = ConfigUtils
-        .PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153, Path.BASE + "pdnsd-nat.pid", getString(R.string.exclude), 8163)
+
+    val conf = if (config.route == Route.BYPASS_CHN) {
+      val reject = ConfigUtils.getRejectList(getContext, application)
+      ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
+      Path.BASE + "pdnsd-nat.pid", reject, reject, 8163)
+    } else {
+      ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
+        Path.BASE + "pdnsd-nat.pid", 8163)
+    }
+
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
@@ -407,14 +416,14 @@ class ShadowsocksNatService extends Service with BaseService {
 
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
     if (!InetAddressUtils.isIPv6Address(config.proxy.toUpperCase)) {
-      init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-d " + config.proxy))
+      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
     }
-    init_sb.append(cmd_bypass.replace("0.0.0.0", "127.0.0.1"))
-    init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + myUid))
+    init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 127.0.0.1"))
+    init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
     init_sb.append(Utils.getIptables
-      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + DNS_PORT)
+      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + 8153)
 
     if (config.isGlobalProxy || config.isBypassApps) {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)

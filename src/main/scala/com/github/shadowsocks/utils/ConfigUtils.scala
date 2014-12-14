@@ -40,7 +40,7 @@
 package com.github.shadowsocks.utils
 
 import android.content.{SharedPreferences, Context}
-import com.github.shadowsocks.ShadowsocksApplication
+import com.github.shadowsocks.{R, ShadowsocksApplication}
 import com.google.android.gms.tagmanager.Container
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.shadowsocks.aidl.Config
@@ -61,36 +61,6 @@ object ConfigUtils {
     " port = %d;" +
     " type = socks5;" +
     "}"
-  val PDNSD =
-    """
-      |global {
-      | perm_cache = 2048;
-      | cache_dir = "/data/data/com.github.shadowsocks";
-      | server_ip = %s;
-      | server_port = 8153;
-      | query_method = tcp_only;
-      | run_ipv4 = on;
-      | min_ttl = 15m;
-      | max_ttl = 1w;
-      | timeout = 10;
-      | daemon = on;
-      | pid_file = "/data/data/com.github.shadowsocks/pdnsd.pid";
-      |}
-      |
-      |server {
-      | label = "google-servers";
-      | ip = 8.8.8.8, 8.8.4.4;
-      | timeout = 5;
-      |}
-      |
-      |rr {
-      | name=localhost;
-      | reverse=on;
-      | a=127.0.0.1;
-      | owner=localhost;
-      | soa=localhost,root.localhost,42,86400,900,86400,86400;
-      |}
-    """.stripMargin
 
   val PDNSD_LOCAL =
     """
@@ -98,14 +68,14 @@ object ConfigUtils {
       | perm_cache = 2048;
       | cache_dir = "/data/data/com.github.shadowsocks";
       | server_ip = %s;
-      | server_port = 8153;
+      | server_port = %d;
       | query_method = tcp_only;
       | run_ipv4 = on;
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = on;
-      | pid_file = "/data/data/com.github.shadowsocks/pdnsd.pid";
+      | pid_file = %s;
       |}
       |
       |server {
@@ -166,6 +136,63 @@ object ConfigUtils {
       |}
     """.stripMargin
 
+  val PDNSD_DIRECT =
+    """
+      |global {
+      | perm_cache = 2048;
+      | cache_dir = "/data/data/com.github.shadowsocks";
+      | server_ip = %s;
+      | server_port = %d;
+      | query_method = udp_tcp;
+      | run_ipv4 = on;
+      | min_ttl = 15m;
+      | max_ttl = 1w;
+      | timeout = 10;
+      | daemon = on;
+      | pid_file = "%s";
+      |}
+      |
+      |server {
+      | label = "china-servers";
+      | ip = 223.5.5.5, 114.114.114.114;
+      | timeout = 2;
+      | reject = %s;
+      | reject_policy = fail;
+      | reject_recursively = on;
+      | uptest = query;
+      | query_test_name = ".";
+      |	interval = ontimeout;
+      |}
+      |
+      |server {
+      | label= "secure";
+      | port = 443;
+      | ip = 208.67.220.220,113.20.8.17,77.66.84.233,176.56.237.171;
+      | timeout = 3;
+      | reject = %s;
+      | reject_policy = fail;
+      | reject_recursively = on;
+      |	uptest = query;
+      |	query_test_name = ".";
+      |	interval = ontimeout;
+      |}
+      |
+      |server {
+      | label = "local-server";
+      | ip = 127.0.0.1;
+      | port = %d;
+      | timeout = 3;
+      |}
+      |
+      |rr {
+      | name=localhost;
+      | reverse=on;
+      | a=127.0.0.1;
+      | owner=localhost;
+      | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+    """.stripMargin
+
   def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
     val p = new java.io.PrintWriter(f)
     try {
@@ -178,6 +205,17 @@ object ConfigUtils {
   def refresh(context: Context) {
     val holder = context.getApplicationContext.asInstanceOf[ShadowsocksApplication].containerHolder
     if (holder != null) holder.refresh()
+  }
+
+  def getRejectList(context: Context, app: ShadowsocksApplication): String = {
+    val default = context.getString(R.string.reject)
+    try {
+      val container = app.containerHolder.getContainer
+      val update = container.getString("reject")
+      if (update == null || update.isEmpty) default else update
+    } catch {
+      case ex: Exception => default
+    }
   }
 
   def getPublicConfig(context: Context, container: Container, config: Config): Config = {

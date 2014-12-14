@@ -138,6 +138,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     })
     val cmd = new ArrayBuffer[String]
     cmd +=(Path.BASE + "ss-tunnel"
+      , "-u"
       , "-b", "127.0.0.1"
       , "-l", "8163"
       , "-L", "8.8.8.8:53"
@@ -150,10 +151,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val conf = {
-      if (Utils.isLollipopOrAbove) {
-        ConfigUtils.PDNSD_BYPASS.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153, Path.BASE + "pdnsd-vpn.pid", getString(R.string.exclude), 8163)
+      if (Utils.isLollipopOrAbove && config.route == Route.BYPASS_CHN) {
+        val reject = ConfigUtils.getRejectList(getContext, application)
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
+          Path.BASE + "pdnsd-vpn.pid", reject, reject, 8163)
       } else {
-        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "0.0.0.0", 8163)
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
+          Path.BASE + "pdnsd-vpn.pid", 8163)
       }
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-vpn.conf"))(p => {
