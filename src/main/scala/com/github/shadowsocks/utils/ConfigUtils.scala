@@ -123,6 +123,8 @@ object ConfigUtils {
       |server {
       | label = "local-server";
       | ip = 127.0.0.1;
+      | uptest = none;
+      | preset = on;
       | port = %d;
       | timeout = 5;
       |}
@@ -159,9 +161,8 @@ object ConfigUtils {
       | reject = %s;
       | reject_policy = fail;
       | reject_recursively = on;
-      | uptest = query;
-      | query_test_name = ".";
-      |	interval = ontimeout;
+      | uptest = none;
+      | preset = on;
       |}
       |
       |server {
@@ -172,9 +173,8 @@ object ConfigUtils {
       | reject = %s;
       | reject_policy = fail;
       | reject_recursively = on;
-      |	uptest = query;
-      |	query_test_name = ".";
-      |	interval = ontimeout;
+      | uptest = none;
+      | preset = on;
       |}
       |
       |server {
