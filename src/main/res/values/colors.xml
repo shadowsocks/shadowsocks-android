@@ -4,6 +4,7 @@
 
   <color name="title_background">#ff5e5e5e</color>
   <color name="dialog_title_background">#17170443</color>
+  <color name="white">#FFFFFF</color>
   <color name="black">#000000</color>
   <color name="grey1">#646464</color>
   <color name="grey2">#c8c8c8</color>

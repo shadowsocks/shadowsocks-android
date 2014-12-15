@@ -29,10 +29,10 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_shadow</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_shadow</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Shadow</item>
-        
-                <!-- Light.DarkActionBar specific -->
+        <!-- Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.Shadow.Widget</item>
-
+        <item name="android:textAppearanceLargePopupMenu">@style/m_textAppearanceLargePopupMenu</item>
+        <item name="android:textAppearanceSmallPopupMenu" >@style/m_textAppearanceSmallPopupMenu</item>
     </style>
 
     <style name="ActionBar.Solid.Shadow" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
@@ -49,6 +49,14 @@
 
     <style name="PopupMenu.Shadow" parent="@android:style/Widget.Holo.ListPopupWindow">
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_shadow</item>	
+    </style>
+
+    <style name="m_textAppearanceSmallPopupMenu" parent="@android:style/TextAppearance.Holo.Widget.PopupMenu.Small">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="m_textAppearanceLargePopupMenu" parent="@android:style/TextAppearance.Holo.Widget.PopupMenu.Large">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="DropDownListView.Shadow" parent="@android:style/Widget.Holo.ListView.DropDown">
@@ -77,6 +85,9 @@
     <style name="Theme.Shadow.Widget" parent="@android:style/Theme.Holo">
         <item name="android:popupMenuStyle">@style/PopupMenu.Shadow</item>
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Shadow</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textAppearanceLargePopupMenu">@style/m_textAppearanceLargePopupMenu</item>
+        <item name="android:textAppearanceSmallPopupMenu" >@style/m_textAppearanceSmallPopupMenu</item>
     </style>
 
 </resources>

@@ -40,6 +40,8 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, ProgressDialog}
+import android.content.ClipboardManager
+import android.content.ClipData
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -47,6 +49,8 @@ import android.graphics.{Bitmap, PixelFormat}
 import android.os.Bundle
 import android.os.Handler
 import android.preference.PreferenceManager
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.ViewGroup
@@ -115,7 +119,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
   var appsLoaded: Boolean = false
 
   def loadApps(context: Context): Array[ProxiedApp] = {
-    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
     val proxiedAppString = prefs.getString(Key.proxied, "")
     val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
@@ -218,6 +222,48 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     }
   }
 
+  protected override def onOptionsItemSelected(item: MenuItem): Boolean = {
+    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+    val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
+    item.getItemId match {
+      case R.id.action_export =>
+        val proxiedAppString = prefs.getString(Key.proxied, "")
+        val clip = ClipData.newPlainText(Key.proxied, proxiedAppString)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
+        return true
+      case R.id.action_import =>
+        if (clipboard.hasPrimaryClip) {
+          val clipdata = clipboard.getPrimaryClip
+          val label = clipdata.getDescription.getLabel
+          if (label == Key.proxied) {
+            val proxiedAppSequence = clipdata.getItemAt(0).getText
+            if (proxiedAppSequence != null) {
+              val proxiedAppString = proxiedAppSequence.toString
+              if (!proxiedAppString.isEmpty) {
+                Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+                prefs.edit.putString(Key.proxied, proxiedAppString).commit()
+                // Restart activity
+                val intent = getIntent
+                finish()
+                startActivity(intent)
+                return true
+              }
+            }
+          }
+        }
+        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
+        return false
+    }
+    super.onOptionsItemSelected(item)
+  }
+
+  protected override def onCreateOptionsMenu(menu: Menu): Boolean = {
+    val inflater = getMenuInflater()
+    inflater.inflate(R.menu.app_manager_menu, menu)
+    return super.onCreateOptionsMenu(menu)
+  }
+
   protected override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
@@ -239,7 +285,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     ImageLoader.getInstance().init(config)
 
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
-    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
+    val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     bypassSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener {
       def onCheckedChanged(button: CompoundButton, checked: Boolean) {
         prefs.edit().putBoolean(Key.isBypassApps, checked).commit()
@@ -261,7 +307,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
 
   def saveAppSettings(context: Context) {
     if (apps == null) return
-    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+    val prefs = PreferenceManager.getDefaultSharedPreferences(this)
     val proxiedApps = new StringBuilder
     apps.foreach(app =>
       if (app.proxied) {
