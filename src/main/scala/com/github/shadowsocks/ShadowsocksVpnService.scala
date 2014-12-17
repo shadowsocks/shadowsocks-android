@@ -116,9 +116,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val cmd = new ArrayBuffer[String]
     cmd +=(Path.BASE + "ss-local", "-u"
-      , "-b", "127.0.0.1"
-      , "-c", Path.BASE + "ss-local-vpn.conf"
-      , "-f", Path.BASE + "ss-local-vpn.pid")
+      , "-b" , "127.0.0.1"
+      , "-t" , "600"
+      , "-c" , Path.BASE + "ss-local-vpn.conf"
+      , "-f" , Path.BASE + "ss-local-vpn.pid")
 
     if (Utils.isLollipopOrAbove && config.route != Route.ALL) {
       cmd += "--acl"
@@ -139,11 +140,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val cmd = new ArrayBuffer[String]
     cmd +=(Path.BASE + "ss-tunnel"
       , "-u"
-      , "-b", "127.0.0.1"
-      , "-l", "8163"
-      , "-L", "8.8.8.8:53"
-      , "-c", Path.BASE + "ss-tunnel-vpn.conf"
-      , "-f", Path.BASE + "ss-tunnel-vpn.pid")
+      , "-t" , "10"
+      , "-b" , "127.0.0.1"
+      , "-l" , "8163"
+      , "-L" , "8.8.8.8:53"
+      , "-c" , Path.BASE + "ss-tunnel-vpn.conf"
+      , "-f" , Path.BASE + "ss-tunnel-vpn.pid")
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     Console.runCommand(cmd.mkString(" "))

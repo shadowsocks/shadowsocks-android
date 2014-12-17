@@ -200,6 +200,7 @@ class ShadowsocksNatService extends Service with BaseService {
     val cmd = new ArrayBuffer[String]
     cmd += (Path.BASE + "ss-local"
           , "-b" , "127.0.0.1"
+          , "-t" , "600"
           , "-c" , Path.BASE + "ss-local-nat.conf"
           , "-f" , Path.BASE + "ss-local-nat.pid")
 
@@ -223,6 +224,7 @@ class ShadowsocksNatService extends Service with BaseService {
       val cmd = new ArrayBuffer[String]
       cmd += (Path.BASE + "ss-tunnel"
         , "-u"
+        , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-L" , "8.8.8.8:53"
         , "-c" , Path.BASE + "ss-tunnel-nat.conf"
@@ -244,6 +246,7 @@ class ShadowsocksNatService extends Service with BaseService {
       val cmdBuf = new ArrayBuffer[String]
       cmdBuf += (Path.BASE + "ss-tunnel"
         , "-u"
+        , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
         , "-L" , "8.8.8.8:53"
