@@ -227,8 +227,9 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     item.getItemId match {
       case R.id.action_export =>
+        val bypass = prefs.getBoolean(Key.isBypassApps, false)
         val proxiedAppString = prefs.getString(Key.proxied, "")
-        val clip = ClipData.newPlainText(Key.proxied, proxiedAppString)
+        val clip = ClipData.newPlainText(Key.proxied, bypass + " " + proxiedAppString)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
         return true
@@ -241,8 +242,12 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
             if (proxiedAppSequence != null) {
               val proxiedAppString = proxiedAppSequence.toString
               if (!proxiedAppString.isEmpty) {
+                val array = proxiedAppString.split(" ")
+                val bypass = array(0).toBoolean
+                val apps = if (array.size > 1) array(1) else ""
+                prefs.edit.putBoolean(Key.isBypassApps, bypass).commit()
+                prefs.edit.putString(Key.proxied, apps).commit()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-                prefs.edit.putString(Key.proxied, proxiedAppString).commit()
                 // Restart activity
                 val intent = getIntent
                 finish()
