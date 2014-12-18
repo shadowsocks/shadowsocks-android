@@ -479,7 +479,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     // stop the service if no callback registered
-    if (callbackCount == 0) {
+    if (getCallbackCount == 0) {
       stopSelf()
     }
 

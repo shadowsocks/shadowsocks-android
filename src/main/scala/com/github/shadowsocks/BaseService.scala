@@ -49,8 +49,8 @@ import android.content.Context
 
 trait BaseService {
 
-  @volatile var state = State.INIT
-  @volatile var callbackCount = 0
+  @volatile private var state = State.INIT
+  @volatile private var callbackCount = 0
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
 
@@ -100,6 +100,12 @@ trait BaseService {
   def getTag: String
   def getContext: Context
 
+  def getCallbackCount(): Int = {
+    callbackCount
+  }
+  def getState(): Int = {
+    state
+  }
   def changeState(s: Int) {
     changeState(s, null)
   }

@@ -43,7 +43,7 @@ import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
 import java.util.Locale
 
-import android.app.{Notification, NotificationManager, PendingIntent, Service}
+import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Network, ConnectivityManager}
@@ -75,6 +75,7 @@ class ShadowsocksNatService extends Service with BaseService {
   private val mStartForegroundArgs = new Array[AnyRef](2)
   private val mStopForegroundArgs = new Array[AnyRef](1)
 
+  var lockReceiver: BroadcastReceiver = null
   var closeReceiver: BroadcastReceiver = null
   var connReceiver: BroadcastReceiver = null
   var notificationManager: NotificationManager = null
@@ -327,7 +328,7 @@ class ShadowsocksNatService extends Service with BaseService {
     }
   }
 
-  def notifyForegroundAlert(title: String, info: String) {
+  def notifyForegroundAlert(title: String, info: String, visible: Boolean) {
     val openIntent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
     val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
@@ -344,7 +345,11 @@ class ShadowsocksNatService extends Service with BaseService {
       .setSmallIcon(R.drawable.ic_stat_shadowsocks)
       .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
         actionIntent)
-      .setPriority(NotificationCompat.PRIORITY_MIN)
+
+    if (visible)
+      builder.setPriority(NotificationCompat.PRIORITY_MAX)
+    else
+      builder.setPriority(NotificationCompat.PRIORITY_MIN)
 
     startForegroundCompat(1, builder.build)
   }
@@ -500,12 +505,38 @@ class ShadowsocksNatService extends Service with BaseService {
     filter.addAction(Intent.ACTION_SHUTDOWN)
     filter.addAction(Action.CLOSE)
     closeReceiver = new BroadcastReceiver() {
-      def onReceive(p1: Context, p2: Intent) {
-        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT).show()
+      def onReceive(context: Context, intent: Intent) {
+        Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
         stopRunner()
       }
     }
     registerReceiver(closeReceiver, filter)
+
+    val screenFilter = new IntentFilter()
+    screenFilter.addAction(Intent.ACTION_SCREEN_ON)
+    screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
+    screenFilter.addAction(Intent.ACTION_USER_PRESENT)
+    lockReceiver = new BroadcastReceiver() {
+      def onReceive(context: Context, intent: Intent) {
+        if (getState == State.CONNECTED) {
+          val action = intent.getAction
+          if (action == Intent.ACTION_SCREEN_OFF) {
+            notifyForegroundAlert(getString(R.string.forward_success),
+              getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
+          } else if (action == Intent.ACTION_SCREEN_ON) {
+            val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
+            if (!keyGuard.inKeyguardRestrictedInputMode) {
+              notifyForegroundAlert(getString(R.string.forward_success),
+                getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
+            }
+          } else if (action == Intent.ACTION_USER_PRESENT) {
+            notifyForegroundAlert(getString(R.string.forward_success),
+              getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
+          }
+        }
+      }
+    }
+    registerReceiver(lockReceiver, screenFilter)
 
     // send event
     application.tracker.send(new HitBuilders.EventBuilder()
@@ -554,7 +585,7 @@ class ShadowsocksNatService extends Service with BaseService {
           flushDns()
 
           notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName))
+            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
           changeState(State.CONNECTED)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
@@ -574,6 +605,10 @@ class ShadowsocksNatService extends Service with BaseService {
       unregisterReceiver(closeReceiver)
       closeReceiver = null
     }
+    if (lockReceiver != null) {
+      unregisterReceiver(lockReceiver)
+      lockReceiver = null
+    }
 
     // send event
     application.tracker.send(new HitBuilders.EventBuilder()
@@ -586,7 +621,7 @@ class ShadowsocksNatService extends Service with BaseService {
     killProcesses()
 
     // stop the service if no callback registered
-    if (callbackCount == 0) {
+    if (getCallbackCount == 0) {
       stopSelf()
     }
 
