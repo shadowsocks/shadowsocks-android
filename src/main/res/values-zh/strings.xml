@@ -47,7 +47,7 @@
   <string name="service_failed">无法连接远程服务器</string>
   <string name="stop">停止服务</string>
   <string name="stopping">正在关闭...</string>
-  <string name="vpn_error">后台服务启动失败：\"%s\"。</string>
+  <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="ok_iknow">确定</string>
   <string name="port_alert">端口号应大于1024</string>
   <string name="port_empty">端口号不能为空</string>
@@ -94,5 +94,6 @@
   <string name="action_export_err">导出失败</string>
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
+  <string name="error">错误</string>
 
 </resources>

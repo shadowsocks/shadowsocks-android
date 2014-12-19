@@ -56,6 +56,7 @@ import android.view.View.OnLongClickListener
 import android.view._
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
+import com.github.mrengineer13.snackbar._
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.preferences.{PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
@@ -64,7 +65,6 @@ import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import com.google.android.gms.analytics.HitBuilders
 import com.google.zxing.integration.android.IntentIntegrator
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import de.keyboardsurfer.android.widget.crouton.{Configuration, Crouton, Style}
 import net.simonvt.menudrawer.MenuDrawer
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -205,7 +205,6 @@ class Shadowsocks
       // Update the UI
       if (switchButton != null) switchButton.setEnabled(true)
       if (State.isAvailable(bgService.getState)) {
-        Crouton.cancelAllCroutons()
         setPreferenceEnabled(enabled = true)
       } else {
         changeSwitch(checked = true)
@@ -367,7 +366,7 @@ class Shadowsocks
 
   def isTextEmpty(s: String, msg: String): Boolean = {
     if (s == null || s.length <= 0) {
-      Crouton.makeText(this, msg, Style.ALERT).show()
+      new SnackBar.Builder(this).withMessage(msg).withStyle(SnackBar.Style.ALERT).show()
       return true
     }
     false
@@ -828,7 +827,6 @@ class Shadowsocks
   override def onDestroy() {
     super.onDestroy()
     deattachService()
-    Crouton.cancelAllCroutons()
     unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
     if (handler != null) {
@@ -927,12 +925,12 @@ class Shadowsocks
     try {
       val port: Int = Integer.valueOf(text)
       if (!low && port <= 1024) {
-        Crouton.makeText(this, R.string.port_alert, Style.ALERT).show()
+        new SnackBar.Builder(this).withMessageId(R.string.port_alert).withStyle(SnackBar.Style.ALERT).show()
         return false
       }
     } catch {
       case ex: Exception =>
-        Crouton.makeText(this, R.string.port_alert, Style.ALERT).show()
+        new SnackBar.Builder(this).withMessageId(R.string.port_alert).withStyle(SnackBar.Style.ALERT).show()
         return false
     }
     true
@@ -1014,15 +1012,12 @@ class Shadowsocks
             case State.STOPPED =>
               clearDialog()
               changeSwitch(checked = false)
-              Crouton.cancelAllCroutons()
               if (m != null) {
-                val style = new Style.Builder().setBackgroundColorValue(Style.holoRedLight).build()
-                val config = new Configuration.Builder()
-                  .setDuration(Configuration.DURATION_LONG)
-                  .build()
-                Crouton
-                  .makeText(Shadowsocks.this, getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), style)
-                  .setConfiguration(config)
+                new SnackBar.Builder(Shadowsocks.this)
+                  .withMessage(getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m))
+                  .withActionMessageId(R.string.error)
+                  .withStyle(SnackBar.Style.ALERT)
+                  .withDuration(SnackBar.LONG_SNACK)
                   .show()
               }
               setPreferenceEnabled(enabled = true)

@@ -14,6 +14,8 @@ ndkJavah in Android := List()
 
 ndkBuild in Android := List()
 
+typedResources in Android := false
+
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
 resolvers += "madeye private releases" at "http://madeye-maven-repository.googlecode.com/git/"
@@ -32,7 +34,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
-  "de.keyboardsurfer.android.widget" % "crouton" % "1.8.4" exclude("com.google.android", "support-v4"),
+  "com.github.mrengineer13" % "snackbar" % "0.5.0",
   "com.nostra13.universalimageloader" % "universal-image-loader" % "1.8.4",
   "com.j256.ormlite" % "ormlite-core" % "4.47",
   "com.j256.ormlite" % "ormlite-android" % "4.47"
