@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.shadowsocks"
-    android:versionCode="97"
-    android:versionName="2.5.7">
+    android:versionCode="98"
+    android:versionName="2.6.0">
 
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
