@@ -161,6 +161,8 @@ object ConfigUtils {
       | reject = %s;
       | reject_policy = fail;
       | reject_recursively = on;
+      | exclude = %s;
+      | policy = included;
       | uptest = none;
       | preset = on;
       |}
@@ -173,6 +175,8 @@ object ConfigUtils {
       | reject = %s;
       | reject_policy = fail;
       | reject_recursively = on;
+      | exclude = %s;
+      | policy = included;
       | uptest = none;
       | preset = on;
       |}
@@ -212,6 +216,17 @@ object ConfigUtils {
     try {
       val container = app.containerHolder.getContainer
       val update = container.getString("reject")
+      if (update == null || update.isEmpty) default else update
+    } catch {
+      case ex: Exception => default
+    }
+  }
+
+  def getBlackList(context: Context, app: ShadowsocksApplication): String = {
+    val default = context.getString(R.string.black_list)
+    try {
+      val container = app.containerHolder.getContainer
+      val update = container.getString("black_list")
       if (update == null || update.isEmpty) default else update
     } catch {
       case ex: Exception => default
