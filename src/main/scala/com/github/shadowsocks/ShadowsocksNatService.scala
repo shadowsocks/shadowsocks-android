@@ -265,7 +265,7 @@ class ShadowsocksNatService extends Service with BaseService {
       val reject = ConfigUtils.getRejectList(getContext, application)
       val blackList = ConfigUtils.getBlackList(getContext, application)
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
-        Path.BASE + "pdnsd-nat.pid", reject, blackList, reject, blackList, 8163)
+        Path.BASE + "pdnsd-nat.pid", reject, blackList, 8163)
     } else {
       ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
         Path.BASE + "pdnsd-nat.pid", 8163)

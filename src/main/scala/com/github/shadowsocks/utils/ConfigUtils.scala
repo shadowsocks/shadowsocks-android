@@ -168,20 +168,6 @@ object ConfigUtils {
       |}
       |
       |server {
-      | label= "secure";
-      | port = 443;
-      | ip = 208.67.220.220,113.20.8.17,77.66.84.233,176.56.237.171;
-      | timeout = 3;
-      | reject = %s;
-      | reject_policy = fail;
-      | reject_recursively = on;
-      | exclude = %s;
-      | policy = included;
-      | uptest = none;
-      | preset = on;
-      |}
-      |
-      |server {
       | label = "local-server";
       | ip = 127.0.0.1;
       | port = %d;
