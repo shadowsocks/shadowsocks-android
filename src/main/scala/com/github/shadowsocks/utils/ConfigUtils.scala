@@ -145,7 +145,7 @@ object ConfigUtils {
       | cache_dir = "/data/data/com.github.shadowsocks";
       | server_ip = %s;
       | server_port = %d;
-      | query_method = udp_tcp;
+      | query_method = tcp_only;
       | run_ipv4 = on;
       | min_ttl = 15m;
       | max_ttl = 1w;
