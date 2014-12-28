@@ -61,8 +61,8 @@ SODIUM_SOURCE := $(crypto_aead_src) $(crypto_auth_src) $(crypto_box_src) \
 	$(crypto_stream_src) $(crypto_verify_src) $(randombytes_src) $(sodium_src)
 
 LOCAL_MODULE := sodium
-LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include \
-				-I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include/sodium \
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
+				-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 				-DPACKAGE_NAME=\"libsodium\" -DPACKAGE_TARNAME=\"libsodium\" \
 				-DPACKAGE_VERSION=\"1.0.1\" -DPACKAGE_STRING=\"libsodium\ 1.0.1\" \
 				-DPACKAGE_BUGREPORT=\"https://github.com/jedisct1/libsodium/issues\" \
@@ -79,7 +79,7 @@ LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include 
 				-DHAVE_WEAK_SYMBOLS=1 -DHAVE_ARC4RANDOM=1 -DHAVE_ARC4RANDOM_BUF=1 \
 				-DHAVE_MLOCK=1 -DHAVE_MPROTECT=1 -DHAVE_POSIX_MEMALIGN=1
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks/libsodium/src/libsodium/,$(SODIUM_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libsodium/src/libsodium/,$(SODIUM_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -126,10 +126,10 @@ set_src = set/allocation.c set/inspection.c set/ipv4_set.c set/ipv6_set.c \
 IPSET_SOURCE := general.c $(bdd_src) $(map_src) $(set_src)
 
 LOCAL_MODULE := libipset
-LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks/libipset/include \
-				-I$(LOCAL_PATH)/shadowsocks/libcork/include
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
+				-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks/libipset/,$(IPSET_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libipset/,$(IPSET_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -153,10 +153,10 @@ pthreads_src := pthreads/thread.c
 CORK_SOURCE := $(cli_src) $(core_src) $(ds_src) $(posix_src) $(pthreads_src)
 
 LOCAL_MODULE := libcork
-LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks/libcork/include \
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 				-DCORK_API=CORK_LOCAL
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks/libcork/,$(CORK_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/,$(CORK_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -210,7 +210,7 @@ LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## shadowsocks local library
+## shadowsocks-libev local library
 ########################################################
 
 include $(CLEAR_VARS)
@@ -218,15 +218,15 @@ include $(CLEAR_VARS)
 SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c acl.c 
 
 LOCAL_MODULE    := ss-local
-LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
 					-I$(LOCAL_PATH)/libev/ \
 					-I$(LOCAL_PATH)/openssl/include  \
-					-I$(LOCAL_PATH)/shadowsocks/libcork/include \
-					-I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include \
-					-I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/shadowsocks/libipset/include
+					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libsodium
 
@@ -235,7 +235,7 @@ LOCAL_LDLIBS := -llog
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## shadowsocks tunnel
+## shadowsocks-libev tunnel
 ########################################################
 
 include $(CLEAR_VARS)
@@ -243,12 +243,12 @@ include $(CLEAR_VARS)
 SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
 
 LOCAL_MODULE    := ss-tunnel
-LOCAL_SRC_FILES := $(addprefix shadowsocks/src/, $(SHADOWSOCKS_SOURCES))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
 					-I$(LOCAL_PATH)/libev/ \
-					-I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include \
-					-I$(LOCAL_PATH)/shadowsocks/libsodium/src/libsodium/include/sodium \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/openssl/include 
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium
