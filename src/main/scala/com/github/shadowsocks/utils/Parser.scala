@@ -52,17 +52,21 @@ object Parser {
       if (uri.getScheme == Scheme.SS) {
         val encoded = data.replace(Scheme.SS + "://", "")
         val content = new String(Base64.decode(encoded, Base64.NO_PADDING), "UTF-8")
-        val info = content.split('@')
-        val encinfo = info(0).split(':')
-        val serverinfo = info(1).split(':')
+        val methodIdx = content.indexOf(':')
+        val passwordIdx = content.lastIndexOf('@')
+        val hostIdx = content.lastIndexOf(':')
+        val method = content.substring(0, methodIdx)
+        val password = content.substring(methodIdx + 1, passwordIdx)
+        val host = content.substring(passwordIdx + 1, hostIdx)
+        val port = content.substring(hostIdx + 1)
 
         val profile = new Profile
-        profile.name = serverinfo(0)
-        profile.host = serverinfo(0)
-        profile.remotePort = serverinfo(1).toInt
+        profile.name = host
+        profile.host = host
+        profile.remotePort = port.toInt
         profile.localPort = 1080
-        profile.method = encinfo(0)
-        profile.password = encinfo(1)
+        profile.method = method
+        profile.password = password
         return Some(profile)
       }
     } catch {
