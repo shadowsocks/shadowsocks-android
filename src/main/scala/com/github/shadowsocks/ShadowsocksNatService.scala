@@ -513,31 +513,33 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     registerReceiver(closeReceiver, filter)
 
-    val screenFilter = new IntentFilter()
-    screenFilter.addAction(Intent.ACTION_SCREEN_ON)
-    screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-    screenFilter.addAction(Intent.ACTION_USER_PRESENT)
-    lockReceiver = new BroadcastReceiver() {
-      def onReceive(context: Context, intent: Intent) {
-        if (getState == State.CONNECTED) {
-          val action = intent.getAction
-          if (action == Intent.ACTION_SCREEN_OFF) {
-            notifyForegroundAlert(getString(R.string.forward_success),
-              getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
-          } else if (action == Intent.ACTION_SCREEN_ON) {
-            val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
-            if (!keyGuard.inKeyguardRestrictedInputMode) {
+    if (Utils.isLollipopOrAbove) {
+      val screenFilter = new IntentFilter()
+      screenFilter.addAction(Intent.ACTION_SCREEN_ON)
+      screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
+      screenFilter.addAction(Intent.ACTION_USER_PRESENT)
+      lockReceiver = new BroadcastReceiver() {
+        def onReceive(context: Context, intent: Intent) {
+          if (getState == State.CONNECTED) {
+            val action = intent.getAction
+            if (action == Intent.ACTION_SCREEN_OFF) {
+              notifyForegroundAlert(getString(R.string.forward_success),
+                getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
+            } else if (action == Intent.ACTION_SCREEN_ON) {
+              val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
+              if (!keyGuard.inKeyguardRestrictedInputMode) {
+                notifyForegroundAlert(getString(R.string.forward_success),
+                  getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
+            }
+            } else if (action == Intent.ACTION_USER_PRESENT) {
               notifyForegroundAlert(getString(R.string.forward_success),
                 getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
             }
-          } else if (action == Intent.ACTION_USER_PRESENT) {
-            notifyForegroundAlert(getString(R.string.forward_success),
-              getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
+            }
           }
         }
-      }
+        registerReceiver(lockReceiver, screenFilter)
     }
-    registerReceiver(lockReceiver, screenFilter)
 
     // send event
     application.tracker.send(new HitBuilders.EventBuilder()
@@ -606,9 +608,12 @@ class ShadowsocksNatService extends Service with BaseService {
       unregisterReceiver(closeReceiver)
       closeReceiver = null
     }
-    if (lockReceiver != null) {
-      unregisterReceiver(lockReceiver)
-      lockReceiver = null
+
+    if (Utils.isLollipopOrAbove) {
+      if (lockReceiver != null) {
+        unregisterReceiver(lockReceiver)
+        lockReceiver = null
+      }
     }
 
     // send event
