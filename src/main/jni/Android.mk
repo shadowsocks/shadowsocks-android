@@ -234,7 +234,7 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c acl.c 
+SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c acl.c
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
@@ -260,7 +260,7 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c json.c jconf.c
+SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c
 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
