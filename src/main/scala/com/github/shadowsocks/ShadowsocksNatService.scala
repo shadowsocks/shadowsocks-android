@@ -348,7 +348,7 @@ class ShadowsocksNatService extends Service with BaseService {
         actionIntent)
 
     if (visible)
-      builder.setPriority(NotificationCompat.PRIORITY_MAX)
+      builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
     else
       builder.setPriority(NotificationCompat.PRIORITY_MIN)
 
