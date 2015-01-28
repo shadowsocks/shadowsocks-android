@@ -1,4 +1,9 @@
 language: scala
+cache:
+- apt
+- directories:
+  - android-sdk-linux
+  - android-ndk-r10d
 scala:
 - 2.10.4
 before_install:
