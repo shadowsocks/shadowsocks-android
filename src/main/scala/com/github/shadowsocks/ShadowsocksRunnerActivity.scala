@@ -58,7 +58,9 @@ class ShadowsocksRunnerActivity extends Activity {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
       handler.postDelayed(new Runnable() {
-        override def run() = startBackgroundService()
+        override def run() {
+          if (bgService != null) startBackgroundService()
+        }
       }, 1000)
     }
     override def onServiceDisconnected(name: ComponentName) {
