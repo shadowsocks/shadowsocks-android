@@ -65,7 +65,7 @@ object Parser {
         profile.host = host
         profile.remotePort = port.toInt
         profile.localPort = 1080
-        profile.method = method
+        profile.method = method.toLowerCase
         profile.password = password
         return Some(profile)
       }
