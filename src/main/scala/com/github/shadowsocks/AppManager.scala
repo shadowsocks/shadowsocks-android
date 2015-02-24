@@ -259,6 +259,9 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         }
         Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
         return false
+      case android.R.id.home =>
+        navigateUpTo(getParentActivityIntent)
+        return true
     }
     super.onOptionsItemSelected(item)
   }
@@ -274,7 +277,9 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
 
     handler = new Handler()
 
-    getActionBar.setTitle(R.string.proxied_help)
+    val actionBar = getActionBar()
+    actionBar.setTitle(R.string.proxied_help)
+    actionBar.setDisplayHomeAsUpEnabled(true)
     this.setContentView(R.layout.layout_apps)
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
