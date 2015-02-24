@@ -277,7 +277,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
 
     handler = new Handler()
 
-    val actionBar = getActionBar
+    val actionBar = getActionBar()
     actionBar.setTitle(R.string.proxied_help)
     actionBar.setDisplayHomeAsUpEnabled(true)
     this.setContentView(R.layout.layout_apps)
