@@ -261,7 +261,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         return false
       case android.R.id.home =>
         navigateUpTo(getParentActivityIntent)
-	return true
+        return true
     }
     super.onOptionsItemSelected(item)
   }
