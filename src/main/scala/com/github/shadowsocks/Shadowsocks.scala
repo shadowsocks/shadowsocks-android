@@ -321,7 +321,7 @@ class Shadowsocks
     }
   }
 
-  private def crash_recovery() {
+  private def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
@@ -849,7 +849,7 @@ class Shadowsocks
 
   def reset() {
 
-    crash_recovery()
+    crashRecovery()
 
     copyAssets(System.getABI)
 
