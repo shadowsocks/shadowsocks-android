@@ -1,9 +1,6 @@
 language: scala
 cache:
 - apt
-- directories:
-  - android-sdk-linux
-  - android-ndk-r10d
 scala:
 - 2.10.4
 before_install:
@@ -12,8 +9,8 @@ install:
 - sudo apt-get install -y libc6-dev-i386 lib32ncurses5-dev libx11-dev g++-multilib lib32z1-dev ccache
 - export NDK_CCACHE=ccache
 - export ARCH=`uname -m`
-- wget http://dl.google.com/android/android-sdk_r23.0.2-linux.tgz
-- tar xf android-sdk_r23.0.2-linux.tgz
+- wget http://dl.google.com/android/android-sdk_r24.0.2-linux.tgz
+- tar xf android-sdk_r24.0.2-linux.tgz
 - wget http://dl.google.com/android/ndk/android-ndk-r10d-linux-${ARCH}.bin
 - chmod +x android-ndk-r10d-linux-${ARCH}.bin
 - ./android-ndk-r10d-linux-${ARCH}.bin -y | grep gcc
