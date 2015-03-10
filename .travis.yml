@@ -1,24 +1,25 @@
-language: scala
+language: android
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-21.1.1
+  - android-21
+  - extra-google-m2repository
+  - extra-android-m2repository
 cache:
 - apt
-scala:
-- 2.10.4
 before_install:
 - sudo apt-get update
 install:
 - sudo apt-get install -y libc6-dev-i386 lib32ncurses5-dev libx11-dev g++-multilib lib32z1-dev ccache
 - export NDK_CCACHE=ccache
 - export ARCH=`uname -m`
-- wget http://dl.google.com/android/android-sdk_r24.0.2-linux.tgz
-- tar xf android-sdk_r24.0.2-linux.tgz
 - wget http://dl.google.com/android/ndk/android-ndk-r10d-linux-${ARCH}.bin
 - chmod +x android-ndk-r10d-linux-${ARCH}.bin
 - ./android-ndk-r10d-linux-${ARCH}.bin -y | grep gcc
 - export ANDROID_NDK_HOME=`pwd`/android-ndk-r10d
-- export ANDROID_HOME=`pwd`/android-sdk-linux
 - export PATH=${PATH}:${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
-- echo "y" | android update sdk --filter tools,platform-tools,build-tools-21.0.1,android-21,extra-google-m2repository --no-ui --no-https -a
-- echo "y" | android update sdk --filter extra-android-m2repository --no-ui --no-https -a
 script:
 - cp local.properties.travis local.properties
 - ./build.sh
