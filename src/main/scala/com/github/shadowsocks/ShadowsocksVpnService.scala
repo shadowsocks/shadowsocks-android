@@ -153,7 +153,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val conf = {
-      if (Utils.isLollipopOrAbove && config.route == Route.BYPASS_CHN) {
+      if (config.route == Route.BYPASS_CHN) {
         val reject = ConfigUtils.getRejectList(getContext, application)
         val blackList = ConfigUtils.getBlackList(getContext, application)
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
