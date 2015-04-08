@@ -8,7 +8,7 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 ### TRAVIS CI STATUS
 
-[![Build Status](https://secure.travis-ci.org/shadowsocks/shadowsocks-android.png)](http://travis-ci.org/shadowsocks/shadowsocks-android)
+[![Build Status](https://drone.io/github.com/shadowsocks/shadowsocks-android/status.png)](https://drone.io/github.com/shadowsocks/shadowsocks-android/latest)
 
 ### PREREQUISITES
 
