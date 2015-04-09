@@ -82,6 +82,9 @@ object ConfigUtils {
       | label = "local";
       | ip = 127.0.0.1;
       | port = %d;
+      | reject = ::/0;
+      | reject_policy = negate;
+      | reject_recursively = on;
       | timeout = 5;
       |}
       |
