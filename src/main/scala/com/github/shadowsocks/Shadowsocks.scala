@@ -366,19 +366,29 @@ class Shadowsocks
 
   def isTextEmpty(s: String, msg: String): Boolean = {
     if (s == null || s.length <= 0) {
-      new SnackBar.Builder(this).withMessage(msg).withStyle(SnackBar.Style.ALERT).show()
+      new SnackBar.Builder(this)
+        .withMessage(msg)
+        .withActionMessageId(R.string.error)
+        .withStyle(SnackBar.Style.ALERT)
+        .withDuration(SnackBar.LONG_SNACK)
+        .show()
       return true
     }
     false
   }
 
   def cancelStart() {
-    handler.postDelayed(new Runnable {
-      override def run() {
-        clearDialog()
-        changeSwitch(checked = false)
-      }
-    }, 1000)
+    clearDialog()
+    changeSwitch(checked = false)
+  }
+
+  def isReady(): Boolean = {
+    if (!checkText(Key.proxy)) return false
+    if (!checkText(Key.sitekey)) return false
+    if (!checkNumber(Key.localPort, low = false)) return false
+    if (!checkNumber(Key.remotePort, low = true)) return false
+    if (bgService == null) return false
+    true
   }
 
   def prepareStartService() {
@@ -392,9 +402,7 @@ class Shadowsocks
           onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
         }
       } else {
-        if (!serviceStart) {
-          cancelStart()
-        }
+        serviceStart()
       }
     }
   }
@@ -403,7 +411,10 @@ class Shadowsocks
     if (compoundButton eq switchButton) {
       checked match {
         case true =>
-          prepareStartService()
+          if (isReady)
+            prepareStartService()
+          else
+            changeSwitch(checked = false)
         case false =>
           serviceStop()
       }
@@ -889,9 +900,7 @@ class Shadowsocks
       resultCode match {
         case Activity.RESULT_OK =>
           prepared = true
-          if (!serviceStart) {
-            cancelStart()
-          }
+          serviceStart()
         case _ =>
           cancelStart()
           Log.e(Shadowsocks.TAG, "Failed to start VpnService")
@@ -925,33 +934,34 @@ class Shadowsocks
     try {
       val port: Int = Integer.valueOf(text)
       if (!low && port <= 1024) {
-        new SnackBar.Builder(this).withMessageId(R.string.port_alert).withStyle(SnackBar.Style.ALERT).show()
+        new SnackBar.Builder(this)
+          .withMessageId(R.string.port_alert)
+          .withActionMessageId(R.string.error)
+          .withStyle(SnackBar.Style.ALERT)
+          .withDuration(SnackBar.LONG_SNACK)
+          .show()
         return false
       }
     } catch {
       case ex: Exception =>
-        new SnackBar.Builder(this).withMessageId(R.string.port_alert).withStyle(SnackBar.Style.ALERT).show()
+        new SnackBar.Builder(this)
+          .withMessageId(R.string.port_alert)
+          .withActionMessageId(R.string.error)
+          .withStyle(SnackBar.Style.ALERT)
+          .withDuration(SnackBar.LONG_SNACK)
+          .show()
         return false
     }
     true
   }
 
   /** Called when connect button is clicked. */
-  def serviceStart: Boolean = {
-
-    if (!checkText(Key.proxy)) return false
-    if (!checkText(Key.sitekey)) return false
-    if (!checkNumber(Key.localPort, low = false)) return false
-    if (!checkNumber(Key.remotePort, low = true)) return false
-
-    if (bgService == null) return false
-
+  def serviceStart() {
     bgService.start(ConfigUtils.load(settings))
 
     if (isVpnEnabled) {
       changeSwitch(checked = false)
     }
-    true
   }
 
   private def showAbout() {

@@ -65,7 +65,7 @@
 
   <!-- alert category -->
   <string name="ok_iknow">OK</string>
-  <string name="port_alert">The port number should be greater than 1024</string>
+  <string name="port_alert">The local port number should be greater than 1024</string>
   <string name="port_empty">Port should not be empty</string>
   <string name="proxy_empty">Proxy should not be empty</string>
   <string name="crash_alert">An unexpected exit detected, the context has been reset.

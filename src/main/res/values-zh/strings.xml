@@ -49,7 +49,7 @@
   <string name="stopping">正在关闭...</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="ok_iknow">确定</string>
-  <string name="port_alert">端口号应大于1024</string>
+  <string name="port_alert">本地端口号应大于1024</string>
   <string name="port_empty">端口号不能为空</string>
   <string name="proxy_empty">代理服务器地址不能为空</string>
   <string name="crash_alert">检测到意外退出，状态已被重置。</string>
