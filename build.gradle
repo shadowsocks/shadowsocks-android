@@ -55,6 +55,10 @@ android {
             jni.srcDirs = []
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
