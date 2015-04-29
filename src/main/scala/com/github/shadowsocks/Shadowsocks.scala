@@ -41,6 +41,7 @@ package com.github.shadowsocks
 import java.util
 import java.io.{OutputStream, InputStream, ByteArrayInputStream, ByteArrayOutputStream, IOException, FileOutputStream}
 import java.util.Locale
+import java.lang.Math
 
 import android.app.backup.BackupManager
 import android.app.{Activity, AlertDialog, ProgressDialog}
@@ -66,6 +67,10 @@ import com.google.android.gms.analytics.HitBuilders
 import com.google.zxing.integration.android.IntentIntegrator
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import net.simonvt.menudrawer.MenuDrawer
+import com.joanzapata.android.iconify.Iconify
+import com.joanzapata.android.iconify.Iconify.IconValue
+import com.joanzapata.android.iconify.IconDrawable
+import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.concurrent.ops._
@@ -711,7 +716,7 @@ class Shadowsocks
 
   def getProfileList: List[Item] = {
     val list = profileManager.getAllProfiles getOrElse List[Profile]()
-    list.map(p => new Item(p.id, p.name, -1, updateProfile, delProfile))
+    list.map(p => new IconItem(p.id, p.name, -1, updateProfile, delProfile))
   }
 
   def getMenuList: List[Any] = {
@@ -723,11 +728,13 @@ class Shadowsocks
     buf ++= getProfileList
 
     buf +=
-      new Item(-400, getString(R.string.add_profile), android.R.drawable.ic_menu_add, newProfile)
+      new DrawableItem(-400, getString(R.string.add_profile), new IconDrawable(this, IconValue.fa_plus_circle)
+        .colorRes(android.R.color.darker_gray).sizeDp(26), newProfile)
 
     buf += new Category(getString(R.string.settings))
 
-    buf += new Item(-100, getString(R.string.recovery), android.R.drawable.ic_menu_revert, _ => {
+    buf += new DrawableItem(-100, getString(R.string.recovery), new IconDrawable(this, IconValue.fa_recycle)
+        .colorRes(android.R.color.darker_gray).sizeDp(26), _ => {
       // send event
       application.tracker.send(new HitBuilders.EventBuilder()
         .setCategory(Shadowsocks.TAG)
@@ -738,7 +745,8 @@ class Shadowsocks
     })
 
     buf +=
-      new Item(-200, getString(R.string.flush_dnscache), android.R.drawable.ic_menu_delete, _ => {
+      new DrawableItem(-200, getString(R.string.flush_dnscache), new IconDrawable(this, IconValue.fa_refresh)
+        .colorRes(android.R.color.darker_gray).sizeDp(26), _ => {
         // send event
         application.tracker.send(new HitBuilders.EventBuilder()
           .setCategory(Shadowsocks.TAG)
@@ -748,7 +756,20 @@ class Shadowsocks
         flushDnsCache()
       })
 
-    buf += new Item(-300, getString(R.string.about), android.R.drawable.ic_menu_info_details, _ => {
+    buf +=
+      new DrawableItem(-300, getString(R.string.qrcode), new IconDrawable(this, IconValue.fa_qrcode)
+        .colorRes(android.R.color.darker_gray).sizeDp(26), _ => {
+        // send event
+        application.tracker.send(new HitBuilders.EventBuilder()
+          .setCategory(Shadowsocks.TAG)
+          .setAction("qrcode")
+          .setLabel(getVersionName)
+          .build())
+        showQrCode()
+      })
+
+    buf += new DrawableItem(-400, getString(R.string.about), new IconDrawable(this, IconValue.fa_info_circle)
+        .colorRes(android.R.color.darker_gray).sizeDp(26), _ => {
       // send event
       application.tracker.send(new HitBuilders.EventBuilder()
         .setCategory(Shadowsocks.TAG)
@@ -879,6 +900,31 @@ class Shadowsocks
       reset()
       h.sendEmptyMessage(0)
     }
+  }
+
+  private def dp2px(dp: Int): Int = {
+    val displayMetrics = getBaseContext.getResources.getDisplayMetrics()
+    Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
+  }
+
+  private def showQrCode() {
+    val image = new ImageView(this)
+    image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
+    val qrcode = QRCode.from(Parser.generate(currentProfile))
+      .withSize(dp2px(250), dp2px(250)).asInstanceOf[QRCode]
+    image.setImageBitmap(qrcode.bitmap())
+
+    new AlertDialog.Builder(this)
+      .setTitle(getString(R.string.qrcode))
+      .setCancelable(true)
+      .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
+      override def onClick(dialog: DialogInterface, id: Int) {
+        dialog.cancel()
+      }
+    })
+      .setView(image)
+      .create()
+      .show()
   }
 
   private def flushDnsCache() {

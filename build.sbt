@@ -28,6 +28,8 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  "com.joanzapata.android" % "android-iconify" % "1.0.9",
+  "net.glxn.qrgen" % "android" % "2.0",
   "net.simonvt.menudrawer" % "menudrawer" % "3.0.6",
   "com.google.android.gms" % "play-services-base" % "6.5.87",
   "com.google.android.gms" % "play-services-ads" % "6.5.87",
@@ -48,6 +50,7 @@ proguardOptions in Android ++= Seq("-keep class android.support.v4.app.** { *; }
           "-keep class org.jraf.android.backport.** { *; }",
           "-keep class com.github.shadowsocks.** { *; }",
           "-keep class * extends com.j256.ormlite.** { *; }",
+          "-keep class com.joanzapata.** { *; }",
           "-keepattributes *Annotation*",
           "-dontwarn org.xbill.**",
           "-dontwarn com.actionbarsherlock.**")
