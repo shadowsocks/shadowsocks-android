@@ -1,0 +1,88 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:1.2.0"
+        classpath "jp.leafytree.gradle:gradle-android-scala-plugin:1.4"
+    }
+}
+
+repositories {
+    jcenter()
+
+    maven {
+        url "http://JRAF.org/static/maven/2"
+    }
+
+    maven {
+        url "http://madeye-maven-repository.googlecode.com/git/"
+    }
+}
+
+apply plugin: "com.android.application"
+apply plugin: "jp.leafytree.android-scala"
+
+android {
+    compileSdkVersion "android-22"
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        targetSdkVersion 22
+        testInstrumentationRunner "com.android.test.runner.MultiDexTestRunner"
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+
+    productFlavors {
+        dev {
+            minSdkVersion 21 // To reduce compilation time
+        }
+
+        prod {
+            minSdkVersion 14
+        }
+    }
+
+    sourceSets {
+        main {
+            scala.srcDirs = ['src/main/scala', 'src/main/java'] // default: "src/main/scala"
+            java.srcDirs = ['src/main/java', 'src/main/aidl']
+            aidl.srcDirs = ['src/main/aidl']
+            jniLibs.srcDirs = ['src/main/libs']
+            jni.srcDirs = []
+        }
+    }
+}
+
+dependencies {
+    compile "org.scala-lang:scala-library:2.10.5"
+    compile "com.android.support:multidex:1.0.1"
+    androidTestCompile "com.android.support:multidex-instrumentation:1.0.1", { exclude module: "multidex" }
+
+    compile 'eu.chainfire:libsuperuser:1.0.0.+'
+
+    compile "dnsjava:dnsjava:2.1.5"
+    compile "com.github.kevinsawicki:http-request:5.6"
+    compile "commons-net:commons-net:3.3"
+    compile "com.google.zxing:android-integration:3.1.0"
+
+    compile "net.simonvt.menudrawer:menudrawer:3.0.6"
+    compile "com.google.android.gms:play-services-base:7.0.0"
+    compile "com.google.android.gms:play-services-ads:7.0.0"
+    compile "com.android.support:support-v4:22.1.1"
+
+    compile "com.github.mrengineer13:snackbar:0.5.0"
+    compile "com.nostra13.universalimageloader:universal-image-loader:1.8.4"
+    compile "com.j256.ormlite:ormlite-core:4.47"
+    compile "com.j256.ormlite:ormlite-android:4.47"
+}
+
+tasks.withType(ScalaCompile) {
+    // If you want to use scala compile daemon
+    scalaCompileOptions.useCompileDaemon = true
+    scalaCompileOptions.deprecation = false
+    scalaCompileOptions.additionalParameters = ["-feature"]
+}
