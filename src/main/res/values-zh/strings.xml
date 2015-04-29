@@ -49,6 +49,7 @@
   <string name="stopping">正在关闭...</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="ok_iknow">确定</string>
+  <string name="close">关闭</string>
   <string name="port_alert">本地端口号应大于1024</string>
   <string name="port_empty">端口号不能为空</string>
   <string name="proxy_empty">代理服务器地址不能为空</string>
@@ -67,6 +68,7 @@
   <string name="about_title">影梭（shadowsocks）%s</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>
   <string name="flushing">刷新中...</string>
+  <string name="qrcode">二维码</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="enable_nat">启用 NAT 模式.</string>

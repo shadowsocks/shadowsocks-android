@@ -45,11 +45,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import android.graphics.drawable.Drawable
 import com.github.shadowsocks.{R}
 import android.view.View.{OnLongClickListener, OnClickListener}
 
-case class Item(id: Int, title: String, iconRes: Int,
+abstract class Item {
+  def id: Int
+  def title: String
+  def click: Int => Unit
+  def longClick: Int => Boolean
+}
+
+case class IconItem(id: Int, title: String, iconRes: Int,
   click: Int => Unit, longClick: Int => Boolean = _ => false)
+  extends Item
+
+case class DrawableItem(id: Int, title: String, iconRes: Drawable,
+  click: Int => Unit, longClick: Int => Boolean = _ => false)
+  extends Item
 
 case class Category(title: String)
 
@@ -89,7 +102,8 @@ class MenuAdapter(context: Context, var items: List[Any]) extends BaseAdapter {
   @Override override def getItemViewType(position: Int): Int = {
     getItem(position) match {
       case Category => MenuAdapter.CATEGORY
-      case Item => MenuAdapter.ITEM
+      case IconItem => MenuAdapter.ITEM
+      case DrawableItem => MenuAdapter.ITEM
       case _ => MenuAdapter.UNDEFINED
     }
   }
@@ -121,9 +135,18 @@ class MenuAdapter(context: Context, var items: List[Any]) extends BaseAdapter {
         }
         val tv: TextView = v.asInstanceOf[TextView]
         tv.setText(value.title)
-        if (value.iconRes != -1) {
-          tv.setCompoundDrawablesWithIntrinsicBounds(value.iconRes, 0, 0, 0)
+
+        value match {
+          case iconItem: IconItem =>
+            if (iconItem.iconRes != -1) {
+              tv.setCompoundDrawablesWithIntrinsicBounds(iconItem.iconRes, 0, 0, 0)
+            }
+          case drawableItem: DrawableItem =>
+            if (drawableItem.iconRes != null) {
+              tv.setCompoundDrawablesWithIntrinsicBounds(drawableItem.iconRes, null, null, null)
+            }
         }
+
         tv.setOnClickListener(new OnClickListener {
           def onClick(view: View) {
             val item = view.getTag(R.id.mdItem).asInstanceOf[Item]

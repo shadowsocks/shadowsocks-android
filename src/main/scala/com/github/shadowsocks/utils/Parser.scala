@@ -40,11 +40,19 @@
 package com.github.shadowsocks.utils
 
 import com.github.shadowsocks.database.Profile
+import java.util.Locale
 import android.net.Uri
 import android.util.{Log, Base64}
 
 object Parser {
   val TAG = "ShadowParser"
+
+  def generate (profile: Profile): String = {
+    val path = "%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
+      profile.method, profile.password, profile.host, profile.remotePort)
+    return "ss://" + Base64.encodeToString(path.getBytes, Base64.NO_PADDING)
+  }
+
   def parse (data: String): Option[Profile] = {
     try {
       Log.d(TAG, data)

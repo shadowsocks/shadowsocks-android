@@ -65,6 +65,7 @@
 
   <!-- alert category -->
   <string name="ok_iknow">OK</string>
+  <string name="close">Close</string>
   <string name="port_alert">The local port number should be greater than 1024</string>
   <string name="port_empty">Port should not be empty</string>
   <string name="proxy_empty">Proxy should not be empty</string>
@@ -84,6 +85,7 @@
   <string name="recovery">Reset</string>
   <string name="about">About</string>
   <string name="about_title">Shadowsocks %s</string>
+  <string name="qrcode">QR Code</string>
   <string name="flush_dnscache">Flush DNS Cache</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
