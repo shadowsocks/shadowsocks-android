@@ -28,6 +28,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201504231659",
   "com.joanzapata.android" % "android-iconify" % "1.0.9",
   "net.glxn.qrgen" % "android" % "2.0",
   "net.simonvt.menudrawer" % "menudrawer" % "3.0.6",
