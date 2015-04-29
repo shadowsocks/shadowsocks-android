@@ -16,6 +16,8 @@ ndkBuild in Android := List()
 
 typedResources in Android := false
 
+resolvers += "jcenter" at "http://jcenter.bintray.com"
+
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
 resolvers += "madeye private releases" at "http://madeye-maven-repository.googlecode.com/git/"
