@@ -514,7 +514,14 @@ class Shadowsocks
     getActionBar.setCustomView(switchLayout)
     getActionBar.setDisplayShowTitleEnabled(false)
     getActionBar.setDisplayShowCustomEnabled(true)
-    getActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
+    if (Utils.isLollipopOrAbove) {
+      getWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+      getWindow.setStatusBarColor(getResources().getColor(R.color.grey3));
+      getActionBar.setDisplayHomeAsUpEnabled(true)
+      getActionBar.setDisplayShowHomeEnabled(false)
+    } else {
+      getActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
+    }
     title.setOnLongClickListener(new OnLongClickListener {
       override def onLongClick(v: View): Boolean = {
         if (Utils.isLollipopOrAbove && bgService != null

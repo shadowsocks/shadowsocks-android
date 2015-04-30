@@ -18,10 +18,8 @@ typedResources in Android := false
 
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
-resolvers += "madeye private releases" at "http://madeye-maven-repository.googlecode.com/git/"
-
 libraryDependencies ++= Seq(
-  "dnsjava" % "dnsjava" % "2.1.5",
+  "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "5.6",
   "commons-net" % "commons-net" % "3.3",
   "com.google.zxing" % "android-integration" % "3.1.0"

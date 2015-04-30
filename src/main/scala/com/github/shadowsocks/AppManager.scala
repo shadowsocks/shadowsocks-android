@@ -280,6 +280,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     val actionBar = getActionBar()
     actionBar.setTitle(R.string.proxied_help)
     actionBar.setDisplayHomeAsUpEnabled(true)
+    actionBar.setDisplayShowHomeEnabled(false)
     this.setContentView(R.layout.layout_apps)
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
