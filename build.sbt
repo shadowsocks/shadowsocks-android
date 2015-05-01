@@ -16,6 +16,8 @@ ndkBuild in Android := List()
 
 typedResources in Android := false
 
+resolvers += Resolver.jcenterRepo
+
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
 libraryDependencies ++= Seq(
