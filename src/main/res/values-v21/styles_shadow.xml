@@ -49,11 +49,11 @@
     </style>
 
     <style name="m_textAppearanceSmallPopupMenu" parent="@android:style/TextAppearance.Material.Widget.PopupMenu.Small">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="m_textAppearanceLargePopupMenu" parent="@android:style/TextAppearance.Material.Widget.PopupMenu.Large">
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="DropDownListView.Shadow" parent="@android:style/Widget.Material.ListView.DropDown">
