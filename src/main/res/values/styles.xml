@@ -19,7 +19,9 @@
     <style name="Theme.AppManager" parent="@style/Theme.Shadow">
     </style>
 
-    <style name="PopupTheme" parent="@android:style/Theme.Translucent.NoTitleBar">
+    <style name="PopupTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowContentOverlay">@null</item>

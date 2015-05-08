@@ -638,6 +638,25 @@ class Shadowsocks
     builder.create().show()
   }
 
+  def reloadProfile() {
+    drawer.closeMenu(true)
+
+    val h = showProgress(getString(R.string.loading))
+
+    handler.postDelayed(new Runnable {
+      def run() {
+        currentProfile = {
+          profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse currentProfile
+        }
+        menuAdapter.updateList(getMenuList, currentProfile.id)
+
+        updatePreferenceScreen()
+
+        h.sendEmptyMessage(0)
+      }
+    }, 600)
+  }
+
   def addProfile(profile: Profile) {
     drawer.closeMenu(true)
 
@@ -826,6 +845,10 @@ class Shadowsocks
       switchButton.setOnCheckedChangeListener(Shadowsocks.this)
     }
     ConfigUtils.refresh(this)
+
+    // Check if profile list changed
+    if (currentProfile.id != settings.getInt(Key.profileId, -1))
+      reloadProfile()
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
