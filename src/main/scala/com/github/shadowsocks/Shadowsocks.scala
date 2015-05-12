@@ -977,7 +977,11 @@ class Shadowsocks
     if (scanResult != null) {
       Parser.parse(scanResult.getContents) match {
         case Some(profile) => addProfile(profile)
-        case _ => // ignore
+        case _ => // try try json
+            Parser.parse_json(scanResult.getContents) match {
+                case Some(profile) => addProfile(profile)
+                case _ => // end now
+            }
       }
     } else {
       resultCode match {
