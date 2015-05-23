@@ -847,7 +847,8 @@ class Shadowsocks
     ConfigUtils.refresh(this)
 
     // Check if profile list changed
-    if (currentProfile.id != settings.getInt(Key.profileId, -1))
+    val id = settings.getInt(Key.profileId, -1)
+    if (id != -1 && id != currentProfile.id)
       reloadProfile()
   }
 
