@@ -43,6 +43,7 @@ import com.github.shadowsocks.database.Profile
 import java.util.Locale
 import android.net.Uri
 import android.util.{Log, Base64}
+import org.json.JSONObject
 
 object Parser {
   val TAG = "ShadowParser"
@@ -51,6 +52,31 @@ object Parser {
     val path = "%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
       profile.method, profile.password, profile.host, profile.remotePort)
     return "ss://" + Base64.encodeToString(path.getBytes, Base64.NO_PADDING)
+  }
+
+  def parse_json (data: String): Option[Profile] = {
+    try {
+      Log.d(TAG, data)
+      val json = new JSONObject(data.trim)
+      if (json != null) {
+        val method = json.getString("method")
+        val password = json.getString("password")
+        val host = json.getString("server")
+        val port = json.getInt("server_port")
+
+        val profile = new Profile
+        profile.name = host
+        profile.host = host
+        profile.remotePort = port.toInt
+        profile.localPort = 1080
+        profile.method = method.toLowerCase
+        profile.password = password
+        return Some(profile)
+      }
+    } catch {
+      case ex : Exception => Log.e(TAG, "json parser error", ex)// Ignore
+    }
+    None
   }
 
   def parse (data: String): Option[Profile] = {
