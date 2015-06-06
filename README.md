@@ -14,8 +14,8 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 * JDK 1.7+
 * SBT 0.13.0+
-* Android SDK r21+
-* Android NDK r9+
+* Android SDK r24+
+* Android NDK r10d+
 
 ### BUILD
 
