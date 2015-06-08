@@ -1,3 +1,6 @@
+# fork from shadowsocks/shadowsocks-android
+想自己做一个适合自己的版本,还没有开始,别着急
+
 ## Shadowsocks for Android
 
 A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
