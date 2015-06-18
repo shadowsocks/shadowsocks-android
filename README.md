@@ -6,16 +6,6 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 [![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=com.github.shadowsocks)
 
-## OPEN SOURCE LICENSES
-
-* shadowsocks-libev: [GPLv3](https://github.com/shadowsocks/shadowsocks-libev/blob/master/LICENSE)
-* tun2socks: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/badvpn/COPYING)
-* redsocks: [APL 2.0](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/redsocks/README)
-* OpenSSL: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/openssl/NOTICE)
-* pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
-* libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
-* libevent: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libevent/LICENSE)
-
 ### CI STATUS
 
 [![Build Status](https://drone.io/github.com/shadowsocks/shadowsocks-android/status.png)](https://drone.io/github.com/shadowsocks/shadowsocks-android/latest)
@@ -67,6 +57,16 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
     # Build the apk
     sbt clean android:package-release
 ```
+
+## OPEN SOURCE LICENSES
+
+* shadowsocks-libev: [GPLv3](https://github.com/shadowsocks/shadowsocks-libev/blob/master/LICENSE)
+* tun2socks: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/badvpn/COPYING)
+* redsocks: [APL 2.0](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/redsocks/README)
+* OpenSSL: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/openssl/NOTICE)
+* pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
+* libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
+* libevent: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libevent/LICENSE)
 
 ### LICENSE
 
