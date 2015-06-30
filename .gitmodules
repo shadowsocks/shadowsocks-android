@@ -1,0 +1,3 @@
+[submodule "src/main/jni/shadowsocks-libev"]
+	path = src/main/jni/shadowsocks-libev
+	url = https://github.com/shadowsocks/shadowsocks-libev
