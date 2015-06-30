@@ -1,9 +1,0 @@
-This module matches the netfilter mark field associated with a packet
-(which can be set using the
-.B MARK
-target below).
-.TP
-[\fB!\fP] \fB\-\-mark\fP \fIvalue\fP[\fB/\fP\fImask\fP]
-Matches packets with the given unsigned mark value (if a \fImask\fP is
-specified, this is logically ANDed with the \fImask\fP before the
-comparison).

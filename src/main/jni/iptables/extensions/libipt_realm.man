@@ -1,7 +1,0 @@
-This matches the routing realm.  Routing realms are used in complex routing
-setups involving dynamic routing protocols like BGP.
-.TP
-[\fB!\fP] \fB\-\-realm\fP \fIvalue\fP[\fB/\fP\fImask\fP]
-Matches a given realm number (and optionally mask). If not a number, value
-can be a named realm from /etc/iproute2/rt_realms (mask can not be used in
-that case).

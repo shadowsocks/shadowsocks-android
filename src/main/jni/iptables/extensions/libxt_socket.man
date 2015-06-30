@@ -1,5 +1,0 @@
-This matches if an open socket can be found by doing a socket lookup on the
-packet.
-.TP
-\fB\-\-transparent\fP
-Ignore non-transparent sockets.

@@ -1,8 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/action_export"
-        android:title="@string/action_export"
-        android:showAsAction="never" />
-    <item android:id="@+id/action_import"
-        android:title="@string/action_import"
-        android:showAsAction="never" />
-</menu>

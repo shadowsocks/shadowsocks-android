@@ -1,7 +1,0 @@
-This module matches the parameters in Hop-by-Hop Options header
-.TP
-[\fB!\fP] \fB\-\-hbh\-len\fP \fIlength\fP
-Total length of this header in octets.
-.TP
-\fB\-\-hbh\-opts\fP \fItype\fP[\fB:\fP\fIlength\fP][\fB,\fP\fItype\fP[\fB:\fP\fIlength\fP]...]
-numeric type of option and the length of the option data in octets.

@@ -1,9 +1,0 @@
-This extension can be used if `\-\-protocol icmp' is specified. It
-provides the following option:
-.TP
-[\fB!\fP] \fB\-\-icmp\-type\fP {\fItype\fP[\fB/\fP\fIcode\fP]|\fItypename\fP}
-This allows specification of the ICMP type, which can be a numeric
-ICMP type, type/code pair, or one of the ICMP type names shown by the command
-.nf
- iptables \-p icmp \-h
-.fi
