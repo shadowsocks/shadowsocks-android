@@ -1,0 +1,72 @@
+There are many ways to build BadVPN for Windows. It can be built with MSVC or GCC compilers,
+and it be built natively from Windows or cross-compiled from Linux. However, this document
+only describes building natively from Windows using MSVC.
+
+1. Get a MSVC compiler, e.g. from Visual Studio, Visual Studio Express or from the Windows SDK.
+
+2. Choose a directory where built stuff will be installed into; we call it <root>.
+
+3. Build the NSS library.
+   NOTE: you can also use the prebuilt version in the BadVPN windows download.
+
+    - Install MozillaBuild:
+        http://ftp.mozilla.org/pub/mozilla.org/mozilla/libraries/win32/MozillaBuildSetup-Latest.exe .
+
+    - Download the NSS source code that includes NSPR. As of the time of writing the latest version was 3.13.5:
+      https://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/NSS_3_13_5_RTM/src/nss-3.13.5-with-nspr-4.9.1.tar.gz .
+
+      Extract it to c:\ so that you have C:\mozilla .
+
+    - Open a terminal with access to the Visual Studio compilers and other tools. E.g. if you use the Windows SDK,
+      activate the following start menu item: Programs -> Microsoft Windows SDK v7.1 -> Windows SDK 7.1 Command Prompt.
+
+    - In this terminal, run:
+
+      > c:\mozilla-build\start-l10n.bat
+
+    - Either a new terminal opens with a bash shell, or a bash shell starts in the existing terminal. Either way,
+      enter the following commands to finally build NSS: (here paths are written as /driveletter/...)
+
+      $ export OS_TARGET=WINNT
+      $ export BUILD_OPT=1
+      $ cd <nss_source_dir>/mozilla/security/nss
+      $ make nss_build_all
+
+      Now use a script shipped with the BadVPN source to copy the resulting files into appropriate directories within <root>:
+
+      $ <badvpn_source_dir>/scripts/copy_nss ../../dist <root>
+
+4. Build the OpenSSL library.
+   NOTE: you can also use the prebuilt version in the BadVPN windows download.
+
+    - Install ActivePerl.
+
+    - Download the OpenSSL source code and extract it.
+
+    - Open a compiler terminal, as was done when building NSS. Inside it, run:
+
+      > cd <openssl_source_dir>
+      > perl Configure VC-WIN32 --prefix=<root>
+      > ms\do_ms
+      > nmake -f ms\ntdll.mak
+
+      To copy the results into <root>:
+
+      > nmake -f ms\ntdll.mak install
+
+5. Build BadVPN.
+
+    - Install CMake. During installation, select the option to include cmake in PATH
+      to avoid having to type a long path into the terminal.
+
+    - Create an empty folder where BadVPN will be built; call it <build>.
+
+    - Open a compiler terminal. Inside it, run:
+
+      > cd <build>
+      > cmake <badvpn_source_dir> -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=<root> -DCMAKE_BUILD_TYPE=Release
+      > nmake
+
+      To copy the results into <root>:
+
+      > nmake install

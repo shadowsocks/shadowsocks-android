@@ -1,0 +1,65 @@
+\fBhashlimit\fP uses hash buckets to express a rate limiting match (like the
+\fBlimit\fP match) for a group of connections using a \fBsingle\fP iptables
+rule. Grouping can be done per-hostgroup (source and/or destination address)
+and/or per-port. It gives you the ability to express "\fIN\fP packets per time
+quantum per group" (see below for some examples).
+.PP
+A hash limit option (\fB\-\-hashlimit\-upto\fP, \fB\-\-hashlimit\-above\fP) and
+\fB\-\-hashlimit\-name\fP are required.
+.TP
+\fB\-\-hashlimit\-upto\fP \fIamount\fP[\fB/second\fP|\fB/minute\fP|\fB/hour\fP|\fB/day\fP]
+Match if the rate is below or equal to \fIamount\fP/quantum. It is specified as
+a number, with an optional time quantum suffix; the default is 3/hour.
+.TP
+\fB\-\-hashlimit\-above\fP \fIamount\fP[\fB/second\fP|\fB/minute\fP|\fB/hour\fP|\fB/day\fP]
+Match if the rate is above \fIamount\fP/quantum.
+.TP
+\fB\-\-hashlimit\-burst\fP \fIamount\fP
+Maximum initial number of packets to match: this number gets recharged by one
+every time the limit specified above is not reached, up to this number; the
+default is 5.
+.TP
+\fB\-\-hashlimit\-mode\fP {\fBsrcip\fP|\fBsrcport\fP|\fBdstip\fP|\fBdstport\fP}\fB,\fP...
+A comma-separated list of objects to take into consideration. If no
+\-\-hashlimit\-mode option is given, hashlimit acts like limit, but at the
+expensive of doing the hash housekeeping.
+.TP
+\fB\-\-hashlimit\-srcmask\fP \fIprefix\fP
+When \-\-hashlimit\-mode srcip is used, all source addresses encountered will be
+grouped according to the given prefix length and the so-created subnet will be
+subject to hashlimit. \fIprefix\fP must be between (inclusive) 0 and 32. Note
+that \-\-hashlimit\-srcmask 0 is basically doing the same thing as not specifying
+srcip for \-\-hashlimit\-mode, but is technically more expensive.
+.TP
+\fB\-\-hashlimit\-dstmask\fP \fIprefix\fP
+Like \-\-hashlimit\-srcmask, but for destination addresses.
+.TP
+\fB\-\-hashlimit\-name\fP \fIfoo\fP
+The name for the /proc/net/ipt_hashlimit/foo entry.
+.TP
+\fB\-\-hashlimit\-htable\-size\fP \fIbuckets\fP
+The number of buckets of the hash table
+.TP
+\fB\-\-hashlimit\-htable\-max\fP \fIentries\fP
+Maximum entries in the hash.
+.TP
+\fB\-\-hashlimit\-htable\-expire\fP \fImsec\fP
+After how many milliseconds do hash entries expire.
+.TP
+\fB\-\-hashlimit\-htable\-gcinterval\fP \fImsec\fP
+How many milliseconds between garbage collection intervals.
+.PP
+Examples:
+.TP
+matching on source host
+"1000 packets per second for every host in 192.168.0.0/16" =>
+\-s 192.168.0.0/16 \-\-hashlimit\-mode srcip \-\-hashlimit\-upto 1000/sec
+.TP
+matching on source port
+"100 packets per second for every service of 192.168.1.1" =>
+\-s 192.168.1.1 \-\-hashlimit\-mode srcport \-\-hashlimit\-upto 100/sec
+.TP
+matching on subnet
+"10000 packets per minute for every /28 subnet (groups of 8 addresses)
+in 10.0.0.0/8" =>
+\-s 10.0.0.8 \-\-hashlimit\-mask 28 \-\-hashlimit\-upto 10000/min

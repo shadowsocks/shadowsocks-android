@@ -1,0 +1,13 @@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+xtlibdir=@xtlibdir@
+includedir=@includedir@
+
+Name:		xtables
+Description:	Shared Xtables code for extensions and iproute2
+Version:	@PACKAGE_VERSION@
+Cflags:		-I${includedir}
+Libs:		-L${libdir} -lxtables
+Libs.private:	-ldl

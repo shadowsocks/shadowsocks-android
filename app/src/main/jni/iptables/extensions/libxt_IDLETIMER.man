@@ -1,0 +1,24 @@
+This target can be used to identify when interfaces have been idle for a
+certain period of time.  Timers are identified by labels and are created when
+a rule is set with a new label.  The rules also take a timeout value (in
+seconds) as an option.  If more than one rule uses the same timer label, the
+timer will be restarted whenever any of the rules get a hit.  One entry for
+each timer is created in sysfs.  This attribute contains the timer remaining
+for the timer to expire.  The attributes are located under the xt_idletimer
+class:
+.PP
+/sys/class/xt_idletimer/timers/<label>
+.PP
+When the timer expires, the target module sends a sysfs notification to the
+userspace, which can then decide what to do (eg. disconnect to save power).
+.TP
+\fB\-\-timeout\fP \fIamount\fP
+This is the time in seconds that will trigger the notification.
+.TP
+\fB\-\-label\fP \fIstring\fP
+This is a unique identifier for the timer.  The maximum length for the
+label string is 27 characters.
+.TP
+\fB\-\---send_nl_msg\fP \fI(0/1)\fP
+Send netlink messages in addition to sysfs notifications and show remaining
+time. Defaults to 0.

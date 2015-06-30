@@ -1,0 +1,44 @@
+.\"     Title: iptables-apply
+.\"    Author: Martin F. Krafft
+.\"      Date: Jun 04, 2006
+.\"
+.TH iptables\-apply 8 2006-06-04
+.\" disable hyphenation
+.nh
+.SH NAME
+iptables-apply \- a safer way to update iptables remotely
+.SH SYNOPSIS
+\fBiptables\-apply\fP [\-\fBhV\fP] [\fB-t\fP \fItimeout\fP] \fIruleset\-file\fP
+.SH "DESCRIPTION"
+.PP
+iptables\-apply will try to apply a new ruleset (as output by
+iptables\-save/read by iptables\-restore) to iptables, then prompt the
+user whether the changes are okay. If the new ruleset cut the existing
+connection, the user will not be able to answer affirmatively. In this
+case, the script rolls back to the previous ruleset after the timeout
+expired. The timeout can be set with \fB\-t\fP.
+.PP
+When called as ip6tables\-apply, the script will use
+ip6tables\-save/\-restore instead.
+.SH OPTIONS
+.TP
+\fB\-t\fP \fIseconds\fR, \fB\-\-timeout\fP \fIseconds\fR
+Sets the timeout after which the script will roll back to the previous
+ruleset.
+.TP
+\fB\-h\fP, \fB\-\-help\fP
+Display usage information.
+.TP
+\fB\-V\fP, \fB\-\-version\fP
+Display version information.
+.SH "SEE ALSO"
+.PP
+\fBiptables-restore\fP(8), \fBiptables-save\fP(8), \fBiptables\fR(8).
+.SH LEGALESE
+.PP
+iptables\-apply is copyright by Martin F. Krafft.
+.PP
+This manual page was written by Martin F. Krafft <madduck@madduck.net>
+.PP
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the Artistic License 2.0.

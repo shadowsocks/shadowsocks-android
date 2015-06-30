@@ -1,0 +1,24 @@
+Match IPVS connection properties.
+.TP
+[\fB!\fP] \fB\-\-ipvs\fP
+packet belongs to an IPVS connection
+.TP
+Any of the following options implies \-\-ipvs (even negated)
+.TP
+[\fB!\fP] \fB\-\-vproto\fP \fIprotocol\fP
+VIP protocol to match; by number or name, e.g. "tcp"
+.TP
+[\fB!\fP] \fB\-\-vaddr\fP \fIaddress\fP[\fB/\fP\fImask\fP]
+VIP address to match
+.TP
+[\fB!\fP] \fB\-\-vport\fP \fIport\fP
+VIP port to match; by number or name, e.g. "http"
+.TP
+\fB\-\-vdir\fP {\fBORIGINAL\fP|\fBREPLY\fP}
+flow direction of packet
+.TP
+[\fB!\fP] \fB\-\-vmethod\fP {\fBGATE\fP|\fBIPIP\fP|\fBMASQ\fP}
+IPVS forwarding method used
+.TP
+[\fB!\fP] \fB\-\-vportctl\fP \fIport\fP
+VIP port of the controlling connection to match, e.g. 21 for FTP

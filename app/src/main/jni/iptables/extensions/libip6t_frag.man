@@ -1,0 +1,20 @@
+This module matches the parameters in Fragment header.
+.TP
+[\fB!\fP] \fB\-\-fragid\fP \fIid\fP[\fB:\fP\fIid\fP]
+Matches the given Identification or range of it.
+.TP
+[\fB!\fP] \fB\-\-fraglen\fP \fIlength\fP
+This option cannot be used with kernel version 2.6.10 or later. The length of
+Fragment header is static and this option doesn't make sense.
+.TP
+\fB\-\-fragres\fP
+Matches if the reserved fields are filled with zero.
+.TP
+\fB\-\-fragfirst\fP
+Matches on the first fragment.
+.TP
+\fB\-\-fragmore\fP
+Matches if there are more fragments.
+.TP
+\fB\-\-fraglast\fP
+Matches if this is the last fragment.

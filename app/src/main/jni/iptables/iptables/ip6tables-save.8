@@ -1,0 +1,53 @@
+.TH IP6TABLES-SAVE 8 "Jan 30, 2002" "" ""
+.\"
+.\" Man page written by Harald Welte <laforge@gnumonks.org>
+.\" It is based on the iptables man page.
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\"
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\"
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\"
+.SH NAME
+ip6tables-save \(em dump iptables rules to stdout
+.SH SYNOPSIS
+\fBip6tables\-save\fP [\fB\-M\fP \fImodprobe\fP] [\fB\-c\fP]
+[\fB\-t\fP \fItable\fP
+.SH DESCRIPTION
+.PP
+.B ip6tables-save
+is used to dump the contents of an IPv6 Table in easily parseable format
+to STDOUT. Use I/O-redirection provided by your shell to write to a file.
+.TP
+\fB\-M\fP \fImodprobe_program\fP
+Specify the path to the modprobe program. By default, iptables-save will
+inspect /proc/sys/kernel/modprobe to determine the executable's path.
+.TP
+\fB\-c\fR, \fB\-\-counters\fR
+include the current values of all packet and byte counters in the output
+.TP
+\fB\-t\fR, \fB\-\-table\fR \fItablename\fP
+restrict output to only one table. If not specified, output includes all
+available tables.
+.SH BUGS
+None known as of iptables-1.2.1 release
+.SH AUTHORS
+Harald Welte <laforge@gnumonks.org>
+.br
+Andras Kis-Szabo <kisza@sch.bme.hu>
+.SH SEE ALSO
+\fBip6tables\-restore\fP(8), \fBip6tables\fP(8)
+.PP
+The iptables-HOWTO, which details more iptables usage, the NAT-HOWTO,
+which details NAT, and the netfilter-hacking-HOWTO which details the
+internals.

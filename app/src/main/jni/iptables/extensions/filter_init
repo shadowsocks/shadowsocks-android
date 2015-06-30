@@ -1,0 +1,7 @@
+#!/bin/sh
+# This is for working around Android.mk's incapability to handle $* in CFLAGS,
+# even with SECONDEXPNASION.
+# LOCAL_CFLAGS:=-D_INIT=$*_init
+f=${1##*/}
+f=${f%%.*}
+sed "s/\([ ]*\)\(_init\)\(([ ]*void\)/\1${f}_init\3/" $1

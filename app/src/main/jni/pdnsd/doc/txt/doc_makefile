@@ -1,0 +1,21 @@
+# Makefile for converting pdnsd html documentation to text files.
+# This file was based on a Makefile originally written by Thomas Moestl
+# and adapted by Paul Rombouts.
+
+
+HTML2TXT=w3m -dump -cols 80 -T text/html
+
+doc: intro.txt manual.txt faq.txt
+.PHONY: doc clean
+
+intro.txt: ../html/index.html
+	sed -e 's/<!--\(nodoc\|notext\)(-->/<!--/g' -e 's/<!--)\(nodoc\|notext\)-->/-->/g' ../html/index.html | $(HTML2TXT) | sed -e 's/[[:blank:]]\+$$//' > intro.txt
+
+manual.txt: ../html/doc.html
+	sed -e 's/<!--\(nodoc\|notext\)(-->/<!--/g' -e 's/<!--)\(nodoc\|notext\)-->/-->/g' ../html/doc.html | $(HTML2TXT) | sed -e 's/[[:blank:]]\+$$//' > manual.txt
+
+faq.txt: ../html/faq.html
+	sed -e 's/<!--\(nodoc\|notext\)(-->/<!--/g' -e 's/<!--)\(nodoc\|notext\)-->/-->/g' ../html/faq.html | $(HTML2TXT) | sed -e 's/[[:blank:]]\+$$//' > faq.txt
+
+clean:
+	@rm -fv intro.txt manual.txt faq.txt

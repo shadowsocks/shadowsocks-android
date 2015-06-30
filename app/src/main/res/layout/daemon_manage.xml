@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1">
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="tun2scoks"
+            android:id="@+id/tun2scoks_switch"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.05"/>
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UDP"
+            android:id="@+id/UPD_check"
+            android:layout_gravity="center_horizontal"
+            android:checked="false"
+            android:paddingLeft="100dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PID:"
+            android:id="@+id/tun2scoks_PID"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="11dp"
+            android:password="false"
+            />
+
+    </LinearLayout>
+
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ss-local"
+        android:id="@+id/sslocal_switch"/>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="pdnsd"
+        android:id="@+id/pdnsd_switch"
+        />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ss-tunnel"
+        android:id="@+id/sstunnel_switch"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
+        android:text="daemon_manege"/>
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DebugLog"
+        android:id="@+id/debug_switch"
+        android:checked="false"/>
+
+
+    <!--android:layout_gravity="center_vertical"-->
+</LinearLayout>

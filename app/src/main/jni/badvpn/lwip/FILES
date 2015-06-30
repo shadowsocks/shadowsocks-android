@@ -1,0 +1,4 @@
+src/      - The source code for the lwIP TCP/IP stack.
+doc/      - The documentation for lwIP.
+
+See also the FILES file in each subdirectory.

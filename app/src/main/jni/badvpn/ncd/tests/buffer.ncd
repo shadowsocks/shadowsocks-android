@@ -1,0 +1,54 @@
+process main {
+    buffer() buf;
+    val_equal(buf, "") a;
+    assert(a);
+    
+    buf->append("12");
+    val_equal(buf, "12") a;
+    assert(a);
+    
+    buf->append("345");
+    val_equal(buf, "12345") a;
+    assert(a);
+    
+    buf->consume("1");
+    val_equal(buf, "2345") a;
+    assert(a);
+    
+    buf->consume("1");
+    val_equal(buf, "345") a;
+    assert(a);
+    
+    buf->consume("3");
+    val_equal(buf, "") a;
+    assert(a);
+    
+    buf->append("6");
+    val_equal(buf, "6") a;
+    assert(a);
+    
+    buf->append("7890");
+    val_equal(buf, "67890") a;
+    assert(a);
+    
+    buf->append("");
+    val_equal(buf, "67890") a;
+    assert(a);
+    
+    buf->consume("4");
+    val_equal(buf, "0") a;
+    assert(a);
+    
+    buf->append("1234567890");
+    val_equal(buf, "01234567890") a;
+    assert(a);
+    
+    val_equal(buf.length, "11") a;
+    assert(a);
+    
+    buffer("hello") buf2;
+    val_equal(buf2, "hello") a;
+    assert(a);
+    
+    exit("0");
+}

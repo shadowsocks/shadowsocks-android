@@ -1,0 +1,64 @@
+.TH IPQ_ERRSTR 3 "16 October 2001" "Linux iptables 1.2" "Linux Programmer's Manual" 
+.\"
+.\"     Copyright (c) 2000 Netfilter Core Team
+.\"
+.\"     This program is free software; you can redistribute it and/or modify
+.\"     it under the terms of the GNU General Public License as published by
+.\"     the Free Software Foundation; either version 2 of the License, or
+.\"     (at your option) any later version.
+.\"
+.\"     This program is distributed in the hope that it will be useful,
+.\"     but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"     GNU General Public License for more details.
+.\"
+.\"     You should have received a copy of the GNU General Public License
+.\"     along with this program; if not, write to the Free Software
+.\"     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\"
+.SH NAME
+ipq_errstr, ipq_perror \(em libipq error handling routines
+.SH SYNOPSIS
+.B #include <linux/netfilter.h>
+.br
+.B #include <libipq.h>
+.sp
+.BI "char *ipq_errstr(" void );
+.br
+.BI "void ipq_perror(const char *" s );
+.SH DESCRIPTION
+The
+.B ipq_errstr
+function returns a descriptive error message based on the current
+value of the internal
+.B ipq_errno
+variable.  All libipq API functions set this internal variable
+upon failure.
+.PP
+The
+.B ipq_perror
+function prints an error message to stderr corresponding to the
+current value of the internal
+.B ipq_error
+variable, and the global
+.B errno
+variable (if set).  The error message is prefixed with the string
+.I s
+as supplied by the application. If
+.I s
+is NULL, the error message is prefixed with the string "ERROR".
+.SH RETURN VALUE
+.B ipq_errstr
+returns an error message as outlined above.
+.SH BUGS
+None known.
+.SH AUTHOR
+James Morris <jmorris@intercode.com.au>
+.SH COPYRIGHT
+Copyright (c) 2000-2001 Netfilter Core Team.
+.PP
+Distributed under the GNU General Public License.
+.SH SEE ALSO
+.BR iptables (8),
+.BR libipq (3).

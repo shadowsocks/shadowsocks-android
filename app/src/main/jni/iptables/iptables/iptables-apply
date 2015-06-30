@@ -1,0 +1,174 @@
+#!/bin/bash
+#
+# iptables-apply -- a safer way to update iptables remotely
+#
+# Copyright © Martin F. Krafft <madduck@madduck.net>
+# Released under the terms of the Artistic Licence 2.0
+#
+set -eu
+
+PROGNAME="${0##*/}";
+VERSION=1.0
+
+TIMEOUT=10
+DEFAULT_FILE=/etc/network/iptables
+
+function blurb()
+{
+	cat <<-_eof
+	$PROGNAME $VERSION -- a safer way to update iptables remotely
+	_eof
+}
+
+function copyright()
+{
+	cat <<-_eof
+	$PROGNAME is C Martin F. Krafft <madduck@madduck.net>.
+
+	The program has been published under the terms of the Artistic Licence 2.0
+	_eof
+}
+
+function about()
+{
+	blurb
+	echo
+	copyright
+}
+
+function usage()
+{
+	cat <<-_eof
+	Usage: $PROGNAME [options] ruleset
+
+	The script will try to apply a new ruleset (as output by iptables-save/read
+	by iptables-restore) to iptables, then prompt the user whether the changes
+	are okay. If the new ruleset cut the existing connection, the user will not
+	be able to answer affirmatively. In this case, the script rolls back to the
+	previous ruleset.
+
+	The following options may be specified, using standard conventions:
+
+	-t | --timeout	Specify the timeout in seconds (default: $TIMEOUT)
+	-V | --version	Display version information
+	-h | --help	Display this help text
+	_eof
+}
+
+SHORTOPTS="t:Vh";
+LONGOPTS="timeout:,version,help";
+
+OPTS=$(getopt -s bash -o "$SHORTOPTS" -l "$LONGOPTS" -n "$PROGNAME" -- "$@") || exit $?
+for opt in $OPTS; do
+	case "$opt" in
+		(-*) unset OPT_STATE;;
+		(*)
+			case "${OPT_STATE:-}" in
+				(SET_TIMEOUT)
+					eval TIMEOUT=$opt
+					case "$TIMEOUT" in
+						([0-9]*) :;;
+						(*)
+							echo "E: non-numeric timeout value." >&2
+							exit 1
+							;;
+					esac
+					;;
+			esac
+			;;
+	esac
+
+	case "$opt" in
+		(-h|--help) usage >&2; exit 0;;
+		(-V|--version) about >&2; exit 0;;
+		(-t|--timeout) OPT_STATE=SET_TIMEOUT;;
+		(--) break;;
+	esac
+	shift
+done
+
+FILE="${1:-$DEFAULT_FILE}";
+
+if [[ -z "$FILE" ]]; then
+	echo "E: missing file argument." >&2
+	exit 1
+fi
+
+if [[ ! -r "$FILE" ]]; then
+	echo "E: cannot read $FILE" >&2
+	exit 2
+fi
+
+case "${0##*/}" in
+	(*6*)
+		SAVE=ip6tables-save
+		RESTORE=ip6tables-restore
+		;;
+	(*)
+		SAVE=iptables-save
+		RESTORE=iptables-restore
+		;;
+esac
+
+COMMANDS=(tempfile "$SAVE" "$RESTORE")
+
+for cmd in "${COMMANDS[@]}"; do
+	if ! command -v $cmd >/dev/null; then
+		echo "E: command not found: $cmd" >&2
+		exit 127
+	fi
+done
+
+umask 0700
+
+TMPFILE=$(tempfile -p iptap)
+trap "rm -f $TMPFILE" EXIT 1 2 3 4 5 6 7 8 10 11 12 13 14 15
+
+if ! "$SAVE" >"$TMPFILE"; then
+	if ! grep -q ipt /proc/modules 2>/dev/null; then
+		echo "E: iptables support lacking from the kernel." >&2
+		exit 3
+	else
+		echo "E: unknown error saving current iptables ruleset." >&2
+		exit 4
+	fi
+fi
+
+[ -x /etc/init.d/fail2ban ] && /etc/init.d/fail2ban stop
+
+echo -n "Applying new ruleset... "
+if ! "$RESTORE" <"$FILE"; then
+	echo "failed."
+	echo "E: unknown error applying new iptables ruleset." >&2
+	exit 5
+else
+	echo done.
+fi
+
+echo -n "Can you establish NEW connections to the machine? (y/N) "
+
+read -n1 -t "${TIMEOUT:-15}" ret 2>&1 || :
+case "${ret:-}" in
+	(y*|Y*)
+		echo
+		echo ... then my job is done. See you next time.
+		;;
+	(*)
+		if [[ -z "${ret:-}" ]]; then
+			echo "apparently not..."
+		else
+			echo
+		fi
+		echo "Timeout. Something happened (or did not). Better play it safe..."
+		echo -n "Reverting to old ruleset... "
+		"$RESTORE" <"$TMPFILE";
+		echo done.
+		exit 255
+		;;
+esac
+
+[ -x /etc/init.d/fail2ban ] && /etc/init.d/fail2ban start
+
+exit 0
+
+# vim:noet:sw=8

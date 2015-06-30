@@ -1,0 +1,12 @@
+The \fBTEE\fP target will clone a packet and redirect this clone to another
+machine on the \fBlocal\fP network segment. In other words, the nexthop
+must be the target, or you will have to configure the nexthop to forward it
+further if so desired.
+.TP
+\fB\-\-gateway\fP \fIipaddr\fP
+Send the cloned packet to the host reachable at the given IP address.
+Use of 0.0.0.0 (for IPv4 packets) or :: (IPv6) is invalid.
+.PP
+To forward all incoming traffic on eth0 to an Network Layer logging box:
+.PP
+\-t mangle \-A PREROUTING \-i eth0 \-j TEE \-\-gateway 2001:db8::1

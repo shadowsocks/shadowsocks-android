@@ -1,0 +1,6 @@
+Allows you to add comments (up to 256 characters) to any rule.
+.TP
+\fB\-\-comment\fP \fIcomment\fP
+.TP
+Example:
+iptables \-A INPUT \-i eth1 \-m comment \-\-comment "my local LAN"

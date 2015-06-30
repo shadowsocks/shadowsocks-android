@@ -1,0 +1,21 @@
+This target is only valid in the \fBmangle\fP table, in the \fBPREROUTING\fP
+chain and user-defined chains which are only called from this chain. It
+redirects the packet to a local socket without changing the packet header in
+any way. It can also change the mark value which can then be used in advanced
+routing rules.
+It takes three options:
+.TP
+\fB\-\-on\-port\fP \fIport\fP
+This specifies a destination port to use. It is a required option, 0 means the
+new destination port is the same as the original. This is only valid if the
+rule also specifies \fB\-p tcp\fP or \fB\-p udp\fP.
+.TP
+\fB\-\-on\-ip\fP \fIaddress\fP
+This specifies a destination address to use. By default the address is the IP
+address of the incoming interface. This is only valid if the rule also
+specifies \fB\-p tcp\fP or \fB\-p udp\fP.
+.TP
+\fB\-\-tproxy\-mark\fP \fIvalue\fP[\fB/\fP\fImask\fP]
+Marks packets with the given value/mask. The fwmark value set here can be used
+by advanced routing. (Required for transparent proxying to work: otherwise
+these packets will get forwarded, which is probably not what you want.)

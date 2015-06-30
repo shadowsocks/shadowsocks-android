@@ -1,0 +1,29 @@
+This module matches packets based on some statistic condition.
+It supports two distinct modes settable with the 
+\fB\-\-mode\fP
+option.
+.PP
+Supported options:
+.TP
+\fB\-\-mode\fP \fImode\fP
+Set the matching mode of the matching rule, supported modes are
+.B random
+and
+.B nth. 
+.TP
+[\fB!\fP] \fB\-\-probability\fP \fIp\fP
+Set the probability for a packet to be randomly matched. It only works with the
+\fBrandom\fP mode. \fIp\fP must be within 0.0 and 1.0. The supported
+granularity is in 1/2147483648th increments.
+.TP
+[\fB!\fP] \fB\-\-every\fP \fIn\fP
+Match one packet every nth packet. It works only with the
+.B nth
+mode (see also the 
+\fB\-\-packet\fP
+option).
+.TP
+\fB\-\-packet\fP \fIp\fP
+Set the initial counter value (0 <= p <= n\-1, default 0) for the
+.B nth 
+mode.

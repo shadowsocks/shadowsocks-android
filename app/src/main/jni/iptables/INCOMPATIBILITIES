@@ -1,0 +1,14 @@
+INCOMPATIBILITIES:
+
+- The REJECT target has an '--reject-with admin-prohib' option which used
+  with kernels that do not support it, will result in a plain DROP instead
+  of REJECT.  Use with caution.
+  Kernels that do support it:
+  	2.4 - since 2.4.22-pre9
+	2.6 - all
+
+- There are some issues related to upgrading from 1.2.x to 1.3.x on a system
+  with dynamic ruleset changes during runtime. (Please see 
+  https://bugzilla.netfilter.org/bugzilla/show_bug.cgi?id=334).
+  After upgrading from 1.2 to 1.3, it suggest go do an iptables-save, then
+  iptables-restore to ensure your dynamic rule changes continue to work.

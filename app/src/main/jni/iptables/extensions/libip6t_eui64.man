@@ -1,0 +1,10 @@
+This module matches the EUI-64 part of a stateless autoconfigured IPv6 address.
+It compares the EUI-64 derived from the source MAC address in Ethernet frame
+with the lower 64 bits of the IPv6 source address. But "Universal/Local"
+bit is not compared. This module doesn't match other link layer frame, and
+is only valid in the
+.BR PREROUTING ,
+.BR INPUT
+and
+.BR FORWARD
+chains.

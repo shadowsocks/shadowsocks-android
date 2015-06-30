@@ -1,0 +1,12 @@
+This is an experimental demonstration target which inverts the source
+and destination fields in the IP header and retransmits the packet.
+It is only valid in the
+.BR INPUT ,
+.B FORWARD
+and
+.B PREROUTING
+chains, and user-defined chains which are only called from those
+chains.  Note that the outgoing packets are
+.B NOT
+seen by any packet filtering chains, connection tracking or NAT, to
+avoid loops and other problems.

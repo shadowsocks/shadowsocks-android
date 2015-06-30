@@ -1,0 +1,5 @@
+This target disables connection tracking for all packets matching that rule.
+.PP
+It can only be used in the
+.B raw
+table.

@@ -1,0 +1,37 @@
+This module matches IPv6 extension headers and/or upper layer header.
+.TP
+\fB\-\-soft\fP
+Matches if the packet includes \fBany\fP of the headers specified with
+\fB\-\-header\fP.
+.TP
+[\fB!\fP] \fB\-\-header\fP \fIheader\fP[\fB,\fP\fIheader\fP...]
+Matches the packet which EXACTLY includes all specified headers. The headers
+encapsulated with ESP header are out of scope.
+Possible \fIheader\fP types can be:
+.TP
+\fBhop\fP|\fBhop\-by\-hop\fP
+Hop-by-Hop Options header
+.TP
+\fBdst\fP
+Destination Options header
+.TP
+\fBroute\fP
+Routing header
+.TP
+\fBfrag\fP
+Fragment header
+.TP
+\fBauth\fP
+Authentication header
+.TP
+\fBesp\fP
+Encapsulating Security Payload header
+.TP
+\fBnone\fP
+No Next header which matches 59 in the 'Next Header field' of IPv6 header or
+any IPv6 extension headers
+.TP
+\fBproto\fP
+which matches any upper layer protocol header. A protocol name from
+/etc/protocols and numeric value also allowed. The number 255 is equivalent to
+\fBproto\fP.

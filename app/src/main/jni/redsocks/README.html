@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="stylesheet" type="text/css" href="../site.css" />
+<title>redsocks - transparent socks redirector</title>
+</head>
+<body>
+<!-- Intro -->
+<h1>redsocks - transparent socks redirector</h1>
+<div class="navi">
+	<a href="../">darkk's homepage</a>
+	<a href="http://github.com/darkk/redsocks/tree/master">download source code</a>
+</div>
+
+<hr/>
+
+<p>This tool allows you to redirect any TCP connection to SOCKS or HTTPS
+proxy using your firewall, so redirection is system-wide.</p>
+
+<p>Why is that useful? I can suggest following reasons:</p>
+<ul>
+	<li>you use <a href="http://www.torproject.org">tor</a> and don't want any TCP connection to leak</li>
+	<li>you use DVB ISP and this ISP provides internet connectivity with some
+  special daemon that may be also called "Internet accelerator" and this
+	accelerator acts as proxy. <a href="http://www.globax.biz">Globax</a> is example of such an accelerator</li>
+</ul>
+
+<p>Linux/iptables, OpenBSD/pf and FreeBSD/ipfw are supported.
+Linux/iptables is well-tested, other implementations may have bugs,
+your bugreports are welcome.</p>
+
+<p><a href="http://transocks.sourceforge.net/">Transocks</a> is alike project but it has noticable performance penality.</p>
+
+<p><a href="http://oss.tiggerswelt.net/transocks_ev/">Transsocks_ev</a> is alike project too, but it has no HTTPS-proxy support
+and does not support authentication.</p>
+
+<p>Several Andoird apps also use redsocks under-the-hood: <a href="http://code.google.com/p/proxydroid/">ProxyDroid</a> (<a href="https://market.android.com/details?id=org.proxydroid">@AndroidMarket</a>) and
+<a href="http://code.google.com/p/sshtunnel/">sshtunnel</a> (<a href="https://market.android.com/details?id=org.sshtunnel">@AndroidMarket</a>). And that's over 100'000 downloads! Wow!</p>
+
+<p>Another related issue is DNS over TCP. Redsocks includes `dnstc' that is fake
+and really dumb DNS server that returns "truncated answer" to every query via
+UDP. RFC-compliant resolver should repeat same query via TCP in this case - so
+the request can be redirected using usual redsocks facilities.</p>
+
+<p>Known compliant resolvers are:</p>
+<ul>
+	<li>bind9 (server)</li>
+	<li>dig, nslookup (tools based on bind9 code)</li>
+</ul>
+<p>Known non-compliant resolvers are:</p>
+<ul>
+	<li>eglibc resolver fails without any attempt to send request via TCP</li>
+	<li>powerdns-recursor can't properly startup without UDP connectivity as it
+   can't load root hints</li>
+</ul>
+
+<p>On the other hand, DNS via TCP using bind9 may be painfully slow. If your bind9
+setup is really slow, you have at least two options: <a href="http://www.phys.uu.nl/~rombouts/pdnsd.html">pdnsd</a> caching server
+can run in TCP-only mode, <a href="http://www.mulliner.org/collin/ttdnsd.php">ttdnsd</a> (<a href="https://gitweb.torproject.org/ioerror/ttdnsd.git">git repo</a>) has no cache but can be useful for same
+purpose.</p>
+
+<h2>Features</h2>
+
+<p>Redirect any TCP connection to SOCKS4, SOCKS5 or HTTPS (HTTP/CONNECT)
+proxy server.</p>
+
+<p>Login/password authentication is supported for SOCKS5/HTTPS connections.
+SOCKS4 supports only username, password is ignored. for HTTPS, currently
+only Basic and Digest scheme is supported.</p>
+
+<p>Redirect UDP packets via SOCKS5 proxy server. NB: UDP still goes via UDP, so
+you can't relay UDP via OpenSSH.</p>
+
+<p>Sends "truncated reply" as an answer to UDP DNS queries.</p>
+
+<p>Redirect any HTTP connection to proxy that does not support transparent
+proxying (e.g. old SQUID had broken `acl myport' for such connections).</p>
+
+
+<h2>License</h2>
+
+<p>All source code is licensed under Apache 2.0 license.</p>
+<p>You can get a copy at <a href="http://www.apache.org/licenses/LICENSE-2.0.html">http://www.apache.org/licenses/LICENSE-2.0.html</a></p>
+
+
+<h2>Packages</h2>
+<ul>
+	<li><img src="http://www.archlinux.org/favicon.ico" alt="" />
+	<a href="https://aur.archlinux.org/packages.php?ID=41765">Archlinux AUR</a></li>
+
+	<li><img src="http://www.debian.org/favicon.ico" alt="" />
+	<a href="http://packages.debian.org/search?searchon=names&keywords=redsocks">Debian</a></li>
+
+	<li><img src="http://www.gentoo.org/favicon.ico" alt="" />
+	<a href="https://code.google.com/p/pentoo/source/browse/portage/trunk/net-proxy/redsocks">Gentoo (pentoo overlay)</a></li>
+
+	<li><img src="http://www.gentoo.org/favicon.ico" alt="" />
+	<a href="http://code.google.com/p/theebuilds/source/browse/trunk/net-misc/redsocks">Gentoo (theebuilds overlay)</a></li>
+
+	<li><img src="http://www.gentoo.org/favicon.ico" alt="" />
+	<a href="http://gpo.zugaina.org/net-proxy/redsocks">Gentoo (zugaina overlay)</a></li>
+
+	<li><img src="http://www.ubuntu.com/sites/all/themes/ubuntu10/favicon.ico" alt="" />
+	<a href="http://packages.ubuntu.com/search?searchon=names&keywords=redsocks">Ubuntu</a></li>
+</ul>
+
+
+<h2>Compilation</h2>
+
+<p><a href="http://libevent.org/">libevent</a> is required.</p>
+
+<p>gcc is only supported compiler right now, other compilers can be used
+but may require some code changes.</p>
+
+<p>Compilation is as easy as running `make', there is no `./configure' magic.</p>
+
+<p>GNU Make works, other implementations of make were not tested.</p>
+
+
+<h2>Running</h2>
+
+<p>Program has following command-line options:<br/>
+-c   sets proper path to config file ("./redsocks.conf" is default one)<br/>
+-t   tests config file syntax<br/>
+-p   set a file to write the getpid() into</p>
+
+<p>Following signals are understood:<br/>
+SIGUSR1 dumps list of connected clients to log<br/>
+SIGTERM and SIGINT terminates daemon, all active connections are closed</p>
+
+<p>You can see configuration file example in redsocks.conf.example</p>
+
+
+<h2>iptables example</h2>
+
+<p>You have to build iptables with connection tracking and REDIRECT target.</p>
+
+<pre>
+# Create new chain
+<strong>root#</strong> <code>iptables -t nat -N REDSOCKS</code>
+
+# Ignore LANs and some other reserved addresses.
+# See <a href="http://en.wikipedia.org/wiki/Reserved_IP_addresses#Reserved_IPv4_addresses">Wikipedia</a> and <a href="http://tools.ietf.org/html/rfc5735">RFC5735</a> for full list of reserved networks.
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 0.0.0.0/8 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 10.0.0.0/8 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 169.254.0.0/16 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 172.16.0.0/12 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 224.0.0.0/4 -j RETURN</code>
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -d 240.0.0.0/4 -j RETURN</code>
+
+# Anything else should be redirected to port 12345
+<strong>root#</strong> <code>iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports 12345</code>
+
+# Any tcp connection made by `luser' should be redirected.
+<strong>root#</strong> <code>iptables -t nat -A OUTPUT -p tcp -m owner --uid-owner luser -j REDSOCKS</code>
+
+# You can also control that in more precise way using `gid-owner` from
+# iptables.
+<strong>root#</strong> <code>groupadd socksified</code>
+<strong>root#</strong> <code>usermod --append --groups socksified luser</code>
+<strong>root#</strong> <code>iptables -t nat -A OUTPUT -p tcp -m owner --gid-owner socksified -j REDSOCKS</code>
+
+# Now you can launch your specific application with GID `socksified` and it
+# will be... socksified. See following commands (numbers may vary).
+# Note: you may have to relogin to apply `usermod` changes.
+<strong>luser$</strong> <code>id</code>
+uid=1000(luser) gid=1000(luser) groups=1000(luser),1001(socksified)
+<strong>luser$</strong> <code>sg socksified -c id</code>
+uid=1000(luser) gid=1001(socksified) groups=1000(luser),1001(socksified)
+<strong>luser$</strong> <code>sg socksified -c "firefox"</code>
+
+# If you want to configure socksifying router, you should look at
+# <a href="doc/iptables-packet-flow.png">doc/iptables-packet-flow.png</a> and <a href="doc/iptables-packet-flow-ng.png">doc/iptables-packet-flow-ng.png</a>
+# Note, you should have proper `local_ip' value to get external packets with
+# redsocks, default 127.0.0.1 will not go. See iptables(8) manpage regarding
+# <a href="http://dev.medozas.de/files/xtables/iptables.html#76">REDIRECT target</a> for details.
+# Depending on your network configuration iptables conf. may be as easy as:
+<strong>root#</strong> <code>iptables -t nat -A PREROUTING --in-interface eth_int -p tcp -j REDSOCKS</code>
+</pre>
+
+<h3>Note about GID-based redirection</h3>
+<p>
+Keep in mind, that changed GID affects filesystem permissions, so if your
+application creates some files, the files will be created with luser:socksified
+owner/group. So, if you're not the only user in the group `socksified` and your
+umask allows to create group-readable files and your directory permissions, and
+so on, blah-blah, etc. THEN you may expose your files to another user.
+</p>
+<p>
+Ok, you have been warned.
+</p>
+
+<h2>Homepage</h2>
+
+<p>Homepage: <a href="http://darkk.net.ru/redsocks/">http://darkk.net.ru/redsocks/</a></p>
+
+<p>Mailing list: <a href="mailto:redsocks@librelist.com">redsocks@librelist.com</a></p>
+
+<p>Mailing list also has <a href="http://librelist.com/browser/redsocks/">archives</a>.</p>
+
+
+<h2>TODO</h2>
+
+<ul>
+	<li>Test OpenBSD (pf) and FreeBSD (ipfw) and write setup examples for those
+	firewall types.</li>
+</ul>
+
+
+<h2>Author</h2>
+This program was written by Leonid Evdokimov.
+
+
+<!-- Outro -->
+<a name="address"></a>
+<pre>
+ (~~~~~~~~~~\   __
+ | jabber:  )  /  \
+ | mailto: (  /|oo \
+  \_________\(_|  /_)
+              _ @/_ \
+             |     | \   \\
+      leon   | (*) |  \   ))  darkk.net.ru
+             |__U__| /  \//
+              _//|| _\   /
+             (_/(_|(____/
+                         <a href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS!</a>
+                         <a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0 Transitional</a>
+</pre>
+<!-- /Outro -->
+<!-- vim:set tabstop=2 softtabstop=2 shiftwidth=2: -->
+</body>
+</html>

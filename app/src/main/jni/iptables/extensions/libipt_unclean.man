@@ -1,0 +1,2 @@
+This module takes no options, but attempts to match packets which seem
+malformed or unusual.  This is regarded as experimental.

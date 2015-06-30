@@ -1,0 +1,87 @@
+.TH IPTABLES-XML 8 "Jul 16, 2007" "" ""
+.\"
+.\" Man page written by Sam Liddicott <azez@ufomechanic.net>
+.\" It is based on the iptables-save man page.
+.\"
+.\"	This program is free software; you can redistribute it and/or modify
+.\"	it under the terms of the GNU General Public License as published by
+.\"	the Free Software Foundation; either version 2 of the License, or
+.\"	(at your option) any later version.
+.\"
+.\"	This program is distributed in the hope that it will be useful,
+.\"	but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"	GNU General Public License for more details.
+.\"
+.\"	You should have received a copy of the GNU General Public License
+.\"	along with this program; if not, write to the Free Software
+.\"	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.\"
+.\"
+.SH NAME
+iptables-xml \(em Convert iptables-save format to XML
+.SH SYNOPSIS
+\fBiptables\-xml\fP [\fB\-c\fP] [\fB\-v\fP]
+.SH DESCRIPTION
+.PP
+.B iptables-xml
+is used to convert the output of iptables-save into an easily manipulatable
+XML format to STDOUT.  Use I/O-redirection provided by your shell to write to 
+a file.
+.TP
+\fB\-c\fR, \fB\-\-combine\fR
+combine consecutive rules with the same matches but different targets. iptables
+does not currently support more than one target per match, so this simulates 
+that by collecting the targets from consecutive iptables rules into one action
+tag, but only when the rule matches are identical. Terminating actions like
+RETURN, DROP, ACCEPT and QUEUE are not combined with subsequent targets.
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Output xml comments containing the iptables line from which the XML is derived
+
+.PP
+iptables-xml does a mechanistic conversion to a very expressive xml
+format; the only semantic considerations are for \-g and \-j targets in
+order to discriminate between <call> <goto> and <nane-of-target> as it
+helps xml processing scripts if they can tell the difference between a
+target like SNAT and another chain.
+
+Some sample output is:
+
+<iptables-rules>
+  <table name="mangle">
+    <chain name="PREROUTING" policy="ACCEPT" packet-count="63436"
+byte-count="7137573">
+      <rule>
+       <conditions>
+        <match>
+          <p>tcp</p>
+        </match>
+        <tcp>
+          <sport>8443</sport>
+        </tcp>
+       </conditions>
+       <actions>
+        <call>
+          <check_ip/>
+        </call>
+        <ACCEPT/>
+       </actions>
+      </rule>
+    </chain>
+  </table>
+</iptables-rules>
+
+.PP
+Conversion from XML to iptables-save format may be done using the 
+iptables.xslt script and xsltproc, or a custom program using
+libxsltproc or similar; in this fashion:
+
+xsltproc iptables.xslt my-iptables.xml | iptables-restore
+
+.SH BUGS
+None known as of iptables-1.3.7 release
+.SH AUTHOR
+Sam Liddicott <azez@ufomechanic.net>
+.SH SEE ALSO
+\fBiptables\-save\fP(8), \fBiptables\-restore\fP(8), \fBiptables\fP(8)

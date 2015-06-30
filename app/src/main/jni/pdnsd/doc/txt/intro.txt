@@ -1,0 +1,305 @@
+-------------------------------------------------------------------------------
+
+About pdnsd
+
+pdnsd is a proxy DNS server with permanent caching (the cache contents are
+written to hard disk on exit) that is designed to cope with unreachable or down
+DNS servers (for example in dial-in networking).
+Since version 1.1.0, pdnsd supports negative caching.
+
+It is licensed under the GNU General Public License (GPL). This, in short,
+means that the sources are distributed togehter with the program, and that you
+are free to modify the sources and redistribute them as long as you also
+license them under the GPL. You do not need to pay anything for pdnsd. It also
+means that there is ABSOLUTELY NO WARRANTY for pdnsd or any part of it. For
+details, please read the GPL.
+
+pdnsd can be used with applications that do DNS lookups, e.g. on startup, and
+can't be configured to change that behaviour, to prevent the often minute-long
+hangs (or even crashes) that result from stalled DNS queries. Some Netscape
+Navigator versions for Unix, for example, expose this behaviour.
+
+pdnsd is configurable via a file and supports run-time configuration using the
+program pdnsd-ctl that comes with pdnsd. This allows you to set the status
+flags of servers that pdnsd knows (to influence which servers pdnsd will
+query), and the addition, deletion and invalidation of DNS records in pdnsd's
+cache.
+Parallel name server queries are supported. This is a technique that allows
+querying several servers at the same time so that very slow or unavailable
+servers will not block the answer for one timeout interval.
+Since version 1.0.0, pdnsd has full IPv6 support.
+
+There is also a limited support for local zone records, intended for defining
+1.0.0.127.in-addr.arpa. and localhost. , since some clients request that
+information and it must be served even if the cached servers are not available
+or do not serve these records. pdnsd may also read your /etc/hosts file (this
+file is normally used by your local resolver and usually contains information
+for localhost as well as for your machines FQDN) and serve its contents.
+
+pdnsd was started on Linux, and has since been ported to FreeBSD (and Cygwin
+and Darwin). 90% of the source code should be easily portable to POSIX- and
+BSD-compatible systems, provided that those systems support the POSIX threads
+(pthreads). The rest might need OS-specific rewrites.
+
+Currently, pdnsd is only compileable by gcc. This should be easy to fix, but I
+just do not have documentation for other compilers. If you are not able or do
+not want to use gcc, I would recommend you just try to do the minor changes.
+
+pdnsd must be started as root in some cases (raw sockets are needed for icmp
+echoes for the option uptest=ping, and the default port is 53, this must be >
+1024 to allow non-root execution). However, pdnsd can be configured to change
+it's user and group id to those of a non-privileged user after opening the
+sockets needed for this.
+
+The server should support the full standard DNS queries following the rfcs 1034
+and 1035. As of version 1.0.0, the rfc compliance has been improved again, and
+pdnsd is now believed (or hoped?) to be fully rfc-compatible. It completely
+follows rfc 2181 (except for one minor issue in the FreeBSD port, see the
+documentation). It does not support the following features, of which most are
+marked optional, experimental or obsolete in these rfcs:
+
+  * Inverse queries
+  * Status queries
+  * Completion queries
+  * Namespaces other than IN (Internet)
+  * AXFR and IXFR queries (whole zone transfers); since pdnsd does not maintain
+    zones, that should not violate the standard
+
+The following record types, that are extensions to the original DNS standard,
+are supported for caching since version 1.2.9 (if you do not need most of them,
+you can disable runtime support for the unneeded ones before compiling pdnsd
+and save a little cache and executable space, see the source file src/
+rr_types.in):
+
+  * RP (responsible person, RFC 1183)
+  * AFSDB (AFS database location, RFC 1183)
+  * X25 (X25 address, RFC 1183)
+  * ISDN (ISDN number/address, RFC 1183)
+  * RT (route through, RFC 1183)
+  * NSAP (Network Service Access Protocol address , RFC 1348)
+  * PX (X.400/RFC822 mapping information, RFC 1995)
+  * GPOS (geographic position, deprecated)
+  * AAAA (IPv6 address, RFC 1886)
+  * LOC (location, RFC 1876)
+  * EID (Nimrod EID)
+  * NIMLOC (Nimrod locator)
+  * SRV (service record, RFC 2782)
+  * ATMA (ATM address)
+  * NAPTR (URI mapping, RFC 2168)
+  * KX (key exchange, RFC 2230)
+  * CERT (Certificate record, RFC 4398)
+  * DS (Delegation Signer, RFC 4034)
+  * RRSIG (Resource Record Signature, RFC 4034)
+  * NSEC (Next Secure, RFC 4034)
+  * DNSKEY (record containing the public key for a zone, RFC 4034)
+  * NSEC3 (Next Secure version 3, RFC 5155)
+  * NSEC3PARAM (NSEC3 parameters, RFC 5155)
+
+Note: This list is incomplete. For the complete list see the source file src/
+rr_types.in.
+
+There are FreeBSD and OpenBSD ports available for pdnsd (ports/net/pdnsd for
+both). Thanks go to Roman Shterenzon for the FreeBSD port Sebastian Stark for
+the OpenBSD one! Thanks to Kiyo Kelvin Lee now also runs on the Cygwin
+platform! Thanks goes to Rodney Brown for extending portability to the Darwin
+(Apple Mac OS X) platform!
+
+If you have questions left, you should take a look into the FAQ.
+Bugfixes, patches and compatability fixes for other OSs are very welcome!
+
+Features in detail
+
+This section describes some of pdnsds features in detail. Most of the options
+are set in the config file. For more information on the configuration file, see
+the documenation page.
+
+
+Uptests
+
+pdnsd provides several methods to test whether a remote DNS server should be
+regarded as available (so that pdnsd can query it), in addition to the obvious
+"none" test (the server is always regarded as available, or availability is set
+on or off using the pdnsd-ctl utility). These tests are:
+
+  * ping: a given adress is ping'ed in a given interval. If it there is no
+    response or the host is unreachable, the server is seen to be not available
+    (for those who don't know: pinging is sending a certain Internet packet
+    type to a host to which any standard-conformant host is required to reply).
+  * if: a given network interface is tested whether it is existent, up and
+    running. If it is not, the server is regarded to be not available. This is
+    especially useful for ppp and similar interfaces. A special case test for
+    Linux isdn (ippp*) interfaces is integrated, so that the uptests should
+    also work for these.
+  * dev: this is a variant of the if uptest for use with Linux dial-on-demand
+    ppp interfaces. In addition to performing an if-style interface uptest, it
+    also tests whether a specified program (e.g. pppd) owns a lock to a given
+    (modem-) device.
+  * exec: a given shell command line is executed and the exit status of the
+    whole command line (which is normally the exit status of the last command)
+    is evaluated. If it is not zero, the server is regarded to be not
+    available. This is a very flexible testing method with which it should be
+    able to perform virtually any needed test.
+  * query: New in version 1.2: This works like the ping test, except it sends
+    an (empty) DNS query to the remote server. If the server sends a
+    well-formed response back within the timeout period (except SERVFAIL), it
+    will be regarded as available. This test is useful if a remote server does
+    not respond to ICMP_ECHO requests at all, which unfortunately is quite
+    common these days. In many cases this test will be a more reliable
+    indicator of availability than the ones mentioned above.
+
+
+Local Records ("Zones")
+
+As mentioned above, there are only very basic local record types (ie the record
+types that you may use in record declarations in your local configuration for
+records that pdnsd shall serve in addion to the cached ones). They are
+organized roughly in zones but have not complete zone declarations, so I
+generally do not use the term "zone" for them, but rather "local records".
+These are the local record types pdnsd can understand:
+
+  * SOA (information about the name server)
+  * A (domain-name-to-address mapping)
+  * PTR (pointer, used normally for address-to-domain-name mapping)
+  * NS (name server, generated automatically by pdnsd for any local record set)
+  * CNAME (canonical host name)
+  * MX (mail exchange for the domain)
+  * TXT (arbitrary text strings, often used for Sender Policy Framework)
+
+You can specify these records in the configuration file.
+You may "source" a file in a format like that used in the /etc/hosts file, that
+means that pdnsd reads this file, extracts addresses and domain names from it
+and automatically generates A records for name to address mapping, PTR records
+for address to name mapping and NS records (name server specifiation) for each
+entry in the file.
+Records can also be changed dynamically at run time.
+A script contributed by Marko Stolle makes pdnsd usable in a DHCP setup using
+this feature.
+
+System requirements
+
+As mentioned, pdnsd currently runs under Linux, FreeBSD and Cygwin. Other BSD
+flavours may or may not work (feedback is very welcome!). The system and
+software requirements under Linux are:
+
+  * Kernel version >2.2.0
+  * glibc version >2.0.1 (aka libc6) with LinuxThreads (normally included) or
+    NPTL (Native Posix Thread Library, recommended).
+    Due to a bug, pdnsd 0.9.8 does not run with glibc2.1.1. This behaviour was
+    fixed in pdnsd 0.9.9.
+  * For IPv6: glibc>=2.1
+
+The system requirements under FreeBSD are:
+
+  * FreeBSD versions >=2.6 (prior ones may or may not work)
+  * For IPv6: FreeBSD >=4.0 is recommended (no idea if it runs on prior
+    versions)
+
+The common software requirements for all supported systems are:
+
+  * GCC, preferably egcs-2.* or 3.* (other compilers are currently not
+    supported; the needed patch for another compiler should not be difficult,
+    however)
+  * GNU or BSD make
+  * the standard commands install, grep, sed, awk, touch and which (along with
+    the REALLY standard ones mv, cp, ln, rm, pwd, test, echo, cat, mkdir,
+    chown, chmod, tar). In any standard Unix installation, this should be no
+    problem.
+  * for hacking and building own packages, you might also need gzip, bzip2,
+    perl and rpmbuild
+
+
+Download
+
+If you want to download pdnsd, please visit the download page.
+
+Authors
+
+pdnsd was originally written by Thomas Moestl, but is no longer maintained by
+him. Paul A. Rombouts has revised large portions of the code and has added a
+number of new features. See README.par and the ChangeLog in the source
+directory (or /usr/share/doc/pdnsd-<version> if you have installed a binary
+package) for more details. If you have questions about the recent
+modifications, you can find the email address of the current maintainer at the
+end of README.par.
+
+Daniel Smolik has contributed RedHat RPMs (the most recent RPMs are available
+here).
+Torben Janssen contributed start scripts for Red Hat Linux.
+Soenke J. Peters contributed patches and suggestions for Red Hat compatability.
+Wolfgang Ocker has contributed the code and documentation for the server_ip
+option.
+Markus Mohr contributed a Debian rc script.
+Nikita V. Youschenko contributed extensions to the "if" uptest.
+Lyonel Vincent extended the serve_aliases option to support an arbitrary number
+of aliases.
+Sourav K. Mandal wrote the autoconf scripts and contributed many fixes and
+suggestions.
+Stephan Boettcher contributed the SCHEME= option.
+Ron Yorston contributed the uptest for Linux ppp dial-on-demand devices.
+Alexandre Nunes fixed some bugs in the autoconf files.
+Sverker Wiberg contributed fixes for IPv6.
+Carsten Block contributed configure-able rc scripts.
+Olaf Kirch contributed a security fix for the run_as code.
+Paul Wagland contributed various patches for bind9-compatability and other
+issues.
+Roman Shterenzon contributed patches and lots of helpful hints for FreeBSD
+compatability.
+Bernd Leibing has contributed spec file fixes.
+Michael Wiedmann has contributed the pdnsd-ctl.8 man page.
+Marko Stolle has contributed the contrib/pdnsd_update.pl script that makes
+pdnsd usable in a DHCP setup.
+P.J. Bostley has contributed patches to get pdnsd working on alpha properly.
+Christian Engstler contributed patches for SuSE compatability.
+Bjoern Fischer contributed code to make pdnsd leave the case of names in the
+cache unchanged.
+Marko Stolle contributed the contrib/pdnsd_update.pl script that makes pdnsd
+usable in a DHCP setup.
+Andrew M. Bishop contributed the support for the label server option and the
+pdnsd-ctl interface for using it.
+Frank Elsner contributed rc script fixes.
+Andreas Steinmetz contributed the code for query_port_start and query_port_end
+options.
+Mahesh T. Pai contributed the pdnsd.8 man page.
+Nikola Kotur contributed the Slackware start-up script.
+Kiyo Kelvin Lee contributed a patch for Cygwin support.
+Rodney Brown contributed a patch for Darwin (Apple Mac OS X) support.
+Jan-Marek Glogowski contributed a patch implementing the use_nss option.
+
+Special thanks to Bert Frederiks for letting me do a late-night debugging run
+on his machine to spot obscure bugs!
+
+Thanks to the following persons for reporting bugs and being helpful:
+David G. Andersen,
+Dirk Armbrust,
+Daniel Black,
+Kevin A. Burton,
+Juliusz Chroboczek,
+Joachim Dorner,
+Stefan Erhardt,
+Stefan F?rster,
+Mike Hammer,
+Jonathan Hudson,
+Dan Jacobson,
+Byrial Jensen,
+Patrick Loschmidt,
+James MacLean,
+Fraser McCrossan,
+Michael M?ller,
+Erich Reitz,
+Brian Schroeder,
+Milan P. Stanic,
+Michael Steiner,
+Norbert Steinl,
+Markus Storm,
+Michael Str?der,
+Alan Swanson,
+Eelco Vriezekolk.
+
+
+-------------------------------------------------------------------------------
+
+Thomas Moestl and Paul A. Rombouts
+
+
+Last revised: 17 March 2012 by Paul A. Rombouts
+

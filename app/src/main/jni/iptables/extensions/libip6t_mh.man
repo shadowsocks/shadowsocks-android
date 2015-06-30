@@ -1,0 +1,12 @@
+This extension is loaded if `\-\-protocol ipv6\-mh' or `\-\-protocol mh' is
+specified. It provides the following option:
+.TP
+[\fB!\fP] \fB\-\-mh\-type\fP \fItype\fP[\fB:\fP\fItype\fP]
+This allows specification of the Mobility Header(MH) type, which can be
+a numeric MH
+.IR type ,
+.IR type
+or one of the MH type names shown by the command
+.nf
+ ip6tables \-p ipv6\-mh \-h
+.fi

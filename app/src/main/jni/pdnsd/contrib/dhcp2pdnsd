@@ -1,0 +1,45 @@
+#! /bin/sh
+#
+# dhcp2pdnsd       Start/Stop DHCP to DNS update script
+#
+# chkconfig: 345 96 99
+# description: DHCP to DNS update script
+# processname: dhcp2pdnsd.pl
+#
+# $Id: dhcp2pdnsd,v 1.1 2001/03/25 20:01:34 tmm Exp $
+
+where="/usr/local/bin/"
+name="pdnsd_dhcp.pl"
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Get config.
+. /etc/sysconfig/network
+
+# See how we were called.
+case "$1" in
+  start)
+	$where$name > /dev/null 2> /dev/null &
+	action "Starting DHCP to DNS update script: " /bin/true
+	;;
+  stop)
+        p=`ps h -C $name | awk '{print $1}'`	
+	[ $p -gt 0 ] 2> /dev/null && kill $p && action "Stopping DHCP to DNS update script: " /bin/true
+	[ $p -gt 0 ] 2> /dev/null || action "Stopping DHCP to DNS update script: " /bin/false
+	;;
+  status)
+        p=`ps h -C $name | awk '{print $1}'`
+	[ $p -gt 0 ] 2> /dev/null && echo 'running as '$p
+	[ $p -gt 0 ] 2> /dev/null || echo 'not running'
+	;;
+  restart|reload)
+	$0 stop
+	$0 start
+	;;
+  *)
+	echo "Usage: dhcp2pdnsd {start|stop|status|restart|reload}"
+	exit 1
+esac
+
+exit 0

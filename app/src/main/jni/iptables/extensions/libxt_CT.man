@@ -1,0 +1,25 @@
+The CT target allows to set parameters for a packet or its associated
+connection. The target attaches a "template" connection tracking entry to
+the packet, which is then used by the conntrack core when initializing
+a new ct entry. This target is thus only valid in the "raw" table.
+.TP
+\fB\-\-notrack\fP
+Disables connection tracking for this packet.
+.TP
+\fB\-\-helper\fP \fIname\fP
+Use the helper identified by \fIname\fP for the connection. This is more
+flexible than loading the conntrack helper modules with preset ports.
+.TP
+\fB\-\-ctevents\fP \fIevent\fP[\fB,\fP...]
+Only generate the specified conntrack events for this connection. Possible
+event types are: \fBnew\fP, \fBrelated\fP, \fBdestroy\fP, \fBreply\fP,
+\fBassured\fP, \fBprotoinfo\fP, \fBhelper\fP, \fBmark\fP (this refers to
+the ctmark, not nfmark), \fBnatseqinfo\fP, \fBsecmark\fP (ctsecmark).
+.TP
+\fB\-\-expevents\fP \fIevent\fP[\fB,\fP...]
+Only generate the specified expectation events for this connection.
+Possible event types are: \fBnew\fP.
+.TP
+\fB\-\-zone\fP \fIid\fP
+Assign this packet to zone \fIid\fP and only have lookups done in that zone.
+By default, packets have zone 0.
