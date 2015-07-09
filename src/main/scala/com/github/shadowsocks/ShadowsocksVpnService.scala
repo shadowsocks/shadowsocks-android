@@ -330,9 +330,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     else
       cmd += " --dnsgw %s:8153".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"))
 
-    if (Utils.isLollipopOrAbove) {
-      cmd += " --fake-proc"
-    }
+    // if (Utils.isLollipopOrAbove) {
+    //   cmd += " --fake-proc"
+    // }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
