@@ -1,5 +1,7 @@
 package yyf.shadowsocks.utils;
 
+import android.os.Build;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -11,25 +13,11 @@ import java.io.PrintWriter;
  */
 public class ConfigUtils {
     static public String SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}";
-    static public String REDSOCKS = "base {" +
-            " log_debug = off;" +
-            " log_info = off;" +
-            " log = stderr;" +
-            " daemon = on;" +
-            " redirector = iptables;" +
-            "}" +
-            "redsocks {" +
-            " local_ip = 127.0.0.1;" +
-            " local_port = 8123;" +
-            " ip = 127.0.0.1;" +
-            " port = %d;" +
-            " type = socks5;" +
-            "}";
 
     static public String PDNSD_LOCAL =
             "global { \n" +
                     "perm_cache = 2048;\n" +
-                    "cache_dir = \"/data/data/com.github.shadowsocks\";" +
+                    "cache_dir = \"/data/data/yyf.shadowsocks\";" +
                     "server_ip = %s;" +
                     "server_port = %d;" +
                     "query_method = tcp_only;" +
@@ -60,7 +48,7 @@ public class ConfigUtils {
     static public String PDNSD_BYPASS =
             "global {" +
                     "perm_cache = 2048;" +
-                    "cache_dir = \"/data/data/com.github.shadowsocks\";" +
+                    "cache_dir = \"/data/data/yyf.shadowsocks\";" +
                     "server_ip = %s;" +
                     "server_port = %d;" +
                     "query_method = tcp_only;" +
@@ -98,45 +86,45 @@ public class ConfigUtils {
 
 
     static public String PDNSD_DIRECT =
-            "global {" +
-                    "perm_cache = 2048;" +
-                    "cache_dir = \"/data/data/com.github.shadowsocks\";" +
-                    "server_ip = %s;" +
-                    "server_port = %d;" +
-                    "query_method = tcp_only;" +
-                    "run_ipv4 = on;" +
-                    "min_ttl = 15m;" +
-                    "max_ttl = 1w;" +
-                    "timeout = 10;" +
-                    "daemon = on;" +
-                    "pid_file = \"%s\";" +
-                    "}" +
-                    "server {" +
-                    "label = \"china-servers\";" +
-                    "ip = 223.5.5.5, 114.114.114.114;" +
-                    "timeout = 2;" +
-                    "reject = %s;" +
-                    "reject_policy = fail;" +
-                    "reject_recursively = on;" +
-                    "exclude = %s;" +
-                    "policy = included;" +
-                    "uptest = none;" +
-                    "preset = on;" +
-                    "}" +
-                    "server {" +
-                    "label = \"local-server\";" +
-                    "ip = 127.0.0.1;" +
-                    "port = %d;" +
-                    "timeout = 3;" +
-                    "}" +
-                    "" +
-                    "rr {" +
-                    "name=localhost;" +
-                    "reverse=on;" +
-                    "a=127.0.0.1;" +
-                    "owner=localhost;" +
-                    "soa=localhost,root.localhost,42,86400,900,86400,86400;" +
-                    "}";
+            "global {\n" +
+            " perm_cache = 2048;\n" +
+            " cache_dir = \"/data/yyf.shadowsocks\";\n" +
+            " server_ip = %s;\n" +
+            " server_port = %d;\n" +
+            " query_method = tcp_only;\n" +
+            " run_ipv4 = on;\n" +
+            " min_ttl = 15m;\n" +
+            " max_ttl = 1w;\n" +
+            " timeout = 10;\n" +
+            " daemon = on;\n" +
+            " pid_file = \"%s\";\n" +
+            "}\n" +
+            "server {\n" +
+            " label = \"china-servers\";\n" +
+            " ip = 223.5.5.5, 114.114.114.114;\n" +
+            " timeout = 2;\n" +
+            " reject = %s;\n" +
+            " reject_policy = fail;\n" +
+            " reject_recursively = on;\n" +
+            " exclude = %s;\n" +
+            " policy = included;\n" +
+            " uptest = none;\n" +
+            " preset = on;\n" +
+            "}\n" +
+            "server {\n" +
+            " label = \"local-server\";\n" +
+            " ip = 127.0.0.1;\n" +
+            " port = %d;\n" +
+            " timeout = 3;\n" +
+            "}\n" +
+            "\n" +
+            "rr {\n" +
+            " name=localhost;\n" +
+            " reverse=on;\n" +
+            " a=127.0.0.1;\n" +
+            " owner=localhost;\n" +
+            " soa=localhost,root.localhost,42,86400,900,86400,86400;\n" +
+            "}\n";
 
     public static PrintWriter printToFile(File f) {
         PrintWriter p = null;
@@ -146,11 +134,15 @@ public class ConfigUtils {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            p.close();
         }
     }
-
+    public static boolean isLollipopOrAbove(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return true;
+        } else {
+            return false;
+        }
+    }
         /*TODO 需要自定义Application修改此代码
         void refresh(Context context) {
         val holder = context.getApplicationContext.asInstanceOf[ShadowsocksApplication].containerHolder

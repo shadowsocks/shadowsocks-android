@@ -78,7 +78,7 @@ public  class TabFragment extends Fragment {
         ArrayList<String> list = new ArrayList<>();
         for(int i = 0;i<serverList.size();i++){
             list.add(serverList.get(i).getRemarks());
-            Log.v("ss-log","add server" + serverList.get(i).getRemarks());
+            //Log.v("ss-log","add server" + serverList.get(i).getRemarks());
         }
 
         ServerListAdapter adapter = new ServerListAdapter(getActivity(),list);

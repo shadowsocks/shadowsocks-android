@@ -87,7 +87,7 @@ public class ServerListDB extends SQLiteOpenHelper{
             sp.setLocal_port(cursor.getInt(cursor.getColumnIndex(ServerColums.COLUMN_LOCAL_PORT)));
             sp.setRemarks(cursor.getString(cursor.getColumnIndex(ServerColums.COLUMN_NAME)));
             list.add(sp);
-            Log.v("ss-android", sp.toString());
+            //Log.v("ss-android", sp.toString());
             cursor.moveToNext();
             //Log.v("ss-android",sp.toString());
         }

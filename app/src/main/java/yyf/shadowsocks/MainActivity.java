@@ -1,8 +1,14 @@
 package yyf.shadowsocks;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.res.AssetManager;
 import android.net.VpnService;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -16,18 +22,71 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Locale;
+import java.util.ServiceConfigurationError;
 
 import yyf.shadowsocks.service.ShadowsocksVpnService;
+import yyf.shadowsocks.utils.Console;
+import yyf.shadowsocks.utils.Constants;
 import yyf.shadowsocks.utils.ServerListDB;
 import yyf.shadowsocks.preferences.JsonPreference;
-
+import yyf.shadowsocks.jni.System;
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
     SectionsPagerAdapter mSectionsPagerAdapter;
     ViewPager mainPager;//主界面 base
     //vpnservice
     public static int REQUEST_CONNECT = 1;
+
+    IShadowsocksService bgService = null;
+
+    ServiceConnection connection = new ServiceConnection(){
+
+        @Override public void onServiceConnected(ComponentName name,IBinder service) {
+            // Initialize the background service
+            bgService = IShadowsocksService.Stub.asInterface(service);
+//            try {
+//                bgService.registerCallback(callback)
+//            } catch {
+//                case ignored: RemoteException => // Nothing
+//            }
+            // Update the UI
+            //if (switchButton != null) switchButton.setEnabled(true)
+            Log.v("ss-vpn","onServiceConnected");
+//            if (Constants.State.isAvailable(bgService.getState)) {
+//                setPreferenceEnabled(enabled = true)
+//            } else {
+//                changeSwitch(checked = true)
+//                setPreferenceEnabled(enabled = false)
+//            }
+            try {
+                Log.v("ss-vpn", "vpn state:" + bgService.getState());
+            }catch (RemoteException e){
+                e.getStackTrace();
+            }
+            // set the listener
+            //switchButton.setOnCheckedChangeListener(Shadowsocks.this)
+        }
+
+        @Override public void onServiceDisconnected(ComponentName name) {
+            //if (switchButton != null) switchButton.setEnabled(false)
+            Log.v("ss-vpn","onServiceDisconneted");
+            try {
+                if (bgService != null) {
+                    Log.v("ss-vpn", "ServiceState:" + bgService.getState());
+                    //bgService.unregisterCallback(callback);
+                }
+            } catch (RemoteException e){
+                e.getStackTrace();
+            }
+            bgService = null;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +123,27 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         }
         /*Set up the action barSet up the action bar END*/
 
+        /*  Set profile   TODO 复制可执行文件到根目录 写成版本更新或者清除目录后执行,而不是每次都执行*/
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                copyAssets(System.getABI());
+                String ab = "chmod 755 " + Constants.Path.BASE + "pdnsd"+"\n";
+                ab+="chmod 755 " + Constants.Path.BASE + "redsocks"+"\n";
+                ab+="chmod 755 " + Constants.Path.BASE + "ss-local"+"\n";
+                ab+="chmod 755 " + Constants.Path.BASE + "ss-tunnel"+"\n";
+                ab+="chmod 755 " + Constants.Path.BASE + "tun2socks";
+                Console.runCommand(ab);
+            }
+        }.start();
+        /*END Set the profile*/
+        /*Bind Service */
+        Intent intent = new Intent(this, ShadowsocksVpnService.class);
+        intent.setAction(Constants.Action.SERVICE);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        startService(new Intent(this, ShadowsocksVpnService.class));
+        /*Bind Service END */
     }
     void prepareStartService() {
         //showProgress(getString(R.string.connecting));
@@ -77,16 +157,22 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             Log.v("ss-vpn", "onActivityResult");
         }
         //cancelStart()
-
-
-
     }
     @Override
     protected void onActivityResult(int request, int result, Intent data) {
         if (result == RESULT_OK) {
-            Intent intent = new Intent(this, ShadowsocksVpnService.class);
-            Log.v("ss-vpn","StartVpnService");
-            startService(intent);
+            //Intent intent = new Intent(this, ShadowsocksVpnService.class);
+            //bindService(intent,connection,BIND_AUTO_CREATE);
+            if(bgService != null){
+                try {
+                    bgService.start(new Config());
+                    Log.v("ss-vpn", "bgService.StartVpn");
+                }catch(RemoteException e){
+                    e.getStackTrace();
+                }
+            }else{
+                Log.v("ss-vpn","bgServiceIsNull");
+            }
         }
     }
     @Override
@@ -127,7 +213,48 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    private void copyAssets(String path) {
+        AssetManager assetManager = getAssets();
+        String[] files = null;
+        try {
+            files = assetManager.list(path);
+        } catch(IOException e) {
+                Log.e("ss-error", e.getMessage());
+        }
+        if (files != null) {
+            for (int i = 0 ; i<files.length ; i++) {
+                InputStream in = null;
+                OutputStream out = null;
+                try {
+                    if (path.length() > 0) {
+                        in = assetManager.open(path + "/" + files[i]);
+                    } else {
+                        in = assetManager.open(files[i]);
+                    }
+                    out = new FileOutputStream(Constants.Path.BASE + files[i]);
+                    copyFile(in, out);
+                    in.close();
+                    in = null;
+                    out.flush();
+                    out.close();
+                    out = null;
+                } catch(Exception e){
+                    Log.e("ss-srror", e.getMessage());
+                }
+            }
+        }
+    }
+    private void copyFile(InputStream in,OutputStream out) throws IOException{
+        byte buffer[] = new byte[1024];
+        int read = 0;
+        while(true){
+            read = in.read(buffer);
+            if(read!=-1)
+                out.write(buffer, 0, read);
+            else
+                break;
+        }
+    }
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 
@@ -151,20 +278,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            /*switch(position){
-                case 0:
-                    return new ServerListFragment();
-                case 1:
-                    return new DaemonManagerFragment();
-                case 2:
-                    return new LogCatFragment();
-                default:
-                    return new ServerListFragment();
-            }*/
             return TabFragment.newInstance(position + 1);
-
         }
 
         @Override

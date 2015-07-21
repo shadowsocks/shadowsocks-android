@@ -9,6 +9,20 @@
         <dex dex="E:\workspace\ss-android\app\build\intermediates\pre-dexed\debug\internal_impl-22.1.1-3e874c73ef82ee17acce6eedc308507ae71a2728.jar" />
     </item>
     <item
+        jar="E:\workspace\ss-android\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.1.1\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="a3ff3c506644c820eb2bdf06e8339f72be578551">
+        <dex dex="E:\workspace\ss-android\app\build\intermediates\pre-dexed\debug\classes-8aacbb3e5f3d95009ab2f79c9ef5ae74eeaf5aad.jar" />
+    </item>
+    <item
+        jar="E:\workspace\ss-android\app\libs\dnsjava-2.1.7.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="441ce0c012497bf338147c8853365f955f51b9bd">
+        <dex dex="E:\workspace\ss-android\app\build\intermediates\pre-dexed\debug\dnsjava-2.1.7-2bcc277bda914fbcfa8dda61b23e8447c5222f60.jar" />
+    </item>
+    <item
         jar="E:\workspace\ss-android\app\build\intermediates\exploded-aar\com.android.support\support-v4\22.1.1\jars\classes.jar"
         jumboMode="false"
         revision="22.0.1"
@@ -21,13 +35,6 @@
         revision="22.0.1"
         sha1="01d051a6bfb1218b1db2d3a5af0480ac2c25c42a">
         <dex dex="E:\workspace\ss-android\app\build\intermediates\pre-dexed\debug\support-annotations-22.1.1-624d36cd9484d1fb5a695d384ae122a71665b1f3.jar" />
-    </item>
-    <item
-        jar="E:\workspace\ss-android\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\22.1.1\jars\classes.jar"
-        jumboMode="false"
-        revision="22.0.1"
-        sha1="a3ff3c506644c820eb2bdf06e8339f72be578551">
-        <dex dex="E:\workspace\ss-android\app\build\intermediates\pre-dexed\debug\classes-8aacbb3e5f3d95009ab2f79c9ef5ae74eeaf5aad.jar" />
     </item>
 
 </items>

@@ -1,41 +1,31 @@
 package yyf.shadowsocks.service;
 
+import android.app.Notification;
+import android.content.Context;
 import android.net.VpnService;
-//import yyf.shadowsocks.utils.Config;
-//import yyf.shadowsocks.aidl.IShadowsocksService;
+import android.os.Handler;
+import android.os.RemoteCallbackList;
+import android.util.Log;
+
+import yyf.shadowsocks.IShadowsocksService;
+import yyf.shadowsocks.utils.Constants;
+import yyf.shadowsocks.Config;
 //import yyf.shadowsocks.aidl.IShadowsocksServiceCallback;
 
 /**
  * Created by yyf on 2015/6/18.
  */
 public abstract class BaseService extends VpnService {
-  /*      volatile private Constants.State state = Constants.State.INIT;
-        volatile private int callbackCount = 0;
-        final RemoteCallbackList callbacks = new RemoteCallbackList<IShadowsocksServiceCallback>();
-        protected IShadowsocksService.Stub binder = new IShadowsocksService.Stub(){
+        volatile private Constants.State state = Constants.State.INIT;
+        //volatile private int callbackCount = 0;
+        //final RemoteCallbackList callbacks = new RemoteCallbackList<IShadowsocksServiceCallback>();
+        IShadowsocksService.Stub binder = new IShadowsocksService.Stub(){
             public int getMode(){
                     return getServiceMode().ordinal();
             }
 
             public int getState(){
                     return state.ordinal();
-            }
-
-            public void unregisterCallback(IShadowsocksServiceCallback cb) {
-                if (cb != null ) {
-                    callbacks.unregister(cb);
-                    callbackCount -= 1;
-                }
-                if (callbackCount == 0 && state != Constants.State.CONNECTING && state != Constants.State.CONNECTED) {
-                    stopBackgroundService();
-                }
-            }
-
-            public void registerCallback(IShadowsocksServiceCallback cb) {
-                if (cb != null) {
-                    callbacks.register(cb);
-                    callbackCount += 1;
-                }
             }
 
             public void stop() {
@@ -59,7 +49,8 @@ public abstract class BaseService extends VpnService {
         public abstract Context getContext();
 
         public int getCallbackCount(){
-                return callbackCount;
+        //        return callbackCount;
+            return -1;
         }
         public Constants.State getState(){
                 return state;
@@ -69,27 +60,27 @@ public abstract class BaseService extends VpnService {
         }
 
         protected void changeState(final Constants.State s,final String msg) {
-        /*    Handler handler = new Handler(getContext().getMainLooper());
-            handler.post(new Runnable(){
-                public void run() {
-                    if (state != s) {
-                        if (callbackCount > 0) {
-                            int n = callbacks.beginBroadcast();
-                            for (int i =0;i < n; i++) {
-                                //callbacks.getBroadcastItem(i).stateChanged(s.ordinal(),msg);
-                                Log.v("ss-error", "badbad");
-                            }
-                            callbacks.finishBroadcast();
-                        }
-                        state = s;
-                    }
-                }
-            });
+//            Handler handler = new Handler(getContext().getMainLooper());
+//            handler.post(new Runnable() {
+//                public void run() {
+//                    if (state != s) {
+//                        if (callbackCount > 0) {
+//                            int n = callbacks.beginBroadcast();
+//                            for (int i = 0; i < n; i++) {
+//                                //callbacks.getBroadcastItem(i).stateChanged(s.ordinal(),msg);
+//                                Log.v("ss-error", "badbad");
+//                            }
+//                            callbacks.finishBroadcast();
+//                        }
+//                        state = s;
+//                    }
+//                }
+//            });
 
         }
 
-    void initSoundVibrateLights(Notification notification) {
+        void initSoundVibrateLights(Notification notification) {
         notification.sound = null;
     }
-    */
+
 }
