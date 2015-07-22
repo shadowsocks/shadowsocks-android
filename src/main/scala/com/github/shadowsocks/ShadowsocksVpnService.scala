@@ -184,7 +184,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     version
   }
 
-  def startVpn() {
+  def startVpn(): Int = {
 
     val builder = new Builder()
     builder
@@ -310,7 +310,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (conn == null) {
       stopRunner()
-      return
+      return -1
     }
 
     val fd = conn.getFd
@@ -336,7 +336,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    System.exec(cmd)
+    Console.runCommand(cmd.mkString(" "))
+
+    return fd;
   }
 
   /** Called when the activity is first created. */
@@ -346,8 +348,19 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       startDnsDaemon()
       startDnsTunnel()
     }
-    startVpn()
-    true
+
+    val fd = startVpn()
+
+    if (fd == -1) {
+      false
+    } else {
+      Thread.sleep(1000)
+      if (System.sendfd(fd) == -1) {
+        false
+      } else {
+        true
+      }
+    }
   }
 
   override def onBind(intent: Intent): IBinder = {
