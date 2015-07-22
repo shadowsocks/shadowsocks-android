@@ -1,6 +1,6 @@
 resolvers += Resolver.url("scalasbt releases", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-snapshots"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.hanhuy.sbt" % "android-sdk-plugin" % "1.4.0")
+addSbtPlugin("com.hanhuy.sbt" % "android-sdk-plugin" % "1.4.6")
 
 resolvers += Resolver.sbtPluginRepo("snapshots")
 
