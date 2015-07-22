@@ -336,7 +336,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Console.runCommand(cmd.mkString(" "))
+    Console.runCommand(cmd)
 
     return fd;
   }
