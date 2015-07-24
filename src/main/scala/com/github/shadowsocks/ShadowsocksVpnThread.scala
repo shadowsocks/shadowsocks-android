@@ -40,23 +40,33 @@
 package com.github.shadowsocks
 
 import java.io.{File, FileDescriptor, IOException}
+import java.util.concurrent.Executors
 
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 
-class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Runnable {
+class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   val TAG = "ShadowsocksVpnService"
   val PATH = "/data/data/com.github.shadowsocks/protect_path"
 
-  override def run(): Unit = {
+  var isRunning: Boolean = true
+  var serverSocket: LocalServerSocket = null
 
-    var serverSocket: LocalServerSocket = null
+  def stopThread() {
+    isRunning = false
+    if (serverSocket != null) {
+      serverSocket.close()
+      serverSocket = null
+    }
+  }
+
+  override def run(): Unit = {
 
     try {
       new File(PATH).delete()
     } catch {
-      case _ => // ignore
+      case _: Exception => // ignore
     }
 
     try {
@@ -71,42 +81,49 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Runnable {
         return
     }
 
-    Log.d(TAG, "start to accept connections")
+    val pool = Executors.newFixedThreadPool(4)
 
-    while (true) {
+    while (isRunning) {
 
       try {
         val socket = serverSocket.accept()
 
-        val input = socket.getInputStream
-        val output = socket.getOutputStream
+        pool.execute(new Runnable {
+          override def run(){
+            try {
+              val input = socket.getInputStream
+              val output = socket.getOutputStream
 
-        input.read()
+              input.read()
 
-        Log.d(TAG, "test")
+              val fds = socket.getAncillaryFileDescriptors
 
-        val fds = socket.getAncillaryFileDescriptors
+              if (fds.length > 0) {
+                var ret = false
 
-        if (fds.length > 0) {
-          var ret = false
+                val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
+                val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
+                ret = vpnService.protect(fd)
 
-          val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
-          val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
-          ret = vpnService.protect(fd)
+                if (ret) {
+                  output.write(0)
+                } else {
+                  output.write(1)
+                }
 
-          if (ret) {
-            socket.setFileDescriptorsForSend(fds)
-            output.write(0)
+                input.close()
+                output.close()
+              }
+
+              socket.close()
+          } catch {
+            case e: Exception =>
+              Log.e(TAG, "Error when protect socket", e)
           }
-
-          input.close()
-          output.close()
-        }
+        }})
       } catch {
-        case e: Exception =>
-          Log.e(TAG, "Error when protect socket", e)
+        case e: IOException => Log.e(TAG, "Error when accept socket", e)
       }
-
     }
   }
 }
