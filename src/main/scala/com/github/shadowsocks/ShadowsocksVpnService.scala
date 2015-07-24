@@ -212,89 +212,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
             builder.addDisallowedApplication(pkg)
           }
         }
-
-        if (config.isBypassApps) {
-          builder.addDisallowedApplication(this.getPackageName)
-        }
-      } else {
-        builder.addDisallowedApplication(this.getPackageName)
       }
     }
 
-    if (InetAddressUtils.isIPv6Address(config.proxy)) {
+    if (config.route == Route.ALL) {
       builder.addRoute("0.0.0.0", 0)
     } else {
-      if (!Utils.isLollipopOrAbove) {
-        config.route match {
-          case Route.BYPASS_LAN =>
-            for (i <- 1 to 223) {
-              if (i != 26 && i != 127) {
-                val addr = i.toString + ".0.0.0"
-                val cidr = addr + "/8"
-                val net = new SubnetUtils(cidr)
-
-                if (!isByass(net) && !isPrivateA(i)) {
-                  builder.addRoute(addr, 8)
-                } else {
-                  for (j <- 0 to 255) {
-                    val subAddr = i.toString + "." + j.toString + ".0.0"
-                    val subCidr = subAddr + "/16"
-                    val subNet = new SubnetUtils(subCidr)
-                    if (!isByass(subNet) && !isPrivateB(i, j)) {
-                      builder.addRoute(subAddr, 16)
-                    }
-                  }
-                }
-              }
-            }
-          case Route.BYPASS_CHN =>
-            val list = {
-              if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
-                getResources.getStringArray(R.array.simple_route)
-              } else {
-                getResources.getStringArray(R.array.gfw_route)
-              }
-            }
-            list.foreach(cidr => {
-              val net = new SubnetUtils(cidr)
-              if (!isByass(net)) {
-                val addr = cidr.split('/')
-                builder.addRoute(addr(0), addr(1).toInt)
-              }
-            })
-          case Route.ALL =>
-            for (i <- 1 to 223) {
-              if (i != 26 && i != 127) {
-                val addr = i.toString + ".0.0.0"
-                val cidr = addr + "/8"
-                val net = new SubnetUtils(cidr)
-
-                if (!isByass(net)) {
-                  builder.addRoute(addr, 8)
-                } else {
-                  for (j <- 0 to 255) {
-                    val subAddr = i.toString + "." + j.toString + ".0.0"
-                    val subCidr = subAddr + "/16"
-                    val subNet = new SubnetUtils(subCidr)
-                    if (!isByass(subNet)) {
-                      builder.addRoute(subAddr, 16)
-                    }
-                  }
-                }
-              }
-            }
-        }
-      } else {
-        if (config.route == Route.ALL) {
-          builder.addRoute("0.0.0.0", 0)
-        } else {
-          val privateList = getResources.getStringArray(R.array.bypass_private_route)
-          privateList.foreach(cidr => {
-            val addr = cidr.split('/')
-            builder.addRoute(addr(0), addr(1).toInt)
-          })
-        }
-      }
+      val privateList = getResources.getStringArray(R.array.bypass_private_route)
+      privateList.foreach(cidr => {
+        val addr = cidr.split('/')
+        builder.addRoute(addr(0), addr(1).toInt)
+      })
     }
 
     builder.addRoute("8.8.0.0", 16)
@@ -330,15 +258,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     else
       cmd += " --dnsgw %s:8153".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"))
 
-    // if (Utils.isLollipopOrAbove) {
-    //   cmd += " --fake-proc"
-    // }
-
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
     Console.runCommand(cmd)
 
-    return fd;
+    return fd
   }
 
   /** Called when the activity is first created. */
@@ -350,7 +274,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     val fd = startVpn()
-
     if (fd == -1) {
       false
     } else {
@@ -361,6 +284,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         true
       }
     }
+
   }
 
   override def onBind(intent: Intent): IBinder = {
@@ -380,6 +304,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
+
+    new Thread(new ShadowsocksVpnThread(this)).start()
   }
 
   override def onRevoke() {
