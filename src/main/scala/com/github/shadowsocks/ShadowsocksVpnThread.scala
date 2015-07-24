@@ -105,6 +105,9 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
                 val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
                 ret = vpnService.protect(fd)
 
+                // Trick to close file decriptor
+                System.jniclose(fd)
+
                 if (ret) {
                   output.write(0)
                 } else {
