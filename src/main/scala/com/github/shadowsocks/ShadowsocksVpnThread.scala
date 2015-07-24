@@ -89,7 +89,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         val socket = serverSocket.accept()
 
         pool.execute(new Runnable {
-          override def run(){
+          override def run() {
             try {
               val input = socket.getInputStream
               val output = socket.getOutputStream
@@ -114,12 +114,18 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
                 input.close()
                 output.close()
               }
-
-              socket.close()
           } catch {
             case e: Exception =>
               Log.e(TAG, "Error when protect socket", e)
           }
+
+          // close socket
+          try {
+            socket.close()
+          } catch {
+            case _: Exception => // ignore
+          }
+
         }})
       } catch {
         case e: IOException => Log.e(TAG, "Error when accept socket", e)
