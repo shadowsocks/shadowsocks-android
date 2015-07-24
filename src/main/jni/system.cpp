@@ -43,6 +43,10 @@ void Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring 
     env->ReleaseStringUTFChars(cmd, str);
 }
 
+void Java_com_github_shadowsocks_system_jniclose(JNIEnv *env, jobject thiz, jint fd) {
+    close(fd);
+}
+
 jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint tun_fd) {
     int fd;
     struct sockaddr_un addr;
@@ -75,6 +79,8 @@ jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint t
 static const char *classPathName = "com/github/shadowsocks/System";
 
 static JNINativeMethod method_table[] = {
+    { "jniclose", "(I)V",
+        (void*) Java_com_github_shadowsocks_system_jniclose },
     { "sendfd", "(I)I",
         (void*) Java_com_github_shadowsocks_system_sendfd },
     { "exec", "(Ljava/lang/String;)V",

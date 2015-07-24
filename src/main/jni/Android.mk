@@ -249,13 +249,14 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c acl.c
+SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c acl.c android.c
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
-					-I$(LOCAL_PATH)/libev/ \
+					-I$(LOCAL_PATH)/libev \
+					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/openssl/include  \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
@@ -263,7 +264,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include
 
-LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libudns libsodium
+LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libudns libsodium libancillary
 
 LOCAL_LDLIBS := -llog
 
@@ -275,20 +276,21 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c
+SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c
 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
-					-I$(LOCAL_PATH)/libev/ \
+					-I$(LOCAL_PATH)/libev \
+					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/openssl/include 
 
-LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium libcork libudns
+LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium libcork libudns libancillary
 
 LOCAL_LDLIBS := -llog
 
