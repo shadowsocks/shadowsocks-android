@@ -932,10 +932,14 @@ class Shadowsocks
 
   private def recovery() {
     val h = showProgress(getString(R.string.recovering))
-    serviceStop()
     spawn {
       reset()
-      h.sendEmptyMessage(0)
+      handler.post(new Runnable {
+        override def run() {
+          serviceStop
+          h.sendEmptyMessage(0)
+        }
+      })
     }
   }
 
