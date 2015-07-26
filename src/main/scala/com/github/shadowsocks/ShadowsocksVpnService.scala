@@ -281,7 +281,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
 
-    if (Utils.isLollipopOrAbove && config.route != Route.ALL) {
+    if (config.route != Route.ALL) {
       val acl: Array[String] = config.route match {
         case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
         case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
