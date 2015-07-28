@@ -474,20 +474,20 @@ class Shadowsocks
 
     addPreferencesFromResource(R.xml.pref_all)
 
-    // Initialize the profile
-    currentProfile = {
-      profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse currentProfile
-    }
-
     // Update the profile
     if (!status.getBoolean(getVersionName, false)) {
       val h = showProgress(getString(R.string.initializing))
       status.edit.putBoolean(getVersionName, true).apply()
+      currentProfile = profileManager.create()
       spawn {
         reset()
-        currentProfile = profileManager.create()
         h.sendEmptyMessage(0)
       }
+    }
+
+    // Initialize the profile
+    currentProfile = {
+      profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse currentProfile
     }
 
     // Initialize drawer
