@@ -266,17 +266,18 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     val fd = startVpn()
-    if (fd == -1) {
-      false
-    } else {
-      Thread.sleep(1000)
-      if (System.sendfd(fd) == -1) {
-        false
-      } else {
-        true
+
+    if (fd != -1) {
+      var tries = 1
+      while (tries < 5) {
+        Thread.sleep(1000 * tries)
+        if (System.sendfd(fd) != -1) {
+          return true
+        }
+        tries += 1
       }
     }
-
+    false
   }
 
   def startShadowsocksDaemon() {
