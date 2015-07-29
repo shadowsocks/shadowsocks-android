@@ -480,7 +480,7 @@ class Shadowsocks
       status.edit.putBoolean(getVersionName, true).apply()
       currentProfile = profileManager.create()
       spawn {
-        reset()
+        install()
         h.sendEmptyMessage(0)
       }
     }
@@ -916,10 +916,7 @@ class Shadowsocks
     Console.runRootCommand(ab.toArray)
   }
 
-  def reset() {
-
-    crashRecovery()
-
+  def install() {
     copyAssets(System.getABI)
 
     val ab = new ArrayBuffer[String]
@@ -927,7 +924,13 @@ class Shadowsocks
       ab.append("chmod 755 " + Path.BASE + executable)
     }
     Console.runCommand(ab.toArray)
+  }
 
+  def reset() {
+
+    crashRecovery()
+
+    install()
   }
 
   private def recovery() {
