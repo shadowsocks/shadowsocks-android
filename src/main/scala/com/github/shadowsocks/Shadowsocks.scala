@@ -399,6 +399,11 @@ class Shadowsocks
   def prepareStartService() {
     showProgress(getString(R.string.connecting))
     spawn {
+      if (!status.getBoolean(getVersionName, false)) {
+        status.edit.putBoolean(getVersionName, true).commit()
+        install()
+      }
+
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
@@ -476,13 +481,7 @@ class Shadowsocks
 
     // Update the profile
     if (!status.getBoolean(getVersionName, false)) {
-      val h = showProgress(getString(R.string.initializing))
-      status.edit.putBoolean(getVersionName, true).apply()
       currentProfile = profileManager.create()
-      spawn {
-        install()
-        h.sendEmptyMessage(0)
-      }
     }
 
     // Initialize the profile

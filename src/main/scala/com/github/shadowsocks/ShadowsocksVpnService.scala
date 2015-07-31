@@ -63,7 +63,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
   val TAG = "ShadowsocksVpnService"
-  val VPN_MTU = 1500
+  val VPN_MTU = 1400
   val PRIVATE_VLAN = "26.26.26.%s"
   var conn: ParcelFileDescriptor = null
   var notificationManager: NotificationManager = null
