@@ -159,8 +159,8 @@ object ConfigUtils {
       |
       |server {
       | label = "china-servers";
-      | ip = 223.5.5.5, 114.114.114.114;
-      | timeout = 2;
+      | ip = 114.114.114.114, 112.124.47.27;
+      | timeout = 4;
       | reject = %s;
       | reject_policy = fail;
       | reject_recursively = on;

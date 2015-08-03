@@ -85,7 +85,23 @@
         <item>101.0.0.0/8</item>
         <item>102.0.0.0/7</item>
         <item>104.0.0.0/5</item>
-        <item>112.0.0.0/7</item>
+        <item>112.0.0.0/10</item>
+        <item>112.64.0.0/11</item>
+        <item>112.96.0.0/12</item>
+        <item>112.112.0.0/13</item>
+        <item>112.120.0.0/14</item>
+        <item>112.124.0.0/19</item>
+        <item>112.124.32.0/21</item>
+        <item>112.124.40.0/22</item>
+        <item>112.124.44.0/23</item>
+        <item>112.124.46.0/24</item>
+        <item>112.124.48.0/20</item>
+        <item>112.124.64.0/18</item>
+        <item>112.124.128.0/17</item>
+        <item>112.125.0.0/16</item>
+        <item>112.126.0.0/15</item>
+        <item>112.128.0.0/9</item>
+        <item>113.0.0.0/8</item>
         <item>114.0.0.0/10</item>
         <item>114.64.0.0/11</item>
         <item>114.96.0.0/12</item>
@@ -208,25 +224,6 @@
         <item>203.64.0.0/10</item>
         <item>203.128.0.0/9</item>
         <item>204.0.0.0/6</item>
-        <item>208.0.0.0/5</item>
-        <item>216.0.0.0/6</item>
-        <item>220.0.0.0/7</item>
-        <item>222.0.0.0/8</item>
-        <item>223.0.0.0/14</item>
-        <item>223.4.0.0/16</item>
-        <item>223.5.0.0/22</item>
-        <item>223.5.4.0/24</item>
-        <item>223.5.6.0/23</item>
-        <item>223.5.8.0/21</item>
-        <item>223.5.16.0/20</item>
-        <item>223.5.32.0/19</item>
-        <item>223.5.64.0/18</item>
-        <item>223.5.128.0/17</item>
-        <item>223.6.0.0/15</item>
-        <item>223.8.0.0/13</item>
-        <item>223.16.0.0/12</item>
-        <item>223.32.0.0/11</item>
-        <item>223.64.0.0/10</item>
-        <item>223.128.0.0/9</item>
+        <item>208.0.0.0/4</item>
     </string-array>
 </resources>
