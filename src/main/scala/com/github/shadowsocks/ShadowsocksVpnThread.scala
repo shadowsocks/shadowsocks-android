@@ -48,7 +48,7 @@ import android.util.Log
 class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   val TAG = "ShadowsocksVpnService"
-  val PATH = "/data/data/com.github.shadowsocks/protect_path"
+  val PATH = "shadowsocks_protect"
 
   var isRunning: Boolean = true
   var serverSocket: LocalServerSocket = null
@@ -64,16 +64,11 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   override def run(): Unit = {
 
     try {
-      new File(PATH).delete()
-    } catch {
-      case _: Exception => // ignore
-    }
-
-    try {
-      val localSocket = new LocalSocket
-
-      localSocket.bind(new LocalSocketAddress(PATH, LocalSocketAddress.Namespace.FILESYSTEM))
-      serverSocket = new LocalServerSocket(localSocket.getFileDescriptor)
+      if (serverSocket != null) {
+        serverSocket.close()
+        serverSocket = null
+      }
+      serverSocket = new LocalServerSocket(PATH)
     } catch {
       case e: IOException =>
         Log.e(TAG, "unable to bind", e)

@@ -58,7 +58,8 @@ jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint t
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, "/data/data/com.github.shadowsocks/sock_path", sizeof(addr.sun_path)-1);
+    strncpy(addr.sun_path, "#shadowsocks_tunfd", sizeof(addr.sun_path)-1);
+    addr.sun_path[0] = 0;
 
     if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
         LOGE("connect() failed: %s (fd = %d)\n", strerror(errno), fd);
