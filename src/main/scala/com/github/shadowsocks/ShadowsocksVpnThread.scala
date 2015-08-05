@@ -123,6 +123,14 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       } catch {
         case e: IOException => {
           Log.e(TAG, "Error when accept socket", e)
+          if (ShadowsocksVpn.serverSocket != null) {
+            try {
+              ShadowsocksVpn.serverSocket.close()
+            } catch {
+              case _: Exception => // ignore
+            }
+            ShadowsocksVpn.serverSocket = null
+          }
           return
         }
       }
