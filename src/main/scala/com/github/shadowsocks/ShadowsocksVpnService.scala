@@ -63,7 +63,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
   val TAG = "ShadowsocksVpnService"
-  val VPN_MTU = 1400
+  val VPN_MTU = 1500
   val PRIVATE_VLAN = "26.26.26.%s"
   var conn: ParcelFileDescriptor = null
   var notificationManager: NotificationManager = null
@@ -103,11 +103,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     null
   }
 
-  override def onDestroy() {
-    super.onDestroy()
-    if (vpnThread != null) vpnThread.stopThread()
-  }
-
   override def onCreate() {
     super.onCreate()
 
@@ -115,9 +110,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
-
-    vpnThread = new ShadowsocksVpnThread(this)
-    vpnThread.start()
   }
 
   override def onRevoke() {
@@ -125,6 +117,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def stopRunner() {
+
+    if (vpnThread != null) {
+      vpnThread.stopThread()
+      vpnThread = null
+    }
 
     // channge the state
     changeState(State.STOPPING)
@@ -184,6 +181,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def startRunner(c: Config) {
+
+    if (vpnThread != null) {
+      vpnThread.stopThread()
+      vpnThread = null
+    }
+
+    vpnThread = new ShadowsocksVpnThread(this)
+    vpnThread.start()
 
     config = c
 

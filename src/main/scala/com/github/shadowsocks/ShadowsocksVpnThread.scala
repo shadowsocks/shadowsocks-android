@@ -45,43 +45,38 @@ import java.util.concurrent.Executors
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 
+object ShadowsocksVpn {
+  @volatile var serverSocket: LocalServerSocket = null
+}
+
 class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   val TAG = "ShadowsocksVpnService"
   val PATH = "shadowsocks_protect"
 
   var isRunning: Boolean = true
-  var serverSocket: LocalServerSocket = null
 
   def stopThread() {
     isRunning = false
-    if (serverSocket != null) {
-      serverSocket.close()
-      serverSocket = null
-    }
   }
 
   override def run(): Unit = {
 
     try {
-      if (serverSocket != null) {
-        serverSocket.close()
-        serverSocket = null
+      if (ShadowsocksVpn.serverSocket == null) {
+        ShadowsocksVpn.serverSocket = new LocalServerSocket(PATH)
       }
-      serverSocket = new LocalServerSocket(PATH)
     } catch {
       case e: IOException =>
         Log.e(TAG, "unable to bind", e)
-        vpnService.stopBackgroundService()
         return
     }
 
     val pool = Executors.newFixedThreadPool(4)
 
     while (isRunning) {
-
       try {
-        val socket = serverSocket.accept()
+        val socket = ShadowsocksVpn.serverSocket.accept()
 
         pool.execute(new Runnable {
           override def run() {
@@ -126,7 +121,10 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
         }})
       } catch {
-        case e: IOException => Log.e(TAG, "Error when accept socket", e)
+        case e: IOException => {
+          Log.e(TAG, "Error when accept socket", e)
+          return
+        }
       }
     }
   }
