@@ -219,6 +219,11 @@ class Shadowsocks
       state = bgService.getState
       // set the listener
       switchButton.setOnCheckedChangeListener(Shadowsocks.this)
+
+      if (!status.getBoolean(getVersionName, false)) {
+        status.edit.putBoolean(getVersionName, true).commit()
+        recovery();
+      }
     }
 
     override def onServiceDisconnected(name: ComponentName) {
@@ -401,11 +406,6 @@ class Shadowsocks
   def prepareStartService() {
     showProgress(R.string.connecting)
     spawn {
-      if (!status.getBoolean(getVersionName, false)) {
-        status.edit.putBoolean(getVersionName, true).commit()
-        install()
-      }
-
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {

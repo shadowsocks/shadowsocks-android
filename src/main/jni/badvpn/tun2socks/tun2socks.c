@@ -502,11 +502,11 @@ int main (int argc, char **argv)
         goto fail2;
     }
 
-    char *path = "#shadowsocks_tunfd";
+    char *path = "/data/data/com.github.shadowsocks/sock_path";
+    unlink(path);
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, path, sizeof(addr.sun_path)-1);
-    addr.sun_path[0] = 0;
 
     if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
         BLog(BLOG_ERROR, "bind() failed: %s (sock = %d)\n", strerror(errno), sock);

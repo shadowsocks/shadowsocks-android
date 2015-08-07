@@ -45,27 +45,42 @@ import java.util.concurrent.Executors
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 
-object ShadowsocksVpn {
-  @volatile var serverSocket: LocalServerSocket = null
-}
-
 class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   val TAG = "ShadowsocksVpnService"
-  val PATH = "shadowsocks_protect"
+  val PATH = "/data/data/com.github.shadowsocks/protect_path"
 
-  var isRunning: Boolean = true
+  @volatile var isRunning: Boolean = true
+  @volatile var serverSocket: LocalServerSocket = null
+
+  def closeServerSocket() {
+    if (serverSocket != null) {
+      try {
+        serverSocket.close()
+      } catch {
+        case _: Exception => // ignore
+      }
+      serverSocket = null
+      }
+  }
 
   def stopThread() {
     isRunning = false
+    closeServerSocket()
   }
 
   override def run(): Unit = {
 
     try {
-      if (ShadowsocksVpn.serverSocket == null) {
-        ShadowsocksVpn.serverSocket = new LocalServerSocket(PATH)
-      }
+      new File(PATH).delete()
+    } catch {
+      case _: Exception => // ignore
+    }
+
+    try {
+      val localSocket = new LocalSocket
+      localSocket.bind(new LocalSocketAddress(PATH, LocalSocketAddress.Namespace.FILESYSTEM))
+      serverSocket = new LocalServerSocket(localSocket.getFileDescriptor)
     } catch {
       case e: IOException =>
         Log.e(TAG, "unable to bind", e)
@@ -76,7 +91,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
     while (isRunning) {
       try {
-        val socket = ShadowsocksVpn.serverSocket.accept()
+        val socket = serverSocket.accept()
 
         pool.execute(new Runnable {
           override def run() {
@@ -123,14 +138,6 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       } catch {
         case e: IOException => {
           Log.e(TAG, "Error when accept socket", e)
-          if (ShadowsocksVpn.serverSocket != null) {
-            try {
-              ShadowsocksVpn.serverSocket.close()
-            } catch {
-              case _: Exception => // ignore
-            }
-            ShadowsocksVpn.serverSocket = null
-          }
           return
         }
       }

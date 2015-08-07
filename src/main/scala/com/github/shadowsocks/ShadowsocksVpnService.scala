@@ -104,12 +104,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def onCreate() {
+
     super.onCreate()
 
     ConfigUtils.refresh(this)
 
     notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
       .asInstanceOf[NotificationManager]
+
   }
 
   override def onRevoke() {
@@ -181,11 +183,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def startRunner(c: Config) {
-
-    if (vpnThread != null) {
-      vpnThread.stopThread()
-      vpnThread = null
-    }
 
     vpnThread = new ShadowsocksVpnThread(this)
     vpnThread.start()
