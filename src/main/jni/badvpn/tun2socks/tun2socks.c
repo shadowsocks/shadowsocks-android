@@ -1772,6 +1772,9 @@ err_t listener_accept_func (void *arg, struct tcp_pcb *newpcb, err_t err)
     // set client not closed
     client->client_closed = 0;
 
+    // enable TCP_NODELAY
+    tcp_nagle_disable(client->pcb);
+
     // setup handler argument
     tcp_arg(client->pcb, client);
 
