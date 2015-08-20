@@ -174,7 +174,9 @@ object ConfigUtils {
       | label = "local-server";
       | ip = 127.0.0.1;
       | port = %d;
-      | timeout = 3;
+      | reject = ::/0;
+      | reject_policy = negate;
+      | reject_recursively = on;
       |}
       |
       |rr {
