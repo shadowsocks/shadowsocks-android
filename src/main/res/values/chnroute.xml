@@ -3771,6 +3771,5 @@
         <item>223.255.0.0/17</item>
         <item>223.255.236.0/22</item>
         <item>223.255.252.0/23</item>
-        <item>224.0.0.0/3</item>
     </string-array>
 </resources>
