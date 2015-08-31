@@ -1111,7 +1111,7 @@ class Shadowsocks
               changeSwitch(checked = true)
               setPreferenceEnabled(enabled = false)
             case State.STOPPED =>
-              if (progressTag == R.string.stopping) {
+              if (progressTag == R.string.stopping || progressTag == R.string.connecting) {
                 clearDialog()
               }
               changeSwitch(checked = false)
