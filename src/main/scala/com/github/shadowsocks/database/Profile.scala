@@ -90,6 +90,9 @@ class Profile {
   @DatabaseField
   var udpdns: Boolean = false
 
+  @DatabaseField
+  var auth: Boolean = false
+
   @DatabaseField(dataType = DataType.LONG_STRING)
   var individual: String = ""
 

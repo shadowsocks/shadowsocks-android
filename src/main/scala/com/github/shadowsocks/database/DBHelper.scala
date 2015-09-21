@@ -51,7 +51,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 9) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 10) {
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
 
@@ -67,6 +67,8 @@ class DBHelper(val context: Context)
         profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
       } else if (oldVersion < 9) {
         profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+      } else if (oldVersion < 10) {
+        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
       } else {
         profileDao.executeRaw("DROP TABLE IF EXISTS 'profile';")
         onCreate(database, connectionSource)

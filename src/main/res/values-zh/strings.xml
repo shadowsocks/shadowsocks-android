@@ -77,6 +77,9 @@
   <string name="udp_dns">UDP 转发</string>
   <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>
 
+  <string name="onetime_auth">一次性认证</string>
+  <string name="onetime_auth_summary">启用一次性认证(实验性)</string>
+
   <!-- profile -->
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string-array name="add_profile_methods">

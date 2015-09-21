@@ -25,6 +25,8 @@
 
   <!-- feature category -->
   <string name="feature_cat">Feature Settings</string>
+  <string name="onetime_auth">Onetime Authentication</string>
+  <string name="onetime_auth_summary">Enable onetime authentication (Experimental)</string>
   <string name="http_proxy">HTTP Proxy</string>
   <string name="http_proxy_summary">Local HTTP Proxy</string>
   <string name="dns_proxy">DNS Proxy</string>

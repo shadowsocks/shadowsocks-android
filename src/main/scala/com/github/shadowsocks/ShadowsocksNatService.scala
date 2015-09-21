@@ -205,6 +205,8 @@ class ShadowsocksNatService extends Service with BaseService {
           , "-c" , Path.BASE + "ss-local-nat.conf"
           , "-f" , Path.BASE + "ss-local-nat.pid")
 
+    if (config.isAuth) cmd += "-A"
+
     if (config.route != Route.ALL) {
       cmd += "--acl"
       cmd += (Path.BASE + "acl.list")
@@ -233,6 +235,8 @@ class ShadowsocksNatService extends Service with BaseService {
 
       cmd += ("-l" , "8153")
 
+      if (config.isAuth) cmd += "-A"
+
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
       Console.runCommand(cmd.mkString(" "))
@@ -253,6 +257,8 @@ class ShadowsocksNatService extends Service with BaseService {
         , "-L" , "8.8.8.8:53"
         , "-c" , Path.BASE + "ss-tunnel-nat.conf"
         , "-f" , Path.BASE + "ss-tunnel-nat.pid")
+
+      if (config.isAuth) cmdBuf += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
       Console.runCommand(cmdBuf.mkString(" "))

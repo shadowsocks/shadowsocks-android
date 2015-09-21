@@ -79,6 +79,7 @@ object Key {
   val isBypassApps = "isBypassApps"
   val isTrafficStat = "isTrafficStat"
   val isUdpDns = "isUdpDns"
+  val isAuth= "isAuth"
 
   val proxy = "proxy"
   val sitekey = "sitekey"

@@ -79,6 +79,12 @@
                 android:title="@string/udp_dns">
         </CheckBoxPreference>
         <CheckBoxPreference
+                android:key="isAuth"
+                android:defaultValue="false"
+                android:summary="@string/onetime_auth_summary"
+                android:title="@string/onetime_auth">
+        </CheckBoxPreference>
+        <CheckBoxPreference
                 android:key="isAutoConnect"
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect">
