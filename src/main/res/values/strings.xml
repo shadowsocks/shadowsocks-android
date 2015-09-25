@@ -25,12 +25,14 @@
 
   <!-- feature category -->
   <string name="feature_cat">Feature Settings</string>
+  <string name="ipv6">IPv6 Route</string>
+  <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
   <string name="onetime_auth">One-time Authentication</string>
   <string name="onetime_auth_summary">Enable one-time authentication (Experimental)</string>
   <string name="http_proxy">HTTP Proxy</string>
   <string name="http_proxy_summary">Local HTTP Proxy</string>
   <string name="dns_proxy">DNS Proxy</string>
-  <string name="dns_proxy_summary">Redirect DNS queries to remote server</string>
+  <string name="dns_proxy_summary">Redirect DNS queries to remote</string>
   <string name="auto_set_gfwlist">CHN Route</string>
   <string name="auto_set_gfwlist_summary">Bypass all sites located in China
   </string>

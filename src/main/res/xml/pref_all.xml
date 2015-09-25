@@ -59,6 +59,12 @@
                 android:title="@string/route_list">
         </com.github.shadowsocks.preferences.SummaryListPreference>
         <CheckBoxPreference
+                android:key="isIpv6"
+                android:defaultValue="false"
+                android:summary="@string/ipv6_summary"
+                android:title="@string/ipv6">
+        </CheckBoxPreference>
+        <CheckBoxPreference
                 android:defaultValue="true"
                 android:key="isGlobalProxy"
                 android:disableDependentsState="true"

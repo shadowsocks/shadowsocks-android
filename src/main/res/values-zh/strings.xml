@@ -80,6 +80,9 @@
   <string name="onetime_auth">一次性认证</string>
   <string name="onetime_auth_summary">启用一次性认证(实验性)</string>
 
+  <string name="ipv6">IPv6 路由</string>
+  <string name="ipv6_summary">向远程服务器转发 IPv6 流量</string>
+
   <!-- profile -->
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string-array name="add_profile_methods">

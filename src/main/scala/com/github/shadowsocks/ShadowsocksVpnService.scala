@@ -65,6 +65,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
   val PRIVATE_VLAN = "26.26.26.%s"
+  val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = null
   var notificationManager: NotificationManager = null
   var receiver: BroadcastReceiver = null
@@ -344,15 +345,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsDaemon() {
+    val ipv6 = if (config.isIpv6) "" else "reject = ::/0;"
     val conf = {
       if (config.route == Route.BYPASS_CHN) {
         val reject = ConfigUtils.getRejectList(getContext, application)
         val blackList = ConfigUtils.getBlackList(getContext, application)
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
-          Path.BASE + "pdnsd-vpn.pid", reject, blackList, 8163)
+          Path.BASE + "pdnsd-vpn.pid", reject, blackList, 8163, ipv6)
       } else {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
-          Path.BASE + "pdnsd-vpn.pid", 8163)
+          Path.BASE + "pdnsd-vpn.pid", 8163, ipv6)
       }
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-vpn.conf"))(p => {
@@ -375,9 +377,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
       .addDnsServer("8.8.8.8")
 
-    if (Utils.isLollipopOrAbove) {
+    if (config.isIpv6) {
+      builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
+      builder.addRoute("::", 0)
+    }
 
-      builder.allowFamily(android.system.OsConstants.AF_INET6)
+    if (Utils.isLollipopOrAbove) {
 
       if (!config.isGlobalProxy) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
@@ -433,7 +438,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--tunmtu %d "
       + "--loglevel 3 "
       + "--pid %stun2socks-vpn.pid")
-      .formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"), config.localPort, fd, VPN_MTU, Path.BASE)
+      .formatLocal(Locale.ENGLISH,
+        PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
+        config.localPort, fd, VPN_MTU, Path.BASE)
+
+    if (config.isIpv6)
+      cmd += " --netif-ip6addr " + PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "2")
 
     if (config.isUdpDns)
       cmd += " --enable-udprelay"

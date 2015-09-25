@@ -82,7 +82,7 @@ object ConfigUtils {
       | label = "local";
       | ip = 127.0.0.1;
       | port = %d;
-      | reject = ::/0;
+      | %s
       | reject_policy = negate;
       | reject_recursively = on;
       | timeout = 5;
@@ -174,7 +174,7 @@ object ConfigUtils {
       | label = "local-server";
       | ip = 127.0.0.1;
       | port = %d;
-      | reject = ::/0;
+      | %s
       | reject_policy = negate;
       | reject_recursively = on;
       |}
@@ -242,7 +242,7 @@ object ConfigUtils {
     val method = proxy(3).trim
 
     new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
-      config.isUdpDns, config.isAuth, config.profileName, host, password, method, config.proxiedAppString, config.route, port,
+      config.isUdpDns, config.isAuth, config.isIpv6, config.profileName, host, password, method, config.proxiedAppString, config.route, port,
       config.localPort)
   }
 
@@ -253,6 +253,7 @@ object ConfigUtils {
     val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
     val isUdpDns = settings.getBoolean(Key.isUdpDns, false)
     val isAuth = settings.getBoolean(Key.isAuth, false)
+    val isIpv6 = settings.getBoolean(Key.isIpv6, false)
 
     val profileName = settings.getString(Key.profileName, "default")
     val proxy = settings.getString(Key.proxy, "127.0.0.1")
@@ -274,7 +275,7 @@ object ConfigUtils {
     }
     val proxiedAppString = settings.getString(Key.proxied, "")
 
-    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, isUdpDns, isAuth, profileName, proxy,
+    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, isUdpDns, isAuth, isIpv6, profileName, proxy,
       sitekey, encMethod, proxiedAppString, route, remotePort, localPort)
   }
 }
