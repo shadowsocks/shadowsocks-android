@@ -31,9 +31,10 @@ libraryDependencies ++= Seq(
   "com.joanzapata.android" % "android-iconify" % "1.0.9",
   "net.glxn.qrgen" % "android" % "2.0",
   "net.simonvt.menudrawer" % "menudrawer" % "3.0.6",
-  "com.google.android.gms" % "play-services-base" % "6.5.87",
-  "com.google.android.gms" % "play-services-ads" % "6.5.87",
-  "com.android.support" % "support-v4" % "21.0.3"
+  "com.google.android.gms" % "play-services-base" % "8.1.0",
+  "com.google.android.gms" % "play-services-ads" % "8.1.0",
+  "com.google.android.gms" % "play-services-analytics" % "8.1.0",
+  "com.android.support" % "support-v4" % "23.0.1"
 )
 
 libraryDependencies ++= Seq(
@@ -52,5 +53,6 @@ proguardOptions in Android ++= Seq("-keep class android.support.v4.app.** { *; }
           "-keep class * extends com.j256.ormlite.** { *; }",
           "-keep class com.joanzapata.** { *; }",
           "-keepattributes *Annotation*",
+          "-dontwarn com.google.android.gms.internal.zzhu",
           "-dontwarn org.xbill.**",
           "-dontwarn com.actionbarsherlock.**")
