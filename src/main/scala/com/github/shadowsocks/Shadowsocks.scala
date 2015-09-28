@@ -250,7 +250,7 @@ class Shadowsocks
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
-  var handler: Handler = null
+  var handler = new Handler()
 
   def isSinglePane: Boolean = {
     if (singlePane == -1) {
@@ -478,8 +478,6 @@ class Shadowsocks
   override def onCreate(savedInstanceState: Bundle) {
 
     super.onCreate(savedInstanceState)
-
-    handler = new Handler()
 
     addPreferencesFromResource(R.xml.pref_all)
 
@@ -901,10 +899,7 @@ class Shadowsocks
     deattachService()
     unregisterReceiver(preferenceReceiver)
     new BackupManager(this).dataChanged()
-    if (handler != null) {
-      handler.removeCallbacksAndMessages(null)
-      handler = null
-    }
+    handler.removeCallbacksAndMessages(null)
   }
 
   def copyToSystem() {
