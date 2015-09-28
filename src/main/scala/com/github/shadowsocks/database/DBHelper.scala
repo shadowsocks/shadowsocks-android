@@ -62,18 +62,23 @@ class DBHelper(val context: Context)
   def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int,
     newVersion: Int) {
     if (oldVersion != newVersion) {
-      if (oldVersion < 8) {
-        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
-        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
-      } else if (oldVersion < 9) {
-        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
-      } else if (oldVersion < 10) {
-        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
-      } else if (oldVersion < 11) {
-        profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
-      } else {
+      if (oldVersion < 7) {
         profileDao.executeRaw("DROP TABLE IF EXISTS 'profile';")
         onCreate(database, connectionSource)
+      } else {
+        if (oldVersion < 8) {
+          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
+          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+        }
+        if (oldVersion < 9) {
+          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+        }
+        if (oldVersion < 10) {
+          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
+        }
+        if (oldVersion < 11) {
+          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
+        }
       }
     }
   }
