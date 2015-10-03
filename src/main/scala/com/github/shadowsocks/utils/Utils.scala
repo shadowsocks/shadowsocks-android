@@ -44,8 +44,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.util.{Base64, Log}
 import java.io._
-import java.net.{UnknownHostException, InetAddress, NetworkInterface}
-import org.apache.http.conn.util.InetAddressUtils
+import java.net._
 import org.xbill.DNS._
 import android.graphics._
 import android.app.ActivityManager
@@ -233,6 +232,9 @@ object Utils {
     None
   }
 
+  lazy val isNumericMethod = classOf[InetAddress].getMethod("isNumeric", classOf[String])
+  def isNumeric(address: String): Boolean = isNumericMethod.invoke(null, address).asInstanceOf[Boolean]
+
   /**
    * Get local IPv4 address
    */
@@ -245,9 +247,8 @@ object Utils {
         while (addrs.hasMoreElements) {
           val addr = addrs.nextElement()
           if (!addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
-            val sAddr = addr.getHostAddress.toUpperCase
-            if (InetAddressUtils.isIPv4Address(sAddr)) {
-              return Some(sAddr)
+            if (addr.isInstanceOf[Inet4Address]) {
+              return Some(addr.getHostAddress.toUpperCase)
             }
           }
         }
@@ -271,8 +272,7 @@ object Utils {
         while (addrs.hasMoreElements) {
           val addr = addrs.nextElement()
           if (!addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
-            val sAddr = addr.getHostAddress.toUpperCase
-            if (InetAddressUtils.isIPv6Address(sAddr)) {
+            if (addr.isInstanceOf[Inet6Address]) {
               if (BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
               return true
             }

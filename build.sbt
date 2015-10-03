@@ -1,14 +1,16 @@
 import android.Keys._
 
-import android.Dependencies.{apklib,aar}
-
 android.Plugin.androidBuild
 
-platformTarget in Android := "android-21"
+platformTarget in Android := "android-22"
 
 name := "shadowsocks"
 
 compileOrder in Compile := CompileOrder.JavaThenScala
+
+javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
+
+scalacOptions += "-target:jvm-1.6"
 
 ndkJavah in Android := List()
 
