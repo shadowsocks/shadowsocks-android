@@ -41,6 +41,7 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.lang.reflect.{InvocationTargetException, Method}
+import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
 import android.app._
@@ -54,7 +55,6 @@ import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.HitBuilders
-import org.apache.http.conn.util.InetAddressUtils
 
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
@@ -430,7 +430,7 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(Utils.getIptables + " -t nat -F OUTPUT")
 
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
-    if (!InetAddressUtils.isIPv6Address(config.proxy.toUpperCase)) {
+    if (!InetAddress.getByName(config.proxy.toUpperCase).isInstanceOf[Inet6Address]) {
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 127.0.0.1"))
@@ -576,8 +576,7 @@ class ShadowsocksNatService extends Service with BaseService {
         killProcesses()
 
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-          !InetAddressUtils.isIPv6Address(config.proxy)) {
+        if (!Utils.isNumeric(config.proxy)) {
           Utils.resolve(config.proxy, enableIPv6 = true) match {
             case Some(a) =>
               config.proxy = a

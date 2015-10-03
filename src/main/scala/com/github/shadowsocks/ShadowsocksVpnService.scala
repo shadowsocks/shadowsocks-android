@@ -40,6 +40,7 @@
 package com.github.shadowsocks
 
 import java.io.File
+import java.net.InetAddress
 import java.util.Locale
 
 import android.app._
@@ -53,7 +54,6 @@ import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.HitBuilders
 import org.apache.commons.net.util.SubnetUtils
-import org.apache.http.conn.util.InetAddressUtils
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -238,8 +238,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
         // Resolve the server address
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-          !InetAddressUtils.isIPv6Address(config.proxy)) {
+        if (!Utils.isNumeric(config.proxy)) {
           Utils.resolve(config.proxy, enableIPv6 = true) match {
             case Some(addr) =>
               config.proxy = addr
