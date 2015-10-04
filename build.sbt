@@ -12,7 +12,7 @@ compileOrder in Compile := CompileOrder.JavaThenScala
 
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
-scalacOptions += "-target:jvm-1.6"
+scalacOptions ++= Seq("-target:jvm-1.6", "-Xexperimental")
 
 ndkJavah in Android := List()
 

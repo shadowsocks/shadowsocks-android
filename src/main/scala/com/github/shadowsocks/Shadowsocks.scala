@@ -953,11 +953,7 @@ class Shadowsocks
 
     new AlertDialog.Builder(this)
       .setCancelable(true)
-      .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
-      override def onClick(dialog: DialogInterface, id: Int) {
-        dialog.cancel()
-      }
-    })
+      .setNegativeButton(getString(R.string.close), (dialog: DialogInterface, id: Int) => dialog.cancel())
       .setView(image)
       .create()
       .show()
