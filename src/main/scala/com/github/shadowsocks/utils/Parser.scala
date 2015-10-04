@@ -47,11 +47,8 @@ import android.util.{Log, Base64}
 object Parser {
   val TAG = "ShadowParser"
 
-  def generate (profile: Profile): String = {
-    val path = "%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
-      profile.method, profile.password, profile.host, profile.remotePort)
-    return "ss://" + Base64.encodeToString(path.getBytes, Base64.NO_PADDING)
-  }
+  def generate (profile: Profile): String = "ss://" + Base64.encodeToString("%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
+    profile.method, profile.password, profile.host, profile.remotePort).getBytes, Base64.NO_PADDING)
 
   def parse (data: String): Option[Profile] = {
     try {

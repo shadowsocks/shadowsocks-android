@@ -39,13 +39,11 @@
 
 package com.github.shadowsocks
 
-import android.os.{Handler, RemoteCallbackList}
-import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.{Path, State}
-import java.io.{IOException, FileNotFoundException, FileReader, BufferedReader}
-import android.util.Log
 import android.app.Notification
 import android.content.Context
+import android.os.{Handler, RemoteCallbackList}
+import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
+import com.github.shadowsocks.utils.State
 
 trait BaseService {
 
@@ -100,10 +98,10 @@ trait BaseService {
   def getTag: String
   def getContext: Context
 
-  def getCallbackCount(): Int = {
+  def getCallbackCount: Int = {
     callbackCount
   }
-  def getState(): Int = {
+  def getState: Int = {
     state
   }
   def changeState(s: Int) {

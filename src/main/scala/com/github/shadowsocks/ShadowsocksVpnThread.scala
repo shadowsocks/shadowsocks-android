@@ -103,7 +103,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
               val fds = socket.getAncillaryFileDescriptors
 
-              if (fds.length > 0) {
+              if (fds.nonEmpty) {
                 var ret = false
 
                 val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
@@ -136,10 +136,9 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
         }})
       } catch {
-        case e: IOException => {
+        case e: IOException =>
           Log.e(TAG, "Error when accept socket", e)
           return
-        }
       }
     }
   }

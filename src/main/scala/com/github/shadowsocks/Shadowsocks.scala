@@ -38,10 +38,9 @@
  */
 package com.github.shadowsocks
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, FileOutputStream, IOException, InputStream, OutputStream}
 import java.util
-import java.io.{OutputStream, InputStream, ByteArrayInputStream, ByteArrayOutputStream, IOException, FileOutputStream}
 import java.util.Locale
-import java.lang.Math
 
 import android.app.backup.BackupManager
 import android.app.{Activity, AlertDialog, ProgressDialog}
@@ -52,6 +51,7 @@ import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
 import android.preference._
+import android.support.v4.content.ContextCompat
 import android.util.{DisplayMetrics, Log}
 import android.view.View.OnLongClickListener
 import android.view._
@@ -65,15 +65,15 @@ import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import com.google.android.gms.analytics.HitBuilders
 import com.google.zxing.integration.android.IntentIntegrator
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import net.simonvt.menudrawer.MenuDrawer
-import com.joanzapata.android.iconify.Iconify
-import com.joanzapata.android.iconify.Iconify.IconValue
 import com.joanzapata.android.iconify.IconDrawable
+import com.joanzapata.android.iconify.Iconify.IconValue
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import net.glxn.qrgen.android.QRCode
+import net.simonvt.menudrawer.MenuDrawer
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.concurrent.ops._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -224,7 +224,7 @@ class Shadowsocks
 
       if (!status.getBoolean(getVersionName, false)) {
         status.edit.putBoolean(getVersionName, true).commit()
-        recovery();
+        recovery()
       }
     }
 
@@ -396,7 +396,7 @@ class Shadowsocks
     changeSwitch(checked = false)
   }
 
-  def isReady(): Boolean = {
+  def isReady: Boolean = {
     if (!checkText(Key.proxy)) return false
     if (!checkText(Key.sitekey)) return false
     if (!checkNumber(Key.localPort, low = false)) return false
@@ -407,7 +407,7 @@ class Shadowsocks
 
   def prepareStartService() {
     showProgress(R.string.connecting)
-    spawn {
+    Future {
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
@@ -522,8 +522,8 @@ class Shadowsocks
     getActionBar.setDisplayShowTitleEnabled(false)
     getActionBar.setDisplayShowCustomEnabled(true)
     if (Utils.isLollipopOrAbove) {
-      getWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-      getWindow.setStatusBarColor(getResources().getColor(R.color.grey3));
+      getWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+      getWindow.setStatusBarColor(ContextCompat.getColor(this, R.color.grey3))
       getActionBar.setDisplayHomeAsUpEnabled(true)
       getActionBar.setHomeAsUpIndicator(R.drawable.ic_drawer)
     } else {
@@ -551,7 +551,7 @@ class Shadowsocks
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
     // Bind to the service
-    spawn {
+    Future {
       val isRoot = (!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot
       handler.post(new Runnable {
         override def run() {
@@ -718,7 +718,7 @@ class Shadowsocks
 
     val profile = profileManager.getProfile(id)
 
-    if (!profile.isDefined) return false
+    if (profile.isEmpty) return false
 
     new AlertDialog.Builder(this)
       .setMessage(String.format(Locale.ENGLISH, getString(R.string.remove_profile), profile.get.name))
@@ -731,7 +731,7 @@ class Shadowsocks
         profileManager.delProfile(id)
         val profileId = {
           val profiles = profileManager.getAllProfiles.getOrElse(List[Profile]())
-          if (profiles.isEmpty) -1 else profiles(0).id
+          if (profiles.isEmpty) -1 else profiles.head.id
         }
         currentProfile = profileManager.load(profileId)
         menuAdapter.updateList(getMenuList, currentProfile.id)
@@ -934,16 +934,14 @@ class Shadowsocks
   private def recovery() {
     serviceStop()
     val h = showProgress(R.string.recovering)
-    spawn {
+    Future {
       reset()
       h.sendEmptyMessage(0)
     }
   }
 
-  private def dp2px(dp: Int): Int = {
-    val displayMetrics = getBaseContext.getResources.getDisplayMetrics()
-    Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
-  }
+  private def dp2px(dp: Int): Int =
+    Math.round(dp * (getBaseContext.getResources.getDisplayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
 
   private def showQrCode() {
     val image = new ImageView(this)
@@ -967,7 +965,7 @@ class Shadowsocks
 
   private def flushDnsCache() {
     val h = showProgress(R.string.flushing)
-    spawn {
+    Future {
       Utils.toggleAirplaneMode(getBaseContext)
       h.sendEmptyMessage(0)
     }

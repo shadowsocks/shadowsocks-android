@@ -46,7 +46,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import android.graphics.drawable.Drawable
-import com.github.shadowsocks.{R}
+import com.github.shadowsocks.R
 import android.view.View.{OnLongClickListener, OnClickListener}
 
 abstract class Item {

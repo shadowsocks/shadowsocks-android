@@ -39,9 +39,9 @@
 
 package com.github.shadowsocks.database
 
+import android.content.SharedPreferences
 import android.util.Log
 import com.github.shadowsocks._
-import android.content.{SharedPreferences, Context}
 import com.github.shadowsocks.utils.Key
 
 class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {

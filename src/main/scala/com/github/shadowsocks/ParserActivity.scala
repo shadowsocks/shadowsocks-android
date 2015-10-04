@@ -39,15 +39,15 @@
 
 package com.github.shadowsocks
 
-import android.os.{Message, Handler, Bundle}
-import android.app.{ProgressDialog, AlertDialog, Activity}
-import android.content.{Intent, DialogInterface}
-import com.github.shadowsocks.database.{ProfileManager, Profile}
-import com.github.shadowsocks.utils.{Parser, Action}
-import android.preference.PreferenceManager
-import android.view.WindowManager
+import android.app.{Activity, AlertDialog, ProgressDialog}
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.{Bundle, Handler, Message}
+import android.preference.PreferenceManager
+import android.view.WindowManager
+import com.github.shadowsocks.database.{Profile, ProfileManager}
+import com.github.shadowsocks.utils.Parser
 
 class ParserActivity extends Activity {
   override def onCreate(savedInstanceState: Bundle) {

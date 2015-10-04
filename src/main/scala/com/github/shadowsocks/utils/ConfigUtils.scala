@@ -233,8 +233,8 @@ object ConfigUtils {
       .readTimeout(2000)
       .send("sig="+sig)
       .body
-    val proxies = util.Random.shuffle(list.split('|').toSeq).toSeq
-    val proxy = proxies(0).split(':')
+    val proxies = util.Random.shuffle(list.split('|').toSeq)
+    val proxy = proxies.head.split(':')
 
     val host = proxy(0).trim
     val port = proxy(1).trim.toInt

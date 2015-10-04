@@ -58,7 +58,8 @@ import com.google.android.gms.analytics.HitBuilders
 
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ops._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ShadowsocksNatService extends Service with BaseService {
 
@@ -556,7 +557,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     changeState(State.CONNECTING)
 
-    spawn {
+    Future {
 
       if (config.proxy == "198.199.101.152") {
         val holder = application.containerHolder
