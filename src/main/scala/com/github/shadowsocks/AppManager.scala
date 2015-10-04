@@ -297,11 +297,8 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
 
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
-    bypassSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener {
-      def onCheckedChanged(button: CompoundButton, checked: Boolean) {
-        prefs.edit().putBoolean(Key.isBypassApps, checked).commit()
-      }
-    })
+    bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>
+      prefs.edit().putBoolean(Key.isBypassApps, checked).commit())
     bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
 
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]

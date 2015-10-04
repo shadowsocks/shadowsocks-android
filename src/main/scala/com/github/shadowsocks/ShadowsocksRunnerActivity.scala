@@ -57,11 +57,7 @@ class ShadowsocksRunnerActivity extends Activity {
   val connection = new ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
-      handler.postDelayed(new Runnable() {
-        override def run() {
-          if (bgService != null) startBackgroundService()
-        }
-      }, 1000)
+      handler.postDelayed(() => if (bgService != null) startBackgroundService(), 1000)
     }
     override def onServiceDisconnected(name: ComponentName) {
       bgService = null
@@ -122,11 +118,9 @@ class ShadowsocksRunnerActivity extends Activity {
     val locked = km.inKeyguardRestrictedInputMode
     if (locked) {
       val filter = new IntentFilter(Intent.ACTION_USER_PRESENT)
-      receiver = new BroadcastReceiver() {
-        override def onReceive(context: Context, intent: Intent) {
-          if (intent.getAction == Intent.ACTION_USER_PRESENT) {
-            attachService()
-          }
+      receiver = (context: Context, intent: Intent) => {
+        if (intent.getAction == Intent.ACTION_USER_PRESENT) {
+          attachService()
         }
       }
       registerReceiver(receiver, filter)

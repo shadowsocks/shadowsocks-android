@@ -208,11 +208,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
-    receiver = new BroadcastReceiver {
-      def onReceive(p1: Context, p2: Intent) {
-        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
-        stopRunner()
-      }
+    receiver = (p1: Context, p2: Intent) => {
+      Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
+      stopRunner()
     }
     registerReceiver(receiver, filter)
 

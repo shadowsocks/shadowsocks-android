@@ -40,14 +40,10 @@
 package com.github.shadowsocks.database
 
 import android.content.Context
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.TextView
 import android.graphics.drawable.Drawable
+import android.view.{LayoutInflater, View, ViewGroup}
+import android.widget.{BaseAdapter, TextView}
 import com.github.shadowsocks.R
-import android.view.View.{OnLongClickListener, OnClickListener}
 
 abstract class Item {
   def id: Int
@@ -147,17 +143,13 @@ class MenuAdapter(context: Context, var items: List[Any]) extends BaseAdapter {
             }
         }
 
-        tv.setOnClickListener(new OnClickListener {
-          def onClick(view: View) {
-            val item = view.getTag(R.id.mdItem).asInstanceOf[Item]
-            item.click(item.id)
-          }
+        tv.setOnClickListener((view: View) => {
+          val item = view.getTag(R.id.mdItem).asInstanceOf[Item]
+          item.click(item.id)
         })
-        tv.setOnLongClickListener(new OnLongClickListener {
-          def onLongClick(view: View): Boolean = {
-            val item = view.getTag(R.id.mdItem).asInstanceOf[Item]
-            item.longClick(item.id)
-          }
+        tv.setOnLongClickListener((view: View) => {
+          val item = view.getTag(R.id.mdItem).asInstanceOf[Item]
+          item.longClick(item.id)
         })
 
         v.setTag(R.id.mdItem, value)
