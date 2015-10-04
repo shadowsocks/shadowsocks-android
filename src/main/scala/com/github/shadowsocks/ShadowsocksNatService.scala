@@ -58,7 +58,8 @@ import com.google.android.gms.analytics.HitBuilders
 
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ops._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ShadowsocksNatService extends Service with BaseService {
 
@@ -172,11 +173,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def initConnectionReceiver() {
     val filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-    connReceiver = new BroadcastReceiver {
-      override def onReceive(context: Context, intent: Intent) = {
-        setupDns()
-      }
-    }
+    connReceiver = (context: Context, intent: Intent) => setupDns()
     registerReceiver(connReceiver, filter)
   }
 
@@ -511,11 +508,9 @@ class ShadowsocksNatService extends Service with BaseService {
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
     filter.addAction(Action.CLOSE)
-    closeReceiver = new BroadcastReceiver() {
-      def onReceive(context: Context, intent: Intent) {
-        Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-        stopRunner()
-      }
+    closeReceiver = (context: Context, intent: Intent) => {
+      Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+      stopRunner()
     }
     registerReceiver(closeReceiver, filter)
 
@@ -524,26 +519,22 @@ class ShadowsocksNatService extends Service with BaseService {
       screenFilter.addAction(Intent.ACTION_SCREEN_ON)
       screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
       screenFilter.addAction(Intent.ACTION_USER_PRESENT)
-      lockReceiver = new BroadcastReceiver() {
-        def onReceive(context: Context, intent: Intent) {
-          if (getState == State.CONNECTED) {
-            val action = intent.getAction
-            if (action == Intent.ACTION_SCREEN_OFF) {
-              notifyForegroundAlert(getString(R.string.forward_success),
-                getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
-            } else if (action == Intent.ACTION_SCREEN_ON) {
-              val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
-              if (!keyGuard.inKeyguardRestrictedInputMode) {
-                notifyForegroundAlert(getString(R.string.forward_success),
-                  getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
-            }
-            } else if (action == Intent.ACTION_USER_PRESENT) {
-              notifyForegroundAlert(getString(R.string.forward_success),
-                getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
-            }
-            }
+      lockReceiver = (context: Context, intent: Intent) => if (getState == State.CONNECTED) {
+        val action = intent.getAction
+        if (action == Intent.ACTION_SCREEN_OFF) {
+          notifyForegroundAlert(getString(R.string.forward_success),
+            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
+        } else if (action == Intent.ACTION_SCREEN_ON) {
+          val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
+          if (!keyGuard.inKeyguardRestrictedInputMode) {
+            notifyForegroundAlert(getString(R.string.forward_success),
+              getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
           }
+        } else if (action == Intent.ACTION_USER_PRESENT) {
+          notifyForegroundAlert(getString(R.string.forward_success),
+            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
         }
+      }
         registerReceiver(lockReceiver, screenFilter)
     }
 
@@ -556,7 +547,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     changeState(State.CONNECTING)
 
-    spawn {
+    Future {
 
       if (config.proxy == "198.199.101.152") {
         val holder = application.containerHolder

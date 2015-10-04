@@ -38,10 +38,9 @@
  */
 package com.github.shadowsocks
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, FileOutputStream, IOException, InputStream, OutputStream}
 import java.util
-import java.io.{OutputStream, InputStream, ByteArrayInputStream, ByteArrayOutputStream, IOException, FileOutputStream}
 import java.util.Locale
-import java.lang.Math
 
 import android.app.backup.BackupManager
 import android.app.{Activity, AlertDialog, ProgressDialog}
@@ -52,8 +51,8 @@ import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
 import android.preference._
+import android.support.v4.content.ContextCompat
 import android.util.{DisplayMetrics, Log}
-import android.view.View.OnLongClickListener
 import android.view._
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
@@ -65,15 +64,15 @@ import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import com.google.android.gms.analytics.HitBuilders
 import com.google.zxing.integration.android.IntentIntegrator
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import net.simonvt.menudrawer.MenuDrawer
-import com.joanzapata.android.iconify.Iconify
-import com.joanzapata.android.iconify.Iconify.IconValue
 import com.joanzapata.android.iconify.IconDrawable
+import com.joanzapata.android.iconify.Iconify.IconValue
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 import net.glxn.qrgen.android.QRCode
+import net.simonvt.menudrawer.MenuDrawer
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.concurrent.ops._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
   extends BaseImageDownloader(context, connectTimeout, readTimeout) {
@@ -224,7 +223,7 @@ class Shadowsocks
 
       if (!status.getBoolean(getVersionName, false)) {
         status.edit.putBoolean(getVersionName, true).commit()
-        recovery();
+        recovery()
       }
     }
 
@@ -270,11 +269,7 @@ class Shadowsocks
     switchButton.setChecked(checked)
     if (switchButton.isEnabled) {
       switchButton.setEnabled(false)
-      handler.postDelayed(new Runnable {
-        override def run() {
-          switchButton.setEnabled(true)
-        }
-      }, 1000)
+      handler.postDelayed(() => switchButton.setEnabled(true), 1000)
     }
     switchButton.setOnCheckedChangeListener(this)
   }
@@ -396,7 +391,7 @@ class Shadowsocks
     changeSwitch(checked = false)
   }
 
-  def isReady(): Boolean = {
+  def isReady: Boolean = {
     if (!checkText(Key.proxy)) return false
     if (!checkText(Key.sitekey)) return false
     if (!checkNumber(Key.localPort, low = false)) return false
@@ -407,7 +402,7 @@ class Shadowsocks
 
   def prepareStartService() {
     showProgress(R.string.connecting)
-    spawn {
+    Future {
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
@@ -434,11 +429,7 @@ class Shadowsocks
       }
       if (switchButton.isEnabled) {
         switchButton.setEnabled(false)
-        handler.postDelayed(new Runnable {
-          override def run() {
-            switchButton.setEnabled(true)
-          }
-        }, 1000)
+        handler.postDelayed(() => switchButton.setEnabled(true), 1000)
       }
     }
   }
@@ -522,28 +513,26 @@ class Shadowsocks
     getActionBar.setDisplayShowTitleEnabled(false)
     getActionBar.setDisplayShowCustomEnabled(true)
     if (Utils.isLollipopOrAbove) {
-      getWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-      getWindow.setStatusBarColor(getResources().getColor(R.color.grey3));
+      getWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+      getWindow.setStatusBarColor(ContextCompat.getColor(this, R.color.grey3))
       getActionBar.setDisplayHomeAsUpEnabled(true)
       getActionBar.setHomeAsUpIndicator(R.drawable.ic_drawer)
     } else {
       getActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
     }
-    title.setOnLongClickListener(new OnLongClickListener {
-      override def onLongClick(v: View): Boolean = {
-        if (Utils.isLollipopOrAbove && bgService != null
-          && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
-          val natEnabled = status.getBoolean(Key.isNAT, false)
-          status.edit().putBoolean(Key.isNAT, !natEnabled).commit()
-          if (!natEnabled) {
-            Toast.makeText(getBaseContext, R.string.enable_nat, Toast.LENGTH_LONG).show()
-          } else {
-            Toast.makeText(getBaseContext, R.string.disable_nat, Toast.LENGTH_LONG).show()
-          }
-          true
+    title.setOnLongClickListener((v: View) => {
+      if (Utils.isLollipopOrAbove && bgService != null
+        && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
+        val natEnabled = status.getBoolean(Key.isNAT, false)
+        status.edit().putBoolean(Key.isNAT, !natEnabled).commit()
+        if (!natEnabled) {
+          Toast.makeText(getBaseContext, R.string.enable_nat, Toast.LENGTH_LONG).show()
         } else {
-          false
+          Toast.makeText(getBaseContext, R.string.disable_nat, Toast.LENGTH_LONG).show()
         }
+        true
+      } else {
+        false
       }
     })
 
@@ -551,13 +540,11 @@ class Shadowsocks
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
     // Bind to the service
-    spawn {
+    Future {
       val isRoot = (!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot
-      handler.post(new Runnable {
-        override def run() {
-          status.edit.putBoolean(Key.isRoot, isRoot).commit()
-          attachService()
-        }
+      handler.post(() => {
+        status.edit.putBoolean(Key.isRoot, isRoot).commit()
+        attachService()
       })
     }
   }
@@ -613,29 +600,23 @@ class Shadowsocks
     val builder = new AlertDialog.Builder(this)
     builder
       .setTitle(R.string.add_profile)
-      .setItems(R.array.add_profile_methods, new DialogInterface.OnClickListener() {
-      def onClick(dialog: DialogInterface, which: Int) {
-        which match {
-          case 0 =>
-            dialog.dismiss()
-            val h = showProgress(R.string.loading)
-            h.postDelayed(new Runnable() {
-              def run() {
-                val integrator = new IntentIntegrator(Shadowsocks.this)
-                val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
-                list.add("tw.com.quickmark")
-                integrator.setTargetApplications(list)
-                integrator.initiateScan()
-                h.sendEmptyMessage(0)
-              }
-            }, 600)
-          case 1 =>
-            dialog.dismiss()
-            addProfile(id)
-          case _ =>
-        }
-      }
-    })
+      .setItems(R.array.add_profile_methods, ((dialog: DialogInterface, which: Int) => which match {
+        case 0 =>
+          dialog.dismiss()
+          val h = showProgress(R.string.loading)
+          h.postDelayed(() => {
+            val integrator = new IntentIntegrator(Shadowsocks.this)
+            val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
+            list.add("tw.com.quickmark")
+            integrator.setTargetApplications(list)
+            integrator.initiateScan()
+            h.sendEmptyMessage(0)
+          }, 600)
+        case 1 =>
+          dialog.dismiss()
+          addProfile(id)
+        case _ =>
+      }): DialogInterface.OnClickListener)
     builder.create().show()
   }
 
@@ -644,17 +625,15 @@ class Shadowsocks
 
     val h = showProgress(R.string.loading)
 
-    handler.postDelayed(new Runnable {
-      def run() {
-        currentProfile = {
-          profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse currentProfile
-        }
-        menuAdapter.updateList(getMenuList, currentProfile.id)
-
-        updatePreferenceScreen()
-
-        h.sendEmptyMessage(0)
+    handler.postDelayed(() => {
+      currentProfile = {
+        profileManager.getProfile(settings.getInt(Key.profileId, -1)) getOrElse currentProfile
       }
+      menuAdapter.updateList(getMenuList, currentProfile.id)
+
+      updatePreferenceScreen()
+
+      h.sendEmptyMessage(0)
     }, 600)
   }
 
@@ -663,17 +642,15 @@ class Shadowsocks
 
     val h = showProgress(R.string.loading)
 
-    handler.postDelayed(new Runnable {
-      def run() {
-        currentProfile = profile
-        profileManager.createOrUpdateProfile(currentProfile)
-        profileManager.reload(currentProfile.id)
-        menuAdapter.updateList(getMenuList, currentProfile.id)
+    handler.postDelayed(() => {
+      currentProfile = profile
+      profileManager.createOrUpdateProfile(currentProfile)
+      profileManager.reload(currentProfile.id)
+      menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        updatePreferenceScreen()
+      updatePreferenceScreen()
 
-        h.sendEmptyMessage(0)
-      }
+      h.sendEmptyMessage(0)
     }, 600)
   }
 
@@ -682,16 +659,14 @@ class Shadowsocks
 
     val h = showProgress(R.string.loading)
 
-    handler.postDelayed(new Runnable {
-      def run() {
-        currentProfile = profileManager.reload(id)
-        profileManager.save()
-        menuAdapter.updateList(getMenuList, currentProfile.id)
+    handler.postDelayed(() => {
+      currentProfile = profileManager.reload(id)
+      profileManager.save()
+      menuAdapter.updateList(getMenuList, currentProfile.id)
 
-        updatePreferenceScreen()
+      updatePreferenceScreen()
 
-        h.sendEmptyMessage(0)
-      }
+      h.sendEmptyMessage(0)
     }, 600)
   }
 
@@ -700,16 +675,14 @@ class Shadowsocks
 
     val h = showProgress(R.string.loading)
 
-    handler.postDelayed(new Runnable {
-      def run() {
-        currentProfile = profileManager.reload(id)
-        menuAdapter.setActiveId(id)
-        menuAdapter.notifyDataSetChanged()
+    handler.postDelayed(() => {
+      currentProfile = profileManager.reload(id)
+      menuAdapter.setActiveId(id)
+      menuAdapter.notifyDataSetChanged()
 
-        updatePreferenceScreen()
+      updatePreferenceScreen()
 
-        h.sendEmptyMessage(0)
-      }
+      h.sendEmptyMessage(0)
     }, 600)
   }
 
@@ -718,20 +691,18 @@ class Shadowsocks
 
     val profile = profileManager.getProfile(id)
 
-    if (!profile.isDefined) return false
+    if (profile.isEmpty) return false
 
     new AlertDialog.Builder(this)
       .setMessage(String.format(Locale.ENGLISH, getString(R.string.remove_profile), profile.get.name))
       .setCancelable(false)
-      .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-      override def onClick(dialog: DialogInterface, i: Int) = dialog.cancel()
-    })
-      .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-      override def onClick(dialog: DialogInterface, i: Int) {
+      .setNegativeButton(R.string.no,
+        ((dialog: DialogInterface, i: Int) => dialog.cancel()): DialogInterface.OnClickListener)
+      .setPositiveButton(R.string.yes, ((dialog: DialogInterface, i: Int) => {
         profileManager.delProfile(id)
         val profileId = {
           val profiles = profileManager.getAllProfiles.getOrElse(List[Profile]())
-          if (profiles.isEmpty) -1 else profiles(0).id
+          if (profiles.isEmpty) -1 else profiles.head.id
         }
         currentProfile = profileManager.load(profileId)
         menuAdapter.updateList(getMenuList, currentProfile.id)
@@ -739,8 +710,7 @@ class Shadowsocks
         updatePreferenceScreen()
 
         dialog.dismiss()
-      }
-    })
+      }): DialogInterface.OnClickListener)
       .create()
       .show()
 
@@ -934,16 +904,14 @@ class Shadowsocks
   private def recovery() {
     serviceStop()
     val h = showProgress(R.string.recovering)
-    spawn {
+    Future {
       reset()
       h.sendEmptyMessage(0)
     }
   }
 
-  private def dp2px(dp: Int): Int = {
-    val displayMetrics = getBaseContext.getResources.getDisplayMetrics()
-    Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
-  }
+  private def dp2px(dp: Int): Int =
+    Math.round(dp * (getBaseContext.getResources.getDisplayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
 
   private def showQrCode() {
     val image = new ImageView(this)
@@ -955,11 +923,8 @@ class Shadowsocks
 
     new AlertDialog.Builder(this)
       .setCancelable(true)
-      .setNegativeButton(getString(R.string.close), new DialogInterface.OnClickListener() {
-      override def onClick(dialog: DialogInterface, id: Int) {
-        dialog.cancel()
-      }
-    })
+      .setNegativeButton(getString(R.string.close),
+        ((dialog: DialogInterface, id: Int) => dialog.cancel()): DialogInterface.OnClickListener)
       .setView(image)
       .create()
       .show()
@@ -967,7 +932,7 @@ class Shadowsocks
 
   private def flushDnsCache() {
     val h = showProgress(R.string.flushing)
-    spawn {
+    Future {
       Utils.toggleAirplaneMode(getBaseContext)
       h.sendEmptyMessage(0)
     }
@@ -1070,11 +1035,8 @@ class Shadowsocks
     new AlertDialog.Builder(this)
       .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, versionName))
       .setCancelable(false)
-      .setNegativeButton(getString(R.string.ok_iknow), new DialogInterface.OnClickListener() {
-      override def onClick(dialog: DialogInterface, id: Int) {
-        dialog.cancel()
-      }
-    })
+      .setNegativeButton(getString(R.string.ok_iknow),
+        ((dialog: DialogInterface, id: Int) => dialog.cancel()): DialogInterface.OnClickListener)
       .setView(web)
       .create()
       .show()
@@ -1089,46 +1051,42 @@ class Shadowsocks
   }
 
   def onStateChanged(s: Int, m: String) {
-    handler.post(new Runnable {
-      override def run() {
-        if (state != s) {
-          state = s
-          state match {
-            case State.CONNECTING =>
-              if (progressDialog == null) {
-                progressDialog = ProgressDialog
-                  .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
-                progressTag = R.string.connecting
-              }
-              setPreferenceEnabled(enabled = false)
-            case State.CONNECTED =>
-              if (progressTag == R.string.connecting) {
-                clearDialog()
-              }
-              changeSwitch(checked = true)
-              setPreferenceEnabled(enabled = false)
-            case State.STOPPED =>
-              if (progressTag == R.string.stopping || progressTag == R.string.connecting) {
-                clearDialog()
-              }
-              changeSwitch(checked = false)
-              if (m != null) {
-                new SnackBar.Builder(Shadowsocks.this)
-                  .withMessage(getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m))
-                  .withActionMessageId(R.string.error)
-                  .withStyle(SnackBar.Style.ALERT)
-                  .withDuration(SnackBar.LONG_SNACK)
-                  .show()
-              }
-              setPreferenceEnabled(enabled = true)
-            case State.STOPPING =>
-              if (progressDialog == null) {
-                progressDialog = ProgressDialog
-                  .show(Shadowsocks.this, "", getString(R.string.stopping), true, true)
-                progressTag = R.string.stopping
-              }
+    handler.post(() => if (state != s) {
+      state = s
+      state match {
+        case State.CONNECTING =>
+          if (progressDialog == null) {
+            progressDialog = ProgressDialog
+              .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
+            progressTag = R.string.connecting
           }
-        }
+          setPreferenceEnabled(enabled = false)
+        case State.CONNECTED =>
+          if (progressTag == R.string.connecting) {
+            clearDialog()
+          }
+          changeSwitch(checked = true)
+          setPreferenceEnabled(enabled = false)
+        case State.STOPPED =>
+          if (progressTag == R.string.stopping || progressTag == R.string.connecting) {
+            clearDialog()
+          }
+          changeSwitch(checked = false)
+          if (m != null) {
+            new SnackBar.Builder(Shadowsocks.this)
+              .withMessage(getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m))
+              .withActionMessageId(R.string.error)
+              .withStyle(SnackBar.Style.ALERT)
+              .withDuration(SnackBar.LONG_SNACK)
+              .show()
+          }
+          setPreferenceEnabled(enabled = true)
+        case State.STOPPING =>
+          if (progressDialog == null) {
+            progressDialog = ProgressDialog
+              .show(Shadowsocks.this, "", getString(R.string.stopping), true, true)
+            progressTag = R.string.stopping
+          }
       }
     })
   }

@@ -40,7 +40,6 @@
 package com.github.shadowsocks
 
 import java.io.File
-import java.net.InetAddress
 import java.util.Locale
 
 import android.app._
@@ -57,7 +56,8 @@ import org.apache.commons.net.util.SubnetUtils
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ops._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class ShadowsocksVpnService extends VpnService with BaseService {
 
@@ -208,17 +208,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
-    receiver = new BroadcastReceiver {
-      def onReceive(p1: Context, p2: Intent) {
-        Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
-        stopRunner()
-      }
+    receiver = (p1: Context, p2: Intent) => {
+      Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
+      stopRunner()
     }
     registerReceiver(receiver, filter)
 
     changeState(State.CONNECTING)
 
-    spawn {
+    Future {
       if (config.proxy == "198.199.101.152") {
         val holder = getApplication.asInstanceOf[ShadowsocksApplication].containerHolder
         try {
@@ -453,7 +451,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     Console.runCommand(cmd)
 
-    return fd
+    fd
   }
 
   override def stopBackgroundService() {

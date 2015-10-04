@@ -93,35 +93,34 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       try {
         val socket = serverSocket.accept()
 
-        pool.execute(new Runnable {
-          override def run() {
-            try {
-              val input = socket.getInputStream
-              val output = socket.getOutputStream
+        pool.execute(() => {
+          try {
+            val input = socket.getInputStream
+            val output = socket.getOutputStream
 
-              input.read()
+            input.read()
 
-              val fds = socket.getAncillaryFileDescriptors
+            val fds = socket.getAncillaryFileDescriptors
 
-              if (fds.length > 0) {
-                var ret = false
+            if (fds.nonEmpty) {
+              var ret = false
 
-                val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
-                val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
-                ret = vpnService.protect(fd)
+              val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
+              val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
+              ret = vpnService.protect(fd)
 
-                // Trick to close file decriptor
-                System.jniclose(fd)
+              // Trick to close file decriptor
+              System.jniclose(fd)
 
-                if (ret) {
-                  output.write(0)
-                } else {
-                  output.write(1)
-                }
-
-                input.close()
-                output.close()
+              if (ret) {
+                output.write(0)
+              } else {
+                output.write(1)
               }
+
+              input.close()
+              output.close()
+            }
           } catch {
             case e: Exception =>
               Log.e(TAG, "Error when protect socket", e)
@@ -134,12 +133,11 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
             case _: Exception => // ignore
           }
 
-        }})
+        })
       } catch {
-        case e: IOException => {
+        case e: IOException =>
           Log.e(TAG, "Error when accept socket", e)
           return
-        }
       }
     }
   }

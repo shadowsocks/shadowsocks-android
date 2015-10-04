@@ -47,7 +47,6 @@ import com.github.shadowsocks.database.DBHelper
 import com.github.shadowsocks.utils.Utils
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.common.api.ResultCallback
-import com.google.android.gms.tagmanager.Container.FunctionCallMacroCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 
 class ShadowsocksApplication extends Application {
@@ -66,14 +65,13 @@ class ShadowsocksApplication extends Application {
         }
         containerHolder = holder
         val container = holder.getContainer
-        container.registerFunctionCallMacroCallback(SIG_FUNC, new FunctionCallMacroCallback {
-          override def getValue(functionName: String, parameters: util.Map[String, AnyRef]): AnyRef = {
+        container.registerFunctionCallMacroCallback(SIG_FUNC,
+          (functionName: String, parameters: util.Map[String, AnyRef]) => {
             if (functionName == SIG_FUNC) {
               Utils.getSignature(getApplicationContext)
             }
             null
-          }
-        })
+          })
       }
     }
     pending.setResultCallback(callback, 2, TimeUnit.SECONDS)

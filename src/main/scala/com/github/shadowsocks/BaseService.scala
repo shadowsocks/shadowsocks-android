@@ -39,13 +39,11 @@
 
 package com.github.shadowsocks
 
-import android.os.{Handler, RemoteCallbackList}
-import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.{Path, State}
-import java.io.{IOException, FileNotFoundException, FileReader, BufferedReader}
-import android.util.Log
 import android.app.Notification
 import android.content.Context
+import android.os.{Handler, RemoteCallbackList}
+import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
+import com.github.shadowsocks.utils.State
 
 trait BaseService {
 
@@ -100,10 +98,10 @@ trait BaseService {
   def getTag: String
   def getContext: Context
 
-  def getCallbackCount(): Int = {
+  def getCallbackCount: Int = {
     callbackCount
   }
-  def getState(): Int = {
+  def getState: Int = {
     state
   }
   def changeState(s: Int) {
@@ -112,23 +110,19 @@ trait BaseService {
 
   protected def changeState(s: Int, msg: String) {
     val handler = new Handler(getContext.getMainLooper)
-    handler.post(new Runnable {
-      override def run() {
-        if (state != s) {
-          if (callbackCount > 0) {
-            val n = callbacks.beginBroadcast()
-            for (i <- 0 to n - 1) {
-              try {
-                callbacks.getBroadcastItem(i).stateChanged(s, msg)
-              } catch {
-                case _: Exception => // Ignore
-              }
-            }
-            callbacks.finishBroadcast()
+    handler.post(() => if (state != s) {
+      if (callbackCount > 0) {
+        val n = callbacks.beginBroadcast()
+        for (i <- 0 to n - 1) {
+          try {
+            callbacks.getBroadcastItem(i).stateChanged(s, msg)
+          } catch {
+            case _: Exception => // Ignore
           }
-          state = s
         }
+        callbacks.finishBroadcast()
       }
+      state = s
     })
   }
 
