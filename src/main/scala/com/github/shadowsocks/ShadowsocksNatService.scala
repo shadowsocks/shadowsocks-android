@@ -69,24 +69,12 @@ class ShadowsocksNatService extends Service with BaseService {
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
 
-  private val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
-  private val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
-  private val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
-  private val mSetForegroundArgs = new Array[AnyRef](1)
-  private val mStartForegroundArgs = new Array[AnyRef](2)
-  private val mStopForegroundArgs = new Array[AnyRef](1)
-
   var lockReceiver: BroadcastReceiver = null
   var closeReceiver: BroadcastReceiver = null
   var connReceiver: BroadcastReceiver = null
-  var notificationManager: NotificationManager = null
   var config: Config = null
   var apps: Array[ProxiedApp] = null
   val myUid = Process.myUid()
-
-  private var mSetForeground: Method = null
-  private var mStartForeground: Method = null
-  private var mStopForeground: Method = null
 
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
@@ -321,17 +309,6 @@ class ShadowsocksNatService extends Service with BaseService {
     true
   }
 
-  def invokeMethod(method: Method, args: Array[AnyRef]) {
-    try {
-      method.invoke(this, mStartForegroundArgs: _*)
-    } catch {
-      case e: InvocationTargetException =>
-        Log.w(TAG, "Unable to invoke method", e)
-      case e: IllegalAccessException =>
-        Log.w(TAG, "Unable to invoke method", e)
-    }
-  }
-
   def notifyForegroundAlert(title: String, info: String, visible: Boolean) {
     val openIntent = new Intent(this, classOf[Shadowsocks])
     openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -355,7 +332,7 @@ class ShadowsocksNatService extends Service with BaseService {
     else
       builder.setPriority(NotificationCompat.PRIORITY_MIN)
 
-    startForegroundCompat(1, builder.build)
+    startForeground(1, builder.build)
   }
 
   def onBind(intent: Intent): IBinder = {
@@ -369,29 +346,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def onCreate() {
     super.onCreate()
-
     ConfigUtils.refresh(this)
-
-    notificationManager = this
-      .getSystemService(Context.NOTIFICATION_SERVICE)
-      .asInstanceOf[NotificationManager]
-    try {
-      mStartForeground = getClass.getMethod("startForeground", mStartForegroundSignature: _*)
-      mStopForeground = getClass.getMethod("stopForeground", mStopForegroundSignature: _*)
-    } catch {
-      case e: NoSuchMethodException =>
-        mStartForeground = {
-          mStopForeground = null
-          mStopForeground
-        }
-    }
-    try {
-      mSetForeground = getClass.getMethod("setForeground", mSetForegroundSignature: _*)
-    } catch {
-      case e: NoSuchMethodException =>
-        throw new IllegalStateException(
-          "OS doesn't have Service.startForeground OR Service.setForeground!")
-    }
   }
 
   def killProcesses() {
@@ -460,44 +415,6 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     Console.runRootCommand(init_sb.toArray)
     Console.runRootCommand(http_sb.toArray)
-  }
-
-  /**
-   * This is a wrapper around the new startForeground method, using the older
-   * APIs if it is not available.
-   */
-  def startForegroundCompat(id: Int, notification: Notification) {
-    if (mStartForeground != null) {
-      mStartForegroundArgs(0) = int2Integer(id)
-      mStartForegroundArgs(1) = notification
-      invokeMethod(mStartForeground, mStartForegroundArgs)
-      return
-    }
-    mSetForegroundArgs(0) = boolean2Boolean(x = true)
-    invokeMethod(mSetForeground, mSetForegroundArgs)
-    notificationManager.notify(id, notification)
-  }
-
-  /**
-   * This is a wrapper around the new stopForeground method, using the older
-   * APIs if it is not available.
-   */
-  def stopForegroundCompat(id: Int) {
-    if (mStopForeground != null) {
-      mStopForegroundArgs(0) = boolean2Boolean(x = true)
-      try {
-        mStopForeground.invoke(this, mStopForegroundArgs: _*)
-      } catch {
-        case e: InvocationTargetException =>
-          Log.w(TAG, "Unable to invoke stopForeground", e)
-        case e: IllegalAccessException =>
-          Log.w(TAG, "Unable to invoke stopForeground", e)
-      }
-      return
-    }
-    notificationManager.cancel(id)
-    mSetForegroundArgs(0) = boolean2Boolean(x = false)
-    invokeMethod(mSetForeground, mSetForegroundArgs)
   }
 
   override def startRunner(c: Config) {
@@ -627,7 +544,7 @@ class ShadowsocksNatService extends Service with BaseService {
       stopSelf()
     }
 
-    stopForegroundCompat(1)
+    stopForeground(true)
 
     // change the state
     changeState(State.STOPPED)
