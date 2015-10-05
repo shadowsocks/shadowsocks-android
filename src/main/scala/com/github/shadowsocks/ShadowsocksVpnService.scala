@@ -68,10 +68,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val PRIVATE_VLAN = "26.26.26.%s"
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = null
-  var receiver: BroadcastReceiver = null
   var apps: Array[ProxiedApp] = null
   var config: Config = null
   var vpnThread: ShadowsocksVpnThread = null
+  var closeReceiver: BroadcastReceiver = null
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
@@ -171,10 +171,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       stopSelf()
     }
 
-    // clean up the context
-    if (receiver != null) {
-      unregisterReceiver(receiver)
-      receiver = null
+    // clean up recevier
+    if (closeReceiver != null) {
+      unregisterReceiver(closeReceiver)
+      closeReceiver = null
     }
 
     // channge the state
@@ -211,6 +211,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     config = c
 
+    // register close receiver
+    val filter = new IntentFilter()
+    filter.addAction(Intent.ACTION_SHUTDOWN)
+    filter.addAction(Action.CLOSE)
+    closeReceiver = (context: Context, intent: Intent) => {
+      Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+      stopRunner()
+    }
+    registerReceiver(closeReceiver, filter)
+
     // ensure the VPNService is prepared
     if (VpnService.prepare(this) != null) {
       val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
@@ -225,15 +235,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setAction("start")
       .setLabel(getVersionName)
       .build())
-
-    // register close receiver
-    val filter = new IntentFilter()
-    filter.addAction(Intent.ACTION_SHUTDOWN)
-    receiver = (p1: Context, p2: Intent) => {
-      Toast.makeText(p1, R.string.stopping, Toast.LENGTH_SHORT)
-      stopRunner()
-    }
-    registerReceiver(receiver, filter)
 
     changeState(State.CONNECTING)
 
