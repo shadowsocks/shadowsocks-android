@@ -1,6 +1,6 @@
 resolvers += Resolver.url("scalasbt releases", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-snapshots"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("com.hanhuy.sbt" % "android-sdk-plugin" % "1.5.1")
+addSbtPlugin("com.hanhuy.sbt" % "android-sdk-plugin" % "1.5.4")
 
 resolvers += "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
