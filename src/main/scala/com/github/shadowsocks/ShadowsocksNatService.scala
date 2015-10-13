@@ -178,7 +178,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
-        config.sitekey, config.encMethod, 10)
+        config.sitekey, config.encMethod, 600)
     ConfigUtils.printToFile(new File(Path.BASE + "ss-local-nat.conf"))(p => {
       p.println(conf)
     })
