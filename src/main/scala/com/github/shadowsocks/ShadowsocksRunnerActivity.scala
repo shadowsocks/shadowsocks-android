@@ -112,11 +112,6 @@ class ShadowsocksRunnerActivity extends Activity {
     }
   }
 
-  override def onStart() {
-    super.onStart()
-    setVisible(true);
-  }
-
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     val km = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
