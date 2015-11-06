@@ -5,3 +5,7 @@
 	path = src/main/jni/badvpn
 	url = https://github.com/Mygod/badvpn.git
 	branch = shadowsocks
+[submodule "src/main/jni/iptables"]
+	path = src/main/jni/iptables
+	url = https://github.com/Mygod/iptables.git
+	branch = shadowsocks
