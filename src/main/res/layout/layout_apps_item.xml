@@ -24,7 +24,7 @@
         android:textSize="18sp"
         android:padding="3dp"/>
 
-    <CheckBox
+    <Switch
         android:id="@+id/itemcheck"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
