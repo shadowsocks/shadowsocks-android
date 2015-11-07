@@ -12,7 +12,6 @@ import android.view.{View, ViewGroup}
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.{AdapterView, ArrayAdapter}
 import com.github.shadowsocks.R
-import com.github.shadowsocks.utils.Utils
 
 /**
   * Based on: https://github.com/Mygod/mygod-lib-android/blob/683c41cb86d10e99ab0f457d41a218c6915fccc8/lib/src/main/scala/tk/mygod/preference/DropDownPreference.scala
@@ -35,7 +34,8 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     override def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long) = setValueIndex(position)
   })
   setOnPreferenceClickListener((preference: Preference) => {
-    mSpinner.setDropDownVerticalOffset(Utils.dpToPx(getContext, 8 - 48 * mSelectedIndex).toInt) // TODO: scrolling?
+    // TODO: not working with scrolling
+    // mSpinner.setDropDownVerticalOffset(Utils.dpToPx(getContext, -48 * mSelectedIndex).toInt)
     mSpinner.performClick
     true
   })
@@ -169,8 +169,9 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
 
   protected override def onBindView(@NonNull view: View) {
     super.onBindView(view)
-    if (view == mSpinner.getParent) return
-    if (mSpinner.getParent != null) mSpinner.getParent.asInstanceOf[ViewGroup].removeView(mSpinner)
+    val parent = mSpinner.getParent.asInstanceOf[ViewGroup]
+    if (view eq parent) return
+    if (parent != null) parent.removeView(mSpinner)
     view.asInstanceOf[ViewGroup].addView(mSpinner, 0)
     val lp = mSpinner.getLayoutParams
     lp.width = 0

@@ -50,17 +50,17 @@ import android.content.res.AssetManager
 import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
-import android.preference._
+import android.preference.{PreferenceManager, SwitchPreference, Preference}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.{DisplayMetrics, Log}
-import android.view._
+import android.view.{View, ViewGroup, ViewParent}
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
-import com.github.shadowsocks.preferences.{PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences.{DropDownPreference, PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import com.google.android.gms.analytics.HitBuilders
@@ -132,8 +132,8 @@ object Shadowsocks {
   val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
 
   // Helper functions
-  def updateListPreference(pref: Preference, value: String) {
-    pref.asInstanceOf[ListPreference].setValue(value)
+  def updateDropDownPreference(pref: Preference, value: String) {
+    pref.asInstanceOf[DropDownPreference].setValue(value)
   }
 
   def updatePasswordEditTextPreference(pref: Preference, value: String) {
@@ -162,8 +162,8 @@ object Shadowsocks {
       case Key.remotePort => updateSummaryEditTextPreference(pref, profile.remotePort.toString)
       case Key.localPort => updateSummaryEditTextPreference(pref, profile.localPort.toString)
       case Key.sitekey => updatePasswordEditTextPreference(pref, profile.password)
-      case Key.encMethod => updateListPreference(pref, profile.method)
-      case Key.route => updateListPreference(pref, profile.route)
+      case Key.encMethod => updateDropDownPreference(pref, profile.method)
+      case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.isGlobalProxy => updateSwitchPreference(pref, profile.global)
       case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
       case Key.isAuth => updateSwitchPreference(pref, profile.auth)
