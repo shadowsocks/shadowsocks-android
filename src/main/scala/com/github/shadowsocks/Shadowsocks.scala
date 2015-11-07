@@ -151,8 +151,8 @@ object Shadowsocks {
     pref.asInstanceOf[ProfileEditTextPreference].setText(value)
   }
 
-  def updateCheckBoxPreference(pref: Preference, value: Boolean) {
-    pref.asInstanceOf[CheckBoxPreference].setChecked(value)
+  def updateSwitchPreference(pref: Preference, value: Boolean) {
+    pref.asInstanceOf[SwitchPreference].setChecked(value)
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
@@ -164,10 +164,10 @@ object Shadowsocks {
       case Key.sitekey => updatePasswordEditTextPreference(pref, profile.password)
       case Key.encMethod => updateListPreference(pref, profile.method)
       case Key.route => updateListPreference(pref, profile.route)
-      case Key.isGlobalProxy => updateCheckBoxPreference(pref, profile.global)
-      case Key.isUdpDns => updateCheckBoxPreference(pref, profile.udpdns)
-      case Key.isAuth => updateCheckBoxPreference(pref, profile.auth)
-      case Key.isIpv6 => updateCheckBoxPreference(pref, profile.ipv6)
+      case Key.isGlobalProxy => updateSwitchPreference(pref, profile.global)
+      case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
+      case Key.isAuth => updateSwitchPreference(pref, profile.auth)
+      case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
       case _ =>
     }
   }
