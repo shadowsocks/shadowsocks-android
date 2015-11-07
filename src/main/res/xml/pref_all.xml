@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
     <PreferenceCategory
             android:title="@string/proxy_cat">
@@ -37,28 +38,28 @@
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey">
         </com.github.shadowsocks.preferences.PasswordEditTextPreference>
-        <ListPreference
+        <com.github.shadowsocks.preferences.DropDownPreference
                 android:defaultValue="rc4"
                 android:key="encMethod"
-                android:entries="@array/enc_method_entry"
-                android:entryValues="@array/enc_method_value"
-                android:summary="%s"
+                app:entries="@array/enc_method_entry"
+                app:entryValues="@array/enc_method_value"
+                app:summary="%s"
                 android:title="@string/enc_method">
-        </ListPreference>
+        </com.github.shadowsocks.preferences.DropDownPreference>
 
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="@string/feature_cat">
 
-        <ListPreference
+        <com.github.shadowsocks.preferences.DropDownPreference
                 android:defaultValue="all"
                 android:key="route"
-                android:entries="@array/route_entry"
-                android:entryValues="@array/route_value"
-                android:summary="%s"
+                app:entries="@array/route_entry"
+                app:entryValues="@array/route_value"
+                app:summary="%s"
                 android:title="@string/route_list">
-        </ListPreference>
+        </com.github.shadowsocks.preferences.DropDownPreference>
         <SwitchPreference
                 android:key="isIpv6"
                 android:defaultValue="false"
