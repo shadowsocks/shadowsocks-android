@@ -37,27 +37,28 @@
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey">
         </com.github.shadowsocks.preferences.PasswordEditTextPreference>
-        <com.github.shadowsocks.preferences.SummaryListPreference
+        <ListPreference
                 android:defaultValue="rc4"
                 android:key="encMethod"
                 android:entries="@array/enc_method_entry"
                 android:entryValues="@array/enc_method_value"
+                android:summary="%s"
                 android:title="@string/enc_method">
-        </com.github.shadowsocks.preferences.SummaryListPreference>
+        </ListPreference>
 
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="@string/feature_cat">
 
-        <com.github.shadowsocks.preferences.SummaryListPreference
+        <ListPreference
                 android:defaultValue="all"
                 android:key="route"
                 android:entries="@array/route_entry"
                 android:entryValues="@array/route_value"
-                android:summary="@string/route_list_summary"
+                android:summary="%s"
                 android:title="@string/route_list">
-        </com.github.shadowsocks.preferences.SummaryListPreference>
+        </ListPreference>
         <SwitchPreference
                 android:key="isIpv6"
                 android:defaultValue="false"
