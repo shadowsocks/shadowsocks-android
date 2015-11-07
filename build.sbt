@@ -36,7 +36,7 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services-ads" % "8.1.0",
   "com.google.android.gms" % "play-services-analytics" % "8.1.0",
   "com.android.support" % "support-v4" % "23.1.0",
-  "com.github.mrengineer13" % "snackbar" % "1.2.0",
+  "com.android.support" % "design" % "23.1.0",
   "com.nostra13.universalimageloader" % "universal-image-loader" % "1.9.4",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48"
@@ -44,6 +44,7 @@ libraryDependencies ++= Seq(
 
 proguardOptions in Android ++= Seq("-keep class android.support.v4.app.** { *; }",
           "-keep interface android.support.v4.app.** { *; }",
+          "-keep class android.support.v7.widget.Toolbar { <init>(...); }",
           "-keep class com.actionbarsherlock.** { *; }",
           "-keep interface com.actionbarsherlock.** { *; }",
           "-keep class org.jraf.android.backport.** { *; }",

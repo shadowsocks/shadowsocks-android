@@ -51,12 +51,13 @@ import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
 import android.preference._
-import android.support.v4.content.ContextCompat
+import android.support.design.widget.{FloatingActionButton, Snackbar}
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.util.{DisplayMetrics, Log}
 import android.view._
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
-import com.github.mrengineer13.snackbar._
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.preferences.{PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
@@ -173,8 +174,7 @@ object Shadowsocks {
 }
 
 class Shadowsocks
-  extends PreferenceActivity
-  with CompoundButton.OnCheckedChangeListener
+  extends AppCompatActivity
   with MenuAdapter.MenuListener {
 
   // Flags
@@ -184,8 +184,9 @@ class Shadowsocks
   var singlePane: Int = -1
 
   // Variables
-  var switchButton: Switch = null
-  var progressDialog: ProgressDialog = null
+  private var serviceStarted = false
+  var fab: FloatingActionButton = _
+  var progressDialog: ProgressDialog = _
   var progressTag = -1
   var state = State.INIT
   var prepared = false
@@ -210,7 +211,7 @@ class Shadowsocks
         case ignored: RemoteException => // Nothing
       }
       // Update the UI
-      if (switchButton != null) switchButton.setEnabled(true)
+      if (fab != null) fab.setEnabled(true)
       if (State.isAvailable(bgService.getState)) {
         setPreferenceEnabled(enabled = true)
       } else {
@@ -218,8 +219,6 @@ class Shadowsocks
         setPreferenceEnabled(enabled = false)
       }
       state = bgService.getState
-      // set the listener
-      switchButton.setOnCheckedChangeListener(Shadowsocks.this)
 
       if (!status.getBoolean(getVersionName, false)) {
         status.edit.putBoolean(getVersionName, true).commit()
@@ -228,7 +227,7 @@ class Shadowsocks
     }
 
     override def onServiceDisconnected(name: ComponentName) {
-      if (switchButton != null) switchButton.setEnabled(false)
+      if (fab != null) fab.setEnabled(false)
       try {
         if (bgService != null) bgService.unregisterCallback(callback)
       } catch {
@@ -238,8 +237,10 @@ class Shadowsocks
     }
   }
 
-  private lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
-  private lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
+  private lazy val preferences =
+    getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
+  lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
+  lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
   private lazy val preferenceReceiver = new PreferenceBroadcastReceiver
   private lazy val drawer = MenuDrawer.attach(this)
   private lazy val menuAdapter = new MenuAdapter(this, getMenuList)
@@ -265,13 +266,12 @@ class Shadowsocks
   }
 
   private def changeSwitch(checked: Boolean) {
-    switchButton.setOnCheckedChangeListener(null)
-    switchButton.setChecked(checked)
-    if (switchButton.isEnabled) {
-      switchButton.setEnabled(false)
-      handler.postDelayed(() => switchButton.setEnabled(true), 1000)
+    serviceStarted = checked
+    fab.setImageResource(if (checked) R.drawable.ic_cloud else R.drawable.ic_cloud_off)
+    if (fab.isEnabled) {
+      fab.setEnabled(false)
+      handler.postDelayed(() => fab.setEnabled(true), 1000)
     }
-    switchButton.setOnCheckedChangeListener(this)
   }
 
   private def showProgress(msg: Int): Handler = {
@@ -374,16 +374,9 @@ class Shadowsocks
   }
 
   def isTextEmpty(s: String, msg: String): Boolean = {
-    if (s == null || s.length <= 0) {
-      new SnackBar.Builder(this)
-        .withMessage(msg)
-        .withActionMessageId(R.string.error)
-        .withStyle(SnackBar.Style.ALERT)
-        .withDuration(SnackBar.LONG_SNACK)
-        .show()
-      return true
-    }
-    false
+    if (s != null && s.length > 0) return false
+    Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG).show
+    true
   }
 
   def cancelStart() {
@@ -412,24 +405,6 @@ class Shadowsocks
         }
       } else {
         serviceStart()
-      }
-    }
-  }
-
-  def onCheckedChanged(compoundButton: CompoundButton, checked: Boolean) {
-    if (compoundButton eq switchButton) {
-      checked match {
-        case true =>
-          if (isReady)
-            prepareStartService()
-          else
-            changeSwitch(checked = false)
-        case false =>
-          serviceStop()
-      }
-      if (switchButton.isEnabled) {
-        switchButton.setEnabled(false)
-        handler.postDelayed(() => switchButton.setEnabled(true), 1000)
       }
     }
   }
@@ -470,7 +445,7 @@ class Shadowsocks
 
     super.onCreate(savedInstanceState)
 
-    addPreferencesFromResource(R.xml.pref_all)
+    setContentView(R.layout.layout_main)
 
     // Update the profile
     if (!status.getBoolean(getVersionName, false)) {
@@ -502,24 +477,32 @@ class Shadowsocks
     }
 
     // Initialize action bar
-    val switchLayout = getLayoutInflater
-      .inflate(R.layout.layout_switch, null)
-      .asInstanceOf[RelativeLayout]
-    val title: TextView = switchLayout.findViewById(R.id.title).asInstanceOf[TextView]
+    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar.setTitle(getTitle)
+    val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
+    field.setAccessible(true)
+    val title: TextView = field.get(toolbar).asInstanceOf[TextView]
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
-    switchButton = switchLayout.findViewById(R.id.switchButton).asInstanceOf[Switch]
-    getActionBar.setCustomView(switchLayout)
-    getActionBar.setDisplayShowTitleEnabled(false)
-    getActionBar.setDisplayShowCustomEnabled(true)
-    if (Utils.isLollipopOrAbove) {
-      getWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-      getWindow.setStatusBarColor(ContextCompat.getColor(this, R.color.grey3))
-      getActionBar.setDisplayHomeAsUpEnabled(true)
-      getActionBar.setHomeAsUpIndicator(R.drawable.ic_drawer)
-    } else {
-      getActionBar.setIcon(R.drawable.ic_stat_shadowsocks)
-    }
+    fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
+    fab.setOnClickListener((v: View) => {
+      serviceStarted = !serviceStarted
+      serviceStarted match {
+        case true =>
+          if (isReady)
+            prepareStartService()
+          else
+            changeSwitch(checked = false)
+        case false =>
+          serviceStop()
+      }
+      if (fab.isEnabled) {
+        fab.setEnabled(false)
+        handler.postDelayed(() => fab.setEnabled(true), 1000)
+      }
+    })
+    toolbar.setNavigationIcon(R.drawable.ic_drawer)
+    toolbar.setNavigationOnClickListener((v: View) => drawer.toggleMenu())
     title.setOnLongClickListener((v: View) => {
       if (Utils.isLollipopOrAbove && bgService != null
         && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
@@ -785,18 +768,8 @@ class Shadowsocks
     buf.toList
   }
 
-  override def onOptionsItemSelected(item: MenuItem): Boolean = {
-    item.getItemId match {
-      case android.R.id.home =>
-        drawer.toggleMenu()
-        return true
-    }
-    super.onOptionsItemSelected(item)
-  }
-
   protected override def onPause() {
     super.onPause()
-    switchButton.setOnCheckedChangeListener(null)
     prepared = false
   }
 
@@ -812,8 +785,6 @@ class Shadowsocks
           changeSwitch(checked = false)
       }
       state = bgService.getState
-      // set the listener
-      switchButton.setOnCheckedChangeListener(Shadowsocks.this)
     }
     ConfigUtils.refresh(this)
 
@@ -825,13 +796,13 @@ class Shadowsocks
 
   private def setPreferenceEnabled(enabled: Boolean) {
     for (name <- Shadowsocks.PROXY_PREFS) {
-      val pref = findPreference(name)
+      val pref = preferences.findPreference(name)
       if (pref != null) {
         pref.setEnabled(enabled)
       }
     }
     for (name <- Shadowsocks.FEATRUE_PREFS) {
-      val pref = findPreference(name)
+      val pref = preferences.findPreference(name)
       if (pref != null) {
         if (Seq(Key.isGlobalProxy, Key.proxyedApps)
           .contains(name)) {
@@ -846,11 +817,11 @@ class Shadowsocks
   private def updatePreferenceScreen() {
     val profile = currentProfile
     for (name <- Shadowsocks.PROXY_PREFS) {
-      val pref = findPreference(name)
+      val pref = preferences.findPreference(name)
       Shadowsocks.updatePreference(pref, name, profile)
     }
     for (name <- Shadowsocks.FEATRUE_PREFS) {
-      val pref = findPreference(name)
+      val pref = preferences.findPreference(name)
       Shadowsocks.updatePreference(pref, name, profile)
     }
   }
@@ -983,22 +954,14 @@ class Shadowsocks
     try {
       val port: Int = Integer.valueOf(text)
       if (!low && port <= 1024) {
-        new SnackBar.Builder(this)
-          .withMessageId(R.string.port_alert)
-          .withActionMessageId(R.string.error)
-          .withStyle(SnackBar.Style.ALERT)
-          .withDuration(SnackBar.LONG_SNACK)
-          .show()
+        Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content), R.string.port_alert,
+          Snackbar.LENGTH_LONG).show
         return false
       }
     } catch {
       case ex: Exception =>
-        new SnackBar.Builder(this)
-          .withMessageId(R.string.port_alert)
-          .withActionMessageId(R.string.error)
-          .withStyle(SnackBar.Style.ALERT)
-          .withDuration(SnackBar.LONG_SNACK)
-          .show()
+        Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content), R.string.port_alert,
+          Snackbar.LENGTH_LONG).show
         return false
     }
     true
@@ -1072,14 +1035,8 @@ class Shadowsocks
             clearDialog()
           }
           changeSwitch(checked = false)
-          if (m != null) {
-            new SnackBar.Builder(Shadowsocks.this)
-              .withMessage(getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m))
-              .withActionMessageId(R.string.error)
-              .withStyle(SnackBar.Style.ALERT)
-              .withDuration(SnackBar.LONG_SNACK)
-              .show()
-          }
+          if (m != null) Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content),
+            getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
           setPreferenceEnabled(enabled = true)
         case State.STOPPING =>
           if (progressDialog == null) {
