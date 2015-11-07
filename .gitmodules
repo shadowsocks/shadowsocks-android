@@ -1,3 +1,15 @@
 [submodule "src/main/jni/shadowsocks-libev"]
 	path = src/main/jni/shadowsocks-libev
 	url = https://github.com/shadowsocks/shadowsocks-libev
+[submodule "src/main/jni/badvpn"]
+	path = src/main/jni/badvpn
+	url = https://github.com/shadowsocks/badvpn.git
+	branch = shadowsocks-android
+[submodule "src/main/jni/iptables"]
+	path = src/main/jni/iptables
+	url = https://github.com/shadowsocks/iptables.git
+	branch = shadowsocks-android
+[submodule "src/main/jni/libancillary"]
+	path = src/main/jni/libancillary
+	url = https://github.com/shadowsocks/libancillary.git
+	branch = shadowsocks-android
