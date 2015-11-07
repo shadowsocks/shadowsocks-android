@@ -5,6 +5,7 @@
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:duplicateParentState="false">
+  <include layout="@layout/toolbar_light_dark" />
   <RelativeLayout
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"

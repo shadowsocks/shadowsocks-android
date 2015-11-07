@@ -16,11 +16,27 @@
 
 <resources>
 
-    <style name="Theme.AppManager" parent="@style/Theme.Shadow">
+    <style name="Theme.Material" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:alertDialogTheme">@style/Theme.Material.Dialog.Alert</item>
+        <item name="android:dialogTheme">@style/Theme.Material.Dialog</item>
+        <item name="android:navigationBarColor">@color/material_accent_700</item>
+        <item name="colorAccent">@color/material_accent_500</item>
+        <item name="colorButtonNormal">@color/material_accent_500</item>
+        <item name="colorPrimary">@color/material_accent_500</item>
+        <item name="colorPrimaryDark">@color/material_accent_700</item>
+    </style>
+    <style name="Theme.Material.Dialog" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/material_accent_500</item>
+        <item name="colorPrimary">@color/material_accent_500</item>
+        <item name="colorPrimaryDark">@color/material_accent_700</item>
+    </style>
+    <style name="Theme.Material.Dialog.Alert" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/material_accent_500</item>
+        <item name="colorPrimary">@color/material_accent_500</item>
+        <item name="colorPrimaryDark">@color/material_accent_700</item>
     </style>
 
-    <style name="PopupTheme" parent="@android:style/Theme.Holo.Light">
-        <item name="android:windowActionBar">false</item>
+    <style name="PopupTheme" parent="Theme.Material.Dialog">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">false</item>
@@ -29,12 +45,11 @@
         <item name="android:windowSoftInputMode">stateAlwaysHidden</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowCloseOnTouchOutside">true</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <!-- Variation on the Light theme that turns off the title -->
-    <style name="Theme.Shadowsocks" parent="@style/Theme.Shadow">
+    <style name="Theme.Shadowsocks" parent="Theme.Material">
         <item name="menuDrawerStyle">@style/MenuDrawerStyle</item>
     </style>
 
@@ -57,7 +72,7 @@
     </style>
 
     <style name="MenuDrawer.Widget.Title">
-        <item name="android:background">@drawable/md__list_selector_holo_dark</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textAppearance">?android:attr/textAppearance</item>
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
         <item name="android:textSize">18sp</item>

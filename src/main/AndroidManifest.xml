@@ -64,7 +64,7 @@
 
         <activity
                 android:name=".AppManager"
-                android:theme="@style/Theme.AppManager"
+                android:theme="@style/Theme.Material"
                 android:label="@string/app_name"
                 android:parentActivityName=".Shadowsocks">
             <intent-filter>

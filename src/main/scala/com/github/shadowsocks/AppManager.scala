@@ -49,6 +49,7 @@ import android.graphics.{Bitmap, PixelFormat}
 import android.os.Bundle
 import android.os.Handler
 import android.preference.PreferenceManager
+import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -260,9 +261,6 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         }
         Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
         return false
-      case android.R.id.home =>
-        navigateUpTo(getParentActivityIntent)
-        return true
     }
     super.onOptionsItemSelected(item)
   }
@@ -277,11 +275,14 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
 
     handler = new Handler()
 
-    val actionBar = getActionBar
-    actionBar.setTitle(R.string.proxied_help)
-    actionBar.setDisplayHomeAsUpEnabled(true)
-    actionBar.setDisplayShowHomeEnabled(false)
     this.setContentView(R.layout.layout_apps)
+    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar.setTitle(R.string.proxied_help)
+    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
+    toolbar.setNavigationOnClickListener((v: View) => {
+      val intent = getParentActivityIntent
+      if (intent == null) finish else navigateUpTo(intent)
+    })
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
         WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
