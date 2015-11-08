@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <!-- Todo: replace this placeholder icon with a material one -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:title="@string/add_profile"
-          android:icon="@android:drawable/ic_menu_add"
+          android:icon="@drawable/ic_content_add"
           android:alphabeticShortcut="a"
           android:numericShortcut="0"
           app:showAsAction="always">
