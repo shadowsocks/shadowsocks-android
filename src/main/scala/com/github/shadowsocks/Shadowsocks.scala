@@ -51,6 +51,7 @@ import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
 import android.preference.{Preference, PreferenceManager, SwitchPreference}
+import android.support.v4.content.ContextCompat
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -214,13 +215,7 @@ class Shadowsocks
       }
       // Update the UI
       if (fab != null) fab.setEnabled(true)
-      if (State.isAvailable(bgService.getState)) {
-        setPreferenceEnabled(enabled = true)
-      } else {
-        changeSwitch(checked = true)
-        setPreferenceEnabled(enabled = false)
-      }
-      state = bgService.getState
+      stateUpdate()
 
       if (!status.getBoolean(getVersionName, false)) {
         status.edit.putBoolean(getVersionName, true).apply()
@@ -249,8 +244,9 @@ class Shadowsocks
   private lazy val listView = new ListView(this)
   private lazy val profileManager =
     new ProfileManager(settings, getApplication.asInstanceOf[ShadowsocksApplication].dbHelper)
-
   private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
+  private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
+  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_600)
 
   var handler = new Handler()
 
@@ -778,25 +774,33 @@ class Shadowsocks
     prepared = false
   }
 
-  protected override def onResume() {
-    super.onResume()
+  private def stateUpdate() {
     if (bgService != null) {
       bgService.getState match {
         case State.CONNECTING =>
+          fab.setBackgroundTintList(greyTint);
           fabProgressCircle.show()
           changeSwitch(checked = true)
         case State.CONNECTED =>
+          fab.setBackgroundTintList(greenTint);
           fabProgressCircle.hide()
           changeSwitch(checked = true)
         case State.STOPPING =>
+          fab.setBackgroundTintList(greyTint);
           fabProgressCircle.show()
           changeSwitch(checked = false)
         case _ =>
+          fab.setBackgroundTintList(greyTint);
           fabProgressCircle.hide()
           changeSwitch(checked = false)
       }
       state = bgService.getState
     }
+  }
+
+  protected override def onResume() {
+    super.onResume()
+    stateUpdate()
     ConfigUtils.refresh(this)
 
     // Check if profile list changed
@@ -1022,11 +1026,13 @@ class Shadowsocks
     handler.post(() => if (state != s) {
       s match {
         case State.CONNECTING =>
+          fab.setBackgroundTintList(greyTint);
           fab.setImageResource(R.drawable.ic_cloud_queue)
           fab.setEnabled(false)
           fabProgressCircle.show()
           setPreferenceEnabled(enabled = false)
         case State.CONNECTED =>
+          fab.setBackgroundTintList(greenTint);
           if (state == State.CONNECTING) {
             fabProgressCircle.beginFinalAnimation()
           } else {
@@ -1036,6 +1042,7 @@ class Shadowsocks
           changeSwitch(checked = true)
           setPreferenceEnabled(enabled = false)
         case State.STOPPED =>
+          fab.setBackgroundTintList(greyTint);
           handler.postDelayed(() => fabProgressCircle.hide(), 1000)
           fab.setEnabled(true)
           changeSwitch(checked = false)
@@ -1043,6 +1050,7 @@ class Shadowsocks
             getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
           setPreferenceEnabled(enabled = true)
         case State.STOPPING =>
+          fab.setBackgroundTintList(greyTint);
           fab.setImageResource(R.drawable.ic_cloud_queue)
           fab.setEnabled(false)
           fabProgressCircle.show()

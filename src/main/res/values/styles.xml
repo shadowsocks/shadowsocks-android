@@ -16,6 +16,9 @@
 
 <resources>
 
+    <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+            <item name="android:textSize">24sp</item>
+    </style>
     <style name="Theme.Material" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:alertDialogTheme">@style/Theme.Material.Dialog.Alert</item>
         <item name="android:dialogTheme">@style/Theme.Material.Dialog</item>
