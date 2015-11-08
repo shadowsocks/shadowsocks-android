@@ -78,7 +78,7 @@ class ObjectArrayTools[T <: AnyRef](a: Array[T]) {
   }
 }
 
-case class ListEntry(box: CheckBox, text: TextView, icon: ImageView)
+case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
 
 object AppManager {
 
@@ -162,13 +162,13 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         if (convertView == null) {
           convertView = getLayoutInflater.inflate(R.layout.layout_apps_item, parent, false)
           val icon = convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
-          val box = convertView.findViewById(R.id.itemcheck).asInstanceOf[CheckBox]
+          val switch = convertView.findViewById(R.id.itemcheck).asInstanceOf[Switch]
           val text = convertView.findViewById(R.id.itemtext).asInstanceOf[TextView]
-          entry = new ListEntry(box, text, icon)
+          entry = new ListEntry(switch, text, icon)
           entry.text.setOnClickListener(AppManager.this)
           entry.text.setOnClickListener(AppManager.this)
           convertView.setTag(entry)
-          entry.box.setOnCheckedChangeListener(AppManager.this)
+          entry.switch.setOnCheckedChangeListener(AppManager.this)
         } else {
           entry = convertView.getTag.asInstanceOf[ListEntry]
         }
@@ -187,10 +187,10 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         ImageLoader.getInstance().displayImage(Scheme.APP + app.packageName, entry.icon, options)
 
         entry.text.setText(app.name)
-        val box: CheckBox = entry.box
-        box.setTag(app)
-        box.setChecked(app.proxied)
-        entry.text.setTag(box)
+        val switch = entry.switch
+        switch.setTag(app)
+        switch.setChecked(app.proxied)
+        entry.text.setTag(switch)
         convertView
       }
     }
@@ -207,11 +207,11 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
   }
 
   def onClick(v: View) {
-    val cbox: CheckBox = v.getTag.asInstanceOf[CheckBox]
-    val app: ProxiedApp = cbox.getTag.asInstanceOf[ProxiedApp]
+    val switch = v.getTag.asInstanceOf[Switch]
+    val app: ProxiedApp = switch.getTag.asInstanceOf[ProxiedApp]
     if (app != null) {
       app.proxied = !app.proxied
-      cbox.setChecked(app.proxied)
+      switch.setChecked(app.proxied)
     }
     saveAppSettings(this)
   }
@@ -247,8 +247,8 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
                 val array = proxiedAppString.split(" ")
                 val bypass = array(0).toBoolean
                 val apps = if (array.size > 1) array(1) else ""
-                prefs.edit.putBoolean(Key.isBypassApps, bypass).commit()
-                prefs.edit.putString(Key.proxied, apps).commit()
+                prefs.edit.putBoolean(Key.isBypassApps, bypass).apply()
+                prefs.edit.putString(Key.proxied, apps).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 // Restart activity
                 val intent = getIntent
@@ -299,7 +299,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>
-      prefs.edit().putBoolean(Key.isBypassApps, checked).commit())
+      prefs.edit().putBoolean(Key.isBypassApps, checked).apply())
     bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
 
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
@@ -325,7 +325,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
       })
     val edit: SharedPreferences.Editor = prefs.edit
     edit.putString(Key.proxied, proxiedApps.toString())
-    edit.commit
+    edit.apply
   }
 
   val loadStartRunnable = new Runnable {

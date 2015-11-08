@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TODO: Remove when this issue is fixed: https://github.com/JorgeCastilloPrz/FABProgressCircle/issues/19 -->
+    <dimen name="fab_margin_bottom">-44dp</dimen>
+</resources>

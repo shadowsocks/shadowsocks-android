@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
     <PreferenceCategory
             android:title="@string/proxy_cat">
@@ -37,40 +38,41 @@
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey">
         </com.github.shadowsocks.preferences.PasswordEditTextPreference>
-        <com.github.shadowsocks.preferences.SummaryListPreference
+        <com.github.shadowsocks.preferences.DropDownPreference
                 android:defaultValue="rc4"
                 android:key="encMethod"
-                android:entries="@array/enc_method_entry"
-                android:entryValues="@array/enc_method_value"
+                app:entries="@array/enc_method_entry"
+                app:entryValues="@array/enc_method_value"
+                app:summary="%s"
                 android:title="@string/enc_method">
-        </com.github.shadowsocks.preferences.SummaryListPreference>
+        </com.github.shadowsocks.preferences.DropDownPreference>
 
     </PreferenceCategory>
 
     <PreferenceCategory
             android:title="@string/feature_cat">
 
-        <com.github.shadowsocks.preferences.SummaryListPreference
+        <com.github.shadowsocks.preferences.DropDownPreference
                 android:defaultValue="all"
                 android:key="route"
-                android:entries="@array/route_entry"
-                android:entryValues="@array/route_value"
-                android:summary="@string/route_list_summary"
+                app:entries="@array/route_entry"
+                app:entryValues="@array/route_value"
+                app:summary="%s"
                 android:title="@string/route_list">
-        </com.github.shadowsocks.preferences.SummaryListPreference>
-        <CheckBoxPreference
+        </com.github.shadowsocks.preferences.DropDownPreference>
+        <SwitchPreference
                 android:key="isIpv6"
                 android:defaultValue="false"
                 android:summary="@string/ipv6_summary"
                 android:title="@string/ipv6">
-        </CheckBoxPreference>
-        <CheckBoxPreference
+        </SwitchPreference>
+        <SwitchPreference
                 android:defaultValue="true"
                 android:key="isGlobalProxy"
                 android:disableDependentsState="true"
                 android:summary="@string/auto_set_proxy_summary"
                 android:title="@string/auto_set_proxy">
-        </CheckBoxPreference>
+        </SwitchPreference>
         <Preference
                 android:key="proxyedApps"
                 android:dependency="isGlobalProxy"
@@ -78,23 +80,23 @@
                 android:title="@string/proxied_apps">
             <intent android:action="com.github.shadowsocks.AppManager"/>
         </Preference>
-        <CheckBoxPreference
+        <SwitchPreference
                 android:key="isUdpDns"
                 android:defaultValue="false"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns">
-        </CheckBoxPreference>
-        <CheckBoxPreference
+        </SwitchPreference>
+        <SwitchPreference
                 android:key="isAuth"
                 android:defaultValue="false"
                 android:summary="@string/onetime_auth_summary"
                 android:title="@string/onetime_auth">
-        </CheckBoxPreference>
-        <CheckBoxPreference
+        </SwitchPreference>
+        <SwitchPreference
                 android:key="isAutoConnect"
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect">
-        </CheckBoxPreference>
+        </SwitchPreference>
 
     </PreferenceCategory>
 

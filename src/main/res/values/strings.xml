@@ -37,7 +37,6 @@
   <string name="auto_set_gfwlist_summary">Bypass all sites located in China
   </string>
   <string name="route_list">Route</string>
-  <string name="route_list_summary">Bypass IP addresses in the route list</string>
   <string name="auto_set_proxy">Global Proxy</string>
   <string name="auto_set_proxy_summary">Set up system-wide proxy</string>
   <string name="proxied_apps">Per-App Proxy</string>
@@ -75,7 +74,7 @@
   <string name="proxy_empty">Proxy should not be empty</string>
   <string name="crash_alert">An unexpected exit detected, the context has been reset.
   </string>
-  <string name="connecting">Connecting…</string>
+  <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
   <string name="loading">Loading…</string>

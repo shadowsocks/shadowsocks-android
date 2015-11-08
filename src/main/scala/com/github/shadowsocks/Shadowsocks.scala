@@ -50,17 +50,18 @@ import android.content.res.AssetManager
 import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
-import android.preference._
+import android.preference.{Preference, PreferenceManager, SwitchPreference}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.{DisplayMetrics, Log}
-import android.view._
+import android.view.{View, ViewGroup, ViewParent}
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
+import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
-import com.github.shadowsocks.preferences.{PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences.{DropDownPreference, PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import com.google.android.gms.analytics.HitBuilders
@@ -132,8 +133,8 @@ object Shadowsocks {
   val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL, Executable.TUN2SOCKS)
 
   // Helper functions
-  def updateListPreference(pref: Preference, value: String) {
-    pref.asInstanceOf[ListPreference].setValue(value)
+  def updateDropDownPreference(pref: Preference, value: String) {
+    pref.asInstanceOf[DropDownPreference].setValue(value)
   }
 
   def updatePasswordEditTextPreference(pref: Preference, value: String) {
@@ -151,8 +152,8 @@ object Shadowsocks {
     pref.asInstanceOf[ProfileEditTextPreference].setText(value)
   }
 
-  def updateCheckBoxPreference(pref: Preference, value: Boolean) {
-    pref.asInstanceOf[CheckBoxPreference].setChecked(value)
+  def updateSwitchPreference(pref: Preference, value: Boolean) {
+    pref.asInstanceOf[SwitchPreference].setChecked(value)
   }
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
@@ -162,12 +163,12 @@ object Shadowsocks {
       case Key.remotePort => updateSummaryEditTextPreference(pref, profile.remotePort.toString)
       case Key.localPort => updateSummaryEditTextPreference(pref, profile.localPort.toString)
       case Key.sitekey => updatePasswordEditTextPreference(pref, profile.password)
-      case Key.encMethod => updateListPreference(pref, profile.method)
-      case Key.route => updateListPreference(pref, profile.route)
-      case Key.isGlobalProxy => updateCheckBoxPreference(pref, profile.global)
-      case Key.isUdpDns => updateCheckBoxPreference(pref, profile.udpdns)
-      case Key.isAuth => updateCheckBoxPreference(pref, profile.auth)
-      case Key.isIpv6 => updateCheckBoxPreference(pref, profile.ipv6)
+      case Key.encMethod => updateDropDownPreference(pref, profile.method)
+      case Key.route => updateDropDownPreference(pref, profile.route)
+      case Key.isGlobalProxy => updateSwitchPreference(pref, profile.global)
+      case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
+      case Key.isAuth => updateSwitchPreference(pref, profile.auth)
+      case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
       case _ =>
     }
   }
@@ -186,6 +187,7 @@ class Shadowsocks
   // Variables
   private var serviceStarted = false
   var fab: FloatingActionButton = _
+  var fabProgressCircle: FABProgressCircle = _
   var progressDialog: ProgressDialog = _
   var progressTag = -1
   var state = State.INIT
@@ -221,7 +223,7 @@ class Shadowsocks
       state = bgService.getState
 
       if (!status.getBoolean(getVersionName, false)) {
-        status.edit.putBoolean(getVersionName, true).commit()
+        status.edit.putBoolean(getVersionName, true).apply()
         recovery()
       }
     }
@@ -394,7 +396,6 @@ class Shadowsocks
   }
 
   def prepareStartService() {
-    showProgress(R.string.connecting)
     Future {
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
@@ -485,6 +486,7 @@ class Shadowsocks
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
+    fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener((v: View) => {
       serviceStarted = !serviceStarted
       serviceStarted match {
@@ -495,24 +497,31 @@ class Shadowsocks
             changeSwitch(checked = false)
         case false =>
           serviceStop()
+          if (fab.isEnabled) {
+            fab.setEnabled(false)
+            handler.postDelayed(() => {
+              fab.setEnabled(true)
+            }, 1000)
+          }
       }
-      if (fab.isEnabled) {
-        fab.setEnabled(false)
-        handler.postDelayed(() => fab.setEnabled(true), 1000)
-      }
+    })
+    fab.setOnLongClickListener((v: View) => {
+      Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
+        Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8).toInt).show
+      true
     })
     toolbar.setNavigationIcon(R.drawable.ic_drawer)
     toolbar.setNavigationOnClickListener((v: View) => drawer.toggleMenu())
     title.setOnLongClickListener((v: View) => {
       if (Utils.isLollipopOrAbove && bgService != null
         && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
-        val natEnabled = status.getBoolean(Key.isNAT, false)
-        status.edit().putBoolean(Key.isNAT, !natEnabled).commit()
-        if (!natEnabled) {
-          Toast.makeText(getBaseContext, R.string.enable_nat, Toast.LENGTH_LONG).show()
-        } else {
-          Toast.makeText(getBaseContext, R.string.disable_nat, Toast.LENGTH_LONG).show()
-        }
+        val natEnabled = !status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove)
+        status.edit().putBoolean(Key.isNAT, natEnabled).apply()
+        deattachService()
+        attachService()
+        if (!Utils.isLollipopOrAbove) setPreferenceEnabled(State.isAvailable(bgService.getState))
+        Toast.makeText(getBaseContext, if (natEnabled) R.string.enable_nat else R.string.disable_nat, Toast.LENGTH_LONG)
+          .show()
         true
       } else {
         false
@@ -523,13 +532,9 @@ class Shadowsocks
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
     // Bind to the service
-    Future {
-      val isRoot = (!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot
-      handler.post(() => {
-        status.edit.putBoolean(Key.isRoot, isRoot).commit()
-        attachService()
-      })
-    }
+    handler.post(() => {
+      attachService()
+    })
   }
 
   def attachService() {
@@ -777,11 +782,17 @@ class Shadowsocks
     super.onResume()
     if (bgService != null) {
       bgService.getState match {
-        case State.CONNECTED =>
-          changeSwitch(checked = true)
         case State.CONNECTING =>
+          fabProgressCircle.show()
           changeSwitch(checked = true)
+        case State.CONNECTED =>
+          fabProgressCircle.hide()
+          changeSwitch(checked = true)
+        case State.STOPPING =>
+          fabProgressCircle.show()
+          changeSwitch(checked = false)
         case _ =>
+          fabProgressCircle.hide()
           changeSwitch(checked = false)
       }
       state = bgService.getState
@@ -886,7 +897,6 @@ class Shadowsocks
 
   private def showQrCode() {
     val image = new ImageView(this)
-    image.setPadding(0, dp2px(20), 0, dp2px(20))
     image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
     val qrcode = QRCode.from(Parser.generate(currentProfile))
       .withSize(dp2px(250), dp2px(250)).asInstanceOf[QRCode]
@@ -928,15 +938,10 @@ class Shadowsocks
     }
   }
 
+  var isRoot: Option[Boolean] = None
   def isVpnEnabled: Boolean = {
-    if (vpnEnabled < 0) {
-      vpnEnabled = if (!status.getBoolean(Key.isRoot, false)) {
-        1
-      } else {
-        0
-      }
-    }
-    if (vpnEnabled == 1) true else false
+    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
+    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
   }
 
   def serviceStop() {
@@ -1015,36 +1020,31 @@ class Shadowsocks
 
   def onStateChanged(s: Int, m: String) {
     handler.post(() => if (state != s) {
-      state = s
-      state match {
+      s match {
         case State.CONNECTING =>
-          if (progressDialog == null) {
-            progressDialog = ProgressDialog
-              .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
-            progressTag = R.string.connecting
-          }
+          fab.setImageResource(R.drawable.ic_cloud_queue)
+          fab.setEnabled(false)
+          fabProgressCircle.show()
           setPreferenceEnabled(enabled = false)
         case State.CONNECTED =>
-          if (progressTag == R.string.connecting) {
-            clearDialog()
-          }
+          if (state == State.CONNECTING) fabProgressCircle.beginFinalAnimation() else fabProgressCircle.hide()
+          fab.setEnabled(true)
           changeSwitch(checked = true)
           setPreferenceEnabled(enabled = false)
         case State.STOPPED =>
-          if (progressTag == R.string.stopping || progressTag == R.string.connecting) {
-            clearDialog()
-          }
+          handler.post(() => fabProgressCircle.hide())
+          fab.setEnabled(true)
           changeSwitch(checked = false)
           if (m != null) Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content),
             getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
           setPreferenceEnabled(enabled = true)
         case State.STOPPING =>
-          if (progressDialog == null) {
-            progressDialog = ProgressDialog
-              .show(Shadowsocks.this, "", getString(R.string.stopping), true, true)
-            progressTag = R.string.stopping
-          }
+          fab.setImageResource(R.drawable.ic_cloud_queue)
+          fab.setEnabled(false)
+          fabProgressCircle.show()
+          setPreferenceEnabled(enabled = false)
       }
+      state = s
     })
   }
 

@@ -50,6 +50,7 @@ import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{Network, ConnectivityManager}
 import android.os._
 import android.support.v4.app.NotificationCompat
+import android.support.v4.content.ContextCompat
 import android.util.{SparseArray, Log}
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
@@ -319,6 +320,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     builder
       .setWhen(0)
+      .setColor(ContextCompat.getColor(this, R.color.material_accent_500))
       .setTicker(title)
       .setContentTitle(getString(R.string.app_name))
       .setContentText(info)

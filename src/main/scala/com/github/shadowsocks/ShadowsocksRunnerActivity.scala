@@ -65,19 +65,13 @@ class ShadowsocksRunnerActivity extends Activity {
   }
 
   // Variables
-  var vpnEnabled = -1
-  var bgService: IShadowsocksService = null
-  var receiver:BroadcastReceiver = null
+  var isRoot: Option[Boolean] = None
+  var bgService: IShadowsocksService = _
+  var receiver:BroadcastReceiver = _
 
   def isVpnEnabled: Boolean = {
-    if (vpnEnabled < 0) {
-      vpnEnabled = if ((!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot) {
-        0
-      } else {
-        1
-      }
-    }
-    if (vpnEnabled == 1) true else false
+    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
+    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
   }
 
 
@@ -127,6 +121,7 @@ class ShadowsocksRunnerActivity extends Activity {
     } else {
       attachService()
     }
+    finish
   }
 
   override def onDestroy() {

@@ -26,7 +26,6 @@
   <string name="auto_set_gfwlist">国内路由</string>
   <string name="auto_set_gfwlist_summary">绕过所有位于中国的网站</string>
   <string name="route_list">路由</string>
-  <string name="route_list_summary">绕过指定路由列表中的地址</string>
   <string name="auto_set_proxy">全局代理</string>
   <string name="auto_set_proxy_summary">设置系统代理</string>
   <string name="proxied_apps">分应用代理</string>
@@ -54,7 +53,7 @@
   <string name="port_empty">端口号不能为空</string>
   <string name="proxy_empty">代理服务器地址不能为空</string>
   <string name="crash_alert">检测到意外退出，状态已被重置。</string>
-  <string name="connecting">正在连接...</string>
+  <string name="connect">连接</string>
   <string name="initializing">正在初始化...</string>
   <string name="recovering">重置中...</string>
   <string name="loading">正在加载...</string>

@@ -50,7 +50,10 @@ import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.content.ContextCompat
-import android.util.{Base64, Log}
+import android.util.{DisplayMetrics, Base64, Log}
+import android.view.View.MeasureSpec
+import android.view.{Gravity, View, Window}
+import android.widget.Toast
 import com.github.shadowsocks.BuildConfig
 import org.xbill.DNS._
 
@@ -72,20 +75,13 @@ object Utils {
   val TIME_OUT: Int = -99
   var initialized: Boolean = false
   var hasRedirectSupport: Int = -1
-  var isRoot: Int = -1
   var shell: String = null
   var root_shell: String = null
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
 
-  def isLollipopOrAbove: Boolean = {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      true
-    } else {
-      false
-    }
-  }
+  def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
   def getSignature(context: Context): String = {
     val info = context
@@ -124,6 +120,23 @@ object Utils {
       .drawText(text, (bitmap.getWidth - bounds.width()) / 2,
       bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
     bitmap
+  }
+
+  // Based on: http://stackoverflow.com/a/21026866/2245107
+  def positionToast(toast: Toast, view: View, window: Window, offsetX: Int = 0, offsetY: Int = 0) = {
+    val rect = new Rect
+    window.getDecorView.getWindowVisibleDisplayFrame(rect)
+    val viewLocation = new Array[Int](2)
+    view.getLocationInWindow(viewLocation)
+    val metrics = new DisplayMetrics
+    window.getWindowManager.getDefaultDisplay.getMetrics(metrics)
+    val toastView = toast.getView
+    toastView.measure(MeasureSpec.makeMeasureSpec(metrics.widthPixels, MeasureSpec.UNSPECIFIED),
+      MeasureSpec.makeMeasureSpec(metrics.heightPixels, MeasureSpec.UNSPECIFIED))
+    toast.setGravity(Gravity.LEFT | Gravity.TOP,
+      viewLocation(0) - rect.left + (view.getWidth - toast.getView.getMeasuredWidth) / 2 + offsetX,
+      viewLocation(1) - rect.top + view.getHeight + offsetY)
+    toast
   }
 
   // Blocked > 3 seconds

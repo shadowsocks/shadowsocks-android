@@ -66,7 +66,6 @@ object Key {
   val proxied = "Proxyed"
 
   val isNAT = "isNAT"
-  val isRoot = "isRoot"
   val status = "status"
   val proxyedApps = "proxyedApps"
   val route = "route"
