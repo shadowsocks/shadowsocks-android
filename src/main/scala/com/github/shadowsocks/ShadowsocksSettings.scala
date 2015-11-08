@@ -15,7 +15,6 @@ class ShadowsocksSettings extends PreferenceFragment {
       if (ShadowsocksApplication.isRoot) activity.handler.post(() => {
         activity.deattachService()
         activity.attachService()
-        true
       }) else false)
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "reset")
