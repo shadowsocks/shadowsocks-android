@@ -368,7 +368,7 @@ class Shadowsocks
       val adView = new AdView(this)
       adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
       adView.setAdSize(AdSize.SMART_BANNER)
-      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)  // TODO: test
+      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)
       adView.loadAd(new AdRequest.Builder().build())
     }
 
