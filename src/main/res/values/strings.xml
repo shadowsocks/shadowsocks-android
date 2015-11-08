@@ -8,6 +8,9 @@
   <string name="global_cat">Global Settings</string>
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile</string>
+  <string name="nat">NAT mode</string>
+  <string name="nat_summary">Use NAT/VPN mode.</string>
+  <string name="nat_summary_no_root">NAT mode is disabled without root.</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
@@ -55,10 +58,8 @@
   <string name="service_running">Connected to "%s"</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="stop">Stop the service</string>
-  <string name="stopping">Shutting down...</string>
+  <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
-  <string name="enable_nat">Turn on NAT mode.</string>
-  <string name="disable_nat">Turn off NAT mode.</string>
 
   <!-- alert category -->
   <string name="close">Close</string>

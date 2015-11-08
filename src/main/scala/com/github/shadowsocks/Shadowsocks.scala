@@ -197,8 +197,8 @@ class Shadowsocks
       if (fab != null) fab.setEnabled(true)
       stateUpdate()
 
-      if (!status.getBoolean(ShadowsocksApplication.getVersionName, false)) {
-        status.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
+      if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
+        ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
         recovery()
       }
     }
@@ -216,7 +216,6 @@ class Shadowsocks
 
   private lazy val preferences =
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
-  private lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_600)
 
@@ -340,7 +339,7 @@ class Shadowsocks
 
   def prepareStartService() {
     Future {
-      if (isVpnEnabled) {
+      if (ShadowsocksApplication.isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
           startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
@@ -374,7 +373,7 @@ class Shadowsocks
     }
 
     // Update the profile
-    if (!status.getBoolean(ShadowsocksApplication.getVersionName, false)) {
+    if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
       currentProfile = ShadowsocksApplication.profileManager.create()
     }
 
@@ -395,21 +394,6 @@ class Shadowsocks
     title.setOnClickListener((view: View) => {
       ShadowsocksApplication.track(TAG, "about")
       showAbout()
-    })
-    title.setOnLongClickListener((v: View) => {
-      if (Utils.isLollipopOrAbove && bgService != null
-        && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
-        val natEnabled = !status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove)
-        status.edit().putBoolean(Key.isNAT, natEnabled).apply()
-        deattachService()
-        attachService()
-        if (!Utils.isLollipopOrAbove) setPreferenceEnabled(State.isAvailable(bgService.getState))
-        Toast.makeText(getBaseContext, if (natEnabled) R.string.enable_nat else R.string.disable_nat, Toast.LENGTH_LONG)
-          .show()
-        true
-      } else {
-        false
-      }
     })
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
@@ -446,7 +430,8 @@ class Shadowsocks
 
   def attachService() {
     if (bgService == null) {
-      val s = if (!isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      val s = if (ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksVpnService]
+      else classOf[ShadowsocksNatService]
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
@@ -526,6 +511,7 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
+    preferences.findPreference(Key.isNAT).setEnabled(enabled)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)
       if (pref != null) {
@@ -537,7 +523,7 @@ class Shadowsocks
       if (pref != null) {
         if (Seq(Key.isGlobalProxy, Key.proxyedApps)
           .contains(name)) {
-          pref.setEnabled(enabled && (Utils.isLollipopOrAbove || !isVpnEnabled))
+          pref.setEnabled(enabled && (Utils.isLollipopOrAbove || !ShadowsocksApplication.isVpnEnabled))
         } else {
           pref.setEnabled(enabled)
         }
@@ -628,12 +614,6 @@ class Shadowsocks
       Log.e(Shadowsocks.TAG, "Failed to start VpnService")
   }
 
-  var isRoot: Option[Boolean] = None
-  def isVpnEnabled: Boolean = {
-    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
-    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
-  }
-
   def serviceStop() {
     if (bgService != null) bgService.stop()
   }
@@ -666,7 +646,7 @@ class Shadowsocks
   def serviceStart() {
     bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
 
-    if (isVpnEnabled) {
+    if (ShadowsocksApplication.isVpnEnabled) {
       changeSwitch(checked = false)
     }
   }

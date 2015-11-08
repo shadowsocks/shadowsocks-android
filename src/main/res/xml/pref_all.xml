@@ -7,7 +7,9 @@
         <Preference android:summary="@string/profile_summary" android:title="@string/profile">
             <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
         </Preference>
-        <!-- TODO: VPN/NAT SwitchPreference -->
+        <com.github.shadowsocks.preferences.NatSwitchPreference android:key="isNAT"
+                                                                android:title="@string/nat"
+                                                                android:summary="@string/nat_summary"/>
         <SwitchPreference
                 android:key="isAutoConnect"
                 android:summary="@string/auto_connect_summary"

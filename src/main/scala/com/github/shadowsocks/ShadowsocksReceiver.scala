@@ -39,12 +39,7 @@
 
 package com.github.shadowsocks
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.preference.PreferenceManager
+import android.content.{BroadcastReceiver, Context, Intent}
 import com.github.shadowsocks.utils._
 
 class ShadowsocksReceiver extends BroadcastReceiver {
@@ -52,18 +47,8 @@ class ShadowsocksReceiver extends BroadcastReceiver {
   val TAG = "Shadowsocks"
 
   def onReceive(context: Context, intent: Intent) {
-    val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    val status = context.getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-
-    var versionName: String = null
-    try {
-      versionName = context.getPackageManager.getPackageInfo(context.getPackageName, 0).versionName
-    } catch {
-      case e: PackageManager.NameNotFoundException =>
-        versionName = "NONE"
-    }
-    val isAutoConnect: Boolean = settings.getBoolean(Key.isAutoConnect, false)
-    val isInstalled: Boolean = status.getBoolean(versionName, false)
+    val isAutoConnect: Boolean = ShadowsocksApplication.settings.getBoolean(Key.isAutoConnect, false)
+    val isInstalled: Boolean = ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)
     if (isAutoConnect && isInstalled) {
       if (Utils.isLollipopOrAbove) {
         val intent = new Intent(context, classOf[ShadowsocksRunnerService])
