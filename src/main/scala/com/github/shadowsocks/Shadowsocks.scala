@@ -505,6 +505,11 @@ class Shadowsocks
           }
       }
     })
+    fab.setOnLongClickListener((v: View) => {
+      Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
+        Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8).toInt).show
+      true
+    })
     toolbar.setNavigationIcon(R.drawable.ic_drawer)
     toolbar.setNavigationOnClickListener((v: View) => drawer.toggleMenu())
     title.setOnLongClickListener((v: View) => {

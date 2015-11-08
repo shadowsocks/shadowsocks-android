@@ -74,7 +74,7 @@
   <string name="proxy_empty">Proxy should not be empty</string>
   <string name="crash_alert">An unexpected exit detected, the context has been reset.
   </string>
-  <string name="connecting">Connecting…</string>
+  <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
   <string name="loading">Loading…</string>

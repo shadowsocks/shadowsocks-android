@@ -53,7 +53,7 @@
   <string name="port_empty">端口号不能为空</string>
   <string name="proxy_empty">代理服务器地址不能为空</string>
   <string name="crash_alert">检测到意外退出，状态已被重置。</string>
-  <string name="connecting">正在连接...</string>
+  <string name="connect">连接</string>
   <string name="initializing">正在初始化...</string>
   <string name="recovering">重置中...</string>
   <string name="loading">正在加载...</string>
