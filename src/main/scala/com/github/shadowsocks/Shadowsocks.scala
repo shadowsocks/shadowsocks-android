@@ -1027,12 +1027,16 @@ class Shadowsocks
           fabProgressCircle.show()
           setPreferenceEnabled(enabled = false)
         case State.CONNECTED =>
-          if (state == State.CONNECTING) fabProgressCircle.beginFinalAnimation() else fabProgressCircle.hide()
+          if (state == State.CONNECTING) {
+            fabProgressCircle.beginFinalAnimation()
+          } else {
+            handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+          }
           fab.setEnabled(true)
           changeSwitch(checked = true)
           setPreferenceEnabled(enabled = false)
         case State.STOPPED =>
-          handler.post(() => fabProgressCircle.hide())
+          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
           fab.setEnabled(true)
           changeSwitch(checked = false)
           if (m != null) Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content),
