@@ -786,11 +786,17 @@ class Shadowsocks
     super.onResume()
     if (bgService != null) {
       bgService.getState match {
-        case State.CONNECTED =>
-          changeSwitch(checked = true)
         case State.CONNECTING =>
+          fabProgressCircle.show()
           changeSwitch(checked = true)
+        case State.CONNECTED =>
+          fabProgressCircle.hide()
+          changeSwitch(checked = true)
+        case State.STOPPING =>
+          fabProgressCircle.show()
+          changeSwitch(checked = false)
         case _ =>
+          fabProgressCircle.hide()
           changeSwitch(checked = false)
       }
       state = bgService.getState
@@ -1036,7 +1042,7 @@ class Shadowsocks
           changeSwitch(checked = true)
           setPreferenceEnabled(enabled = false)
         case State.STOPPED =>
-          fabProgressCircle.hide()
+          handler.post(() => fabProgressCircle.hide())
           fab.setEnabled(true)
           changeSwitch(checked = false)
           if (m != null) Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content),
