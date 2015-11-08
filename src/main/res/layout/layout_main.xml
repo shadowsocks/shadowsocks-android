@@ -15,7 +15,7 @@
                                                    android:layout_alignParentEnd="true"
                                                    android:layout_marginRight="16dp"
                                                    android:layout_marginEnd="16dp"
-                                                   android:layout_marginBottom="-28dp">
+                                                   android:layout_marginBottom="@dimen/fab_margin_bottom">
         <android.support.design.widget.FloatingActionButton android:id="@+id/fab" android:layout_width="wrap_content"
                                                             android:layout_height="wrap_content"
                                                             app:backgroundTint="@color/material_green_600"
