@@ -901,7 +901,6 @@ class Shadowsocks
 
   private def showQrCode() {
     val image = new ImageView(this)
-    image.setPadding(0, dp2px(20), 0, dp2px(20))
     image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
     val qrcode = QRCode.from(Parser.generate(currentProfile))
       .withSize(dp2px(250), dp2px(250)).asInstanceOf[QRCode]
