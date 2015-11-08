@@ -217,7 +217,7 @@ class Shadowsocks
   private lazy val preferences =
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
-  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_600)
+  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
 
   var handler = new Handler()
 
