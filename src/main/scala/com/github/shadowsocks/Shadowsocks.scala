@@ -223,7 +223,7 @@ class Shadowsocks
       state = bgService.getState
 
       if (!status.getBoolean(getVersionName, false)) {
-        status.edit.putBoolean(getVersionName, true).commit()
+        status.edit.putBoolean(getVersionName, true).apply()
         recovery()
       }
     }
@@ -515,13 +515,13 @@ class Shadowsocks
     title.setOnLongClickListener((v: View) => {
       if (Utils.isLollipopOrAbove && bgService != null
         && (bgService.getState == State.INIT || bgService.getState == State.STOPPED)) {
-        val natEnabled = status.getBoolean(Key.isNAT, false)
-        status.edit().putBoolean(Key.isNAT, !natEnabled).commit()
-        if (!natEnabled) {
-          Toast.makeText(getBaseContext, R.string.enable_nat, Toast.LENGTH_LONG).show()
-        } else {
-          Toast.makeText(getBaseContext, R.string.disable_nat, Toast.LENGTH_LONG).show()
-        }
+        val natEnabled = !status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove)
+        status.edit().putBoolean(Key.isNAT, natEnabled).apply()
+        deattachService()
+        attachService()
+        if (!Utils.isLollipopOrAbove) setPreferenceEnabled(State.isAvailable(bgService.getState))
+        Toast.makeText(getBaseContext, if (natEnabled) R.string.enable_nat else R.string.disable_nat, Toast.LENGTH_LONG)
+          .show()
         true
       } else {
         false
@@ -532,13 +532,9 @@ class Shadowsocks
     registerReceiver(preferenceReceiver, new IntentFilter(Action.UPDATE_PREFS))
 
     // Bind to the service
-    Future {
-      val isRoot = (!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot
-      handler.post(() => {
-        status.edit.putBoolean(Key.isRoot, isRoot).commit()
-        attachService()
-      })
-    }
+    handler.post(() => {
+      attachService()
+    })
   }
 
   def attachService() {
@@ -942,15 +938,10 @@ class Shadowsocks
     }
   }
 
+  var isRoot: Option[Boolean] = None
   def isVpnEnabled: Boolean = {
-    if (vpnEnabled < 0) {
-      vpnEnabled = if (!status.getBoolean(Key.isRoot, false)) {
-        1
-      } else {
-        0
-      }
-    }
-    if (vpnEnabled == 1) true else false
+    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
+    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
   }
 
   def serviceStop() {
@@ -1051,6 +1042,7 @@ class Shadowsocks
           fab.setImageResource(R.drawable.ic_cloud_queue)
           fab.setEnabled(false)
           fabProgressCircle.show()
+          setPreferenceEnabled(enabled = false)
       }
       state = s
     })

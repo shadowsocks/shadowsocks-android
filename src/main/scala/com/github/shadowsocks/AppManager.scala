@@ -247,8 +247,8 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
                 val array = proxiedAppString.split(" ")
                 val bypass = array(0).toBoolean
                 val apps = if (array.size > 1) array(1) else ""
-                prefs.edit.putBoolean(Key.isBypassApps, bypass).commit()
-                prefs.edit.putString(Key.proxied, apps).commit()
+                prefs.edit.putBoolean(Key.isBypassApps, bypass).apply()
+                prefs.edit.putString(Key.proxied, apps).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 // Restart activity
                 val intent = getIntent
@@ -299,7 +299,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>
-      prefs.edit().putBoolean(Key.isBypassApps, checked).commit())
+      prefs.edit().putBoolean(Key.isBypassApps, checked).apply())
     bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
 
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
@@ -325,7 +325,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
       })
     val edit: SharedPreferences.Editor = prefs.edit
     edit.putString(Key.proxied, proxiedApps.toString())
-    edit.commit
+    edit.apply
   }
 
   val loadStartRunnable = new Runnable {

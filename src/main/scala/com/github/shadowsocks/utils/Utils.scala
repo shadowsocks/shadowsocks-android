@@ -75,20 +75,13 @@ object Utils {
   val TIME_OUT: Int = -99
   var initialized: Boolean = false
   var hasRedirectSupport: Int = -1
-  var isRoot: Int = -1
   var shell: String = null
   var root_shell: String = null
   var iptables: String = null
   var data_path: String = null
   var rootTries = 0
 
-  def isLollipopOrAbove: Boolean = {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      true
-    } else {
-      false
-    }
-  }
+  def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
   def getSignature(context: Context): String = {
     val info = context

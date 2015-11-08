@@ -133,7 +133,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     edit.putString(Key.proxied, profile.individual)
     edit.putInt(Key.profileId, profile.id)
     edit.putString(Key.route, profile.route)
-    edit.commit()
+    edit.apply()
 
     profile
   }

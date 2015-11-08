@@ -64,18 +64,12 @@ class ShadowsocksRunnerService extends Service {
   }
 
   // Variables
-  var vpnEnabled = -1
-  var bgService: IShadowsocksService = null
+  var isRoot: Option[Boolean] = None
+  var bgService: IShadowsocksService = _
 
   def isVpnEnabled: Boolean = {
-    if (vpnEnabled < 0) {
-      vpnEnabled = if ((!Utils.isLollipopOrAbove || status.getBoolean(Key.isNAT, false)) && Console.isRoot) {
-        0
-      } else {
-        1
-      }
-    }
-    if (vpnEnabled == 1) true else false
+    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
+    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
   }
 
   override def onBind(intent: Intent): IBinder = {
