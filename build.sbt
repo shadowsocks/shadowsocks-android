@@ -37,6 +37,7 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services-analytics" % "8.1.0",
   "com.android.support" % "support-v4" % "23.1.0",
   "com.android.support" % "design" % "23.1.0",
+  "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.nostra13.universalimageloader" % "universal-image-loader" % "1.9.4",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48"

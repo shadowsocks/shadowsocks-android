@@ -50,7 +50,7 @@ import android.content.res.AssetManager
 import android.graphics.{Bitmap, Color, Typeface}
 import android.net.{Uri, VpnService}
 import android.os._
-import android.preference.{PreferenceManager, SwitchPreference, Preference}
+import android.preference.{Preference, PreferenceManager, SwitchPreference}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
@@ -58,6 +58,7 @@ import android.util.{DisplayMetrics, Log}
 import android.view.{View, ViewGroup, ViewParent}
 import android.webkit.{WebView, WebViewClient}
 import android.widget._
+import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.preferences.{DropDownPreference, PasswordEditTextPreference, ProfileEditTextPreference, SummaryEditTextPreference}
@@ -186,6 +187,7 @@ class Shadowsocks
   // Variables
   private var serviceStarted = false
   var fab: FloatingActionButton = _
+  var fabProgressCircle: FABProgressCircle = _
   var progressDialog: ProgressDialog = _
   var progressTag = -1
   var state = State.INIT
@@ -394,7 +396,6 @@ class Shadowsocks
   }
 
   def prepareStartService() {
-    showProgress(R.string.connecting)
     Future {
       if (isVpnEnabled) {
         val intent = VpnService.prepare(this)
@@ -485,6 +486,7 @@ class Shadowsocks
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
+    fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener((v: View) => {
       serviceStarted = !serviceStarted
       serviceStarted match {
@@ -495,10 +497,12 @@ class Shadowsocks
             changeSwitch(checked = false)
         case false =>
           serviceStop()
-      }
-      if (fab.isEnabled) {
-        fab.setEnabled(false)
-        handler.postDelayed(() => fab.setEnabled(true), 1000)
+          if (fab.isEnabled) {
+            fab.setEnabled(false)
+            handler.postDelayed(() => {
+              fab.setEnabled(true)
+            }, 1000)
+          }
       }
     })
     toolbar.setNavigationIcon(R.drawable.ic_drawer)
@@ -1015,36 +1019,30 @@ class Shadowsocks
 
   def onStateChanged(s: Int, m: String) {
     handler.post(() => if (state != s) {
-      state = s
-      state match {
+      s match {
         case State.CONNECTING =>
-          if (progressDialog == null) {
-            progressDialog = ProgressDialog
-              .show(Shadowsocks.this, "", getString(R.string.connecting), true, true)
-            progressTag = R.string.connecting
-          }
+          fab.setImageResource(R.drawable.ic_cloud_queue)
+          fab.setEnabled(false)
+          fabProgressCircle.show()
           setPreferenceEnabled(enabled = false)
         case State.CONNECTED =>
-          if (progressTag == R.string.connecting) {
-            clearDialog()
-          }
+          if (state == State.CONNECTING) fabProgressCircle.beginFinalAnimation()
+          fab.setEnabled(true)
           changeSwitch(checked = true)
           setPreferenceEnabled(enabled = false)
         case State.STOPPED =>
-          if (progressTag == R.string.stopping || progressTag == R.string.connecting) {
-            clearDialog()
-          }
+          if (state == State.STOPPING || state == State.CONNECTING) fabProgressCircle.hide()
+          fab.setEnabled(true)
           changeSwitch(checked = false)
           if (m != null) Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content),
             getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
           setPreferenceEnabled(enabled = true)
         case State.STOPPING =>
-          if (progressDialog == null) {
-            progressDialog = ProgressDialog
-              .show(Shadowsocks.this, "", getString(R.string.stopping), true, true)
-            progressTag = R.string.stopping
-          }
+          fab.setImageResource(R.drawable.ic_cloud_queue)
+          fab.setEnabled(false)
+          fabProgressCircle.show()
       }
+      state = s
     })
   }
 
