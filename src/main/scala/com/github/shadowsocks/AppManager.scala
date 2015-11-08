@@ -39,32 +39,26 @@
 
 package com.github.shadowsocks
 
-import android.app.{Activity, ProgressDialog}
-import android.content.ClipboardManager
-import android.content.ClipData
-import android.content.Context
-import android.content.SharedPreferences
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
+
+import android.app.ProgressDialog
+import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
 import android.content.pm.PackageManager
 import android.graphics.{Bitmap, PixelFormat}
-import android.os.Bundle
-import android.os.Handler
+import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
 import android.view.View.OnClickListener
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
-import android.view.WindowManager
-import android.widget._
+import android.view.{Menu, MenuItem, View, ViewGroup, WindowManager}
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
-import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
+import android.widget._
+import com.github.shadowsocks.utils.{Key, Scheme, Utils}
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
-import com.github.shadowsocks.utils.{Utils, Scheme, Key}
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader
+import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -105,7 +99,7 @@ object AppManager {
   }
 }
 
-class AppManager extends Activity with OnCheckedChangeListener with OnClickListener {
+class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener {
 
   val MSG_LOAD_START = 1
   val MSG_LOAD_FINISH = 2

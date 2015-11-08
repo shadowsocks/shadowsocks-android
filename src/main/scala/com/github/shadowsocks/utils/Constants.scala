@@ -111,8 +111,6 @@ object State {
 object Action {
   val SERVICE = "com.github.shadowsocks.SERVICE"
   val CLOSE = "com.github.shadowsocks.CLOSE"
-  val UPDATE_FRAGMENT = "com.github.shadowsocks.ACTION_UPDATE_FRAGMENT"
-  val UPDATE_PREFS = "com.github.shadowsocks.ACTION_UPDATE_PREFS"
 }
 
 object Route {

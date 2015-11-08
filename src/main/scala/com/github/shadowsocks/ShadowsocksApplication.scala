@@ -43,19 +43,47 @@ import java.util
 import java.util.concurrent.TimeUnit
 
 import android.app.Application
-import com.github.shadowsocks.database.DBHelper
-import com.github.shadowsocks.utils.Utils
-import com.google.android.gms.analytics.GoogleAnalytics
+import android.content.pm.PackageManager
+import android.preference.PreferenceManager
+import com.github.shadowsocks.database.{DBHelper, ProfileManager}
+import com.github.shadowsocks.utils.{Key, Utils}
+import com.google.android.gms.analytics.{HitBuilders, GoogleAnalytics}
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 
+object ShadowsocksApplication {
+  var instance: ShadowsocksApplication = _
+  lazy val dbHelper = new DBHelper(instance)
+  final val SIG_FUNC = "getSignature"
+  var containerHolder: ContainerHolder = _
+  lazy val tracker = GoogleAnalytics.getInstance(instance).newTracker(R.xml.tracker)
+  lazy val settings = PreferenceManager.getDefaultSharedPreferences(instance)
+  lazy val profileManager = new ProfileManager(settings, dbHelper)
+
+  def getVersionName = try {
+    instance.getPackageManager.getPackageInfo(instance.getPackageName, 0).versionName
+  } catch {
+    case _: PackageManager.NameNotFoundException => "Package name not found"
+    case _: Throwable => null
+  }
+
+  // send event
+  def track(category: String, action: String) = tracker.send(new HitBuilders.EventBuilder()
+    .setAction(action)
+    .setLabel(getVersionName)
+    .build())
+
+  def profileId = settings.getInt(Key.profileId, -1)
+  def profileId(i: Int) = settings.edit.putInt(Key.profileId, i).apply
+  def proxy = settings.getString(Key.proxy, "")
+  def currentProfile = profileManager.getProfile(profileId)
+}
+
 class ShadowsocksApplication extends Application {
-  lazy val dbHelper = new DBHelper(this)
-  lazy val SIG_FUNC = "getSignature"
-  var containerHolder: ContainerHolder = null
-  lazy val tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
+  import ShadowsocksApplication._
 
   override def onCreate() {
+    ShadowsocksApplication.instance = this
     val tm = TagManager.getInstance(this)
     val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
     val callback = new ResultCallback[ContainerHolder] {
