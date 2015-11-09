@@ -14,14 +14,13 @@ final class NatSwitchPreference(context: Context, attrs: AttributeSet) extends S
   private var disabled = false
 
   override def isEnabled = super.isEnabled && !disabled
+  override def setEnabled(b: Boolean) = super.setEnabled(b && !disabled)
 
-  override def onGetDefaultValue(a: TypedArray, index: Int) = {
-    val result = ShadowsocksApplication.isVpnEnabled
-    if (!ShadowsocksApplication.isRoot) {
-      disabled = true
-      setEnabled(false)
-      setSummary(R.string.nat_summary_no_root)
-    }
-    result.asInstanceOf[AnyRef]
+  if (!ShadowsocksApplication.isRoot) {
+    disabled = true
+    setEnabled(false)
+    setSummary(R.string.nat_summary_no_root)
   }
+
+  override def onGetDefaultValue(a: TypedArray, index: Int) = ShadowsocksApplication.isVpnEnabled.asInstanceOf[AnyRef]
 }
