@@ -271,7 +271,13 @@ class Shadowsocks
       cmd.append("chmod 666 %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
       cmd.append("chmod 666 %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
-    Console.runRootCommand(cmd.toArray)
+
+    if (!ShadowsocksApplication.isVpnEnabled) {
+      Console.runRootCommand(cmd.toArray)
+    } else {
+      Console.runCommand(cmd.toArray)
+    }
+
     cmd.clear()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
@@ -291,8 +297,10 @@ class Shadowsocks
       cmd.append("rm -f %s%s-vpn.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
     Console.runCommand(cmd.toArray)
-    Console.runRootCommand(cmd.toArray)
-    Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+    if (!ShadowsocksApplication.isVpnEnabled) {
+      Console.runRootCommand(cmd.toArray)
+      Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+    }
   }
 
   def isTextEmpty(s: String, msg: String): Boolean = {

@@ -2,26 +2,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
-    <PreferenceCategory android:title="@string/global_cat">
-
-        <Preference android:summary="@string/profile_summary" android:title="@string/profile">
-            <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
-        </Preference>
-        <com.github.shadowsocks.preferences.NatSwitchPreference android:key="isNAT"
-                                                                android:title="@string/nat"
-                                                                android:summary="@string/nat_summary"/>
-        <SwitchPreference
-                android:key="isAutoConnect"
-                android:summary="@string/auto_connect_summary"
-                android:title="@string/auto_connect"/>
-        <Preference android:key="recovery" android:title="@string/recovery"/>
-        <Preference android:key="flush_dnscache" android:title="@string/flush_dnscache"/>
-
-    </PreferenceCategory>
-
     <PreferenceCategory
             android:title="@string/proxy_cat">
 
+        <Preference android:summary="@string/profile_summary" android:title="@string/profiles">
+            <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
+        </Preference>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:defaultValue="Default"
                 android:key="profileName"
@@ -56,6 +42,11 @@
                 app:entryValues="@array/enc_method_value"
                 app:summary="%s"
                 android:title="@string/enc_method"/>
+        <SwitchPreference
+                android:key="isAuth"
+                android:defaultValue="false"
+                android:summary="@string/onetime_auth_summary"
+                android:title="@string/onetime_auth"/>
 
     </PreferenceCategory>
 
@@ -92,12 +83,23 @@
                 android:defaultValue="false"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
-        <SwitchPreference
-                android:key="isAuth"
-                android:defaultValue="false"
-                android:summary="@string/onetime_auth_summary"
-                android:title="@string/onetime_auth"/>
 
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/global_cat">
+        <com.github.shadowsocks.preferences.NatSwitchPreference android:key="isNAT"
+                                                                android:title="@string/nat"
+                                                                android:summary="@string/nat_summary"/>
+        <SwitchPreference
+                android:key="isAutoConnect"
+                android:summary="@string/auto_connect_summary"
+                android:title="@string/auto_connect"/>
+        <Preference android:key="recovery" android:title="@string/recovery"
+            android:summary="@string/recovery_summary"/>
+        <Preference android:key="flush_dnscache" android:title="@string/flush_dnscache"
+            android:summary="@string/flush_dnscache_summary"/>
+
+    </PreferenceCategory>
+
 
 </PreferenceScreen>
