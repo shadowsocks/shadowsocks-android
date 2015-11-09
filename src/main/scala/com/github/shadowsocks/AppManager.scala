@@ -156,8 +156,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
           val switch = convertView.findViewById(R.id.itemcheck).asInstanceOf[Switch]
           val text = convertView.findViewById(R.id.itemtext).asInstanceOf[TextView]
           entry = new ListEntry(switch, text, icon)
-          entry.text.setOnClickListener(AppManager.this)
-          entry.text.setOnClickListener(AppManager.this)
+          convertView.setOnClickListener(AppManager.this)
           convertView.setTag(entry)
           entry.switch.setOnCheckedChangeListener(AppManager.this)
         } else {
@@ -187,7 +186,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   def onClick(v: View) {
-    val switch = v.getTag.asInstanceOf[Switch]
+    val switch = v.getTag.asInstanceOf[ListEntry].switch
     val app: ProxiedApp = switch.getTag.asInstanceOf[ProxiedApp]
     if (app != null) {
       app.proxied = !app.proxied
