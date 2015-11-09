@@ -2,7 +2,7 @@
 <resources>
 
   <string name="app_name">Shadowsocks</string>
-  <string name="screen_name">shadowsocks</string>
+  <string name="screen_name" translatable="false">shadowsocks</string>
 
   <!-- global/misc category -->
   <string name="global_cat">Global Settings</string>
@@ -10,8 +10,8 @@
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile</string>
   <string name="nat">NAT mode (deprecated)</string>
-  <string name="nat_summary">Use NAT mode instead of VPN mode.</string>
-  <string name="nat_summary_no_root">NAT mode is disabled without root.</string>
+  <string name="nat_summary">Use NAT mode instead of VPN mode</string>
+  <string name="nat_summary_no_root">NAT mode is disabled without root</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
@@ -71,8 +71,6 @@
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
   <string name="loading">Loading…</string>
-  <string name="yes">Yes</string>
-  <string name="no">No</string>
   <string name="remove_profile">Remove this profile "%s"?</string>
 
   <!-- menu category -->
@@ -84,7 +82,7 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="qrcode">QR Code</string>
   <string name="flush_dnscache">Flush DNS cache</string>
-  <string name="flush_dnscache_summary">Require ROOT permission</string>
+  <string name="flush_dnscache_summary">Requires ROOT permission</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
   <string name="action_export">Export to Clipboard</string>
