@@ -394,7 +394,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (Utils.isLollipopOrAbove) {
 
-      if (!config.isGlobalProxy) {
+      if (config.isProxyApps) {
         val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
         val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
         for (app <- apps) {

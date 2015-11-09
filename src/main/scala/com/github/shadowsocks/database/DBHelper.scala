@@ -39,19 +39,19 @@
 
 package com.github.shadowsocks.database
 
-import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
+import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
-import com.j256.ormlite.dao.Dao
 
 object DBHelper {
   val PROFILE = "profile.db"
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 11) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 12) {
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
 
@@ -63,21 +63,31 @@ class DBHelper(val context: Context)
     newVersion: Int) {
     if (oldVersion != newVersion) {
       if (oldVersion < 7) {
-        profileDao.executeRaw("DROP TABLE IF EXISTS 'profile';")
+        profileDao.executeRawNoArgs("DROP TABLE IF EXISTS 'profile';")
         onCreate(database, connectionSource)
       } else {
         if (oldVersion < 8) {
-          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
-          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
         }
         if (oldVersion < 9) {
-          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
         }
         if (oldVersion < 10) {
-          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
         }
         if (oldVersion < 11) {
-          profileDao.executeRaw("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
+        }
+        if (oldVersion < 12) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
+          onCreate(database, connectionSource)
+          profileDao.executeRawNoArgs(
+            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
+              " udpdns, auth, ipv6, individual) " +
+            "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
+            " ipv6, individual FROM `tmp`;")
+          profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
         }
       }
     }

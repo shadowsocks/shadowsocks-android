@@ -390,10 +390,10 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(Utils.getIptables
       + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + 8153)
 
-    if (config.isGlobalProxy || config.isBypassApps) {
+    if (!config.isProxyApps || config.isBypassApps) {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
-    if (!config.isGlobalProxy) {
+    if (config.isProxyApps) {
       if (apps == null || apps.length <= 0) {
         apps = AppManager.getProxiedApps(this, config.proxiedAppString)
       }

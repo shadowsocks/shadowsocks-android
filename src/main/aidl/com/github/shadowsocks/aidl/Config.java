@@ -5,10 +5,8 @@ import android.os.Parcelable;
 
 public class Config implements Parcelable {
 
-  public boolean isGlobalProxy = true;
-  public boolean isGFWList = true;
+  public boolean isProxyApps = false;
   public boolean isBypassApps = false;
-  public boolean isTrafficStat = false;
   public boolean isUdpDns = false;
   public boolean isAuth = false;
   public boolean isIpv6 = false;
@@ -34,13 +32,11 @@ public class Config implements Parcelable {
     }
   };
 
-  public Config(boolean isGlobalProxy, boolean isGFWList, boolean isBypassApps,
-      boolean isTrafficStat, boolean isUdpDns, boolean isAuth, boolean isIpv6, String profileName, String proxy, String sitekey,
+  public Config(boolean isProxyApps, boolean isBypassApps,
+      boolean isUdpDns, boolean isAuth, boolean isIpv6, String profileName, String proxy, String sitekey,
       String encMethod, String proxiedAppString, String route, int remotePort, int localPort) {
-    this.isGlobalProxy = isGlobalProxy;
-    this.isGFWList = isGFWList;
+    this.isProxyApps = isProxyApps;
     this.isBypassApps = isBypassApps;
-    this.isTrafficStat = isTrafficStat;
     this.isUdpDns = isUdpDns;
     this.isAuth = isAuth;
     this.isIpv6 = isIpv6;
@@ -59,10 +55,8 @@ public class Config implements Parcelable {
   }
 
   public void readFromParcel(Parcel in) {
-    isGlobalProxy = in.readInt() == 1;
-    isGFWList = in.readInt() == 1;
+    isProxyApps = in.readInt() == 1;
     isBypassApps = in.readInt() == 1;
-    isTrafficStat = in.readInt() == 1;
     isUdpDns = in.readInt() == 1;
     isAuth = in.readInt() == 1;
     isIpv6 = in.readInt() == 1;
@@ -81,10 +75,8 @@ public class Config implements Parcelable {
   }
 
   @Override public void writeToParcel(Parcel out, int flags) {
-    out.writeInt(isGlobalProxy ? 1 : 0);
-    out.writeInt(isGFWList ? 1 : 0);
+    out.writeInt(isProxyApps ? 1 : 0);
     out.writeInt(isBypassApps ? 1 : 0);
-    out.writeInt(isTrafficStat ? 1 : 0);
     out.writeInt(isUdpDns ? 1 : 0);
     out.writeInt(isAuth ? 1 : 0);
     out.writeInt(isIpv6 ? 1 : 0);

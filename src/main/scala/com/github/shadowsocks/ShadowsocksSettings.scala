@@ -5,8 +5,8 @@ import java.util.Locale
 import android.app.AlertDialog
 import android.content.{DialogInterface, Intent}
 import android.net.Uri
-import android.os.Bundle
-import android.preference.{Preference, PreferenceFragment}
+import android.os.{Build, Bundle}
+import android.preference.{SwitchPreference, Preference, PreferenceFragment}
 import android.webkit.{WebViewClient, WebView}
 import com.github.shadowsocks.utils.Key
 
@@ -14,9 +14,17 @@ import com.github.shadowsocks.utils.Key
 class ShadowsocksSettings extends PreferenceFragment {
   private lazy val activity = getActivity.asInstanceOf[Shadowsocks]
 
+  private var isProxyApps: SwitchPreference = _
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     addPreferencesFromResource(R.xml.pref_all)
+
+    isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
+    isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
+      startActivity(new Intent(activity, classOf[AppManager]))
+      newValue.asInstanceOf[Boolean]  // keep it ON
+    })
 
     findPreference(Key.isNAT).setOnPreferenceChangeListener((preference: Preference, newValue: Any) =>
       if (ShadowsocksApplication.isRoot) activity.handler.post(() => {
@@ -30,7 +38,11 @@ class ShadowsocksSettings extends PreferenceFragment {
       true
     })
 
-    findPreference("flush_dnscache").setOnPreferenceClickListener((preference: Preference) => {
+    val flush = findPreference("flush_dnscache")
+    if (Build.VERSION.SDK_INT >= 17 && !ShadowsocksApplication.isRoot) {
+      flush.setEnabled(false)
+      flush.setSummary(R.string.flush_dnscache_summary_disabled)
+    } else flush.setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "flush_dnscache")
       activity.flushDnsCache()
       true
@@ -57,5 +69,10 @@ class ShadowsocksSettings extends PreferenceFragment {
         .show()
       true
     })
+  }
+
+  override def onResume = {
+    super.onResume
+    isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
   }
 }
