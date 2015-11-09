@@ -457,7 +457,6 @@ class Shadowsocks
       case None =>                  // removed
         val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List[Profile]())
         ShadowsocksApplication.profileId(if (profiles.isEmpty) -1 else profiles.head.id)
-        ShadowsocksApplication.currentProfile getOrElse currentProfile
     }
 
     updatePreferenceScreen()
