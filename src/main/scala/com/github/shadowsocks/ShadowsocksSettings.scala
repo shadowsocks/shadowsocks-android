@@ -6,7 +6,7 @@ import android.app.AlertDialog
 import android.content.{DialogInterface, Intent}
 import android.net.Uri
 import android.os.{Build, Bundle}
-import android.preference.{Preference, PreferenceFragment}
+import android.preference.{SwitchPreference, Preference, PreferenceFragment}
 import android.webkit.{WebViewClient, WebView}
 import com.github.shadowsocks.utils.Key
 
@@ -14,9 +14,17 @@ import com.github.shadowsocks.utils.Key
 class ShadowsocksSettings extends PreferenceFragment {
   private lazy val activity = getActivity.asInstanceOf[Shadowsocks]
 
+  private var isProxyApps: SwitchPreference = _
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     addPreferencesFromResource(R.xml.pref_all)
+
+    isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
+    isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
+      startActivity(new Intent(activity, classOf[AppManager]))
+      newValue.asInstanceOf[Boolean]  // keep it ON
+    })
 
     findPreference(Key.isNAT).setOnPreferenceChangeListener((preference: Preference, newValue: Any) =>
       if (ShadowsocksApplication.isRoot) activity.handler.post(() => {
@@ -61,5 +69,10 @@ class ShadowsocksSettings extends PreferenceFragment {
         .show()
       true
     })
+  }
+
+  override def onResume = {
+    super.onResume
+    isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
   }
 }

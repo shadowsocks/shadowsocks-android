@@ -77,18 +77,10 @@
                 android:summary="@string/ipv6_summary"
                 android:title="@string/ipv6"/>
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="isGlobalProxy"
-                android:disableDependentsState="true"
-                android:summary="@string/auto_set_proxy_summary"
-                android:title="@string/auto_set_proxy"/>
-        <Preference
-                android:key="proxyedApps"
-                android:dependency="isGlobalProxy"
+                android:key="isProxyApps"
+                android:defaultValue="false"
                 android:summary="@string/proxied_apps_summary"
-                android:title="@string/proxied_apps">
-            <intent android:action="com.github.shadowsocks.AppManager"/>
-        </Preference>
+                android:title="@string/proxied_apps"/>
         <SwitchPreference
                 android:key="isUdpDns"
                 android:defaultValue="false"

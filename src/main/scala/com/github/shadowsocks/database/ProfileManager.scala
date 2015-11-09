@@ -117,10 +117,8 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     }
 
     val edit = settings.edit()
-    edit.putBoolean(Key.isGlobalProxy, profile.global)
-    edit.putBoolean(Key.isGFWList, profile.chnroute)
+    edit.putBoolean(Key.isProxyApps, profile.proxyApps)
     edit.putBoolean(Key.isBypassApps, profile.bypass)
-    edit.putBoolean(Key.isTrafficStat, profile.traffic)
     edit.putBoolean(Key.isUdpDns, profile.udpdns)
     edit.putBoolean(Key.isAuth, profile.auth)
     edit.putBoolean(Key.isIpv6, profile.ipv6)
@@ -143,10 +141,8 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
 
     profile.id = settings.getInt(Key.profileId, -1)
 
-    profile.global = settings.getBoolean(Key.isGlobalProxy, false)
-    profile.chnroute = settings.getBoolean(Key.isGFWList, false)
+    profile.proxyApps = settings.getBoolean(Key.isProxyApps, false)
     profile.bypass = settings.getBoolean(Key.isBypassApps, false)
-    profile.traffic = settings.getBoolean(Key.isTrafficStat, false)
     profile.udpdns = settings.getBoolean(Key.isUdpDns, false)
     profile.auth = settings.getBoolean(Key.isAuth, false)
     profile.ipv6 = settings.getBoolean(Key.isIpv6, false)

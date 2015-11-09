@@ -241,16 +241,13 @@ object ConfigUtils {
     val password = proxy(2).trim
     val method = proxy(3).trim
 
-    new Config(config.isGlobalProxy, config.isGFWList, config.isBypassApps, config.isTrafficStat,
-      config.isUdpDns, config.isAuth, config.isIpv6, config.profileName, host, password, method, config.proxiedAppString, config.route, port,
-      config.localPort)
+    new Config(config.isProxyApps, config.isBypassApps, config.isUdpDns, config.isAuth, config.isIpv6,
+      config.profileName, host, password, method, config.proxiedAppString, config.route, port, config.localPort)
   }
 
   def load(settings: SharedPreferences): Config = {
-    val isGlobalProxy = settings.getBoolean(Key.isGlobalProxy, false)
-    val isGFWList = settings.getBoolean(Key.isGFWList, false)
+    val isProxyApps = settings.getBoolean(Key.isProxyApps, false)
     val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
-    val isTrafficStat = settings.getBoolean(Key.isTrafficStat, false)
     val isUdpDns = settings.getBoolean(Key.isUdpDns, false)
     val isAuth = settings.getBoolean(Key.isAuth, false)
     val isIpv6 = settings.getBoolean(Key.isIpv6, false)
@@ -265,7 +262,7 @@ object ConfigUtils {
     val localPort = settings.getInt(Key.localPort, 1984)
     val proxiedAppString = settings.getString(Key.proxied, "")
 
-    new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, isUdpDns, isAuth, isIpv6, profileName, proxy,
-      sitekey, encMethod, proxiedAppString, route, remotePort, localPort)
+    new Config(isProxyApps, isBypassApps, isUdpDns, isAuth, isIpv6, profileName, proxy, sitekey, encMethod,
+      proxiedAppString, route, remotePort, localPort)
   }
 }

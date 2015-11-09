@@ -67,16 +67,13 @@ object Key {
 
   val profiles = "profiles"
   val isNAT = "isNAT"
-  val proxyedApps = "proxyedApps"
   val route = "route"
 
   val isRunning = "isRunning"
   val isAutoConnect = "isAutoConnect"
 
-  val isGlobalProxy = "isGlobalProxy"
-  val isGFWList = "isGFWList"
+  val isProxyApps = "isProxyApps"
   val isBypassApps = "isBypassApps"
-  val isTrafficStat = "isTrafficStat"
   val isUdpDns = "isUdpDns"
   val isAuth= "isAuth"
   val isIpv6= "isIpv6"

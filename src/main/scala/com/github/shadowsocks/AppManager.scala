@@ -252,7 +252,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
 
     this.setContentView(R.layout.layout_apps)
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    toolbar.setTitle(R.string.proxied_help)
+    toolbar.setTitle(R.string.proxied_apps)
     toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
     toolbar.setNavigationOnClickListener((v: View) => {
       val intent = getParentActivityIntent
@@ -267,6 +267,12 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
           WindowManager.LayoutParams.TYPE_APPLICATION,
           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
+
+    findViewById(R.id.onSwitch).asInstanceOf[Switch]
+      .setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) => {
+        ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).apply()
+        finish()
+      })
 
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>

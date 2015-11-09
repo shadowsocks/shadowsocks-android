@@ -64,7 +64,7 @@
 
         <activity
                 android:name=".ProfileManagerActivity"
-                android:label="@string/app_name"
+                android:label="@string/profiles"
                 android:parentActivityName=".Shadowsocks"
                 android:exported="false">
             <intent-filter>
@@ -75,14 +75,8 @@
 
         <activity
                 android:name=".AppManager"
-                android:label="@string/app_name"
-                android:parentActivityName=".Shadowsocks"
-                android:exported="false">
-            <intent-filter>
-                <action android:name="com.github.shadowsocks.AppManager"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
+                android:label="@string/proxied_apps"
+                android:parentActivityName=".Shadowsocks"/>
 
         <service
                 android:name=".ShadowsocksRunnerService"

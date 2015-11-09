@@ -60,7 +60,7 @@ import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
-import com.github.shadowsocks.preferences.{DropDownPreference, PasswordEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences.{NumberPickerPreference, DropDownPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
@@ -98,7 +98,7 @@ object Shadowsocks {
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
     Key.isAuth)
-  val FEATURE_PREFS = Array(Key.route, Key.isGlobalProxy, Key.proxyedApps, Key.isUdpDns, Key.isIpv6)
+  val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
   val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS)
 
@@ -110,6 +110,10 @@ object Shadowsocks {
   def updatePasswordEditTextPreference(pref: Preference, value: String) {
     pref.setSummary(value)
     pref.asInstanceOf[PasswordEditTextPreference].setText(value)
+  }
+
+  def updateNumberPickerPreference(pref: Preference, value: Int): Unit = {
+    pref.asInstanceOf[NumberPickerPreference].setValue(value)
   }
 
   def updateSummaryEditTextPreference(pref: Preference, value: String) {
@@ -125,12 +129,12 @@ object Shadowsocks {
     name match {
       case Key.profileName => updateSummaryEditTextPreference(pref, profile.name)
       case Key.proxy => updateSummaryEditTextPreference(pref, profile.host)
-      case Key.remotePort => updateSummaryEditTextPreference(pref, profile.remotePort.toString)
-      case Key.localPort => updateSummaryEditTextPreference(pref, profile.localPort.toString)
+      case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
+      case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
       case Key.sitekey => updatePasswordEditTextPreference(pref, profile.password)
       case Key.encMethod => updateDropDownPreference(pref, profile.method)
       case Key.route => updateDropDownPreference(pref, profile.route)
-      case Key.isGlobalProxy => updateSwitchPreference(pref, profile.global)
+      case Key.isProxyApps => updateSwitchPreference(pref, profile.proxyApps)
       case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
       case Key.isAuth => updateSwitchPreference(pref, profile.auth)
       case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
@@ -501,8 +505,7 @@ class Shadowsocks
     for (name <- Shadowsocks.FEATURE_PREFS) {
       val pref = preferences.findPreference(name)
       if (pref != null) {
-        if (Seq(Key.isGlobalProxy, Key.proxyedApps)
-          .contains(name)) {
+        if (name == Key.isProxyApps) {
           pref.setEnabled(enabled && (Utils.isLollipopOrAbove || !ShadowsocksApplication.isVpnEnabled))
         } else {
           pref.setEnabled(enabled)

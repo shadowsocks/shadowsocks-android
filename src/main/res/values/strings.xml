@@ -40,11 +40,9 @@
   <string name="auto_set_gfwlist_summary">Bypass all sites located in China
   </string>
   <string name="route_list">Route</string>
-  <string name="auto_set_proxy">Global Proxy</string>
-  <string name="auto_set_proxy_summary">Set up system-wide proxy</string>
   <string name="proxied_apps">Per-App Proxy</string>
   <string name="proxied_apps_summary">Set proxy for selected apps</string>
-  <string name="proxied_help">Per-App Proxy</string>
+  <string name="on">On</string>
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
