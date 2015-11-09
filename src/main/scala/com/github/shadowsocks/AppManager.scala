@@ -42,16 +42,17 @@ package com.github.shadowsocks
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 
 import android.app.ProgressDialog
-import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
 import android.content.pm.PackageManager
+import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
 import android.graphics.{Bitmap, PixelFormat}
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.view.View.OnClickListener
 import android.view.ViewGroup.LayoutParams
-import android.view.{Menu, MenuItem, View, ViewGroup, WindowManager}
+import android.view.{MenuItem, View, ViewGroup, WindowManager}
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
@@ -99,7 +100,8 @@ object AppManager {
   }
 }
 
-class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener {
+class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener
+  with OnMenuItemClickListener {
 
   val MSG_LOAD_START = 1
   val MSG_LOAD_FINISH = 2
@@ -115,8 +117,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   var appsLoaded: Boolean = false
 
   def loadApps(context: Context): Array[ProxiedApp] = {
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-    val proxiedAppString = prefs.getString(Key.proxied, "")
+    val proxiedAppString = ShadowsocksApplication.settings.getString(Key.proxied, "")
     val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
     import scala.collection.JavaConversions._
@@ -218,7 +219,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     }
   }
 
-  protected override def onOptionsItemSelected(item: MenuItem): Boolean = {
+  def onMenuItemClick(item: MenuItem): Boolean = {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     item.getItemId match {
@@ -256,12 +257,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
         return false
     }
-    super.onOptionsItemSelected(item)
-  }
-
-  protected override def onCreateOptionsMenu(menu: Menu): Boolean = {
-    getMenuInflater.inflate(R.menu.app_manager_menu, menu)
-    super.onCreateOptionsMenu(menu)
+    false
   }
 
   protected override def onCreate(savedInstanceState: Bundle) {
@@ -277,6 +273,9 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
       val intent = getParentActivityIntent
       if (intent == null) finish else navigateUpTo(intent)
     })
+    toolbar.inflateMenu(R.menu.app_manager_menu)
+    toolbar.setOnMenuItemClickListener(this)
+
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
         WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
@@ -291,10 +290,9 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     ImageLoader.getInstance().init(config)
 
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
-    val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>
-      prefs.edit().putBoolean(Key.isBypassApps, checked).apply())
-    bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
+      ShadowsocksApplication.settings.edit().putBoolean(Key.isBypassApps, checked).apply())
+    bypassSwitch.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isBypassApps, false))
 
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
   }
@@ -310,14 +308,13 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
 
   def saveAppSettings(context: Context) {
     if (apps == null) return
-    val prefs = PreferenceManager.getDefaultSharedPreferences(this)
     val proxiedApps = new StringBuilder
     apps.foreach(app =>
       if (app.proxied) {
         proxiedApps ++= app.uid.toString
         proxiedApps += '|'
       })
-    val edit: SharedPreferences.Editor = prefs.edit
+    val edit: SharedPreferences.Editor = ShadowsocksApplication.settings.edit
     edit.putString(Key.proxied, proxiedApps.toString())
     edit.apply
   }
