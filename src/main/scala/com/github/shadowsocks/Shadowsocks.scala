@@ -710,7 +710,7 @@ class Shadowsocks
           fab.setBackgroundTintList(greyTint)
           fab.setImageResource(R.drawable.ic_cloud_queue)
           fab.setEnabled(false)
-          fabProgressCircle.show()
+          if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
           setPreferenceEnabled(enabled = false)
       }
       state = s
