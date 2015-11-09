@@ -15,7 +15,7 @@
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
-  <string name="profile_name">Profile name</string>
+  <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP of the remote server</string>
   <string name="remote_port">Remote Port</string>

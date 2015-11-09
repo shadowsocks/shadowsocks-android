@@ -3,9 +3,12 @@
 <resources>
   <string name="app_name">影梭</string>
   <string name="screen_name">shadowsocks</string>
+  <string name="global_cat">全局设置</string>
+  <string name="misc_cat">杂项</string>
   <string name="proxy_cat">服务器设置</string>
+  <string name="profile_name">配置名称</string>
   <string name="profile">配置文件</string>
-  <string name="profile_summary">配置文件名称</string>
+  <string name="profile_summary">新建或切换到其他配置文件</string>
   <string name="proxy">服务器</string>
   <string name="proxy_summary">远程服务器的地址</string>
   <string name="remote_port">远程端口</string>
@@ -60,6 +63,10 @@
   <string name="flushing">刷新中……</string>
   <string name="qrcode">二维码</string>
   <string name="add_profile">添加配置文件</string>
+
+  <string name="nat">NAT 模式 (仅限调试)</string>
+  <string name="nat_summary">停用 VPN 模式，启用 NAT 模式</string>
+  <string name="nat_summary_no_root">NAT 模式已禁用，需要 ROOT 权限</string>
 
   <string name="udp_dns">UDP 转发</string>
   <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>
