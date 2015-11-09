@@ -8,14 +8,14 @@
   <string name="global_cat">Global Settings</string>
   <string name="misc_cat">Misc</string>
   <string name="profile">Profile</string>
-  <string name="profile_summary">Switch to another profile</string>
+  <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
   <string name="nat_summary">Use NAT mode instead of VPN mode</string>
   <string name="nat_summary_no_root">NAT mode is disabled without root</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
-  <string name="profile_name">Profile name</string>
+  <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP of the remote server</string>
   <string name="remote_port">Remote Port</string>
