@@ -38,7 +38,7 @@
  */
 package com.github.shadowsocks
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, FileOutputStream, IOException, InputStream, OutputStream}
+import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
 import java.util
 import java.util.Locale
 
@@ -46,7 +46,7 @@ import android.app.backup.BackupManager
 import android.app.{Activity, AlertDialog, ProgressDialog}
 import android.content._
 import android.content.res.AssetManager
-import android.graphics.{Bitmap, Color, Typeface}
+import android.graphics.Typeface
 import android.net.{Uri, VpnService}
 import android.os._
 import android.preference.{Preference, SwitchPreference}
@@ -64,32 +64,10 @@ import com.github.shadowsocks.database._
 import com.github.shadowsocks.preferences.{DropDownPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
 
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-class ProfileIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
-  extends BaseImageDownloader(context, connectTimeout, readTimeout) {
-
-  def this(context: Context) {
-    this(context, 0, 0)
-  }
-
-  override def getStreamFromOtherSource(imageUri: String, extra: AnyRef): InputStream = {
-    val text = imageUri.substring(Scheme.PROFILE.length)
-    val size = Utils.dpToPx(context, 16)
-    val idx = text.getBytes.last % 6
-    val color = Seq(Color.MAGENTA, Color.GREEN, Color.YELLOW, Color.BLUE, Color.DKGRAY, Color.CYAN)(
-      idx)
-    val bitmap = Utils.getBitmap(text, size, size, color)
-
-    val os = new ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
-    new ByteArrayInputStream(os.toByteArray)
-  }
-}
 
 object Typefaces {
   def get(c: Context, assetPath: String): Typeface = {

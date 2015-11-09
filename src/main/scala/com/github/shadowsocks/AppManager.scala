@@ -39,11 +39,10 @@
 
 package com.github.shadowsocks
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
-
 import android.content.pm.PackageManager
 import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
-import android.graphics.{Bitmap, PixelFormat}
+import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
@@ -55,16 +54,13 @@ import android.view.{MenuItem, View, ViewGroup, WindowManager}
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
-import com.github.shadowsocks.utils.{Key, Scheme, Utils}
-import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
+import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-case class ProxiedApp(uid: Int, name: String, packageName: String, var proxied: Boolean)
+case class ProxiedApp(uid: Int, name: String, packageName: String, icon: Drawable, var proxied: Boolean)
 
 class ObjectArrayTools[T <: AnyRef](a: Array[T]) {
   def binarySearch(key: T) = {
@@ -94,7 +90,7 @@ object AppManager {
         val name = packageManager.getApplicationLabel(a).toString
         val packageName = a.packageName
         val proxied = proxiedApps.binarySearch(userName) >= 0
-        new ProxiedApp(uid, name, packageName, proxied)
+        new ProxiedApp(uid, name, packageName, null, proxied)
     }.toArray
   }
 }
@@ -132,7 +128,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         val name = packageManager.getApplicationLabel(a).toString
         val packageName = a.packageName
         val proxied = (proxiedApps binarySearch userName) >= 0
-        new ProxiedApp(uid, name, packageName, proxied)
+        new ProxiedApp(uid, name, packageName, a.loadIcon(packageManager), proxied)
     }.toArray
   }
 
@@ -167,19 +163,9 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         }
 
         val app: ProxiedApp = apps(position)
-        val options =
-          new DisplayImageOptions.Builder()
-            .showStubImage(STUB)
-            .showImageForEmptyUri(STUB)
-            .showImageOnFail(STUB)
-            .resetViewBeforeLoading()
-            .cacheInMemory()
-            .cacheOnDisc()
-            .displayer(new FadeInBitmapDisplayer(300))
-            .build()
-        ImageLoader.getInstance().displayImage(Scheme.APP + app.packageName, entry.icon, options)
 
         entry.text.setText(app.name)
+        entry.icon.setImageDrawable(app.icon)
         val switch = entry.switch
         switch.setTag(app)
         switch.setChecked(app.proxied)
@@ -281,12 +267,6 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
 
-    val config =
-      new ImageLoaderConfiguration.Builder(this)
-        .imageDownloader(new AppIconDownloader(this))
-        .build()
-    ImageLoader.getInstance().init(config)
-
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>
       ShadowsocksApplication.settings.edit().putBoolean(Key.isBypassApps, checked).apply())
@@ -341,23 +321,5 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   var handler: Handler = null
-
-  class AppIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
-    extends BaseImageDownloader(context, connectTimeout, readTimeout) {
-
-    def this(context: Context) {
-      this(context, 0, 0)
-    }
-
-    override def getStreamFromOtherSource(imageUri: String, extra: AnyRef): InputStream = {
-      val packageName = imageUri.substring(Scheme.APP.length)
-      val drawable = Utils.getAppIcon(getBaseContext, packageName)
-      val bitmap = Utils.drawableToBitmap(drawable)
-
-      val os = new ByteArrayOutputStream()
-      bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
-      new ByteArrayInputStream(os.toByteArray)
-    }
-  }
 
 }
