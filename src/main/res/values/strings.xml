@@ -4,12 +4,13 @@
   <string name="app_name">Shadowsocks</string>
   <string name="screen_name">shadowsocks</string>
 
-  <!-- global category -->
+  <!-- global/misc category -->
   <string name="global_cat">Global Settings</string>
+  <string name="misc_cat">Misc</string>
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile</string>
-  <string name="nat">NAT mode</string>
-  <string name="nat_summary">Use NAT/VPN mode.</string>
+  <string name="nat">NAT mode (deprecated)</string>
+  <string name="nat_summary">Use NAT mode instead of VPN mode.</string>
   <string name="nat_summary_no_root">NAT mode is disabled without root.</string>
 
   <!-- proxy category -->
