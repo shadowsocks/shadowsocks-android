@@ -5,7 +5,7 @@ import java.util.Locale
 import android.app.AlertDialog
 import android.content.{DialogInterface, Intent}
 import android.net.Uri
-import android.os.Bundle
+import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment}
 import android.webkit.{WebViewClient, WebView}
 import com.github.shadowsocks.utils.Key
@@ -30,7 +30,11 @@ class ShadowsocksSettings extends PreferenceFragment {
       true
     })
 
-    findPreference("flush_dnscache").setOnPreferenceClickListener((preference: Preference) => {
+    val flush = findPreference("flush_dnscache")
+    if (Build.VERSION.SDK_INT >= 17 && !ShadowsocksApplication.isRoot) {
+      flush.setEnabled(false)
+      flush.setSummary(R.string.flush_dnscache_summary_disabled)
+    } else flush.setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "flush_dnscache")
       activity.flushDnsCache()
       true

@@ -104,8 +104,7 @@
                                                                 android:summary="@string/nat_summary"/>
         <Preference android:key="recovery" android:title="@string/recovery"
             android:summary="@string/recovery_summary"/>
-        <Preference android:key="flush_dnscache" android:title="@string/flush_dnscache"
-                    android:summary="@string/flush_dnscache_summary"/>
+        <Preference android:key="flush_dnscache" android:title="@string/flush_dnscache"/>
         <Preference android:key="about" android:title="@string/about"/>
 
     </PreferenceCategory>

@@ -56,7 +56,7 @@
   <string name="about">关于</string>
   <string name="about_title">影梭（shadowsocks）%s</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>
-  <string name="flush_dnscache_summary">需要 ROOT 权限</string>
+  <string name="flush_dnscache_summary_disabled">需要 ROOT 权限</string>
   <string name="flushing">刷新中……</string>
   <string name="qrcode">二维码</string>
   <string name="add_profile">添加配置文件</string>

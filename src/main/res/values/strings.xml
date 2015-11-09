@@ -80,7 +80,7 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="qrcode">QR Code</string>
   <string name="flush_dnscache">Flush DNS cache</string>
-  <string name="flush_dnscache_summary">Requires ROOT permission</string>
+  <string name="flush_dnscache_summary_disabled">Requires ROOT permission</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
   <string name="action_export">Export to Clipboard</string>

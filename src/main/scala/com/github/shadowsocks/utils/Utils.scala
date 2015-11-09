@@ -55,7 +55,7 @@ import android.util.{DisplayMetrics, Base64, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
 import android.widget.Toast
-import com.github.shadowsocks.BuildConfig
+import com.github.shadowsocks.{ShadowsocksApplication, BuildConfig}
 import org.xbill.DNS._
 
 
@@ -155,22 +155,11 @@ object Utils {
 
   // Blocked > 3 seconds
   def toggleAirplaneMode(context: Context) {
-    if (Build.VERSION.SDK_INT >= 17) {
-      toggleAboveApiLevel17()
-    } else {
+    if (ShadowsocksApplication.isRoot) {
+      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+    } else if (Build.VERSION.SDK_INT < 17) {
       toggleBelowApiLevel17(context)
     }
-  }
-
-  private def toggleAboveApiLevel17() {
-    // Android 4.2 and above
-
-    Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
-
-    //Utils.runRootCommand("settings put global airplane_mode_on 1\n"
-    //  + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true\n"
-    //  + "settings put global airplane_mode_on 0\n"
-    //  + "am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false\n")
   }
 
   //noinspection ScalaDeprecation
