@@ -43,11 +43,11 @@ import java.util
 import java.util.Locale
 
 import android.app.backup.BackupManager
-import android.app.{Activity, AlertDialog, ProgressDialog}
+import android.app.{Activity, ProgressDialog}
 import android.content._
 import android.content.res.AssetManager
 import android.graphics.Typeface
-import android.net.{Uri, VpnService}
+import android.net.VpnService
 import android.os._
 import android.preference.{Preference, SwitchPreference}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
@@ -56,7 +56,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.{View, ViewGroup, ViewParent}
-import android.webkit.{WebView, WebViewClient}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
@@ -97,7 +96,7 @@ object Shadowsocks {
   val REQUEST_CONNECT = 1
 
   val PREFS_NAME = "Shadowsocks"
-  val PROXY_PREFS = Array(Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod)
+  val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod)
   val FEATURE_PREFS = Array(Key.route, Key.isGlobalProxy, Key.proxyedApps, Key.isUdpDns, Key.isAuth, Key.isIpv6)
   val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS)
@@ -141,7 +140,6 @@ object Shadowsocks {
 
 class Shadowsocks
   extends AppCompatActivity {
-  import Shadowsocks._
 
   // Variables
   private var serviceStarted = false
@@ -377,10 +375,6 @@ class Shadowsocks
     val title: TextView = field.get(toolbar).asInstanceOf[TextView]
     val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
-    title.setOnClickListener((view: View) => {
-      ShadowsocksApplication.track(TAG, "about")
-      showAbout()
-    })
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
@@ -496,6 +490,7 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
+    preferences.findPreference(Key.profiles).setEnabled(enabled)
     preferences.findPreference(Key.isNAT).setEnabled(enabled)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)
@@ -518,7 +513,6 @@ class Shadowsocks
 
   private def updatePreferenceScreen() {
     val profile = currentProfile
-    Shadowsocks.updatePreference(preferences.findPreference(Key.profileName), Key.profileName, profile)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)
       Shadowsocks.updatePreference(pref, name, profile)
@@ -634,26 +628,6 @@ class Shadowsocks
     if (ShadowsocksApplication.isVpnEnabled) {
       changeSwitch(checked = false)
     }
-  }
-
-  private def showAbout() {
-    val web = new WebView(this)
-    web.loadUrl("file:///android_asset/pages/about.html")
-    web.setWebViewClient(new WebViewClient() {
-      override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        true
-      }
-    })
-
-    new AlertDialog.Builder(this)
-      .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, ShadowsocksApplication.getVersionName))
-      .setCancelable(false)
-      .setNegativeButton(getString(android.R.string.ok),
-        ((dialog: DialogInterface, id: Int) => dialog.cancel()): DialogInterface.OnClickListener)
-      .setView(web)
-      .create()
-      .show()
   }
 
   def clearDialog() {
