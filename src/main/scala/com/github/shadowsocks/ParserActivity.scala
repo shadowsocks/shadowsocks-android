@@ -39,11 +39,11 @@
 
 package com.github.shadowsocks
 
-import android.app.{Activity, AlertDialog, ProgressDialog}
+import android.app.{Activity, AlertDialog}
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.{Bundle, Handler, Message}
+import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.WindowManager
 import com.github.shadowsocks.database.{Profile, ProfileManager}
@@ -84,27 +84,11 @@ class ParserActivity extends Activity {
   }
 
   def addProfile(profile: Profile) {
-
-    val h = showProgress(getString(R.string.loading))
-
-    h.postDelayed(() => {
-      val profileManager =
-        new ProfileManager(PreferenceManager.getDefaultSharedPreferences(getBaseContext),
-          ShadowsocksApplication.dbHelper)
-      profileManager.createOrUpdateProfile(profile)
-      profileManager.reload(profile.id)
-      h.sendEmptyMessage(0)
-    }, 600)
-  }
-
-  private def showProgress(msg: String): Handler = {
-    val progressDialog = ProgressDialog.show(this, "", msg, true, false)
-    new Handler {
-      override def handleMessage(msg: Message) {
-        progressDialog.dismiss()
-        finish()
-      }
-    }
+    val profileManager =
+      new ProfileManager(PreferenceManager.getDefaultSharedPreferences(getBaseContext),
+        ShadowsocksApplication.dbHelper)
+    profileManager.createOrUpdateProfile(profile)
+    profileManager.reload(profile.id)
   }
 
 }

@@ -18,6 +18,8 @@ ndkJavah in Android := List()
 
 ndkBuild in Android := List()
 
+shrinkResources in Android := true
+
 typedResources in Android := false
 
 resolvers += Resolver.jcenterRepo
@@ -39,12 +41,7 @@ libraryDependencies ++= Seq(
   "com.j256.ormlite" % "ormlite-android" % "4.48"
 )
 
-proguardOptions in Android ++= Seq("-keep class android.support.v4.app.** { *; }",
-          "-keep interface android.support.v4.app.** { *; }",
-          "-keep class android.support.v7.widget.Toolbar { <init>(...); }",
-          "-keep class org.jraf.android.backport.** { *; }",
-          "-keep class com.github.shadowsocks.** { *; }",
-          "-keep class * extends com.j256.ormlite.** { *; }",
+proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <init>(...); }",
+          "-keep class com.github.shadowsocks.System { *; }",
           "-keepattributes *Annotation*",
-          "-dontwarn com.google.android.gms.internal.zzhu",
           "-dontwarn org.xbill.**")

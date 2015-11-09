@@ -467,18 +467,22 @@ class Shadowsocks
           fab.setBackgroundTintList(greyTint)
           fabProgressCircle.show()
           changeSwitch(checked = true)
+          setPreferenceEnabled(false)
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
           fabProgressCircle.hide()
           changeSwitch(checked = true)
+          setPreferenceEnabled(false)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           fabProgressCircle.show()
           changeSwitch(checked = false)
+          setPreferenceEnabled(false)
         case _ =>
           fab.setBackgroundTintList(greyTint)
           fabProgressCircle.hide()
           changeSwitch(checked = false)
+          setPreferenceEnabled(true)
       }
       state = bgService.getState
     }
@@ -524,10 +528,6 @@ class Shadowsocks
       val pref = preferences.findPreference(name)
       Shadowsocks.updatePreference(pref, name, profile)
     }
-  }
-
-  override def onStart() {
-    super.onStart()
   }
 
   override def onStop() {
