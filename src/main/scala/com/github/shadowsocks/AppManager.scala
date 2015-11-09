@@ -41,7 +41,6 @@ package com.github.shadowsocks
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 
-import android.app.ProgressDialog
 import android.content.pm.PackageManager
 import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
 import android.graphics.{Bitmap, PixelFormat}
@@ -112,7 +111,6 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   var apps: Array[ProxiedApp] = null
   var appListView: ListView = null
   var overlay: TextView = null
-  var progressDialog: ProgressDialog = null
   var adapter: ListAdapter = null
   var appsLoaded: Boolean = false
 
@@ -295,14 +293,37 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     bypassSwitch.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isBypassApps, false))
 
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
+    appListView.setOnScrollListener(new AbsListView.OnScrollListener {
+      var visible = false
+      def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
+                   totalItemCount: Int) {
+        if (visible) {
+          val name: String = apps(firstVisibleItem).name
+          if (name != null && name.length > 1) {
+            overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
+          } else {
+            overlay.setText("*")
+          }
+          overlay.setVisibility(View.VISIBLE)
+        }
+      }
+      def onScrollStateChanged(view: AbsListView, scrollState: Int) {
+        visible = true
+        if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+          overlay.setVisibility(View.INVISIBLE)
+        }
+      }
+    })
   }
 
   protected override def onResume() {
     super.onResume()
     Future {
-      handler.post(loadStartRunnable)
       if (!appsLoaded) loadApps()
-      handler.post(loadFinishRunnable)
+      handler.post(() => {
+        appListView.setAdapter(adapter)
+        Utils.crossFade(AppManager.this, findViewById(R.id.loading), appListView)
+      })
     }
   }
 
@@ -317,44 +338,6 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     val edit: SharedPreferences.Editor = ShadowsocksApplication.settings.edit
     edit.putString(Key.proxied, proxiedApps.toString())
     edit.apply
-  }
-
-  val loadStartRunnable = new Runnable {
-    override def run() {
-      progressDialog = ProgressDialog
-        .show(AppManager.this, "", getString(R.string.loading), true, true)
-    }
-  }
-
-  val loadFinishRunnable = new Runnable {
-    override def run() = {
-      appListView.setAdapter(adapter)
-      appListView.setOnScrollListener(new AbsListView.OnScrollListener {
-        def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
-                     totalItemCount: Int) {
-          if (visible) {
-            val name: String = apps(firstVisibleItem).name
-            if (name != null && name.length > 1) {
-              overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
-            } else {
-              overlay.setText("*")
-            }
-            overlay.setVisibility(View.VISIBLE)
-          }
-        }
-        def onScrollStateChanged(view: AbsListView, scrollState: Int) {
-          visible = true
-          if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            overlay.setVisibility(View.INVISIBLE)
-          }
-        }
-        var visible = false
-      })
-      if (progressDialog != null) {
-        progressDialog.dismiss()
-        progressDialog = null
-      }
-    }
   }
 
   var handler: Handler = null

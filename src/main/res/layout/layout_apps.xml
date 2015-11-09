@@ -32,8 +32,17 @@
         android:layout_marginEnd="6dp"
         android:layout_marginRight="6dp"/>
   </LinearLayout>
-  <ListView
-      android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:id="@+id/applistview"/>
+  <FrameLayout android:layout_width="fill_parent"
+               android:layout_height="0dp"
+               android:layout_weight="1">
+    <ProgressBar android:id="@+id/loading"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="center" />
+    <ListView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/applistview"
+            android:visibility="gone"/>
+  </FrameLayout>
 </LinearLayout>

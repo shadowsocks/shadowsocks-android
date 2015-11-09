@@ -42,6 +42,7 @@ import java.io._
 import java.net._
 import java.security.MessageDigest
 
+import android.animation.{AnimatorListenerAdapter, Animator}
 import android.app.ActivityManager
 import android.content.pm.{ApplicationInfo, PackageManager}
 import android.content.{Context, Intent}
@@ -140,6 +141,16 @@ object Utils {
       viewLocation(0) - rect.left + (view.getWidth - toast.getView.getMeasuredWidth) / 2 + offsetX,
       viewLocation(1) - rect.top + view.getHeight + offsetY)
     toast
+  }
+
+  def crossFade(context: Context, from: View, to: View) {
+    def shortAnimTime = context.getResources.getInteger(android.R.integer.config_shortAnimTime)
+    to.setAlpha(0)
+    to.setVisibility(View.VISIBLE)
+    to.animate().alpha(1).setDuration(shortAnimTime)
+    from.animate().alpha(0).setDuration(shortAnimTime).setListener(new AnimatorListenerAdapter {
+      override def onAnimationEnd(animation: Animator) = from.setVisibility(View.GONE)
+    })
   }
 
   // Blocked > 3 seconds
