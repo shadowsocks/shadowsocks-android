@@ -14,7 +14,6 @@ import android.widget.{AdapterView, ArrayAdapter}
 import com.github.shadowsocks.R
 
 /**
-  * Based on: https://github.com/Mygod/mygod-lib-android/blob/683c41cb86d10e99ab0f457d41a218c6915fccc8/lib/src/main/scala/tk/mygod/preference/DropDownPreference.scala
   * @author Mygod
   */
 final class DropDownPreference(private val mContext: Context, attrs: AttributeSet = null)

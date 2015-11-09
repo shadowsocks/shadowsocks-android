@@ -316,8 +316,6 @@ class Shadowsocks
   def isReady: Boolean = {
     if (!checkText(Key.proxy)) return false
     if (!checkText(Key.sitekey)) return false
-    if (!checkNumber(Key.localPort, low = false)) return false
-    if (!checkNumber(Key.remotePort, low = true)) return false
     if (bgService == null) return false
     true
   }
@@ -348,15 +346,6 @@ class Shadowsocks
 
     super.onCreate(savedInstanceState)
 
-    setContentView(R.layout.layout_main)
-    if (ShadowsocksApplication.proxy == "198.199.101.152") {
-      val adView = new AdView(this)
-      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-      adView.setAdSize(AdSize.SMART_BANNER)
-      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)
-      adView.loadAd(new AdRequest.Builder().build())
-    }
-
     // Update the profile
     if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
       currentProfile = ShadowsocksApplication.profileManager.create()
@@ -365,6 +354,16 @@ class Shadowsocks
     // Initialize the profile
     currentProfile = {
       ShadowsocksApplication.currentProfile getOrElse currentProfile
+    }
+    ShadowsocksApplication.profileManager.load(currentProfile.id)
+
+    setContentView(R.layout.layout_main)
+    if (ShadowsocksApplication.proxy == "198.199.101.152") {
+      val adView = new AdView(this)
+      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
+      adView.setAdSize(AdSize.SMART_BANNER)
+      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)
+      adView.loadAd(new AdRequest.Builder().build())
     }
 
     // Initialize action bar
@@ -601,25 +600,6 @@ class Shadowsocks
   def checkText(key: String): Boolean = {
     val text = ShadowsocksApplication.settings.getString(key, "")
     !isTextEmpty(text, getString(R.string.proxy_empty))
-  }
-
-  def checkNumber(key: String, low: Boolean): Boolean = {
-    val text = ShadowsocksApplication.settings.getString(key, "")
-    if (isTextEmpty(text, getString(R.string.port_empty))) return false
-    try {
-      val port: Int = Integer.valueOf(text)
-      if (!low && port <= 1024) {
-        Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content), R.string.port_alert,
-          Snackbar.LENGTH_LONG).show
-        return false
-      }
-    } catch {
-      case ex: Exception =>
-        Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content), R.string.port_alert,
-          Snackbar.LENGTH_LONG).show
-        return false
-    }
-    true
   }
 
   /** Called when connect button is clicked. */

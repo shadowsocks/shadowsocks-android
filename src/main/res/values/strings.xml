@@ -19,9 +19,9 @@
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP of the remote server</string>
   <string name="remote_port">Remote Port</string>
-  <string name="remote_port_summary">Port number of the remote server</string>
+  <string name="remote_port_summary">%d (port number of the remote server)</string>
   <string name="port">Local Port</string>
-  <string name="port_summary">Port number of the local server</string>
+  <string name="port_summary">%d (port number of the local server)</string>
   <string name="sitekey">Password</string>
   <string name="sitekey_summary">Password of the remote server</string>
   <string name="enc_method">Encrypt Method</string>
@@ -64,8 +64,6 @@
 
   <!-- alert category -->
   <string name="close">Close</string>
-  <string name="port_alert">The local port number should be greater than 1024</string>
-  <string name="port_empty">Port should not be empty</string>
   <string name="proxy_empty">Proxy should not be empty</string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>

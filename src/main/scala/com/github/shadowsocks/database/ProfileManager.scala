@@ -128,8 +128,8 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     edit.putString(Key.proxy, profile.host)
     edit.putString(Key.sitekey, profile.password)
     edit.putString(Key.encMethod, profile.method)
-    edit.putString(Key.remotePort, profile.remotePort.toString)
-    edit.putString(Key.localPort, profile.localPort.toString)
+    edit.putInt(Key.remotePort, profile.remotePort)
+    edit.putInt(Key.localPort, profile.localPort)
     edit.putString(Key.proxied, profile.individual)
     edit.putInt(Key.profileId, profile.id)
     edit.putString(Key.route, profile.route)
@@ -155,18 +155,8 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     profile.password = settings.getString(Key.sitekey, "default")
     profile.method = settings.getString(Key.encMethod, "table")
     profile.route = settings.getString(Key.route, "all")
-    profile.remotePort = try {
-      Integer.valueOf(settings.getString(Key.remotePort, "1984"))
-    } catch {
-      case ex: NumberFormatException =>
-        1984
-    }
-    profile.localPort = try {
-      Integer.valueOf(settings.getString(Key.localPort, "1984"))
-    } catch {
-      case ex: NumberFormatException =>
-        1984
-    }
+    profile.remotePort = settings.getInt(Key.remotePort, 1984)
+    profile.localPort = settings.getInt(Key.localPort, 1984)
     profile.individual = settings.getString(Key.proxied, "")
 
     profile

@@ -261,18 +261,8 @@ object ConfigUtils {
     val encMethod = settings.getString(Key.encMethod, "table")
     val route = settings.getString(Key.route, "all")
 
-    val remotePort: Int = try {
-      settings.getString(Key.remotePort, "1984").toInt
-    } catch {
-      case ex: NumberFormatException =>
-        1984
-    }
-    val localPort: Int = try {
-      settings.getString(Key.localPort, "1984").toInt
-    } catch {
-      case ex: NumberFormatException =>
-        1984
-    }
+    val remotePort = settings.getInt(Key.remotePort, 1984)
+    val localPort = settings.getInt(Key.localPort, 1984)
     val proxiedAppString = settings.getString(Key.proxied, "")
 
     new Config(isGlobalProxy, isGFWList, isBypassApps, isTrafficStat, isUdpDns, isAuth, isIpv6, profileName, proxy,

@@ -7,7 +7,6 @@ import com.github.shadowsocks.R
 
 /**
   * Make your preference support %s in summary. Override getSummaryValue to customize what to put in.
-  * Based on: https://github.com/Mygod/mygod-lib-android/blob/eb20c57a0da70bb5dbc27104002f20fb1eb31d76/lib/src/main/scala/tk/mygod/preference/SummaryPreference.scala
   * @author Mygod
   */
 trait SummaryPreference extends Preference {
