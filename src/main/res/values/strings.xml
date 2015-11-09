@@ -4,15 +4,17 @@
   <string name="app_name">Shadowsocks</string>
   <string name="screen_name">shadowsocks</string>
 
-  <!-- function category -->
-  <string name="function_cat">Service Controller</string>
-  <string name="service_controller">Proxy Switch</string>
-  <string name="service_summary">Enable / Disable Proxy</string>
+  <!-- global category -->
+  <string name="global_cat">Global Settings</string>
+  <string name="profile">Profile</string>
+  <string name="profile_summary">Switch to another profile</string>
+  <string name="nat">NAT mode</string>
+  <string name="nat_summary">Use NAT/VPN mode.</string>
+  <string name="nat_summary_no_root">NAT mode is disabled without root.</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
-  <string name="profile">Profile</string>
-  <string name="profile_summary">Profile name</string>
+  <string name="profile_name">Profile name</string>
   <string name="proxy">Server</string>
   <string name="proxy_summary">Hostname or IP of the remote server</string>
   <string name="remote_port">Remote Port</string>
@@ -54,26 +56,16 @@
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
   <string name="service_running">Connected to "%s"</string>
-  <string name="service_status" formatted="false">Current Rate: %d KB/s</string>
-  <string name="forward_fail">Shadowsocks failed to start.</string>
-  <string name="service_stopped">Shadowsocks stopped.</string>
-  <string name="forward_stop">Shadowsocks stopped.</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="stop">Stop the service</string>
-  <string name="stopping">Shutting down...</string>
+  <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
-  <string name="enable_nat">Turn on NAT mode.</string>
-  <string name="disable_nat">Turn off NAT mode.</string>
-  <string name="error">ERROR</string>
 
   <!-- alert category -->
-  <string name="ok_iknow">OK</string>
   <string name="close">Close</string>
   <string name="port_alert">The local port number should be greater than 1024</string>
   <string name="port_empty">Port should not be empty</string>
   <string name="proxy_empty">Proxy should not be empty</string>
-  <string name="crash_alert">An unexpected exit detected, the context has been reset.
-  </string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
@@ -101,9 +93,9 @@
 
   <!-- profile -->
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
-  <string-array name="add_profile_methods">
-    <item>Scan QR code</item>
-    <item>Manual Settings</item>
-  </string-array>
+  <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
+  <string name="add_profile_methods_manual_settings">Manual Settings</string>
+  <string name="removed">Removed</string>
+  <string name="undo">Undo</string>
 
 </resources>

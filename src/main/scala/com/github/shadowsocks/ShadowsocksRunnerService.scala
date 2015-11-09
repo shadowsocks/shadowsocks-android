@@ -43,15 +43,10 @@ import android.app.Service
 import android.content._
 import android.net.VpnService
 import android.os._
-import android.preference.PreferenceManager
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.utils._
 
 class ShadowsocksRunnerService extends Service {
-
-  private lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
-  private lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
-
   val handler = new Handler()
   val connection = new ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
@@ -64,35 +59,29 @@ class ShadowsocksRunnerService extends Service {
   }
 
   // Variables
-  var isRoot: Option[Boolean] = None
   var bgService: IShadowsocksService = _
-
-  def isVpnEnabled: Boolean = {
-    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
-    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
-  }
 
   override def onBind(intent: Intent): IBinder = {
     null
   }
 
   def startBackgroundService() {
-    if (isVpnEnabled) {
+    if (ShadowsocksApplication.isVpnEnabled) {
       val intent = VpnService.prepare(ShadowsocksRunnerService.this)
       if (intent == null) {
         if (bgService != null) {
-          bgService.start(ConfigUtils.load(settings))
+          bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
         }
       }
     } else {
-      bgService.start(ConfigUtils.load(settings))
+      bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
     }
     stopSelf()
   }
 
   def attachService() {
     if (bgService == null) {
-      val s = if (!isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      val s = if (!ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)

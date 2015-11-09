@@ -57,14 +57,14 @@ class ParserActivity extends Activity {
     new AlertDialog.Builder(this)
       .setTitle(R.string.add_profile_dialog)
       .setCancelable(false)
-      .setPositiveButton(R.string.yes, ((dialog: DialogInterface, id: Int) => {
+      .setPositiveButton(android.R.string.yes, ((dialog: DialogInterface, id: Int) => {
         Parser.parse(data) match {
           case Some(profile) => addProfile(profile)
           case _ => // ignore
         }
         dialog.dismiss()
       }): DialogInterface.OnClickListener)
-      .setNegativeButton(R.string.no, ((dialog: DialogInterface, id: Int) => {
+      .setNegativeButton(android.R.string.no, ((dialog: DialogInterface, id: Int) => {
         dialog.dismiss()
         finish()
       }): DialogInterface.OnClickListener)
@@ -90,7 +90,7 @@ class ParserActivity extends Activity {
     h.postDelayed(() => {
       val profileManager =
         new ProfileManager(PreferenceManager.getDefaultSharedPreferences(getBaseContext),
-          getApplication.asInstanceOf[ShadowsocksApplication].dbHelper)
+          ShadowsocksApplication.dbHelper)
       profileManager.createOrUpdateProfile(profile)
       profileManager.reload(profile.id)
       h.sendEmptyMessage(0)

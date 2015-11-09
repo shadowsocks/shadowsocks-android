@@ -40,22 +40,20 @@
 package com.github.shadowsocks
 
 import java.io.File
-import java.lang.reflect.{InvocationTargetException, Method}
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
 import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.{Network, ConnectivityManager}
+import android.net.{ConnectivityManager, Network}
 import android.os._
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
-import android.util.{SparseArray, Log}
+import android.util.{Log, SparseArray}
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
-import com.google.android.gms.analytics.HitBuilders
 
 import scala.collection._
 import scala.collection.mutable.ArrayBuffer
@@ -76,8 +74,6 @@ class ShadowsocksNatService extends Service with BaseService {
   var config: Config = null
   var apps: Array[ProxiedApp] = null
   val myUid = Process.myUid()
-
-  private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
 
   private val dnsAddressCache = new SparseArray[String]
 
@@ -254,8 +250,8 @@ class ShadowsocksNatService extends Service with BaseService {
   def startDnsDaemon() {
 
     val conf = if (config.route == Route.BYPASS_CHN) {
-      val reject = ConfigUtils.getRejectList(getContext, application)
-      val blackList = ConfigUtils.getBlackList(getContext, application)
+      val reject = ConfigUtils.getRejectList(getContext)
+      val blackList = ConfigUtils.getBlackList(getContext)
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
         Path.BASE + "pdnsd-nat.pid", reject, blackList, 8163, "")
     } else {
@@ -457,19 +453,14 @@ class ShadowsocksNatService extends Service with BaseService {
         registerReceiver(lockReceiver, screenFilter)
     }
 
-    // send event
-    application.tracker.send(new HitBuilders.EventBuilder()
-      .setCategory(TAG)
-      .setAction("start")
-      .setLabel(getVersionName)
-      .build())
+    ShadowsocksApplication.track(TAG, "start")
 
     changeState(State.CONNECTING)
 
     Future {
 
       if (config.proxy == "198.199.101.152") {
-        val holder = application.containerHolder
+        val holder = ShadowsocksApplication.containerHolder
         try {
           config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
@@ -531,12 +522,7 @@ class ShadowsocksNatService extends Service with BaseService {
       }
     }
 
-    // send event
-    application.tracker.send(new HitBuilders.EventBuilder()
-      .setCategory(TAG)
-      .setAction("stop")
-      .setLabel(getVersionName)
-      .build())
+    ShadowsocksApplication.track(TAG, "stop")
 
     // reset NAT
     killProcesses()

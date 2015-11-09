@@ -7,6 +7,5 @@
     android:background="?attr/colorPrimary"
     android:elevation="4dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    app:titleTextAppearance="@style/Toolbar.TitleText"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     android:id="@+id/toolbar" />

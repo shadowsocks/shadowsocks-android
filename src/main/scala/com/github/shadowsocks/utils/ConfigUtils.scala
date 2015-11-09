@@ -198,14 +198,14 @@ object ConfigUtils {
   }
 
   def refresh(context: Context) {
-    val holder = context.getApplicationContext.asInstanceOf[ShadowsocksApplication].containerHolder
+    val holder = ShadowsocksApplication.containerHolder
     if (holder != null) holder.refresh()
   }
 
-  def getRejectList(context: Context, app: ShadowsocksApplication): String = {
+  def getRejectList(context: Context): String = {
     val default = context.getString(R.string.reject)
     try {
-      val container = app.containerHolder.getContainer
+      val container = ShadowsocksApplication.containerHolder.getContainer
       val update = container.getString("reject")
       if (update == null || update.isEmpty) default else update
     } catch {
@@ -213,10 +213,10 @@ object ConfigUtils {
     }
   }
 
-  def getBlackList(context: Context, app: ShadowsocksApplication): String = {
+  def getBlackList(context: Context): String = {
     val default = context.getString(R.string.black_list)
     try {
-      val container = app.containerHolder.getContainer
+      val container = ShadowsocksApplication.containerHolder.getContainer
       val update = container.getString("black_list")
       if (update == null || update.isEmpty) default else update
     } catch {

@@ -40,18 +40,14 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, KeyguardManager}
-import android.os._
-import android.net.VpnService
 import android.content._
+import android.net.VpnService
+import android.os._
 import android.util.Log
-import android.preference.PreferenceManager
-import com.github.shadowsocks.utils._
 import com.github.shadowsocks.aidl.IShadowsocksService
+import com.github.shadowsocks.utils._
 
 class ShadowsocksRunnerActivity extends Activity {
-
-  private lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
-  private lazy val status = getSharedPreferences(Key.status, Context.MODE_PRIVATE)
 
   val handler = new Handler()
   val connection = new ServiceConnection {
@@ -65,18 +61,12 @@ class ShadowsocksRunnerActivity extends Activity {
   }
 
   // Variables
-  var isRoot: Option[Boolean] = None
   var bgService: IShadowsocksService = _
   var receiver:BroadcastReceiver = _
 
-  def isVpnEnabled: Boolean = {
-    if (isRoot.isEmpty) isRoot = Some(Console.isRoot)
-    !(isRoot.get && status.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
-  }
-
 
   def startBackgroundService() {
-    if (isVpnEnabled) {
+    if (ShadowsocksApplication.isVpnEnabled) {
       val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
       if (intent != null) {
         startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
@@ -84,14 +74,15 @@ class ShadowsocksRunnerActivity extends Activity {
         onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
       }
     } else {
-      bgService.start(ConfigUtils.load(settings))
+      bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
       finish()
     }
   }
 
   def attachService() {
     if (bgService == null) {
-      val s = if (!isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      val s = if (ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksVpnService]
+        else classOf[ShadowsocksNatService]
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
@@ -137,7 +128,7 @@ class ShadowsocksRunnerActivity extends Activity {
     resultCode match {
       case Activity.RESULT_OK =>
         if (bgService != null) {
-          bgService.start(ConfigUtils.load(settings))
+          bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
         }
       case _ =>
         Log.e(Shadowsocks.TAG, "Failed to start VpnService")

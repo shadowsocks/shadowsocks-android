@@ -22,7 +22,8 @@
             android:hardwareAccelerated="true"
             android:icon="@drawable/ic_launcher"
             android:backupAgent=".ShadowsocksBackupAgent"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Material">
 
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>
@@ -36,7 +37,6 @@
         <activity
                 android:name=".Shadowsocks"
                 android:label="@string/app_name"
-                android:theme="@style/Theme.Shadowsocks"
                 android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -63,10 +63,21 @@
         </activity>
 
         <activity
-                android:name=".AppManager"
-                android:theme="@style/Theme.Material"
+                android:name=".ProfileManagerActivity"
                 android:label="@string/app_name"
-                android:parentActivityName=".Shadowsocks">
+                android:parentActivityName=".Shadowsocks"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.ProfileManagerActivity"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".AppManager"
+                android:label="@string/app_name"
+                android:parentActivityName=".Shadowsocks"
+                android:exported="false">
             <intent-filter>
                 <action android:name="com.github.shadowsocks.AppManager"/>
                 <category android:name="android.intent.category.DEFAULT"/>

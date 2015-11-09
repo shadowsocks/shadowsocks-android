@@ -53,7 +53,6 @@ import android.util.Log
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
-import com.google.android.gms.analytics.HitBuilders
 import org.apache.commons.net.util.SubnetUtils
 
 import scala.collection.mutable
@@ -62,8 +61,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ShadowsocksVpnService extends VpnService with BaseService {
-
-  private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
   val PRIVATE_VLAN = "26.26.26.%s"
@@ -152,12 +149,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // channge the state
     changeState(State.STOPPING)
 
-    // send event
-    application.tracker.send(new HitBuilders.EventBuilder()
-      .setCategory(TAG)
-      .setAction("stop")
-      .setLabel(getVersionName)
-      .build())
+    ShadowsocksApplication.track(TAG, "stop")
 
     // reset VPN
     killProcesses()
@@ -231,18 +223,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       return
     }
 
-    // send event
-    application.tracker.send(new HitBuilders.EventBuilder()
-      .setCategory(TAG)
-      .setAction("start")
-      .setLabel(getVersionName)
-      .build())
+    ShadowsocksApplication.track(TAG, "start")
 
     changeState(State.CONNECTING)
 
     Future {
       if (config.proxy == "198.199.101.152") {
-        val holder = getApplication.asInstanceOf[ShadowsocksApplication].containerHolder
+        val holder = ShadowsocksApplication.containerHolder
         try {
           config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
@@ -371,8 +358,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val ipv6 = if (config.isIpv6) "" else "reject = ::/0;"
     val conf = {
       if (config.route == Route.BYPASS_CHN) {
-        val reject = ConfigUtils.getRejectList(getContext, application)
-        val blackList = ConfigUtils.getBlackList(getContext, application)
+        val reject = ConfigUtils.getRejectList(getContext)
+        val blackList = ConfigUtils.getBlackList(getContext)
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
           Path.BASE + "pdnsd-vpn.pid", reject, blackList, 8163, ipv6)
       } else {

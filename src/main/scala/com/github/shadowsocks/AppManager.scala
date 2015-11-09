@@ -39,38 +39,28 @@
 
 package com.github.shadowsocks
 
-import android.app.{Activity, ProgressDialog}
-import android.content.ClipboardManager
-import android.content.ClipData
-import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.{Bitmap, PixelFormat}
-import android.os.Bundle
-import android.os.Handler
+import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
+import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
+import android.os.{Bundle, Handler}
 import android.preference.PreferenceManager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.view.View.OnClickListener
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
-import android.view.WindowManager
-import android.widget._
+import android.view.{MenuItem, View, ViewGroup, WindowManager}
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader
-import java.io.{ByteArrayOutputStream, ByteArrayInputStream, InputStream}
-import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader, ImageLoaderConfiguration}
-import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
-import com.github.shadowsocks.utils.{Utils, Scheme, Key}
+import android.widget._
+import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-case class ProxiedApp(uid: Int, name: String, packageName: String, var proxied: Boolean)
+case class ProxiedApp(uid: Int, name: String, packageName: String, icon: Drawable, var proxied: Boolean)
 
 class ObjectArrayTools[T <: AnyRef](a: Array[T]) {
   def binarySearch(key: T) = {
@@ -100,12 +90,13 @@ object AppManager {
         val name = packageManager.getApplicationLabel(a).toString
         val packageName = a.packageName
         val proxied = proxiedApps.binarySearch(userName) >= 0
-        new ProxiedApp(uid, name, packageName, proxied)
+        new ProxiedApp(uid, name, packageName, null, proxied)
     }.toArray
   }
 }
 
-class AppManager extends Activity with OnCheckedChangeListener with OnClickListener {
+class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener
+  with OnMenuItemClickListener {
 
   val MSG_LOAD_START = 1
   val MSG_LOAD_FINISH = 2
@@ -116,13 +107,11 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
   var apps: Array[ProxiedApp] = null
   var appListView: ListView = null
   var overlay: TextView = null
-  var progressDialog: ProgressDialog = null
   var adapter: ListAdapter = null
   var appsLoaded: Boolean = false
 
   def loadApps(context: Context): Array[ProxiedApp] = {
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-    val proxiedAppString = prefs.getString(Key.proxied, "")
+    val proxiedAppString = ShadowsocksApplication.settings.getString(Key.proxied, "")
     val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
 
     import scala.collection.JavaConversions._
@@ -139,7 +128,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         val name = packageManager.getApplicationLabel(a).toString
         val packageName = a.packageName
         val proxied = (proxiedApps binarySearch userName) >= 0
-        new ProxiedApp(uid, name, packageName, proxied)
+        new ProxiedApp(uid, name, packageName, a.loadIcon(packageManager), proxied)
     }.toArray
   }
 
@@ -174,19 +163,9 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         }
 
         val app: ProxiedApp = apps(position)
-        val options =
-          new DisplayImageOptions.Builder()
-            .showStubImage(STUB)
-            .showImageForEmptyUri(STUB)
-            .showImageOnFail(STUB)
-            .resetViewBeforeLoading()
-            .cacheInMemory()
-            .cacheOnDisc()
-            .displayer(new FadeInBitmapDisplayer(300))
-            .build()
-        ImageLoader.getInstance().displayImage(Scheme.APP + app.packageName, entry.icon, options)
 
         entry.text.setText(app.name)
+        entry.icon.setImageDrawable(app.icon)
         val switch = entry.switch
         switch.setTag(app)
         switch.setChecked(app.proxied)
@@ -224,7 +203,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
     }
   }
 
-  protected override def onOptionsItemSelected(item: MenuItem): Boolean = {
+  def onMenuItemClick(item: MenuItem): Boolean = {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     item.getItemId match {
@@ -262,12 +241,7 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
         Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
         return false
     }
-    super.onOptionsItemSelected(item)
-  }
-
-  protected override def onCreateOptionsMenu(menu: Menu): Boolean = {
-    getMenuInflater.inflate(R.menu.app_manager_menu, menu)
-    super.onCreateOptionsMenu(menu)
+    false
   }
 
   protected override def onCreate(savedInstanceState: Bundle) {
@@ -283,6 +257,9 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
       val intent = getParentActivityIntent
       if (intent == null) finish else navigateUpTo(intent)
     })
+    toolbar.inflateMenu(R.menu.app_manager_menu)
+    toolbar.setOnMenuItemClickListener(this)
+
     this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
         WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
@@ -290,100 +267,59 @@ class AppManager extends Activity with OnCheckedChangeListener with OnClickListe
           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
 
-    val config =
-      new ImageLoaderConfiguration.Builder(this)
-        .imageDownloader(new AppIconDownloader(this))
-        .build()
-    ImageLoader.getInstance().init(config)
-
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
-    val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     bypassSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) =>
-      prefs.edit().putBoolean(Key.isBypassApps, checked).apply())
-    bypassSwitch.setChecked(prefs.getBoolean(Key.isBypassApps, false))
+      ShadowsocksApplication.settings.edit().putBoolean(Key.isBypassApps, checked).apply())
+    bypassSwitch.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isBypassApps, false))
 
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
+    appListView.setOnScrollListener(new AbsListView.OnScrollListener {
+      var visible = false
+      def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
+                   totalItemCount: Int) {
+        if (visible) {
+          val name: String = apps(firstVisibleItem).name
+          if (name != null && name.length > 1) {
+            overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
+          } else {
+            overlay.setText("*")
+          }
+          overlay.setVisibility(View.VISIBLE)
+        }
+      }
+      def onScrollStateChanged(view: AbsListView, scrollState: Int) {
+        visible = true
+        if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+          overlay.setVisibility(View.INVISIBLE)
+        }
+      }
+    })
   }
 
   protected override def onResume() {
     super.onResume()
     Future {
-      handler.post(loadStartRunnable)
       if (!appsLoaded) loadApps()
-      handler.post(loadFinishRunnable)
+      handler.post(() => {
+        appListView.setAdapter(adapter)
+        Utils.crossFade(AppManager.this, findViewById(R.id.loading), appListView)
+      })
     }
   }
 
   def saveAppSettings(context: Context) {
     if (apps == null) return
-    val prefs = PreferenceManager.getDefaultSharedPreferences(this)
     val proxiedApps = new StringBuilder
     apps.foreach(app =>
       if (app.proxied) {
         proxiedApps ++= app.uid.toString
         proxiedApps += '|'
       })
-    val edit: SharedPreferences.Editor = prefs.edit
+    val edit: SharedPreferences.Editor = ShadowsocksApplication.settings.edit
     edit.putString(Key.proxied, proxiedApps.toString())
     edit.apply
   }
 
-  val loadStartRunnable = new Runnable {
-    override def run() {
-      progressDialog = ProgressDialog
-        .show(AppManager.this, "", getString(R.string.loading), true, true)
-    }
-  }
-
-  val loadFinishRunnable = new Runnable {
-    override def run() = {
-      appListView.setAdapter(adapter)
-      appListView.setOnScrollListener(new AbsListView.OnScrollListener {
-        def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
-                     totalItemCount: Int) {
-          if (visible) {
-            val name: String = apps(firstVisibleItem).name
-            if (name != null && name.length > 1) {
-              overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
-            } else {
-              overlay.setText("*")
-            }
-            overlay.setVisibility(View.VISIBLE)
-          }
-        }
-        def onScrollStateChanged(view: AbsListView, scrollState: Int) {
-          visible = true
-          if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            overlay.setVisibility(View.INVISIBLE)
-          }
-        }
-        var visible = false
-      })
-      if (progressDialog != null) {
-        progressDialog.dismiss()
-        progressDialog = null
-      }
-    }
-  }
-
   var handler: Handler = null
-
-  class AppIconDownloader(context: Context, connectTimeout: Int, readTimeout: Int)
-    extends BaseImageDownloader(context, connectTimeout, readTimeout) {
-
-    def this(context: Context) {
-      this(context, 0, 0)
-    }
-
-    override def getStreamFromOtherSource(imageUri: String, extra: AnyRef): InputStream = {
-      val packageName = imageUri.substring(Scheme.APP.length)
-      val drawable = Utils.getAppIcon(getBaseContext, packageName)
-      val bitmap = Utils.drawableToBitmap(drawable)
-
-      val os = new ByteArrayOutputStream()
-      bitmap.compress(Bitmap.CompressFormat.PNG, 100, os)
-      new ByteArrayInputStream(os.toByteArray)
-    }
-  }
 
 }
