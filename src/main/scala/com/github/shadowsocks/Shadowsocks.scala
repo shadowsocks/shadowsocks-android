@@ -526,10 +526,6 @@ class Shadowsocks
     }
   }
 
-  override def onStart() {
-    super.onStart()
-  }
-
   override def onStop() {
     super.onStop()
     clearDialog()
