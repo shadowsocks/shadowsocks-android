@@ -104,11 +104,12 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
 
   implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
 
-  var apps: Array[ProxiedApp] = null
-  var appListView: ListView = null
-  var overlay: TextView = null
-  var adapter: ListAdapter = null
-  var appsLoaded: Boolean = false
+  var apps: Array[ProxiedApp] = _
+  var appListView: ListView = _
+  var loadingView: View = _
+  var overlay: TextView = _
+  var adapter: ListAdapter = _
+  @volatile var appsLoading: Boolean = _
 
   def loadApps(context: Context): Array[ProxiedApp] = {
     val proxiedAppString = ShadowsocksApplication.settings.getString(Key.proxied, "")
@@ -133,6 +134,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   def loadApps() {
+    appsLoading = true
     apps = loadApps(this).sortWith((a, b) => {
       if (a == null || b == null || a.name == null || b.name == null) {
         true
@@ -173,7 +175,6 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         convertView
       }
     }
-    appsLoaded = true
   }
 
   /** Called an application is check/unchecked */
@@ -230,9 +231,9 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
                 prefs.edit.putString(Key.proxied, apps).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 // Restart activity
-                val intent = getIntent
-                finish()
-                startActivity(intent)
+                appListView.setVisibility(View.GONE)
+                loadingView.setVisibility(View.VISIBLE)
+                if (appsLoading) appsLoading = false else loadAppsAsync()
                 return true
               }
             }
@@ -272,6 +273,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
       ShadowsocksApplication.settings.edit().putBoolean(Key.isBypassApps, checked).apply())
     bypassSwitch.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isBypassApps, false))
 
+    loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[ListView]
     appListView.setOnScrollListener(new AbsListView.OnScrollListener {
       var visible = false
@@ -294,15 +296,16 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         }
       }
     })
+    loadAppsAsync()
   }
 
-  protected override def onResume() {
-    super.onResume()
+  def loadAppsAsync() {
     Future {
-      if (!appsLoaded) loadApps()
+      while (!appsLoading) loadApps()
+      appsLoading = false
       handler.post(() => {
         appListView.setAdapter(adapter)
-        Utils.crossFade(AppManager.this, findViewById(R.id.loading), appListView)
+        Utils.crossFade(AppManager.this, loadingView, appListView)
       })
     }
   }
