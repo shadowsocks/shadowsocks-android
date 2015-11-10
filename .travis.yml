@@ -1,0 +1,12 @@
+before_install:
+- ./travis-ci/setup.sh &> /dev/null
+- export NDK_CCACHE=ccache
+- export ARCH=`uname -m`
+- export ANDROID_NDK_HOME=`pwd`/android-ndk-r10d
+- export ANDROID_HOME=`pwd`/android-sdk-linux
+- export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
+- cp local.properties.travis local.properties
+
+script:
+- ./build.sh
+- sbt android:package-release
