@@ -22,5 +22,6 @@ final class NatSwitchPreference(context: Context, attrs: AttributeSet) extends S
     setSummary(R.string.nat_summary_no_root)
   }
 
-  override def onGetDefaultValue(a: TypedArray, index: Int) = ShadowsocksApplication.isVpnEnabled.asInstanceOf[AnyRef]
+  override def onGetDefaultValue(a: TypedArray, index: Int) =
+    (!ShadowsocksApplication.isVpnEnabled).asInstanceOf[AnyRef]
 }
