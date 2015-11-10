@@ -2,6 +2,11 @@ language: scala
 
 sudo: false
 
+addons:
+    apt:
+        packages:
+            - gcc-multilib
+            - g++-multilib
 scala:
     - 2.11.7
 
