@@ -16,7 +16,7 @@ cache:
         - $HOME/.sbt/boot
 
 before_install:
-    - ./travis-ci/setup.sh &> /dev/null
+    - ./travis-ci/setup.sh
     - export NDK_CCACHE=ccache
     - export ARCH=`uname -m`
     - export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r10d

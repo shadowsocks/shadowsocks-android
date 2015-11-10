@@ -22,6 +22,5 @@ if [ ! -d "$ANDROID_NDK_HOME" ]
     popd
 fi
 
-echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.1,android-23,extra-google-m2repository
---no-ui -a
+echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.1,android-23,extra-google-m2repository --no-ui -a
 echo "y" | android update sdk --filter extra-android-m2repository --no-ui -a
