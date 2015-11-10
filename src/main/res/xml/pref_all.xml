@@ -18,23 +18,19 @@
             android:title="@string/proxy_cat">
 
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
-                android:defaultValue="Default"
                 android:key="profileName"
                 android:title="@string/profile_name"/>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
-                android:defaultValue="198.199.101.152"
                 android:key="proxy"
                 android:summary="@string/proxy_summary"
                 android:title="@string/proxy"/>
         <com.github.shadowsocks.preferences.NumberPickerPreference
-                android:defaultValue="443"
                 app:min="1"
                 app:max="65535"
                 android:key="remotePort"
                 app:summary="@string/remote_port_summary"
                 android:title="@string/remote_port"/>
         <com.github.shadowsocks.preferences.NumberPickerPreference
-                android:defaultValue="1080"
                 app:min="1025"
                 app:max="65535"
                 android:key="port"
@@ -42,12 +38,10 @@
                 android:title="@string/port"/>
         <com.github.shadowsocks.preferences.PasswordEditTextPreference
                 android:inputType="textPassword"
-                android:defaultValue="u1rRWTssNv0p"
                 android:key="sitekey"
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey"/>
         <com.github.shadowsocks.preferences.DropDownPreference
-                android:defaultValue="rc4"
                 android:key="encMethod"
                 app:entries="@array/enc_method_entry"
                 app:entryValues="@array/enc_method_value"
@@ -55,7 +49,6 @@
                 android:title="@string/enc_method"/>
         <SwitchPreference
                 android:key="isAuth"
-                android:defaultValue="false"
                 android:summary="@string/onetime_auth_summary"
                 android:title="@string/onetime_auth"/>
 
@@ -65,7 +58,6 @@
             android:title="@string/feature_cat">
 
         <com.github.shadowsocks.preferences.DropDownPreference
-                android:defaultValue="all"
                 android:key="route"
                 app:entries="@array/route_entry"
                 app:entryValues="@array/route_value"
@@ -73,17 +65,14 @@
                 android:title="@string/route_list"/>
         <SwitchPreference
                 android:key="isIpv6"
-                android:defaultValue="false"
                 android:summary="@string/ipv6_summary"
                 android:title="@string/ipv6"/>
         <SwitchPreference
                 android:key="isProxyApps"
-                android:defaultValue="false"
                 android:summary="@string/proxied_apps_summary"
                 android:title="@string/proxied_apps"/>
         <SwitchPreference
                 android:key="isUdpDns"
-                android:defaultValue="false"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
 

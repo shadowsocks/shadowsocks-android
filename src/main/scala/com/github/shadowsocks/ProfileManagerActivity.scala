@@ -61,7 +61,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
 
     def onClick(v: View) = {
-      ShadowsocksApplication.profileId(item.id)
+      ShadowsocksApplication.switchProfile(item.id)
       finish
     }
   }
@@ -168,7 +168,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       true
     case R.id.manual_settings =>
       ShadowsocksApplication.profileManager.reload(-1)
-      ShadowsocksApplication.profileId(ShadowsocksApplication.profileManager.save.id)
+      ShadowsocksApplication.switchProfile(ShadowsocksApplication.profileManager.save.id)
       finish
       true
     case _ => false

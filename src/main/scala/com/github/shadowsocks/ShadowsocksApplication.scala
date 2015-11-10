@@ -77,12 +77,14 @@ object ShadowsocksApplication {
     .build())
 
   def profileId = settings.getInt(Key.profileId, -1)
-  def profileId(i: Int) = {
-    settings.edit.putInt(Key.profileId, i).apply
-    profileManager.load(i)
-  }
+  def profileId(i: Int) = settings.edit.putInt(Key.profileId, i).apply
   def proxy = settings.getString(Key.proxy, "")
   def currentProfile = profileManager.getProfile(profileId)
+
+  def switchProfile(id: Int) = {
+    profileId(id)
+    profileManager.load(id)
+  }
 }
 
 class ShadowsocksApplication extends Application {

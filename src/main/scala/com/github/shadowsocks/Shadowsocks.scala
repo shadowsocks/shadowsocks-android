@@ -55,12 +55,12 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.{View, ViewGroup, ViewParent}
+import android.view.{ViewGroup, View, ViewParent}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database._
-import com.github.shadowsocks.preferences.{NumberPickerPreference, DropDownPreference, PasswordEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences.{DropDownPreference, NumberPickerPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
@@ -197,6 +197,7 @@ class Shadowsocks
 
   private lazy val preferences =
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
+  private var adView: AdView = _
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
 
@@ -349,22 +350,7 @@ class Shadowsocks
   override def onCreate(savedInstanceState: Bundle) {
 
     super.onCreate(savedInstanceState)
-
-    // Initialize the profile
-    currentProfile = {
-      ShadowsocksApplication.currentProfile getOrElse currentProfile
-    }
-    ShadowsocksApplication.profileManager.load(currentProfile.id)
-
     setContentView(R.layout.layout_main)
-    if (ShadowsocksApplication.proxy == "198.199.101.152") {
-      val adView = new AdView(this)
-      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-      adView.setAdSize(AdSize.SMART_BANNER)
-      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)
-      adView.loadAd(new AdRequest.Builder().build())
-    }
-
     // Initialize action bar
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(getString(R.string.screen_name))
@@ -429,7 +415,8 @@ class Shadowsocks
       case Some(profile) => profile // updated
       case None =>                  // removed
         val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List[Profile]())
-        ShadowsocksApplication.profileId(if (profiles.isEmpty) -1 else profiles.head.id)
+        if (profiles.isEmpty) ShadowsocksApplication.profileManager.createDefault()
+        else ShadowsocksApplication.switchProfile(profiles.head.id)
     }
 
     updatePreferenceScreen()
@@ -509,6 +496,14 @@ class Shadowsocks
   }
 
   private def updatePreferenceScreen() {
+    if (ShadowsocksApplication.proxy == "198.199.101.152" && adView == null) {
+      adView = new AdView(this)
+      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
+      adView.setAdSize(AdSize.SMART_BANNER)
+      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)
+      adView.loadAd(new AdRequest.Builder().build())
+    }
+
     val profile = currentProfile
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)

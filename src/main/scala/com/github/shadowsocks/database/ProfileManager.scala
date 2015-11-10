@@ -163,4 +163,15 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     updateProfile(profile)
     profile
   }
+
+  def createDefault(): Profile = {
+    val profile = new Profile {
+      name = "Default"
+      host = "198.199.101.152"
+      remotePort = 443
+      password = "u1rRWTssNv0p"
+    }
+    createOrUpdateProfile(profile)
+    profile
+  }
 }
