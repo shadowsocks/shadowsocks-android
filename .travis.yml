@@ -1,6 +1,6 @@
 before_cache:
     - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2/ -name "*.lock" | xargs rm
+    - find $HOME/.ivy2 -name "*.lock" | xargs rm
 
 cache:
     directories:
