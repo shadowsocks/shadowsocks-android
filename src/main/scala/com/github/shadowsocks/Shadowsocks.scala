@@ -350,11 +350,6 @@ class Shadowsocks
 
     super.onCreate(savedInstanceState)
 
-    // Update the profile
-    if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
-      currentProfile = ShadowsocksApplication.profileManager.create()
-    }
-
     // Initialize the profile
     currentProfile = {
       ShadowsocksApplication.currentProfile getOrElse currentProfile
@@ -392,12 +387,6 @@ class Shadowsocks
             changeSwitch(checked = false)
         case false =>
           serviceStop()
-          if (fab.isEnabled) {
-            fab.setEnabled(false)
-            handler.postDelayed(() => {
-              fab.setEnabled(true)
-            }, 1000)
-          }
       }
     })
     fab.setOnLongClickListener((v: View) => {
@@ -444,6 +433,8 @@ class Shadowsocks
     }
 
     updatePreferenceScreen()
+
+    serviceStop()
   }
 
   def addProfile(profile: Profile) {
@@ -498,7 +489,6 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
-    preferences.findPreference(Key.profiles).setEnabled(enabled)
     preferences.findPreference(Key.isNAT).setEnabled(enabled)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)
