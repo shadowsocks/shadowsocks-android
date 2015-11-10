@@ -5,7 +5,7 @@ export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r10d
 export ANDROID_HOME=$HOME/.android/android-sdk-linux
 export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
-if [ ! -d "$ANDROID_HOME" ]
+if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android
     wget -q http://dl.google.com/android/android-sdk_r24.3.4-linux.tgz
@@ -13,7 +13,7 @@ if [ ! -d "$ANDROID_HOME" ]
     popd
 fi
 
-if [ ! -d "$ANDROID_NDK_HOME" ]
+if [ ! -d "$ANDROID_NDK_HOME" ]; then
     mkdir -p $ANDROID_NDK_HOME
     pushd $HOME/.android
     wget -q http://dl.google.com/android/ndk/android-ndk-r10d-linux-${ARCH}.bin
