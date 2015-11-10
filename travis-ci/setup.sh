@@ -1,7 +1,6 @@
 #!/bin/bash
 
-echo "deb http://dl.bintray.com/sbt/debian /" | sudo tee -a
-/etc/apt/sources.list.d/sbt.list
+echo "deb http://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
 sudo apt-get update
 sudo apt-get install -y ccache sbt
 export ARCH=`uname -m`

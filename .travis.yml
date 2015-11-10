@@ -8,5 +8,5 @@ before_install:
 - cp local.properties.travis local.properties
 
 script:
-- ./build.sh
+- ./build.sh > /dev/null
 - sbt android:package-release
