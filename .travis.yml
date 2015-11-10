@@ -5,7 +5,12 @@ sudo: false
 addons:
     apt:
         packages:
-            - ia32-libs
+            - gcc-multilibs
+            - g++-multilibs
+            - libstdc++6:i386
+            - libgcc1:i386
+            - zlib1g:i386
+            - libncurses5:i386
 
 scala:
     - 2.11.7
