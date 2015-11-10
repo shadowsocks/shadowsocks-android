@@ -5,8 +5,8 @@ sudo: false
 addons:
     apt:
         packages:
-            - gcc-multilib
-            - g++-multilib
+            - ia32-libs
+
 scala:
     - 2.11.7
 
