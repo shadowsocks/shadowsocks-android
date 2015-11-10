@@ -5,10 +5,6 @@ export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r10d
 export ANDROID_HOME=$HOME/.android/android-sdk-linux
 export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
-echo "deb http://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
-sudo apt-get update
-sudo apt-get install -y ccache sbt
-
 if [ ! -d "$ANDROID_HOME" ]
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android

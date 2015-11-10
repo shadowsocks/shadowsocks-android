@@ -1,3 +1,10 @@
+language: scala
+
+sudo: false
+
+scala:
+    - 2.11.7
+
 before_cache:
     - find $HOME/.sbt -name "*.lock" | xargs rm
     - find $HOME/.ivy2 -name "*.lock" | xargs rm
