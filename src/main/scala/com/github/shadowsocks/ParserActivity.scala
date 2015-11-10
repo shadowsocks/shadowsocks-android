@@ -44,33 +44,33 @@ import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.view.WindowManager
-import com.github.shadowsocks.database.{Profile, ProfileManager}
 import com.github.shadowsocks.utils.Parser
 
 class ParserActivity extends Activity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    showAsPopup(this)
     val data = getIntent.getData.toString
-    new AlertDialog.Builder(this)
+    val profile = Parser.parse(data)
+    if (profile.isEmpty) {  // ignore
+      finish()
+      return
+    }
+    showAsPopup(this)
+    val dialog = new AlertDialog.Builder(this)
       .setTitle(R.string.add_profile_dialog)
       .setCancelable(false)
       .setPositiveButton(android.R.string.yes, ((dialog: DialogInterface, id: Int) => {
-        Parser.parse(data) match {
-          case Some(profile) => addProfile(profile)
-          case _ => // ignore
-        }
+        ShadowsocksApplication.profileManager.createOrUpdateProfile(profile.get)
         dialog.dismiss()
       }): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, ((dialog: DialogInterface, id: Int) => {
         dialog.dismiss()
-        finish()
       }): DialogInterface.OnClickListener)
       .setMessage(data)
       .create()
-      .show()
+    dialog.setOnDismissListener((dialog: DialogInterface) => finish())  // builder method was added in API 17
+    dialog.show()
   }
 
   def showAsPopup(activity: Activity) {
@@ -82,13 +82,4 @@ class ParserActivity extends Activity {
     activity.getWindow.setAttributes(params.asInstanceOf[android.view.WindowManager.LayoutParams])
     activity.getWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT))
   }
-
-  def addProfile(profile: Profile) {
-    val profileManager =
-      new ProfileManager(PreferenceManager.getDefaultSharedPreferences(getBaseContext),
-        ShadowsocksApplication.dbHelper)
-    profileManager.createOrUpdateProfile(profile)
-    profileManager.reload(profile.id)
-  }
-
 }

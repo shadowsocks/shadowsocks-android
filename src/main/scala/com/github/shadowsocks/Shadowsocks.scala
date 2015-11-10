@@ -424,14 +424,6 @@ class Shadowsocks
     serviceStop()
   }
 
-  def addProfile(profile: Profile) {
-    currentProfile = profile
-    ShadowsocksApplication.profileManager.createOrUpdateProfile(currentProfile)
-    ShadowsocksApplication.profileManager.reload(currentProfile.id)
-
-    updatePreferenceScreen()
-  }
-
   protected override def onPause() {
     super.onPause()
     ShadowsocksApplication.profileManager.save

@@ -82,10 +82,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       removedSnackbar.dismiss
       commitRemoves
       val pos = getItemCount
-      if (ShadowsocksApplication.profileManager.createOrUpdateProfile(item)) {
-        profiles += item
-        notifyItemInserted(pos)
-      }
+      profiles += item
+      notifyItemInserted(pos)
     }
 
     def remove(pos: Int) {
@@ -126,6 +124,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     toolbar.inflateMenu(R.menu.add_profile_methods)
     toolbar.setOnMenuItemClickListener(this)
 
+    ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     profilesList.setLayoutManager(new LinearLayoutManager(this))
     profilesList.setItemAnimator(new DefaultItemAnimator)
@@ -147,13 +146,14 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onDestroy {
     super.onDestroy
+    ShadowsocksApplication.profileManager.setProfileAddedListener(null)
     profilesAdapter.commitRemoves
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
     if (scanResult != null) Parser.parse(scanResult.getContents) match {
-      case Some(profile) => profilesAdapter.add(profile)
+      case Some(profile) => ShadowsocksApplication.profileManager.createOrUpdateProfile(profile)
       case _ => // ignore
     }
   }

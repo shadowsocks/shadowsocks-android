@@ -46,9 +46,13 @@ import com.github.shadowsocks.utils.Key
 
 class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
 
+  var profileAddedListener: Profile => Any = _
+  def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
+
   def createOrUpdateProfile(profile: Profile): Boolean = {
     try {
       dbHelper.profileDao.createOrUpdate(profile)
+      if (profileAddedListener != null) profileAddedListener(profile)
       true
     } catch {
       case ex: Exception =>
