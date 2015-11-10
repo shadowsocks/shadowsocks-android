@@ -8,8 +8,8 @@ export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-t
 if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android
-    wget -q http://dl.google.com/android/android-sdk_r24.3.4-linux.tgz
-    tar xf android-sdk_r24.3.4-linux.tgz
+    wget -q http://dl.google.com/android/android-sdk_r24.4.1-linux.tgz
+    tar xf android-sdk_r24.4.1-linux.tgz
     popd
 fi
 
@@ -22,5 +22,5 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     popd
 fi
 
-echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.1,android-23,extra-google-m2repository --no-ui -a
+echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.2,android-23,extra-google-m2repository --no-ui -a
 echo "y" | android update sdk --filter extra-android-m2repository --no-ui -a
