@@ -350,11 +350,6 @@ class Shadowsocks
 
     super.onCreate(savedInstanceState)
 
-    // Update the profile
-    if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
-      currentProfile = ShadowsocksApplication.profileManager.create()
-    }
-
     // Initialize the profile
     currentProfile = {
       ShadowsocksApplication.currentProfile getOrElse currentProfile

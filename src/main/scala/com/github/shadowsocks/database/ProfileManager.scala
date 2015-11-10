@@ -163,10 +163,4 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     updateProfile(profile)
     profile
   }
-
-  def create(): Profile = {
-    val profile = loadFromPreferences
-    createOrUpdateProfile(profile)
-    profile
-  }
 }
