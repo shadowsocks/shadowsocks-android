@@ -46,9 +46,13 @@ import com.github.shadowsocks.utils.Key
 
 class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
 
+  var profileAddedListener: Profile => Any = _
+  def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
+
   def createOrUpdateProfile(profile: Profile): Boolean = {
     try {
       dbHelper.profileDao.createOrUpdate(profile)
+      if (profileAddedListener != null) profileAddedListener(profile)
       true
     } catch {
       case ex: Exception =>
@@ -161,6 +165,17 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
   def save(): Profile = {
     val profile = loadFromPreferences
     updateProfile(profile)
+    profile
+  }
+
+  def createDefault(): Profile = {
+    val profile = new Profile {
+      name = "Default"
+      host = "198.199.101.152"
+      remotePort = 443
+      password = "u1rRWTssNv0p"
+    }
+    createOrUpdateProfile(profile)
     profile
   }
 }
