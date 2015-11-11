@@ -7,10 +7,6 @@
         <Preference android:key="profiles" android:summary="@string/profile_summary" android:title="@string/profiles">
             <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
         </Preference>
-        <SwitchPreference
-                android:key="isAutoConnect"
-                android:summary="@string/auto_connect_summary"
-                android:title="@string/auto_connect"/>
 
     </PreferenceCategory>
 
@@ -90,6 +86,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/misc_cat">
+
+        <SwitchPreference
+                android:key="isAutoConnect"
+                android:summary="@string/auto_connect_summary"
+                android:title="@string/auto_connect"/>
 
         <com.github.shadowsocks.preferences.NatSwitchPreference android:key="isNAT"
                                                                 android:title="@string/nat"
