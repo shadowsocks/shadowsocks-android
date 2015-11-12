@@ -51,7 +51,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 12) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 13) {
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
 
@@ -88,6 +88,11 @@ class DBHelper(val context: Context)
             "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
             " ipv6, individual FROM `tmp`;")
           profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
+        }
+        if (oldVersion < 13) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date DATE;")
         }
       }
     }
