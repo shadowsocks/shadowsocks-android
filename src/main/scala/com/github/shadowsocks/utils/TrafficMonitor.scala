@@ -24,7 +24,7 @@ object TrafficMonitor {
       TrafficStats.getUidRxBytes(uid), System.currentTimeMillis())
   }
 
-  def formatTraffic(n: Long): String {
+  def formatTraffic(n: Long): String = {
     if (n <= 1024) {
       "%d KB".formatLocal(Locale.ENGLISH, n)
     } else if (n > 1024) {
@@ -71,7 +71,7 @@ object TrafficMonitor {
     formatTraffic(txRate) + "/s"
   }
 
-  def getTxRate(): String = {
+  def getRxRate(): String = {
     formatTraffic(rxRate) + "/s"
   }
 
