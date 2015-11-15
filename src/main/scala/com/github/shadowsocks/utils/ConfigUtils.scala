@@ -51,16 +51,16 @@ object ConfigUtils {
     " log_debug = off;" +
     " log_info = off;" +
     " log = stderr;" +
-    " daemon = on;" +
+    " daemon = off;" +
     " redirector = iptables;" +
-    "}" +
+    " }\n" +
     "redsocks {" +
     " local_ip = 127.0.0.1;" +
     " local_port = 8123;" +
     " ip = 127.0.0.1;" +
     " port = %d;" +
     " type = socks5;" +
-    "}"
+    " }"
 
   val PDNSD_LOCAL =
     """
@@ -74,8 +74,7 @@ object ConfigUtils {
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
-      | daemon = on;
-      | pid_file = %s;
+      | daemon = off;
       |}
       |
       |server {
@@ -109,8 +108,7 @@ object ConfigUtils {
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
-      | daemon = on;
-      | pid_file = "%s";
+      | daemon = off;
       |}
       |
       |server {
@@ -153,8 +151,7 @@ object ConfigUtils {
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
-      | daemon = on;
-      | pid_file = "%s";
+      | daemon = off;
       |}
       |
       |server {

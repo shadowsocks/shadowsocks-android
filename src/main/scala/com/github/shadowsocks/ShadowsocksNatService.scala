@@ -75,6 +75,11 @@ class ShadowsocksNatService extends Service with BaseService {
   var apps: Array[ProxiedApp] = null
   val myUid = Process.myUid()
 
+  var sslocalPid: Int = 0;
+  var sstunnelPid: Int = 0;
+  var redsocksPid: Int = 0;
+  var pdnsdPid: Int = 0;
+
   private val dnsAddressCache = new SparseArray[String]
 
   def getNetId(network: Network): Int = {
@@ -184,8 +189,7 @@ class ShadowsocksNatService extends Service with BaseService {
     cmd += (Path.BASE + "ss-local"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
-          , "-c" , Path.BASE + "ss-local-nat.conf"
-          , "-f" , Path.BASE + "ss-local-nat.pid")
+          , "-c" , Path.BASE + "ss-local-nat.conf")
 
     if (config.isAuth) cmd += "-A"
 
@@ -195,7 +199,7 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    Console.runCommand(cmd.mkString(" "))
+    sslocalPid = System.exec(cmd.mkString(" "))
   }
 
   def startTunnel() {
@@ -212,8 +216,7 @@ class ShadowsocksNatService extends Service with BaseService {
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel-nat.conf"
-        , "-f" , Path.BASE + "ss-tunnel-nat.pid")
+        , "-c" , Path.BASE + "ss-tunnel-nat.conf")
 
       cmd += ("-l" , "8153")
 
@@ -221,7 +224,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-      Console.runCommand(cmd.mkString(" "))
+     sstunnelPid =  System.exec(cmd.mkString(" "))
 
     } else {
       val conf = ConfigUtils
@@ -237,13 +240,13 @@ class ShadowsocksNatService extends Service with BaseService {
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel-nat.conf"
-        , "-f" , Path.BASE + "ss-tunnel-nat.pid")
+        , "-c" , Path.BASE + "ss-tunnel-nat.conf")
 
       if (config.isAuth) cmdBuf += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
-      Console.runCommand(cmdBuf.mkString(" "))
+
+      sstunnelPid = System.exec(cmdBuf.mkString(" "))
     }
   }
 
@@ -253,10 +256,10 @@ class ShadowsocksNatService extends Service with BaseService {
       val reject = ConfigUtils.getRejectList(getContext)
       val blackList = ConfigUtils.getBlackList(getContext)
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
-        Path.BASE + "pdnsd-nat.pid", reject, blackList, 8163, "")
+        reject, blackList, 8163, "")
     } else {
       ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
-        Path.BASE + "pdnsd-nat.pid", 8163, "")
+        8163, "")
     }
 
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
@@ -266,7 +269,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Console.runCommand(cmd)
+    pdnsdPid = System.exec(cmd)
 
   }
 
@@ -284,14 +287,14 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, config.localPort)
-    val cmd = Path.BASE + "redsocks -p %sredsocks-nat.pid -c %sredsocks-nat.conf"
+    val cmd = Path.BASE + "redsocks -c %sredsocks-nat.conf"
       .formatLocal(Locale.ENGLISH, Path.BASE, Path.BASE)
     ConfigUtils.printToFile(new File(Path.BASE + "redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runCommand(cmd)
+    redsocksPid = System.exec(cmd)
   }
 
   /** Called when the activity is first created. */
@@ -348,27 +351,27 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def killProcesses() {
-    val cmd = new ArrayBuffer[String]()
-
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
-      cmd.append("chmod 666 %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+    try {
+      Process.killProcess(sslocalPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill ss-local")
     }
-    Console.runRootCommand(cmd.toArray)
-    cmd.clear()
-
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
-      try {
-        val pid = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
-        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid))
-        Process.killProcess(pid)
-      } catch {
-        case e: Throwable => Log.e(TAG, "unable to kill " + task)
-      }
-      cmd.append("rm -f %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
-      cmd.append("rm -f %s%s-nat.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
+    try {
+      Process.killProcess(sstunnelPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill ss-tunnel")
+    }
+    try {
+      Process.killProcess(redsocksPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill redsocks")
+    }
+    try {
+      Process.killProcess(pdnsdPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill pdnsd")
     }
 
-    Console.runRootCommand(cmd.toArray)
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
   }
 
