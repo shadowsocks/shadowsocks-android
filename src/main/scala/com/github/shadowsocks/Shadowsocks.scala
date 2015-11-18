@@ -138,7 +138,6 @@ object Shadowsocks {
       case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
       case Key.isAuth => updateSwitchPreference(pref, profile.auth)
       case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
-      case _ =>
     }
   }
 }
