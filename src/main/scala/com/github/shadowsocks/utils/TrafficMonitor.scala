@@ -1,9 +1,10 @@
 package com.github.shadowsocks.utils
 
+import java.lang.{Math, System}
+import java.util.Locale
+
 import android.net.TrafficStats
 import android.os.Process
-import java.lang.{String, System, Math}
-import java.util.Locale
 
 case class Traffic(tx: Long, rx: Long, timestamp: Long)
 
@@ -40,8 +41,11 @@ object TrafficMonitor {
 
   def update() {
     val now = getTraffic
-    txRate = (now.tx - last.tx) / (now.timestamp - last.timestamp)
-    rxRate = (now.rx - last.rx) / (now.timestamp - last.timestamp)
+    val delta = now.timestamp - last.timestamp
+    if (delta != 0) {
+      txRate = (now.tx - last.tx) / delta
+      rxRate = (now.rx - last.rx) / delta
+    }
     txTotal += (now.tx - last.tx) / 1024
     rxTotal += (now.rx - last.rx) / 1024
     last = now
