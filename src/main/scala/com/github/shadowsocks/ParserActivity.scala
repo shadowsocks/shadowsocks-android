@@ -61,7 +61,7 @@ class ParserActivity extends Activity {
       .setTitle(R.string.add_profile_dialog)
       .setCancelable(false)
       .setPositiveButton(android.R.string.yes, ((dialog: DialogInterface, id: Int) => {
-        ShadowsocksApplication.profileManager.createOrUpdateProfile(profile.get)
+        ShadowsocksApplication.profileManager.createProfile(profile.get)
         dialog.dismiss()
       }): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, ((dialog: DialogInterface, id: Int) => {

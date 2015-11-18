@@ -49,15 +49,27 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
   var profileAddedListener: Profile => Any = _
   def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
 
-  def createOrUpdateProfile(profile: Profile): Boolean = {
+  def createProfile(p: Profile = null): Profile = {
     try {
+      val profile = if (p == null) new Profile else p
+      profile.id = 0
+      ShadowsocksApplication.currentProfile match {
+        case Some(oldProfile) =>
+          // Copy Feature Settings from old profile
+          profile.route = oldProfile.route
+          profile.ipv6 = oldProfile.ipv6
+          profile.proxyApps = oldProfile.proxyApps
+          profile.individual = oldProfile.individual
+          profile.udpdns = oldProfile.udpdns
+        case _ =>
+      }
       dbHelper.profileDao.createOrUpdate(profile)
       if (profileAddedListener != null) profileAddedListener(profile)
-      true
+      profile
     } catch {
       case ex: Exception =>
         Log.e(Shadowsocks.TAG, "addProfile", ex)
-        false
+        p
     }
   }
 
@@ -114,11 +126,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
 
   def load(id: Int): Profile =  {
 
-    val profile = getProfile(id) getOrElse {
-      val p = new Profile()
-      createOrUpdateProfile(p)
-      p
-    }
+    val profile = getProfile(id) getOrElse createProfile()
 
     val edit = settings.edit()
     edit.putBoolean(Key.isProxyApps, profile.proxyApps)
@@ -175,7 +183,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       remotePort = 443
       password = "u1rRWTssNv0p"
     }
-    createOrUpdateProfile(profile)
+    createProfile(profile)
     profile
   }
 }

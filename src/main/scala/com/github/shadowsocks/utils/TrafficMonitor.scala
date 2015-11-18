@@ -20,7 +20,7 @@ object TrafficMonitor {
   var txTotal: Long = 0
   var rxTotal: Long = 0
 
-  def getTraffic(): Traffic = {
+  def getTraffic: Traffic = {
     new Traffic(Math.max(TrafficStats.getTotalTxBytes - TrafficStats.getUidTxBytes(uid), 0),
       Math.max(TrafficStats.getTotalRxBytes - TrafficStats.getUidRxBytes(uid), 0), System.currentTimeMillis())
   }
@@ -84,4 +84,3 @@ object TrafficMonitor {
   }
 }
 
-class TrafficMonitor ()
