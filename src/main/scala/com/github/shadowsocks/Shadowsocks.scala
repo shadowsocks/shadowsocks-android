@@ -483,6 +483,7 @@ class Shadowsocks
         })
       }
     }
+    task.run()
     timer = new Timer(true)
     timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
   }
