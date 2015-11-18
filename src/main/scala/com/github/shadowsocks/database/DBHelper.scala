@@ -65,35 +65,36 @@ class DBHelper(val context: Context)
       if (oldVersion < 7) {
         profileDao.executeRawNoArgs("DROP TABLE IF EXISTS 'profile';")
         onCreate(database, connectionSource)
-      } else {
-        if (oldVersion < 8) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
-        }
-        if (oldVersion < 9) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
-        }
-        if (oldVersion < 10) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
-        }
-        if (oldVersion < 11) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
-        }
-        if (oldVersion < 12) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
-          onCreate(database, connectionSource)
-          profileDao.executeRawNoArgs(
-            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
-              " udpdns, auth, ipv6, individual) " +
-            "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
-            " ipv6, individual FROM `tmp`;")
-          profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
-        }
-        if (oldVersion < 13) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date DATE;")
-        }
+        return
+      }
+      if (oldVersion < 8) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+      }
+      if (oldVersion < 9) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+      }
+      if (oldVersion < 10) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
+      }
+      if (oldVersion < 11) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
+      }
+      if (oldVersion < 12) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
+        onCreate(database, connectionSource)
+        profileDao.executeRawNoArgs(
+          "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
+            " udpdns, auth, ipv6, individual) " +
+          "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
+          " ipv6, individual FROM `tmp`;")
+        profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
+        return
+      }
+      if (oldVersion < 13) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date DATE;")
       }
     }
   }
