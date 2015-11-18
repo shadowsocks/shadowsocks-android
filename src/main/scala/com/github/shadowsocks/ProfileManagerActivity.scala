@@ -59,11 +59,13 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     def updateText() {
       val builder = new SpannableStringBuilder
       builder.append(item.name)
-      val start = builder.length
-      builder.append(getString(R.string.stat_profiles,
-        TrafficMonitor.formatTraffic(item.tx), TrafficMonitor.formatTraffic(item.rx)))
-      builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
-        start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      if (item.tx != 0 || item.rx != 0) {
+        val start = builder.length
+        builder.append(getString(R.string.stat_profiles,
+          TrafficMonitor.formatTraffic(item.tx), TrafficMonitor.formatTraffic(item.rx)))
+        builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
+          start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      }
       text.setText(builder)
     }
 
