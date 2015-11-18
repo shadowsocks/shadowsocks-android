@@ -1,10 +1,9 @@
 package com.github.shadowsocks
 
-import android.app.AlertDialog
 import android.content.{DialogInterface, Intent}
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -39,7 +38,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
           .asInstanceOf[QRCode]
         image.setImageBitmap(qrcode.bitmap())
 
-        new AlertDialog.Builder(ProfileManagerActivity.this)
+        new AlertDialog.Builder(ProfileManagerActivity.this, R.style.AppCompatAlertDialogStyle)
           .setCancelable(true)
           .setNegativeButton(getString(R.string.close),
             ((dialog: DialogInterface, id: Int) => dialog.cancel()): DialogInterface.OnClickListener)
