@@ -83,4 +83,13 @@ class Profile {
 
   @DatabaseField(dataType = DataType.LONG_STRING)
   var individual: String = ""
+
+  @DatabaseField
+  var tx: Long = 0
+
+  @DatabaseField
+  var rx: Long = 0
+
+  @DatabaseField
+  val date: java.util.Date = new java.util.Date()
 }

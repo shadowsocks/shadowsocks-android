@@ -420,6 +420,8 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def startRunner(c: Config) {
 
+    TrafficMonitor.reset()
+
     config = c
 
     // register close receiver
@@ -508,6 +510,8 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   override def stopRunner() {
+
+    TrafficMonitor.reset()
 
     // channge the state
     changeState(State.STOPPING)
