@@ -475,15 +475,12 @@ class Shadowsocks
         } else {
           TrafficMonitor.reset()
         }
-        val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
-        if (pm.isScreenOn) {
-          val trafficStat = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
-            TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-            TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
-            handler.post(() => {
-              preferences.findPreference(Key.stat).setSummary(trafficStat)
-            })
-        }
+        val trafficStat = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
+          TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+          TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+        handler.post(() => {
+          preferences.findPreference(Key.stat).setSummary(trafficStat)
+        })
       }
     }
     timer = new Timer(true)
