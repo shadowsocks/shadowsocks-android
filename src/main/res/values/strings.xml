@@ -14,6 +14,11 @@
   <string name="nat_summary_no_root">NAT mode is disabled without root</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Send: \t%1$s\t|\tReceive: \t%2$s\nUpload: \t%3$s\t|\tDownload: \t%4$s</string>
+  <string name="stat_profiles">\nSend: \t%1$s\t|\tReceive: \t%2$s</string>
+  <plurals name="bytes">
+    <item quantity="one">Byte</item>
+    <item quantity="other">Bytes</item>
+  </plurals>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>

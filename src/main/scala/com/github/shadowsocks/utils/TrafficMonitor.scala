@@ -1,10 +1,11 @@
 package com.github.shadowsocks.utils
 
 import java.lang.{Math, System}
-import java.util.Locale
+import java.text.DecimalFormat
 
 import android.net.TrafficStats
 import android.os.Process
+import com.github.shadowsocks.{R, ShadowsocksApplication}
 
 case class Traffic(tx: Long, rx: Long, timestamp: Long)
 
@@ -25,18 +26,17 @@ object TrafficMonitor {
       Math.max(TrafficStats.getTotalRxBytes - TrafficStats.getUidRxBytes(uid), 0), System.currentTimeMillis())
   }
 
-  def formatTraffic(n: Long): String = {
-    if (n <= 1024) {
-      "%d KB".formatLocal(Locale.ENGLISH, n)
-    } else if (n > 1024) {
-      "%d MB".formatLocal(Locale.ENGLISH, n / 1024)
-    } else if (n > 1024 * 1024) {
-      "%d GB".formatLocal(Locale.ENGLISH, n / 1024 / 1024)
-    } else if (n > 1024 * 1024 * 1024) {
-      "%d TB".formatLocal(Locale.ENGLISH, n / 1024 / 1024 / 1024)
-    } else  {
-      ">1024 TB"
+  private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
+  private val numberFormat = new DecimalFormat("0.00")
+  def formatTraffic(size: Long): String = {
+    var n: Double = size
+    var i = -1
+    while (n >= 1024) {
+      n /= 1024
+      i = i + 1
     }
+    if (i < 0) size + " " + ShadowsocksApplication.instance.getResources.getQuantityString(R.plurals.bytes, size.toInt)
+    else numberFormat.format(n) + ' ' + units(i)
   }
 
   def update() {
@@ -46,8 +46,8 @@ object TrafficMonitor {
       txRate = (now.tx - last.tx) / delta
       rxRate = (now.rx - last.rx) / delta
     }
-    txTotal += (now.tx - last.tx) / 1024
-    rxTotal += (now.rx - last.rx) / 1024
+    txTotal += now.tx - last.tx
+    rxTotal += now.rx - last.rx
     last = now
   }
 
