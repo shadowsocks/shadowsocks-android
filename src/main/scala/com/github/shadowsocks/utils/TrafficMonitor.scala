@@ -2,7 +2,7 @@ package com.github.shadowsocks.utils
 
 import android.net.TrafficStats
 import android.os.Process
-import java.lang.{String, System}
+import java.lang.{String, System, Math}
 import java.util.Locale
 
 case class Traffic(tx: Long, rx: Long, timestamp: Long)
@@ -20,8 +20,8 @@ object TrafficMonitor {
   var rxTotal: Long = 0
 
   def getTraffic(): Traffic = {
-    new Traffic(TrafficStats.getTotalTxBytes - TrafficStats.getUidTxBytes(uid),
-      TrafficStats.getTotalRxBytes - TrafficStats.getUidRxBytes(uid), System.currentTimeMillis())
+    new Traffic(Math.max(TrafficStats.getTotalTxBytes - TrafficStats.getUidTxBytes(uid), 0),
+      Math.max(TrafficStats.getTotalRxBytes - TrafficStats.getUidRxBytes(uid), 0), System.currentTimeMillis())
   }
 
   def formatTraffic(n: Long): String = {
