@@ -471,7 +471,11 @@ class Shadowsocks
     // initialize timer
     val task = new TimerTask {
       def run() {
-        TrafficMonitor.update()
+        if (state == State.CONNECTED) {
+          TrafficMonitor.update()
+        } else {
+          TrafficMonitor.reset()
+        }
         val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
         if (pm.isScreenOn) {
           val trafficStat = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,

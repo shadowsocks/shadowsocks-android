@@ -20,8 +20,8 @@ object TrafficMonitor {
   var rxTotal: Long = 0
 
   def getTraffic(): Traffic = {
-    new Traffic(TrafficStats.getUidTxBytes(uid),
-      TrafficStats.getUidRxBytes(uid), System.currentTimeMillis())
+    new Traffic(TrafficStats.getTotalTxBytes - TrafficStats.getUidTxBytes(uid),
+      TrafficStats.getTotalRxBytes - TrafficStats.getUidRxBytes(uid), System.currentTimeMillis())
   }
 
   def formatTraffic(n: Long): String = {
