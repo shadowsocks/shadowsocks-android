@@ -39,15 +39,15 @@
 
 package com.github.shadowsocks
 
-import android.app.{Activity, AlertDialog}
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.view.WindowManager
 import com.github.shadowsocks.utils.Parser
 
-class ParserActivity extends Activity {
+class ParserActivity extends AppCompatActivity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     val data = getIntent.getData.toString
@@ -57,7 +57,7 @@ class ParserActivity extends Activity {
       return
     }
     showAsPopup(this)
-    val dialog = new AlertDialog.Builder(this)
+    val dialog = new AlertDialog.Builder(this, R.style.AppCompatAlertDialogStyle)
       .setTitle(R.string.add_profile_dialog)
       .setCancelable(false)
       .setPositiveButton(android.R.string.yes, ((dialog: DialogInterface, id: Int) => {
