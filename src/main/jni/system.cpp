@@ -37,10 +37,27 @@ jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
   return env->NewStringUTF(abi);
 }
 
-void Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring cmd) {
-    const char *str  = env->GetStringUTFChars(cmd, 0);
-    system(str);
-    env->ReleaseStringUTFChars(cmd, str);
+jint Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring cmd) {
+    const char *cmd_str  = env->GetStringUTFChars(cmd, 0);
+
+    pid_t pid;
+
+    /*  Fork off the parent process */
+    pid = fork();
+    if (pid < 0) {
+        env->ReleaseStringUTFChars(cmd, cmd_str);
+        return -1;
+    }
+
+    if (pid > 0) {
+        env->ReleaseStringUTFChars(cmd, cmd_str);
+        return pid;
+    }
+
+    execl("/system/bin/sh", "sh", "-c", cmd_str, NULL);
+    env->ReleaseStringUTFChars(cmd, cmd_str);
+
+    return 1;
 }
 
 void Java_com_github_shadowsocks_system_jniclose(JNIEnv *env, jobject thiz, jint fd) {
@@ -83,7 +100,7 @@ static JNINativeMethod method_table[] = {
         (void*) Java_com_github_shadowsocks_system_jniclose },
     { "sendfd", "(I)I",
         (void*) Java_com_github_shadowsocks_system_sendfd },
-    { "exec", "(Ljava/lang/String;)V",
+    { "exec", "(Ljava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_system_exec },
     { "getABI", "()Ljava/lang/String;",
         (void*) Java_com_github_shadowsocks_system_getabi }

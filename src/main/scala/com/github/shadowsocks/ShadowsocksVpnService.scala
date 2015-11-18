@@ -71,6 +71,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var vpnThread: ShadowsocksVpnThread = null
   var closeReceiver: BroadcastReceiver = null
 
+  var sslocalPid: Int = 0;
+  var sstunnelPid: Int = 0;
+  var tun2socksPid: Int = 0;
+  var pdnsdPid: Int = 0;
+
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
     info.isInRange(config.proxy)
@@ -188,13 +193,25 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "tun2socks")) {
-      try {
-        val pid = scala.io.Source.fromFile(Path.BASE + task + "-vpn.pid").mkString.trim.toInt
-        Process.killProcess(pid)
-      } catch {
-        case e: Throwable => Log.e(TAG, "unable to kill " + task)
-      }
+    try {
+      Process.killProcess(sslocalPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill ss-local")
+    }
+    try {
+      Process.killProcess(sstunnelPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill ss-tunnel")
+    }
+    try {
+      Process.killProcess(tun2socksPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill tun2socks")
+    }
+    try {
+      Process.killProcess(pdnsdPid)
+    } catch {
+      case e: Throwable => Log.e(TAG, "unable to kill pdnsd")
     }
   }
 
@@ -316,8 +333,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     cmd += (Path.BASE + "ss-local", "-V", "-u"
       , "-b", "127.0.0.1"
       , "-t", "600"
-      , "-c", Path.BASE + "ss-local-vpn.conf"
-      , "-f", Path.BASE + "ss-local-vpn.pid")
+      , "-c", Path.BASE + "ss-local-vpn.conf")
 
     if (config.isAuth) cmd += "-A"
 
@@ -327,7 +343,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    Console.runCommand(cmd.mkString(" "))
+    sslocalPid = System.exec(cmd.mkString(" "))
   }
 
   def startDnsTunnel() = {
@@ -345,13 +361,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-b", "127.0.0.1"
       , "-l", "8163"
       , "-L", "8.8.8.8:53"
-      , "-c", Path.BASE + "ss-tunnel-vpn.conf"
-      , "-f", Path.BASE + "ss-tunnel-vpn.pid")
+      , "-c", Path.BASE + "ss-tunnel-vpn.conf")
 
     if (config.isAuth) cmd += "-A"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    Console.runCommand(cmd.mkString(" "))
+    sstunnelPid = System.exec(cmd.mkString(" "))
   }
 
   def startDnsDaemon() {
@@ -361,10 +376,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val reject = ConfigUtils.getRejectList(getContext)
         val blackList = ConfigUtils.getBlackList(getContext)
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
-          Path.BASE + "pdnsd-vpn.pid", reject, blackList, 8163, ipv6)
+          reject, blackList, 8163, ipv6)
       } else {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
-          Path.BASE + "pdnsd-vpn.pid", 8163, ipv6)
+          8163, ipv6)
       }
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-vpn.conf"))(p => {
@@ -373,7 +388,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd-vpn.conf"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runCommand(cmd)
+    pdnsdPid = System.exec(cmd)
   }
 
   override def getContext = getBaseContext
@@ -446,8 +461,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--loglevel 3 "
-      + "--pid %stun2socks-vpn.pid")
+      + "--loglevel 3 ")
       .formatLocal(Locale.ENGLISH,
         PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
         config.localPort, fd, VPN_MTU, Path.BASE)
@@ -462,7 +476,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Console.runCommand(cmd)
+    tun2socksPid = System.exec(cmd)
 
     fd
   }
