@@ -10,11 +10,13 @@ import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
+import android.text.style.TextAppearanceSpan
+import android.text.{Spanned, SpannableStringBuilder}
 import android.view.View.{OnAttachStateChangeListener, OnClickListener}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{LinearLayout, ImageView, CheckedTextView, Toast}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.{Parser, Utils}
+import com.github.shadowsocks.utils.{TrafficMonitor, Parser, Utils}
 import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
 
@@ -54,10 +56,23 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       })
     }
 
+    def updateText() {
+      val builder = new SpannableStringBuilder
+      builder.append(item.name)
+      if (item.tx != 0 || item.rx != 0) {
+        val start = builder.length
+        builder.append(getString(R.string.stat_profiles,
+          TrafficMonitor.formatTraffic(item.tx), TrafficMonitor.formatTraffic(item.rx)))
+        builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
+          start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      }
+      text.setText(builder)
+    }
+
     def bind(item: Profile) {
-      text.setText(item.name)
-      text.setChecked(item.id == ShadowsocksApplication.profileId)
       this.item = item
+      updateText()
+      text.setChecked(item.id == ShadowsocksApplication.profileId)
     }
 
     def onClick(v: View) = {
@@ -153,7 +168,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
     if (scanResult != null) Parser.parse(scanResult.getContents) match {
-      case Some(profile) => ShadowsocksApplication.profileManager.createOrUpdateProfile(profile)
+      case Some(profile) => ShadowsocksApplication.profileManager.createProfile(profile)
       case _ => // ignore
     }
   }

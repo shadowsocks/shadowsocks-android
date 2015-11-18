@@ -74,6 +74,10 @@
 
   <string name="stat">网络流量</string>
   <string name="stat_summary">发送:\t%1$s\t|\t接收:\t%2$s\n上传:\t%3$s\t|\t下载:\t%4$s</string>
+  <string name="stat_profiles">\n发送:\t%1$s\t|\t接收:\t%2$s</string>
+  <plurals name="bytes">
+    <item quantity="other">字节</item>
+  </plurals>
 
   <!-- profile -->
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
