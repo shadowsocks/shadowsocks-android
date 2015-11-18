@@ -144,6 +144,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def stopRunner() {
 
+    TrafficMonitor.reset()
+
     if (vpnThread != null) {
       vpnThread.stopThread()
       vpnThread = null
@@ -216,6 +218,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def startRunner(c: Config) {
+
+    TrafficMonitor.reset()
 
     vpnThread = new ShadowsocksVpnThread(this)
     vpnThread.start()

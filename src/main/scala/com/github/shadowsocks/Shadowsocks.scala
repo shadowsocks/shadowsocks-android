@@ -40,7 +40,7 @@ package com.github.shadowsocks
 
 import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
 import java.util
-import java.util.Locale
+import java.util.{Locale, Timer, TimerTask}
 
 import android.app.backup.BackupManager
 import android.app.{Activity, ProgressDialog}
@@ -147,7 +147,7 @@ class Shadowsocks
   extends AppCompatActivity {
 
   // Variables
-  private var serviceStarted = false
+  var serviceStarted = false
   var fab: FloatingActionButton = _
   var fabProgressCircle: FABProgressCircle = _
   var progressDialog: ProgressDialog = _
@@ -156,6 +156,8 @@ class Shadowsocks
   var prepared = false
   var currentProfile = new Profile
   var vpnEnabled = -1
+  var timer: Timer = null
+  val TIMER_INTERVAL = 1 // sec
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
@@ -465,6 +467,24 @@ class Shadowsocks
 
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
+
+    // initialize timer
+    val task = new TimerTask {
+      def run() {
+        TrafficMonitor.update()
+        val pm = getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
+        if (pm.isScreenOn) {
+          val trafficStat = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
+            TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+            TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+            handler.post(() => {
+              preferences.findPreference(Key.stat).setSummary(trafficStat)
+            })
+        }
+      }
+    }
+    timer = new Timer(true)
+    timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
@@ -510,6 +530,12 @@ class Shadowsocks
   override def onStop() {
     super.onStop()
     clearDialog()
+
+    // reset timer
+    if (timer != null) {
+      timer.cancel()
+      timer = null
+    }
   }
 
   override def onDestroy() {

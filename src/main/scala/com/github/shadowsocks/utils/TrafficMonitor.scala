@@ -38,16 +38,16 @@ object TrafficMonitor {
     }
   }
 
-  def updateTraffic() {
+  def update() {
     val now = getTraffic
-    txRate = ((now.tx - last.tx) / 1024 / (now.timestamp - last.timestamp))
-    rxRate = ((now.rx - last.rx) / 1024 / (now.timestamp - last.timestamp))
+    txRate = (now.tx - last.tx) / (now.timestamp - last.timestamp)
+    rxRate = (now.rx - last.rx) / (now.timestamp - last.timestamp)
     txTotal += (now.tx - last.tx) / 1024
     rxTotal += (now.rx - last.rx) / 1024
     last = now
   }
 
-  def resetTraffic() {
+  def reset() {
     txRate = 0
     rxRate = 0
     txTotal = 0

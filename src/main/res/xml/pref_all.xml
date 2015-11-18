@@ -8,6 +8,8 @@
             <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
         </Preference>
 
+        <Preference android:key="stat" android:title="@string/stat"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory
