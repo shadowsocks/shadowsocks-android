@@ -18,13 +18,11 @@
         <item name="colorAccent">@color/material_accent_500</item>
         <item name="colorPrimary">@color/material_accent_500</item>
         <item name="colorPrimaryDark">@color/material_accent_700</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
     <style name="Theme.Material.Dialog.Alert" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorAccent">@color/material_accent_500</item>
         <item name="colorPrimary">@color/material_accent_500</item>
         <item name="colorPrimaryDark">@color/material_accent_700</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
     <style name="PopupTheme" parent="Theme.Material.Dialog">
@@ -37,7 +35,6 @@
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
 </resources>
