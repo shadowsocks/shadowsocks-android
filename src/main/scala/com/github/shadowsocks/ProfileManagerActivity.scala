@@ -1,22 +1,21 @@
 package com.github.shadowsocks
 
-import android.app.AlertDialog
-import android.content.{DialogInterface, Intent}
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
-import android.text.{Spanned, SpannableStringBuilder}
+import android.text.{SpannableStringBuilder, Spanned}
 import android.view.View.{OnAttachStateChangeListener, OnClickListener}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
-import android.widget.{LinearLayout, ImageView, CheckedTextView, Toast}
+import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.{TrafficMonitor, Parser, Utils}
+import com.github.shadowsocks.utils.{Parser, TrafficMonitor, Utils}
 import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
 
@@ -38,13 +37,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
         image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
         val qrcode = QRCode.from(Parser.generate(item))
           .withSize(Utils.dpToPx(ProfileManagerActivity.this, 250), Utils.dpToPx(ProfileManagerActivity.this, 250))
-          .asInstanceOf[QRCode]
-        image.setImageBitmap(qrcode.bitmap())
+          .asInstanceOf[QRCode].bitmap()
+        image.setImageBitmap(qrcode)
 
         new AlertDialog.Builder(ProfileManagerActivity.this)
           .setCancelable(true)
-          .setNegativeButton(getString(R.string.close),
-            ((dialog: DialogInterface, id: Int) => dialog.cancel()): DialogInterface.OnClickListener)
+          .setNegativeButton(R.string.close, null)
           .setView(image)
           .create()
           .show()

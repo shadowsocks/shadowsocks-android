@@ -39,15 +39,15 @@
 
 package com.github.shadowsocks
 
-import android.app.{Activity, AlertDialog}
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.support.v7.app.{AppCompatActivity, AlertDialog}
 import android.view.WindowManager
 import com.github.shadowsocks.utils.Parser
 
-class ParserActivity extends Activity {
+class ParserActivity extends AppCompatActivity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     val data = getIntent.getData.toString
@@ -56,30 +56,27 @@ class ParserActivity extends Activity {
       finish()
       return
     }
-    showAsPopup(this)
+    showAsPopup()
     val dialog = new AlertDialog.Builder(this)
       .setTitle(R.string.add_profile_dialog)
       .setCancelable(false)
       .setPositiveButton(android.R.string.yes, ((dialog: DialogInterface, id: Int) => {
         ShadowsocksApplication.profileManager.createProfile(profile.get)
-        dialog.dismiss()
       }): DialogInterface.OnClickListener)
-      .setNegativeButton(android.R.string.no, ((dialog: DialogInterface, id: Int) => {
-        dialog.dismiss()
-      }): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, null)
       .setMessage(data)
       .create()
     dialog.setOnDismissListener((dialog: DialogInterface) => finish())  // builder method was added in API 17
     dialog.show()
   }
 
-  def showAsPopup(activity: Activity) {
-    activity.getWindow.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND,
-      WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-    val params = activity.getWindow.getAttributes
+  def showAsPopup() {
+    val window = getWindow
+    window.setFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND, WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    val params = window.getAttributes
     params.alpha = 1.0f
     params.dimAmount = 0.5f
-    activity.getWindow.setAttributes(params.asInstanceOf[android.view.WindowManager.LayoutParams])
-    activity.getWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT))
+    window.setAttributes(params.asInstanceOf[android.view.WindowManager.LayoutParams])
+    window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT))
   }
 }
