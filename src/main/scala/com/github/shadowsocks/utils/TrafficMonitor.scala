@@ -1,6 +1,6 @@
 package com.github.shadowsocks.utils
 
-import java.lang.{Math, System}
+import java.lang.System
 import java.text.DecimalFormat
 
 import com.github.shadowsocks.{R, ShadowsocksApplication}

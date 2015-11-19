@@ -74,10 +74,10 @@ class ShadowsocksNatService extends Service with BaseService {
   var apps: Array[ProxiedApp] = null
   val myUid = Process.myUid()
 
-  var sslocalPid: Int = 0;
-  var sstunnelPid: Int = 0;
-  var redsocksPid: Int = 0;
-  var pdnsdPid: Int = 0;
+  var sslocalPid: Int = 0
+  var sstunnelPid: Int = 0
+  var redsocksPid: Int = 0
+  var pdnsdPid: Int = 0
 
   private val dnsAddressCache = new SparseArray[String]
 

@@ -40,7 +40,7 @@ package com.github.shadowsocks
 
 import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
 import java.util
-import java.util.{Locale, Timer, TimerTask}
+import java.util.Locale
 
 import android.app.backup.BackupManager
 import android.app.{Activity, ProgressDialog}
@@ -55,7 +55,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.{ViewGroup, View, ViewParent}
+import android.view.{View, ViewGroup, ViewParent}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
@@ -73,8 +73,7 @@ object Typefaces {
     cache synchronized {
       if (!cache.containsKey(assetPath)) {
         try {
-          val t: Typeface = Typeface.createFromAsset(c.getAssets, assetPath)
-          cache.put(assetPath, t)
+          cache.put(assetPath, Typeface.createFromAsset(c.getAssets, assetPath))
         } catch {
           case e: Exception =>
             Log.e(TAG, "Could not get typeface '" + assetPath + "' because " + e.getMessage)
@@ -471,6 +470,9 @@ class Shadowsocks
 
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
+
+    callback.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+      TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {

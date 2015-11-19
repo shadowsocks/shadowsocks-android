@@ -70,10 +70,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var vpnThread: ShadowsocksVpnThread = null
   var closeReceiver: BroadcastReceiver = null
 
-  var sslocalPid: Int = 0;
-  var sstunnelPid: Int = 0;
-  var tun2socksPid: Int = 0;
-  var pdnsdPid: Int = 0;
+  var sslocalPid: Int = 0
+  var sstunnelPid: Int = 0
+  var tun2socksPid: Int = 0
+  var pdnsdPid: Int = 0
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
