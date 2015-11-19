@@ -472,8 +472,6 @@ class Shadowsocks
       def run() {
         if (state == State.CONNECTED) {
           TrafficMonitor.update()
-        } else {
-          TrafficMonitor.reset()
         }
         val trafficStat = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
           TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
