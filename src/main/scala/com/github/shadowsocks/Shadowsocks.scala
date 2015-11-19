@@ -155,8 +155,6 @@ class Shadowsocks
   var prepared = false
   var currentProfile = new Profile
   var vpnEnabled = -1
-  var timer: Timer = null
-  val TIMER_INTERVAL = 1 // sec
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
@@ -164,6 +162,13 @@ class Shadowsocks
   val callback = new IShadowsocksServiceCallback.Stub {
     override def stateChanged(state: Int, msg: String) {
       onStateChanged(state, msg)
+    }
+    override def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+      val trafficStat = getString(R.string.stat_summary)
+        .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
+      handler.post(() => {
+        preferences.findPreference(Key.stat).setSummary(trafficStat)
+      })
     }
   }
   val connection = new ServiceConnection {
@@ -466,26 +471,6 @@ class Shadowsocks
 
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
-
-    // initialize timer
-    val task = new TimerTask {
-      def run() {
-        if (state == State.CONNECTED) {
-          TrafficMonitor.update()
-        } else {
-          TrafficMonitor.reset()
-        }
-        val trafficStat = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
-          TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-          TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
-        handler.post(() => {
-          preferences.findPreference(Key.stat).setSummary(trafficStat)
-        })
-      }
-    }
-    task.run()
-    timer = new Timer(true)
-    timer.schedule(task, TIMER_INTERVAL * 1000, TIMER_INTERVAL * 1000)
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
@@ -531,12 +516,6 @@ class Shadowsocks
   override def onStop() {
     super.onStop()
     clearDialog()
-
-    // reset timer
-    if (timer != null) {
-      timer.cancel()
-      timer = null
-    }
   }
 
   override def onDestroy() {

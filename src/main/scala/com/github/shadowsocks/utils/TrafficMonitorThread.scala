@@ -37,21 +37,22 @@
  *
  */
 
-package com.github.shadowsocks
+package com.github.shadowsocks.utils
 
 import java.io.{File, FileDescriptor, IOException}
 import java.util.concurrent.Executors
 
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
+import com.github.shadowsocks.BaseService
 
-class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
+class TrafficMonitorThread(service: BaseService) extends Thread {
 
-  val TAG = "ShadowsocksVpnService"
-  val PATH = "/data/data/com.github.shadowsocks/protect_path"
+  val TAG = "TrafficMonitorThread"
+  val PATH = "/data/data/com.github.shadowsocks/stat_path"
 
-  @volatile var isRunning: Boolean = true
   @volatile var serverSocket: LocalServerSocket = null
+  @volatile var isRunning: Boolean = true
 
   def closeServerSocket() {
     if (serverSocket != null) {
@@ -87,7 +88,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         return
     }
 
-    val pool = Executors.newFixedThreadPool(4)
+    val pool = Executors.newFixedThreadPool(1)
 
     while (isRunning) {
       try {
@@ -98,33 +99,27 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
             val input = socket.getInputStream
             val output = socket.getOutputStream
 
-            input.read()
+            val buffer = new Array[Byte](256)
+            val size = input.read(buffer)
 
-            val fds = socket.getAncillaryFileDescriptors
+            val array = new Array[Byte](size)
+            Array.copy(buffer, 0, array, 0, size)
 
-            if (fds.nonEmpty) {
-              var ret = false
-
-              val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
-              val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
-              ret = vpnService.protect(fd)
-
-              // Trick to close file decriptor
-              System.jniclose(fd)
-
-              if (ret) {
-                output.write(0)
-              } else {
-                output.write(1)
-              }
+            val stat = new String(array, "UTF-8").split("\\|")
+            if (stat.length == 2) {
+              TrafficMonitor.update(stat(0).toLong, stat(1).toLong)
+              service.updateTraffic(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+                TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
             }
+
+            output.write(0)
 
             input.close()
             output.close()
 
           } catch {
             case e: Exception =>
-              Log.e(TAG, "Error when protect socket", e)
+              Log.e(TAG, "Error when recv traffic stat", e)
           }
 
           // close socket

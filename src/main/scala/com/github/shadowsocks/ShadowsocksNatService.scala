@@ -71,7 +71,6 @@ class ShadowsocksNatService extends Service with BaseService {
   var lockReceiver: BroadcastReceiver = null
   var closeReceiver: BroadcastReceiver = null
   var connReceiver: BroadcastReceiver = null
-  var config: Config = null
   var apps: Array[ProxiedApp] = null
   val myUid = Process.myUid()
 
@@ -418,11 +417,9 @@ class ShadowsocksNatService extends Service with BaseService {
     Console.runRootCommand(http_sb.toArray)
   }
 
-  override def startRunner(c: Config) {
+  override def startRunner(config: Config) {
 
-    TrafficMonitor.reset()
-
-    config = c
+    super.startRunner(config)
 
     // register close receiver
     val filter = new IntentFilter()
@@ -467,16 +464,16 @@ class ShadowsocksNatService extends Service with BaseService {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
-          config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
+          this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
             changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
-            config = null
+            this.config = null
         }
       }
 
-      if (config != null) {
+      if (this.config != null) {
 
         // Clean up
         killProcesses()
@@ -511,7 +508,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def stopRunner() {
 
-    TrafficMonitor.reset()
+    super.stopRunner()
 
     // channge the state
     changeState(State.STOPPING)
