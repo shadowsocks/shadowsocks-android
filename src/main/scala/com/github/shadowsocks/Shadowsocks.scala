@@ -337,7 +337,7 @@ class Shadowsocks
         if (intent != null) {
           startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
         } else {
-          onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+          handler.post(() => onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null))
         }
       } else {
         serviceStart()
