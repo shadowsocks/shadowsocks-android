@@ -440,22 +440,18 @@ class Shadowsocks
       bgService.getState match {
         case State.CONNECTING =>
           fab.setBackgroundTintList(greyTint)
-          fabProgressCircle.show()
           changeSwitch(checked = true)
           setPreferenceEnabled(false)
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
-          fabProgressCircle.hide()
           changeSwitch(checked = true)
           setPreferenceEnabled(false)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
-          fabProgressCircle.show()
           changeSwitch(checked = false)
           setPreferenceEnabled(false)
         case _ =>
           fab.setBackgroundTintList(greyTint)
-          fabProgressCircle.hide()
           changeSwitch(checked = false)
           setPreferenceEnabled(true)
       }
