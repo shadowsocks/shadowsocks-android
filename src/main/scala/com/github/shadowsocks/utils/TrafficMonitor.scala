@@ -3,15 +3,12 @@ package com.github.shadowsocks.utils
 import java.lang.{Math, System}
 import java.text.DecimalFormat
 
-import android.net.TrafficStats
-import android.os.Process
 import com.github.shadowsocks.{R, ShadowsocksApplication}
 
 case class Traffic(tx: Long, rx: Long, timestamp: Long)
 
 object TrafficMonitor {
-  val uid = Process.myUid
-  var last: Traffic = getTraffic
+  var last: Traffic = getTraffic(0, 0)
 
   // Kilo bytes per second
   var txRate: Long = 0
@@ -21,9 +18,8 @@ object TrafficMonitor {
   var txTotal: Long = 0
   var rxTotal: Long = 0
 
-  def getTraffic: Traffic = {
-    new Traffic(Math.max(TrafficStats.getTotalTxBytes - TrafficStats.getUidTxBytes(uid), 0),
-      Math.max(TrafficStats.getTotalRxBytes - TrafficStats.getUidRxBytes(uid), 0), System.currentTimeMillis())
+  def getTraffic(tx: Long, rx: Long): Traffic = {
+    new Traffic(tx, rx, System.currentTimeMillis())
   }
 
   private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
@@ -39,8 +35,8 @@ object TrafficMonitor {
     else numberFormat.format(n) + ' ' + units(i)
   }
 
-  def update() {
-    val now = getTraffic
+  def update(tx: Long, rx: Long) {
+    val now = getTraffic(tx, rx)
     val delta = now.timestamp - last.timestamp
     if (delta != 0) {
       txRate = (now.tx - last.tx) * 1000 / delta
@@ -56,7 +52,7 @@ object TrafficMonitor {
     rxRate = 0
     txTotal = 0
     rxTotal = 0
-    last = getTraffic
+    last = getTraffic(0, 0)
   }
 
   def getTxTotal(): String = {

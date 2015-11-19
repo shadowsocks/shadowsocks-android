@@ -67,7 +67,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = null
   var apps: Array[ProxiedApp] = null
-  var config: Config = null
   var vpnThread: ShadowsocksVpnThread = null
   var closeReceiver: BroadcastReceiver = null
 
@@ -144,7 +143,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def stopRunner() {
 
-    TrafficMonitor.reset()
+    super.stopRunner()
 
     if (vpnThread != null) {
       vpnThread.stopThread()
@@ -217,14 +216,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
-  override def startRunner(c: Config) {
+  override def startRunner(config: Config) {
 
-    TrafficMonitor.reset()
+    super.startRunner(config)
 
     vpnThread = new ShadowsocksVpnThread(this)
     vpnThread.start()
-
-    config = c
 
     // register close receiver
     val filter = new IntentFilter()
@@ -252,12 +249,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
-          config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
+          this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
             changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
-            config = null
+            this.config = null
         }
       }
 

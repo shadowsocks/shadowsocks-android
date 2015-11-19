@@ -39,16 +39,20 @@
 
 package com.github.shadowsocks
 
+import java.util.Locale
+
 import android.app.Notification
 import android.content.Context
 import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.State
+import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
 
 trait BaseService {
 
   @volatile private var state = State.INIT
   @volatile private var callbackCount = 0
+  @volatile private var trafficMonitorThread: TrafficMonitorThread = null
+  var config: Config = null
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
 
@@ -91,9 +95,21 @@ trait BaseService {
     }
   }
 
+  def startRunner(config: Config) {
+    this.config = config;
+
+    TrafficMonitor.reset()
+    trafficMonitorThread = new TrafficMonitorThread(this)
+    trafficMonitorThread.start()
+  }
+  def stopRunner() {
+    TrafficMonitor.reset()
+    if (trafficMonitorThread != null) {
+      trafficMonitorThread.stopThread()
+      trafficMonitorThread = null
+    }
+  }
   def stopBackgroundService()
-  def startRunner(config: Config)
-  def stopRunner()
   def getServiceMode: Int
   def getTag: String
   def getContext: Context
@@ -106,6 +122,23 @@ trait BaseService {
   }
   def changeState(s: Int) {
     changeState(s, null)
+  }
+
+  def updateTraffic(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+    val handler = new Handler(getContext.getMainLooper)
+    handler.post(() => {
+      if (callbackCount > 0) {
+        val n = callbacks.beginBroadcast()
+        for (i <- 0 to n - 1) {
+          try {
+            callbacks.getBroadcastItem(i).trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+          } catch {
+            case _: Exception => // Ignore
+          }
+        }
+        callbacks.finishBroadcast()
+      }
+    })
   }
 
   protected def changeState(s: Int, msg: String) {
