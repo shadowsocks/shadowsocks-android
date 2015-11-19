@@ -39,8 +39,6 @@
 
 package com.github.shadowsocks
 
-import java.util.Locale
-
 import android.app.Notification
 import android.content.Context
 import android.os.{Handler, RemoteCallbackList}
@@ -96,7 +94,7 @@ trait BaseService {
   }
 
   def startRunner(config: Config) {
-    this.config = config;
+    this.config = config
 
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(this)
@@ -129,7 +127,7 @@ trait BaseService {
     handler.post(() => {
       if (callbackCount > 0) {
         val n = callbacks.beginBroadcast()
-        for (i <- 0 to n - 1) {
+        for (i <- 0 until n) {
           try {
             callbacks.getBroadcastItem(i).trafficUpdated(txRate, rxRate, txTotal, rxTotal)
           } catch {
@@ -146,7 +144,7 @@ trait BaseService {
     handler.post(() => if (state != s) {
       if (callbackCount > 0) {
         val n = callbacks.beginBroadcast()
-        for (i <- 0 to n - 1) {
+        for (i <- 0 until n) {
           try {
             callbacks.getBroadcastItem(i).stateChanged(s, msg)
           } catch {

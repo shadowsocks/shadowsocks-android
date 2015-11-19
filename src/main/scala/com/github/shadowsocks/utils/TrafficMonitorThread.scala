@@ -39,7 +39,7 @@
 
 package com.github.shadowsocks.utils
 
-import java.io.{File, FileDescriptor, IOException}
+import java.io.{File, IOException}
 import java.util.concurrent.Executors
 
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}

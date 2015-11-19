@@ -1,6 +1,6 @@
 package com.github.shadowsocks.utils
 
-import java.lang.{Math, System}
+import java.lang.System
 import java.text.DecimalFormat
 
 import com.github.shadowsocks.{R, ShadowsocksApplication}
@@ -39,8 +39,8 @@ object TrafficMonitor {
     val now = getTraffic(tx, rx)
     val delta = now.timestamp - last.timestamp
     if (delta != 0) {
-      txRate = (now.tx - last.tx) / delta
-      rxRate = (now.rx - last.rx) / delta
+      txRate = (now.tx - last.tx) * 1000 / delta
+      rxRate = (now.rx - last.rx) * 1000 / delta
     }
     txTotal += now.tx - last.tx
     rxTotal += now.rx - last.rx
