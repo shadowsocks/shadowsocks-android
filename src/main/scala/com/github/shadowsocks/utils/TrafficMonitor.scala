@@ -43,8 +43,8 @@ object TrafficMonitor {
     val now = getTraffic
     val delta = now.timestamp - last.timestamp
     if (delta != 0) {
-      txRate = (now.tx - last.tx) / delta
-      rxRate = (now.rx - last.rx) / delta
+      txRate = (now.tx - last.tx) * 1000 / delta
+      rxRate = (now.rx - last.rx) * 1000 / delta
     }
     txTotal += now.tx - last.tx
     rxTotal += now.rx - last.rx
