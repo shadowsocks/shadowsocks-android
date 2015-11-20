@@ -442,11 +442,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     try {
       conn = builder.establish()
+      if (conn == null) changeState(State.STOPPED, getString(R.string.reboot_required))
     } catch {
       case ex: IllegalStateException =>
         changeState(State.STOPPED, ex.getMessage)
         conn = null
-      case ex: Exception => conn = null
+      case ex: Exception =>
+        ex.printStackTrace()
+        conn = null
     }
 
     if (conn == null) {
