@@ -42,6 +42,7 @@ package com.github.shadowsocks
 import java.io.File
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
+import java.lang.{Process, ProcessBuilder}
 
 import android.app._
 import android.content._
@@ -56,6 +57,7 @@ import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 
 import scala.collection._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -72,12 +74,12 @@ class ShadowsocksNatService extends Service with BaseService {
   var closeReceiver: BroadcastReceiver = null
   var connReceiver: BroadcastReceiver = null
   var apps: Array[ProxiedApp] = null
-  val myUid = Process.myUid()
+  val myUid = android.os.Process.myUid()
 
-  var sslocalPid: Int = 0
-  var sstunnelPid: Int = 0
-  var redsocksPid: Int = 0
-  var pdnsdPid: Int = 0
+  var sslocalProcess: Process = null
+  var sstunnelProcess: Process = null
+  var redsocksProcess: Process = null
+  var pdnsdProcess: Process = null
 
   private val dnsAddressCache = new SparseArray[String]
 
@@ -198,7 +200,10 @@ class ShadowsocksNatService extends Service with BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    sslocalPid = System.exec(cmd.mkString(" "))
+    sslocalProcess = new ProcessBuilder()
+      .command(cmd)
+      .redirectErrorStream(false)
+      .start()
   }
 
   def startTunnel() {
@@ -223,7 +228,10 @@ class ShadowsocksNatService extends Service with BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-     sstunnelPid =  System.exec(cmd.mkString(" "))
+      sstunnelProcess = new ProcessBuilder()
+        .command(cmd)
+        .redirectErrorStream(false)
+        .start()
 
     } else {
       val conf = ConfigUtils
@@ -245,7 +253,10 @@ class ShadowsocksNatService extends Service with BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
 
-      sstunnelPid = System.exec(cmdBuf.mkString(" "))
+      sstunnelProcess = new ProcessBuilder()
+        .command(cmdBuf)
+        .redirectErrorStream(false)
+        .start()
     }
   }
 
@@ -268,8 +279,10 @@ class ShadowsocksNatService extends Service with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    pdnsdPid = System.exec(cmd)
-
+    pdnsdProcess = new ProcessBuilder()
+      .command(cmd.split(" ").toSeq)
+      .redirectErrorStream(false)
+      .start()
   }
 
   def getVersionName: String = {
@@ -293,7 +306,10 @@ class ShadowsocksNatService extends Service with BaseService {
     })
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    redsocksPid = System.exec(cmd)
+    redsocksProcess = new ProcessBuilder()
+      .command(cmd.split(" ").toSeq)
+      .redirectErrorStream(false)
+      .start()
   }
 
   /** Called when the activity is first created. */
@@ -350,25 +366,21 @@ class ShadowsocksNatService extends Service with BaseService {
   }
 
   def killProcesses() {
-    try {
-      Process.killProcess(sslocalPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill ss-local")
+    if (sslocalProcess != null) {
+      sslocalProcess.destroy()
+      sslocalProcess = null
     }
-    try {
-      Process.killProcess(sstunnelPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill ss-tunnel")
+    if (sstunnelProcess != null) {
+      sstunnelProcess.destroy()
+      sstunnelProcess = null
     }
-    try {
-      Process.killProcess(redsocksPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill redsocks")
+    if (redsocksProcess != null) {
+      redsocksProcess.destroy()
+      redsocksProcess = null
     }
-    try {
-      Process.killProcess(pdnsdPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill pdnsd")
+    if (pdnsdProcess != null) {
+      pdnsdProcess.destroy()
+      pdnsdProcess = null
     }
 
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")

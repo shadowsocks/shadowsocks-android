@@ -41,6 +41,7 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.util.Locale
+import java.lang.{Process, ProcessBuilder}
 
 import android.app._
 import android.content._
@@ -55,6 +56,7 @@ import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import org.apache.commons.net.util.SubnetUtils
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -70,10 +72,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var vpnThread: ShadowsocksVpnThread = null
   var closeReceiver: BroadcastReceiver = null
 
-  var sslocalPid: Int = 0
-  var sstunnelPid: Int = 0
-  var tun2socksPid: Int = 0
-  var pdnsdPid: Int = 0
+  var sslocalProcess: Process = null
+  var sstunnelProcess: Process = null
+  var pdnsdProcess: Process = null
+  var tun2socksProcess: Process = null
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
@@ -194,25 +196,21 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
-    try {
-      Process.killProcess(sslocalPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill ss-local")
+    if (sslocalProcess != null) {
+      sslocalProcess.destroy()
+      sslocalProcess = null
     }
-    try {
-      Process.killProcess(sstunnelPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill ss-tunnel")
+    if (sstunnelProcess != null) {
+      sstunnelProcess.destroy()
+      sstunnelProcess = null
     }
-    try {
-      Process.killProcess(tun2socksPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill tun2socks")
+    if (tun2socksProcess != null) {
+      tun2socksProcess.destroy()
+      tun2socksProcess = null
     }
-    try {
-      Process.killProcess(pdnsdPid)
-    } catch {
-      case e: Throwable => Log.e(TAG, "unable to kill pdnsd")
+    if (pdnsdProcess != null) {
+      pdnsdProcess.destroy()
+      pdnsdProcess = null
     }
   }
 
@@ -344,7 +342,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    sslocalPid = System.exec(cmd.mkString(" "))
+
+    sslocalProcess = new ProcessBuilder()
+      .command(cmd)
+      .redirectErrorStream(false)
+      .start()
   }
 
   def startDnsTunnel() = {
@@ -367,7 +369,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (config.isAuth) cmd += "-A"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    sstunnelPid = System.exec(cmd.mkString(" "))
+
+    sstunnelProcess = new ProcessBuilder()
+      .command(cmd)
+      .redirectErrorStream(false)
+      .start()
   }
 
   def startDnsDaemon() {
@@ -389,7 +395,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd-vpn.conf"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    pdnsdPid = System.exec(cmd)
+
+    pdnsdProcess = new ProcessBuilder()
+      .command(cmd.split(" ").toSeq)
+      .redirectErrorStream(false)
+      .start()
   }
 
   override def getContext = getBaseContext
@@ -465,7 +475,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--socks-server-addr 127.0.0.1:%d "
       + "--tunfd %d "
       + "--tunmtu %d "
-      + "--loglevel 3 ")
+      + "--loglevel 3")
       .formatLocal(Locale.ENGLISH,
         PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
         config.localPort, fd, VPN_MTU, Path.BASE)
@@ -480,7 +490,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    tun2socksPid = System.exec(cmd)
+    tun2socksProcess = new ProcessBuilder()
+      .command(cmd.split(" ").toSeq)
+      .redirectErrorStream(false)
+      .start()
 
     fd
   }
