@@ -18,6 +18,10 @@ object TrafficMonitor {
   var txTotal: Long = 0
   var rxTotal: Long = 0
 
+  // Kilo bytes for the last query
+  var txLast: Long = 0
+  var rxLast: Long = 0
+
   def getTraffic(tx: Long, rx: Long): Traffic = {
     new Traffic(tx, rx, System.currentTimeMillis())
   }
@@ -42,6 +46,8 @@ object TrafficMonitor {
       txRate = (now.tx - last.tx) * 1000 / delta
       rxRate = (now.rx - last.rx) * 1000 / delta
     }
+    txLast = now.tx - last.tx
+    rxLast = now.rx - last.rx
     txTotal += now.tx - last.tx
     rxTotal += now.rx - last.rx
     last = now

@@ -22,6 +22,8 @@ public class Config implements Parcelable {
   public int remotePort = 1984;
   public int localPort = 1080;
 
+  public int profileId = 0;
+
   public static final Parcelable.Creator<Config> CREATOR = new Parcelable.Creator<Config>() {
     public Config createFromParcel(Parcel in) {
       return new Config(in);
@@ -34,7 +36,7 @@ public class Config implements Parcelable {
 
   public Config(boolean isProxyApps, boolean isBypassApps,
       boolean isUdpDns, boolean isAuth, boolean isIpv6, String profileName, String proxy, String sitekey,
-      String encMethod, String proxiedAppString, String route, int remotePort, int localPort) {
+      String encMethod, String proxiedAppString, String route, int remotePort, int localPort, int profileId) {
     this.isProxyApps = isProxyApps;
     this.isBypassApps = isBypassApps;
     this.isUdpDns = isUdpDns;
@@ -48,6 +50,7 @@ public class Config implements Parcelable {
     this.route = route;
     this.remotePort = remotePort;
     this.localPort = localPort;
+    this.profileId = profileId;
   }
 
   private Config(Parcel in) {
@@ -68,6 +71,7 @@ public class Config implements Parcelable {
     route = in.readString();
     remotePort = in.readInt();
     localPort = in.readInt();
+    profileId = in.readInt();
   }
 
   @Override public int describeContents() {
@@ -88,5 +92,6 @@ public class Config implements Parcelable {
     out.writeString(route);
     out.writeInt(remotePort);
     out.writeInt(localPort);
+    out.writeInt(profileId);
   }
 }

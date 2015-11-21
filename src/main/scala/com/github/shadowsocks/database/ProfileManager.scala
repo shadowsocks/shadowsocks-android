@@ -79,7 +79,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       true
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "addProfile", ex)
+        Log.e(Shadowsocks.TAG, "updateProfile", ex)
         false
     }
   }
@@ -149,9 +149,13 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
   }
 
   private def loadFromPreferences: Profile = {
-    val profile = new Profile()
 
-    profile.id = settings.getInt(Key.profileId, -1)
+    val id = settings.getInt(Key.profileId, -1)
+
+    val profile: Profile = getProfile(id) match {
+      case Some(p) => p
+      case _ => new Profile()
+    }
 
     profile.proxyApps = settings.getBoolean(Key.isProxyApps, false)
     profile.bypass = settings.getBoolean(Key.isBypassApps, false)

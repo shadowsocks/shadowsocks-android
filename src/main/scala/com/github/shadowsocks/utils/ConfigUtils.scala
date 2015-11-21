@@ -239,7 +239,7 @@ object ConfigUtils {
     val method = proxy(3).trim
 
     new Config(config.isProxyApps, config.isBypassApps, config.isUdpDns, config.isAuth, config.isIpv6,
-      config.profileName, host, password, method, config.proxiedAppString, config.route, port, config.localPort)
+      config.profileName, host, password, method, config.proxiedAppString, config.route, port, config.localPort, 0)
   }
 
   def load(settings: SharedPreferences): Config = {
@@ -259,7 +259,9 @@ object ConfigUtils {
     val localPort = settings.getInt(Key.localPort, 1984)
     val proxiedAppString = settings.getString(Key.proxied, "")
 
+    val profileId = settings.getInt(Key.profileId, -1)
+
     new Config(isProxyApps, isBypassApps, isUdpDns, isAuth, isIpv6, profileName, proxy, sitekey, encMethod,
-      proxiedAppString, route, remotePort, localPort)
+      proxiedAppString, route, remotePort, localPort, profileId)
   }
 }

@@ -44,6 +44,9 @@ import java.util.{Timer, TimerTask}
 import android.app.Notification
 import android.content.Context
 import android.os.{Handler, RemoteCallbackList}
+import android.util.Log
+
+import com.github.shadowsocks.database.{Profile, ProfileManager}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
 
@@ -127,6 +130,23 @@ trait BaseService {
     }
   }
 
+  def updateTrafficTotal(tx: Long, rx: Long) {
+    val handler = new Handler(getContext.getMainLooper)
+    handler.post(() => {
+      if (config != null) {
+        ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
+          case Some(profile) => {
+            profile.tx += tx;
+            profile.rx += rx;
+            Log.d("test", profile.tx + " " + profile.rx)
+            ShadowsocksApplication.profileManager.updateProfile(profile)
+          }
+          case None => // Ignore
+        }
+      }
+    })
+  }
+
   def clearChildProcessStream()
   def stopBackgroundService()
   def getServiceMode: Int
@@ -143,7 +163,7 @@ trait BaseService {
     changeState(s, null)
   }
 
-  def updateTraffic(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+  def updateTrafficRate(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
       if (callbackCount > 0) {
