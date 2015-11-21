@@ -69,7 +69,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     closeServerSocket()
   }
 
-  override def run(): Unit = {
+  override def run() {
 
     try {
       new File(PATH).delete()

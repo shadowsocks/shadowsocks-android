@@ -74,8 +74,7 @@
   <string name="ipv6_summary">向远程服务器转发 IPv6 流量</string>
 
   <string name="stat">网络流量</string>
-  <string name="stat_summary">发送:\t%1$s\t|\t接收:\t%2$s\n上传:\t%3$s\t|\t下载:\t%4$s</string>
-  <string name="stat_profiles">\n已发送: \t%1$s\n已接收: \t%2$s</string>
+  <string name="stat_summary">发送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
   <plurals name="bytes">
     <item quantity="other">字节</item>
   </plurals>

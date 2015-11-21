@@ -70,7 +70,7 @@ class TrafficMonitorThread(service: BaseService) extends Thread {
     closeServerSocket()
   }
 
-  override def run(): Unit = {
+  override def run() {
 
     try {
       new File(PATH).delete()
@@ -108,9 +108,9 @@ class TrafficMonitorThread(service: BaseService) extends Thread {
             val stat = new String(array, "UTF-8").split("\\|")
             if (stat.length == 2) {
               TrafficMonitor.update(stat(0).toLong, stat(1).toLong)
+              service.updateTrafficTotal(TrafficMonitor.txLast, TrafficMonitor.rxLast)
               service.updateTrafficRate(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
                 TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
-              service.updateTrafficTotal(TrafficMonitor.txLast, TrafficMonitor.rxLast)
             }
 
             output.write(0)
