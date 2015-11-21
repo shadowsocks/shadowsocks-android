@@ -61,6 +61,8 @@ object TrafficMonitor {
     rxRate = 0
     txTotal = 0
     rxTotal = 0
+    txLast = 0
+    rxLast = 0
     last = getTraffic(0, 0)
   }
 
