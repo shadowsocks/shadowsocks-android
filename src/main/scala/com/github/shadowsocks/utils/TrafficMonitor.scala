@@ -74,15 +74,15 @@ object TrafficMonitor {
   }
 
   def getTxRate(): String = {
-    formatTraffic(txRate) + "/s"
+    formatTraffic(txRate)
   }
 
   def getRxRate(): String = {
-    formatTraffic(rxRate) + "/s"
+    formatTraffic(rxRate)
   }
 
   def getRate(): String = {
-    formatTraffic(txRate + rxRate) + "/s"
+    formatTraffic(txRate + rxRate)
   }
 }
 
