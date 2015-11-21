@@ -14,6 +14,7 @@ import android.text.{SpannableStringBuilder, Spanned}
 import android.view.View.{OnAttachStateChangeListener, OnClickListener}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
+import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Parser, TrafficMonitor, Utils}
 import com.google.zxing.integration.android.IntentIntegrator
@@ -24,7 +25,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Mygod
   */
-class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener {
+class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     private var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -54,8 +55,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       })
     }
 
-    def updateText() {
+    def updateText(refetch: Boolean = false) {
       val builder = new SpannableStringBuilder
+      val item = if (refetch) ShadowsocksApplication.profileManager.getProfile(this.item.id) match {
+        case Some(profile) => profile
+        case None => return
+      } else this.item
       builder.append(item.name)
       if (item.tx != 0 || item.rx != 0) {
         val start = builder.length
@@ -70,7 +75,10 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     def bind(item: Profile) {
       this.item = item
       updateText()
-      text.setChecked(item.id == ShadowsocksApplication.profileId)
+      if (item.id == ShadowsocksApplication.profileId) {
+        text.setChecked(true)
+        selectedItem = this
+      }
     }
 
     def onClick(v: View) = {
@@ -120,6 +128,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
+  private var selectedItem: ProfileViewHolder = _
+
   private lazy val profilesAdapter = new ProfilesAdapter
   private var removedSnackbar: Snackbar = _
 
@@ -155,9 +165,17 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       }
       def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = false  // TODO?
     }).attachToRecyclerView(profilesList)
+
+    attachService(new IShadowsocksServiceCallback.Stub {
+      def stateChanged(state: Int, msg: String) = () // ignore
+      def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+        if (selectedItem != null) selectedItem.updateText(true)
+      }
+    })
   }
 
   override def onDestroy {
+    deattachService()
     super.onDestroy
     ShadowsocksApplication.profileManager.setProfileAddedListener(null)
     profilesAdapter.commitRemoves

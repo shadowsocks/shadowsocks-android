@@ -40,29 +40,20 @@
 package com.github.shadowsocks
 
 import android.app.Service
-import android.content._
+import android.content.Intent
 import android.net.VpnService
-import android.os._
-import com.github.shadowsocks.aidl.IShadowsocksService
-import com.github.shadowsocks.utils._
+import android.os.{IBinder, Handler}
+import com.github.shadowsocks.utils.ConfigUtils
 
-class ShadowsocksRunnerService extends Service {
+class ShadowsocksRunnerService extends Service with ServiceBoundContext {
   val handler = new Handler()
-  val connection = new ServiceConnection {
-    override def onServiceConnected(name: ComponentName, service: IBinder) {
-      bgService = IShadowsocksService.Stub.asInterface(service)
-      handler.postDelayed(() => if (bgService != null) startBackgroundService(), 1000)
-    }
-    override def onServiceDisconnected(name: ComponentName) {
-      bgService = null
-    }
-  }
-
-  // Variables
-  var bgService: IShadowsocksService = _
 
   override def onBind(intent: Intent): IBinder = {
     null
+  }
+
+  override def onServiceConnected() {
+    handler.postDelayed(() => if (bgService != null) startBackgroundService(), 1000)
   }
 
   def startBackgroundService() {
@@ -77,23 +68,6 @@ class ShadowsocksRunnerService extends Service {
       bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
     }
     stopSelf()
-  }
-
-  def attachService() {
-    if (bgService == null) {
-      val s = if (!ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
-      val intent = new Intent(this, s)
-      intent.setAction(Action.SERVICE)
-      bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      startService(new Intent(this, s))
-    }
-  }
-
-  def deattachService() {
-    if (bgService != null) {
-      unbindService(connection)
-      bgService = null
-    }
   }
 
   override def onCreate() {

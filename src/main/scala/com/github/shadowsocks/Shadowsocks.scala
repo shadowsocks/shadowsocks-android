@@ -58,7 +58,7 @@ import android.util.Log
 import android.view.{View, ViewGroup, ViewParent}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
-import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
+import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.preferences.{DropDownPreference, NumberPickerPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
@@ -111,7 +111,7 @@ object Shadowsocks {
     pref.asInstanceOf[PasswordEditTextPreference].setText(value)
   }
 
-  def updateNumberPickerPreference(pref: Preference, value: Int): Unit = {
+  def updateNumberPickerPreference(pref: Preference, value: Int) {
     pref.asInstanceOf[NumberPickerPreference].setValue(value)
   }
 
@@ -142,7 +142,7 @@ object Shadowsocks {
 }
 
 class Shadowsocks
-  extends AppCompatActivity {
+  extends AppCompatActivity with ServiceBoundContext {
 
   // Variables
   var serviceStarted = false
@@ -157,47 +157,28 @@ class Shadowsocks
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
-  var bgService: IShadowsocksService = null
-  val callback = new IShadowsocksServiceCallback.Stub {
-    override def stateChanged(state: Int, msg: String) {
-      onStateChanged(state, msg)
-    }
-    override def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
-      val trafficStat = getString(R.string.stat_summary)
-        .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
-      handler.post(() => {
-        preferences.findPreference(Key.stat).setSummary(trafficStat)
-      })
+
+  override def onServiceConnected() {
+    // Update the UI
+    if (fab != null) fab.setEnabled(true)
+    stateUpdate()
+
+    if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
+      ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
+      recovery()
     }
   }
-  val connection = new ServiceConnection {
-    override def onServiceConnected(name: ComponentName, service: IBinder) {
-      // Initialize the background service
-      bgService = IShadowsocksService.Stub.asInterface(service)
-      try {
-        bgService.registerCallback(callback)
-      } catch {
-        case ignored: RemoteException => // Nothing
-      }
-      // Update the UI
-      if (fab != null) fab.setEnabled(true)
-      stateUpdate()
 
-      if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
-        ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
-        recovery()
-      }
-    }
+  override def onServiceDisconnected() {
+    if (fab != null) fab.setEnabled(false)
+  }
 
-    override def onServiceDisconnected(name: ComponentName) {
-      if (fab != null) fab.setEnabled(false)
-      try {
-        if (bgService != null) bgService.unregisterCallback(callback)
-      } catch {
-        case ignored: RemoteException => // Nothing
-      }
-      bgService = null
-    }
+  def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+    val trafficStat = getString(R.string.stat_summary)
+      .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
+    handler.post(() => {
+      preferences.findPreference(Key.stat).setSummary(trafficStat)
+    })
   }
 
   private lazy val preferences =
@@ -388,31 +369,15 @@ class Shadowsocks
 
     // Bind to the service
     handler.post(() => {
-      attachService()
+      attachService(new IShadowsocksServiceCallback.Stub {
+        override def stateChanged(state: Int, msg: String) {
+          onStateChanged(state, msg)
+        }
+        override def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+          Shadowsocks.this.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+        }
+      })
     })
-  }
-
-  def attachService() {
-    if (bgService == null) {
-      val s = if (ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksVpnService]
-      else classOf[ShadowsocksNatService]
-      val intent = new Intent(this, s)
-      intent.setAction(Action.SERVICE)
-      bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      startService(new Intent(this, s))
-    }
-  }
-
-  def deattachService() {
-    if (bgService != null) {
-      try {
-        bgService.unregisterCallback(callback)
-      } catch {
-        case ignored: RemoteException => // Nothing
-      }
-      bgService = null
-      unbindService(connection)
-    }
   }
 
   def reloadProfile() {
@@ -467,7 +432,7 @@ class Shadowsocks
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
 
-    callback.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+    trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
       TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
   }
 

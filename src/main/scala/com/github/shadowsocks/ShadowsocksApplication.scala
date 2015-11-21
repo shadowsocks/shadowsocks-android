@@ -95,7 +95,7 @@ class ShadowsocksApplication extends Application {
     val tm = TagManager.getInstance(this)
     val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
     val callback = new ResultCallback[ContainerHolder] {
-      override def onResult(holder: ContainerHolder): Unit = {
+      override def onResult(holder: ContainerHolder) {
         if (!holder.getStatus.isSuccess) {
           return
         }

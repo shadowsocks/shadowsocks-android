@@ -40,30 +40,22 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, KeyguardManager}
-import android.content._
+import android.content.{Intent, IntentFilter, Context, BroadcastReceiver}
 import android.net.VpnService
-import android.os._
+import android.os.{Bundle, Handler}
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import com.github.shadowsocks.aidl.IShadowsocksService
-import com.github.shadowsocks.utils._
+import com.github.shadowsocks.utils.ConfigUtils
 
-class ShadowsocksRunnerActivity extends Activity {
-
+class ShadowsocksRunnerActivity extends AppCompatActivity with ServiceBoundContext {
   val handler = new Handler()
-  val connection = new ServiceConnection {
-    override def onServiceConnected(name: ComponentName, service: IBinder) {
-      bgService = IShadowsocksService.Stub.asInterface(service)
-      handler.postDelayed(() => if (bgService != null) startBackgroundService(), 1000)
-    }
-    override def onServiceDisconnected(name: ComponentName) {
-      bgService = null
-    }
-  }
 
   // Variables
-  var bgService: IShadowsocksService = _
-  var receiver:BroadcastReceiver = _
+  var receiver: BroadcastReceiver = _
 
+  override def onServiceConnected() {
+    handler.postDelayed(() => if (bgService != null) startBackgroundService(), 1000)
+  }
 
   def startBackgroundService() {
     if (ShadowsocksApplication.isVpnEnabled) {
@@ -76,24 +68,6 @@ class ShadowsocksRunnerActivity extends Activity {
     } else {
       bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
       finish()
-    }
-  }
-
-  def attachService() {
-    if (bgService == null) {
-      val s = if (ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksVpnService]
-        else classOf[ShadowsocksNatService]
-      val intent = new Intent(this, s)
-      intent.setAction(Action.SERVICE)
-      bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      startService(new Intent(this, s))
-    }
-  }
-
-  def deattachService() {
-    if (bgService != null) {
-      unbindService(connection)
-      bgService = null
     }
   }
 

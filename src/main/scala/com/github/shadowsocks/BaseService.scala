@@ -45,8 +45,6 @@ import android.app.Notification
 import android.content.Context
 import android.os.{Handler, RemoteCallbackList}
 import android.util.Log
-
-import com.github.shadowsocks.database.{Profile, ProfileManager}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
 
@@ -135,12 +133,11 @@ trait BaseService {
     handler.post(() => {
       if (config != null) {
         ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
-          case Some(profile) => {
-            profile.tx += tx;
-            profile.rx += rx;
+          case Some(profile) =>
+            profile.tx += tx
+            profile.rx += rx
             Log.d("test", profile.tx + " " + profile.rx)
             ShadowsocksApplication.profileManager.updateProfile(profile)
-          }
           case None => // Ignore
         }
       }

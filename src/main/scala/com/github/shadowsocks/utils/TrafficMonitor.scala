@@ -10,15 +10,15 @@ case class Traffic(tx: Long, rx: Long, timestamp: Long)
 object TrafficMonitor {
   var last: Traffic = getTraffic(0, 0)
 
-  // Kilo bytes per second
+  // Bytes per second
   var txRate: Long = 0
   var rxRate: Long = 0
 
-  // Kilo bytes for the current session
+  // Bytes for the current session
   var txTotal: Long = 0
   var rxTotal: Long = 0
 
-  // Kilo bytes for the last query
+  // Bytes for the last query
   var txLast: Long = 0
   var rxLast: Long = 0
 
@@ -42,14 +42,14 @@ object TrafficMonitor {
   def update(tx: Long, rx: Long) {
     val now = getTraffic(tx, rx)
     val delta = now.timestamp - last.timestamp
-    if (delta != 0) {
-      txRate = (now.tx - last.tx) * 1000 / delta
-      rxRate = (now.rx - last.rx) * 1000 / delta
-    }
     txLast = now.tx - last.tx
     rxLast = now.rx - last.rx
-    txTotal += now.tx - last.tx
-    rxTotal += now.rx - last.rx
+    if (delta != 0) {
+      txRate = txLast * 1000 / delta
+      rxRate = rxLast * 1000 / delta
+    }
+    txTotal += txLast
+    rxTotal += rxLast
     last = now
   }
 
