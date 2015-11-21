@@ -407,18 +407,24 @@ class Shadowsocks
           fab.setBackgroundTintList(greyTint)
           changeSwitch(checked = true)
           setPreferenceEnabled(false)
+          fabProgressCircle.show()
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
           changeSwitch(checked = true)
           setPreferenceEnabled(false)
+          fabProgressCircle.show()
+          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           changeSwitch(checked = false)
           setPreferenceEnabled(false)
+          fabProgressCircle.show()
         case _ =>
           fab.setBackgroundTintList(greyTint)
           changeSwitch(checked = false)
           setPreferenceEnabled(true)
+          fabProgressCircle.show()
+          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
       }
       state = bgService.getState
     }
