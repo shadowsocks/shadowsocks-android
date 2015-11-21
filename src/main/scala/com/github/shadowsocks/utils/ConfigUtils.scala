@@ -47,20 +47,20 @@ import com.github.shadowsocks.aidl.Config
 
 object ConfigUtils {
   val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
-  val REDSOCKS = "base {" +
-    " log_debug = off;" +
-    " log_info = off;" +
-    " log = stderr;" +
-    " daemon = off;" +
-    " redirector = iptables;" +
-    " }\n" +
-    "redsocks {" +
-    " local_ip = 127.0.0.1;" +
-    " local_port = 8123;" +
-    " ip = 127.0.0.1;" +
-    " port = %d;" +
-    " type = socks5;" +
-    " }"
+  val REDSOCKS = "base {\n" +
+    " log_debug = off;\n" +
+    " log_info = off;\n" +
+    " log = stderr;\n" +
+    " daemon = off;\n" +
+    " redirector = iptables;\n" +
+    "}\n" +
+    "redsocks {\n" +
+    " local_ip = 127.0.0.1;\n" +
+    " local_port = 8123;\n" +
+    " ip = 127.0.0.1;\n" +
+    " port = %d;\n" +
+    " type = socks5;\n" +
+    "}\n"
 
   val PDNSD_LOCAL =
     """
