@@ -61,6 +61,7 @@ void crash_msg(char *msg)
  * the optional following arguments are the arguments like in printf */
 void log_message(int prior, const char *s, ...)
 {
+#ifndef ANDROID
 	int gotlock=0;
 	va_list va;
 	FILE *f;
@@ -112,6 +113,7 @@ void log_message(int prior, const char *s, ...)
 	}
 	if (gotlock)
 		pthread_mutex_unlock(&loglock);
+#endif
 }
 
 

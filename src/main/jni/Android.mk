@@ -231,7 +231,7 @@ LOCAL_CFLAGS := -O2 -std=gnu99 -DUSE_IPTABLES \
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## pdnsd library
+## pdnsd
 ########################################################
 
 include $(CLEAR_VARS)
@@ -240,12 +240,12 @@ PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
 
 LOCAL_MODULE    := pdnsd
 LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -Wall -O2 -I$(LOCAL_PATH)/pdnsd
+LOCAL_CFLAGS    := -DANDROID -Wall -O2 -I$(LOCAL_PATH)/pdnsd
 
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## shadowsocks-libev local library
+## shadowsocks-libev local
 ########################################################
 
 include $(CLEAR_VARS)

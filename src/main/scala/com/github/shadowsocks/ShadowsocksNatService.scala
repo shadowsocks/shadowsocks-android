@@ -202,7 +202,7 @@ class ShadowsocksNatService extends Service with BaseService {
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     sslocalProcess = new ProcessBuilder()
       .command(cmd)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
   }
 
@@ -230,7 +230,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
       sstunnelProcess = new ProcessBuilder()
         .command(cmd)
-        .redirectErrorStream(false)
+        .redirectErrorStream(true)
         .start()
 
     } else {
@@ -255,7 +255,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
       sstunnelProcess = new ProcessBuilder()
         .command(cmdBuf)
-        .redirectErrorStream(false)
+        .redirectErrorStream(true)
         .start()
     }
   }
@@ -281,7 +281,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
     pdnsdProcess = new ProcessBuilder()
       .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
   }
 
@@ -308,7 +308,7 @@ class ShadowsocksNatService extends Service with BaseService {
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
     redsocksProcess = new ProcessBuilder()
       .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
   }
 
@@ -427,6 +427,17 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     Console.runRootCommand(init_sb.toArray)
     Console.runRootCommand(http_sb.toArray)
+  }
+
+  override def clearChildProcessStream() {
+    try {
+      sslocalProcess.getInputStream.skip(65535)
+      sstunnelProcess.getInputStream.skip(65535)
+      pdnsdProcess.getInputStream.skip(65535)
+      redsocksProcess.getInputStream.skip(65535)
+    } catch {
+      case ex: Exception => // Ignore
+    }
   }
 
   override def startRunner(config: Config) {

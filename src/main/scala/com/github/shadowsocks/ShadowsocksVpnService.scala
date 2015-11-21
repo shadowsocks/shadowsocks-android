@@ -214,6 +214,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
+  override def clearChildProcessStream() {
+    try {
+      sslocalProcess.getInputStream.skip(65535)
+      sstunnelProcess.getInputStream.skip(65535)
+      pdnsdProcess.getInputStream.skip(65535)
+      tun2socksProcess.getInputStream.skip(65535)
+    } catch {
+      case ex: Exception => // Ignore
+    }
+  }
+
   override def startRunner(config: Config) {
 
     super.startRunner(config)
@@ -345,7 +356,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     sslocalProcess = new ProcessBuilder()
       .command(cmd)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
   }
 
@@ -372,7 +383,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     sstunnelProcess = new ProcessBuilder()
       .command(cmd)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
   }
 
@@ -398,7 +409,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     pdnsdProcess = new ProcessBuilder()
       .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
   }
 
@@ -492,7 +503,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     tun2socksProcess = new ProcessBuilder()
       .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(false)
+      .redirectErrorStream(true)
       .start()
 
     fd

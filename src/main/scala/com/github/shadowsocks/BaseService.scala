@@ -39,6 +39,8 @@
 
 package com.github.shadowsocks
 
+import java.util.{Timer, TimerTask}
+
 import android.app.Notification
 import android.content.Context
 import android.os.{Handler, RemoteCallbackList}
@@ -49,7 +51,9 @@ trait BaseService {
 
   @volatile private var state = State.INIT
   @volatile private var callbackCount = 0
-  @volatile private var trafficMonitorThread: TrafficMonitorThread = null
+
+  var timer: Timer = null
+  var trafficMonitorThread: TrafficMonitorThread = null
   var config: Config = null
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
@@ -99,14 +103,31 @@ trait BaseService {
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(this)
     trafficMonitorThread.start()
+
+    val task = new TimerTask {
+      def run {
+        clearChildProcessStream()
+      }
+    }
+
+    timer = new Timer(true)
+    timer.schedule(task, 60 * 1000, 60 * 1000)
   }
+
   def stopRunner() {
     TrafficMonitor.reset()
     if (trafficMonitorThread != null) {
       trafficMonitorThread.stopThread()
       trafficMonitorThread = null
     }
+
+    if (timer != null) {
+      timer.cancel()
+      timer = null
+    }
   }
+
+  def clearChildProcessStream()
   def stopBackgroundService()
   def getServiceMode: Int
   def getTag: String
