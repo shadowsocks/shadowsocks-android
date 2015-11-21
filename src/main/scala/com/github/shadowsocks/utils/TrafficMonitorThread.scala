@@ -46,7 +46,7 @@ import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 import com.github.shadowsocks.BaseService
 
-class TrafficMonitorThread(service: BaseService) extends Thread {
+class TrafficMonitorThread() extends Thread {
 
   val TAG = "TrafficMonitorThread"
   val PATH = "/data/data/com.github.shadowsocks/stat_path"
@@ -108,9 +108,6 @@ class TrafficMonitorThread(service: BaseService) extends Thread {
             val stat = new String(array, "UTF-8").split("\\|")
             if (stat.length == 2) {
               TrafficMonitor.update(stat(0).toLong, stat(1).toLong)
-              service.updateTrafficTotal(TrafficMonitor.txLast, TrafficMonitor.rxLast)
-              service.updateTrafficRate(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-                TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
             }
 
             output.write(0)

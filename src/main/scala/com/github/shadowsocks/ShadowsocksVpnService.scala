@@ -214,17 +214,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
-  override def clearChildProcessStream() {
-    try {
-      sslocalProcess.getInputStream.skip(65535)
-      sstunnelProcess.getInputStream.skip(65535)
-      pdnsdProcess.getInputStream.skip(65535)
-      tun2socksProcess.getInputStream.skip(65535)
-    } catch {
-      case ex: Exception => // Ignore
-    }
-  }
-
   override def startRunner(config: Config) {
 
     super.startRunner(config)

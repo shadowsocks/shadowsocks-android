@@ -39,18 +39,21 @@ object TrafficMonitor {
     else numberFormat.format(n) + ' ' + units(i)
   }
 
-  def update(tx: Long, rx: Long) {
-    val now = getTraffic(tx, rx)
+  def updateRate() {
+    val now = getTraffic(txTotal, rxTotal)
     val delta = now.timestamp - last.timestamp
-    txLast = now.tx - last.tx
-    rxLast = now.rx - last.rx
+    val deltaTx = now.tx - last.tx
+    val deltaRx = now.rx - last.rx
     if (delta != 0) {
-      txRate = txLast * 1000 / delta
-      rxRate = rxLast * 1000 / delta
+      txRate = deltaTx * 1000 / delta
+      rxRate = deltaRx * 1000 / delta
     }
-    txTotal += txLast
-    rxTotal += rxLast
     last = now
+  }
+
+  def update(tx: Long, rx: Long) {
+    txTotal = tx;
+    rxTotal = rx;
   }
 
   def reset() {
@@ -83,6 +86,18 @@ object TrafficMonitor {
 
   def getRate(): String = {
     formatTraffic(txRate + rxRate)
+  }
+
+  def getDeltaTx(): Long = {
+    val last = txLast
+    txLast = txTotal
+    txTotal - last
+  }
+
+  def getDeltaRx(): Long = {
+    val last = rxLast
+    rxLast = rxTotal
+    rxTotal - last
   }
 }
 

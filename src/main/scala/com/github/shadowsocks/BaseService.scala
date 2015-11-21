@@ -73,6 +73,10 @@ trait BaseService {
         callbacks.unregister(cb)
         callbackCount -= 1
       }
+      if (callbackCount == 0 && timer != null) {
+        timer.cancel()
+        timer = null
+      }
       if (callbackCount == 0 && state != State.CONNECTING && state != State.CONNECTED) {
         stopBackgroundService()
       }
@@ -80,6 +84,18 @@ trait BaseService {
 
     override def registerCallback(cb: IShadowsocksServiceCallback) {
       if (cb != null) {
+        if (callbackCount == 0 && timer == null) {
+          val task = new TimerTask {
+            def run {
+              TrafficMonitor.updateRate()
+              updateTrafficTotal(TrafficMonitor.getDeltaTx, TrafficMonitor.getDeltaRx)
+              updateTrafficRate(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+                TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+            }
+          }
+          timer = new Timer(true)
+          timer.schedule(task, 1000, 1000)
+        }
         callbacks.register(cb)
         callbackCount += 1
       }
@@ -102,29 +118,18 @@ trait BaseService {
     this.config = config
 
     TrafficMonitor.reset()
-    trafficMonitorThread = new TrafficMonitorThread(this)
+    trafficMonitorThread = new TrafficMonitorThread()
     trafficMonitorThread.start()
-
-    val task = new TimerTask {
-      def run {
-        clearChildProcessStream()
-      }
-    }
-
-    timer = new Timer(true)
-    timer.schedule(task, 60 * 1000, 60 * 1000)
   }
 
   def stopRunner() {
+    // Make sure update total traffic when stopping the runner
+    updateTrafficTotal(TrafficMonitor.getDeltaTx, TrafficMonitor.getDeltaRx)
+
     TrafficMonitor.reset()
     if (trafficMonitorThread != null) {
       trafficMonitorThread.stopThread()
       trafficMonitorThread = null
-    }
-
-    if (timer != null) {
-      timer.cancel()
-      timer = null
     }
   }
 
@@ -136,7 +141,6 @@ trait BaseService {
           case Some(profile) =>
             profile.tx += tx
             profile.rx += rx
-            Log.d("test", profile.tx + " " + profile.rx)
             ShadowsocksApplication.profileManager.updateProfile(profile)
           case None => // Ignore
         }
@@ -144,7 +148,6 @@ trait BaseService {
     })
   }
 
-  def clearChildProcessStream()
   def stopBackgroundService()
   def getServiceMode: Int
   def getTag: String

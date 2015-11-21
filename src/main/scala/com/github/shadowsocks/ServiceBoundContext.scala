@@ -55,6 +55,13 @@ trait ServiceBoundContext extends Context {
 
   def deattachService() {
     if (bgService != null) {
+      if (callback != null) {
+        try {
+          bgService.unregisterCallback(callback)
+        } catch {
+          case ignored: RemoteException => // Nothing
+        }
+      }
       unbindService(connection)
       bgService = null
     }

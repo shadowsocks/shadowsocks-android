@@ -429,17 +429,6 @@ class ShadowsocksNatService extends Service with BaseService {
     Console.runRootCommand(http_sb.toArray)
   }
 
-  override def clearChildProcessStream() {
-    try {
-      sslocalProcess.getInputStream.skip(65535)
-      sstunnelProcess.getInputStream.skip(65535)
-      pdnsdProcess.getInputStream.skip(65535)
-      redsocksProcess.getInputStream.skip(65535)
-    } catch {
-      case ex: Exception => // Ignore
-    }
-  }
-
   override def startRunner(config: Config) {
 
     super.startRunner(config)
