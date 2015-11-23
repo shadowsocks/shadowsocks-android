@@ -153,7 +153,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     profilesList.setLayoutManager(new LinearLayoutManager(this))
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
-    removedSnackbar = Snackbar.make(findViewById(android.R.id.content), R.string.removed, Snackbar.LENGTH_LONG)
+    removedSnackbar = Snackbar.make(profilesList, R.string.removed, Snackbar.LENGTH_LONG)
       .setAction(R.string.undo, ((v: View) => profilesAdapter.undoRemoves): OnClickListener)
     removedSnackbar.getView.addOnAttachStateChangeListener(new OnAttachStateChangeListener {
       def onViewDetachedFromWindow(v: View) = profilesAdapter.commitRemoves
