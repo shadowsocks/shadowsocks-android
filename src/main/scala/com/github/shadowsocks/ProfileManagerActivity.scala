@@ -1,7 +1,7 @@
 package com.github.shadowsocks
 
 import android.content.Intent
-import android.os.Bundle
+import android.os.{Handler, Bundle}
 import android.support.design.widget.Snackbar
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -69,7 +69,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
         builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
           start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
       }
-      text.setText(builder)
+      handler.post(() => text.setText(builder))
     }
 
     def bind(item: Profile) {
@@ -129,6 +129,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   }
 
   private var selectedItem: ProfileViewHolder = _
+  private val handler = new Handler
 
   private lazy val profilesAdapter = new ProfilesAdapter
   private var removedSnackbar: Snackbar = _
