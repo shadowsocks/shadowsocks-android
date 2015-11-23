@@ -293,12 +293,6 @@ class Shadowsocks
     }
   }
 
-  def isTextEmpty(s: String, msg: String): Boolean = {
-    if (s != null && s.length > 0) return false
-    Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG).show
-    true
-  }
-
   def cancelStart() {
     clearDialog()
     changeSwitch(checked = false)
@@ -554,7 +548,9 @@ class Shadowsocks
 
   def checkText(key: String): Boolean = {
     val text = ShadowsocksApplication.settings.getString(key, "")
-    !isTextEmpty(text, getString(R.string.proxy_empty))
+    if (text != null && text.length > 0) return true
+    Snackbar.make(findViewById(android.R.id.content), getString(R.string.proxy_empty), Snackbar.LENGTH_LONG).show
+    false
   }
 
   /** Called when connect button is clicked. */
@@ -598,7 +594,7 @@ class Shadowsocks
           handler.postDelayed(() => fabProgressCircle.hide(), 1000)
           fab.setEnabled(true)
           changeSwitch(checked = false)
-          if (m != null) Snackbar.make(getWindow.getDecorView.findViewById(android.R.id.content),
+          if (m != null) Snackbar.make(findViewById(android.R.id.content),
             getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
           setPreferenceEnabled(enabled = true)
         case State.STOPPING =>

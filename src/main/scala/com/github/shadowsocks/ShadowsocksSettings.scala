@@ -5,9 +5,9 @@ import java.util.Locale
 import android.content.{DialogInterface, Intent}
 import android.net.Uri
 import android.os.{Build, Bundle}
-import android.preference.{SwitchPreference, Preference, PreferenceFragment}
+import android.preference.{Preference, PreferenceFragment, SwitchPreference}
 import android.support.v7.app.AlertDialog
-import android.webkit.{WebViewClient, WebView}
+import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.utils.Key
 
 // TODO: Move related logic here

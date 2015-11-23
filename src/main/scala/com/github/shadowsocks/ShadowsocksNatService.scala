@@ -40,9 +40,9 @@
 package com.github.shadowsocks
 
 import java.io.File
+import java.lang.Process
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
-import java.lang.{Process, ProcessBuilder}
 
 import android.app._
 import android.content._
@@ -56,8 +56,8 @@ import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 
-import scala.collection._
 import scala.collection.JavaConversions._
+import scala.collection._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

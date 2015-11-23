@@ -40,8 +40,8 @@
 package com.github.shadowsocks
 
 import java.io.File
+import java.lang.Process
 import java.util.Locale
-import java.lang.{Process, ProcessBuilder}
 
 import android.app._
 import android.content._
