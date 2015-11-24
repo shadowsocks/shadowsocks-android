@@ -41,14 +41,13 @@ package com.github.shadowsocks
 
 import java.util.{Timer, TimerTask}
 
-import android.app.Notification
+import android.app.Service
 import android.content.Context
 import android.os.{Handler, RemoteCallbackList}
-import android.util.Log
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
 
-trait BaseService {
+trait BaseService extends Service {
 
   @volatile private var state = State.INIT
   @volatile private var callbackCount = 0
@@ -196,9 +195,5 @@ trait BaseService {
       }
       state = s
     })
-  }
-
-  def initSoundVibrateLights(notification: Notification) {
-    notification.sound = null
   }
 }
