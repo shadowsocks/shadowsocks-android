@@ -81,19 +81,22 @@ class DBHelper(val context: Context)
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
       }
       if (oldVersion < 12) {
+        profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
-        onCreate(database, connectionSource)
+        TableUtils.createTable(connectionSource, classOf[Profile])
         profileDao.executeRawNoArgs(
           "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
             " udpdns, auth, ipv6, individual) " +
           "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
           " ipv6, individual FROM `tmp`;")
         profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
+        profileDao.executeRawNoArgs("COMMIT;")
+        return
       }
       if (oldVersion < 13) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date DATE;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
       }
     }
   }

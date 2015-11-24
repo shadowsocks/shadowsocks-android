@@ -166,6 +166,20 @@ class Shadowsocks
     if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
       ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
       recovery()
+
+      // Workaround that convert port(String) to port(Int)
+      val oldLocalPort = ShadowsocksApplication.settings.getString("port", "-1")
+      val oldRemotePort = ShadowsocksApplication.settings.getString("remotePort", "-1")
+      try {
+        if (oldLocalPort != "-1") {
+          ShadowsocksApplication.settings.edit.putInt(Key.localPort, oldLocalPort.toInt).commit()
+        }
+        if (oldRemotePort != "-1") {
+          ShadowsocksApplication.settings.edit.putInt(Key.remotePort, oldRemotePort.toInt).commit()
+        }
+      } catch {
+        case ex: Exception => // Ignore
+      }
     }
   }
 

@@ -25,13 +25,13 @@
         <com.github.shadowsocks.preferences.NumberPickerPreference
                 app:min="1"
                 app:max="65535"
-                android:key="remotePort"
+                android:key="remotePortNum"
                 app:summary="@string/remote_port_summary"
                 android:title="@string/remote_port"/>
         <com.github.shadowsocks.preferences.NumberPickerPreference
                 app:min="1025"
                 app:max="65535"
-                android:key="port"
+                android:key="localPortNum"
                 app:summary="@string/port_summary"
                 android:title="@string/port"/>
         <com.github.shadowsocks.preferences.PasswordEditTextPreference

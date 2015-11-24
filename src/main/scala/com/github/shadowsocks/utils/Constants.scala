@@ -82,8 +82,8 @@ object Key {
   val proxy = "proxy"
   val sitekey = "sitekey"
   val encMethod = "encMethod"
-  val remotePort = "remotePort"
-  val localPort = "port"
+  val remotePort = "remotePortNum"
+  val localPort = "localPortNum"
 }
 
 object Scheme {
