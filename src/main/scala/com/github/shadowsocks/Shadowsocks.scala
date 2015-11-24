@@ -167,10 +167,11 @@ class Shadowsocks
       ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
       recovery()
 
-      // Workaround that convert port(String) to port(Int)
-      val oldLocalPort = ShadowsocksApplication.settings.getString("port", "-1")
-      val oldRemotePort = ShadowsocksApplication.settings.getString("remotePort", "-1")
       try {
+        // Workaround that convert port(String) to port(Int)
+        val oldLocalPort = ShadowsocksApplication.settings.getString("port", "-1")
+        val oldRemotePort = ShadowsocksApplication.settings.getString("remotePort", "-1")
+
         if (oldLocalPort != "-1") {
           ShadowsocksApplication.settings.edit.putInt(Key.localPort, oldLocalPort.toInt).commit()
         }
