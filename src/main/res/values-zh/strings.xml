@@ -35,7 +35,7 @@
   <string name="traffic_stat">流量统计</string>
   <string name="traffic_stat_summary">在通知栏上显示当前上下行速率</string>
   <string name="forward_success">后台服务已开始运行。</string>
-  <string name="service_running">已连接到「%s」</string>
+  <string name="service_running">影梭 → %s</string>
   <string name="service_failed">无法连接远程服务器</string>
   <string name="stop">停止服务</string>
   <string name="stopping">正在关闭……</string>
