@@ -89,7 +89,6 @@ class DBHelper(val context: Context)
           "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
           " ipv6, individual FROM `tmp`;")
         profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
-        return
       }
       if (oldVersion < 13) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
