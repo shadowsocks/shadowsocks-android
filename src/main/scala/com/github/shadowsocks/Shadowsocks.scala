@@ -452,7 +452,6 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
-    preferences.findPreference(Key.notificationTraffic).setEnabled(enabled)
     preferences.findPreference(Key.isNAT).setEnabled(enabled)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)

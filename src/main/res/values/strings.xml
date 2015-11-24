@@ -13,7 +13,6 @@
   <string name="nat_summary">Use NAT mode instead of VPN mode</string>
   <string name="nat_summary_no_root">NAT mode is disabled without root</string>
   <string name="stat">Network Traffic</string>
-  <string name="notification_traffic">Show traffic in notification</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>

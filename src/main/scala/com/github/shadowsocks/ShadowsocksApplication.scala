@@ -76,8 +76,6 @@ object ShadowsocksApplication {
     .setLabel(getVersionName)
     .build())
 
-  def notificationTraffic = settings.getBoolean(Key.notificationTraffic, true)
-
   def profileId = settings.getInt(Key.profileId, -1)
   def profileId(i: Int) = settings.edit.putInt(Key.profileId, i).apply
   def currentProfile = profileManager.getProfile(profileId)
