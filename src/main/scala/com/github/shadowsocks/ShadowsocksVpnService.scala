@@ -247,8 +247,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         }
 
         if (resolved && handleConnection) {
-          notification = new ShadowsocksNotification(this, config.profileName)
           changeState(State.CONNECTED)
+          notification = new ShadowsocksNotification(this, config.profileName)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()

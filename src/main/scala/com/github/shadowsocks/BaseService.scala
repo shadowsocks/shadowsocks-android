@@ -58,7 +58,7 @@ trait BaseService extends Service {
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
 
-  protected val binder = new IShadowsocksService.Stub {
+  val binder = new IShadowsocksService.Stub {
     override def getMode: Int = {
       getServiceMode
     }

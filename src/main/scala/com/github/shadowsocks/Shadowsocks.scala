@@ -346,7 +346,7 @@ class Shadowsocks
 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_main)
-    // Initialize action bar
+    // Initialize Toolbar
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(getString(R.string.screen_name))
     toolbar.setTitleTextAppearance(toolbar.getContext, R.style.Toolbar_Logo)

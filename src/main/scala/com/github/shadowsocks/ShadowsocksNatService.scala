@@ -453,8 +453,8 @@ class ShadowsocksNatService extends BaseService {
           // Set DNS
           flushDns()
 
-          notification = new ShadowsocksNotification(this, config.profileName, true)
           changeState(State.CONNECTED)
+          notification = new ShadowsocksNotification(this, config.profileName, true)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()
