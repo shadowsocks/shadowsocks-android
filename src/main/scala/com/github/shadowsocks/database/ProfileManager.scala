@@ -59,6 +59,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
           profile.route = oldProfile.route
           profile.ipv6 = oldProfile.ipv6
           profile.proxyApps = oldProfile.proxyApps
+          profile.bypass = oldProfile.bypass
           profile.individual = oldProfile.individual
           profile.udpdns = oldProfile.udpdns
         case _ =>
