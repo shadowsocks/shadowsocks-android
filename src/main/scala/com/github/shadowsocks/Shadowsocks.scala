@@ -452,6 +452,7 @@ class Shadowsocks
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
+    preferences.findPreference(Key.notificationTraffic).setEnabled(enabled)
     preferences.findPreference(Key.isNAT).setEnabled(enabled)
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)
@@ -472,7 +473,8 @@ class Shadowsocks
   }
 
   private def updatePreferenceScreen() {
-    if (ShadowsocksApplication.proxy == "198.199.101.152" && adView == null) {
+    val profile = currentProfile
+    if (profile.host == "198.199.101.152" && adView == null) {
       adView = new AdView(this)
       adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
       adView.setAdSize(AdSize.SMART_BANNER)
@@ -480,7 +482,6 @@ class Shadowsocks
       adView.loadAd(new AdRequest.Builder().build())
     }
 
-    val profile = currentProfile
     for (name <- Shadowsocks.PROXY_PREFS) {
       val pref = preferences.findPreference(name)
       Shadowsocks.updatePreference(pref, name, profile)

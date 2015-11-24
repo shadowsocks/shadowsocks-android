@@ -82,6 +82,8 @@
                 android:key="isAutoConnect"
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect"/>
+        <SwitchPreference android:key="notificationTraffic" android:defaultValue="true"
+                          android:title="@string/notification_traffic"/>
 
         <com.github.shadowsocks.preferences.NatSwitchPreference android:key="isNAT"
                                                                 android:title="@string/nat"

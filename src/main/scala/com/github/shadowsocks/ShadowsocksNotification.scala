@@ -13,8 +13,7 @@ import com.github.shadowsocks.utils.{Action, State, Utils}
 /**
   * @author Mygod
   */
-class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false,
-                              private val showTraffic: Boolean = true) {
+class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false) {
   private lazy val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val callback = new Stub {
     override def stateChanged(state: Int, msg: String) = () // ignore
@@ -26,6 +25,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     }
   }
   private var lockReceiver: BroadcastReceiver = _
+  private var callbackRegistered: Boolean = true
 
   private val builder = new NotificationCompat.Builder(service)
     .setWhen(0)
@@ -39,8 +39,8 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
       PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   private lazy val style = new BigTextStyle(builder)
   private val showOnUnlock = visible && Utils.isLollipopOrAbove
-  if (showOnUnlock || showTraffic) {
-    update(Intent.ACTION_USER_PRESENT)
+  if (showOnUnlock || ShadowsocksApplication.notificationTraffic) {
+    update()
     lockReceiver = (context: Context, intent: Intent) => update(intent.getAction)
     val screenFilter = new IntentFilter()
     screenFilter.addAction(Intent.ACTION_SCREEN_ON)
@@ -49,16 +49,23 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     service.registerReceiver(lockReceiver, screenFilter)
   } else setVisible(visible).show()
 
-  private def update(action: String) = if (service.getState == State.CONNECTED) {
+  def update(action: String = Intent.ACTION_SCREEN_ON) = if (service.getState == State.CONNECTED) {
     if (action == Intent.ACTION_SCREEN_OFF) {
       if (showOnUnlock) setVisible(false)
-      if (showTraffic) service.binder.unregisterCallback(callback)
-    } else if (action == Intent.ACTION_USER_PRESENT ||
-      action == Intent.ACTION_SCREEN_ON && !keyGuard.inKeyguardRestrictedInputMode) {
-      setVisible(showOnUnlock)
-      if (showTraffic) service.binder.registerCallback(callback)
-    }
+      unregisterCallback  // unregister callback to save battery
+    } else if (action == Intent.ACTION_SCREEN_ON) {
+      if (ShadowsocksApplication.notificationTraffic) {
+        service.binder.registerCallback(callback)
+        callbackRegistered = true
+      } else unregisterCallback
+      if (!keyGuard.inKeyguardRestrictedInputMode) setVisible(showOnUnlock)
+    } else if (action == Intent.ACTION_USER_PRESENT) setVisible(showOnUnlock)
     show()
+  }
+
+  private def unregisterCallback = if (callbackRegistered) {
+    service.binder.unregisterCallback(callback)
+    callbackRegistered = false
   }
 
   def setVisible(visible: Boolean) = {
@@ -66,15 +73,15 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     this
   }
 
-  def notification = if (showTraffic) style.build() else builder.build()
+  def notification = if (callbackRegistered) style.build() else builder.build()
   def show() = service.startForeground(1, notification)
 
-  def destroy() = {
+  def destroy() {
     if (lockReceiver != null) {
       service.unregisterReceiver(lockReceiver)
       lockReceiver = null
     }
-    if (showTraffic) service.binder.unregisterCallback(callback)
+    unregisterCallback
     service.stopForeground(true)
   }
 }
