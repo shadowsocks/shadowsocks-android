@@ -43,13 +43,10 @@ import java.io.File
 import java.lang.Process
 import java.util.Locale
 
-import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.VpnService
 import android.os._
-import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat
 import android.util.Log
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
@@ -70,6 +67,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var conn: ParcelFileDescriptor = null
   var apps: Array[ProxiedApp] = null
   var vpnThread: ShadowsocksVpnThread = null
+  private var notification: ShadowsocksNotification = _
   var closeReceiver: BroadcastReceiver = null
 
   var sslocalProcess: Process = null
@@ -108,32 +106,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     null
   }
 
-  def notifyForegroundAlert(title: String, info: String, visible: Boolean) {
-    val openIntent = new Intent(this, classOf[Shadowsocks])
-    val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent = new Intent(Action.CLOSE)
-    val actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
-    val builder = new NotificationCompat.Builder(this)
-
-    builder
-      .setWhen(0)
-      .setColor(ContextCompat.getColor(this, R.color.material_accent_500))
-      .setTicker(title)
-      .setContentTitle(getString(R.string.app_name))
-      .setContentText(info)
-      .setContentIntent(contentIntent)
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-      .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
-        actionIntent)
-
-    if (visible)
-      builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-    else
-      builder.setPriority(NotificationCompat.PRIORITY_MIN)
-
-    startForeground(1, builder.build)
-  }
-
   override def onCreate() {
     super.onCreate()
     ConfigUtils.refresh(this)
@@ -152,7 +124,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       vpnThread = null
     }
 
-    stopForeground(true)
+    notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
@@ -275,9 +247,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         }
 
         if (resolved && handleConnection) {
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
           changeState(State.CONNECTED)
+          notification = new ShadowsocksNotification(this, config.profileName)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()

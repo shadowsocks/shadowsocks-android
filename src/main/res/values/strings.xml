@@ -15,6 +15,7 @@
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
+  <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
   <plurals name="bytes">
     <item quantity="one">Byte</item>
     <item quantity="other">Bytes</item>
@@ -54,14 +55,12 @@
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
   <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
-  <string name="traffic_stat">Traffic Stats</string>
-  <string name="traffic_stat_summary">Show traffic stats in notification bar</string>
   <string name="udp_dns">UDP Forwarding</string>
   <string name="udp_dns_summary">Forward UDP packets to remote</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
-  <string name="service_running">Connected to "%s"</string>
+  <string name="service_running">Shadowsocks → %s</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="stop">Stop the service</string>
   <string name="stopping">Shutting down…</string>

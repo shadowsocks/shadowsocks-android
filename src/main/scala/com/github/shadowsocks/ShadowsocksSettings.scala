@@ -2,7 +2,8 @@ package com.github.shadowsocks
 
 import java.util.Locale
 
-import android.content.{DialogInterface, Intent}
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.net.Uri
 import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
@@ -11,7 +12,7 @@ import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.utils.Key
 
 // TODO: Move related logic here
-class ShadowsocksSettings extends PreferenceFragment {
+class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChangeListener {
   private lazy val activity = getActivity.asInstanceOf[Shadowsocks]
 
   private var isProxyApps: SwitchPreference = _
@@ -19,18 +20,13 @@ class ShadowsocksSettings extends PreferenceFragment {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     addPreferencesFromResource(R.xml.pref_all)
+    getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
     isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
       startActivity(new Intent(activity, classOf[AppManager]))
       newValue.asInstanceOf[Boolean]  // keep it ON
     })
-
-    findPreference(Key.isNAT).setOnPreferenceChangeListener((preference: Preference, newValue: Any) =>
-      if (ShadowsocksApplication.isRoot) activity.handler.post(() => {
-        activity.deattachService()
-        activity.attachService()
-      }) else false)
 
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "reset")
@@ -74,5 +70,13 @@ class ShadowsocksSettings extends PreferenceFragment {
   override def onResume = {
     super.onResume
     isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
+  }
+
+  def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
+    case Key.isNAT => if (ShadowsocksApplication.isRoot) activity.handler.post(() => {
+      activity.deattachService()
+      activity.attachService()
+    })
+    case _ =>
   }
 }

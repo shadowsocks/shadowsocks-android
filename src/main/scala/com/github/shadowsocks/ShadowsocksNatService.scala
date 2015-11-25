@@ -44,13 +44,10 @@ import java.lang.Process
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
-import android.app._
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{ConnectivityManager, Network}
 import android.os._
-import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat
 import android.util.{Log, SparseArray}
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
@@ -62,7 +59,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ShadowsocksNatService extends Service with BaseService {
+class ShadowsocksNatService extends BaseService {
 
   val TAG = "ShadowsocksNatService"
 
@@ -70,7 +67,7 @@ class ShadowsocksNatService extends Service with BaseService {
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
 
-  var lockReceiver: BroadcastReceiver = null
+  private var notification: ShadowsocksNotification = _
   var closeReceiver: BroadcastReceiver = null
   var connReceiver: BroadcastReceiver = null
   var apps: Array[ProxiedApp] = null
@@ -324,33 +321,6 @@ class ShadowsocksNatService extends Service with BaseService {
     true
   }
 
-  def notifyForegroundAlert(title: String, info: String, visible: Boolean) {
-    val openIntent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-    val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent = new Intent(Action.CLOSE)
-    val actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
-    val builder = new NotificationCompat.Builder(this)
-
-    builder
-      .setWhen(0)
-      .setColor(ContextCompat.getColor(this, R.color.material_accent_500))
-      .setTicker(title)
-      .setContentTitle(getString(R.string.app_name))
-      .setContentText(info)
-      .setContentIntent(contentIntent)
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-      .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
-        actionIntent)
-
-    if (visible)
-      builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-    else
-      builder.setPriority(NotificationCompat.PRIORITY_MIN)
-
-    startForeground(1, builder.build)
-  }
-
   def onBind(intent: Intent): IBinder = {
     Log.d(TAG, "onBind")
     if (Action.SERVICE == intent.getAction) {
@@ -443,30 +413,6 @@ class ShadowsocksNatService extends Service with BaseService {
     }
     registerReceiver(closeReceiver, filter)
 
-    if (Utils.isLollipopOrAbove) {
-      val screenFilter = new IntentFilter()
-      screenFilter.addAction(Intent.ACTION_SCREEN_ON)
-      screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-      screenFilter.addAction(Intent.ACTION_USER_PRESENT)
-      lockReceiver = (context: Context, intent: Intent) => if (getState == State.CONNECTED) {
-        val action = intent.getAction
-        if (action == Intent.ACTION_SCREEN_OFF) {
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
-        } else if (action == Intent.ACTION_SCREEN_ON) {
-          val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
-          if (!keyGuard.inKeyguardRestrictedInputMode) {
-            notifyForegroundAlert(getString(R.string.forward_success),
-              getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
-          }
-        } else if (action == Intent.ACTION_USER_PRESENT) {
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
-        }
-      }
-        registerReceiver(lockReceiver, screenFilter)
-    }
-
     ShadowsocksApplication.track(TAG, "start")
 
     changeState(State.CONNECTING)
@@ -507,9 +453,8 @@ class ShadowsocksNatService extends Service with BaseService {
           // Set DNS
           flushDns()
 
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
           changeState(State.CONNECTED)
+          notification = new ShadowsocksNotification(this, config.profileName, true)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()
@@ -531,12 +476,7 @@ class ShadowsocksNatService extends Service with BaseService {
       closeReceiver = null
     }
 
-    if (Utils.isLollipopOrAbove) {
-      if (lockReceiver != null) {
-        unregisterReceiver(lockReceiver)
-        lockReceiver = null
-      }
-    }
+    notification.destroy()
 
     ShadowsocksApplication.track(TAG, "stop")
 
@@ -547,8 +487,6 @@ class ShadowsocksNatService extends Service with BaseService {
     if (getCallbackCount == 0) {
       stopSelf()
     }
-
-    stopForeground(true)
 
     // change the state
     changeState(State.STOPPED)
