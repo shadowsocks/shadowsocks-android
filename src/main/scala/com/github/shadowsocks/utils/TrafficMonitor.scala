@@ -27,11 +27,11 @@ object TrafficMonitor {
   }
 
   private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
-  private val numberFormat = new DecimalFormat("0.00")
+  private val numberFormat = new DecimalFormat("@@@")
   def formatTraffic(size: Long): String = {
     var n: Double = size
     var i = -1
-    while (n >= 1024) {
+    while (n >= 1000) {
       n /= 1024
       i = i + 1
     }
@@ -52,8 +52,8 @@ object TrafficMonitor {
   }
 
   def update(tx: Long, rx: Long) {
-    txTotal = tx;
-    rxTotal = rx;
+    txTotal = tx
+    rxTotal = rx
   }
 
   def reset() {

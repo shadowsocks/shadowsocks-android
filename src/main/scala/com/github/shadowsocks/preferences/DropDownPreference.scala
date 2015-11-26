@@ -38,7 +38,6 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     mSpinner.performClick
     true
   })
-  initSummary(mContext, attrs)
   val a: TypedArray = mContext.obtainStyledAttributes(attrs, R.styleable.DropDownPreference)
   setEntries(a.getTextArray(R.styleable.DropDownPreference_entries))
   mEntryValues = a.getTextArray(R.styleable.DropDownPreference_entryValues)
