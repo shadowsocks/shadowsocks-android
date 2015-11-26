@@ -41,7 +41,7 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 * Install Android SDK and NDK by run `brew install android-ndk android-sdk`
 * Add `export ANDROID_HOME=/usr/local/Cellar/android-sdk/$version` to your .bashrc , then reopen the shell to load it.
 * Add `export ANDROID_NDK_HOME=/usr/local/Cellar/android-ndk/$version` to your .bashrc , then reopen the shell to load it.
-* echo "y" | android update sdk --filter tools,platform-tools,build-tools-21.0.1,android-21,extra-google-m2repository --no-ui --no-https -a
+* echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.2,android-23,extra-google-m2repository --no-ui -a
 * echo "y" | android update sdk --filter extra-android-m2repository --no-ui --no-https -a
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
