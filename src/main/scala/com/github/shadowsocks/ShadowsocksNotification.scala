@@ -4,6 +4,7 @@ import java.util.Locale
 
 import android.app.{KeyguardManager, PendingIntent}
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
+import android.os.PowerManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
@@ -39,7 +40,9 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
       PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   private lazy val style = new BigTextStyle(builder)
   private val showOnUnlock = visible && Utils.isLollipopOrAbove
-  update()
+  private var isVisible = true
+  update(if (service.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager].isScreenOn)
+    Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
   lockReceiver = (context: Context, intent: Intent) => update(intent.getAction)
   val screenFilter = new IntentFilter()
   screenFilter.addAction(Intent.ACTION_SCREEN_ON)
@@ -47,29 +50,30 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   if (showOnUnlock) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
   service.registerReceiver(lockReceiver, screenFilter)
 
-  def update(action: String = Intent.ACTION_SCREEN_ON) = if (service.getState == State.CONNECTED) {
-    if (action == Intent.ACTION_SCREEN_OFF) {
-      if (showOnUnlock) setVisible(false)
-      unregisterCallback  // unregister callback to save battery
-    } else if (action == Intent.ACTION_SCREEN_ON) {
-      service.binder.registerCallback(callback)
-      callbackRegistered = true
-      if (!keyGuard.inKeyguardRestrictedInputMode) setVisible(showOnUnlock)
-    } else if (action == Intent.ACTION_USER_PRESENT) setVisible(showOnUnlock)
-    show()
-  }
+  private def update(action: String, forceShow: Boolean = false) =
+    if (forceShow || service.getState == State.CONNECTED) action match {
+      case Intent.ACTION_SCREEN_OFF =>
+        setVisible(false, forceShow)
+        unregisterCallback  // unregister callback to save battery
+      case Intent.ACTION_SCREEN_ON =>
+        setVisible(showOnUnlock && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
+        service.binder.registerCallback(callback)
+        callbackRegistered = true
+      case Intent.ACTION_USER_PRESENT => setVisible(showOnUnlock, forceShow)
+    }
 
   private def unregisterCallback = if (callbackRegistered) {
     service.binder.unregisterCallback(callback)
     callbackRegistered = false
   }
 
-  def setVisible(visible: Boolean) = {
+  def setVisible(visible: Boolean, forceShow: Boolean = false) = if (isVisible != visible) {
+    isVisible = visible
     builder.setPriority(if (visible) NotificationCompat.PRIORITY_DEFAULT else NotificationCompat.PRIORITY_MIN)
-    this
-  }
+    show()
+  } else if (forceShow) show()
 
-  def notification = if (callbackRegistered) style.build() else builder.build()
+  def notification = builder.build()
   def show() = service.startForeground(1, notification)
 
   def destroy() {
