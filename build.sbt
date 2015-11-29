@@ -30,6 +30,7 @@ libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "commons-net" % "commons-net" % "3.3",
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201510071325",
   "com.google.zxing" % "android-integration" % "3.2.1",
   "net.glxn.qrgen" % "android" % "2.0",
   "com.google.android.gms" % "play-services-base" % "8.3.0",
