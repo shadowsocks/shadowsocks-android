@@ -78,6 +78,9 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       if (item.id == ShadowsocksApplication.profileId) {
         text.setChecked(true)
         selectedItem = this
+      } else {
+        text.setChecked(false)
+        if (selectedItem eq this) selectedItem = null
       }
     }
 
@@ -169,9 +172,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, msg: String) = () // ignore
-      def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+      def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) =
         if (selectedItem != null) selectedItem.updateText(true)
-      }
     })
   }
 
