@@ -55,7 +55,7 @@ import android.util.{DisplayMetrics, Base64, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
 import android.widget.Toast
-import com.github.shadowsocks.{ShadowsocksApplication, BuildConfig}
+import com.github.shadowsocks.{ShadowsocksRunnerActivity, ShadowsocksRunnerService, ShadowsocksApplication, BuildConfig}
 import org.xbill.DNS._
 
 
@@ -415,6 +415,25 @@ object Utils {
         initialized = true
         false
     }
+  }
+
+  def startSsService(context: Context): Unit = {
+    val isInstalled: Boolean = ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)
+    if (!isInstalled) return
+
+    if (Utils.isLollipopOrAbove) {
+      val intent = new Intent(context, classOf[ShadowsocksRunnerService])
+      context.startService(intent)
+    } else {
+      val intent = new Intent(context, classOf[ShadowsocksRunnerActivity])
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+      context.startActivity(intent)
+    }
+  }
+
+  def stopSsService(context: Context): Unit = {
+    context.sendBroadcast(new Intent(Action.CLOSE))
   }
 }
 

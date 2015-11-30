@@ -80,6 +80,14 @@
                 android:parentActivityName=".Shadowsocks"
                 android:launchMode="singleTask"/>
 
+        <activity android:name=".TaskerActivity"
+            android:icon="@drawable/ic_launcher"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+
         <service
                 android:name=".ShadowsocksRunnerService"
                 android:exported="false">
@@ -109,6 +117,11 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".TaskerReceiver">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

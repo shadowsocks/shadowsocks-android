@@ -36,19 +36,23 @@
  *                              HERE BE DRAGONS
  *
  */
-
 package com.github.shadowsocks
 
 import android.content.{BroadcastReceiver, Context, Intent}
-import com.github.shadowsocks.utils._
+import com.github.shadowsocks.helper.TaskerSettings
+import com.github.shadowsocks.utils.Utils
 
-class ShadowsocksReceiver extends BroadcastReceiver {
+/**
+  * @author CzBiX
+  */
+class TaskerReceiver extends BroadcastReceiver {
+  override def onReceive(context: Context, intent: Intent): Unit = {
+    val settings: TaskerSettings = TaskerSettings.fromIntent(intent)
 
-  val TAG = "Shadowsocks"
-
-  def onReceive(context: Context, intent: Intent) {
-    if (ShadowsocksApplication.settings.getBoolean(Key.isAutoConnect, false)) {
+    if (settings.is_start) {
       Utils.startSsService(context)
+    } else {
+      Utils.stopSsService(context)
     }
   }
 }

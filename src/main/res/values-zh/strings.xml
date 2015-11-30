@@ -97,5 +97,7 @@
 
   <string name="removed">已删除</string>
   <string name="undo">撤销</string>
+  <string name="toggle_service_state">切换服务状态</string>
+  <string name="save">保存</string>
 
 </resources>
