@@ -80,9 +80,7 @@
                 android:parentActivityName=".Shadowsocks"
                 android:launchMode="singleTask"/>
 
-        <activity android:name=".TaskerActivity"
-            android:icon="@drawable/ic_launcher"
-            android:launchMode="singleTask">
+        <activity android:name=".TaskerActivity">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
