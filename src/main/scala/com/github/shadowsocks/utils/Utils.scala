@@ -62,25 +62,11 @@ import org.xbill.DNS._
 object Utils {
 
   val TAG: String = "Shadowsocks"
-  val ABI_PROP: String = "ro.product.cpu.abi"
-  val ABI2_PROP: String = "ro.product.cpu.abi2"
-  val ARM_ABI: String = "armeabi"
-  val ARMV7_ABI: String = "armeabi-v7a"
-  val X86_ABI: String = "x86"
-  val MIPS_ABI: String = "mips"
-  val DEFAULT_SHELL: String = "/system/bin/sh"
-  val DEFAULT_ROOT: String = "/system/bin/su"
-  val ALTERNATIVE_ROOT: String = "/system/xbin/su"
   val DEFAULT_IPTABLES: String = "/system/bin/iptables"
   val ALTERNATIVE_IPTABLES: String = "iptables"
-  val TIME_OUT: Int = -99
   var initialized: Boolean = false
   var hasRedirectSupport: Int = -1
-  var shell: String = null
-  var root_shell: String = null
   var iptables: String = null
-  var data_path: String = null
-  var rootTries = 0
 
   def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
@@ -397,7 +383,6 @@ object Utils {
     if (!Console.isRoot) return
     hasRedirectSupport = 1
 
-    val sb = new StringBuilder
     val command = Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 54 -j REDIRECT --to 8154"
     val lines = Console.runRootCommand(command)
 
