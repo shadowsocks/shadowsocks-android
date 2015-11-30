@@ -106,6 +106,6 @@
   <string name="toggle_service_state">Toggle service state</string>
   <string name="save">Save</string>
   <string name="turn_service_state">Turn service %s</string>
-  <string name="state_on">On</string>
-  <string name="state_off">Off</string>
+  <string name="state_on">on</string>
+  <string name="state_off">off</string>
 </resources>

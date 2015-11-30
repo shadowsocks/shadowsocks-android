@@ -44,8 +44,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.View
-import android.widget.{Button, Switch}
+import android.widget.Switch
 import com.github.shadowsocks.helper.TaskerSettings
 import com.twofortyfouram.locale.api.{Intent => ApiIntent}
 
@@ -56,27 +55,29 @@ class TaskerActivity extends AppCompatActivity {
   var taskerOption: TaskerSettings = _
 
   var switch: Switch = _
-  var btnSave: Button = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_tasker)
 
     switch = findViewById(R.id.service_switch).asInstanceOf[Switch]
-    btnSave = findViewById(R.id.btn_save).asInstanceOf[Button]
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.screen_name)
-    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
+    toolbar.setNavigationIcon(R.drawable.ic_close)
     toolbar.setNavigationOnClickListener(_ => finish())
-
-    switch.setOnCheckedChangeListener((_, isChecked) => taskerOption.is_start = isChecked)
-    btnSave.setOnClickListener(_ => saveResult())
+    toolbar.inflateMenu(R.menu.tasker_menu)
+    toolbar.setOnMenuItemClickListener(_.getItemId match {
+      case R.id.save =>
+        saveResult()
+        true
+      case _ => false
+    })
 
     loadSettings()
   }
 
-  private def loadSettings(): Unit = {
+  private def loadSettings() {
     val intent: Intent = getIntent
     if (intent.getAction != ApiIntent.ACTION_EDIT_SETTING) {
       Log.w(Shadowsocks.TAG, "unknown tasker action")
@@ -89,7 +90,8 @@ class TaskerActivity extends AppCompatActivity {
     switch.setChecked(taskerOption.is_start)
   }
 
-  private def saveResult(): Unit = {
+  private def saveResult() {
+    taskerOption.is_start = switch.isChecked
     setResult(Activity.RESULT_OK, taskerOption.toIntent(this))
     finish()
   }
