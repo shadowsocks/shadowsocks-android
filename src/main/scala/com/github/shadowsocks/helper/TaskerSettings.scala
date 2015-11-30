@@ -36,19 +36,42 @@
  *                              HERE BE DRAGONS
  *
  */
+package com.github.shadowsocks.helper
 
-package com.github.shadowsocks
+import android.content.{Intent, Context}
+import android.os.Bundle
+import com.github.shadowsocks.R
 
-import android.content.{BroadcastReceiver, Context, Intent}
-import com.github.shadowsocks.utils._
+import com.twofortyfouram.locale.api.{Intent => ApiIntent}
 
-class ShadowsocksReceiver extends BroadcastReceiver {
+object TaskerSettings {
+  def fromIntent(intent: Intent): TaskerSettings = {
+    val bundle: Bundle = if (intent.hasExtra(ApiIntent.EXTRA_BUNDLE))
+      intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE) else Bundle.EMPTY
 
-  val TAG = "Shadowsocks"
+    new TaskerSettings(bundle)
+  }
 
-  def onReceive(context: Context, intent: Intent) {
-    if (ShadowsocksApplication.settings.getBoolean(Key.isAutoConnect, false)) {
-      Utils.startSsService(context)
-    }
+  def fromBundle(bundle: Bundle): TaskerSettings = {
+    new TaskerSettings(bundle)
   }
 }
+
+class TaskerSettings(bundle: Bundle) {
+  val KEY_IS_START = "is_start"
+
+  var is_start: Boolean = bundle.getBoolean(KEY_IS_START)
+
+  def toIntent(context: Context): Intent = {
+    val bundle = new Bundle()
+    bundle.putBoolean(KEY_IS_START, is_start)
+
+    val desc = context.getString(R.string.turn_service_state,
+      context.getString(if (is_start) R.string.state_on else R.string.state_off))
+
+    val intent: Intent = new Intent()
+    intent.putExtra(ApiIntent.EXTRA_STRING_BLURB, desc)
+      .putExtra(ApiIntent.EXTRA_BUNDLE, bundle)
+  }
+}
+
