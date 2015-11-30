@@ -9,48 +9,34 @@
   <include layout="@layout/toolbar_light_dark"/>
   <LinearLayout android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="48dp"
-                android:paddingStart="48dp"
                 android:elevation="1dp"
                 android:background="@android:color/white"
                 android:orientation="vertical"
                 tools:ignore="RtlSymmetry">
-    <LinearLayout
-            android:layout_width="fill_parent"
+    <Switch android:checked="true"
+            android:id="@+id/onSwitch"
+            android:text="@string/on"
+            android:textSize="18sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:paddingLeft="60dp"
+            android:paddingRight="8dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
-      <TextView
-              android:layout_width="0dp"
-              android:layout_weight="1"
-              android:layout_height="wrap_content"
-              android:padding="4dp"
-              android:gravity="center_vertical"
-              android:textSize="18sp"
-              android:text="@string/on"/>
-      <Switch android:checked="true"
-              android:id="@+id/onSwitch"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout
-            android:layout_width="fill_parent"
+            tools:ignore="RtlHardcoded"/>
+    <Switch android:checked="true"
+            android:id="@+id/bypassSwitch"
+            android:text="@string/bypass_apps"
+            android:textSize="18sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:paddingLeft="60dp"
+            android:paddingRight="8dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
-      <TextView
-              android:id="@+id/bypassLabel"
-              android:layout_width="0dp"
-              android:layout_weight="1"
-              android:layout_height="wrap_content"
-              android:padding="4dp"
-              android:gravity="center_vertical"
-              android:textSize="18sp"
-              android:text="@string/bypass_apps"/>
-
-      <Switch
-              android:id="@+id/bypassSwitch"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"/>
-    </LinearLayout>
+            tools:ignore="RtlHardcoded"/>
   </LinearLayout>
   <FrameLayout android:layout_width="fill_parent"
                android:layout_height="0dp"

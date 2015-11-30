@@ -81,8 +81,7 @@
                 android:launchMode="singleTask"/>
 
         <activity android:name=".TaskerActivity"
-            android:icon="@drawable/ic_launcher"
-            android:launchMode="singleTask">
+                  android:icon="@drawable/ic_launcher">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>

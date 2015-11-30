@@ -1,30 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <include layout="@layout/toolbar_light_dark" />
-    <RelativeLayout
-        android:padding="16dp"
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <Switch
-            android:layout_width="wrap_content"
+    <include layout="@layout/toolbar_light_dark" />
+    <Switch android:checked="true"
+            android:id="@+id/service_switch"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/toggle_service_state"
-            android:id="@+id/service_switch"
-            android:layout_centerHorizontal="true" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save"
-            android:textColor="@android:color/white"
-            android:id="@+id/btn_save"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-    </RelativeLayout>
+            android:textSize="18sp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:padding="16dp"/>
 </LinearLayout>

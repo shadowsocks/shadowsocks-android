@@ -3,7 +3,7 @@
 <resources>
 
     <style name="Toolbar.Logo" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-            <item name="android:textSize">24sp</item>
+        <item name="android:textSize">24sp</item>
     </style>
     <style name="Theme.Material" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:alertDialogTheme">@style/Theme.Material.Dialog.Alert</item>

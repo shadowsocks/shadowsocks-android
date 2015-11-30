@@ -148,7 +148,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       val intent = getParentActivityIntent
       if (intent == null) finish else navigateUpTo(intent)
     })
-    toolbar.inflateMenu(R.menu.add_profile_methods)
+    toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
