@@ -63,7 +63,7 @@ class TaskerActivity extends AppCompatActivity {
     switch = findViewById(R.id.service_switch).asInstanceOf[Switch]
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    toolbar.setTitle(R.string.screen_name)
+    toolbar.setTitle(R.string.app_name)
     toolbar.setNavigationIcon(R.drawable.ic_close)
     toolbar.setNavigationOnClickListener(_ => finish())
     toolbar.inflateMenu(R.menu.tasker_menu)
