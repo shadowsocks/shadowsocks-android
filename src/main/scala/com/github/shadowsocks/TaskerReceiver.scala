@@ -39,7 +39,6 @@
 package com.github.shadowsocks
 
 import android.content.{BroadcastReceiver, Context, Intent}
-import android.util.Log
 import com.github.shadowsocks.helper.TaskerSettings
 import com.github.shadowsocks.utils.Utils
 
@@ -47,20 +46,15 @@ import com.github.shadowsocks.utils.Utils
   * @author CzBiX
   */
 class TaskerReceiver extends BroadcastReceiver {
-  override def onReceive(context: Context, intent: Intent): Unit = {
-    val settings: TaskerSettings = TaskerSettings.fromIntent(intent)
-
-    settings.action match {
-      case TaskerSettings.ACTION_TOGGLE_SERVICE =>
-        if (settings.isStart) {
-          Utils.startSsService(context)
-        } else {
-          Utils.stopSsService(context)
-        }
-      case TaskerSettings.ACTION_SWITCH_PROFILE =>
+  override def onReceive(context: Context, intent: Intent) {
+    val settings = TaskerSettings.fromIntent(intent)
+    val switched = ShadowsocksApplication.profileManager.getProfile(settings.profileId) match {
+      case Some(p) =>
+        Utils.stopSsService(context)
         ShadowsocksApplication.switchProfile(settings.profileId)
-      case _ =>
-        Log.e(Shadowsocks.TAG, s"unknown tasker action: ${settings.action}")
+        true
+      case _ => false
     }
+    if (settings.switchOn) Utils.startSsService(context) else if (!switched) Utils.stopSsService(context)
   }
 }

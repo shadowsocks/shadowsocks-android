@@ -93,7 +93,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     private val recycleBin = new ArrayBuffer[(Int, Profile)]
     private var profiles = new ArrayBuffer[Profile]
-    profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List[Profile]())
+    profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
     def getItemCount = profiles.length
 
