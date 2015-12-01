@@ -26,7 +26,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     }
   }
   private var lockReceiver: BroadcastReceiver = _
-  private var callbackRegistered: Boolean = true
+  private var callbackRegistered: Boolean = _
 
   private val builder = new NotificationCompat.Builder(service)
     .setWhen(0)

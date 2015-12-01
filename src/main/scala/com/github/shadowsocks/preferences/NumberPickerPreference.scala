@@ -2,9 +2,10 @@ package com.github.shadowsocks.preferences
 
 import android.content.Context
 import android.content.res.TypedArray
+import android.os.Bundle
 import android.preference.DialogPreference
 import android.util.AttributeSet
-import android.view.ViewGroup
+import android.view.{ViewGroup, WindowManager}
 import android.widget.NumberPicker
 import com.github.shadowsocks.R
 
@@ -36,6 +37,10 @@ final class NumberPickerPreference(context: Context, attrs: AttributeSet = null)
   def setMin(value: Int) = picker.setMinValue(value)
   def setMax(value: Int) = picker.setMaxValue(value)
 
+  override protected def showDialog(state: Bundle) {
+    super.showDialog(state)
+    getDialog.getWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+  }
   override protected def onCreateDialogView = {
     val parent = picker.getParent.asInstanceOf[ViewGroup]
     if (parent != null) parent.removeView(picker)
