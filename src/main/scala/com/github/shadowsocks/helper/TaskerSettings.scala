@@ -38,13 +38,17 @@
  */
 package com.github.shadowsocks.helper
 
-import android.content.{Intent, Context}
+import android.content.{Context, Intent}
 import android.os.Bundle
-import com.github.shadowsocks.R
-
+import android.util.Log
+import com.github.shadowsocks.{R, Shadowsocks, ShadowsocksApplication}
 import com.twofortyfouram.locale.api.{Intent => ApiIntent}
 
 object TaskerSettings {
+  val ACTION_UNKNOWN = "unknown"
+  val ACTION_TOGGLE_SERVICE = "toggle_service"
+  val ACTION_SWITCH_PROFILE = "switch_profile"
+
   def fromIntent(intent: Intent): TaskerSettings = {
     val bundle: Bundle = if (intent.hasExtra(ApiIntent.EXTRA_BUNDLE))
       intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE) else Bundle.EMPTY
@@ -58,16 +62,52 @@ object TaskerSettings {
 }
 
 class TaskerSettings(bundle: Bundle) {
-  val KEY_IS_START = "is_start"
+  import TaskerSettings._
 
-  var is_start: Boolean = bundle.getBoolean(KEY_IS_START)
+  private val KEY_ACTION = "action"
+  private val KEY_IS_START = "is_start"
+  private val KEY_PROFILE_ID = "profile_id"
+
+  var action: String = bundle.getString(KEY_ACTION, ACTION_UNKNOWN)
+
+  var isStart: Boolean = _
+  var profileId: Int = _
+
+  action match {
+    case ACTION_TOGGLE_SERVICE =>
+      isStart = bundle.getBoolean(KEY_IS_START, true)
+    case ACTION_SWITCH_PROFILE =>
+      profileId = bundle.getInt(KEY_PROFILE_ID, -1)
+      assert(profileId != -1, "profile id was wrong")
+    case _ =>
+      Log.w(Shadowsocks.TAG, s"unknown tasker action settings: $action")
+  }
+
+  def isEmpty = action == ACTION_UNKNOWN
 
   def toIntent(context: Context): Intent = {
     val bundle = new Bundle()
-    bundle.putBoolean(KEY_IS_START, is_start)
 
-    val desc = context.getString(R.string.turn_service_state,
-      context.getString(if (is_start) R.string.state_on else R.string.state_off))
+    action match {
+      case ACTION_TOGGLE_SERVICE =>
+        bundle.putString(KEY_ACTION, action)
+        bundle.putBoolean(KEY_IS_START, isStart)
+      case ACTION_SWITCH_PROFILE =>
+        bundle.putString(KEY_ACTION, action)
+        bundle.putInt(KEY_PROFILE_ID, profileId)
+    }
+
+    val desc: String = action match {
+      case ACTION_TOGGLE_SERVICE =>
+        context.getString(R.string.turn_service_state,
+          context.getString(if (isStart) R.string.state_on else R.string.state_off))
+      case ACTION_SWITCH_PROFILE =>
+        val profileName = ShadowsocksApplication.profileManager.getProfile(profileId) match {
+          case Some(p) => p.name
+          case None => context.getString(R.string.removed)
+        }
+        context.getString(R.string.switch_profile_to, profileName)
+    }
 
     val intent: Intent = new Intent()
     intent.putExtra(ApiIntent.EXTRA_STRING_BLURB, desc)

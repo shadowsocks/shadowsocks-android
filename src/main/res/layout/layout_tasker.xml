@@ -5,12 +5,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     <include layout="@layout/toolbar_light_dark" />
-    <Switch android:checked="true"
-            android:id="@+id/service_switch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/toggle_service_state"
-            android:textSize="18sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:padding="16dp"/>
+    <FrameLayout
+        android:id="@+id/fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>
