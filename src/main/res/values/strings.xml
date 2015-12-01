@@ -103,12 +103,9 @@
   <string name="undo">Undo</string>
 
   <!-- tasker -->
-  <string name="toggle_service_state">Toggle service state</string>
-  <string name="save">Save</string>
-  <string name="turn_service_state">Turn service %s</string>
-  <string name="no_action_selected">No action was selected</string>
-  <string name="no_profile_selected">No profile was selected</string>
-  <string name="switch_profile_to">Switch profile to %s</string>
-  <string name="state_on">on</string>
-  <string name="state_off">off</string>
+  <string name="toggle_service_state">Start the service</string>
+  <string name="start_service_default">Connect to the current server</string>
+  <string name="start_service">Connect to %s</string>
+  <string name="stop_service">Switch to %s</string>
+  <string name="profile_default">Use the current profile</string>
 </resources>

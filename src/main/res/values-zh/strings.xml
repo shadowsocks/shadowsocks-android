@@ -97,7 +97,10 @@
 
   <string name="removed">已删除</string>
   <string name="undo">撤销</string>
-  <string name="toggle_service_state">切换服务状态</string>
-  <string name="save">保存</string>
+  <string name="toggle_service_state">启动服务</string>
+  <string name="start_service_default">连接到当前服务器</string>
+  <string name="start_service">连接到 %s</string>
+  <string name="stop_service">切换到 %s</string>
+  <string name="profile_default">使用当前配置</string>
 
 </resources>
