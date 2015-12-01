@@ -226,4 +226,14 @@
         <item>204.0.0.0/6</item>
         <item>208.0.0.0/4</item>
     </string-array>
+
+    <string-array name="tasker_action_name">
+        <item>Toggle service</item>
+        <item>Switch profile</item>
+    </string-array>
+
+    <string-array name="tasker_action_value">
+        <item>toggle_service</item>
+        <item>switch_profile</item>
+    </string-array>
 </resources>
