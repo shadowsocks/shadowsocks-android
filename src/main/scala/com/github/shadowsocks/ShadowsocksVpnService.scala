@@ -449,7 +449,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--loglevel 3")
       .formatLocal(Locale.ENGLISH,
         PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
-        config.localPort, fd, VPN_MTU, Path.BASE)
+        config.localPort, fd, VPN_MTU)
 
     if (config.isIpv6)
       cmd += " --netif-ip6addr " + PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "2")
