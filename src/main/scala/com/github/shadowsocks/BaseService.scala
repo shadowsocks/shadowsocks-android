@@ -49,7 +49,7 @@ import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread
 
 trait BaseService extends Service {
 
-  @volatile private var state = State.INIT
+  @volatile private var state = State.STOPPED
   @volatile private var callbackCount = 0
 
   var timer: Timer = null
@@ -76,7 +76,7 @@ trait BaseService extends Service {
         timer.cancel()
         timer = null
       }
-      if (callbackCount == 0 && state != State.CONNECTING && state != State.CONNECTED) {
+      if (callbackCount == 0 && state == State.STOPPED) {
         stopBackgroundService()
       }
     }
@@ -101,13 +101,13 @@ trait BaseService extends Service {
     }
 
     override def stop() {
-      if (state != State.CONNECTING && state != State.STOPPING) {
+      if (state == State.CONNECTED) {
         stopRunner()
       }
     }
 
     override def start(config: Config) {
-      if (state != State.CONNECTING && state != State.STOPPING) {
+      if (state == State.STOPPED) {
         startRunner(config)
       }
     }

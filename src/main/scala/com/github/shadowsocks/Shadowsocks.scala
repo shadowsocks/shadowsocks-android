@@ -150,7 +150,7 @@ class Shadowsocks
   var fabProgressCircle: FABProgressCircle = _
   var progressDialog: ProgressDialog = _
   var progressTag = -1
-  var state = State.INIT
+  var state = State.STOPPED
   var prepared = false
   var currentProfile = new Profile
   var vpnEnabled = -1
@@ -165,8 +165,6 @@ class Shadowsocks
 
     if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
       ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
-      recovery()
-
       try {
         // Workaround that convert port(String) to port(Int)
         val oldLocalPort = ShadowsocksApplication.settings.getString("port", "-1")
@@ -181,6 +179,8 @@ class Shadowsocks
       } catch {
         case ex: Exception => // Ignore
       }
+
+      recovery()
     }
   }
 

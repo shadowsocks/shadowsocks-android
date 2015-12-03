@@ -98,7 +98,6 @@ object Mode {
 }
 
 object State {
-  val INIT = 0
   val CONNECTING = 1
   val CONNECTED = 2
   val STOPPING = 3
