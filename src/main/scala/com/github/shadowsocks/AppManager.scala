@@ -49,7 +49,7 @@ import android.support.v7.widget.Toolbar
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.view.View.OnClickListener
 import android.view.ViewGroup.LayoutParams
-import android.view.{MenuItem, View, ViewGroup, WindowManager}
+import android.view._
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
@@ -68,16 +68,13 @@ case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
 class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener
   with OnMenuItemClickListener {
 
-  val MSG_LOAD_START = 1
-  val MSG_LOAD_FINISH = 2
-  val STUB = android.R.drawable.sym_def_app_icon
-
-  var apps: mutable.Buffer[ProxiedApp] = _
-  var appListView: ListView = _
-  var loadingView: View = _
-  var overlay: TextView = _
-  var adapter: ListAdapter = _
-  @volatile var appsLoading: Boolean = _
+  private var apps: mutable.Buffer[ProxiedApp] = _
+  private var toolbar: Toolbar = _
+  private var appListView: ListView = _
+  private var loadingView: View = _
+  private var overlay: TextView = _
+  private var adapter: ListAdapter = _
+  @volatile private var appsLoading: Boolean = _
 
   def loadApps() {
     appsLoading = true
@@ -203,7 +200,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     handler = new Handler()
 
     this.setContentView(R.layout.layout_apps)
-    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.proxied_apps)
     toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
     toolbar.setNavigationOnClickListener((v: View) => {
@@ -283,4 +280,9 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
 
   var handler: Handler = null
 
+  override def onKeyUp(keyCode: Int, event: KeyEvent) = keyCode match {
+    case KeyEvent.KEYCODE_MENU =>
+      if (toolbar.isOverflowMenuShowing) toolbar.hideOverflowMenu else toolbar.showOverflowMenu
+    case _ => super.onKeyUp(keyCode, event)
+  }
 }
