@@ -9,7 +9,8 @@ import com.github.shadowsocks.utils.Action
   * @author Mygod
   */
 trait ServiceBoundContext extends Context {
-  val connection = new ServiceConnection {
+
+  class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
       if (callback != null) try {
@@ -37,6 +38,7 @@ trait ServiceBoundContext extends Context {
   def onServiceDisconnected() = ()
 
   private var callback: IShadowsocksServiceCallback.Stub = _
+  private var connection: ShadowsocksServiceConnection = _
 
   // Variables
   var bgService: IShadowsocksService = _
@@ -46,9 +48,13 @@ trait ServiceBoundContext extends Context {
     if (bgService == null) {
       val s =
         if (ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksVpnService] else classOf[ShadowsocksNatService]
+
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)
+
+      connection = new ShadowsocksServiceConnection()
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
+
       startService(new Intent(this, s))
     }
   }
@@ -62,8 +68,10 @@ trait ServiceBoundContext extends Context {
           case ignored: RemoteException => // Nothing
         }
       }
-      unbindService(connection)
-      bgService = null
+      if (connection != null) {
+        unbindService(connection)
+        connection = null
+      }
     }
   }
 }
