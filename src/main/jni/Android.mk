@@ -254,7 +254,7 @@ SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c netutils.c j
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL \
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
 					-I$(LOCAL_PATH)/libev \
 					-I$(LOCAL_PATH)/libancillary \
@@ -281,7 +281,7 @@ SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c 
 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DUDPRELAY_LOCAL -DUDPRELAY_TUNNEL \
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
 					-I$(LOCAL_PATH)/libev \
 					-I$(LOCAL_PATH)/libancillary \
