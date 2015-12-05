@@ -54,7 +54,6 @@ import com.github.shadowsocks.utils._
 import org.apache.commons.net.util.SubnetUtils
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -392,14 +391,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (Utils.isLollipopOrAbove) {
 
       if (config.isProxyApps) {
-        val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
-        val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
-        for (app <- apps) {
-          if (app.proxied) {
-            pkgSet.add(app.packageName)
-          }
-        }
-        for (pkg <- pkgSet) {
+        for (pkg <- config.proxiedAppString.split('|').distinct) {
           if (!config.isBypassApps) {
             builder.addAllowedApplication(pkg)
           } else {

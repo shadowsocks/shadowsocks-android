@@ -39,7 +39,6 @@
 
 package com.github.shadowsocks
 
-import android.content.pm.PackageManager
 import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
@@ -56,44 +55,15 @@ import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
 import com.github.shadowsocks.utils.{Key, Utils}
 
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
 case class ProxiedApp(uid: Int, name: String, packageName: String, icon: Drawable, var proxied: Boolean)
 
-class ObjectArrayTools[T <: AnyRef](a: Array[T]) {
-  def binarySearch(key: T) = {
-    java.util.Arrays.binarySearch(a.asInstanceOf[Array[AnyRef]], key)
-  }
-}
-
 case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
-
-object AppManager {
-
-  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
-
-  def getProxiedApps(context: Context, proxiedAppString: String): Array[ProxiedApp] = {
-
-    val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
-
-    import scala.collection.JavaConversions._
-
-    val packageManager: PackageManager = context.getPackageManager
-    val appList = packageManager.getInstalledApplications(0)
-
-    appList.filter(_.uid >= 10000).map {
-      case a =>
-        val uid = a.uid
-        val userName = uid.toString
-        val name = packageManager.getApplicationLabel(a).toString
-        val packageName = a.packageName
-        val proxied = proxiedApps.binarySearch(userName) >= 0
-        new ProxiedApp(uid, name, packageName, null, proxied)
-    }.toArray
-  }
-}
 
 class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener
   with OnMenuItemClickListener {
@@ -102,49 +72,32 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   val MSG_LOAD_FINISH = 2
   val STUB = android.R.drawable.sym_def_app_icon
 
-  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
-
-  var apps: Array[ProxiedApp] = _
+  var apps: mutable.Buffer[ProxiedApp] = _
   var appListView: ListView = _
   var loadingView: View = _
   var overlay: TextView = _
   var adapter: ListAdapter = _
   @volatile var appsLoading: Boolean = _
 
-  def loadApps(context: Context): Array[ProxiedApp] = {
-    val proxiedAppString = ShadowsocksApplication.settings.getString(Key.proxied, "")
-    val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
+  def loadApps() {
+    appsLoading = true
+    val proxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "").split('|').toSet
 
-    import scala.collection.JavaConversions._
-
-    val packageManager: PackageManager = context.getPackageManager
-    val appList = packageManager.getInstalledApplications(0)
-
-    appList.filter(a => a.uid >= 10000
-      && packageManager.getApplicationLabel(a) != null
-      && packageManager.getApplicationIcon(a) != null).map {
-      a =>
+    val packageManager = getPackageManager
+    apps = packageManager.getInstalledApplications(0).filter(_.uid >= 10000).map {
+      case a =>
         val uid = a.uid
         val userName = uid.toString
         val name = packageManager.getApplicationLabel(a).toString
         val packageName = a.packageName
-        val proxied = (proxiedApps binarySearch userName) >= 0
+        val proxied = proxiedApps.contains(userName)
         new ProxiedApp(uid, name, packageName, a.loadIcon(packageManager), proxied)
-    }.toArray
-  }
-
-  def loadApps() {
-    appsLoading = true
-    apps = loadApps(this).sortWith((a, b) => {
+    }.sortWith((a, b) => {
       if (a == null || b == null || a.name == null || b.name == null) {
         true
       } else if (a.proxied == b.proxied) {
         a.name < b.name
-      } else if (a.proxied) {
-        true
-      } else {
-        false
-      }
+      } else a.proxied
     })
     adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
       override def getView(position: Int, view: View, parent: ViewGroup): View = {
