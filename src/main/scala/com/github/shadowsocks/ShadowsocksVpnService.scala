@@ -63,16 +63,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val VPN_MTU = 1500
   val PRIVATE_VLAN = "26.26.26.%s"
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
-  var conn: ParcelFileDescriptor = null
-  var apps: Array[ProxiedApp] = null
-  var vpnThread: ShadowsocksVpnThread = null
+  var conn: ParcelFileDescriptor = _
+  var vpnThread: ShadowsocksVpnThread = _
   private var notification: ShadowsocksNotification = _
-  var closeReceiver: BroadcastReceiver = null
+  var closeReceiver: BroadcastReceiver = _
 
-  var sslocalProcess: Process = null
-  var sstunnelProcess: Process = null
-  var pdnsdProcess: Process = null
-  var tun2socksProcess: Process = null
+  var sslocalProcess: Process = _
+  var sstunnelProcess: Process = _
+  var pdnsdProcess: Process = _
+  var tun2socksProcess: Process = _
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
