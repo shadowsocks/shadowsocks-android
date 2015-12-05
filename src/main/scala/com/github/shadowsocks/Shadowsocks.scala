@@ -158,9 +158,50 @@ class Shadowsocks
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
   private val callback = new IShadowsocksServiceCallback.Stub {
-    def stateChanged(state: Int, msg: String) = onStateChanged(state, msg)
-    def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) =
-      Shadowsocks.this.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+    def stateChanged(s: Int, m: String) {
+      handler.post(() => if (state != s) {
+        s match {
+          case State.CONNECTING =>
+            fab.setBackgroundTintList(greyTint)
+            fab.setImageResource(R.drawable.ic_cloud_queue)
+            fab.setEnabled(false)
+            fabProgressCircle.show()
+            setPreferenceEnabled(enabled = false)
+          case State.CONNECTED =>
+            fab.setBackgroundTintList(greenTint)
+            if (state == State.CONNECTING) {
+              fabProgressCircle.beginFinalAnimation()
+            } else {
+              handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+            }
+            fab.setEnabled(true)
+            changeSwitch(checked = true)
+            setPreferenceEnabled(enabled = false)
+          case State.STOPPED =>
+            fab.setBackgroundTintList(greyTint)
+            handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+            fab.setEnabled(true)
+            changeSwitch(checked = false)
+            if (m != null) Snackbar.make(findViewById(android.R.id.content),
+              getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
+            setPreferenceEnabled(enabled = true)
+          case State.STOPPING =>
+            fab.setBackgroundTintList(greyTint)
+            fab.setImageResource(R.drawable.ic_cloud_queue)
+            fab.setEnabled(false)
+            if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
+            setPreferenceEnabled(enabled = false)
+        }
+        state = s
+      })
+    }
+    def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+      val trafficStat = getString(R.string.stat_summary)
+        .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
+      handler.post(() => {
+        preferences.findPreference(Key.stat).setSummary(trafficStat)
+      })
+    }
   }
 
   def attachService: Unit = attachService(callback)
@@ -193,14 +234,6 @@ class Shadowsocks
 
   override def onServiceDisconnected() {
     if (fab != null) fab.setEnabled(false)
-  }
-
-  def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
-    val trafficStat = getString(R.string.stat_summary)
-      .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
-    handler.post(() => {
-      preferences.findPreference(Key.stat).setSummary(trafficStat)
-    })
   }
 
   private lazy val preferences =
@@ -445,7 +478,7 @@ class Shadowsocks
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
 
-    trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+    callback.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
       TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
   }
 
@@ -581,43 +614,5 @@ class Shadowsocks
       progressDialog = null
       progressTag = -1
     }
-  }
-
-  def onStateChanged(s: Int, m: String) {
-    handler.post(() => if (state != s) {
-      s match {
-        case State.CONNECTING =>
-          fab.setBackgroundTintList(greyTint)
-          fab.setImageResource(R.drawable.ic_cloud_queue)
-          fab.setEnabled(false)
-          fabProgressCircle.show()
-          setPreferenceEnabled(enabled = false)
-        case State.CONNECTED =>
-          fab.setBackgroundTintList(greenTint)
-          if (state == State.CONNECTING) {
-            fabProgressCircle.beginFinalAnimation()
-          } else {
-            handler.postDelayed(() => fabProgressCircle.hide(), 1000)
-          }
-          fab.setEnabled(true)
-          changeSwitch(checked = true)
-          setPreferenceEnabled(enabled = false)
-        case State.STOPPED =>
-          fab.setBackgroundTintList(greyTint)
-          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
-          fab.setEnabled(true)
-          changeSwitch(checked = false)
-          if (m != null) Snackbar.make(findViewById(android.R.id.content),
-            getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
-          setPreferenceEnabled(enabled = true)
-        case State.STOPPING =>
-          fab.setBackgroundTintList(greyTint)
-          fab.setImageResource(R.drawable.ic_cloud_queue)
-          fab.setEnabled(false)
-          if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-          setPreferenceEnabled(enabled = false)
-      }
-      state = s
-    })
   }
 }
