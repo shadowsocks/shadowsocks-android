@@ -157,6 +157,13 @@ class Shadowsocks
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
+  private val callback = new IShadowsocksServiceCallback.Stub {
+    def stateChanged(state: Int, msg: String) = onStateChanged(state, msg)
+    def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) =
+      Shadowsocks.this.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+  }
+
+  def attachService: Unit = attachService(callback)
 
   override def onServiceConnected() {
     // Update the UI
@@ -377,16 +384,7 @@ class Shadowsocks
     })
 
     // Bind to the service
-    handler.post(() => {
-      attachService(new IShadowsocksServiceCallback.Stub {
-        override def stateChanged(state: Int, msg: String) {
-          onStateChanged(state, msg)
-        }
-        override def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
-          Shadowsocks.this.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
-        }
-      })
-    })
+    handler.post(() => attachService)
   }
 
   def reloadProfile() {

@@ -67,11 +67,13 @@ trait ServiceBoundContext extends Context {
         } catch {
           case ignored: RemoteException => // Nothing
         }
+        callback = null
       }
       if (connection != null) {
         unbindService(connection)
         connection = null
       }
+      bgService = null
     }
   }
 }

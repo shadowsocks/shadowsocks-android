@@ -67,7 +67,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
   }
 
-  override def onResume = {
+  override def onResume {
     super.onResume
     isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
   }
@@ -75,9 +75,8 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
     case Key.isNAT => if (ShadowsocksApplication.isRoot && activity != null) {
       activity.handler.post(() => {
-        val intent = activity.getIntent
-        activity.finish()
-        startActivity(intent)
+        activity.deattachService
+        activity.attachService
       })
     }
     case _ =>
