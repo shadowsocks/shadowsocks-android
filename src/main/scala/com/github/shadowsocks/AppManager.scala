@@ -90,7 +90,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     proxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
     apps = getApps(getPackageManager).sortWith((a, b) => {
       val aProxied = proxiedApps.contains(a.packageName)
-      if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name < b.name
+      if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
     })
     adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
       override def getView(position: Int, view: View, parent: ViewGroup): View = {
