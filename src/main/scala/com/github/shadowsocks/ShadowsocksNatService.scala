@@ -55,8 +55,6 @@ import com.github.shadowsocks.utils._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class ShadowsocksNatService extends BaseService {
 
@@ -144,7 +142,7 @@ class ShadowsocksNatService extends BaseService {
       })
       Console.runRootCommand(cmdBuf.toArray)
     } else {
-      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
     }
   }
 
@@ -384,12 +382,17 @@ class ShadowsocksNatService extends BaseService {
         }
       }
     }
-    Console.runRootCommand(init_sb.toArray)
-    Console.runRootCommand(http_sb.toArray)
+    Console.runRootCommand((init_sb ++ http_sb).toArray)
   }
 
   override def startRunner(config: Config) {
 
+    changeState(State.CONNECTING)
+    if (!Console.isRoot) {
+      changeState(State.STOPPED, getString(R.string.nat_no_root))
+      return
+    }
+    
     super.startRunner(config)
 
     // register close receiver
@@ -404,10 +407,7 @@ class ShadowsocksNatService extends BaseService {
 
     ShadowsocksApplication.track(TAG, "start")
 
-    changeState(State.CONNECTING)
-
-    Future {
-
+    ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
@@ -465,7 +465,7 @@ class ShadowsocksNatService extends BaseService {
       closeReceiver = null
     }
 
-    notification.destroy()
+    if (notification != null) notification.destroy()
 
     ShadowsocksApplication.track(TAG, "stop")
 

@@ -58,8 +58,6 @@ import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object AppManager {
@@ -249,7 +247,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   def loadAppsAsync() {
-    Future {
+    ThrowableFuture {
       while (!appsLoading) loadApps()
       appsLoading = false
       handler.post(() => {

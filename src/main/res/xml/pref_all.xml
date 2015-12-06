@@ -83,12 +83,14 @@
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect"/>
 
-        <com.github.shadowsocks.preferences.NatSwitchPreference android:key="isNAT"
-                                                                android:title="@string/nat"
-                                                                android:summary="@string/nat_summary"/>
+        <SwitchPreference android:key="isNAT"
+                          android:title="@string/nat"
+                          android:summary="@string/nat_summary"/>
         <Preference android:key="recovery" android:title="@string/recovery"
             android:summary="@string/recovery_summary"/>
-        <Preference android:key="flush_dnscache" android:title="@string/flush_dnscache"/>
+        <Preference android:key="flush_dnscache"
+                    android:title="@string/flush_dnscache"
+                    android:summary="@string/flush_dnscache_summary_root"/>
         <Preference android:key="about" android:title="@string/about"/>
 
     </PreferenceCategory>

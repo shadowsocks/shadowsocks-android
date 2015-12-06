@@ -65,8 +65,6 @@ import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object Typefaces {
   def get(c: Context, assetPath: String): Typeface = {
@@ -182,8 +180,13 @@ class Shadowsocks
             handler.postDelayed(() => fabProgressCircle.hide(), 1000)
             fab.setEnabled(true)
             changeSwitch(checked = false)
-            if (m != null) Snackbar.make(findViewById(android.R.id.content),
-              getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG).show
+            if (m != null) {
+              val snackbar = Snackbar.make(findViewById(android.R.id.content),
+                getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
+              if (m == getString(R.string.nat_no_root)) snackbar.setAction(R.string.switch_to_vpn,
+                (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
+              snackbar.show
+            }
             setPreferenceEnabled(enabled = true)
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
@@ -317,10 +320,10 @@ class Shadowsocks
       cmd.append("chmod 666 %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
 
-    if (!ShadowsocksApplication.isVpnEnabled) {
-      Console.runRootCommand(cmd.toArray)
-    } else {
+    if (ShadowsocksApplication.isVpnEnabled) {
       Console.runCommand(cmd.toArray)
+    } else {
+      Console.runRootCommand(cmd.toArray)
     }
 
     cmd.clear()
@@ -341,8 +344,7 @@ class Shadowsocks
       cmd.append("rm -f %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
       cmd.append("rm -f %s%s-vpn.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
     }
-    Console.runCommand(cmd.toArray)
-    if (!ShadowsocksApplication.isVpnEnabled) {
+    if (ShadowsocksApplication.isVpnEnabled) Console.runCommand(cmd.toArray) else {
       Console.runRootCommand(cmd.toArray)
       Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
     }
@@ -361,7 +363,7 @@ class Shadowsocks
   }
 
   def prepareStartService() {
-    Future {
+    ThrowableFuture {
       if (ShadowsocksApplication.isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
@@ -534,18 +536,6 @@ class Shadowsocks
     handler.removeCallbacksAndMessages(null)
   }
 
-  def copyToSystem() {
-    val ab = new ArrayBuffer[String]
-    ab.append("mount -o rw,remount -t yaffs2 /dev/block/mtdblock3 /system")
-    for (executable <- Shadowsocks.EXECUTABLES) {
-      ab.append("cp %s%s /system/bin/".formatLocal(Locale.ENGLISH, Path.BASE, executable))
-      ab.append("chmod 755 /system/bin/" + executable)
-      ab.append("chown root:shell /system/bin/" + executable)
-    }
-    ab.append("mount -o ro,remount -t yaffs2 /dev/block/mtdblock3 /system")
-    Console.runRootCommand(ab.toArray)
-  }
-
   def install() {
     copyAssets(System.getABI)
 
@@ -565,7 +555,7 @@ class Shadowsocks
   def recovery() {
     serviceStop()
     val h = showProgress(R.string.recovering)
-    Future {
+    ThrowableFuture {
       reset()
       h.sendEmptyMessage(0)
     }
@@ -573,8 +563,9 @@ class Shadowsocks
 
   def flushDnsCache() {
     val h = showProgress(R.string.flushing)
-    Future {
-      Utils.toggleAirplaneMode(getBaseContext)
+    ThrowableFuture {
+      if (!Utils.toggleAirplaneMode(getBaseContext)) h.post(() => Snackbar.make(findViewById(android.R.id.content),
+        R.string.flush_dnscache_no_root, Snackbar.LENGTH_LONG).show)
       h.sendEmptyMessage(0)
     }
   }
@@ -595,7 +586,7 @@ class Shadowsocks
   def checkText(key: String): Boolean = {
     val text = ShadowsocksApplication.settings.getString(key, "")
     if (text != null && text.length > 0) return true
-    Snackbar.make(findViewById(android.R.id.content), getString(R.string.proxy_empty), Snackbar.LENGTH_LONG).show
+    Snackbar.make(findViewById(android.R.id.content), R.string.proxy_empty, Snackbar.LENGTH_LONG).show
     false
   }
 

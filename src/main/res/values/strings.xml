@@ -10,8 +10,7 @@
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
-  <string name="nat_summary">Use NAT mode instead of VPN mode</string>
-  <string name="nat_summary_no_root">NAT mode is disabled without root</string>
+  <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
@@ -61,6 +60,8 @@
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
   <string name="service_failed">Failed to connect the remote server</string>
+  <string name="nat_no_root">NAT mode requires ROOT permission</string>
+  <string name="switch_to_vpn">Switch to VPN mode</string>
   <string name="stop">Stop the service</string>
   <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
@@ -84,7 +85,9 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="qrcode">QR Code</string>
   <string name="flush_dnscache">Flush DNS cache</string>
-  <string name="flush_dnscache_summary_disabled">Requires ROOT permission</string>
+  <string name="flush_dnscache_summary">Only useful in NAT mode</string>
+  <string name="flush_dnscache_summary_root">Only useful in NAT mode. Requires ROOT permission.</string>
+  <string name="flush_dnscache_no_root">Flush DNS cache cannot proceed without ROOT permission</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
   <string name="action_export">Export to Clipboard</string>

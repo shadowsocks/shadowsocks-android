@@ -34,6 +34,8 @@
   <string name="auto_connect_summary">随系统启动后台服务</string>
   <string name="forward_success">后台服务已开始运行。</string>
   <string name="service_failed">无法连接远程服务器</string>
+  <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
+  <string name="switch_to_vpn">切换到 VPN 模式</string>
   <string name="stop">停止服务</string>
   <string name="stopping">正在关闭……</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
@@ -52,14 +54,15 @@
   <string name="about">关于</string>
   <string name="about_title">影梭（shadowsocks）%s</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>
-  <string name="flush_dnscache_summary_disabled">需要 ROOT 权限</string>
+  <string name="flush_dnscache_summary">只需在 NAT 模式下使用</string>
+  <string name="flush_dnscache_summary_root">只需在 NAT 模式下使用，需要 ROOT 权限</string>
+  <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">刷新中……</string>
   <string name="qrcode">二维码</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
-  <string name="nat_summary">从 VPN 模式切换为 NAT 模式</string>
-  <string name="nat_summary_no_root">NAT 模式已禁用，需要 ROOT 权限</string>
+  <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
 
   <string name="udp_dns">UDP 转发</string>
   <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>

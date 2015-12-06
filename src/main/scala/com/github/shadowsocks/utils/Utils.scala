@@ -140,12 +140,14 @@ object Utils {
   }
 
   // Blocked > 3 seconds
-  def toggleAirplaneMode(context: Context) {
-    if (ShadowsocksApplication.isRoot) {
-      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+  def toggleAirplaneMode(context: Context) = {
+    if (Console.isRoot) {
+      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
+      true
     } else if (Build.VERSION.SDK_INT < 17) {
       toggleBelowApiLevel17(context)
-    }
+      true
+    } else false
   }
 
   //noinspection ScalaDeprecation
@@ -305,8 +307,7 @@ object Utils {
     var compatible: Boolean = false
     var version: Boolean = false
 
-    val command = Array(iptables + " --version", iptables + " -L -t nat -n")
-    val lines = Console.runRootCommand(command)
+    val lines = Console.runRootCommand(iptables + " --version", iptables + " -L -t nat -n")
     if (lines == null) return
 
     if (lines.contains("OUTPUT")) {
@@ -384,9 +385,7 @@ object Utils {
     hasRedirectSupport = 1
 
     val command = Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 54 -j REDIRECT --to 8154"
-    val lines = Console.runRootCommand(command)
-
-    Console.runRootCommand(command.replace("-A", "-D"))
+    val lines = Console.runRootCommand(command, command.replace("-A", "-D"))
     if (lines == null) return
     if (lines.contains("No chain/target/match")) {
       hasRedirectSupport = 0
