@@ -218,18 +218,21 @@ class Shadowsocks
       ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
       try {
         // Workaround that convert port(String) to port(Int)
-        val oldLocalPort = ShadowsocksApplication.settings.getString("port", "-1")
-        val oldRemotePort = ShadowsocksApplication.settings.getString("remotePort", "-1")
+        val oldLocalPort = ShadowsocksApplication.settings.getString(Key.localPort, "")
+        val oldRemotePort = ShadowsocksApplication.settings.getString(Key.remotePort, "")
 
-        if (oldLocalPort != "-1") {
-          ShadowsocksApplication.settings.edit.putInt(Key.localPort, oldLocalPort.toInt).commit()
+        if (oldLocalPort != "") {
+          ShadowsocksApplication.settings.edit.putInt(Key.localPort, oldLocalPort.toInt).apply()
         }
-        if (oldRemotePort != "-1") {
-          ShadowsocksApplication.settings.edit.putInt(Key.remotePort, oldRemotePort.toInt).commit()
+        if (oldRemotePort != "") {
+          ShadowsocksApplication.settings.edit.putInt(Key.remotePort, oldRemotePort.toInt).apply()
         }
       } catch {
         case ex: Exception => // Ignore
       }
+      val oldProxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "")
+      if (oldProxiedApps.contains('|')) ShadowsocksApplication.settings.edit
+        .putString(Key.proxied, DBHelper.updateProxiedApps(this, oldProxiedApps)).apply()
 
       recovery()
     }

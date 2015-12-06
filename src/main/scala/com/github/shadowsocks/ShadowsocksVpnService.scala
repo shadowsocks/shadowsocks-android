@@ -388,7 +388,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (Utils.isLollipopOrAbove) {
 
       if (config.isProxyApps) {
-        for (pkg <- config.proxiedAppString.split('|').distinct) {
+        for (pkg <- config.proxiedAppString.split('\n')) {
           if (!config.isBypassApps) {
             builder.addAllowedApplication(pkg)
           } else {

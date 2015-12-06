@@ -374,12 +374,16 @@ class ShadowsocksNatService extends BaseService {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (config.isProxyApps) {
-      for (uid <- config.proxiedAppString.split('|').distinct) {
-        if (!config.isBypassApps) {
-          http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
-        } else {
-          init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
-        }
+      val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
+      for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
+        case Some(uid) =>
+          if (!config.isBypassApps) {
+            http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+              .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          } else {
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
+          }
+        case _ => // probably removed package, ignore
       }
     }
     Console.runRootCommand((init_sb ++ http_sb).toArray)
@@ -392,7 +396,7 @@ class ShadowsocksNatService extends BaseService {
       changeState(State.STOPPED, getString(R.string.nat_no_root))
       return
     }
-    
+
     super.startRunner(config)
 
     // register close receiver
