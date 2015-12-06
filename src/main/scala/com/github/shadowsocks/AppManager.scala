@@ -233,7 +233,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
                    totalItemCount: Int) {
         if (visible) {
           val name = apps(firstVisibleItem).name
-          overlay.setText(if (name != null && name.length > 1) name(0).toString else "*")
+          overlay.setText(if (name != null && name.length > 1) name(0).toUpper.toString else "*")
           overlay.setVisibility(View.VISIBLE)
         }
       }
