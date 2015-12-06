@@ -43,9 +43,6 @@ import android.content.{BroadcastReceiver, Context, Intent}
 import com.github.shadowsocks.utils._
 
 class ShadowsocksReceiver extends BroadcastReceiver {
-
-  val TAG = "Shadowsocks"
-
   def onReceive(context: Context, intent: Intent) {
     if (ShadowsocksApplication.settings.getBoolean(Key.isAutoConnect, false)) {
       Utils.startSsService(context)

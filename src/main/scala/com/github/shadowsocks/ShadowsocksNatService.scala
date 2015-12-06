@@ -54,7 +54,6 @@ import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 
 import scala.collection.JavaConversions._
-import scala.collection._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -68,15 +67,14 @@ class ShadowsocksNatService extends BaseService {
     "-j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
-  var closeReceiver: BroadcastReceiver = null
-  var connReceiver: BroadcastReceiver = null
-  var apps: Array[ProxiedApp] = null
+  var closeReceiver: BroadcastReceiver = _
+  var connReceiver: BroadcastReceiver = _
   val myUid = android.os.Process.myUid()
 
-  var sslocalProcess: Process = null
-  var sstunnelProcess: Process = null
-  var redsocksProcess: Process = null
-  var pdnsdProcess: Process = null
+  var sslocalProcess: Process = _
+  var sstunnelProcess: Process = _
+  var redsocksProcess: Process = _
+  var pdnsdProcess: Process = _
 
   private val dnsAddressCache = new SparseArray[String]
 
@@ -378,16 +376,7 @@ class ShadowsocksNatService extends BaseService {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (config.isProxyApps) {
-      if (apps == null || apps.length <= 0) {
-        apps = AppManager.getProxiedApps(this, config.proxiedAppString)
-      }
-      val uidSet: mutable.HashSet[Int] = new mutable.HashSet[Int]
-      for (app <- apps) {
-        if (app.proxied) {
-          uidSet.add(app.uid)
-        }
-      }
-      for (uid <- uidSet) {
+      for (uid <- config.proxiedAppString.split('|').distinct) {
         if (!config.isBypassApps) {
           http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
         } else {
