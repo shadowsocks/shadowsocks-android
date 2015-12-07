@@ -55,8 +55,6 @@ import org.apache.commons.net.util.SubnetUtils
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
@@ -122,7 +120,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       vpnThread = null
     }
 
-    notification.destroy()
+    if (notification != null) notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
@@ -213,7 +211,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     changeState(State.CONNECTING)
 
-    Future {
+    ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
@@ -390,7 +388,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (Utils.isLollipopOrAbove) {
 
       if (config.isProxyApps) {
-        for (pkg <- config.proxiedAppString.split('|').distinct) {
+        for (pkg <- config.proxiedAppString.split('\n')) {
           if (!config.isBypassApps) {
             builder.addAllowedApplication(pkg)
           } else {

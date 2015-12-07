@@ -55,8 +55,6 @@ import com.github.shadowsocks.utils._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class ShadowsocksNatService extends BaseService {
 
@@ -144,7 +142,7 @@ class ShadowsocksNatService extends BaseService {
       })
       Console.runRootCommand(cmdBuf.toArray)
     } else {
-      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
     }
   }
 
@@ -376,19 +374,28 @@ class ShadowsocksNatService extends BaseService {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (config.isProxyApps) {
-      for (uid <- config.proxiedAppString.split('|').distinct) {
-        if (!config.isBypassApps) {
-          http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
-        } else {
-          init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
-        }
+      val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
+      for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
+        case Some(uid) =>
+          if (!config.isBypassApps) {
+            http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+              .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          } else {
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
+          }
+        case _ => // probably removed package, ignore
       }
     }
-    Console.runRootCommand(init_sb.toArray)
-    Console.runRootCommand(http_sb.toArray)
+    Console.runRootCommand((init_sb ++ http_sb).toArray)
   }
 
   override def startRunner(config: Config) {
+
+    changeState(State.CONNECTING)
+    if (!Console.isRoot) {
+      changeState(State.STOPPED, getString(R.string.nat_no_root))
+      return
+    }
 
     super.startRunner(config)
 
@@ -404,10 +411,7 @@ class ShadowsocksNatService extends BaseService {
 
     ShadowsocksApplication.track(TAG, "start")
 
-    changeState(State.CONNECTING)
-
-    Future {
-
+    ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
@@ -465,7 +469,7 @@ class ShadowsocksNatService extends BaseService {
       closeReceiver = null
     }
 
-    notification.destroy()
+    if (notification != null) notification.destroy()
 
     ShadowsocksApplication.track(TAG, "stop")
 

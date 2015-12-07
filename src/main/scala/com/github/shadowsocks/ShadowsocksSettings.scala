@@ -14,6 +14,7 @@ import com.github.shadowsocks.utils.Key
 // TODO: Move related logic here
 class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChangeListener {
   private lazy val activity = getActivity.asInstanceOf[Shadowsocks]
+  lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
 
   private var isProxyApps: SwitchPreference = _
 
@@ -35,10 +36,8 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     val flush = findPreference("flush_dnscache")
-    if (Build.VERSION.SDK_INT >= 17 && !ShadowsocksApplication.isRoot) {
-      flush.setEnabled(false)
-      flush.setSummary(R.string.flush_dnscache_summary_disabled)
-    } else flush.setOnPreferenceClickListener((preference: Preference) => {
+    if (Build.VERSION.SDK_INT < 17) flush.setSummary(R.string.flush_dnscache_summary)
+    flush.setOnPreferenceClickListener(_ => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "flush_dnscache")
       activity.flushDnsCache()
       true
@@ -73,12 +72,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
-    case Key.isNAT => if (ShadowsocksApplication.isRoot && activity != null) {
-      activity.handler.post(() => {
-        activity.deattachService
-        activity.attachService
-      })
-    }
+    case Key.isNAT => activity.handler.post(() => {
+      activity.deattachService
+      activity.attachService
+    })
     case _ =>
   }
 }

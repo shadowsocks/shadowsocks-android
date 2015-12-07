@@ -40,18 +40,30 @@
 package com.github.shadowsocks.database
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.database.sqlite.SQLiteDatabase
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+
 object DBHelper {
-  val PROFILE = "profile.db"
+  final val PROFILE = "profile.db"
+  private var apps: mutable.Buffer[ApplicationInfo] = _
+
+  def updateProxiedApps(context: Context, old: String) = {
+    synchronized(if (apps == null) apps = context.getPackageManager.getInstalledApplications(0).asScala)
+    val uidSet = old.split('|').map(_.toInt).toSet
+    apps.filter(ai => uidSet.contains(ai.uid)).map(_.packageName).mkString("\n")
+  }
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 13) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 14) {
+  import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
 
@@ -91,12 +103,16 @@ class DBHelper(val context: Context)
           " ipv6, individual FROM `tmp`;")
         profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
         profileDao.executeRawNoArgs("COMMIT;")
-        return
-      }
-      if (oldVersion < 13) {
+      } else if (oldVersion < 13) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
+      }
+      if (oldVersion < 14) {
+        for (profile <- profileDao.queryForAll.asScala) {
+          profile.individual = updateProxiedApps(context, profile.individual)
+          profileDao.update(profile)
+        }
       }
     }
   }
