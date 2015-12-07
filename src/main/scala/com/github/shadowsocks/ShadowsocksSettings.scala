@@ -13,7 +13,7 @@ import com.github.shadowsocks.utils.Key
 
 // TODO: Move related logic here
 class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChangeListener {
-  private lazy val activity = getActivity.asInstanceOf[Shadowsocks]
+  private def activity = getActivity.asInstanceOf[Shadowsocks]
   lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
 
   private var isProxyApps: SwitchPreference = _
