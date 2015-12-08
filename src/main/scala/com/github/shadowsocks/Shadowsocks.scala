@@ -450,26 +450,28 @@ class Shadowsocks
       bgService.getState match {
         case State.CONNECTING =>
           fab.setBackgroundTintList(greyTint)
-          changeSwitch(checked = true)
+          serviceStarted = false
+          fab.setImageResource(R.drawable.ic_cloud_queue)
           setPreferenceEnabled(false)
           fabProgressCircle.show()
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
-          changeSwitch(checked = true)
+          serviceStarted = true
+          fab.setImageResource(R.drawable.ic_cloud)
           setPreferenceEnabled(false)
-          fabProgressCircle.show()
-          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+          fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
-          changeSwitch(checked = false)
+          serviceStarted = false
+          fab.setImageResource(R.drawable.ic_cloud_queue)
           setPreferenceEnabled(false)
           fabProgressCircle.show()
         case _ =>
           fab.setBackgroundTintList(greyTint)
-          changeSwitch(checked = false)
+          serviceStarted = false
+          fab.setImageResource(R.drawable.ic_cloud_off)
           setPreferenceEnabled(true)
-          fabProgressCircle.show()
-          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+          fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
       }
       state = bgService.getState
     }
