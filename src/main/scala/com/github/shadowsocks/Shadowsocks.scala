@@ -246,7 +246,7 @@ class Shadowsocks
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
   private var adView: AdView = _
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
-  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
+  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_a700)
 
   var handler = new Handler()
 
