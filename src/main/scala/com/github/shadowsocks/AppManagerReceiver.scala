@@ -7,5 +7,5 @@ import android.content.{Intent, Context, BroadcastReceiver}
   */
 class AppManagerReceiver extends BroadcastReceiver {
   override def onReceive(context: Context, intent: Intent) = if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED ||
-    !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) AppManager.cachedApps = null
+    !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) AppManager.synchronized(AppManager.cachedApps = null)
 }

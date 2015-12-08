@@ -246,7 +246,7 @@ class Shadowsocks
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
   private var adView: AdView = _
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
-  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
+  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_a700)
 
   var handler = new Handler()
 
@@ -450,26 +450,28 @@ class Shadowsocks
       bgService.getState match {
         case State.CONNECTING =>
           fab.setBackgroundTintList(greyTint)
-          changeSwitch(checked = true)
+          serviceStarted = false
+          fab.setImageResource(R.drawable.ic_cloud_queue)
           setPreferenceEnabled(false)
           fabProgressCircle.show()
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
-          changeSwitch(checked = true)
+          serviceStarted = true
+          fab.setImageResource(R.drawable.ic_cloud)
           setPreferenceEnabled(false)
-          fabProgressCircle.show()
-          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+          fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
-          changeSwitch(checked = false)
+          serviceStarted = false
+          fab.setImageResource(R.drawable.ic_cloud_queue)
           setPreferenceEnabled(false)
           fabProgressCircle.show()
         case _ =>
           fab.setBackgroundTintList(greyTint)
-          changeSwitch(checked = false)
+          serviceStarted = false
+          fab.setImageResource(R.drawable.ic_cloud_off)
           setPreferenceEnabled(true)
-          fabProgressCircle.show()
-          handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+          fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
       }
       state = bgService.getState
     }

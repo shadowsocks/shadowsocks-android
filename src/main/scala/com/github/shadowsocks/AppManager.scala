@@ -54,6 +54,7 @@ import android.view._
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
+import android.Manifest.permission
 import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.collection.JavaConversions._
@@ -66,8 +67,10 @@ object AppManager {
 
   var cachedApps: Array[ProxiedApp] = _
   private def getApps(pm: PackageManager) = {
-    if (cachedApps == null) cachedApps = pm.getInstalledApplications(0)
-      .map(a => new ProxiedApp(pm.getApplicationLabel(a).toString, a.packageName, a.loadIcon(pm))).toArray
+    if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+      .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
+      .map(p => new ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
+        p.applicationInfo.loadIcon(pm))).toArray
     cachedApps
   }
 }
