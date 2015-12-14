@@ -21,7 +21,7 @@ before_cache:
 
 cache:
     directories:
-        - $HOME/.android
+        - $HOME/.android/android-sdk-linux
         - $HOME/.ivy2/cache
         - $HOME/.sbt/boot
 
