@@ -221,6 +221,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
 
+    ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, true).commit()
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) => {
         ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).commit()

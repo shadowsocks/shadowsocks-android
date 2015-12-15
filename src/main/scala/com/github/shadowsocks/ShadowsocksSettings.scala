@@ -1,7 +1,6 @@
 package com.github.shadowsocks
 
 import java.lang.System.currentTimeMillis
-import java.lang.{Long => jLong}
 import java.net.{HttpURLConnection, URL}
 import java.util.Locale
 
@@ -67,6 +66,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
+    isProxyApps.setOnPreferenceClickListener((preference: Preference) => {
+      startActivity(new Intent(activity, classOf[AppManager]))
+      isProxyApps.setChecked(true)
+      false
+    })
 
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "reset")
@@ -108,15 +112,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   override def onResume {
     super.onResume()
     isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
-    isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
-      startActivity(new Intent(activity, classOf[AppManager]))
-      newValue.asInstanceOf[Boolean]  // keep it ON
-    })
   }
 
   override def onPause {
     super.onPause()
-    isProxyApps.setOnPreferenceChangeListener(null)
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
