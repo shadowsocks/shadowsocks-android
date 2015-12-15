@@ -152,6 +152,8 @@ class Shadowsocks
   var prepared = false
   var currentProfile = new Profile
   var vpnEnabled = -1
+  var trafficCache: String = _
+  var connectionTestResult: String = _
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
@@ -199,12 +201,15 @@ class Shadowsocks
       })
     }
     def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
-      val trafficStat = getString(R.string.stat_summary)
-        .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
-      handler.post(() => {
-        preferences.findPreference(Key.stat).setSummary(trafficStat)
-      })
+      trafficCache = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
+      handler.post(updateTraffic)
     }
+  }
+
+  def updateTraffic(): Unit = if (trafficCache == null) callback.trafficUpdated(TrafficMonitor.getTxRate,
+    TrafficMonitor.getRxRate, TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal) else {
+    if (connectionTestResult == null) connectionTestResult = getString(R.string.connection_test_pending)
+    preferences.stat.setSummary(trafficCache + '\n' + connectionTestResult)
   }
 
   def attachService: Unit = attachService(callback)
@@ -485,8 +490,7 @@ class Shadowsocks
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
 
-    callback.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-      TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+    updateTraffic()
   }
 
   private def setPreferenceEnabled(enabled: Boolean) {
