@@ -24,10 +24,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
-    isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
-      startActivity(new Intent(activity, classOf[AppManager]))
-      newValue.asInstanceOf[Boolean]  // keep it ON
-    })
 
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(Shadowsocks.TAG, "reset")
@@ -67,8 +63,19 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   override def onResume {
-    super.onResume
+    super.onResume()
     isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
+    isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
+      if (newValue.asInstanceOf[Boolean] == true) {
+        startActivity(new Intent(activity, classOf[AppManager]))
+      }
+      true
+    })
+  }
+
+  override def onPause {
+    super.onPause()
+    isProxyApps.setOnPreferenceChangeListener(null)
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {

@@ -150,6 +150,10 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
       handler.removeCallbacksAndMessages(null)
       handler = null
     }
+    if (overlay != null) {
+      getWindowManager.removeViewImmediate(overlay)
+      overlay = null
+    }
   }
 
   def onMenuItemClick(item: MenuItem): Boolean = {
@@ -210,7 +214,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
+    overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
         WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
           WindowManager.LayoutParams.TYPE_APPLICATION,
@@ -219,7 +223,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
 
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) => {
-        ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).apply()
+        ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).commit()
         finish()
       })
 
