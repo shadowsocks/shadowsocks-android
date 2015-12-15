@@ -66,10 +66,8 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     super.onResume()
     isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
     isProxyApps.setOnPreferenceChangeListener((preference: Preference, newValue: Any) => {
-      if (newValue.asInstanceOf[Boolean] == true) {
-        startActivity(new Intent(activity, classOf[AppManager]))
-      }
-      true
+      startActivity(new Intent(activity, classOf[AppManager]))
+      newValue.asInstanceOf[Boolean]  // keep it ON
     })
   }
 
