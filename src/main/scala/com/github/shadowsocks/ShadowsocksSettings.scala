@@ -118,6 +118,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
   override def onPause {
     super.onPause()
+    ShadowsocksApplication.settings.unregisterOnSharedPreferenceChangeListener(this)
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
