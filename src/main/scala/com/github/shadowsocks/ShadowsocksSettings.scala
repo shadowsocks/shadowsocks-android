@@ -38,7 +38,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       }
       ThrowableFuture {
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection
+        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
           .asInstanceOf[HttpURLConnection]) { conn =>
           conn.setConnectTimeout(5 * 1000)
           conn.setReadTimeout(5 * 1000)

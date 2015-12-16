@@ -364,10 +364,11 @@ class ShadowsocksNatService extends BaseService {
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 127.0.0.1"))
+    init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
     init_sb.append(Utils.getIptables
-      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + 8153)
+      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
     if (!config.isProxyApps || config.isBypassApps) {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
