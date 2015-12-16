@@ -1,5 +1,7 @@
 package com.github.shadowsocks
 
+import java.lang.System.currentTimeMillis
+import java.net.{HttpURLConnection, URL}
 import java.util.Locale
 
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -9,19 +11,59 @@ import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
+import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.Key
 
 // TODO: Move related logic here
 class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChangeListener {
   private def activity = getActivity.asInstanceOf[Shadowsocks]
   lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
+  var stat: Preference = _
 
   private var isProxyApps: SwitchPreference = _
+  private var testCount: Int = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
+
+    stat = findPreference(Key.stat)
+    stat.setOnPreferenceClickListener(_ => {
+      val id = synchronized {
+        testCount += 1
+        activity.connectionTestResult = getString(R.string.connection_test_testing)
+        activity.updateTraffic()
+        testCount
+      }
+      ThrowableFuture {
+        // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
+        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection
+          .asInstanceOf[HttpURLConnection]) { conn =>
+          conn.setInstanceFollowRedirects(false)
+          conn.setUseCaches(false)
+          if (testCount == id) {
+            var result: String = null
+            try {
+              val start = currentTimeMillis
+              conn.getInputStream
+              val elapsed = currentTimeMillis - start
+              val code = conn.getResponseCode
+              if (code == 204 || code == 200 && conn.getContentLength == 0)
+                result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+            } catch {
+              case e: Exception => result = getString(R.string.connection_test_error, e.getMessage)
+            }
+            synchronized(if (testCount == id) {
+              activity.connectionTestResult = result
+              activity.handler.post(activity.updateTraffic)
+            })
+          }
+        }
+      }
+      true
+    })
 
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
     isProxyApps.setOnPreferenceClickListener((preference: Preference) => {

@@ -222,9 +222,8 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
 
     ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, true).commit()
-    val onSwitch = findViewById(R.id.onSwitch).asInstanceOf[Switch]
-    onSwitch.setChecked(true)
-    onSwitch.setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) => {
+    findViewById(R.id.onSwitch).asInstanceOf[Switch]
+      .setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) => {
         ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).commit()
         finish()
       })
