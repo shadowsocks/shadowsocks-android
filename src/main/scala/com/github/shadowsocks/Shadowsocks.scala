@@ -209,7 +209,7 @@ class Shadowsocks
   def updateTraffic(): Unit = if (trafficCache == null) callback.trafficUpdated(TrafficMonitor.getTxRate,
     TrafficMonitor.getRxRate, TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal) else {
     if (connectionTestResult == null) connectionTestResult = getString(R.string.connection_test_pending)
-    preferences.stat.setSummary(trafficCache + '\n' + connectionTestResult)
+    preferences.stat.setSummary(connectionTestResult + "\n" + trafficCache)
   }
 
   def attachService: Unit = attachService(callback)

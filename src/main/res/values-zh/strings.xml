@@ -80,7 +80,7 @@
   </plurals>
   <string name="connection_test_pending">点击检查是否接入互联网。</string>
   <string name="connection_test_testing">测试中……</string>
-  <string name="connection_test_available">已接入互联网。（%d 毫秒）</string>
+  <string name="connection_test_available">已接入互联网。（延时：%d 毫秒）</string>
   <string name="connection_test_error">失败：%s</string>
   <string name="connection_test_error_status_code">状态码无效。（#%d）</string>
 

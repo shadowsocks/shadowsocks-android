@@ -21,7 +21,7 @@
   </plurals>
   <string name="connection_test_pending">Tap to check Internet connection availability.</string>
   <string name="connection_test_testing">Testing…</string>
-  <string name="connection_test_available">Internet connection available. (time=%dms)</string>
+  <string name="connection_test_available">Internet connection available. (latency: %dms)</string>
   <string name="connection_test_error">Fail: %s</string>
   <string name="connection_test_error_status_code">Invalid status code. (#%d)</string>
 
