@@ -87,7 +87,6 @@ trait BaseService extends Service {
           val task = new TimerTask {
             def run {
               TrafficMonitor.updateRate()
-              updateTrafficTotal(TrafficMonitor.getDeltaTx, TrafficMonitor.getDeltaRx)
               updateTrafficRate(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
                 TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
             }
