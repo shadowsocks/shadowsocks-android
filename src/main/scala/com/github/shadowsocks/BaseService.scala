@@ -51,10 +51,10 @@ trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
   @volatile private var callbackCount = 0
+  @volatile protected var config: Config = null
 
   var timer: Timer = null
   var trafficMonitorThread: TrafficMonitorThread = null
-  var config: Config = null
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
 
