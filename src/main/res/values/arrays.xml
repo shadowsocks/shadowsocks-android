@@ -18,6 +18,7 @@
         <item>SEED-CFB</item>
         <item>SALSA20</item>
         <item>CHACHA20</item>
+        <item>CHACHA20-IETF</item>
     </string-array>
 
     <string-array name="enc_method_value">
@@ -38,6 +39,7 @@
         <item>seed-cfb</item>
         <item>salsa20</item>
         <item>chacha20</item>
+        <item>chacha20-ietf</item>
     </string-array>
 
     <string-array name="route_entry">
