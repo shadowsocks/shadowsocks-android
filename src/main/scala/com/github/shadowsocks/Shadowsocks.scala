@@ -537,8 +537,8 @@ class Shadowsocks
   }
 
   def clearDialog() {
-    if (progressDialog != null) {
-      progressDialog.dismiss()
+    if (progressDialog != null && progressDialog.isShowing) {
+      if (!isDestroyed) progressDialog.dismiss()
       progressDialog = null
       progressTag = -1
     }
