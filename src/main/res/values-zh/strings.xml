@@ -85,6 +85,10 @@
   <string name="connection_test_error_status_code">状态码无效。（#%d）</string>
 
   <!-- profile -->
+  <string name="profile_manager_dialog">配置文件</string>
+  <string name="profile_manager_dialog_content">&#8226; 点击选择配置文件；\n&#8226; 滑动删除；\n&#8226;
+    长按拖动改变顺序。</string>
+  <string name="gotcha">好的</string>
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>

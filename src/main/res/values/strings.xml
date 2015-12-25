@@ -103,6 +103,10 @@
   <string name="action_import_err">Failed to import.</string>
 
   <!-- profile -->
+  <string name="profile_manager_dialog">Profiles</string>
+  <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe to remove;\n&#8226;
+    Long press to reorder profiles.</string>
+  <string name="gotcha">Gotcha!</string>
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>

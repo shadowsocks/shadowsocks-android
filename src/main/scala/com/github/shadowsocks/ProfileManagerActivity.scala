@@ -1,7 +1,7 @@
 package com.github.shadowsocks
 
 import android.content.Intent
-import android.os.{Handler, Bundle}
+import android.os.{Bundle, Handler}
 import android.support.design.widget.Snackbar
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -25,7 +25,13 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Mygod
   */
+object ProfileManagerActivity {
+  private final val profileTip = "profileTip"
+}
+
 class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
+  import ProfileManagerActivity._
+
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     private var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -204,6 +210,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) =
         if (selectedItem != null) selectedItem.updateText(true)
     })
+
+    if (ShadowsocksApplication.settings.getBoolean(profileTip, true)) {
+      ShadowsocksApplication.settings.edit.putBoolean(profileTip, false).commit
+      new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
+        .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
+    }
   }
 
   override def onDestroy {
