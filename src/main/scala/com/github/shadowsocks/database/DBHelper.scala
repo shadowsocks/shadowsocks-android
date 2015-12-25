@@ -64,7 +64,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 14) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 15) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -114,6 +114,15 @@ class DBHelper(val context: Context)
         for (profile <- profileDao.queryForAll.asScala) {
           profile.individual = updateProxiedApps(context, profile.individual)
           profileDao.update(profile)
+        }
+      }
+      if (oldVersion < 15) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
+        var i = 0
+        for (profile <- profileDao.queryForAll.asScala) {
+          profile.userOrder = i
+          profileDao.update(profile)
+          i += 1
         }
       }
     }

@@ -49,7 +49,6 @@ import android.content.res.AssetManager
 import android.graphics.Typeface
 import android.net.VpnService
 import android.os._
-import android.preference.{Preference, SwitchPreference}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -60,7 +59,6 @@ import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
-import com.github.shadowsocks.preferences.{DropDownPreference, NumberPickerPreference, PasswordEditTextPreference, SummaryEditTextPreference}
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
@@ -91,52 +89,9 @@ object Shadowsocks {
   // Constants
   val TAG = "Shadowsocks"
   val REQUEST_CONNECT = 1
-
-  val PREFS_NAME = "Shadowsocks"
-  val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
-    Key.isAuth)
-  val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
   val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS)
 
-  // Helper functions
-  def updateDropDownPreference(pref: Preference, value: String) {
-    pref.asInstanceOf[DropDownPreference].setValue(value)
-  }
-
-  def updatePasswordEditTextPreference(pref: Preference, value: String) {
-    pref.setSummary(value)
-    pref.asInstanceOf[PasswordEditTextPreference].setText(value)
-  }
-
-  def updateNumberPickerPreference(pref: Preference, value: Int) {
-    pref.asInstanceOf[NumberPickerPreference].setValue(value)
-  }
-
-  def updateSummaryEditTextPreference(pref: Preference, value: String) {
-    pref.setSummary(value)
-    pref.asInstanceOf[SummaryEditTextPreference].setText(value)
-  }
-
-  def updateSwitchPreference(pref: Preference, value: Boolean) {
-    pref.asInstanceOf[SwitchPreference].setChecked(value)
-  }
-
-  def updatePreference(pref: Preference, name: String, profile: Profile) {
-    name match {
-      case Key.profileName => updateSummaryEditTextPreference(pref, profile.name)
-      case Key.proxy => updateSummaryEditTextPreference(pref, profile.host)
-      case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
-      case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
-      case Key.sitekey => updatePasswordEditTextPreference(pref, profile.password)
-      case Key.encMethod => updateDropDownPreference(pref, profile.method)
-      case Key.route => updateDropDownPreference(pref, profile.route)
-      case Key.isProxyApps => updateSwitchPreference(pref, profile.proxyApps)
-      case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
-      case Key.isAuth => updateSwitchPreference(pref, profile.auth)
-      case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
-    }
-  }
 }
 
 class Shadowsocks
@@ -166,7 +121,7 @@ class Shadowsocks
             fab.setImageResource(R.drawable.ic_cloud_queue)
             fab.setEnabled(false)
             fabProgressCircle.show()
-            setPreferenceEnabled(enabled = false)
+            preferences.setEnabled(false)
           case State.CONNECTED =>
             fab.setBackgroundTintList(greenTint)
             if (state == State.CONNECTING) {
@@ -176,7 +131,7 @@ class Shadowsocks
             }
             fab.setEnabled(true)
             changeSwitch(checked = true)
-            setPreferenceEnabled(enabled = false)
+            preferences.setEnabled(false)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             handler.postDelayed(() => fabProgressCircle.hide(), 1000)
@@ -189,13 +144,13 @@ class Shadowsocks
                 (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
               snackbar.show
             }
-            setPreferenceEnabled(enabled = true)
+            preferences.setEnabled(true)
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
             fab.setImageResource(R.drawable.ic_cloud_queue)
             fab.setEnabled(false)
             if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-            setPreferenceEnabled(enabled = false)
+            preferences.setEnabled(false)
         }
         state = s
       })
@@ -255,7 +210,7 @@ class Shadowsocks
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
   private var adView: AdView = _
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
-  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_a700)
+  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
 
   var handler = new Handler()
 
@@ -367,12 +322,7 @@ class Shadowsocks
     changeSwitch(checked = false)
   }
 
-  def isReady: Boolean = {
-    if (!checkText(Key.proxy)) return false
-    if (!checkText(Key.sitekey)) return false
-    if (bgService == null) return false
-    true
-  }
+  def isReady: Boolean = checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null
 
   def prepareStartService() {
     ThrowableFuture {
@@ -438,9 +388,10 @@ class Shadowsocks
     currentProfile = ShadowsocksApplication.currentProfile match {
       case Some(profile) => profile // updated
       case None =>                  // removed
-        val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List[Profile]())
-        if (profiles.isEmpty) ShadowsocksApplication.profileManager.createDefault()
-        else ShadowsocksApplication.switchProfile(profiles.head.id)
+        ShadowsocksApplication.profileManager.getFirstProfile match {
+          case Some(first) => ShadowsocksApplication.switchProfile(first.id)
+          case None => ShadowsocksApplication.profileManager.createDefault()
+        }
     }
 
     updatePreferenceScreen()
@@ -461,25 +412,25 @@ class Shadowsocks
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_cloud_queue)
-          setPreferenceEnabled(false)
+          preferences.setEnabled(false)
           fabProgressCircle.show()
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
           serviceStarted = true
           fab.setImageResource(R.drawable.ic_cloud)
-          setPreferenceEnabled(false)
+          preferences.setEnabled(false)
           fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_cloud_queue)
-          setPreferenceEnabled(false)
+          preferences.setEnabled(false)
           fabProgressCircle.show()
         case _ =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_cloud_off)
-          setPreferenceEnabled(true)
+          preferences.setEnabled(true)
           fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
       }
       state = bgService.getState
@@ -497,26 +448,6 @@ class Shadowsocks
     updateTraffic()
   }
 
-  private def setPreferenceEnabled(enabled: Boolean) {
-    preferences.findPreference(Key.isNAT).setEnabled(enabled)
-    for (name <- Shadowsocks.PROXY_PREFS) {
-      val pref = preferences.findPreference(name)
-      if (pref != null) {
-        pref.setEnabled(enabled)
-      }
-    }
-    for (name <- Shadowsocks.FEATURE_PREFS) {
-      val pref = preferences.findPreference(name)
-      if (pref != null) {
-        if (name == Key.isProxyApps) {
-          pref.setEnabled(enabled && (Utils.isLollipopOrAbove || !ShadowsocksApplication.isVpnEnabled))
-        } else {
-          pref.setEnabled(enabled)
-        }
-      }
-    }
-  }
-
   private def updatePreferenceScreen() {
     val profile = currentProfile
     if (profile.host == "198.199.101.152" && adView == null) {
@@ -527,14 +458,7 @@ class Shadowsocks
       adView.loadAd(new AdRequest.Builder().build())
     }
 
-    for (name <- Shadowsocks.PROXY_PREFS) {
-      val pref = preferences.findPreference(name)
-      Shadowsocks.updatePreference(pref, name, profile)
-    }
-    for (name <- Shadowsocks.FEATURE_PREFS) {
-      val pref = preferences.findPreference(name)
-      Shadowsocks.updatePreference(pref, name, profile)
-    }
+    preferences.update(profile)
   }
 
   override def onStop() {
@@ -542,8 +466,11 @@ class Shadowsocks
     clearDialog()
   }
 
+  private var _isDestroyed: Boolean = _
+  override def isDestroyed = if (Build.VERSION.SDK_INT >= 17) super.isDestroyed else _isDestroyed
   override def onDestroy() {
     super.onDestroy()
+    _isDestroyed = true
     deattachService()
     new BackupManager(this).dataChanged()
     handler.removeCallbacksAndMessages(null)
@@ -613,8 +540,8 @@ class Shadowsocks
   }
 
   def clearDialog() {
-    if (progressDialog != null) {
-      progressDialog.dismiss()
+    if (progressDialog != null && progressDialog.isShowing) {
+      if (!isDestroyed) progressDialog.dismiss()
       progressDialog = null
       progressTag = -1
     }
