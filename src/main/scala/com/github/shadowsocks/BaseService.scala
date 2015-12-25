@@ -134,6 +134,7 @@ trait BaseService extends Service {
   def updateTrafficTotal(tx: Long, rx: Long) {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
+      val config = this.config  // avoid race conditions without locking
       if (config != null) {
         ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
           case Some(profile) =>
