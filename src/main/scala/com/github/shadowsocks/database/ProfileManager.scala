@@ -66,7 +66,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       }
       val last = dbHelper.profileDao.queryRaw(dbHelper.profileDao.queryBuilder.selectRaw("MAX(userOrder)")
         .prepareStatementString).getFirstResult
-      if (last != null && last.length == 1) profile.userOrder = last(0).toInt + 1
+      if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
       dbHelper.profileDao.createOrUpdate(profile)
       if (profileAddedListener != null) profileAddedListener(profile)
       profile
@@ -114,7 +114,8 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
 
   def getFirstProfile = {
     try {
-      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.limit(1L).prepare).get(0))
+      val result = dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.limit(1L).prepare)
+      if (result.size == 1) Option(result.get(0)) else None
     } catch {
       case ex: Exception =>
         Log.e(Shadowsocks.TAG, "getAllProfiles", ex)
