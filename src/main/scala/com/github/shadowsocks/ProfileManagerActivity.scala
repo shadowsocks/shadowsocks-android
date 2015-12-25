@@ -72,11 +72,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       handler.post(() => text.setText(builder))
     }
 
-    def bind(item: Profile) {
+    def bind(item: Profile, i: Int) {
       this.item = item
       updateText()
       if (item.id == ShadowsocksApplication.profileId) {
         text.setChecked(true)
+        selectedIndex = i
         selectedItem = this
       } else {
         text.setChecked(false)
@@ -92,12 +93,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     private val recycleBin = new ArrayBuffer[(Int, Profile)]
-    private var profiles = new ArrayBuffer[Profile]
+    var profiles = new ArrayBuffer[Profile]
     profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
     def getItemCount = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i), i)
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
@@ -131,6 +132,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
+  private var selectedIndex = -1
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
@@ -153,9 +155,14 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    profilesList.setLayoutManager(new LinearLayoutManager(this))
+    val layoutManager = new LinearLayoutManager(this)
+    profilesList.setLayoutManager(layoutManager)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
+    if (selectedIndex < 0) selectedIndex = profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == ShadowsocksApplication.profileId => i
+    }.getOrElse(-1)
+    layoutManager.scrollToPosition(selectedIndex)
     removedSnackbar = Snackbar.make(profilesList, R.string.removed, Snackbar.LENGTH_LONG)
       .setAction(R.string.undo, ((v: View) => profilesAdapter.undoRemoves): OnClickListener)
     removedSnackbar.getView.addOnAttachStateChangeListener(new OnAttachStateChangeListener {
