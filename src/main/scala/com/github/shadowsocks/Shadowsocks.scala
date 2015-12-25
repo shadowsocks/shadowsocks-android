@@ -466,8 +466,11 @@ class Shadowsocks
     clearDialog()
   }
 
+  private var _isDestroyed: Boolean = _
+  override def isDestroyed = if (Build.VERSION.SDK_INT >= 17) super.isDestroyed else _isDestroyed
   override def onDestroy() {
     super.onDestroy()
+    _isDestroyed = true
     deattachService()
     new BackupManager(this).dataChanged()
     handler.removeCallbacksAndMessages(null)
