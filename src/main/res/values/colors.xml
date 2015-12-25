@@ -2,7 +2,7 @@
 
 <resources>
 
-  <color name="material_green_a700">#64DD17</color>
+  <color name="material_green_700">#388E3C</color>
   <color name="material_blue_grey_300">#90A4AE</color>
   <color name="material_blue_grey_500">#607D8B</color>
   <color name="material_blue_grey_700">#455A64</color>
