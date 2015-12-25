@@ -172,14 +172,18 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
-    case Key.isNAT => activity.handler.post(() => {
-      activity.deattachService
-      activity.attachService
-    })
+    case Key.isNAT =>
+      activity.handler.post(() => {
+        activity.deattachService
+        activity.attachService
+      })
+      setEnabled(enabled)
     case _ =>
   }
 
+  private var enabled = true
   def setEnabled(enabled: Boolean) {
+    this.enabled = enabled
     findPreference(Key.isNAT).setEnabled(enabled)
     for (name <- PROXY_PREFS) {
       val pref = findPreference(name)
