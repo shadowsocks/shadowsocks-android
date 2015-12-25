@@ -92,4 +92,7 @@ class Profile {
 
   @DatabaseField
   val date: java.util.Date = new java.util.Date()
+
+  @DatabaseField
+  var userOrder: Long = _
 }

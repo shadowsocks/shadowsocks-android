@@ -438,9 +438,10 @@ class Shadowsocks
     currentProfile = ShadowsocksApplication.currentProfile match {
       case Some(profile) => profile // updated
       case None =>                  // removed
-        val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List[Profile]())
-        if (profiles.isEmpty) ShadowsocksApplication.profileManager.createDefault()
-        else ShadowsocksApplication.switchProfile(profiles.head.id)
+        ShadowsocksApplication.profileManager.getFirstProfile match {
+          case Some(first) => ShadowsocksApplication.switchProfile(first.id)
+          case None => ShadowsocksApplication.profileManager.createDefault()
+        }
     }
 
     updatePreferenceScreen()

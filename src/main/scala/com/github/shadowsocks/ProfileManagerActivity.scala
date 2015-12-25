@@ -111,6 +111,24 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       notifyItemInserted(pos)
     }
 
+    def move(from: Int, to: Int) {
+      val step = if (from < to) 1 else -1
+      val first = profiles(from)
+      var previousOrder = profiles(from).userOrder
+      for (i <- from until to by step) {
+        val next = profiles(i + step)
+        val order = next.userOrder
+        next.userOrder = previousOrder
+        previousOrder = order
+        profiles(i) = next
+        ShadowsocksApplication.profileManager.updateProfile(next)
+      }
+      first.userOrder = previousOrder
+      profiles(to) = first
+      ShadowsocksApplication.profileManager.updateProfile(first)
+      notifyItemMoved(from, to)
+    }
+
     def remove(pos: Int) {
       recycleBin.append((pos, profiles(pos)))
       profiles.remove(pos)
@@ -169,12 +187,16 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       def onViewDetachedFromWindow(v: View) = profilesAdapter.commitRemoves
       def onViewAttachedToWindow(v: View) = ()
     })
-    new ItemTouchHelper(new SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
+    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+      ItemTouchHelper.START | ItemTouchHelper.END) {
       def onSwiped(viewHolder: ViewHolder, direction: Int) = {
         profilesAdapter.remove(viewHolder.getAdapterPosition)
         removedSnackbar.show
       }
-      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = false  // TODO?
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+        profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
+        true
+      }
     }).attachToRecyclerView(profilesList)
 
     attachService(new IShadowsocksServiceCallback.Stub {
