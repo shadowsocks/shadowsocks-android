@@ -110,16 +110,11 @@ class DBHelper(val context: Context)
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
       }
-      if (oldVersion < 14) {
-        for (profile <- profileDao.queryForAll.asScala) {
-          profile.individual = updateProxiedApps(context, profile.individual)
-          profileDao.update(profile)
-        }
-      }
       if (oldVersion < 15) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
         var i = 0
         for (profile <- profileDao.queryForAll.asScala) {
+          if (oldVersion < 14) profile.individual = updateProxiedApps(context, profile.individual)
           profile.userOrder = i
           profileDao.update(profile)
           i += 1
