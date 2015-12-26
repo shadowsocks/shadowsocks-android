@@ -87,8 +87,7 @@ trait BaseService extends Service {
           val task = new TimerTask {
             def run {
               TrafficMonitor.updateRate()
-              updateTrafficRate(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-                TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+              updateTrafficRate()
             }
           }
           timer = new Timer(true)
@@ -122,7 +121,7 @@ trait BaseService extends Service {
 
   def stopRunner() {
     // Make sure update total traffic when stopping the runner
-    updateTrafficTotal(TrafficMonitor.getDeltaTx, TrafficMonitor.getDeltaRx)
+    updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
 
     TrafficMonitor.reset()
     if (trafficMonitorThread != null) {
@@ -132,19 +131,16 @@ trait BaseService extends Service {
   }
 
   def updateTrafficTotal(tx: Long, rx: Long) {
-    val handler = new Handler(getContext.getMainLooper)
-    handler.post(() => {
-      val config = this.config  // avoid race conditions without locking
-      if (config != null) {
-        ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
-          case Some(profile) =>
-            profile.tx += tx
-            profile.rx += rx
-            ShadowsocksApplication.profileManager.updateProfile(profile)
-          case None => // Ignore
-        }
+    val config = this.config  // avoid race conditions without locking
+    if (config != null) {
+      ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
+        case Some(profile) =>
+          profile.tx += tx
+          profile.rx += rx
+          ShadowsocksApplication.profileManager.updateProfile(profile)
+        case None => // Ignore
       }
-    })
+    }
   }
 
   def stopBackgroundService()
@@ -162,10 +158,14 @@ trait BaseService extends Service {
     changeState(s, null)
   }
 
-  def updateTrafficRate(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+  def updateTrafficRate() {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
       if (callbackCount > 0) {
+        val txRate = TrafficMonitor.getTxRate
+        val rxRate = TrafficMonitor.getRxRate
+        val txTotal = TrafficMonitor.getTxTotal
+        val rxTotal = TrafficMonitor.getRxTotal
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {

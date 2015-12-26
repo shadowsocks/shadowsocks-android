@@ -5,26 +5,19 @@ import java.text.DecimalFormat
 
 import com.github.shadowsocks.{R, ShadowsocksApplication}
 
-case class Traffic(tx: Long, rx: Long, timestamp: Long)
-
 object TrafficMonitor {
-  var last: Traffic = getTraffic(0, 0)
-
   // Bytes per second
-  var txRate: Long = 0
-  var rxRate: Long = 0
+  var txRate: Long = _
+  var rxRate: Long = _
 
   // Bytes for the current session
-  var txTotal: Long = 0
-  var rxTotal: Long = 0
+  var txTotal: Long = _
+  var rxTotal: Long = _
 
   // Bytes for the last query
-  var txLast: Long = 0
-  var rxLast: Long = 0
-
-  def getTraffic(tx: Long, rx: Long): Traffic = {
-    new Traffic(tx, rx, System.currentTimeMillis())
-  }
+  var txLast: Long = _
+  var rxLast: Long = _
+  var timestampLast: Long = _
 
   private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
   private val numberFormat = new DecimalFormat("@@@")
@@ -40,15 +33,15 @@ object TrafficMonitor {
   }
 
   def updateRate() {
-    val now = getTraffic(txTotal, rxTotal)
-    val delta = now.timestamp - last.timestamp
-    val deltaTx = now.tx - last.tx
-    val deltaRx = now.rx - last.rx
+    val now = System.currentTimeMillis()
+    val delta = now - timestampLast
     if (delta != 0) {
-      txRate = deltaTx * 1000 / delta
-      rxRate = deltaRx * 1000 / delta
+      txRate = (txTotal - txLast) * 1000 / delta
+      rxRate = (rxTotal - rxLast) * 1000 / delta
+      txLast = txTotal
+      rxLast = rxTotal
+      timestampLast = now
     }
-    last = now
   }
 
   def update(tx: Long, rx: Long) {
@@ -63,7 +56,6 @@ object TrafficMonitor {
     rxTotal = 0
     txLast = 0
     rxLast = 0
-    last = getTraffic(0, 0)
   }
 
   def getTxTotal(): String = {
@@ -88,18 +80,6 @@ object TrafficMonitor {
 
   def getRate(): String = {
     formatTraffic(txRate + rxRate)
-  }
-
-  def getDeltaTx(): Long = {
-    val last = txLast
-    txLast = txTotal
-    txTotal - last
-  }
-
-  def getDeltaRx(): Long = {
-    val last = rxLast
-    rxLast = rxTotal
-    rxTotal - last
   }
 }
 
