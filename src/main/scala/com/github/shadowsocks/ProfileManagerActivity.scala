@@ -218,6 +218,15 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
+  override def onStart() {
+    super.onStart()
+    registerCallback
+  }
+  override def onStop() {
+    super.onStop()
+    unregisterCallback
+  }
+
   override def onDestroy {
     deattachService()
     super.onDestroy
