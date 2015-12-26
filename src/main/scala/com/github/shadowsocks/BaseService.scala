@@ -86,8 +86,7 @@ trait BaseService extends Service {
         if (callbackCount == 0 && timer == null) {
           val task = new TimerTask {
             def run {
-              TrafficMonitor.updateRate()
-              updateTrafficRate()
+              if (TrafficMonitor.updateRate()) updateTrafficRate()
             }
           }
           timer = new Timer(true)
@@ -95,6 +94,9 @@ trait BaseService extends Service {
         }
         callbacks.register(cb)
         callbackCount += 1
+        TrafficMonitor.updateRate()
+        cb.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
+          TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
       }
     }
 

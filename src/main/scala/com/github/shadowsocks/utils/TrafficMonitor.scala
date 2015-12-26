@@ -18,6 +18,7 @@ object TrafficMonitor {
   var txLast: Long = _
   var rxLast: Long = _
   var timestampLast: Long = _
+  @volatile var dirty = true
 
   private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
   private val numberFormat = new DecimalFormat("@@@")
@@ -32,21 +33,42 @@ object TrafficMonitor {
     else numberFormat.format(n) + ' ' + units(i)
   }
 
-  def updateRate() {
+  def updateRate() = {
     val now = System.currentTimeMillis()
     val delta = now - timestampLast
+    var updated = false
     if (delta != 0) {
-      txRate = (txTotal - txLast) * 1000 / delta
-      rxRate = (rxTotal - rxLast) * 1000 / delta
-      txLast = txTotal
-      rxLast = rxTotal
+      if (dirty) {
+        txRate = (txTotal - txLast) * 1000 / delta
+        rxRate = (rxTotal - rxLast) * 1000 / delta
+        txLast = txTotal
+        rxLast = rxTotal
+        dirty = false
+        updated = true
+      } else {
+        if (txRate != 0) {
+          txRate = 0
+          updated = true
+        }
+        if (rxRate != 0) {
+          rxRate = 0
+          updated = true
+        }
+      }
       timestampLast = now
     }
+    updated
   }
 
   def update(tx: Long, rx: Long) {
-    txTotal = tx
-    rxTotal = rx
+    if (txTotal != tx) {
+      txTotal = tx
+      dirty = true
+    }
+    if (rxTotal != rx) {
+      rxTotal = rx
+      dirty = true
+    }
   }
 
   def reset() {
@@ -56,6 +78,7 @@ object TrafficMonitor {
     rxTotal = 0
     txLast = 0
     rxLast = 0
+    dirty = true
   }
 
   def getTxTotal(): String = {
