@@ -45,7 +45,12 @@ import java.util.concurrent.Executors
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 
+object ShadowsocksVpnThread {
+  val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
+}
+
 class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
+  import ShadowsocksVpnThread._
 
   val TAG = "ShadowsocksVpnService"
   val PATH = "/data/data/com.github.shadowsocks/protect_path"
@@ -103,11 +108,8 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
             val fds = socket.getAncillaryFileDescriptors
 
             if (fds.nonEmpty) {
-              var ret = false
-
-              val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
               val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
-              ret = vpnService.protect(fd)
+              val ret = vpnService.protect(fd)
 
               // Trick to close file decriptor
               System.jniclose(fd)
