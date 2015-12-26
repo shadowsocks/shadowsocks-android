@@ -39,8 +39,11 @@
 
 package com.github.shadowsocks
 
-import android.content.pm.PackageManager
+import java.util.concurrent.atomic.AtomicBoolean
+
+import android.Manifest.permission
 import android.content._
+import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
@@ -54,7 +57,6 @@ import android.view._
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
-import android.Manifest.permission
 import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.collection.JavaConversions._
@@ -65,6 +67,8 @@ object AppManager {
   case class ProxiedApp(name: String, packageName: String, icon: Drawable)
   private case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
 
+  private var instance: AppManager = _
+
   private var receiverRegistered: Boolean = _
   private var cachedApps: Array[ProxiedApp] = _
   private def getApps(pm: PackageManager) = {
@@ -73,8 +77,12 @@ object AppManager {
       filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
       filter.addDataScheme("package")
       ShadowsocksApplication.instance.registerReceiver((context: Context, intent: Intent) =>
-        if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED || !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))
-          synchronized(cachedApps = null), filter)
+        if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED ||
+          !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+          synchronized(cachedApps = null)
+          val instance = AppManager.instance
+          if (instance != null) instance.reloadApps()
+        }, filter)
       receiverRegistered = true
     }
     synchronized {
@@ -98,43 +106,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   private var loadingView: View = _
   private var overlay: TextView = _
   private var adapter: ListAdapter = _
-  @volatile private var appsLoading: Boolean = _
-
-  def loadApps() {
-    appsLoading = true
-    proxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
-    apps = getApps(getPackageManager).sortWith((a, b) => {
-      val aProxied = proxiedApps.contains(a.packageName)
-      if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
-    })
-    adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
-      override def getView(position: Int, view: View, parent: ViewGroup): View = {
-        var convertView = view
-        var entry: ListEntry = null
-        if (convertView == null) {
-          convertView = getLayoutInflater.inflate(R.layout.layout_apps_item, parent, false)
-          entry = new ListEntry(convertView.findViewById(R.id.itemcheck).asInstanceOf[Switch],
-            convertView.findViewById(R.id.itemtext).asInstanceOf[TextView],
-            convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView])
-          convertView.setOnClickListener(AppManager.this)
-          convertView.setTag(entry)
-          entry.switch.setOnCheckedChangeListener(AppManager.this)
-        } else {
-          entry = convertView.getTag.asInstanceOf[ListEntry]
-        }
-
-        val app: ProxiedApp = apps(position)
-
-        entry.text.setText(app.name)
-        entry.icon.setImageDrawable(app.icon)
-        val switch = entry.switch
-        switch.setTag(app)
-        switch.setChecked(proxiedApps.contains(app.packageName))
-        entry.text.setTag(switch)
-        convertView
-      }
-    }
-  }
+  private val appsLoading = new AtomicBoolean
 
   private def setProxied(pn: String, proxied: Boolean) = if (proxied) proxiedApps.add(pn) else proxiedApps.remove(pn)
 
@@ -157,6 +129,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   override def onDestroy() {
+    instance = null
     super.onDestroy()
     if (handler != null) {
       handler.removeCallbacksAndMessages(null)
@@ -198,7 +171,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
                 // Restart activity
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
-                if (appsLoading) appsLoading = false else loadAppsAsync()
+                reloadApps()
                 return true
               }
             }
@@ -264,13 +237,49 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         }
       }
     })
+    instance = this
     loadAppsAsync()
   }
 
+  def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
   def loadAppsAsync() {
+    if (!appsLoading.compareAndSet(false, true)) return
     ThrowableFuture {
-      while (!appsLoading) loadApps()
-      appsLoading = false
+      do {
+        proxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
+        appsLoading.set(true)
+        apps = getApps(getPackageManager).sortWith((a, b) => {
+          val aProxied = proxiedApps.contains(a.packageName)
+          if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
+        })
+        adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
+          override def getView(position: Int, view: View, parent: ViewGroup): View = {
+            var convertView = view
+            var entry: ListEntry = null
+            if (convertView == null) {
+              convertView = getLayoutInflater.inflate(R.layout.layout_apps_item, parent, false)
+              entry = new ListEntry(convertView.findViewById(R.id.itemcheck).asInstanceOf[Switch],
+                convertView.findViewById(R.id.itemtext).asInstanceOf[TextView],
+                convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView])
+              convertView.setOnClickListener(AppManager.this)
+              convertView.setTag(entry)
+              entry.switch.setOnCheckedChangeListener(AppManager.this)
+            } else {
+              entry = convertView.getTag.asInstanceOf[ListEntry]
+            }
+
+            val app: ProxiedApp = apps(position)
+
+            entry.text.setText(app.name)
+            entry.icon.setImageDrawable(app.icon)
+            val switch = entry.switch
+            switch.setTag(app)
+            switch.setChecked(proxiedApps.contains(app.packageName))
+            entry.text.setTag(switch)
+            convertView
+          }
+        }
+      } while (!appsLoading.compareAndSet(true, false))
       handler.post(() => {
         appListView.setAdapter(adapter)
         Utils.crossFade(AppManager.this, loadingView, appListView)
@@ -279,7 +288,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   def saveAppSettings(context: Context) {
-    if (!appsLoading) ShadowsocksApplication.settings.edit.putString(Key.proxied, proxiedApps.mkString("\n")).apply
+    if (!appsLoading.get) ShadowsocksApplication.settings.edit.putString(Key.proxied, proxiedApps.mkString("\n")).apply
   }
 
   var handler: Handler = null
