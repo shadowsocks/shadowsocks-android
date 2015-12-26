@@ -108,14 +108,6 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".AppManagerReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <action android:name="android.intent.action.PACKAGE_REMOVED" />
-                <data android:scheme="package"/>
-            </intent-filter>
-        </receiver>
-
         <receiver android:name=".ShadowsocksReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

@@ -40,7 +40,7 @@
 package com.github.shadowsocks
 
 import android.content.pm.PackageManager
-import android.content.{ClipData, ClipboardManager, Context}
+import android.content._
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
@@ -65,13 +65,25 @@ object AppManager {
   case class ProxiedApp(name: String, packageName: String, icon: Drawable)
   private case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
 
-  var cachedApps: Array[ProxiedApp] = _
+  private var receiverRegistered: Boolean = _
+  private var cachedApps: Array[ProxiedApp] = _
   private def getApps(pm: PackageManager) = {
-    if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-      .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
-      .map(p => new ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
-        p.applicationInfo.loadIcon(pm))).toArray
-    cachedApps
+    if (!receiverRegistered) {
+      val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+      filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+      filter.addDataScheme("package")
+      ShadowsocksApplication.instance.registerReceiver((context: Context, intent: Intent) =>
+        if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED || !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))
+          synchronized(cachedApps = null), filter)
+      receiverRegistered = true
+    }
+    synchronized {
+      if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+        .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
+        .map(p => new ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
+          p.applicationInfo.loadIcon(pm))).toArray
+      cachedApps
+    }
   }
 }
 
