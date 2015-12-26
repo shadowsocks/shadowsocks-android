@@ -50,7 +50,6 @@ import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread
 trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
-  @volatile private var callbackCount = 0
   @volatile protected var config: Config = null
 
   var timer: Timer = null
@@ -70,20 +69,17 @@ trait BaseService extends Service {
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
       if (cb != null ) {
         callbacks.unregister(cb)
-        callbackCount -= 1
       }
-      if (callbackCount == 0 && timer != null) {
+      if (callbacks.getRegisteredCallbackCount == 0 && timer != null) {
         timer.cancel()
         timer = null
-      }
-      if (callbackCount == 0 && state == State.STOPPED) {
-        stopBackgroundService()
       }
     }
 
     override def registerCallback(cb: IShadowsocksServiceCallback) {
       if (cb != null) {
-        if (callbackCount == 0 && timer == null) {
+        callbacks.register(cb)
+        if (callbacks.getRegisteredCallbackCount != 0 && timer == null) {
           val task = new TimerTask {
             def run {
               if (TrafficMonitor.updateRate()) updateTrafficRate()
@@ -92,8 +88,6 @@ trait BaseService extends Service {
           timer = new Timer(true)
           timer.schedule(task, 1000, 1000)
         }
-        callbacks.register(cb)
-        callbackCount += 1
         TrafficMonitor.updateRate()
         cb.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
           TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
@@ -145,14 +139,10 @@ trait BaseService extends Service {
     }
   }
 
-  def stopBackgroundService()
   def getServiceMode: Int
   def getTag: String
   def getContext: Context
 
-  def getCallbackCount: Int = {
-    callbackCount
-  }
   def getState: Int = {
     state
   }
@@ -163,7 +153,7 @@ trait BaseService extends Service {
   def updateTrafficRate() {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
-      if (callbackCount > 0) {
+      if (callbacks.getRegisteredCallbackCount > 0) {
         val txRate = TrafficMonitor.getTxRate
         val rxRate = TrafficMonitor.getRxRate
         val txTotal = TrafficMonitor.getTxTotal
@@ -184,7 +174,7 @@ trait BaseService extends Service {
   protected def changeState(s: Int, msg: String) {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => if (state != s) {
-      if (callbackCount > 0) {
+      if (callbacks.getRegisteredCallbackCount > 0) {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {

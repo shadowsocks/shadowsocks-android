@@ -476,17 +476,11 @@ class ShadowsocksNatService extends BaseService {
     // reset NAT
     killProcesses()
 
-    // stop the service if no callback registered
-    if (getCallbackCount == 0) {
-      stopSelf()
-    }
+    // stop the service if nothing has bound to it
+    stopSelf()
 
     // change the state
     changeState(State.STOPPED)
-  }
-
-  override def stopBackgroundService() {
-    stopSelf()
   }
 
   override def getTag = TAG

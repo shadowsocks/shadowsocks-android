@@ -136,10 +136,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    // stop the service if no callback registered
-    if (getCallbackCount == 0) {
-      stopSelf()
-    }
+    // stop the service if nothing has bound to it
+    stopSelf()
 
     // clean up recevier
     if (closeReceiver != null) {
@@ -456,10 +454,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .start()
 
     fd
-  }
-
-  override def stopBackgroundService() {
-    stopSelf()
   }
 
   override def getTag = TAG
