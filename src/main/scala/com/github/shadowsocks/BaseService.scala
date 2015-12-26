@@ -42,7 +42,7 @@ package com.github.shadowsocks
 import java.util.{Timer, TimerTask}
 
 import android.app.Service
-import android.content.Context
+import android.content.{Intent, Context}
 import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
@@ -110,6 +110,7 @@ trait BaseService extends Service {
   def startRunner(config: Config) {
     this.config = config
 
+    startService(new Intent(getContext, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread()
     trafficMonitorThread.start()
@@ -124,6 +125,12 @@ trait BaseService extends Service {
       trafficMonitorThread.stopThread()
       trafficMonitorThread = null
     }
+
+    // change the state
+    changeState(State.STOPPED)
+
+    // stop the service if nothing has bound to it
+    stopSelf()
   }
 
   def updateTrafficTotal(tx: Long, rx: Long) {

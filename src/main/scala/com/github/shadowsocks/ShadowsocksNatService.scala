@@ -458,8 +458,6 @@ class ShadowsocksNatService extends BaseService {
 
   override def stopRunner() {
 
-    super.stopRunner()
-
     // channge the state
     changeState(State.STOPPING)
 
@@ -476,11 +474,7 @@ class ShadowsocksNatService extends BaseService {
     // reset NAT
     killProcesses()
 
-    // stop the service if nothing has bound to it
-    stopSelf()
-
-    // change the state
-    changeState(State.STOPPED)
+    super.stopRunner()
   }
 
   override def getTag = TAG

@@ -113,8 +113,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def stopRunner() {
 
-    super.stopRunner()
-
     if (vpnThread != null) {
       vpnThread.stopThread()
       vpnThread = null
@@ -136,17 +134,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    // stop the service if nothing has bound to it
-    stopSelf()
-
     // clean up recevier
     if (closeReceiver != null) {
       unregisterReceiver(closeReceiver)
       closeReceiver = null
     }
 
-    // channge the state
-    changeState(State.STOPPED)
+    super.stopRunner()
   }
 
   def getVersionName: String = {

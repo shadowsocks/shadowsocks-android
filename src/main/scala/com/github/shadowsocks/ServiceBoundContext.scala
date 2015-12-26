@@ -54,8 +54,6 @@ trait ServiceBoundContext extends Context {
 
       connection = new ShadowsocksServiceConnection()
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
-
-      startService(new Intent(this, s))
     }
   }
 
