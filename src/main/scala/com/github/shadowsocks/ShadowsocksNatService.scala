@@ -44,6 +44,7 @@ import java.lang.Process
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
+import android.app.Service
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{ConnectivityManager, Network}
@@ -330,6 +331,8 @@ class ShadowsocksNatService extends BaseService {
     super.onCreate()
     ConfigUtils.refresh(this)
   }
+
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_STICKY
 
   def killProcesses() {
     if (sslocalProcess != null) {
