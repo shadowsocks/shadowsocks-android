@@ -49,6 +49,8 @@ import android.net.VpnService
 import android.os._
 import android.util.Log
 import android.widget.Toast
+import android.content.pm.PackageManager.NameNotFoundException
+
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import org.apache.commons.net.util.SubnetUtils
@@ -381,10 +383,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
       if (config.isProxyApps) {
         for (pkg <- config.proxiedAppString.split('\n')) {
-          if (!config.isBypassApps) {
-            builder.addAllowedApplication(pkg)
-          } else {
-            builder.addDisallowedApplication(pkg)
+          try {
+            if (!config.isBypassApps) {
+              builder.addAllowedApplication(pkg)
+            } else {
+              builder.addDisallowedApplication(pkg)
+            }
+          } catch {
+            case ex: NameNotFoundException =>
+              Log.e(TAG, "Invalid package name", ex);
           }
         }
       }
