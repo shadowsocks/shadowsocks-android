@@ -461,8 +461,13 @@ class Shadowsocks
     preferences.update(profile)
   }
 
+  override def onStart() {
+    super.onStart()
+    registerCallback
+  }
   override def onStop() {
     super.onStop()
+    unregisterCallback
     clearDialog()
   }
 

@@ -40,11 +40,11 @@
 package com.github.shadowsocks.utils
 
 import java.io.{File, IOException}
+import java.nio.{ByteBuffer, ByteOrder}
 import java.util.concurrent.Executors
 
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
-import com.github.shadowsocks.BaseService
 
 class TrafficMonitorThread() extends Thread {
 
@@ -99,16 +99,10 @@ class TrafficMonitorThread() extends Thread {
             val input = socket.getInputStream
             val output = socket.getOutputStream
 
-            val buffer = new Array[Byte](256)
-            val size = input.read(buffer)
-
-            val array = new Array[Byte](size)
-            Array.copy(buffer, 0, array, 0, size)
-
-            val stat = new String(array, "UTF-8").split("\\|")
-            if (stat.length == 2) {
-              TrafficMonitor.update(stat(0).toLong, stat(1).toLong)
-            }
+            val buffer = new Array[Byte](16)
+            if (input.read(buffer) != 16) throw new IOException("Unexpected traffic stat length")
+            val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
+            TrafficMonitor.update(stat.getLong(0), stat.getLong(8))
 
             output.write(0)
 

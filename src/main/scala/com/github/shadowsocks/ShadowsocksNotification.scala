@@ -2,7 +2,7 @@ package com.github.shadowsocks
 
 import java.util.Locale
 
-import android.app.{KeyguardManager, PendingIntent}
+import android.app.{KeyguardManager, NotificationManager, PendingIntent}
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.os.PowerManager
 import android.support.v4.app.NotificationCompat
@@ -16,6 +16,7 @@ import com.github.shadowsocks.utils.{Action, State, Utils}
   */
 class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false) {
   private lazy val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
+  private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
     override def stateChanged(state: Int, msg: String) = () // ignore
     override def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
@@ -27,6 +28,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   }
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _
+  private var started: Boolean = _
 
   private val builder = new NotificationCompat.Builder(service)
     .setWhen(0)
@@ -73,8 +75,10 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     show()
   } else if (forceShow) show()
 
-  def notification = builder.build()
-  def show() = service.startForeground(1, notification)
+  def show() = if (started) nm.notify(1, builder.build) else {
+    service.startForeground(1, builder.build)
+    started = true
+  }
 
   def destroy() {
     if (lockReceiver != null) {
