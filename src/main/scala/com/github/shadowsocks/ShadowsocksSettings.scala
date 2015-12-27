@@ -166,18 +166,16 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     isProxyApps.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isProxyApps, false))  // update
   }
 
-  override def onPause {
-    super.onPause()
+  override def onDestroy {
+    super.onDestroy()
     ShadowsocksApplication.settings.unregisterOnSharedPreferenceChangeListener(this)
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
-    case Key.isNAT =>
-      activity.handler.post(() => {
-        activity.deattachService
-        activity.attachService
-      })
-      setEnabled(enabled)
+    case Key.isNAT => activity.handler.post(() => {
+      activity.deattachService
+      activity.attachService
+    })
     case _ =>
   }
 

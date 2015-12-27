@@ -104,7 +104,6 @@ class Shadowsocks
   var progressDialog: ProgressDialog = _
   var progressTag = -1
   var state = State.STOPPED
-  var prepared = false
   var currentProfile = new Profile
   var vpnEnabled = -1
   var trafficCache: String = _
@@ -402,7 +401,6 @@ class Shadowsocks
   protected override def onPause() {
     super.onPause()
     ShadowsocksApplication.profileManager.save
-    prepared = false
   }
 
   private def stateUpdate() {
@@ -517,7 +515,6 @@ class Shadowsocks
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) = resultCode match {
     case Activity.RESULT_OK =>
-      prepared = true
       serviceStart()
     case _ =>
       cancelStart()

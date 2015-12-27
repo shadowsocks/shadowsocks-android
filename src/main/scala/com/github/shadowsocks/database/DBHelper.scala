@@ -105,17 +105,14 @@ class DBHelper(val context: Context)
           " ipv6, individual FROM `tmp`;")
         profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
         profileDao.executeRawNoArgs("COMMIT;")
-        return
-      }
-
-      if (oldVersion < 13) {
+      } else if (oldVersion < 13) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
       }
 
       if (oldVersion < 15) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
+        if (oldVersion >= 12) profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
         var i = 0
         for (profile <- profileDao.queryForAll.asScala) {
           if (oldVersion < 14) profile.individual = updateProxiedApps(context, profile.individual)

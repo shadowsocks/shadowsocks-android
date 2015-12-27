@@ -56,6 +56,7 @@ trait BaseService extends Service {
   var trafficMonitorThread: TrafficMonitorThread = null
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
+  var callbacksCount: Int = _
 
   val binder = new IShadowsocksService.Stub {
     override def getMode: Int = {
@@ -67,19 +68,19 @@ trait BaseService extends Service {
     }
 
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null ) {
-        callbacks.unregister(cb)
-      }
-      if (callbacks.getRegisteredCallbackCount == 0 && timer != null) {
-        timer.cancel()
-        timer = null
+      if (cb != null && callbacks.unregister(cb)) {
+        callbacksCount -= 1
+        if (callbacksCount == 0 && timer != null) {
+          timer.cancel()
+          timer = null
+        }
       }
     }
 
     override def registerCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null) {
-        callbacks.register(cb)
-        if (callbacks.getRegisteredCallbackCount != 0 && timer == null) {
+      if (cb != null && callbacks.register(cb)) {
+        callbacksCount += 1
+        if (callbacksCount != 0 && timer == null) {
           val task = new TimerTask {
             def run {
               if (TrafficMonitor.updateRate()) updateTrafficRate()
@@ -160,7 +161,7 @@ trait BaseService extends Service {
   def updateTrafficRate() {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
-      if (callbacks.getRegisteredCallbackCount > 0) {
+      if (callbacksCount > 0) {
         val txRate = TrafficMonitor.getTxRate
         val rxRate = TrafficMonitor.getRxRate
         val txTotal = TrafficMonitor.getTxTotal
@@ -181,7 +182,7 @@ trait BaseService extends Service {
   protected def changeState(s: Int, msg: String) {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => if (state != s) {
-      if (callbacks.getRegisteredCallbackCount > 0) {
+      if (callbacksCount > 0) {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
