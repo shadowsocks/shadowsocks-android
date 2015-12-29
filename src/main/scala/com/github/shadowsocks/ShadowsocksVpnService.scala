@@ -65,7 +65,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = _
   var vpnThread: ShadowsocksVpnThread = _
-  private var notification: ShadowsocksNotification = _
   var closeReceiver: BroadcastReceiver = _
 
   var sslocalProcess: Process = _
@@ -238,7 +237,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
         if (resolved && handleConnection) {
           changeState(State.CONNECTED)
-          notification = new ShadowsocksNotification(this, config.profileName)
+          notification = new ShadowsocksNotification(this, config.profileName,
+            ShadowsocksApplication.notificationTraffic)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()

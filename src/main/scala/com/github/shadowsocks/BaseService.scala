@@ -45,12 +45,13 @@ import android.app.Service
 import android.content.{Intent, Context}
 import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
+import com.github.shadowsocks.utils.{Key, State, TrafficMonitor, TrafficMonitorThread}
 
 trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
   @volatile protected var config: Config = null
+  protected var notification: ShadowsocksNotification = _
 
   var timer: Timer = null
   var trafficMonitorThread: TrafficMonitorThread = null
@@ -104,6 +105,12 @@ trait BaseService extends Service {
       if (state == State.STOPPED) {
         startRunner(config)
       }
+    }
+
+    override def showNotificationTraffic(value: Boolean) {
+      ShadowsocksApplication.settings.edit.putBoolean(Key.notificationTraffic, value).apply
+      val notification = BaseService.this.notification
+      if (notification != null) notification.setShowTraffic(value)
     }
   }
 

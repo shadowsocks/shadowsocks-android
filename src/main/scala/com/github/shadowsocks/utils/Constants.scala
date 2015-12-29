@@ -68,6 +68,7 @@ object Key {
   val profiles = "profiles"
   val isNAT = "isNAT"
   val route = "route"
+  val notificationTraffic = "notificationTraffic"
   val stat = "stat"
 
   val isRunning = "isRunning"

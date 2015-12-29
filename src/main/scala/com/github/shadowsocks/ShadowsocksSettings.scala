@@ -172,6 +172,8 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
+    case Key.notificationTraffic => if (activity.bgService != null)
+      activity.bgService.showNotificationTraffic(ShadowsocksApplication.notificationTraffic)
     case Key.isNAT => activity.handler.post(() => {
       activity.deattachService
       activity.attachService

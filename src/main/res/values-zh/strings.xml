@@ -32,6 +32,8 @@
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自动连接</string>
   <string name="auto_connect_summary">随系统启动后台服务</string>
+  <string name="notification_traffic">在通知内显示网络流量</string>
+  <string name="notification_traffic_summary">在屏幕亮起且有网络活动时会更耗电一点。</string>
   <string name="forward_success">后台服务已开始运行。</string>
   <string name="service_failed">无法连接远程服务器</string>
   <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
