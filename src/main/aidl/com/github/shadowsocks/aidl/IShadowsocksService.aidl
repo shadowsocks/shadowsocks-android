@@ -12,4 +12,6 @@ interface IShadowsocksService {
 
   oneway void start(in Config config);
   oneway void stop();
+
+  oneway void showNotificationTraffic(boolean value);
 }

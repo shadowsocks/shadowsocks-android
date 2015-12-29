@@ -65,7 +65,6 @@ class ShadowsocksNatService extends BaseService {
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
 
-  private var notification: ShadowsocksNotification = _
   var closeReceiver: BroadcastReceiver = _
   var connReceiver: BroadcastReceiver = _
   val myUid = android.os.Process.myUid()
@@ -450,7 +449,8 @@ class ShadowsocksNatService extends BaseService {
           flushDns()
 
           changeState(State.CONNECTED)
-          notification = new ShadowsocksNotification(this, config.profileName, true)
+          notification = new ShadowsocksNotification(this, config.profileName, true,
+            ShadowsocksApplication.notificationTraffic)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()

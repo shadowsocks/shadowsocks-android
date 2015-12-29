@@ -51,6 +51,7 @@ trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
   @volatile protected var config: Config = null
+  protected var notification: ShadowsocksNotification = _
 
   var timer: Timer = null
   var trafficMonitorThread: TrafficMonitorThread = null
@@ -104,6 +105,11 @@ trait BaseService extends Service {
       if (state == State.STOPPED) {
         startRunner(config)
       }
+    }
+
+    override def showNotificationTraffic(value: Boolean) {
+      val notification = BaseService.this.notification
+      if (notification != null) notification.setShowTraffic(value)
     }
   }
 
