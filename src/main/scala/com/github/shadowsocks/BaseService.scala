@@ -90,8 +90,7 @@ trait BaseService extends Service {
           timer.schedule(task, 1000, 1000)
         }
         TrafficMonitor.updateRate()
-        cb.trafficUpdated(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-          TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+        cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
     }
 
@@ -162,10 +161,10 @@ trait BaseService extends Service {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
       if (callbacksCount > 0) {
-        val txRate = TrafficMonitor.getTxRate
-        val rxRate = TrafficMonitor.getRxRate
-        val txTotal = TrafficMonitor.getTxTotal
-        val rxTotal = TrafficMonitor.getRxTotal
+        val txRate = TrafficMonitor.txRate
+        val rxRate = TrafficMonitor.rxRate
+        val txTotal = TrafficMonitor.txTotal
+        val rxTotal = TrafficMonitor.rxTotal
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {

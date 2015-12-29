@@ -61,17 +61,15 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       })
     }
 
-    def updateText(refetch: Boolean = false) {
+    def updateText(txTotal: Long = 0, rxTotal: Long = 0) {
       val builder = new SpannableStringBuilder
-      val item = if (refetch) ShadowsocksApplication.profileManager.getProfile(this.item.id) match {
-        case Some(profile) => profile
-        case None => return
-      } else this.item
+      val tx = item.tx + txTotal
+      val rx = item.rx + rxTotal
       builder.append(item.name)
-      if (item.tx != 0 || item.rx != 0) {
+      if (tx != 0 || rx != 0) {
         val start = builder.length
         builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(item.tx), TrafficMonitor.formatTraffic(item.rx)))
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
         builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
           start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
       }
@@ -207,8 +205,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, msg: String) = () // ignore
-      def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) =
-        if (selectedItem != null) selectedItem.updateText(true)
+      def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) =
+        if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
 
     if (ShadowsocksApplication.settings.getBoolean(profileTip, true)) {
