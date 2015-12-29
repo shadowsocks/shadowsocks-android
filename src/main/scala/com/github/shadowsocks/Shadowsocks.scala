@@ -154,14 +154,15 @@ class Shadowsocks
         state = s
       })
     }
-    def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
-      trafficCache = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal)
+    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+      trafficCache = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
+        TrafficMonitor.formatTraffic(txRate), TrafficMonitor.formatTraffic(rxRate),
+        TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal))
       handler.post(updateTraffic)
     }
   }
 
-  def updateTraffic(): Unit = if (trafficCache == null) callback.trafficUpdated(TrafficMonitor.getTxRate,
-    TrafficMonitor.getRxRate, TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal) else {
+  def updateTraffic(): Unit = if (trafficCache == null) callback.trafficUpdated(0, 0, 0, 0) else {
     if (connectionTestResult == null) connectionTestResult = getString(R.string.connection_test_pending)
     if (preferences.natSwitch.isChecked) {
       preferences.stat.setSummary(trafficCache)

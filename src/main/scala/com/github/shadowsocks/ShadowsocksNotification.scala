@@ -9,20 +9,22 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback.Stub
-import com.github.shadowsocks.utils.{Action, State, Utils}
+import com.github.shadowsocks.utils.{TrafficMonitor, Action, State, Utils}
 
 /**
   * @author Mygod
   */
 class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false) {
-  private lazy val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
+  private val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
     override def stateChanged(state: Int, msg: String) = () // ignore
-    override def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
-      builder.setContentText(service.getString(R.string.traffic_summary).formatLocal(Locale.ENGLISH, txRate, rxRate))
-      style.bigText(service.getString(R.string.stat_summary)
-        .formatLocal(Locale.ENGLISH, txRate, rxRate, txTotal, rxTotal))
+    override def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+      val txr = TrafficMonitor.formatTraffic(txRate)
+      val rxr = TrafficMonitor.formatTraffic(rxRate)
+      builder.setContentText(service.getString(R.string.traffic_summary).formatLocal(Locale.ENGLISH, txr, rxr))
+      style.bigText(service.getString(R.string.stat_summary).formatLocal(Locale.ENGLISH, txr, rxr,
+        TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal)))
       show()
     }
   }

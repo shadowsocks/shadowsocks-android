@@ -80,29 +80,5 @@ object TrafficMonitor {
     rxLast = 0
     dirty = true
   }
-
-  def getTxTotal(): String = {
-    formatTraffic(txTotal)
-  }
-
-  def getRxTotal(): String = {
-    formatTraffic(rxTotal)
-  }
-
-  def getTotal(): String = {
-    formatTraffic(txTotal + rxTotal)
-  }
-
-  def getTxRate(): String = {
-    formatTraffic(txRate)
-  }
-
-  def getRxRate(): String = {
-    formatTraffic(rxRate)
-  }
-
-  def getRate(): String = {
-    formatTraffic(txRate + rxRate)
-  }
 }
 
