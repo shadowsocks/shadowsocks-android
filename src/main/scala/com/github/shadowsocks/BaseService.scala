@@ -45,7 +45,7 @@ import android.app.Service
 import android.content.{Intent, Context}
 import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
+import com.github.shadowsocks.utils.{Key, State, TrafficMonitor, TrafficMonitorThread}
 
 trait BaseService extends Service {
 
@@ -108,6 +108,7 @@ trait BaseService extends Service {
     }
 
     override def showNotificationTraffic(value: Boolean) {
+      ShadowsocksApplication.settings.edit.putBoolean(Key.notificationTraffic, value).apply
       val notification = BaseService.this.notification
       if (notification != null) notification.setShowTraffic(value)
     }
