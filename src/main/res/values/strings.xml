@@ -74,7 +74,7 @@
 
   <!-- alert category -->
   <string name="close">Close</string>
-  <string name="proxy_empty">Proxy should not be empty</string>
+  <string name="proxy_empty">Proxy/Password should not be empty</string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
