@@ -126,14 +126,14 @@ class Shadowsocks
             if (state == State.CONNECTING) {
               fabProgressCircle.beginFinalAnimation()
             } else {
-              handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+              fabProgressCircle.postDelayed(hideCircle, 1000)
             }
             fab.setEnabled(true)
             changeSwitch(checked = true)
             preferences.setEnabled(false)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
-            handler.postDelayed(() => fabProgressCircle.hide(), 1000)
+            fabProgressCircle.postDelayed(hideCircle, 1000)
             fab.setEnabled(true)
             changeSwitch(checked = false)
             if (m != null) {
@@ -176,7 +176,7 @@ class Shadowsocks
   override def onServiceConnected() {
     // Update the UI
     if (fab != null) fab.setEnabled(true)
-    stateUpdate()
+    updateState()
 
     if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
       ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
@@ -404,7 +404,15 @@ class Shadowsocks
     ShadowsocksApplication.profileManager.save
   }
 
-  private def stateUpdate() {
+  private def hideCircle() {
+    try {
+      fabProgressCircle.hide()
+    } catch {
+      case _: java.lang.NullPointerException => // Ignore
+    }
+  }
+
+  private def updateState() {
     if (bgService != null) {
       bgService.getState match {
         case State.CONNECTING =>
@@ -418,7 +426,7 @@ class Shadowsocks
           serviceStarted = true
           fab.setImageResource(R.drawable.ic_cloud)
           preferences.setEnabled(false)
-          fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
+          fabProgressCircle.postDelayed(hideCircle, 100)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
@@ -430,7 +438,7 @@ class Shadowsocks
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_cloud_off)
           preferences.setEnabled(true)
-          fabProgressCircle.postDelayed(fabProgressCircle.hide, 100)
+          fabProgressCircle.postDelayed(hideCircle, 100)
       }
       state = bgService.getState
     }
@@ -438,13 +446,13 @@ class Shadowsocks
 
   protected override def onResume() {
     super.onResume()
-    stateUpdate()
     ConfigUtils.refresh(this)
 
     // Check if current profile changed
     if (ShadowsocksApplication.profileId != currentProfile.id) reloadProfile()
 
     updateTraffic()
+    updateState()
   }
 
   private def updatePreferenceScreen() {
