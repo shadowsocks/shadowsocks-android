@@ -89,5 +89,6 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     }
     unregisterCallback
     service.stopForeground(true)
+    nm.cancel(1)
   }
 }
