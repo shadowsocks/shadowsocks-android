@@ -144,7 +144,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       web.loadUrl("file:///android_asset/pages/about.html")
       web.setWebViewClient(new WebViewClient() {
         override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
-          startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+          try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+          } catch {
+            case _: android.content.ActivityNotFoundException => // Ignore
+          }
           true
         }
       })
