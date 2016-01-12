@@ -4,6 +4,7 @@ import android.content.{ComponentName, Context, Intent, ServiceConnection}
 import android.os.{RemoteException, IBinder}
 import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.Utils
 
 /**
   * @author Mygod
@@ -60,6 +61,8 @@ trait ServiceBoundContext extends Context {
 
       connection = new ShadowsocksServiceConnection()
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
+      if (!Utils.isLollipopOrAbove)
+        startService(intent)
     }
   }
 
