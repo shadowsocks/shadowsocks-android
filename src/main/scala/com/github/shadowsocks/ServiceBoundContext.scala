@@ -61,8 +61,7 @@ trait ServiceBoundContext extends Context {
 
       connection = new ShadowsocksServiceConnection()
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      if (!Utils.isLollipopOrAbove)
-        startService(intent)
+      startService(intent)
     }
   }
 
