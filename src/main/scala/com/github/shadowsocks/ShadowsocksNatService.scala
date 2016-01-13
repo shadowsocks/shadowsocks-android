@@ -393,13 +393,10 @@ class ShadowsocksNatService extends BaseService {
   }
 
   override def startRunner(config: Config) {
-
-    changeState(State.CONNECTING)
     if (!Console.isRoot) {
       changeState(State.STOPPED, getString(R.string.nat_no_root))
       return
     }
-
     super.startRunner(config)
 
     // register close receiver
@@ -413,6 +410,8 @@ class ShadowsocksNatService extends BaseService {
     registerReceiver(closeReceiver, filter)
 
     ShadowsocksApplication.track(TAG, "start")
+    
+    changeState(State.CONNECTING)
 
     ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
