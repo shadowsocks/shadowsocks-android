@@ -45,8 +45,9 @@ import java.util.concurrent.TimeUnit
 import android.app.Application
 import android.content.pm.PackageManager
 import android.preference.PreferenceManager
+import com.j256.ormlite.logger.LocalLog
 import com.github.shadowsocks.database.{DBHelper, ProfileManager}
-import com.github.shadowsocks.utils.{Console, Key, Utils}
+import com.github.shadowsocks.utils.{Key, Utils}
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders}
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
@@ -60,8 +61,7 @@ object ShadowsocksApplication {
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(instance)
   lazy val profileManager = new ProfileManager(settings, dbHelper)
 
-  val isRoot = Console.isRoot
-  def isVpnEnabled = !(isRoot && settings.getBoolean(Key.isNAT, !Utils.isLollipopOrAbove))
+  def isVpnEnabled = !settings.getBoolean(Key.isNAT, false)
 
   def getVersionName = try {
     instance.getPackageManager.getPackageInfo(instance.getPackageName, 0).versionName
@@ -90,6 +90,7 @@ class ShadowsocksApplication extends Application {
   import ShadowsocksApplication._
 
   override def onCreate() {
+    java.lang.System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
     ShadowsocksApplication.instance = this
     val tm = TagManager.getInstance(this)
     val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)

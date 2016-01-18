@@ -1,5 +1,7 @@
 package com.github.shadowsocks.preferences
 
+import java.util.Locale
+
 import android.preference.Preference
 
 /**
@@ -15,5 +17,5 @@ trait SummaryPreference extends Preference {
     *
     * @return the summary with appropriate string substitution
     */
-  override def getSummary = String.format(super.getSummary.toString, getSummaryValue)
+  override def getSummary = super.getSummary.toString.formatLocal(Locale.ENGLISH, getSummaryValue)
 }

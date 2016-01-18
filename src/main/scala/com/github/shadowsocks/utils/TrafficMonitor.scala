@@ -5,26 +5,20 @@ import java.text.DecimalFormat
 
 import com.github.shadowsocks.{R, ShadowsocksApplication}
 
-case class Traffic(tx: Long, rx: Long, timestamp: Long)
-
 object TrafficMonitor {
-  var last: Traffic = getTraffic(0, 0)
-
   // Bytes per second
-  var txRate: Long = 0
-  var rxRate: Long = 0
+  var txRate: Long = _
+  var rxRate: Long = _
 
   // Bytes for the current session
-  var txTotal: Long = 0
-  var rxTotal: Long = 0
+  var txTotal: Long = _
+  var rxTotal: Long = _
 
   // Bytes for the last query
-  var txLast: Long = 0
-  var rxLast: Long = 0
-
-  def getTraffic(tx: Long, rx: Long): Traffic = {
-    new Traffic(tx, rx, System.currentTimeMillis())
-  }
+  var txLast: Long = _
+  var rxLast: Long = _
+  var timestampLast: Long = _
+  @volatile var dirty = true
 
   private val units = Array("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
   private val numberFormat = new DecimalFormat("@@@")
@@ -39,21 +33,42 @@ object TrafficMonitor {
     else numberFormat.format(n) + ' ' + units(i)
   }
 
-  def updateRate() {
-    val now = getTraffic(txTotal, rxTotal)
-    val delta = now.timestamp - last.timestamp
-    val deltaTx = now.tx - last.tx
-    val deltaRx = now.rx - last.rx
+  def updateRate() = {
+    val now = System.currentTimeMillis()
+    val delta = now - timestampLast
+    var updated = false
     if (delta != 0) {
-      txRate = deltaTx * 1000 / delta
-      rxRate = deltaRx * 1000 / delta
+      if (dirty) {
+        txRate = (txTotal - txLast) * 1000 / delta
+        rxRate = (rxTotal - rxLast) * 1000 / delta
+        txLast = txTotal
+        rxLast = rxTotal
+        dirty = false
+        updated = true
+      } else {
+        if (txRate != 0) {
+          txRate = 0
+          updated = true
+        }
+        if (rxRate != 0) {
+          rxRate = 0
+          updated = true
+        }
+      }
+      timestampLast = now
     }
-    last = now
+    updated
   }
 
   def update(tx: Long, rx: Long) {
-    txTotal = tx
-    rxTotal = rx
+    if (txTotal != tx) {
+      txTotal = tx
+      dirty = true
+    }
+    if (rxTotal != rx) {
+      rxTotal = rx
+      dirty = true
+    }
   }
 
   def reset() {
@@ -63,43 +78,7 @@ object TrafficMonitor {
     rxTotal = 0
     txLast = 0
     rxLast = 0
-    last = getTraffic(0, 0)
-  }
-
-  def getTxTotal(): String = {
-    formatTraffic(txTotal)
-  }
-
-  def getRxTotal(): String = {
-    formatTraffic(rxTotal)
-  }
-
-  def getTotal(): String = {
-    formatTraffic(txTotal + rxTotal)
-  }
-
-  def getTxRate(): String = {
-    formatTraffic(txRate)
-  }
-
-  def getRxRate(): String = {
-    formatTraffic(rxRate)
-  }
-
-  def getRate(): String = {
-    formatTraffic(txRate + rxRate)
-  }
-
-  def getDeltaTx(): Long = {
-    val last = txLast
-    txLast = txTotal
-    txTotal - last
-  }
-
-  def getDeltaRx(): Long = {
-    val last = rxLast
-    rxLast = rxTotal
-    rxTotal - last
+    dirty = true
   }
 }
 

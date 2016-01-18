@@ -39,8 +39,11 @@
 
 package com.github.shadowsocks
 
+import java.util.concurrent.atomic.AtomicBoolean
+
+import android.Manifest.permission
+import android.content._
 import android.content.pm.PackageManager
-import android.content.{ClipData, ClipboardManager, Context, SharedPreferences}
 import android.graphics.PixelFormat
 import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
@@ -50,138 +53,67 @@ import android.support.v7.widget.Toolbar
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.view.View.OnClickListener
 import android.view.ViewGroup.LayoutParams
-import android.view.{MenuItem, View, ViewGroup, WindowManager}
+import android.view._
 import android.widget.AbsListView.OnScrollListener
 import android.widget.CompoundButton.OnCheckedChangeListener
 import android.widget._
 import com.github.shadowsocks.utils.{Key, Utils}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 import scala.language.implicitConversions
 
-case class ProxiedApp(uid: Int, name: String, packageName: String, icon: Drawable, var proxied: Boolean)
-
-class ObjectArrayTools[T <: AnyRef](a: Array[T]) {
-  def binarySearch(key: T) = {
-    java.util.Arrays.binarySearch(a.asInstanceOf[Array[AnyRef]], key)
-  }
-}
-
-case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
-
 object AppManager {
+  case class ProxiedApp(name: String, packageName: String, icon: Drawable)
+  private case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
 
-  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
+  private var instance: AppManager = _
 
-  def getProxiedApps(context: Context, proxiedAppString: String): Array[ProxiedApp] = {
-
-    val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
-
-    import scala.collection.JavaConversions._
-
-    val packageManager: PackageManager = context.getPackageManager
-    val appList = packageManager.getInstalledApplications(0)
-
-    appList.filter(_.uid >= 10000).map {
-      case a =>
-        val uid = a.uid
-        val userName = uid.toString
-        val name = packageManager.getApplicationLabel(a).toString
-        val packageName = a.packageName
-        val proxied = proxiedApps.binarySearch(userName) >= 0
-        new ProxiedApp(uid, name, packageName, null, proxied)
-    }.toArray
+  private var receiverRegistered: Boolean = _
+  private var cachedApps: Array[ProxiedApp] = _
+  private def getApps(pm: PackageManager) = {
+    if (!receiverRegistered) {
+      val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+      filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+      filter.addDataScheme("package")
+      ShadowsocksApplication.instance.registerReceiver((context: Context, intent: Intent) =>
+        if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED ||
+          !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+          synchronized(cachedApps = null)
+          val instance = AppManager.instance
+          if (instance != null) instance.reloadApps()
+        }, filter)
+      receiverRegistered = true
+    }
+    synchronized {
+      if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+        .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
+        .map(p => new ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
+          p.applicationInfo.loadIcon(pm))).toArray
+      cachedApps
+    }
   }
 }
 
 class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnClickListener
   with OnMenuItemClickListener {
+  import AppManager._
 
-  val MSG_LOAD_START = 1
-  val MSG_LOAD_FINISH = 2
-  val STUB = android.R.drawable.sym_def_app_icon
+  private var apps: Array[ProxiedApp] = _
+  private var proxiedApps: mutable.HashSet[String] = _
+  private var toolbar: Toolbar = _
+  private var appListView: ListView = _
+  private var loadingView: View = _
+  private var overlay: TextView = _
+  private var adapter: ListAdapter = _
+  private val appsLoading = new AtomicBoolean
 
-  implicit def anyrefarray_tools[T <: AnyRef](a: Array[T]): ObjectArrayTools[T] = new ObjectArrayTools(a)
-
-  var apps: Array[ProxiedApp] = _
-  var appListView: ListView = _
-  var loadingView: View = _
-  var overlay: TextView = _
-  var adapter: ListAdapter = _
-  @volatile var appsLoading: Boolean = _
-
-  def loadApps(context: Context): Array[ProxiedApp] = {
-    val proxiedAppString = ShadowsocksApplication.settings.getString(Key.proxied, "")
-    val proxiedApps = proxiedAppString.split('|').sortWith(_ < _)
-
-    import scala.collection.JavaConversions._
-
-    val packageManager: PackageManager = context.getPackageManager
-    val appList = packageManager.getInstalledApplications(0)
-
-    appList.filter(a => a.uid >= 10000
-      && packageManager.getApplicationLabel(a) != null
-      && packageManager.getApplicationIcon(a) != null).map {
-      a =>
-        val uid = a.uid
-        val userName = uid.toString
-        val name = packageManager.getApplicationLabel(a).toString
-        val packageName = a.packageName
-        val proxied = (proxiedApps binarySearch userName) >= 0
-        new ProxiedApp(uid, name, packageName, a.loadIcon(packageManager), proxied)
-    }.toArray
-  }
-
-  def loadApps() {
-    appsLoading = true
-    apps = loadApps(this).sortWith((a, b) => {
-      if (a == null || b == null || a.name == null || b.name == null) {
-        true
-      } else if (a.proxied == b.proxied) {
-        a.name < b.name
-      } else if (a.proxied) {
-        true
-      } else {
-        false
-      }
-    })
-    adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
-      override def getView(position: Int, view: View, parent: ViewGroup): View = {
-        var convertView = view
-        var entry: ListEntry = null
-        if (convertView == null) {
-          convertView = getLayoutInflater.inflate(R.layout.layout_apps_item, parent, false)
-          val icon = convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
-          val switch = convertView.findViewById(R.id.itemcheck).asInstanceOf[Switch]
-          val text = convertView.findViewById(R.id.itemtext).asInstanceOf[TextView]
-          entry = new ListEntry(switch, text, icon)
-          convertView.setOnClickListener(AppManager.this)
-          convertView.setTag(entry)
-          entry.switch.setOnCheckedChangeListener(AppManager.this)
-        } else {
-          entry = convertView.getTag.asInstanceOf[ListEntry]
-        }
-
-        val app: ProxiedApp = apps(position)
-
-        entry.text.setText(app.name)
-        entry.icon.setImageDrawable(app.icon)
-        val switch = entry.switch
-        switch.setTag(app)
-        switch.setChecked(app.proxied)
-        entry.text.setTag(switch)
-        convertView
-      }
-    }
-  }
+  private def setProxied(pn: String, proxied: Boolean) = if (proxied) proxiedApps.add(pn) else proxiedApps.remove(pn)
 
   /** Called an application is check/unchecked */
   def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
     val app: ProxiedApp = buttonView.getTag.asInstanceOf[ProxiedApp]
-    if (app != null) {
-      app.proxied = isChecked
-    }
+    if (app != null) setProxied(app.packageName, isChecked)
     saveAppSettings(this)
   }
 
@@ -189,17 +121,23 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     val switch = v.getTag.asInstanceOf[ListEntry].switch
     val app: ProxiedApp = switch.getTag.asInstanceOf[ProxiedApp]
     if (app != null) {
-      app.proxied = !app.proxied
-      switch.setChecked(app.proxied)
+      val proxied = !proxiedApps.contains(app.packageName)
+      setProxied(app.packageName, proxied)
+      switch.setChecked(proxied)
     }
     saveAppSettings(this)
   }
 
   override def onDestroy() {
+    instance = null
     super.onDestroy()
     if (handler != null) {
       handler.removeCallbacksAndMessages(null)
       handler = null
+    }
+    if (overlay != null) {
+      getWindowManager.removeViewImmediate(overlay)
+      overlay = null
     }
   }
 
@@ -210,7 +148,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
       case R.id.action_export =>
         val bypass = prefs.getBoolean(Key.isBypassApps, false)
         val proxiedAppString = prefs.getString(Key.proxied, "")
-        val clip = ClipData.newPlainText(Key.proxied, bypass + " " + proxiedAppString)
+        val clip = ClipData.newPlainText(Key.proxied, bypass + "\n" + proxiedAppString)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
         return true
@@ -223,16 +161,17 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
             if (proxiedAppSequence != null) {
               val proxiedAppString = proxiedAppSequence.toString
               if (!proxiedAppString.isEmpty) {
-                val array = proxiedAppString.split(" ")
-                val bypass = array(0).toBoolean
-                val apps = if (array.size > 1) array(1) else ""
-                prefs.edit.putBoolean(Key.isBypassApps, bypass).apply()
-                prefs.edit.putString(Key.proxied, apps).apply()
+                val editor = prefs.edit
+                val i = proxiedAppString.indexOf('\n')
+                if (i < 0)
+                  editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
+                else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
+                  .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 // Restart activity
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
-                if (appsLoading) appsLoading = false else loadAppsAsync()
+                reloadApps()
                 return true
               }
             }
@@ -250,7 +189,7 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     handler = new Handler()
 
     this.setContentView(R.layout.layout_apps)
-    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.proxied_apps)
     toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
     toolbar.setNavigationOnClickListener((v: View) => {
@@ -260,16 +199,17 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    this.overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
+    overlay = View.inflate(this, R.layout.overlay, null).asInstanceOf[TextView]
     getWindowManager.addView(overlay, new
         WindowManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
           WindowManager.LayoutParams.TYPE_APPLICATION,
           WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, PixelFormat.TRANSLUCENT))
 
+    ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, true).commit()
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((button: CompoundButton, checked: Boolean) => {
-        ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).apply()
+        ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).commit()
         finish()
       })
 
@@ -285,12 +225,8 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
       def onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int,
                    totalItemCount: Int) {
         if (visible) {
-          val name: String = apps(firstVisibleItem).name
-          if (name != null && name.length > 1) {
-            overlay.setText(apps(firstVisibleItem).name.substring(0, 1))
-          } else {
-            overlay.setText("*")
-          }
+          val name = apps(firstVisibleItem).name
+          overlay.setText(if (name != null && name.length > 1) name(0).toUpper.toString else "*")
           overlay.setVisibility(View.VISIBLE)
         }
       }
@@ -301,13 +237,49 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         }
       }
     })
+    instance = this
     loadAppsAsync()
   }
 
+  def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
   def loadAppsAsync() {
-    Future {
-      while (!appsLoading) loadApps()
-      appsLoading = false
+    if (!appsLoading.compareAndSet(false, true)) return
+    ThrowableFuture {
+      do {
+        proxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
+        appsLoading.set(true)
+        apps = getApps(getPackageManager).sortWith((a, b) => {
+          val aProxied = proxiedApps.contains(a.packageName)
+          if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
+        })
+        adapter = new ArrayAdapter[ProxiedApp](this, R.layout.layout_apps_item, R.id.itemtext, apps) {
+          override def getView(position: Int, view: View, parent: ViewGroup): View = {
+            var convertView = view
+            var entry: ListEntry = null
+            if (convertView == null) {
+              convertView = getLayoutInflater.inflate(R.layout.layout_apps_item, parent, false)
+              entry = new ListEntry(convertView.findViewById(R.id.itemcheck).asInstanceOf[Switch],
+                convertView.findViewById(R.id.itemtext).asInstanceOf[TextView],
+                convertView.findViewById(R.id.itemicon).asInstanceOf[ImageView])
+              convertView.setOnClickListener(AppManager.this)
+              convertView.setTag(entry)
+              entry.switch.setOnCheckedChangeListener(AppManager.this)
+            } else {
+              entry = convertView.getTag.asInstanceOf[ListEntry]
+            }
+
+            val app: ProxiedApp = apps(position)
+
+            entry.text.setText(app.name)
+            entry.icon.setImageDrawable(app.icon)
+            val switch = entry.switch
+            switch.setTag(app)
+            switch.setChecked(proxiedApps.contains(app.packageName))
+            entry.text.setTag(switch)
+            convertView
+          }
+        }
+      } while (!appsLoading.compareAndSet(true, false))
       handler.post(() => {
         appListView.setAdapter(adapter)
         Utils.crossFade(AppManager.this, loadingView, appListView)
@@ -316,18 +288,14 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
   }
 
   def saveAppSettings(context: Context) {
-    if (apps == null) return
-    val proxiedApps = new StringBuilder
-    apps.foreach(app =>
-      if (app.proxied) {
-        proxiedApps ++= app.uid.toString
-        proxiedApps += '|'
-      })
-    val edit: SharedPreferences.Editor = ShadowsocksApplication.settings.edit
-    edit.putString(Key.proxied, proxiedApps.toString())
-    edit.apply
+    if (!appsLoading.get) ShadowsocksApplication.settings.edit.putString(Key.proxied, proxiedApps.mkString("\n")).apply
   }
 
   var handler: Handler = null
 
+  override def onKeyUp(keyCode: Int, event: KeyEvent) = keyCode match {
+    case KeyEvent.KEYCODE_MENU =>
+      if (toolbar.isOverflowMenuShowing) toolbar.hideOverflowMenu else toolbar.showOverflowMenu
+    case _ => super.onKeyUp(keyCode, event)
+  }
 }

@@ -43,11 +43,10 @@ import android.app.{Activity, KeyguardManager}
 import android.content.{Intent, IntentFilter, Context, BroadcastReceiver}
 import android.net.VpnService
 import android.os.{Bundle, Handler}
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.github.shadowsocks.utils.ConfigUtils
 
-class ShadowsocksRunnerActivity extends AppCompatActivity with ServiceBoundContext {
+class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
   val handler = new Handler()
 
   // Variables

@@ -49,31 +49,29 @@ import android.net.VpnService
 import android.os._
 import android.util.Log
 import android.widget.Toast
+import android.content.pm.PackageManager.NameNotFoundException
+
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import org.apache.commons.net.util.SubnetUtils
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class ShadowsocksVpnService extends VpnService with BaseService {
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
   val PRIVATE_VLAN = "26.26.26.%s"
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
-  var conn: ParcelFileDescriptor = null
-  var apps: Array[ProxiedApp] = null
-  var vpnThread: ShadowsocksVpnThread = null
+  var conn: ParcelFileDescriptor = _
+  var vpnThread: ShadowsocksVpnThread = _
   private var notification: ShadowsocksNotification = _
-  var closeReceiver: BroadcastReceiver = null
+  var closeReceiver: BroadcastReceiver = _
 
-  var sslocalProcess: Process = null
-  var sstunnelProcess: Process = null
-  var pdnsdProcess: Process = null
-  var tun2socksProcess: Process = null
+  var sslocalProcess: Process = _
+  var sstunnelProcess: Process = _
+  var pdnsdProcess: Process = _
+  var tun2socksProcess: Process = _
 
   def isByass(net: SubnetUtils): Boolean = {
     val info = net.getInfo
@@ -117,14 +115,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   override def stopRunner() {
 
-    super.stopRunner()
-
     if (vpnThread != null) {
       vpnThread.stopThread()
       vpnThread = null
     }
 
-    notification.destroy()
+    if (notification != null) notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
@@ -140,19 +136,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    // stop the service if no callback registered
-    if (getCallbackCount == 0) {
-      stopSelf()
-    }
-
     // clean up recevier
     if (closeReceiver != null) {
       unregisterReceiver(closeReceiver)
       closeReceiver = null
     }
 
-    // channge the state
-    changeState(State.STOPPED)
+    super.stopRunner()
   }
 
   def getVersionName: String = {
@@ -215,7 +205,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     changeState(State.CONNECTING)
 
-    Future {
+    ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
@@ -392,18 +382,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (Utils.isLollipopOrAbove) {
 
       if (config.isProxyApps) {
-        val apps = AppManager.getProxiedApps(this, config.proxiedAppString)
-        val pkgSet: mutable.HashSet[String] = new mutable.HashSet[String]
-        for (app <- apps) {
-          if (app.proxied) {
-            pkgSet.add(app.packageName)
-          }
-        }
-        for (pkg <- pkgSet) {
-          if (!config.isBypassApps) {
-            builder.addAllowedApplication(pkg)
-          } else {
-            builder.addDisallowedApplication(pkg)
+        for (pkg <- config.proxiedAppString.split('\n')) {
+          try {
+            if (!config.isBypassApps) {
+              builder.addAllowedApplication(pkg)
+            } else {
+              builder.addDisallowedApplication(pkg)
+            }
+          } catch {
+            case ex: NameNotFoundException =>
+              Log.e(TAG, "Invalid package name", ex);
           }
         }
       }
@@ -467,10 +455,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .start()
 
     fd
-  }
-
-  override def stopBackgroundService() {
-    stopSelf()
   }
 
   override def getTag = TAG

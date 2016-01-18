@@ -44,7 +44,6 @@ import com.github.shadowsocks.{R, ShadowsocksApplication}
 import com.twofortyfouram.locale.api.{Intent => ApiIntent}
 
 object TaskerSettings {
-  private val KEY_ACTION = "action"
   private val KEY_SWITCH_ON = "switch_on"
   private val KEY_PROFILE_ID = "profile_id"
 

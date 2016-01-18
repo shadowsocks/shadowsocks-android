@@ -42,7 +42,7 @@ package com.github.shadowsocks
 import java.util.{Timer, TimerTask}
 
 import android.app.Service
-import android.content.Context
+import android.content.{Intent, Context}
 import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
@@ -50,13 +50,13 @@ import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread
 trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
-  @volatile private var callbackCount = 0
+  @volatile protected var config: Config = null
 
   var timer: Timer = null
   var trafficMonitorThread: TrafficMonitorThread = null
-  var config: Config = null
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
+  var callbacksCount: Int = _
 
   val binder = new IShadowsocksService.Stub {
     override def getMode: Int = {
@@ -68,35 +68,29 @@ trait BaseService extends Service {
     }
 
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null ) {
-        callbacks.unregister(cb)
-        callbackCount -= 1
-      }
-      if (callbackCount == 0 && timer != null) {
-        timer.cancel()
-        timer = null
-      }
-      if (callbackCount == 0 && state == State.STOPPED) {
-        stopBackgroundService()
+      if (cb != null && callbacks.unregister(cb)) {
+        callbacksCount -= 1
+        if (callbacksCount == 0 && timer != null) {
+          timer.cancel()
+          timer = null
+        }
       }
     }
 
     override def registerCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null) {
-        if (callbackCount == 0 && timer == null) {
+      if (cb != null && callbacks.register(cb)) {
+        callbacksCount += 1
+        if (callbacksCount != 0 && timer == null) {
           val task = new TimerTask {
             def run {
-              TrafficMonitor.updateRate()
-              updateTrafficTotal(TrafficMonitor.getDeltaTx, TrafficMonitor.getDeltaRx)
-              updateTrafficRate(TrafficMonitor.getTxRate, TrafficMonitor.getRxRate,
-                TrafficMonitor.getTxTotal, TrafficMonitor.getRxTotal)
+              if (TrafficMonitor.updateRate()) updateTrafficRate()
             }
           }
           timer = new Timer(true)
           timer.schedule(task, 1000, 1000)
         }
-        callbacks.register(cb)
-        callbackCount += 1
+        TrafficMonitor.updateRate()
+        cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
     }
 
@@ -116,6 +110,7 @@ trait BaseService extends Service {
   def startRunner(config: Config) {
     this.config = config
 
+    startService(new Intent(getContext, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread()
     trafficMonitorThread.start()
@@ -123,38 +118,38 @@ trait BaseService extends Service {
 
   def stopRunner() {
     // Make sure update total traffic when stopping the runner
-    updateTrafficTotal(TrafficMonitor.getDeltaTx, TrafficMonitor.getDeltaRx)
+    updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
 
     TrafficMonitor.reset()
     if (trafficMonitorThread != null) {
       trafficMonitorThread.stopThread()
       trafficMonitorThread = null
     }
+
+    // change the state
+    changeState(State.STOPPED)
+
+    // stop the service if nothing has bound to it
+    stopSelf()
   }
 
   def updateTrafficTotal(tx: Long, rx: Long) {
-    val handler = new Handler(getContext.getMainLooper)
-    handler.post(() => {
-      if (config != null) {
-        ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
-          case Some(profile) =>
-            profile.tx += tx
-            profile.rx += rx
-            ShadowsocksApplication.profileManager.updateProfile(profile)
-          case None => // Ignore
-        }
+    val config = this.config  // avoid race conditions without locking
+    if (config != null) {
+      ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
+        case Some(profile) =>
+          profile.tx += tx
+          profile.rx += rx
+          ShadowsocksApplication.profileManager.updateProfile(profile)
+        case None => // Ignore
       }
-    })
+    }
   }
 
-  def stopBackgroundService()
   def getServiceMode: Int
   def getTag: String
   def getContext: Context
 
-  def getCallbackCount: Int = {
-    callbackCount
-  }
   def getState: Int = {
     state
   }
@@ -162,10 +157,14 @@ trait BaseService extends Service {
     changeState(s, null)
   }
 
-  def updateTrafficRate(txRate: String, rxRate: String, txTotal: String, rxTotal: String) {
+  def updateTrafficRate() {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
-      if (callbackCount > 0) {
+      if (callbacksCount > 0) {
+        val txRate = TrafficMonitor.txRate
+        val rxRate = TrafficMonitor.rxRate
+        val txTotal = TrafficMonitor.txTotal
+        val rxTotal = TrafficMonitor.rxTotal
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
@@ -182,7 +181,7 @@ trait BaseService extends Service {
   protected def changeState(s: Int, msg: String) {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => if (state != s) {
-      if (callbackCount > 0) {
+      if (callbacksCount > 0) {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {

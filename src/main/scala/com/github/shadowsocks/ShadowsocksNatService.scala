@@ -44,6 +44,7 @@ import java.lang.Process
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
+import android.app.Service
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{ConnectivityManager, Network}
@@ -54,10 +55,7 @@ import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 
 import scala.collection.JavaConversions._
-import scala.collection._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class ShadowsocksNatService extends BaseService {
 
@@ -68,15 +66,14 @@ class ShadowsocksNatService extends BaseService {
     "-j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
-  var closeReceiver: BroadcastReceiver = null
-  var connReceiver: BroadcastReceiver = null
-  var apps: Array[ProxiedApp] = null
+  var closeReceiver: BroadcastReceiver = _
+  var connReceiver: BroadcastReceiver = _
   val myUid = android.os.Process.myUid()
 
-  var sslocalProcess: Process = null
-  var sstunnelProcess: Process = null
-  var redsocksProcess: Process = null
-  var pdnsdProcess: Process = null
+  var sslocalProcess: Process = _
+  var sstunnelProcess: Process = _
+  var redsocksProcess: Process = _
+  var pdnsdProcess: Process = _
 
   private val dnsAddressCache = new SparseArray[String]
 
@@ -146,7 +143,7 @@ class ShadowsocksNatService extends BaseService {
       })
       Console.runRootCommand(cmdBuf.toArray)
     } else {
-      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
     }
   }
 
@@ -335,6 +332,8 @@ class ShadowsocksNatService extends BaseService {
     ConfigUtils.refresh(this)
   }
 
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_STICKY
+
   def killProcesses() {
     if (sslocalProcess != null) {
       sslocalProcess.destroy()
@@ -372,35 +371,32 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
     init_sb.append(Utils.getIptables
-      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + 8153)
+      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
     if (!config.isProxyApps || config.isBypassApps) {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (config.isProxyApps) {
-      if (apps == null || apps.length <= 0) {
-        apps = AppManager.getProxiedApps(this, config.proxiedAppString)
-      }
-      val uidSet: mutable.HashSet[Int] = new mutable.HashSet[Int]
-      for (app <- apps) {
-        if (app.proxied) {
-          uidSet.add(app.uid)
-        }
-      }
-      for (uid <- uidSet) {
-        if (!config.isBypassApps) {
-          http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
-        } else {
-          init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
-        }
+      val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
+      for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
+        case Some(uid) =>
+          if (!config.isBypassApps) {
+            http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+              .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          } else {
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
+          }
+        case _ => // probably removed package, ignore
       }
     }
-    Console.runRootCommand(init_sb.toArray)
-    Console.runRootCommand(http_sb.toArray)
+    Console.runRootCommand((init_sb ++ http_sb).toArray)
   }
 
   override def startRunner(config: Config) {
-
+    if (!Console.isRoot) {
+      changeState(State.STOPPED, getString(R.string.nat_no_root))
+      return
+    }
     super.startRunner(config)
 
     // register close receiver
@@ -414,11 +410,10 @@ class ShadowsocksNatService extends BaseService {
     registerReceiver(closeReceiver, filter)
 
     ShadowsocksApplication.track(TAG, "start")
-
+    
     changeState(State.CONNECTING)
 
-    Future {
-
+    ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
@@ -465,8 +460,6 @@ class ShadowsocksNatService extends BaseService {
 
   override def stopRunner() {
 
-    super.stopRunner()
-
     // channge the state
     changeState(State.STOPPING)
 
@@ -476,24 +469,14 @@ class ShadowsocksNatService extends BaseService {
       closeReceiver = null
     }
 
-    notification.destroy()
+    if (notification != null) notification.destroy()
 
     ShadowsocksApplication.track(TAG, "stop")
 
     // reset NAT
     killProcesses()
 
-    // stop the service if no callback registered
-    if (getCallbackCount == 0) {
-      stopSelf()
-    }
-
-    // change the state
-    changeState(State.STOPPED)
-  }
-
-  override def stopBackgroundService() {
-    stopSelf()
+    super.stopRunner()
   }
 
   override def getTag = TAG

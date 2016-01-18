@@ -75,17 +75,11 @@ object Console {
     shell.close()
   }
 
-  def runRootCommand(command: String): String = runRootCommand(Array(command))
-  def runRootCommand(command: String, context: String): String = runRootCommand(Array(command), context)
-  def runRootCommand(commands: Array[String]): String = runRootCommand(commands, "u:r:init_shell:s0")
-
-  def runRootCommand(commands: Array[String], context: String): String = {
-    if (!isRoot) {
-      return null
-    }
-    val shell = openRootShell(context)
+  def runRootCommand(commands: String*): String = runRootCommand(commands.toArray)
+  def runRootCommand(commands: Array[String]): String = {
+    val shell = openRootShell("u:r:init_shell:s0")
     val sb = new StringBuilder
-    shell.addCommand(commands, 0, ((commandCode: Int, exitCode: Int, output: util.List[String]) => {
+    shell.addCommand(commands, 0, ((_, exitCode, output) => {
       if (exitCode < 0) {
         shell.close()
       } else {

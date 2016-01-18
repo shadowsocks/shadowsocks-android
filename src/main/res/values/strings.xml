@@ -10,8 +10,7 @@
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
-  <string name="nat_summary">Use NAT mode instead of VPN mode</string>
-  <string name="nat_summary_no_root">NAT mode is disabled without root</string>
+  <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
@@ -20,6 +19,11 @@
     <item quantity="one">Byte</item>
     <item quantity="other">Bytes</item>
   </plurals>
+  <string name="connection_test_pending">Tap to check Internet connection availability.</string>
+  <string name="connection_test_testing">Testing…</string>
+  <string name="connection_test_available">Internet connection available. (latency: %dms)</string>
+  <string name="connection_test_error">Fail: %s</string>
+  <string name="connection_test_error_status_code">Invalid status code. (#%d)</string>
 
   <!-- proxy category -->
   <string name="proxy_cat">Server Settings</string>
@@ -60,8 +64,9 @@
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
-  <string name="service_running">%s</string>
   <string name="service_failed">Failed to connect the remote server</string>
+  <string name="nat_no_root">NAT mode requires ROOT permission</string>
+  <string name="switch_to_vpn">Switch to VPN mode</string>
   <string name="stop">Stop the service</string>
   <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
@@ -69,7 +74,7 @@
 
   <!-- alert category -->
   <string name="close">Close</string>
-  <string name="proxy_empty">Proxy should not be empty</string>
+  <string name="proxy_empty">Proxy/Password should not be empty</string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
@@ -85,7 +90,9 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="qrcode">QR Code</string>
   <string name="flush_dnscache">Flush DNS cache</string>
-  <string name="flush_dnscache_summary_disabled">Requires ROOT permission</string>
+  <string name="flush_dnscache_summary">Only useful in NAT mode</string>
+  <string name="flush_dnscache_summary_root">Only useful in NAT mode. Requires ROOT permission.</string>
+  <string name="flush_dnscache_no_root">Flush DNS cache cannot proceed without ROOT permission</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
   <string name="action_export">Export to Clipboard</string>
@@ -96,6 +103,10 @@
   <string name="action_import_err">Failed to import.</string>
 
   <!-- profile -->
+  <string name="profile_manager_dialog">Profiles</string>
+  <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe to remove;\n&#8226;
+    Long press to reorder profiles.</string>
+  <string name="gotcha">Gotcha!</string>
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>

@@ -1,7 +1,7 @@
 package com.github.shadowsocks
 
 import android.content.Intent
-import android.os.{Handler, Bundle}
+import android.os.{Bundle, Handler}
 import android.support.design.widget.Snackbar
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -25,7 +25,13 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Mygod
   */
+object ProfileManagerActivity {
+  private final val profileTip = "profileTip"
+}
+
 class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
+  import ProfileManagerActivity._
+
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     private var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -55,28 +61,27 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       })
     }
 
-    def updateText(refetch: Boolean = false) {
+    def updateText(txTotal: Long = 0, rxTotal: Long = 0) {
       val builder = new SpannableStringBuilder
-      val item = if (refetch) ShadowsocksApplication.profileManager.getProfile(this.item.id) match {
-        case Some(profile) => profile
-        case None => return
-      } else this.item
+      val tx = item.tx + txTotal
+      val rx = item.rx + rxTotal
       builder.append(item.name)
-      if (item.tx != 0 || item.rx != 0) {
+      if (tx != 0 || rx != 0) {
         val start = builder.length
         builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(item.tx), TrafficMonitor.formatTraffic(item.rx)))
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
         builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
           start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
       }
       handler.post(() => text.setText(builder))
     }
 
-    def bind(item: Profile) {
+    def bind(item: Profile, i: Int) {
       this.item = item
       updateText()
       if (item.id == ShadowsocksApplication.profileId) {
         text.setChecked(true)
+        selectedIndex = i
         selectedItem = this
       } else {
         text.setChecked(false)
@@ -92,12 +97,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     private val recycleBin = new ArrayBuffer[(Int, Profile)]
-    private var profiles = new ArrayBuffer[Profile]
+    var profiles = new ArrayBuffer[Profile]
     profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
     def getItemCount = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i), i)
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
@@ -108,6 +113,24 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       val pos = getItemCount
       profiles += item
       notifyItemInserted(pos)
+    }
+
+    def move(from: Int, to: Int) {
+      val step = if (from < to) 1 else -1
+      val first = profiles(from)
+      var previousOrder = profiles(from).userOrder
+      for (i <- from until to by step) {
+        val next = profiles(i + step)
+        val order = next.userOrder
+        next.userOrder = previousOrder
+        previousOrder = order
+        profiles(i) = next
+        ShadowsocksApplication.profileManager.updateProfile(next)
+      }
+      first.userOrder = previousOrder
+      profiles(to) = first
+      ShadowsocksApplication.profileManager.updateProfile(first)
+      notifyItemMoved(from, to)
     }
 
     def remove(pos: Int) {
@@ -131,6 +154,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
+  private var selectedIndex = -1
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
@@ -153,28 +177,52 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    profilesList.setLayoutManager(new LinearLayoutManager(this))
+    val layoutManager = new LinearLayoutManager(this)
+    profilesList.setLayoutManager(layoutManager)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
+    if (selectedIndex < 0) selectedIndex = profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == ShadowsocksApplication.profileId => i
+    }.getOrElse(-1)
+    layoutManager.scrollToPosition(selectedIndex)
     removedSnackbar = Snackbar.make(profilesList, R.string.removed, Snackbar.LENGTH_LONG)
       .setAction(R.string.undo, ((v: View) => profilesAdapter.undoRemoves): OnClickListener)
     removedSnackbar.getView.addOnAttachStateChangeListener(new OnAttachStateChangeListener {
       def onViewDetachedFromWindow(v: View) = profilesAdapter.commitRemoves
       def onViewAttachedToWindow(v: View) = ()
     })
-    new ItemTouchHelper(new SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
+    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+      ItemTouchHelper.START | ItemTouchHelper.END) {
       def onSwiped(viewHolder: ViewHolder, direction: Int) = {
         profilesAdapter.remove(viewHolder.getAdapterPosition)
         removedSnackbar.show
       }
-      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = false  // TODO?
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+        profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
+        true
+      }
     }).attachToRecyclerView(profilesList)
 
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, msg: String) = () // ignore
-      def trafficUpdated(txRate: String, rxRate: String, txTotal: String, rxTotal: String) =
-        if (selectedItem != null) selectedItem.updateText(true)
+      def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) =
+        if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
+
+    if (ShadowsocksApplication.settings.getBoolean(profileTip, true)) {
+      ShadowsocksApplication.settings.edit.putBoolean(profileTip, false).commit
+      new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
+        .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
+    }
+  }
+
+  override def onStart() {
+    super.onStart()
+    registerCallback
+  }
+  override def onStop() {
+    super.onStop()
+    unregisterCallback
   }
 
   override def onDestroy {
