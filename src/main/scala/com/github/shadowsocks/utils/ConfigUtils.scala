@@ -156,7 +156,7 @@ object ConfigUtils {
       |
       |server {
       | label = "china-servers";
-      | ip = 114.114.114.114, 112.124.47.27;
+      | ip = 119.29.29.29, 112.124.47.27;
       | timeout = 4;
       | reject = %s;
       | reject_policy = fail;
@@ -182,6 +182,11 @@ object ConfigUtils {
       | a=127.0.0.1;
       | owner=localhost;
       | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+      |
+      |source {
+      |      owner=localhost;
+      |      file="/sdcard/hosts";
       |}
     """.stripMargin
 
