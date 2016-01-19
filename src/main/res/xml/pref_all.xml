@@ -73,6 +73,10 @@
                 android:key="isUdpDns"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
+        <SwitchPreference
+                android:key="isDnsOverride"
+                android:summary="@string/dns_override_summary"
+                android:title="@string/dns_override"/>
 
     </PreferenceCategory>
 

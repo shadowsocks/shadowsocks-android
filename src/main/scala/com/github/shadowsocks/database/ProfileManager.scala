@@ -58,6 +58,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
           // Copy Feature Settings from old profile
           profile.route = oldProfile.route
           profile.ipv6 = oldProfile.ipv6
+          profile.dnsoverride = oldProfile.dnsoverride
           profile.proxyApps = oldProfile.proxyApps
           profile.bypass = oldProfile.bypass
           profile.individual = oldProfile.individual
@@ -149,6 +150,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     edit.putBoolean(Key.isUdpDns, profile.udpdns)
     edit.putBoolean(Key.isAuth, profile.auth)
     edit.putBoolean(Key.isIpv6, profile.ipv6)
+    edit.putBoolean(Key.isDnsOverride, profile.dnsoverride)
     edit.putString(Key.profileName, profile.name)
     edit.putString(Key.proxy, profile.host)
     edit.putString(Key.sitekey, profile.password)
@@ -177,6 +179,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     profile.udpdns = settings.getBoolean(Key.isUdpDns, false)
     profile.auth = settings.getBoolean(Key.isAuth, false)
     profile.ipv6 = settings.getBoolean(Key.isIpv6, false)
+    profile.dnsoverride = settings.getBoolean(Key.isDnsOverride, false)
     profile.name = settings.getString(Key.profileName, "default")
     profile.host = settings.getString(Key.proxy, "127.0.0.1")
     profile.password = settings.getString(Key.sitekey, "default")

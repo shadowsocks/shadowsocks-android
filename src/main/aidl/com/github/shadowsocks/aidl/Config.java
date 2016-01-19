@@ -10,6 +10,7 @@ public class Config implements Parcelable {
   public boolean isUdpDns = false;
   public boolean isAuth = false;
   public boolean isIpv6 = false;
+  public boolean isDnsOverride = false;
 
   public String profileName = "Untitled";
   public String proxy = "127.0.0.1";
@@ -35,13 +36,14 @@ public class Config implements Parcelable {
   };
 
   public Config(boolean isProxyApps, boolean isBypassApps,
-      boolean isUdpDns, boolean isAuth, boolean isIpv6, String profileName, String proxy, String sitekey,
+      boolean isUdpDns, boolean isAuth, boolean isIpv6, boolean isDnsOverride, String profileName, String proxy, String sitekey,
       String encMethod, String proxiedAppString, String route, int remotePort, int localPort, int profileId) {
     this.isProxyApps = isProxyApps;
     this.isBypassApps = isBypassApps;
     this.isUdpDns = isUdpDns;
     this.isAuth = isAuth;
     this.isIpv6 = isIpv6;
+    this.isDnsOverride = isDnsOverride;
     this.profileName = profileName;
     this.proxy = proxy;
     this.sitekey = sitekey;
@@ -63,6 +65,7 @@ public class Config implements Parcelable {
     isUdpDns = in.readInt() == 1;
     isAuth = in.readInt() == 1;
     isIpv6 = in.readInt() == 1;
+    isDnsOverride = in.readInt() == 1;
     profileName = in.readString();
     proxy = in.readString();
     sitekey = in.readString();
@@ -84,6 +87,7 @@ public class Config implements Parcelable {
     out.writeInt(isUdpDns ? 1 : 0);
     out.writeInt(isAuth ? 1 : 0);
     out.writeInt(isIpv6 ? 1 : 0);
+    out.writeInt(isDnsOverride ? 1 : 0);
     out.writeString(profileName);
     out.writeString(proxy);
     out.writeString(sitekey);
