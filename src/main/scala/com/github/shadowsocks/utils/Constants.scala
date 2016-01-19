@@ -78,6 +78,7 @@ object Key {
   val isUdpDns = "isUdpDns"
   val isAuth= "isAuth"
   val isIpv6= "isIpv6"
+  val isDnsOverride= "isDnsOverride"
 
   val proxy = "proxy"
   val sitekey = "sitekey"

@@ -94,6 +94,7 @@ object ConfigUtils {
       | owner=localhost;
       | soa=localhost,root.localhost,42,86400,900,86400,86400;
       |}
+      |%s
     """.stripMargin
 
   val PDNSD_BYPASS =
@@ -183,6 +184,7 @@ object ConfigUtils {
       | owner=localhost;
       | soa=localhost,root.localhost,42,86400,900,86400,86400;
       |}
+      |%s
     """.stripMargin
 
   def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
@@ -238,7 +240,7 @@ object ConfigUtils {
     val password = proxy(2).trim
     val method = proxy(3).trim
 
-    new Config(config.isProxyApps, config.isBypassApps, config.isUdpDns, config.isAuth, config.isIpv6,
+    new Config(config.isProxyApps, config.isBypassApps, config.isUdpDns, config.isAuth, config.isIpv6, config.isDnsOverride, 
       config.profileName, host, password, method, config.proxiedAppString, config.route, port, config.localPort, 0)
   }
 
@@ -248,6 +250,7 @@ object ConfigUtils {
     val isUdpDns = settings.getBoolean(Key.isUdpDns, false)
     val isAuth = settings.getBoolean(Key.isAuth, false)
     val isIpv6 = settings.getBoolean(Key.isIpv6, false)
+    val isDnsOverride = settings.getBoolean(Key.isDnsOverride, false)
 
     val profileName = settings.getString(Key.profileName, "default")
     val proxy = settings.getString(Key.proxy, "127.0.0.1")
@@ -261,7 +264,7 @@ object ConfigUtils {
 
     val profileId = settings.getInt(Key.profileId, -1)
 
-    new Config(isProxyApps, isBypassApps, isUdpDns, isAuth, isIpv6, profileName, proxy, sitekey, encMethod,
+    new Config(isProxyApps, isBypassApps, isUdpDns, isAuth, isIpv6, isDnsOverride, profileName, proxy, sitekey, encMethod,
       proxiedAppString, route, remotePort, localPort, profileId)
   }
 }

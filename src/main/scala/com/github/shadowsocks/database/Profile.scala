@@ -81,6 +81,9 @@ class Profile {
   @DatabaseField
   var ipv6: Boolean = false
 
+  @DatabaseField
+  var dnsoverride: Boolean = false
+
   @DatabaseField(dataType = DataType.LONG_STRING)
   var individual: String = ""
 

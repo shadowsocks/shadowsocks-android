@@ -21,7 +21,7 @@ object ShadowsocksSettings {
   val PREFS_NAME = "Shadowsocks"
   val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
     Key.isAuth)
-  val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
+  val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6, Key.isDnsOverride)
 
   // Helper functions
   def updateDropDownPreference(pref: Preference, value: String) {
@@ -59,6 +59,7 @@ object ShadowsocksSettings {
       case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
       case Key.isAuth => updateSwitchPreference(pref, profile.auth)
       case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
+      case Key.isDnsOverride => updateSwitchPreference(pref, profile.dnsoverride)
     }
   }
 }

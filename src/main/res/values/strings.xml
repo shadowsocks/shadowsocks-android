@@ -61,6 +61,8 @@
   <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
   <string name="udp_dns">UDP Forwarding</string>
   <string name="udp_dns_summary">Forward UDP packets to remote</string>
+  <string name="dns_override">DNS Override</string>
+  <string name="dns_override_summary">Supports manually setting IP/host pairs in /sdcard/hosts</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>

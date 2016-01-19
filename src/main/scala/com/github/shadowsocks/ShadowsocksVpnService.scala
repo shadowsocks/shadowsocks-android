@@ -339,15 +339,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val ipv6 = if (config.isIpv6) "" else "reject = ::/0;"
+    val dnsoverride = if (config.isDnsOverride) "source {\n owner=localhost; \n file=\"/sdcard/hosts\"; \n}\n" else ""
     val conf = {
       if (config.route == Route.BYPASS_CHN) {
         val reject = ConfigUtils.getRejectList(getContext)
         val blackList = ConfigUtils.getBlackList(getContext)
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
-          reject, blackList, 8163, ipv6)
+          reject, blackList, 8163, ipv6, dnsoverride)
       } else {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "0.0.0.0", 8153,
-          8163, ipv6)
+          8163, ipv6, dnsoverride)
       }
     }
     ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-vpn.conf"))(p => {
