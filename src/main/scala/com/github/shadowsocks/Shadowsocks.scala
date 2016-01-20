@@ -304,7 +304,7 @@ class Shadowsocks
         Process.killProcess(pid_nat)
         Process.killProcess(pid_vpn)
       } catch {
-        case e: Throwable => Log.e(Shadowsocks.TAG, "unable to kill " + task)
+        case e: Throwable => // Ignore
       }
       cmd.append("rm -f %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
       cmd.append("rm -f %s%s-nat.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
