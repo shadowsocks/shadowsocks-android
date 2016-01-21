@@ -39,6 +39,7 @@
 package com.github.shadowsocks
 
 import android.content.{BroadcastReceiver, Context, Intent}
+import android.os.Handler
 import com.github.shadowsocks.helper.TaskerSettings
 import com.github.shadowsocks.utils.Utils
 
@@ -55,6 +56,10 @@ class TaskerReceiver extends BroadcastReceiver {
         true
       case _ => false
     }
-    if (settings.switchOn) Utils.startSsService(context) else if (!switched) Utils.stopSsService(context)
+    val handler = new Handler(context.getMainLooper)
+    handler.postDelayed(() => {
+        if (settings.switchOn) Utils.startSsService(context)
+        else if (!switched) Utils.stopSsService(context)
+      }, 3000)
   }
 }
