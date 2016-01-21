@@ -52,6 +52,9 @@ class TaskerReceiver extends BroadcastReceiver {
     val switched = ShadowsocksApplication.profileManager.getProfile(settings.profileId) match {
       case Some(p) =>
         Utils.stopSsService(context)
+        // avoid potential race condition
+        Thread.sleep(5000)
+
         ShadowsocksApplication.switchProfile(settings.profileId)
         true
       case _ => false
