@@ -75,14 +75,13 @@
 
   <string name="stat">网络流量</string>
   <string name="stat_summary">发送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
-  <plurals name="bytes">
-    <item quantity="other">字节</item>
-  </plurals>
-  <string name="connection_test_pending">点击检查是否接入互联网。</string>
+
+  <string name="connection_test_pending">检查网络连接</string>
   <string name="connection_test_testing">测试中……</string>
-  <string name="connection_test_available">已接入互联网。（延时：%d 毫秒）</string>
+  <string name="connection_test_available">连接有效: 延时 %d 毫秒</string>
+  <string name="connection_test_fail">无互联网连接</string>
   <string name="connection_test_error">失败：%s</string>
-  <string name="connection_test_error_status_code">状态码无效。（#%d）</string>
+  <string name="connection_test_error_status_code">状态码无效（#%d）</string>
 
   <!-- profile -->
   <string name="profile_manager_dialog">配置文件</string>
@@ -113,5 +112,10 @@
   <string name="start_service">连接到 %s</string>
   <string name="stop_service">切换到 %s</string>
   <string name="profile_default">使用当前配置</string>
+
+  <!-- status -->
+  <string name="sent">发送:</string>
+  <string name="received">接收:</string>
+  <string name="check_connectivity">检查网络连接</string>
 
 </resources>

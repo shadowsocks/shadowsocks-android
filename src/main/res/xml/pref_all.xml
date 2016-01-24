@@ -8,7 +8,10 @@
             <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
         </Preference>
 
-        <Preference android:key="stat" android:title="@string/stat"/>
+        <com.github.shadowsocks.preferences.StatusPreference
+                android:key="stat"
+                android:summary="@string/check_connectivity"
+                android:title="@string/stat"/>
 
     </PreferenceCategory>
 

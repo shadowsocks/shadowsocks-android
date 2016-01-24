@@ -1,0 +1,108 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/widget_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical"
+    android:paddingEnd="?android:attr/scrollbarSize"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical" >
+
+    <TableLayout
+        android:layout_marginLeft="15dip"
+        android:layout_marginRight="6dip"
+        android:layout_marginTop="6dip"
+        android:layout_marginBottom="6dip"
+        android:stretchColumns="3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_column="0"
+                android:layout_span="2"
+                android:id="@android:id/title"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:layout_column="3"
+                android:id="@android:id/summary"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_column="0"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="end"
+                android:text="@string/sent" />
+            <TextView
+                android:layout_column="1"
+                android:id="@+id/tx"
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="0 Byte" />
+            <TextView
+                android:layout_column="3"
+                android:id="@+id/txRate"
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:ellipsize="marquee"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="▲ 0 B/s" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_column="0"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="24dp"
+                android:gravity="end"
+                android:text="@string/received"/>
+            <TextView
+                android:layout_column="1"
+                android:id="@+id/rx"
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="0 Byte" />
+            <TextView
+                android:layout_column="3"
+                android:id="@+id/rxRate"
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:ellipsize="marquee"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="▼ 0 B/s" />
+        </TableRow>
+
+    </TableLayout>
+</LinearLayout>

@@ -58,6 +58,7 @@ import android.view.{View, ViewGroup, ViewParent}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
@@ -106,8 +107,9 @@ class Shadowsocks
   var state = State.STOPPED
   var currentProfile = new Profile
   var vpnEnabled = -1
-  var trafficCache: String = _
+  var trafficCache: Array[String] = _
   var connectionTestResult: String = _
+  var connectionTestSuccess: Boolean = true
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
@@ -155,8 +157,9 @@ class Shadowsocks
       })
     }
     def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-      trafficCache = getString(R.string.stat_summary).formatLocal(Locale.ENGLISH,
-        TrafficMonitor.formatTraffic(txRate), TrafficMonitor.formatTraffic(rxRate),
+      trafficCache = Array(
+        "▲ " + TrafficMonitor.formatTraffic(txRate) + "/s",
+        "▼ " + TrafficMonitor.formatTraffic(rxRate) + "/s",
         TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal))
       handler.post(updateTraffic)
     }
@@ -165,10 +168,16 @@ class Shadowsocks
   def updateTraffic(): Unit = if (trafficCache == null) callback.trafficUpdated(0, 0, 0, 0) else {
     if (connectionTestResult == null) connectionTestResult = getString(R.string.connection_test_pending)
     if (preferences.natSwitch.isChecked) {
-      preferences.stat.setSummary(trafficCache)
+      preferences.stat.setSummary("")
     } else {
-      preferences.stat.setSummary(connectionTestResult + "\n" + trafficCache)
+      if (connectionTestSuccess) {
+        preferences.stat.setSummary(connectionTestResult)
+      } else {
+        preferences.stat.setSummary(getString(R.string.connection_test_fail))
+        Snackbar.make(findViewById(android.R.id.content), connectionTestResult, Snackbar.LENGTH_LONG).show
+      }
     }
+    preferences.stat.asInstanceOf[StatusPreference].setRate(trafficCache(2), trafficCache(3), trafficCache(0), trafficCache(1))
   }
 
   def attachService: Unit = attachService(callback)
