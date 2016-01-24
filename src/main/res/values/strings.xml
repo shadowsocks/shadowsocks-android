@@ -21,7 +21,7 @@
   </plurals>
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
-  <string name="connection_test_available">Success: %dms latency to Internet</string>
+  <string name="connection_test_available">Success: %dms latency</string>
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>

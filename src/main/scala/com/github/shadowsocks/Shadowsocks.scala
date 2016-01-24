@@ -262,7 +262,7 @@ class Shadowsocks
           } else {
             in = assetManager.open(file)
           }
-          out = new FileOutputStream(Path.BASE + file)
+          out = new FileOutputStream(getApplicationInfo().dataDir + "/" + file)
           copyFile(in, out)
           in.close()
           in = null
@@ -292,8 +292,8 @@ class Shadowsocks
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
-      cmd.append("chmod 666 %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
-      cmd.append("chmod 666 %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("chmod 666 %s/%s-nat.pid".formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, task))
+      cmd.append("chmod 666 %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, task))
     }
 
     if (ShadowsocksApplication.isVpnEnabled) {
@@ -306,8 +306,8 @@ class Shadowsocks
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
       try {
-        val pid_nat = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
-        val pid_vpn = scala.io.Source.fromFile(Path.BASE + task + "-vpn.pid").mkString.trim.toInt
+        val pid_nat = scala.io.Source.fromFile(getApplicationInfo().dataDir + "/" + task + "-nat.pid").mkString.trim.toInt
+        val pid_vpn = scala.io.Source.fromFile(getApplicationInfo().dataDir + "/" + task + "-vpn.pid").mkString.trim.toInt
         cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid_nat))
         cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid_vpn))
         Process.killProcess(pid_nat)
@@ -315,10 +315,10 @@ class Shadowsocks
       } catch {
         case e: Throwable => // Ignore
       }
-      cmd.append("rm -f %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
-      cmd.append("rm -f %s%s-nat.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
-      cmd.append("rm -f %s%s-vpn.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
-      cmd.append("rm -f %s%s-vpn.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
+      cmd.append("rm -f %s/%s-nat.pid".formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, task))
+      cmd.append("rm -f %s/%s-nat.conf".formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, task))
+      cmd.append("rm -f %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, task))
+      cmd.append("rm -f %s/%s-vpn.conf".formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, task))
     }
     if (ShadowsocksApplication.isVpnEnabled) Console.runCommand(cmd.toArray) else {
       Console.runRootCommand(cmd.toArray)
@@ -502,7 +502,7 @@ class Shadowsocks
 
     val ab = new ArrayBuffer[String]
     for (executable <- Shadowsocks.EXECUTABLES) {
-      ab.append("chmod 755 " + Path.BASE + executable)
+      ab.append("chmod 755 " + getApplicationInfo().dataDir + "/" + executable)
     }
     Console.runCommand(ab.toArray)
   }

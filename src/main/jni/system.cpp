@@ -64,9 +64,10 @@ void Java_com_github_shadowsocks_system_jniclose(JNIEnv *env, jobject thiz, jint
     close(fd);
 }
 
-jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint tun_fd) {
+jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;
     struct sockaddr_un addr;
+    const char *sock_str  = env->GetStringUTFChars(path, 0);
 
     if ( (fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
         LOGE("socket() failed: %s (socket fd = %d)\n", strerror(errno), fd);
@@ -75,7 +76,7 @@ jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint t
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, "/data/data/com.github.shadowsocks/sock_path", sizeof(addr.sun_path)-1);
+    strncpy(addr.sun_path, sock_str, sizeof(addr.sun_path)-1);
 
     if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
         LOGE("connect() failed: %s (fd = %d)\n", strerror(errno), fd);
@@ -90,6 +91,7 @@ jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint t
     }
 
     close(fd);
+    env->ReleaseStringUTFChars(path, sock_str);
     return 0;
 }
 
@@ -98,7 +100,7 @@ static const char *classPathName = "com/github/shadowsocks/System";
 static JNINativeMethod method_table[] = {
     { "jniclose", "(I)V",
         (void*) Java_com_github_shadowsocks_system_jniclose },
-    { "sendfd", "(I)I",
+    { "sendfd", "(ILjava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_system_sendfd },
     { "exec", "(Ljava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_system_exec },

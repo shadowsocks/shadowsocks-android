@@ -55,10 +55,6 @@ object Msg {
   val VPN_ERROR = 6
 }
 
-object Path {
-  val BASE = "/data/data/com.github.shadowsocks/"
-}
-
 object Key {
   val profileId = "profileId"
   val profileName = "profileName"

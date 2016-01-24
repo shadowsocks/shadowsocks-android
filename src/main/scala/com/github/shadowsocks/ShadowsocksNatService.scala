@@ -168,7 +168,7 @@ class ShadowsocksNatService extends BaseService {
         case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
         case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
       }
-      ConfigUtils.printToFile(new File(Path.BASE + "acl.list"))(p => {
+      ConfigUtils.printToFile(new File(getApplicationInfo().dataDir + "/acl.list"))(p => {
         acl.foreach(item => p.println(item))
       })
     }
@@ -176,21 +176,21 @@ class ShadowsocksNatService extends BaseService {
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
         config.sitekey, config.encMethod, 600)
-    ConfigUtils.printToFile(new File(Path.BASE + "ss-local-nat.conf"))(p => {
+    ConfigUtils.printToFile(new File(getApplicationInfo().dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
 
     val cmd = new ArrayBuffer[String]
-    cmd += (Path.BASE + "ss-local"
+    cmd += (getApplicationInfo().dataDir + "/ss-local"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
-          , "-c" , Path.BASE + "ss-local-nat.conf")
+          , "-c" , getApplicationInfo().dataDir + "/ss-local-nat.conf")
 
     if (config.isAuth) cmd += "-A"
 
     if (config.route != Route.ALL) {
       cmd += "--acl"
-      cmd += (Path.BASE + "acl.list")
+      cmd += (getApplicationInfo().dataDir + "/acl.list")
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
@@ -205,16 +205,16 @@ class ShadowsocksNatService extends BaseService {
       val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8153,
           config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
+      ConfigUtils.printToFile(new File(getApplicationInfo().dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
-      cmd += (Path.BASE + "ss-tunnel"
+      cmd += (getApplicationInfo().dataDir + "/ss-tunnel"
         , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel-nat.conf")
+        , "-c" , getApplicationInfo().dataDir + "/ss-tunnel-nat.conf")
 
       cmd += ("-l" , "8153")
 
@@ -231,17 +231,17 @@ class ShadowsocksNatService extends BaseService {
       val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
           config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
+      ConfigUtils.printToFile(new File(getApplicationInfo().dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
-      cmdBuf += (Path.BASE + "ss-tunnel"
+      cmdBuf += (getApplicationInfo().dataDir + "/ss-tunnel"
         , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel-nat.conf")
+        , "-c" , getApplicationInfo().dataDir + "/ss-tunnel-nat.conf")
 
       if (config.isAuth) cmdBuf += "-A"
 
@@ -266,10 +266,10 @@ class ShadowsocksNatService extends BaseService {
         8163, "")
     }
 
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
+    ConfigUtils.printToFile(new File(getApplicationInfo().dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
-    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd-nat.conf"
+    val cmd = getApplicationInfo().dataDir + "/pdnsd -c " + getApplicationInfo().dataDir + "/pdnsd-nat.conf"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
@@ -293,9 +293,9 @@ class ShadowsocksNatService extends BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, config.localPort)
-    val cmd = Path.BASE + "redsocks -c %sredsocks-nat.conf"
-      .formatLocal(Locale.ENGLISH, Path.BASE, Path.BASE)
-    ConfigUtils.printToFile(new File(Path.BASE + "redsocks-nat.conf"))(p => {
+    val cmd = "%s/redsocks -c %s/redsocks-nat.conf"
+      .formatLocal(Locale.ENGLISH, getApplicationInfo().dataDir, getApplicationInfo().dataDir)
+    ConfigUtils.printToFile(new File(getApplicationInfo().dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
