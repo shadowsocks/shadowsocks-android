@@ -144,6 +144,7 @@ class Shadowsocks
               if (m == getString(R.string.nat_no_root)) snackbar.setAction(R.string.switch_to_vpn,
                 (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
               snackbar.show
+              Log.e(TAG, "Error to start VPN service: " + m)
             }
             preferences.setEnabled(true)
           case State.STOPPING =>
