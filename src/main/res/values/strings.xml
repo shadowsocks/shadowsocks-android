@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Shadowsocks</string>
-  <string name="screen_name" translatable="false">shadowsocks</string>
+  <string name="app_name">mc`s vpn</string>
+  <string name="screen_name" translatable="false">mc`s vpn</string>
 
   <!-- global/misc category -->
   <string name="global_cat">Global Settings</string>
