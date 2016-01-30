@@ -30,7 +30,6 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   }
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _
-  private var started: Boolean = _
 
   private val builder = new NotificationCompat.Builder(service)
     .setWhen(0)
@@ -77,9 +76,8 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     show()
   } else if (forceShow) show()
 
-  def show() = if (started) nm.notify(1, builder.build) else {
+  def show() = {
     service.startForeground(1, builder.build)
-    started = true
   }
 
   def destroy() {
