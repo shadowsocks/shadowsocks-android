@@ -60,7 +60,6 @@ object ShadowsocksApplication {
   lazy val tracker = GoogleAnalytics.getInstance(instance).newTracker(R.xml.tracker)
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(instance)
   lazy val profileManager = new ProfileManager(settings, dbHelper)
-  lazy val dataDir = instance.getApplicationInfo().dataDir
 
   def isVpnEnabled = !settings.getBoolean(Key.isNAT, false)
 

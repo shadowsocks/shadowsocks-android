@@ -66,7 +66,7 @@ object ConfigUtils {
     """
       |global {
       | perm_cache = 2048;
-      | cache_dir = "/data/data/com.github.shadowsocks";
+      | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
       | query_method = tcp_only;
@@ -100,7 +100,7 @@ object ConfigUtils {
     """
       |global {
       | perm_cache = 2048;
-      | cache_dir = "/data/data/com.github.shadowsocks";
+      | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
       | query_method = tcp_only;
@@ -143,7 +143,7 @@ object ConfigUtils {
     """
       |global {
       | perm_cache = 2048;
-      | cache_dir = "/data/data/com.github.shadowsocks";
+      | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
       | query_method = tcp_only;

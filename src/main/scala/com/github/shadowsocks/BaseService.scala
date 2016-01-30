@@ -112,7 +112,7 @@ trait BaseService extends Service {
 
     startService(new Intent(getContext, getClass))
     TrafficMonitor.reset()
-    trafficMonitorThread = new TrafficMonitorThread()
+    trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
     trafficMonitorThread.start()
   }
 

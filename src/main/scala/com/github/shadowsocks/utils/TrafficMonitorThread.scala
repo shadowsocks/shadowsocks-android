@@ -43,13 +43,14 @@ import java.io.{File, IOException}
 import java.nio.{ByteBuffer, ByteOrder}
 import java.util.concurrent.Executors
 
+import android.content.Context
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 
-class TrafficMonitorThread() extends Thread {
+class TrafficMonitorThread(context: Context) extends Thread {
 
   val TAG = "TrafficMonitorThread"
-  val PATH = "/data/data/com.github.shadowsocks/stat_path"
+  lazy val PATH = context.getApplicationInfo.dataDir + "/stat_path"
 
   @volatile var serverSocket: LocalServerSocket = null
   @volatile var isRunning: Boolean = true
