@@ -178,6 +178,9 @@ trait BaseService extends Service {
     })
   }
 
+  // Service of shadowsocks should always be started explicitly
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_NOT_STICKY
+
   protected def changeState(s: Int, msg: String) {
     val handler = new Handler(getContext.getMainLooper)
     handler.post(() => if (state != s) {

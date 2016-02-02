@@ -335,8 +335,6 @@ class ShadowsocksNatService extends BaseService {
     ConfigUtils.refresh(this)
   }
 
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_STICKY
-
   def killProcesses() {
     if (sslocalProcess != null) {
       sslocalProcess.destroy()
