@@ -40,27 +40,24 @@
 package com.github.shadowsocks
 
 import java.io.File
-import java.lang.reflect.{InvocationTargetException, Method}
+import java.lang.Process
+import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
-import android.app._
+import android.app.Service
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
-import android.net.{Network, ConnectivityManager}
+import android.net.{ConnectivityManager, Network}
 import android.os._
-import android.support.v4.app.NotificationCompat
-import android.util.{SparseArray, Log}
+import android.util.{Log, SparseArray}
 import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
-import com.google.android.gms.analytics.HitBuilders
-import org.apache.http.conn.util.InetAddressUtils
 
-import scala.collection._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ops._
 
-class ShadowsocksNatService extends Service with BaseService {
+class ShadowsocksNatService extends BaseService {
 
   val TAG = "ShadowsocksNatService"
 
@@ -68,26 +65,15 @@ class ShadowsocksNatService extends Service with BaseService {
   val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
 
-  private val mStartForegroundSignature = Array[Class[_]](classOf[Int], classOf[Notification])
-  private val mStopForegroundSignature = Array[Class[_]](classOf[Boolean])
-  private val mSetForegroundSignature = Array[Class[_]](classOf[Boolean])
-  private val mSetForegroundArgs = new Array[AnyRef](1)
-  private val mStartForegroundArgs = new Array[AnyRef](2)
-  private val mStopForegroundArgs = new Array[AnyRef](1)
+  private var notification: ShadowsocksNotification = _
+  var closeReceiver: BroadcastReceiver = _
+  var connReceiver: BroadcastReceiver = _
+  val myUid = android.os.Process.myUid()
 
-  var lockReceiver: BroadcastReceiver = null
-  var closeReceiver: BroadcastReceiver = null
-  var connReceiver: BroadcastReceiver = null
-  var notificationManager: NotificationManager = null
-  var config: Config = null
-  var apps: Array[ProxiedApp] = null
-  val myUid = Process.myUid()
-
-  private var mSetForeground: Method = null
-  private var mStartForeground: Method = null
-  private var mStopForeground: Method = null
-
-  private lazy val application = getApplication.asInstanceOf[ShadowsocksApplication]
+  var sslocalProcess: Process = _
+  var sstunnelProcess: Process = _
+  var redsocksProcess: Process = _
+  var pdnsdProcess: Process = _
 
   private val dnsAddressCache = new SparseArray[String]
 
@@ -157,7 +143,7 @@ class ShadowsocksNatService extends Service with BaseService {
       })
       Console.runRootCommand(cmdBuf.toArray)
     } else {
-      Console.runRootCommand(Array("ndc resolver flushdefaultif", "ndc resolver flushif wlan0"))
+      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
     }
   }
 
@@ -172,11 +158,7 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def initConnectionReceiver() {
     val filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-    connReceiver = new BroadcastReceiver {
-      override def onReceive(context: Context, intent: Intent) = {
-        setupDns()
-      }
-    }
+    connReceiver = (context: Context, intent: Intent) => setupDns()
     registerReceiver(connReceiver, filter)
   }
 
@@ -186,32 +168,37 @@ class ShadowsocksNatService extends Service with BaseService {
         case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
         case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
       }
-      ConfigUtils.printToFile(new File(Path.BASE + "acl.list"))(p => {
+      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
         acl.foreach(item => p.println(item))
       })
     }
 
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
-        config.sitekey, config.encMethod, 10)
-    ConfigUtils.printToFile(new File(Path.BASE + "ss-local-nat.conf"))(p => {
+        config.sitekey, config.encMethod, 600)
+    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
 
     val cmd = new ArrayBuffer[String]
-    cmd += (Path.BASE + "ss-local"
+    cmd += (getApplicationInfo.dataDir + "/ss-local"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
-          , "-c" , Path.BASE + "ss-local-nat.conf"
-          , "-f" , Path.BASE + "ss-local-nat.pid")
+          , "-P", getApplicationInfo.dataDir
+          , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
+
+    if (config.isAuth) cmd += "-A"
 
     if (config.route != Route.ALL) {
       cmd += "--acl"
-      cmd += (Path.BASE + "acl.list")
+      cmd += (getApplicationInfo.dataDir + "/acl.list")
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    Console.runCommand(cmd.mkString(" "))
+    sslocalProcess = new ProcessBuilder()
+      .command(cmd)
+      .redirectErrorStream(true)
+      .start()
   }
 
   def startTunnel() {
@@ -219,67 +206,80 @@ class ShadowsocksNatService extends Service with BaseService {
       val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8153,
           config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
+      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
-      cmd += (Path.BASE + "ss-tunnel"
+      cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
         , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel-nat.conf"
-        , "-f" , Path.BASE + "ss-tunnel-nat.pid")
+        , "-P" , getApplicationInfo.dataDir
+        , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
 
       cmd += ("-l" , "8153")
 
+      if (config.isAuth) cmd += "-A"
+
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-      Console.runCommand(cmd.mkString(" "))
+      sstunnelProcess = new ProcessBuilder()
+        .command(cmd)
+        .redirectErrorStream(true)
+        .start()
 
     } else {
       val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
           config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(Path.BASE + "ss-tunnel-nat.conf"))(p => {
+      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
-      cmdBuf += (Path.BASE + "ss-tunnel"
+      cmdBuf += (getApplicationInfo.dataDir + "/ss-tunnel"
         , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
         , "-L" , "8.8.8.8:53"
-        , "-c" , Path.BASE + "ss-tunnel-nat.conf"
-        , "-f" , Path.BASE + "ss-tunnel-nat.pid")
+        , "-P", getApplicationInfo.dataDir
+        , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
+
+      if (config.isAuth) cmdBuf += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
-      Console.runCommand(cmdBuf.mkString(" "))
+
+      sstunnelProcess = new ProcessBuilder()
+        .command(cmdBuf)
+        .redirectErrorStream(true)
+        .start()
     }
   }
 
   def startDnsDaemon() {
 
     val conf = if (config.route == Route.BYPASS_CHN) {
-      val reject = ConfigUtils.getRejectList(getContext, application)
-      val blackList = ConfigUtils.getBlackList(getContext, application)
-      ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
-        Path.BASE + "pdnsd-nat.pid", reject, blackList, 8163)
+      val reject = ConfigUtils.getRejectList(getContext)
+      val blackList = ConfigUtils.getBlackList(getContext)
+      ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        "127.0.0.1", 8153, reject, blackList, 8163, "")
     } else {
-      ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "127.0.0.1", 8153,
-        Path.BASE + "pdnsd-nat.pid", 8163)
+      ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        "127.0.0.1", 8153, 8163, "")
     }
 
-    ConfigUtils.printToFile(new File(Path.BASE + "pdnsd-nat.conf"))(p => {
+    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
-    val cmd = Path.BASE + "pdnsd -c " + Path.BASE + "pdnsd-nat.conf"
+    val cmd = getApplicationInfo.dataDir + "/pdnsd -c " + getApplicationInfo.dataDir + "/pdnsd-nat.conf"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    Console.runCommand(cmd)
-
+    pdnsdProcess = new ProcessBuilder()
+      .command(cmd.split(" ").toSeq)
+      .redirectErrorStream(true)
+      .start()
   }
 
   def getVersionName: String = {
@@ -296,14 +296,17 @@ class ShadowsocksNatService extends Service with BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, config.localPort)
-    val cmd = Path.BASE + "redsocks -p %sredsocks-nat.pid -c %sredsocks-nat.conf"
-      .formatLocal(Locale.ENGLISH, Path.BASE, Path.BASE)
-    ConfigUtils.printToFile(new File(Path.BASE + "redsocks-nat.conf"))(p => {
+    val cmd = "%s/redsocks -c %s/redsocks-nat.conf"
+      .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, getApplicationInfo.dataDir)
+    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    Console.runCommand(cmd)
+    redsocksProcess = new ProcessBuilder()
+      .command(cmd.split(" ").toSeq)
+      .redirectErrorStream(true)
+      .start()
   }
 
   /** Called when the activity is first created. */
@@ -318,43 +321,6 @@ class ShadowsocksNatService extends Service with BaseService {
     true
   }
 
-  def invokeMethod(method: Method, args: Array[AnyRef]) {
-    try {
-      method.invoke(this, mStartForegroundArgs: _*)
-    } catch {
-      case e: InvocationTargetException =>
-        Log.w(TAG, "Unable to invoke method", e)
-      case e: IllegalAccessException =>
-        Log.w(TAG, "Unable to invoke method", e)
-    }
-  }
-
-  def notifyForegroundAlert(title: String, info: String, visible: Boolean) {
-    val openIntent = new Intent(this, classOf[Shadowsocks])
-    openIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-    val contentIntent = PendingIntent.getActivity(this, 0, openIntent, 0)
-    val closeIntent = new Intent(Action.CLOSE)
-    val actionIntent = PendingIntent.getBroadcast(this, 0, closeIntent, 0)
-    val builder = new NotificationCompat.Builder(this)
-
-    builder
-      .setWhen(0)
-      .setTicker(title)
-      .setContentTitle(getString(R.string.app_name))
-      .setContentText(info)
-      .setContentIntent(contentIntent)
-      .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-      .addAction(android.R.drawable.ic_menu_close_clear_cancel, getString(R.string.stop),
-        actionIntent)
-
-    if (visible)
-      builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
-    else
-      builder.setPriority(NotificationCompat.PRIORITY_MIN)
-
-    startForegroundCompat(1, builder.build)
-  }
-
   def onBind(intent: Intent): IBinder = {
     Log.d(TAG, "onBind")
     if (Action.SERVICE == intent.getAction) {
@@ -366,53 +332,27 @@ class ShadowsocksNatService extends Service with BaseService {
 
   override def onCreate() {
     super.onCreate()
-
     ConfigUtils.refresh(this)
-
-    notificationManager = this
-      .getSystemService(Context.NOTIFICATION_SERVICE)
-      .asInstanceOf[NotificationManager]
-    try {
-      mStartForeground = getClass.getMethod("startForeground", mStartForegroundSignature: _*)
-      mStopForeground = getClass.getMethod("stopForeground", mStopForegroundSignature: _*)
-    } catch {
-      case e: NoSuchMethodException =>
-        mStartForeground = {
-          mStopForeground = null
-          mStopForeground
-        }
-    }
-    try {
-      mSetForeground = getClass.getMethod("setForeground", mSetForegroundSignature: _*)
-    } catch {
-      case e: NoSuchMethodException =>
-        throw new IllegalStateException(
-          "OS doesn't have Service.startForeground OR Service.setForeground!")
-    }
   }
 
   def killProcesses() {
-    val cmd = new ArrayBuffer[String]()
-
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
-      cmd.append("chmod 666 %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
+    if (sslocalProcess != null) {
+      sslocalProcess.destroy()
+      sslocalProcess = null
     }
-    Console.runRootCommand(cmd.toArray)
-    cmd.clear()
-
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks")) {
-      try {
-        val pid = scala.io.Source.fromFile(Path.BASE + task + "-nat.pid").mkString.trim.toInt
-        cmd.append("kill -9 %d".formatLocal(Locale.ENGLISH, pid))
-        Process.killProcess(pid)
-      } catch {
-        case e: Throwable => Log.e(TAG, "unable to kill " + task)
-      }
-      cmd.append("rm -f %s%s-nat.pid".formatLocal(Locale.ENGLISH, Path.BASE, task))
-      cmd.append("rm -f %s%s-nat.conf".formatLocal(Locale.ENGLISH, Path.BASE, task))
+    if (sstunnelProcess != null) {
+      sstunnelProcess.destroy()
+      sstunnelProcess = null
+    }
+    if (redsocksProcess != null) {
+      redsocksProcess.destroy()
+      redsocksProcess = null
+    }
+    if (pdnsdProcess != null) {
+      pdnsdProcess.destroy()
+      pdnsdProcess = null
     }
 
-    Console.runRootCommand(cmd.toArray)
     Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
   }
 
@@ -424,7 +364,7 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(Utils.getIptables + " -t nat -F OUTPUT")
 
     val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
-    if (!InetAddressUtils.isIPv6Address(config.proxy.toUpperCase)) {
+    if (!InetAddress.getByName(config.proxy.toUpperCase).isInstanceOf[Inet6Address]) {
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
     }
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 127.0.0.1"))
@@ -432,146 +372,68 @@ class ShadowsocksNatService extends Service with BaseService {
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
     init_sb.append(Utils.getIptables
-      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:" + 8153)
+      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
-    if (config.isGlobalProxy || config.isBypassApps) {
+    if (!config.isProxyApps || config.isBypassApps) {
       http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
-    if (!config.isGlobalProxy) {
-      if (apps == null || apps.length <= 0) {
-        apps = AppManager.getProxiedApps(this, config.proxiedAppString)
-      }
-      val uidSet: mutable.HashSet[Int] = new mutable.HashSet[Int]
-      for (app <- apps) {
-        if (app.proxied) {
-          uidSet.add(app.uid)
-        }
-      }
-      for (uid <- uidSet) {
-        if (!config.isBypassApps) {
-          http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS).replace("-t nat", "-t nat -m owner --uid-owner " + uid))
-        } else {
-          init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
-        }
+    if (config.isProxyApps) {
+      val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
+      for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
+        case Some(uid) =>
+          if (!config.isBypassApps) {
+            http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+              .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
+          } else {
+            init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
+          }
+        case _ => // probably removed package, ignore
       }
     }
-    Console.runRootCommand(init_sb.toArray)
-    Console.runRootCommand(http_sb.toArray)
+    Console.runRootCommand((init_sb ++ http_sb).toArray)
   }
 
-  /**
-   * This is a wrapper around the new startForeground method, using the older
-   * APIs if it is not available.
-   */
-  def startForegroundCompat(id: Int, notification: Notification) {
-    if (mStartForeground != null) {
-      mStartForegroundArgs(0) = int2Integer(id)
-      mStartForegroundArgs(1) = notification
-      invokeMethod(mStartForeground, mStartForegroundArgs)
+  override def startRunner(config: Config) {
+    if (!Console.isRoot) {
+      changeState(State.STOPPED, getString(R.string.nat_no_root))
       return
     }
-    mSetForegroundArgs(0) = boolean2Boolean(x = true)
-    invokeMethod(mSetForeground, mSetForegroundArgs)
-    notificationManager.notify(id, notification)
-  }
-
-  /**
-   * This is a wrapper around the new stopForeground method, using the older
-   * APIs if it is not available.
-   */
-  def stopForegroundCompat(id: Int) {
-    if (mStopForeground != null) {
-      mStopForegroundArgs(0) = boolean2Boolean(x = true)
-      try {
-        mStopForeground.invoke(this, mStopForegroundArgs: _*)
-      } catch {
-        case e: InvocationTargetException =>
-          Log.w(TAG, "Unable to invoke stopForeground", e)
-        case e: IllegalAccessException =>
-          Log.w(TAG, "Unable to invoke stopForeground", e)
-      }
-      return
-    }
-    notificationManager.cancel(id)
-    mSetForegroundArgs(0) = boolean2Boolean(x = false)
-    invokeMethod(mSetForeground, mSetForegroundArgs)
-  }
-
-  override def startRunner(c: Config) {
-
-    config = c
+    super.startRunner(config)
 
     // register close receiver
     val filter = new IntentFilter()
     filter.addAction(Intent.ACTION_SHUTDOWN)
     filter.addAction(Action.CLOSE)
-    closeReceiver = new BroadcastReceiver() {
-      def onReceive(context: Context, intent: Intent) {
-        Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-        stopRunner()
-      }
+    closeReceiver = (context: Context, intent: Intent) => {
+      Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+      stopRunner()
     }
     registerReceiver(closeReceiver, filter)
 
-    if (Utils.isLollipopOrAbove) {
-      val screenFilter = new IntentFilter()
-      screenFilter.addAction(Intent.ACTION_SCREEN_ON)
-      screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-      screenFilter.addAction(Intent.ACTION_USER_PRESENT)
-      lockReceiver = new BroadcastReceiver() {
-        def onReceive(context: Context, intent: Intent) {
-          if (getState == State.CONNECTED) {
-            val action = intent.getAction
-            if (action == Intent.ACTION_SCREEN_OFF) {
-              notifyForegroundAlert(getString(R.string.forward_success),
-                getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), false)
-            } else if (action == Intent.ACTION_SCREEN_ON) {
-              val keyGuard = getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
-              if (!keyGuard.inKeyguardRestrictedInputMode) {
-                notifyForegroundAlert(getString(R.string.forward_success),
-                  getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
-            }
-            } else if (action == Intent.ACTION_USER_PRESENT) {
-              notifyForegroundAlert(getString(R.string.forward_success),
-                getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
-            }
-            }
-          }
-        }
-        registerReceiver(lockReceiver, screenFilter)
-    }
-
-    // send event
-    application.tracker.send(new HitBuilders.EventBuilder()
-      .setCategory(TAG)
-      .setAction("start")
-      .setLabel(getVersionName)
-      .build())
-
+    ShadowsocksApplication.track(TAG, "start")
+    
     changeState(State.CONNECTING)
 
-    spawn {
-
+    ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
-        val holder = application.containerHolder
+        val holder = ShadowsocksApplication.containerHolder
         try {
-          config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
+          this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {
           case ex: Exception =>
             changeState(State.STOPPED, getString(R.string.service_failed))
             stopRunner()
-            config = null
+            this.config = null
         }
       }
 
-      if (config != null) {
+      if (this.config != null) {
 
         // Clean up
         killProcesses()
 
         var resolved: Boolean = false
-        if (!InetAddressUtils.isIPv4Address(config.proxy) &&
-          !InetAddressUtils.isIPv6Address(config.proxy)) {
+        if (!Utils.isNumeric(config.proxy)) {
           Utils.resolve(config.proxy, enableIPv6 = true) match {
             case Some(a) =>
               config.proxy = a
@@ -587,9 +449,8 @@ class ShadowsocksNatService extends Service with BaseService {
           // Set DNS
           flushDns()
 
-          notifyForegroundAlert(getString(R.string.forward_success),
-            getString(R.string.service_running).formatLocal(Locale.ENGLISH, config.profileName), true)
           changeState(State.CONNECTED)
+          notification = new ShadowsocksNotification(this, config.profileName, true)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
           stopRunner()
@@ -609,36 +470,14 @@ class ShadowsocksNatService extends Service with BaseService {
       closeReceiver = null
     }
 
-    if (Utils.isLollipopOrAbove) {
-      if (lockReceiver != null) {
-        unregisterReceiver(lockReceiver)
-        lockReceiver = null
-      }
-    }
+    if (notification != null) notification.destroy()
 
-    // send event
-    application.tracker.send(new HitBuilders.EventBuilder()
-      .setCategory(TAG)
-      .setAction("stop")
-      .setLabel(getVersionName)
-      .build())
+    ShadowsocksApplication.track(TAG, "stop")
 
     // reset NAT
     killProcesses()
 
-    // stop the service if no callback registered
-    if (getCallbackCount == 0) {
-      stopSelf()
-    }
-
-    stopForegroundCompat(1)
-
-    // change the state
-    changeState(State.STOPPED)
-  }
-
-  override def stopBackgroundService() {
-    stopSelf()
+    super.stopRunner()
   }
 
   override def getTag = TAG

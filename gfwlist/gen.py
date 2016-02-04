@@ -11,13 +11,7 @@ import IPy
 def main():
     china_list_set = IPy.IPSet()
     for line in sys.stdin:
-        line_params = line.split("|")
-        if len(line_params) < 5 or line_params[2] != "ipv4" or line_params[1] != "CN":
-            continue
-        ip_addr = line_params[3]
-        ip_length = float(line_params[4])
-        ip_mask = 32 - int(math.ceil(math.log(ip_length, 2)))
-        china_list_set.add(IPy.IP("%s/%d" % (ip_addr, ip_mask)))
+        china_list_set.add(IPy.IP(line))
 
     # 添加内网地址
     internal_list = IPy.IPSet(map(IPy.IP, [

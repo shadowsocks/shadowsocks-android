@@ -39,9 +39,10 @@
 
 package com.github.shadowsocks.utils
 
-import eu.chainfire.libsuperuser.Shell
-import eu.chainfire.libsuperuser.Shell.{OnCommandResultListener, SU, Builder}
 import java.util
+
+import eu.chainfire.libsuperuser.Shell
+import eu.chainfire.libsuperuser.Shell.{Builder, SU}
 
 object Console {
 
@@ -68,39 +69,24 @@ object Console {
 
   def runCommand(commands: Array[String]) {
     val shell = openShell()
-    shell.addCommand(commands, 0, new OnCommandResultListener {
-      override def onCommandResult(commandCode: Int, exitCode: Int,
-                                   output: util.List[String]) {
-        if (exitCode < 0) {
-          shell.close()
-        }
-      }
-    })
+    shell.addCommand(commands, 0, ((commandCode: Int, exitCode: Int, output: util.List[String]) =>
+      if (exitCode < 0) shell.close()): Shell.OnCommandResultListener)
     shell.waitForIdle()
     shell.close()
   }
 
-  def runRootCommand(command: String): String = runRootCommand(Array(command))
-  def runRootCommand(command: String, context: String): String = runRootCommand(Array(command), context)
-  def runRootCommand(commands: Array[String]): String = runRootCommand(commands, "u:r:init_shell:s0")
-
-  def runRootCommand(commands: Array[String], context: String): String = {
-    if (!isRoot) {
-      return null
-    }
-    val shell = openRootShell(context)
+  def runRootCommand(commands: String*): String = runRootCommand(commands.toArray)
+  def runRootCommand(commands: Array[String]): String = {
+    val shell = openRootShell("u:r:init_shell:s0")
     val sb = new StringBuilder
-    shell.addCommand(commands, 0, new OnCommandResultListener {
-      override def onCommandResult(commandCode: Int, exitCode: Int,
-        output: util.List[String]) {
-        if (exitCode < 0) {
-          shell.close()
-        } else {
-          import scala.collection.JavaConversions._
-          output.foreach(line => sb.append(line).append('\n'))
-        }
+    shell.addCommand(commands, 0, ((_, exitCode, output) => {
+      if (exitCode < 0) {
+        shell.close()
+      } else {
+        import scala.collection.JavaConversions._
+        output.foreach(line => sb.append(line).append('\n'))
       }
-    })
+    }): Shell.OnCommandResultListener)
     if (shell.waitForIdle()) {
       shell.close()
       sb.toString()

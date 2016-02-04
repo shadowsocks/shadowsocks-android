@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="@string/add_profile"
+          android:icon="@drawable/ic_content_add"
+          android:alphabeticShortcut="a"
+          android:numericShortcut="0"
+          app:showAsAction="always">
+        <menu>
+            <item android:id="@+id/scan_qr_code"
+                  android:title="@string/add_profile_methods_scan_qr_code"
+                  android:alphabeticShortcut="s"
+                  android:numericShortcut="1"/>
+            <item android:id="@+id/manual_settings"
+                  android:title="@string/add_profile_methods_manual_settings"
+                  android:alphabeticShortcut="m"
+                  android:numericShortcut="2"/>
+        </menu>
+    </item>
+</menu>

@@ -45,10 +45,15 @@ import java.util.concurrent.Executors
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
 
+object ShadowsocksVpnThread {
+  val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
+}
+
 class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
+  import ShadowsocksVpnThread._
 
   val TAG = "ShadowsocksVpnService"
-  val PATH = "/data/data/com.github.shadowsocks/protect_path"
+  lazy val PATH = vpnService.getApplicationInfo.dataDir + "/protect_path"
 
   @volatile var isRunning: Boolean = true
   @volatile var serverSocket: LocalServerSocket = null
@@ -69,7 +74,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     closeServerSocket()
   }
 
-  override def run(): Unit = {
+  override def run() {
 
     try {
       new File(PATH).delete()
@@ -93,35 +98,32 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       try {
         val socket = serverSocket.accept()
 
-        pool.execute(new Runnable {
-          override def run() {
-            try {
-              val input = socket.getInputStream
-              val output = socket.getOutputStream
+        pool.execute(() => {
+          try {
+            val input = socket.getInputStream
+            val output = socket.getOutputStream
 
-              input.read()
+            input.read()
 
-              val fds = socket.getAncillaryFileDescriptors
+            val fds = socket.getAncillaryFileDescriptors
 
-              if (fds.length > 0) {
-                var ret = false
+            if (fds.nonEmpty) {
+              val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
+              val ret = vpnService.protect(fd)
 
-                val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
-                val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
-                ret = vpnService.protect(fd)
+              // Trick to close file decriptor
+              System.jniclose(fd)
 
-                // Trick to close file decriptor
-                System.jniclose(fd)
-
-                if (ret) {
-                  output.write(0)
-                } else {
-                  output.write(1)
-                }
-
-                input.close()
-                output.close()
+              if (ret) {
+                output.write(0)
+              } else {
+                output.write(1)
               }
+            }
+
+            input.close()
+            output.close()
+
           } catch {
             case e: Exception =>
               Log.e(TAG, "Error when protect socket", e)
@@ -134,12 +136,11 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
             case _: Exception => // ignore
           }
 
-        }})
+        })
       } catch {
-        case e: IOException => {
+        case e: IOException =>
           Log.e(TAG, "Error when accept socket", e)
           return
-        }
       }
     }
   }

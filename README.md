@@ -8,11 +8,11 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 ### CI STATUS
 
-[![Build Status](https://drone.io/github.com/shadowsocks/shadowsocks-android/status.png)](https://drone.io/github.com/shadowsocks/shadowsocks-android/latest)
+[![Build Status](https://travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
 
 ### PREREQUISITES
 
-* JDK 1.7+
+* JDK 1.7
 * SBT 0.13.0+
 * Android SDK r24+
 * Android NDK r10d+
@@ -41,7 +41,7 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 * Install Android SDK and NDK by run `brew install android-ndk android-sdk`
 * Add `export ANDROID_HOME=/usr/local/Cellar/android-sdk/$version` to your .bashrc , then reopen the shell to load it.
 * Add `export ANDROID_NDK_HOME=/usr/local/Cellar/android-ndk/$version` to your .bashrc , then reopen the shell to load it.
-* echo "y" | android update sdk --filter tools,platform-tools,build-tools-21.0.1,android-21,extra-google-m2repository --no-ui --no-https -a
+* echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.2,android-23,extra-google-m2repository --no-ui -a
 * echo "y" | android update sdk --filter extra-android-m2repository --no-ui --no-https -a
 * Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
 * Put your key in ~/.keystore
@@ -61,16 +61,16 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 ## OPEN SOURCE LICENSES
 
 * shadowsocks-libev: [GPLv3](https://github.com/shadowsocks/shadowsocks-libev/blob/master/LICENSE)
-* tun2socks: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/badvpn/COPYING)
-* redsocks: [APL 2.0](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/redsocks/README)
-* OpenSSL: [OpenSSL](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/openssl/NOTICE)
+* tun2socks: [BSD](https://github.com/shadowsocks/badvpn/blob/shadowsocks-android/COPYING)
+* redsocks: [APL 2.0](https://github.com/shadowsocks/redsocks/blob/master/README)
+* OpenSSL: [OpenSSL](https://github.com/shadowsocks/openssl-android/blob/master/NOTICE)
 * pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
 * libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
-* libevent: [BSD](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libevent/LICENSE)
+* libevent: [BSD](https://github.com/shadowsocks/libevent/blob/master/LICENSE)
 
 ### LICENSE
 
-Copyright (C) 2014 Max Lv <max.c.lv@gmail.com>
+Copyright (C) 2015 Max Lv <max.c.lv@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
