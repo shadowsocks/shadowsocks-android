@@ -119,7 +119,7 @@ class Shadowsocks
         s match {
           case State.CONNECTING =>
             fab.setBackgroundTintList(greyTint)
-            fab.setImageResource(R.drawable.ic_cloud_queue)
+            fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             fabProgressCircle.show()
             preferences.setEnabled(false)
@@ -149,7 +149,7 @@ class Shadowsocks
             preferences.setEnabled(true)
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
-            fab.setImageResource(R.drawable.ic_cloud_queue)
+            fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
             preferences.setEnabled(false)
@@ -226,7 +226,7 @@ class Shadowsocks
 
   private def changeSwitch(checked: Boolean) {
     serviceStarted = checked
-    fab.setImageResource(if (checked) R.drawable.ic_cloud else R.drawable.ic_cloud_off)
+    fab.setImageResource(if (checked) R.drawable.ic_start_connected else R.drawable.ic_start_idle)
     if (fab.isEnabled) {
       fab.setEnabled(false)
       handler.postDelayed(() => fab.setEnabled(true), 1000)
@@ -428,25 +428,25 @@ class Shadowsocks
         case State.CONNECTING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
-          fab.setImageResource(R.drawable.ic_cloud_queue)
+          fab.setImageResource(R.drawable.ic_start_busy)
           preferences.setEnabled(false)
           fabProgressCircle.show()
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
           serviceStarted = true
-          fab.setImageResource(R.drawable.ic_cloud)
+          fab.setImageResource(R.drawable.ic_start_connected)
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
-          fab.setImageResource(R.drawable.ic_cloud_queue)
+          fab.setImageResource(R.drawable.ic_start_busy)
           preferences.setEnabled(false)
           fabProgressCircle.show()
         case _ =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
-          fab.setImageResource(R.drawable.ic_cloud_off)
+          fab.setImageResource(R.drawable.ic_start_idle)
           preferences.setEnabled(true)
           fabProgressCircle.postDelayed(hideCircle, 100)
       }
