@@ -159,8 +159,8 @@ class Shadowsocks
     }
     def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
       trafficCache = Array(
-        "▲ " + TrafficMonitor.formatTraffic(txRate) + "/s",
-        "▼ " + TrafficMonitor.formatTraffic(rxRate) + "/s",
+        TrafficMonitor.formatTraffic(txRate) + "/s",
+        TrafficMonitor.formatTraffic(rxRate) + "/s",
         TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal))
       handler.post(updateTraffic)
     }
