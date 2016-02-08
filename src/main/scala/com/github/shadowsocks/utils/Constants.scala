@@ -110,4 +110,5 @@ object Route {
   val ALL = "all"
   val BYPASS_LAN = "bypass-lan"
   val BYPASS_CHN = "bypass-china"
+  val BYPASS_LAN_CHN = "bypass-lan-china"
 }

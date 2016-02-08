@@ -45,6 +45,7 @@
     <string-array name="route_entry">
         <item>All</item>
         <item>Bypass LAN</item>
+        <item>Bypass China</item>
         <item>Bypass LAN &amp; China</item>
     </string-array>
 
@@ -52,6 +53,7 @@
         <item>all</item>
         <item>bypass-lan</item>
         <item>bypass-china</item>
+        <item>bypass-lan-china</item>
     </string-array>
 
     <string-array name="private_route">
