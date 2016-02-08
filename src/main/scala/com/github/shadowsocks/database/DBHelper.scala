@@ -64,7 +64,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 15) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 16) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -120,6 +120,10 @@ class DBHelper(val context: Context)
           profileDao.update(profile)
           i += 1
         }
+      }
+
+      if (oldVersion < 16) {
+        profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'bypass-lan-china' WHERE route = 'bypass-china'")
       }
     }
   }

@@ -273,12 +273,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startShadowsocksDaemon() {
 
     if (config.route != Route.ALL) {
-      val acl: Array[String] = config.route match {
-        case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
-        case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
+      val acl: Array[Array[String]] = config.route match {
+        case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
+        case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
+        case Route.BYPASS_LAN_CHN =>
+          Array(getResources.getStringArray(R.array.private_route), getResources.getStringArray(R.array.chn_route))
       }
       ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
-        acl.foreach(item => p.println(item))
+        acl.flatten.foreach(p.println)
       })
     }
 

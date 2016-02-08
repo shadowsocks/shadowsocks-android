@@ -44,7 +44,6 @@ import java.lang.Process
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
-import android.app.Service
 import android.content._
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{ConnectivityManager, Network}
@@ -164,12 +163,14 @@ class ShadowsocksNatService extends BaseService {
 
   def startShadowsocksDaemon() {
     if (config.route != Route.ALL) {
-      val acl: Array[String] = config.route match {
-        case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
-        case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route_full)
+      val acl: Array[Array[String]] = config.route match {
+        case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
+        case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
+        case Route.BYPASS_LAN_CHN =>
+          Array(getResources.getStringArray(R.array.private_route), getResources.getStringArray(R.array.chn_route))
       }
       ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
-        acl.foreach(item => p.println(item))
+        acl.flatten.foreach(p.println)
       })
     }
 

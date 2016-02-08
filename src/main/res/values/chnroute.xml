@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="chn_route_full">
-        <item>0.0.0.0/8</item>
+    <string-array name="chn_route">
         <item>1.0.1.0/24</item>
         <item>1.0.2.0/23</item>
         <item>1.0.8.0/21</item>
@@ -49,7 +48,6 @@
         <item>1.192.0.0/13</item>
         <item>1.202.0.0/15</item>
         <item>1.204.0.0/14</item>
-        <item>10.0.0.0/8</item>
         <item>14.0.0.0/21</item>
         <item>14.0.12.0/22</item>
         <item>14.1.0.0/22</item>
@@ -771,7 +769,6 @@
         <item>61.236.0.0/15</item>
         <item>61.240.0.0/14</item>
         <item>91.234.36.0/24</item>
-        <item>100.64.0.0/10</item>
         <item>101.0.0.0/22</item>
         <item>101.1.0.0/22</item>
         <item>101.2.172.0/22</item>
@@ -2270,7 +2267,6 @@
         <item>125.215.0.0/18</item>
         <item>125.216.0.0/13</item>
         <item>125.254.128.0/17</item>
-        <item>127.0.0.0/8</item>
         <item>137.59.88.0/22</item>
         <item>139.9.0.0/16</item>
         <item>139.129.0.0/16</item>
@@ -2386,7 +2382,6 @@
         <item>167.189.0.0/16</item>
         <item>167.220.244.0/22</item>
         <item>168.160.0.0/16</item>
-        <item>169.254.0.0/16</item>
         <item>171.8.0.0/13</item>
         <item>171.34.0.0/15</item>
         <item>171.36.0.0/14</item>
@@ -2395,7 +2390,6 @@
         <item>171.104.0.0/13</item>
         <item>171.112.0.0/12</item>
         <item>171.208.0.0/12</item>
-        <item>172.16.0.0/12</item>
         <item>175.0.0.0/12</item>
         <item>175.16.0.0/13</item>
         <item>175.24.0.0/14</item>
@@ -2507,14 +2501,8 @@
         <item>183.182.0.0/19</item>
         <item>183.184.0.0/13</item>
         <item>183.192.0.0/10</item>
-        <item>192.0.0.0/29</item>
-        <item>192.0.2.0/24</item>
-        <item>192.88.99.0/24</item>
         <item>192.124.154.0/24</item>
-        <item>192.168.0.0/16</item>
         <item>192.188.170.0/24</item>
-        <item>198.18.0.0/15</item>
-        <item>198.51.100.0/24</item>
         <item>202.0.100.0/23</item>
         <item>202.0.122.0/23</item>
         <item>202.0.176.0/22</item>
@@ -2910,7 +2898,6 @@
         <item>203.0.90.0/23</item>
         <item>203.0.96.0/23</item>
         <item>203.0.104.0/21</item>
-        <item>203.0.113.0/24</item>
         <item>203.0.114.0/23</item>
         <item>203.0.122.0/24</item>
         <item>203.0.128.0/24</item>
