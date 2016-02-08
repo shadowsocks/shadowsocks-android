@@ -30,92 +30,95 @@
                 android:gravity="end" />
     </LinearLayout>
 
-    <TableLayout
-        android:stretchColumns="2"
-        android:layout_width="wrap_content"
+    <android.support.v7.widget.GridLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:columnCount="4"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
             <TextView
-                android:layout_column="0"
+                app:layout_column="0"
                 style="@style/TextAppearance.AppCompat.Body2"
                 android:ellipsize="marquee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="end"
                 android:text="@string/sent" />
             <TextView
-                android:layout_column="1"
+                app:layout_column="1"
                 android:id="@+id/tx"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:ellipsize="marquee"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="end" />
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal" />
             <TextView
-                android:layout_column="2"
+                app:layout_column="2"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:ellipsize="marquee"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="end"
                 android:text="▲" />
             <TextView
-                android:layout_column="3"
+                app:layout_column="3"
                 android:id="@+id/txRate"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:ellipsize="marquee"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal"
                 android:gravity="end" />
-        </TableRow>
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
             <TextView
-                android:layout_column="0"
+                app:layout_row="1"
+                app:layout_column="0"
                 style="@style/TextAppearance.AppCompat.Body2"
                 android:ellipsize="marquee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
                 android:gravity="end"
                 android:text="@string/received"/>
             <TextView
-                android:layout_column="1"
+                app:layout_row="1"
+                app:layout_column="1"
                 android:id="@+id/rx"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal" />
+            <TextView
+                app:layout_row="1"
+                app:layout_column="2"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:ellipsize="marquee"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="end" />
-            <TextView
-                android:layout_column="2"
-                android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary"
-                android:ellipsize="marquee"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
                 android:text="▼" />
             <TextView
-                android:layout_column="3"
+                app:layout_row="1"
+                app:layout_column="3"
                 android:id="@+id/rxRate"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
                 android:ellipsize="marquee"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal"
                 android:gravity="end" />
-        </TableRow>
 
-    </TableLayout>
+    </android.support.v7.widget.GridLayout>
 </LinearLayout>

@@ -78,7 +78,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
-    stat= findPreference(Key.stat)
+    stat = findPreference(Key.stat)
     stat.setOnPreferenceClickListener(_ => {
       val id = synchronized {
         testCount += 1
@@ -97,7 +97,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
           conn.setUseCaches(false)
           if (testCount == id) {
             var result: String = null
-            var success: Boolean = true
+            var success = true
             try {
               val start = currentTimeMillis
               conn.getInputStream

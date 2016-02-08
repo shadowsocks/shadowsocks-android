@@ -169,12 +169,12 @@ class Shadowsocks
   def updateTraffic(): Unit = if (trafficCache == null) callback.trafficUpdated(0, 0, 0, 0) else {
     if (connectionTestResult == null) connectionTestResult = getString(R.string.connection_test_pending)
     if (preferences.natSwitch.isChecked) {
-      preferences.stat.setSummary("")
+      preferences.stat.setSummary(null)
     } else {
       if (connectionTestSuccess) {
         preferences.stat.setSummary(connectionTestResult)
       } else {
-        preferences.stat.setSummary(getString(R.string.connection_test_fail))
+        preferences.stat.setSummary(R.string.connection_test_fail)
         Snackbar.make(findViewById(android.R.id.content), connectionTestResult, Snackbar.LENGTH_LONG).show
       }
     }
