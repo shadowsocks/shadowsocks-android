@@ -124,5 +124,4 @@
   <!-- status -->
   <string name="sent">Sent:</string>
   <string name="received">Received:</string>
-  <string name="check_connectivity">Check Connectivity</string>
 </resources>

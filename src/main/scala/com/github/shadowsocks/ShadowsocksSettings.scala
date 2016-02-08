@@ -9,10 +9,11 @@ import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.net.Uri
 import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.preferences.{DropDownPreference, NumberPickerPreference, PasswordEditTextPreference, SummaryEditTextPreference}
+import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.{Key, Utils}
 
@@ -68,7 +69,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
   private def activity = getActivity.asInstanceOf[Shadowsocks]
   lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
-  var stat: Preference = _
+  var stat: StatusPreference = _
 
   private var isProxyApps: SwitchPreference = _
   private var testCount: Int = _
@@ -78,13 +79,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
-    stat= findPreference(Key.stat)
+    stat = findPreference(Key.stat).asInstanceOf[StatusPreference]
     stat.setOnPreferenceClickListener(_ => {
       val id = synchronized {
         testCount += 1
-        activity.connectionTestResult = getString(R.string.connection_test_testing)
-        activity.connectionTestSuccess = true
-        activity.updateTraffic()
+        activity.handler.post(() => stat.setSummary(R.string.connection_test_testing))
         testCount
       }
       ThrowableFuture {
@@ -97,7 +96,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
           conn.setUseCaches(false)
           if (testCount == id) {
             var result: String = null
-            var success: Boolean = true
+            var success = true
             try {
               val start = currentTimeMillis
               conn.getInputStream
@@ -107,21 +106,24 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
                 result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
               else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
             } catch {
-              case e: Exception => {
+              case e: Exception =>
                 success = false
                 result = getString(R.string.connection_test_error, e.getMessage)
-              }
             }
             synchronized(if (testCount == id) {
-              activity.connectionTestSuccess = success
-              activity.connectionTestResult = result
-              activity.handler.post(activity.updateTraffic)
+              if (ShadowsocksApplication.isVpnEnabled) activity.handler.post(() => {
+                if (success) stat.setSummary(result) else {
+                  stat.setSummary(R.string.connection_test_fail)
+                  Snackbar.make(activity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+                }
+              })
             })
           }
         }
       }
       true
     })
+    stat.setSummary(if (ShadowsocksApplication.isVpnEnabled) getString(R.string.connection_test_pending) else null)
 
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
     isProxyApps.setOnPreferenceClickListener((preference: Preference) => {
@@ -182,10 +184,12 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
-    case Key.isNAT => activity.handler.post(() => {
-      activity.deattachService
-      activity.attachService
-    })
+    case Key.isNAT =>
+      activity.handler.post(() => {
+        activity.deattachService
+        activity.attachService
+      })
+      stat.setSummary(if (ShadowsocksApplication.isVpnEnabled) getString(R.string.connection_test_pending) else null)
     case _ =>
   }
 
