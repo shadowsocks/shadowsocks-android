@@ -10,7 +10,7 @@
 
         <com.github.shadowsocks.preferences.StatusPreference
                 android:key="stat"
-                android:summary="@string/check_connectivity"
+                android:summary="@string/connection_test_pending"
                 android:title="@string/stat"/>
 
     </PreferenceCategory>

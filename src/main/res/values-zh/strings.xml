@@ -116,6 +116,5 @@
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
-  <string name="check_connectivity">检查网络连接</string>
 
 </resources>
