@@ -66,6 +66,7 @@
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
   <string name="service_failed">Failed to connect the remote server</string>
+  <string name="nat_deprecated">WARNING: NAT mode has been deprecated since Android 5.0</string>
   <string name="nat_no_root">NAT mode requires ROOT permission</string>
   <string name="switch_to_vpn">Switch to VPN mode</string>
   <string name="stop">Stop the service</string>

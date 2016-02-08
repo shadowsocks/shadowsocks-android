@@ -168,6 +168,11 @@ class Shadowsocks
     // Update the UI
     if (fab != null) fab.setEnabled(true)
     updateState()
+    if (Build.VERSION.SDK_INT >= 21 && !ShadowsocksApplication.isVpnEnabled) {
+      val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
+      snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
+      snackbar.show
+    }
 
     if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
       ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()

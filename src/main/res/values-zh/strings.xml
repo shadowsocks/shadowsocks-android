@@ -34,6 +34,7 @@
   <string name="auto_connect_summary">随系统启动后台服务</string>
   <string name="forward_success">后台服务已开始运行。</string>
   <string name="service_failed">无法连接远程服务器</string>
+  <string name="nat_deprecated">警告：在 Android 5.0 及更高版本中不建议使用 NAT 模式</string>
   <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
   <string name="switch_to_vpn">切换到 VPN 模式</string>
   <string name="stop">停止服务</string>
