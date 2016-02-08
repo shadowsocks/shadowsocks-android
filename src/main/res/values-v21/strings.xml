@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="proxied_apps_summary">Set proxy for selected apps</string>
+</resources>
