@@ -82,7 +82,7 @@ class TaskerActivity extends AppCompatActivity {
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    private val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
     def getItemCount = 1 + profiles.length
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = i match {
       case 0 => vh.bindDefault
@@ -110,9 +110,13 @@ class TaskerActivity extends AppCompatActivity {
     switch = findViewById(R.id.serviceSwitch).asInstanceOf[Switch]
     switch.setChecked(taskerOption.switchOn)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    profilesList.setLayoutManager(new LinearLayoutManager(this))
+    val lm = new LinearLayoutManager(this)
+    profilesList.setLayoutManager(lm)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
+    if (taskerOption.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == taskerOption.profileId => i + 1
+    }.getOrElse(0))
   }
 }
 

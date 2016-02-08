@@ -54,7 +54,7 @@
   </string>
   <string name="route_list">Route</string>
   <string name="proxied_apps">Per-App Proxy</string>
-  <string name="proxied_apps_summary">Set proxy for selected apps</string>
+  <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
   <string name="on">On</string>
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
@@ -66,6 +66,7 @@
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>
   <string name="service_failed">Failed to connect the remote server</string>
+  <string name="nat_deprecated">WARNING: NAT mode has been deprecated since Android 5.0</string>
   <string name="nat_no_root">NAT mode requires ROOT permission</string>
   <string name="switch_to_vpn">Switch to VPN mode</string>
   <string name="stop">Stop the service</string>
