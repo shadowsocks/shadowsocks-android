@@ -106,7 +106,10 @@
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
 
-  <string name="removed">已删除</string>
+  <plurals name="removed">
+    <item quantity="one">已删除</item>
+    <item quantity="other">已删除 %d 项</item>
+  </plurals>
   <string name="undo">撤销</string>
   <string name="toggle_service_state">启动服务</string>
   <string name="start_service_default">连接到当前服务器</string>
