@@ -2,7 +2,6 @@ package com.github.shadowsocks
 
 import android.content.Intent
 import android.os.{Bundle, Handler}
-import android.support.design.widget.Snackbar
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -11,12 +10,12 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned}
-import android.view.View.{OnAttachStateChangeListener, OnClickListener}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Parser, TrafficMonitor, Utils}
+import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
 
@@ -33,7 +32,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   import ProfileManagerActivity._
 
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
-    private var item: Profile = _
+    var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     itemView.setOnClickListener(this)
 
@@ -95,7 +94,6 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    private val recycleBin = new ArrayBuffer[(Int, Profile)]
     var profiles = new ArrayBuffer[Profile]
     profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
@@ -107,14 +105,14 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
 
     def add(item: Profile) {
-      removedSnackbar.dismiss
-      commitRemoves
+      undoManager.flush
       val pos = getItemCount
       profiles += item
       notifyItemInserted(pos)
     }
 
     def move(from: Int, to: Int) {
+      undoManager.flush
       val step = if (from < to) 1 else -1
       val first = profiles(from)
       var previousOrder = profiles(from).userOrder
@@ -133,23 +131,16 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
 
     def remove(pos: Int) {
-      recycleBin.append((pos, profiles(pos)))
       profiles.remove(pos)
       notifyItemRemoved(pos)
     }
-    def undoRemoves {
-      for ((index, item) <- recycleBin.reverseIterator) {
-        profiles.insert(index, item)
-        notifyItemInserted(index)
-      }
-      recycleBin.clear
+    def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
+      profiles.insert(index, item)
+      notifyItemInserted(index)
     }
-    def commitRemoves {
-      for ((index, item) <- recycleBin) {
-        ShadowsocksApplication.profileManager.delProfile(item.id)
-        if (item.id == ShadowsocksApplication.profileId) ShadowsocksApplication.profileId(-1)
-      }
-      recycleBin.clear
+    def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
+      ShadowsocksApplication.profileManager.delProfile(item.id)
+      if (item.id == ShadowsocksApplication.profileId) ShadowsocksApplication.profileId(-1)
     }
   }
 
@@ -157,7 +148,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private val handler = new Handler
 
   private lazy val profilesAdapter = new ProfilesAdapter
-  private var removedSnackbar: Snackbar = _
+  private var undoManager: UndoSnackbarManager[Profile] = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -182,17 +173,13 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == ShadowsocksApplication.profileId => i
     }.getOrElse(-1))
-    removedSnackbar = Snackbar.make(profilesList, R.string.removed, Snackbar.LENGTH_LONG)
-      .setAction(R.string.undo, ((v: View) => profilesAdapter.undoRemoves): OnClickListener)
-    removedSnackbar.getView.addOnAttachStateChangeListener(new OnAttachStateChangeListener {
-      def onViewDetachedFromWindow(v: View) = profilesAdapter.commitRemoves
-      def onViewAttachedToWindow(v: View) = ()
-    })
+    undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
       def onSwiped(viewHolder: ViewHolder, direction: Int) = {
-        profilesAdapter.remove(viewHolder.getAdapterPosition)
-        removedSnackbar.show
+        val index = viewHolder.getAdapterPosition
+        profilesAdapter.remove(index)
+        undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
       }
       def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
         profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
@@ -224,9 +211,9 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onDestroy {
     deattachService()
-    super.onDestroy
+    undoManager.flush
     ShadowsocksApplication.profileManager.setProfileAddedListener(null)
-    profilesAdapter.commitRemoves
+    super.onDestroy
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {

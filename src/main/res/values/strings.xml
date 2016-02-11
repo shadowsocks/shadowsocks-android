@@ -112,7 +112,10 @@
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
-  <string name="removed">Removed</string>
+  <plurals name="removed">
+    <item quantity="one">Removed</item>
+    <item quantity="other">%d items removed</item>
+  </plurals>
   <string name="undo">Undo</string>
 
   <!-- tasker -->
