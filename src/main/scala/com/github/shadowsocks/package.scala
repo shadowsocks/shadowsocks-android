@@ -2,7 +2,7 @@ package com.github
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Try}
+import scala.util.{Success, Failure, Try}
 
 /**
   * @author Mygod
@@ -10,6 +10,7 @@ import scala.util.{Failure, Try}
 package object shadowsocks {
 
   val handleFailure: PartialFunction[Try[_], Unit] = {
+    case Success(_) =>
     case Failure(e) => e.printStackTrace()
   }
 
