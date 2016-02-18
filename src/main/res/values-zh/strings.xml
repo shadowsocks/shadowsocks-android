@@ -96,6 +96,7 @@
   <string-array name="route_entry">
     <item>全局</item>
     <item>绕过局域网地址</item>
+    <item>绕过中国大陆地址</item>
     <item>绕过局域网及中国大陆地址</item>
   </string-array>
 
