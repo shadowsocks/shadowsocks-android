@@ -401,7 +401,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    if (config.route == Route.ALL) {
+    if (config.route == Route.ALL || config.route == Route.BYPASS_CHN) {
       builder.addRoute("0.0.0.0", 0)
     } else {
       val privateList = getResources.getStringArray(R.array.bypass_private_route)
