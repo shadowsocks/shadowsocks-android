@@ -4,16 +4,15 @@ import android.content.{ComponentName, Context, Intent, ServiceConnection}
 import android.os.{RemoteException, IBinder}
 import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
 import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.Utils
 
 /**
   * @author Mygod
   */
-trait ServiceBoundContext extends Context {
-
+trait ServiceBoundContext extends Context { outer =>
   class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       bgService = IShadowsocksService.Stub.asInterface(service)
+      bgService.asBinder().linkToDeath(new ShadowsocksDeathRecipient(outer), 0)
       registerCallback
       ServiceBoundContext.this.onServiceConnected()
     }
@@ -33,11 +32,12 @@ trait ServiceBoundContext extends Context {
   } catch {
     case ignored: RemoteException => // Nothing
   }
+
   def unregisterCallback = if (bgService != null && callback != null && callbackRegistered) try {
     bgService.unregisterCallback(callback)
     callbackRegistered = false
   } catch {
-    case ignored: RemoteException => // Nothing
+    case ignored: RemoteException => callbackRegistered = false
   }
 
   def onServiceConnected() = ()
