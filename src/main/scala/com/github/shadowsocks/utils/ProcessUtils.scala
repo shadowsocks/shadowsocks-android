@@ -33,8 +33,14 @@ object ProcessUtils {
     }
   }
 
-  def inShadowsocks[A](fun: => A): Unit =
-    if(getCurrentProcessName startsWith SHADOWNSOCKS) fun
+  def inShadowsocks[A](fun: => A): Unit = {
+    val pName = getCurrentProcessName
+    if (pName.equals(SHADOWNSOCKS)
+    || (pName.startsWith(SHADOWNSOCKS) && pName.length > SHADOWNSOCKS.length && pName.charAt(SHADOWNSOCKS.length) != ':')){
+      fun
+    }
+  }
+
 
   def inVpn[A](fun: => A): Unit =
     if (getCurrentProcessName startsWith SHADOWNSOCKS_VPN) fun
