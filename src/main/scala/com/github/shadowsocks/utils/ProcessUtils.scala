@@ -2,6 +2,7 @@ package com.github.shadowsocks.utils
 
 import java.io.{BufferedReader, FileInputStream, InputStreamReader}
 
+import android.content.Context
 import com.github.shadowsocks.utils.IOUtils._
 
 /**
@@ -9,23 +10,16 @@ import com.github.shadowsocks.utils.IOUtils._
   */
 object ProcessUtils {
 
-  val SHADOWNSOCKS     = "com.github.shadowsocks"
-  val SHADOWNSOCKS_VPN = "com.github.shadowsocks:vpn"
-  val SHADOWNSOCKS_NAT = "com.github.shadowsocks:nat"
-  val TUN2SOCKS        = "/data/data/com.github.shadowsocks/tun2socks"
-  val SS_LOCAL         = "/data/data/com.github.shadowsocks/ss-local"
-  val SS_TUNNEL        = "/data/data/com.github.shadowsocks/ss-tunnel"
-  val PDNSD            = "/data/data/com.github.shadowsocks/pdnsd"
-
   def getCurrentProcessName: String = {
     inSafe {
       val inputStream = new FileInputStream("/proc/self/cmdline")
       val reader = new BufferedReader(new InputStreamReader(inputStream))
       autoClose(reader) {
-        reader.readLine() match {
-          case name: String => name
-          case _ => ""
-        }
+        val sb = new StringBuilder
+        var c: Int = 0
+        while({c = reader.read(); c > 0})
+          sb.append(c.asInstanceOf[Char])
+        sb.toString()
       }
     } match {
       case Some(name: String) => name
@@ -33,20 +27,18 @@ object ProcessUtils {
     }
   }
 
-  def inShadowsocks[A](fun: => A): Unit = {
-    val pName = getCurrentProcessName
-    if (pName.equals(SHADOWNSOCKS)
-    || (pName.startsWith(SHADOWNSOCKS) && pName.length > SHADOWNSOCKS.length && pName.charAt(SHADOWNSOCKS.length) != ':')){
-      fun
-    }
+  def inShadowsocks[A](context: Context)(fun: => A): Unit = {
+    if (context != null && getCurrentProcessName.equals(context.getPackageName)) fun
   }
 
 
-  def inVpn[A](fun: => A): Unit =
-    if (getCurrentProcessName startsWith SHADOWNSOCKS_VPN) fun
+  def inVpn[A](context: Context)(fun: => A): Unit = {
+    if (context != null && getCurrentProcessName.equals(context.getPackageName + ":vpn")) fun
+  }
 
 
-  def inNat[A](fun: => A): Unit =
-    if (getCurrentProcessName startsWith SHADOWNSOCKS_NAT) fun
+  def inNat[A](context: Context)(fun: => A): Unit = {
+    if (context != null && getCurrentProcessName.equals(context.getPackageName + ":nat")) fun
+  }
 
 }
