@@ -17,7 +17,7 @@ class ShadowsocksDeathRecipient(val mContext: ServiceBoundContext)
 
     mContext match {
       case ss: Shadowsocks =>
-        inShadowsocks {
+        inShadowsocks(mContext) {
           ss.unregisterCallback
           ss.bindToService()
         }
