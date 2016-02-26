@@ -344,7 +344,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsDaemon() {
     val ipv6 = if (config.isIpv6) "" else "reject = ::/0;"
     val conf = {
-      if (config.route == Route.BYPASS_CHN) {
+      if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
         val reject = ConfigUtils.getRejectList(getContext)
         val blackList = ConfigUtils.getBlackList(getContext)
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,

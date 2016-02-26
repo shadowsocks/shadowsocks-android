@@ -260,7 +260,7 @@ class ShadowsocksNatService extends BaseService {
 
   def startDnsDaemon() {
 
-    val conf = if (config.route == Route.BYPASS_CHN) {
+    val conf = if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
       val reject = ConfigUtils.getRejectList(getContext)
       val blackList = ConfigUtils.getBlackList(getContext)
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
