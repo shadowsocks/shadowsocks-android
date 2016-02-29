@@ -18,6 +18,7 @@
         <item>SEED-CFB</item>
         <item>SALSA20</item>
         <item>CHACHA20</item>
+        <item>CHACHA20-IETF</item>
     </string-array>
 
     <string-array name="enc_method_value">
@@ -38,11 +39,13 @@
         <item>seed-cfb</item>
         <item>salsa20</item>
         <item>chacha20</item>
+        <item>chacha20-ietf</item>
     </string-array>
 
     <string-array name="route_entry">
         <item>All</item>
         <item>Bypass LAN</item>
+        <item>Bypass China</item>
         <item>Bypass LAN &amp; China</item>
     </string-array>
 
@@ -50,6 +53,7 @@
         <item>all</item>
         <item>bypass-lan</item>
         <item>bypass-china</item>
+        <item>bypass-lan-china</item>
     </string-array>
 
     <string-array name="private_route">

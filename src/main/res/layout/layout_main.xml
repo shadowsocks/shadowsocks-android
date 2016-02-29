@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                tools:ignore="UnknownIdInLayout" android:clipChildren="false">
+    <include layout="@layout/toolbar_light_dark" />
+    <fragment android:name="com.github.shadowsocks.ShadowsocksSettings"
+              android:id="@android:id/content" android:layout_below="@+id/toolbar"
+              android:layout_width="match_parent" android:layout_height="match_parent"/>
+    <com.github.jorgecastilloprz.FABProgressCircle android:id="@+id/fabProgressCircle" app:reusable="true"
+                                                   android:layout_width="wrap_content"
+                                                   android:layout_height="wrap_content" android:elevation="6dp"
+                                                   android:layout_alignBottom="@+id/toolbar"
+                                                   android:layout_alignParentRight="true"
+                                                   android:layout_alignParentEnd="true"
+                                                   android:layout_marginRight="16dp"
+                                                   android:layout_marginEnd="16dp"
+                                                   android:layout_marginBottom="@dimen/fab_margin_bottom">
+        <android.support.design.widget.FloatingActionButton android:id="@+id/fab" android:layout_width="wrap_content"
+                                                            android:layout_height="wrap_content"
+                                                            app:backgroundTint="@color/material_blue_grey_700"
+                                                            android:src="@drawable/ic_start_idle"
+                                                            app:pressedTranslationZ="6dp" app:borderWidth="0dp" />
+    </com.github.jorgecastilloprz.FABProgressCircle>
+</RelativeLayout>

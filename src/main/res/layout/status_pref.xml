@@ -1,0 +1,124 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/widget_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:gravity="center_vertical"
+    android:paddingLeft="15dip"
+    android:paddingRight="15dip"
+    android:paddingTop="6dip"
+    android:paddingBottom="6dip"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical" >
+    
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView
+                android:id="@android:id/title"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:ellipsize="marquee"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        <TextView
+                android:id="@android:id/summary"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end" />
+    </LinearLayout>
+
+    <android.support.v7.widget.GridLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        app:columnCount="4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+            <TextView
+                app:layout_column="0"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="end"
+                android:text="@string/sent" />
+            <TextView
+                app:layout_column="1"
+                android:id="@+id/tx"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal" />
+            <TextView
+                app:layout_column="2"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▲" />
+            <TextView
+                app:layout_column="3"
+                android:id="@+id/txRate"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal"
+                android:gravity="end" />
+
+            <TextView
+                app:layout_row="1"
+                app:layout_column="0"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="24dp"
+                android:layout_marginEnd="24dp"
+                android:gravity="end"
+                android:text="@string/received"/>
+            <TextView
+                app:layout_row="1"
+                app:layout_column="1"
+                android:id="@+id/rx"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal" />
+            <TextView
+                app:layout_row="1"
+                app:layout_column="2"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▼" />
+            <TextView
+                app:layout_row="1"
+                app:layout_column="3"
+                android:id="@+id/rxRate"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:ellipsize="marquee"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_columnWeight="1"
+                app:layout_gravity="fill_horizontal"
+                android:gravity="end" />
+
+    </android.support.v7.widget.GridLayout>
+</LinearLayout>

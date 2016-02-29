@@ -39,22 +39,26 @@
 
 package com.github.shadowsocks
 
+import java.util.{Timer, TimerTask}
+
+import android.app.Service
+import android.content.{Intent, Context}
 import android.os.{Handler, RemoteCallbackList}
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.{Path, State}
-import java.io.{IOException, FileNotFoundException, FileReader, BufferedReader}
-import android.util.Log
-import android.app.Notification
-import android.content.Context
+import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
 
-trait BaseService {
+trait BaseService extends Service {
 
-  @volatile private var state = State.INIT
-  @volatile private var callbackCount = 0
+  @volatile private var state = State.STOPPED
+  @volatile protected var config: Config = null
+
+  var timer: Timer = null
+  var trafficMonitorThread: TrafficMonitorThread = null
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
+  var callbacksCount: Int = _
 
-  protected val binder = new IShadowsocksService.Stub {
+  val binder = new IShadowsocksService.Stub {
     override def getMode: Int = {
       getServiceMode
     }
@@ -64,75 +68,134 @@ trait BaseService {
     }
 
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null ) {
-        callbacks.unregister(cb)
-        callbackCount -= 1
-      }
-      if (callbackCount == 0 && state != State.CONNECTING && state != State.CONNECTED) {
-        stopBackgroundService()
+      if (cb != null && callbacks.unregister(cb)) {
+        callbacksCount -= 1
+        if (callbacksCount == 0 && timer != null) {
+          timer.cancel()
+          timer = null
+        }
       }
     }
 
     override def registerCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null) {
-        callbacks.register(cb)
-        callbackCount += 1
+      if (cb != null && callbacks.register(cb)) {
+        callbacksCount += 1
+        if (callbacksCount != 0 && timer == null) {
+          val task = new TimerTask {
+            def run {
+              if (TrafficMonitor.updateRate()) updateTrafficRate()
+            }
+          }
+          timer = new Timer(true)
+          timer.schedule(task, 1000, 1000)
+        }
+        TrafficMonitor.updateRate()
+        cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
     }
 
     override def stop() {
-      if (state != State.CONNECTING && state != State.STOPPING) {
+      if (state == State.CONNECTED) {
         stopRunner()
       }
     }
 
     override def start(config: Config) {
-      if (state != State.CONNECTING && state != State.STOPPING) {
+      if (state == State.STOPPED) {
         startRunner(config)
       }
     }
   }
 
-  def stopBackgroundService()
-  def startRunner(config: Config)
-  def stopRunner()
+  def startRunner(config: Config) {
+    this.config = config
+
+    startService(new Intent(getContext, getClass))
+    TrafficMonitor.reset()
+    trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
+    trafficMonitorThread.start()
+  }
+
+  def stopRunner() {
+    // Make sure update total traffic when stopping the runner
+    updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
+
+    TrafficMonitor.reset()
+    if (trafficMonitorThread != null) {
+      trafficMonitorThread.stopThread()
+      trafficMonitorThread = null
+    }
+
+    // change the state
+    changeState(State.STOPPED)
+
+    // stop the service if nothing has bound to it
+    stopSelf()
+  }
+
+  def updateTrafficTotal(tx: Long, rx: Long) {
+    val config = this.config  // avoid race conditions without locking
+    if (config != null) {
+      ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
+        case Some(profile) =>
+          profile.tx += tx
+          profile.rx += rx
+          ShadowsocksApplication.profileManager.updateProfile(profile)
+        case None => // Ignore
+      }
+    }
+  }
+
   def getServiceMode: Int
   def getTag: String
   def getContext: Context
 
-  def getCallbackCount(): Int = {
-    callbackCount
-  }
-  def getState(): Int = {
+  def getState: Int = {
     state
   }
   def changeState(s: Int) {
     changeState(s, null)
   }
 
-  protected def changeState(s: Int, msg: String) {
+  def updateTrafficRate() {
     val handler = new Handler(getContext.getMainLooper)
-    handler.post(new Runnable {
-      override def run() {
-        if (state != s) {
-          if (callbackCount > 0) {
-            val n = callbacks.beginBroadcast()
-            for (i <- 0 to n - 1) {
-              try {
-                callbacks.getBroadcastItem(i).stateChanged(s, msg)
-              } catch {
-                case _: Exception => // Ignore
-              }
-            }
-            callbacks.finishBroadcast()
+    handler.post(() => {
+      if (callbacksCount > 0) {
+        val txRate = TrafficMonitor.txRate
+        val rxRate = TrafficMonitor.rxRate
+        val txTotal = TrafficMonitor.txTotal
+        val rxTotal = TrafficMonitor.rxTotal
+        val n = callbacks.beginBroadcast()
+        for (i <- 0 until n) {
+          try {
+            callbacks.getBroadcastItem(i).trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+          } catch {
+            case _: Exception => // Ignore
           }
-          state = s
         }
+        callbacks.finishBroadcast()
       }
     })
   }
 
-  def initSoundVibrateLights(notification: Notification) {
-    notification.sound = null
+  // Service of shadowsocks should always be started explicitly
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_NOT_STICKY
+
+  protected def changeState(s: Int, msg: String) {
+    val handler = new Handler(getContext.getMainLooper)
+    handler.post(() => if (state != s) {
+      if (callbacksCount > 0) {
+        val n = callbacks.beginBroadcast()
+        for (i <- 0 until n) {
+          try {
+            callbacks.getBroadcastItem(i).stateChanged(s, msg)
+          } catch {
+            case _: Exception => // Ignore
+          }
+        }
+        callbacks.finishBroadcast()
+      }
+      state = s
+    })
   }
 }
