@@ -256,18 +256,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     val fd = startVpn()
-
-    if (fd != -1) {
-      var tries = 1
-      while (tries < 5) {
-        Thread.sleep(1000 * tries)
-        if (System.sendfd(fd, getApplicationInfo.dataDir + "/sock_path") != -1) {
-          return true
-        }
-        tries += 1
-      }
-    }
-    false
+    sendFd(fd)
   }
 
   def startShadowsocksDaemon() {
@@ -307,10 +296,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    sslocalProcess = new ProcessBuilder()
-      .command(cmd)
-      .redirectErrorStream(true)
-      .start()
+    sslocalProcess = new GuardedProcess(cmd)
   }
 
   def startDnsTunnel() = {
@@ -335,10 +321,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    sstunnelProcess = new ProcessBuilder()
-      .command(cmd)
-      .redirectErrorStream(true)
-      .start()
+    sstunnelProcess = new GuardedProcess(cmd)
   }
 
   def startDnsDaemon() {
@@ -361,10 +344,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    pdnsdProcess = new ProcessBuilder()
-      .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(true)
-      .start()
+    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq)
   }
 
   override def getContext = getBaseContext
@@ -454,12 +434,27 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    tun2socksProcess = new ProcessBuilder()
-      .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(true)
-      .start()
+    tun2socksProcess = new GuardedProcess(cmd.split(" ").toSeq, new Runnable {
+      override def run(): Unit = {
+        sendFd(fd)
+      }
+    })
 
     fd
+  }
+
+  def sendFd(fd: Int): Boolean = {
+    if (fd != -1) {
+      var tries = 1
+      while (tries < 5) {
+        Thread.sleep(1000 * tries)
+        if (System.sendfd(fd, getApplicationInfo.dataDir + "/sock_path") != -1) {
+          return true
+        }
+        tries += 1
+      }
+    }
+    false
   }
 
   override def getTag = TAG
