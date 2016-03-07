@@ -296,7 +296,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    sslocalProcess = new GuardedProcess(cmd)
+    sslocalProcess = new GuardedProcess(cmd).start()
   }
 
   def startDnsTunnel() = {
@@ -321,7 +321,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    sstunnelProcess = new GuardedProcess(cmd)
+    sstunnelProcess = new GuardedProcess(cmd).start()
   }
 
   def startDnsDaemon() {
@@ -344,7 +344,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq)
+    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
   }
 
   override def getContext = getBaseContext
@@ -438,7 +438,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       override def run(): Unit = {
         sendFd(fd)
       }
-    })
+    }).start()
 
     fd
   }

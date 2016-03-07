@@ -196,7 +196,7 @@ class ShadowsocksNatService extends BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    sslocalProcess = new GuardedProcess(cmd)
+    sslocalProcess = new GuardedProcess(cmd).start()
   }
 
   def startTunnel() {
@@ -222,7 +222,7 @@ class ShadowsocksNatService extends BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-      sstunnelProcess = new GuardedProcess(cmd)
+      sstunnelProcess = new GuardedProcess(cmd).start()
 
     } else {
       val conf = ConfigUtils
@@ -245,7 +245,7 @@ class ShadowsocksNatService extends BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
 
-      sstunnelProcess = new GuardedProcess(cmdBuf)
+      sstunnelProcess = new GuardedProcess(cmdBuf).start()
     }
   }
 
@@ -268,7 +268,7 @@ class ShadowsocksNatService extends BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq)
+    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
   }
 
   def getVersionName: String = {
@@ -292,7 +292,7 @@ class ShadowsocksNatService extends BaseService {
     })
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    redsocksProcess = new GuardedProcess(cmd.split(" ").toSeq)
+    redsocksProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
   }
 
   /** Called when the activity is first created. */

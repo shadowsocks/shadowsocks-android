@@ -1,6 +1,6 @@
 /*
  * Shadowsocks - A shadowsocks client for Android
- * Copyright (C) 2015 <max.c.lv@gmail.com>
+ * Copyright (C) 2016 <max.c.lv@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,53 +48,45 @@ import java.util.concurrent.atomic.AtomicReference
 
 import collection.JavaConversions._
 
-object GuardedProcess {
-  private val TAG: String = classOf[GuardedProcess].getSimpleName
+/**
+  * @author ayanamist@gmail.com
+  */
+class GuardedProcess (cmd: Seq[String], onRestartCallback: Runnable = null) extends Process {
 
-  @throws(classOf[IOException])
-  private def startProcess(cmd: Seq[String]): Process = {
-    new ProcessBuilder(cmd).redirectErrorStream(true).start
-  }
-}
+  private val TAG = classOf[GuardedProcess].getSimpleName
 
-class GuardedProcess extends Process {
-  private var guardThread: Thread = null
-  @volatile
-  private var isDestroyed: Boolean = false
-  @volatile
-  private var process: Process = null
+  @volatile private var guardThread: Thread = null
+  @volatile private var isDestroyed: Boolean = false
+  @volatile private var process: Process = null
 
-  @throws(classOf[InterruptedException])
-  @throws(classOf[IOException])
-  def this(cmd: Seq[String], onRestartCallback: Runnable = null) {
-    this()
-    initThread(cmd, onRestartCallback)
-  }
+  def start(): GuardedProcess = {
 
-  def initThread(cmd: Seq[String], onRestartCallback: Runnable): Unit = {
-    val atomicIoException: AtomicReference[IOException] = new AtomicReference[IOException](null)
-    val countDownLatch: CountDownLatch = new CountDownLatch(1)
+    val atomicIoException = new AtomicReference[IOException](null)
+    val countDownLatch = new CountDownLatch(1)
+
     guardThread = new Thread(new Runnable() {
-      override def run(): Unit = {
+      override def run() {
         try {
           while (!isDestroyed) {
-            Log.i(GuardedProcess.TAG, "start process: " + cmd)
-            val startTime: Long = java.lang.System.currentTimeMillis
-            process = GuardedProcess.startProcess(cmd)
+            Log.i(TAG, "start process: " + cmd)
+            val startTime = java.lang.System.currentTimeMillis
+
+            process = new ProcessBuilder(cmd).redirectErrorStream(true).start
             if (onRestartCallback != null && countDownLatch.getCount <= 0) {
               onRestartCallback.run()
             }
+
             countDownLatch.countDown()
             process.waitFor
+
             if (java.lang.System.currentTimeMillis - startTime < 1000) {
-              Log.w(GuardedProcess.TAG, "process exit too fast, stop guard: " + cmd)
+              Log.w(TAG, "process exit too fast, stop guard: " + cmd)
               return
             }
           }
-        }
-        catch {
+        } catch {
           case ignored: InterruptedException =>
-            Log.i(GuardedProcess.TAG, "thread interrupt, destroy process: " + cmd)
+            Log.i(TAG, "thread interrupt, destroy process: " + cmd)
             process.destroy()
           case e: IOException =>
             atomicIoException.compareAndSet(null, e)
@@ -103,12 +95,16 @@ class GuardedProcess extends Process {
         }
       }
     }, "GuardThread-" + cmd)
+
     guardThread.start()
     countDownLatch.await()
+
     val ioException: IOException = atomicIoException.get
     if (ioException != null) {
       throw ioException
     }
+
+    this
   }
 
   def destroy() {
