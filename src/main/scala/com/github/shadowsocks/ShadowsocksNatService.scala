@@ -196,10 +196,7 @@ class ShadowsocksNatService extends BaseService {
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-    sslocalProcess = new ProcessBuilder()
-      .command(cmd)
-      .redirectErrorStream(true)
-      .start()
+    sslocalProcess = new GuardedProcess(cmd)
   }
 
   def startTunnel() {
@@ -225,10 +222,7 @@ class ShadowsocksNatService extends BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-      sstunnelProcess = new ProcessBuilder()
-        .command(cmd)
-        .redirectErrorStream(true)
-        .start()
+      sstunnelProcess = new GuardedProcess(cmd)
 
     } else {
       val conf = ConfigUtils
@@ -251,10 +245,7 @@ class ShadowsocksNatService extends BaseService {
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
 
-      sstunnelProcess = new ProcessBuilder()
-        .command(cmdBuf)
-        .redirectErrorStream(true)
-        .start()
+      sstunnelProcess = new GuardedProcess(cmdBuf)
     }
   }
 
@@ -277,10 +268,7 @@ class ShadowsocksNatService extends BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    pdnsdProcess = new ProcessBuilder()
-      .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(true)
-      .start()
+    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq)
   }
 
   def getVersionName: String = {
@@ -304,10 +292,7 @@ class ShadowsocksNatService extends BaseService {
     })
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    redsocksProcess = new ProcessBuilder()
-      .command(cmd.split(" ").toSeq)
-      .redirectErrorStream(true)
-      .start()
+    redsocksProcess = new GuardedProcess(cmd.split(" ").toSeq)
   }
 
   /** Called when the activity is first created. */
