@@ -15,7 +15,7 @@ import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.CloseUtils._
-import com.github.shadowsocks.utils.{Key, Utils}
+import com.github.shadowsocks.utils.Key
 
 object ShadowsocksSettings {
   // Constants
@@ -196,15 +196,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   private var enabled = true
   def setEnabled(enabled: Boolean) {
     this.enabled = enabled
-    findPreference(Key.isNAT).setEnabled(enabled)
-    for (name <- PROXY_PREFS) {
+    for (name <- Key.isNAT #:: PROXY_PREFS.toStream #::: FEATURE_PREFS.toStream) {
       val pref = findPreference(name)
       if (pref != null) pref.setEnabled(enabled)
-    }
-    for (name <- FEATURE_PREFS) {
-      val pref = findPreference(name)
-      if (pref != null) pref.setEnabled(enabled &&
-        (name != Key.isProxyApps || Utils.isLollipopOrAbove || !ShadowsocksApplication.isVpnEnabled))
     }
   }
 

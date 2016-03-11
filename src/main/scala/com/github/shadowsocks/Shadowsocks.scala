@@ -275,7 +275,7 @@ class Shadowsocks
     }
   }
 
-  private def crashRecovery() {
+  def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
@@ -318,8 +318,6 @@ class Shadowsocks
     changeSwitch(checked = false)
   }
 
-  def isReady: Boolean = checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null
-
   def prepareStartService() {
     ThrowableFuture {
       if (ShadowsocksApplication.isVpnEnabled) {
@@ -358,18 +356,9 @@ class Shadowsocks
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener((v: View) => {
-      serviceStarted = !serviceStarted
-      serviceStarted match {
-        case true =>
-          if (isReady)
-            prepareStartService()
-          else
-            changeSwitch(checked = false)
-        case false =>
-          serviceStop()
-      }
-    })
+    fab.setOnClickListener((v: View) => if (serviceStarted) serviceStop()
+      else if (checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null) prepareStartService()
+      else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
         Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show
@@ -377,11 +366,6 @@ class Shadowsocks
     })
     updateTraffic(0, 0, 0, 0)
 
-    bindToService()
-  }
-
-  // Bind to the service
-  def bindToService() {
     handler.post(() => attachService)
   }
 
@@ -488,7 +472,9 @@ class Shadowsocks
     handler.removeCallbacksAndMessages(null)
   }
 
-  def install() {
+  def reset() {
+    crashRecovery()
+
     copyAssets(System.getABI)
 
     val ab = new ArrayBuffer[String]
@@ -496,12 +482,6 @@ class Shadowsocks
       ab.append("chmod 755 " + getApplicationInfo.dataDir + "/" + executable)
     }
     Console.runCommand(ab.toArray)
-  }
-
-  def reset() {
-    crashRecovery()
-
-    install()
   }
 
   def recovery() {

@@ -8,11 +8,11 @@ import com.github.shadowsocks.utils.Action
 /**
   * @author Mygod
   */
-trait ServiceBoundContext extends Context { outer =>
+trait ServiceBoundContext extends Context {
   class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
+      service.linkToDeath(new ShadowsocksDeathRecipient(ServiceBoundContext.this), 0)
       bgService = IShadowsocksService.Stub.asInterface(service)
-      bgService.asBinder().linkToDeath(new ShadowsocksDeathRecipient(outer), 0)
       registerCallback
       ServiceBoundContext.this.onServiceConnected()
     }
@@ -26,18 +26,18 @@ trait ServiceBoundContext extends Context { outer =>
     }
   }
 
-  def registerCallback = if (bgService != null && callback != null && !callbackRegistered) try {
+  protected def registerCallback = if (bgService != null && callback != null && !callbackRegistered) try {
     bgService.registerCallback(callback)
     callbackRegistered = true
   } catch {
     case ignored: RemoteException => // Nothing
   }
 
-  def unregisterCallback = if (bgService != null && callback != null && callbackRegistered) try {
-    bgService.unregisterCallback(callback)
+  protected def unregisterCallback = {
+    if (bgService != null && callback != null && callbackRegistered) try bgService.unregisterCallback(callback) catch {
+      case ignored: RemoteException =>
+    }
     callbackRegistered = false
-  } catch {
-    case ignored: RemoteException => callbackRegistered = false
   }
 
   def onServiceConnected() = ()
@@ -66,16 +66,12 @@ trait ServiceBoundContext extends Context { outer =>
   }
 
   def deattachService() {
-    if (bgService != null) {
-      if (callback != null) {
-        unregisterCallback
-        callback = null
-      }
-      if (connection != null) {
-        unbindService(connection)
-        connection = null
-      }
-      bgService = null
+    unregisterCallback
+    callback = null
+    if (connection != null) {
+      unbindService(connection)
+      connection = null
     }
+    bgService = null
   }
 }
