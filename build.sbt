@@ -6,7 +6,7 @@ platformTarget in Android := "android-23"
 
 name := "shadowsocks"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 compileOrder in Compile := CompileOrder.JavaThenScala
 
@@ -30,14 +30,14 @@ libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "commons-net" % "commons-net" % "3.4",
-  "eu.chainfire" % "libsuperuser" % "1.0.0.201602011018",
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201602271131",
   "com.google.zxing" % "android-integration" % "3.2.1",
   "net.glxn.qrgen" % "android" % "2.0",
   "com.google.android.gms" % "play-services-base" % "8.4.0",
   "com.google.android.gms" % "play-services-ads" % "8.4.0",
   "com.google.android.gms" % "play-services-analytics" % "8.4.0",
-  "com.android.support" % "design" % "23.1.1",
-  "com.android.support" % "gridlayout-v7" % "23.1.1",
+  "com.android.support" % "design" % "23.2.1",
+  "com.android.support" % "gridlayout-v7" % "23.2.1",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
