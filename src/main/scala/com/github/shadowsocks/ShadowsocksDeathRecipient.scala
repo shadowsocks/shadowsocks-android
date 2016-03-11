@@ -2,7 +2,6 @@ package com.github.shadowsocks
 
 import android.os.IBinder
 import android.util.Log
-import com.github.shadowsocks.utils.ProcessUtils._
 
 /**
   * @author chentaov5@gmail.com
@@ -14,15 +13,11 @@ class ShadowsocksDeathRecipient(val mContext: ServiceBoundContext)
 
   override def binderDied(): Unit = {
     Log.d(TAG, "[ShadowsocksDeathRecipient] binder died.")
-
     mContext match {
       case ss: Shadowsocks =>
-        inShadowsocks(mContext) {
-          ss.deattachService
-          ss.attachService
-        }
+        ss.deattachService
+        ss.attachService
       case _ =>
     }
   }
-
 }
