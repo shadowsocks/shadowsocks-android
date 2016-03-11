@@ -60,7 +60,7 @@ class GuardedProcess(cmd: Seq[String]) extends Process {
   def start(onRestartCallback: () => Unit = null): GuardedProcess = {
     val semaphore = new Semaphore(1)
     semaphore.acquire
-    var ioException: IOException = null
+    @volatile var ioException: IOException = null
 
     guardThread = new Thread(() => {
       try {
