@@ -16,6 +16,7 @@ class ShadowsocksDeathRecipient(val mContext: ServiceBoundContext)
     mContext match {
       case ss: Shadowsocks =>
         ss.deattachService
+        ss.crashRecovery
         ss.attachService
       case _ =>
     }

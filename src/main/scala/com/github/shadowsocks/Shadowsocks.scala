@@ -275,7 +275,7 @@ class Shadowsocks
     }
   }
 
-  private def crashRecovery() {
+  def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
     for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
@@ -477,7 +477,9 @@ class Shadowsocks
     handler.removeCallbacksAndMessages(null)
   }
 
-  def install() {
+  def reset() {
+    crashRecovery()
+
     copyAssets(System.getABI)
 
     val ab = new ArrayBuffer[String]
@@ -485,12 +487,6 @@ class Shadowsocks
       ab.append("chmod 755 " + getApplicationInfo.dataDir + "/" + executable)
     }
     Console.runCommand(ab.toArray)
-  }
-
-  def reset() {
-    crashRecovery()
-
-    install()
   }
 
   def recovery() {
