@@ -318,8 +318,6 @@ class Shadowsocks
     changeSwitch(checked = false)
   }
 
-  def isReady: Boolean = checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null
-
   def prepareStartService() {
     ThrowableFuture {
       if (ShadowsocksApplication.isVpnEnabled) {
@@ -358,18 +356,9 @@ class Shadowsocks
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener((v: View) => {
-      serviceStarted = !serviceStarted
-      serviceStarted match {
-        case true =>
-          if (isReady)
-            prepareStartService()
-          else
-            changeSwitch(checked = false)
-        case false =>
-          serviceStop()
-      }
-    })
+    fab.setOnClickListener((v: View) => if (serviceStarted) serviceStop()
+      else if (checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null) prepareStartService()
+      else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
         Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show
