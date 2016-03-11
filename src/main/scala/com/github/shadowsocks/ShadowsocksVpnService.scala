@@ -44,18 +44,16 @@ import java.lang.Process
 import java.util.Locale
 
 import android.content._
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.pm.{PackageInfo, PackageManager}
 import android.net.VpnService
 import android.os._
 import android.util.Log
 import android.widget.Toast
-import android.content.pm.PackageManager.NameNotFoundException
-
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import org.apache.commons.net.util.SubnetUtils
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 class ShadowsocksVpnService extends VpnService with BaseService {
@@ -434,11 +432,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
-    tun2socksProcess = new GuardedProcess(cmd.split(" ").toSeq, new Runnable {
-      override def run(): Unit = {
-        sendFd(fd)
-      }
-    }).start()
+    tun2socksProcess = new GuardedProcess(cmd.split(" ").toSeq).start(() => sendFd(fd))
 
     fd
   }

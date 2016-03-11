@@ -39,67 +39,59 @@
 
 package com.github.shadowsocks
 
-import android.util.Log
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicReference
+import java.io.{IOException, InputStream, OutputStream}
+import java.lang.System.currentTimeMillis
+import java.util.concurrent.Semaphore
 
-import collection.JavaConversions._
+import android.util.Log
+
+import scala.collection.JavaConversions._
 
 /**
   * @author ayanamist@gmail.com
   */
-class GuardedProcess (cmd: Seq[String], onRestartCallback: Runnable = null) extends Process {
-
+class GuardedProcess(cmd: Seq[String]) extends Process {
   private val TAG = classOf[GuardedProcess].getSimpleName
 
-  @volatile private var guardThread: Thread = null
-  @volatile private var isDestroyed: Boolean = false
-  @volatile private var process: Process = null
+  @volatile private var guardThread: Thread = _
+  @volatile private var isDestroyed: Boolean = _
+  @volatile private var process: Process = _
 
-  def start(): GuardedProcess = {
+  def start(onRestartCallback: () => Unit = null): GuardedProcess = {
+    val semaphore = new Semaphore(1)
+    semaphore.acquire
+    var ioException: IOException = null
 
-    val atomicIoException = new AtomicReference[IOException](null)
-    val countDownLatch = new CountDownLatch(1)
+    guardThread = new Thread(() => {
+      try {
+        var callback: () => Unit = null
+        while (!isDestroyed) {
+          Log.i(TAG, "start process: " + cmd)
+          val startTime = currentTimeMillis
 
-    guardThread = new Thread(new Runnable() {
-      override def run() {
-        try {
-          while (!isDestroyed) {
-            Log.i(TAG, "start process: " + cmd)
-            val startTime = java.lang.System.currentTimeMillis
+          process = new ProcessBuilder(cmd).redirectErrorStream(true).start
 
-            process = new ProcessBuilder(cmd).redirectErrorStream(true).start
-            if (onRestartCallback != null && countDownLatch.getCount <= 0) {
-              onRestartCallback.run()
-            }
+          if (callback == null) callback = onRestartCallback else callback()
 
-            countDownLatch.countDown()
-            process.waitFor
+          semaphore.release
+          process.waitFor
 
-            if (java.lang.System.currentTimeMillis - startTime < 1000) {
-              Log.w(TAG, "process exit too fast, stop guard: " + cmd)
-              return
-            }
+          if (currentTimeMillis - startTime < 1000) {
+            Log.w(TAG, "process exit too fast, stop guard: " + cmd)
+            isDestroyed = true
           }
-        } catch {
-          case ignored: InterruptedException =>
-            Log.i(TAG, "thread interrupt, destroy process: " + cmd)
-            process.destroy()
-          case e: IOException =>
-            atomicIoException.compareAndSet(null, e)
-        } finally {
-          countDownLatch.countDown()
         }
-      }
+      } catch {
+        case ignored: InterruptedException =>
+          Log.i(TAG, "thread interrupt, destroy process: " + cmd)
+          process.destroy()
+        case e: IOException => ioException = e
+      } finally semaphore.release
     }, "GuardThread-" + cmd)
 
     guardThread.start()
-    countDownLatch.await()
+    semaphore.acquire
 
-    val ioException: IOException = atomicIoException.get
     if (ioException != null) {
       throw ioException
     }
@@ -111,32 +103,18 @@ class GuardedProcess (cmd: Seq[String], onRestartCallback: Runnable = null) exte
     isDestroyed = true
     guardThread.interrupt()
     process.destroy()
-    try {
-      guardThread.join()
-    }
-    catch {
+    try guardThread.join() catch {
       case ignored: InterruptedException =>
     }
   }
 
-  def exitValue: Int = {
-    throw new UnsupportedOperationException
-  }
-
-  def getErrorStream: InputStream = {
-    throw new UnsupportedOperationException
-  }
-
-  def getInputStream: InputStream = {
-    throw new UnsupportedOperationException
-  }
-
-  def getOutputStream: OutputStream = {
-    throw new UnsupportedOperationException
-  }
+  def exitValue: Int = throw new UnsupportedOperationException
+  def getErrorStream: InputStream = throw new UnsupportedOperationException
+  def getInputStream: InputStream = throw new UnsupportedOperationException
+  def getOutputStream: OutputStream = throw new UnsupportedOperationException
 
   @throws(classOf[InterruptedException])
-  def waitFor: Int = {
+  def waitFor = {
     guardThread.join()
     0
   }
