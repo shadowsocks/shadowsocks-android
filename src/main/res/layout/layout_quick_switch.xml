@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:clickable="true"
+              android:foreground="@android:color/transparent"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <android.support.v7.widget.CardView
+        android:layout_height="260dp"
+        android:layout_width="match_parent"
+        android:layout_margin="8dp"
+        android:layout_gravity="center_vertical"
+        android:clickable="true"
+        app:cardElevation="5dp"
+        app:cardBackgroundColor="#EEEEEE"
+        >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <include layout="@layout/toolbar_light_dark"/>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/profilesList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
