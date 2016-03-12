@@ -27,11 +27,7 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     def bind(item: Profile) {
       this.item = item
       text.setText(item.name)
-      if (item.id == ShadowsocksApplication.profileId) {
-        text.setChecked(true)
-      } else {
-        text.setChecked(false)
-      }
+      text.setChecked(item.id == ShadowsocksApplication.profileId)
     }
 
     def onClick(v: View) {
@@ -74,5 +70,8 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     profilesList.setLayoutManager(lm)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
+    if (ShadowsocksApplication.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == ShadowsocksApplication.profileId => i + 1
+    }.getOrElse(0))
   }
 }
