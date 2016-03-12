@@ -41,8 +41,12 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
     .addAction(android.R.drawable.ic_menu_close_clear_cancel, service.getString(R.string.stop),
       PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
-    .addAction(android.R.drawable.ic_menu_manage, service.getString(R.string.quick_switch),
-      PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))
+  ShadowsocksApplication.profileManager.getAllProfiles match {
+    case Some(profiles) => if (profiles.length > 1)
+      builder.addAction(android.R.drawable.ic_menu_manage, service.getString(R.string.quick_switch),
+        PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))
+    case _ =>
+  }
   private lazy val style = new BigTextStyle(builder)
   private val showOnUnlock = visible && Utils.isLollipopOrAbove
   private var isVisible = true
