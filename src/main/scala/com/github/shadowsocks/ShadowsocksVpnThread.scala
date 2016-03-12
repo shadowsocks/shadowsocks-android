@@ -66,7 +66,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
         case _: Exception => // ignore
       }
       serverSocket = null
-      }
+    }
   }
 
   def stopThread() {
