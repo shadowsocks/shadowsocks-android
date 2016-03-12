@@ -46,12 +46,12 @@ import com.github.shadowsocks.database.Profile
 
 object Parser {
   val TAG = "ShadowParser"
-  private val pattern = "(?i)ss://([A-Za-z0-9+/=]+)".r
+  private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)".r
 
   def generate (profile: Profile): String = "ss://" + Base64.encodeToString("%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
-    profile.method, profile.password, profile.host, profile.remotePort).getBytes, Base64.NO_PADDING)
+    profile.method, profile.password, profile.host, profile.remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP)
 
-  def findAll(data: String) = pattern.findAllMatchIn(data).map(m => try {
+  def findAll(data: CharSequence) = pattern.findAllMatchIn(data).map(m => try {
     val content = new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")
     val methodIdx = content.indexOf(':')
     val passwordIdx = content.lastIndexOf('@')

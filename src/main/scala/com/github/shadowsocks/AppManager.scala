@@ -154,26 +154,22 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
         return true
       case R.id.action_import =>
         if (clipboard.hasPrimaryClip) {
-          val clipdata = clipboard.getPrimaryClip
-          val label = clipdata.getDescription.getLabel
-          if (label == Key.proxied) {
-            val proxiedAppSequence = clipdata.getItemAt(0).getText
-            if (proxiedAppSequence != null) {
-              val proxiedAppString = proxiedAppSequence.toString
-              if (!proxiedAppString.isEmpty) {
-                val editor = prefs.edit
-                val i = proxiedAppString.indexOf('\n')
-                if (i < 0)
-                  editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
-                else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
-                  .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
-                Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-                // Restart activity
-                appListView.setVisibility(View.GONE)
-                loadingView.setVisibility(View.VISIBLE)
-                reloadApps()
-                return true
-              }
+          val proxiedAppSequence = clipboard.getPrimaryClip.getItemAt(0).getText
+          if (proxiedAppSequence != null) {
+            val proxiedAppString = proxiedAppSequence.toString
+            if (!proxiedAppString.isEmpty) {
+              val editor = prefs.edit
+              val i = proxiedAppString.indexOf('\n')
+              if (i < 0)
+                editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
+              else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
+                .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
+              Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+              // Restart activity
+              appListView.setVisibility(View.GONE)
+              loadingView.setVisibility(View.VISIBLE)
+              reloadApps()
+              return true
             }
           }
         }

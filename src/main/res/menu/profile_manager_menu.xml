@@ -15,6 +15,14 @@
                   android:title="@string/add_profile_methods_manual_settings"
                   android:alphabeticShortcut="m"
                   android:numericShortcut="2"/>
+            <item android:id="@+id/action_import"
+                  android:title="@string/action_import"
+                  android:alphabeticShortcut="i"
+                  android:numericShortcut="3"/>
+            <item android:id="@+id/action_export"
+                  android:title="@string/action_export"
+                  android:alphabeticShortcut="e"
+                  android:numericShortcut="4"/>
         </menu>
     </item>
 </menu>
