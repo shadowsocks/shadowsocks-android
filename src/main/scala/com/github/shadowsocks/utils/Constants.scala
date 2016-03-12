@@ -80,6 +80,8 @@ object Key {
   val encMethod = "encMethod"
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
+
+  val profileTip = "profileTip"
 }
 
 object Scheme {

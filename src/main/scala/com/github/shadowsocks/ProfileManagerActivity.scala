@@ -14,7 +14,7 @@ import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.{Parser, TrafficMonitor, Utils}
+import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
@@ -24,13 +24,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Mygod
   */
-object ProfileManagerActivity {
-  private final val profileTip = "profileTip"
-}
-
 class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
-  import ProfileManagerActivity._
-
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -193,8 +187,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
         if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
 
-    if (ShadowsocksApplication.settings.getBoolean(profileTip, true)) {
-      ShadowsocksApplication.settings.edit.putBoolean(profileTip, false).commit
+    if (ShadowsocksApplication.settings.getBoolean(Key.profileTip, true)) {
+      ShadowsocksApplication.settings.edit.putBoolean(Key.profileTip, false).commit
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
     }
