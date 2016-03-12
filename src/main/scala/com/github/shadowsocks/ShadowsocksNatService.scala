@@ -49,7 +49,6 @@ import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{ConnectivityManager, Network}
 import android.os._
 import android.util.{Log, SparseArray}
-import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 
@@ -65,7 +64,6 @@ class ShadowsocksNatService extends BaseService {
     "-j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
-  var closeReceiver: BroadcastReceiver = _
   var connReceiver: BroadcastReceiver = _
   val myUid = android.os.Process.myUid()
 
@@ -386,16 +384,6 @@ class ShadowsocksNatService extends BaseService {
     }
     super.startRunner(config)
 
-    // register close receiver
-    val filter = new IntentFilter()
-    filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Action.CLOSE)
-    closeReceiver = (context: Context, intent: Intent) => {
-      Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-      stopRunner()
-    }
-    registerReceiver(closeReceiver, filter)
-
     ShadowsocksApplication.track(TAG, "start")
     
     changeState(State.CONNECTING)
@@ -449,12 +437,6 @@ class ShadowsocksNatService extends BaseService {
 
     // channge the state
     changeState(State.STOPPING)
-
-    // clean up recevier
-    if (closeReceiver != null) {
-      unregisterReceiver(closeReceiver)
-      closeReceiver = null
-    }
 
     if (notification != null) notification.destroy()
 

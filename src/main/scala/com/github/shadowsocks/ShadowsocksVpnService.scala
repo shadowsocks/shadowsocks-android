@@ -49,7 +49,6 @@ import android.content.pm.{PackageInfo, PackageManager}
 import android.net.VpnService
 import android.os._
 import android.util.Log
-import android.widget.Toast
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import org.apache.commons.net.util.SubnetUtils
@@ -64,7 +63,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var conn: ParcelFileDescriptor = _
   var vpnThread: ShadowsocksVpnThread = _
   private var notification: ShadowsocksNotification = _
-  var closeReceiver: BroadcastReceiver = _
 
   var sslocalProcess: Process = _
   var sstunnelProcess: Process = _
@@ -134,12 +132,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    // clean up recevier
-    if (closeReceiver != null) {
-      unregisterReceiver(closeReceiver)
-      closeReceiver = null
-    }
-
     super.stopRunner()
   }
 
@@ -180,16 +172,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     vpnThread = new ShadowsocksVpnThread(this)
     vpnThread.start()
-
-    // register close receiver
-    val filter = new IntentFilter()
-    filter.addAction(Intent.ACTION_SHUTDOWN)
-    filter.addAction(Action.CLOSE)
-    closeReceiver = (context: Context, intent: Intent) => {
-      Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-      stopRunner()
-    }
-    registerReceiver(closeReceiver, filter)
 
     // ensure the VPNService is prepared
     if (VpnService.prepare(this) != null) {

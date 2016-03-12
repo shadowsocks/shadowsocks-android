@@ -1,9 +1,9 @@
 package com.github.shadowsocks
 
 import android.content.res.Resources
-import android.os.{Handler, Build, Bundle}
+import android.os.{Build, Bundle}
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.{Toolbar, DefaultItemAnimator, LinearLayoutManager, RecyclerView}
+import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.CheckedTextView
 import com.github.shadowsocks.database.Profile
@@ -31,12 +31,8 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     }
 
     def onClick(v: View) {
-      Utils.stopSsService(ShadowsocksQuickSwitchActivity.this)
       ShadowsocksApplication.switchProfile(item.id)
-      val handler = new Handler(ShadowsocksQuickSwitchActivity.this.getMainLooper)
-      handler.postDelayed(() => {
-        Utils.startSsService(ShadowsocksQuickSwitchActivity.this)
-      }, 3000)
+      Utils.startSsService(ShadowsocksQuickSwitchActivity.this)
       finish
     }
   }

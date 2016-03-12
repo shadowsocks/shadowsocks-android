@@ -65,7 +65,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
         onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
       }
     } else {
-      bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
+      bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
       finish()
     }
   }
@@ -101,7 +101,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     resultCode match {
       case Activity.RESULT_OK =>
         if (bgService != null) {
-          bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
+          bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
         }
       case _ =>
         Log.e(Shadowsocks.TAG, "Failed to start VpnService")

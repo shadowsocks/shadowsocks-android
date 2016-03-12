@@ -10,6 +10,5 @@ interface IShadowsocksService {
   oneway void registerCallback(IShadowsocksServiceCallback cb);
   oneway void unregisterCallback(IShadowsocksServiceCallback cb);
 
-  oneway void start(in Config config);
-  oneway void stop();
+  oneway void use(in Config config);
 }

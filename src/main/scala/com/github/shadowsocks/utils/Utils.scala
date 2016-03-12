@@ -42,7 +42,7 @@ import java.io._
 import java.net._
 import java.security.MessageDigest
 
-import android.animation.{AnimatorListenerAdapter, Animator}
+import android.animation.{Animator, AnimatorListenerAdapter}
 import android.app.ActivityManager
 import android.content.pm.{ApplicationInfo, PackageManager}
 import android.content.{Context, Intent}
@@ -51,11 +51,11 @@ import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.os.Build
 import android.provider.Settings
 import android.support.v4.content.ContextCompat
-import android.util.{DisplayMetrics, Base64, Log}
+import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
 import android.widget.Toast
-import com.github.shadowsocks.{ShadowsocksRunnerService, ShadowsocksApplication, BuildConfig}
+import com.github.shadowsocks.{BuildConfig, ShadowsocksApplication, ShadowsocksRunnerService}
 import org.xbill.DNS._
 
 
@@ -401,7 +401,7 @@ object Utils {
     }
   }
 
-  def startSsService(context: Context): Unit = {
+  def startSsService(context: Context) {
     val isInstalled: Boolean = ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)
     if (!isInstalled) return
 
@@ -409,8 +409,9 @@ object Utils {
     context.startService(intent)
   }
 
-  def stopSsService(context: Context): Unit = {
-    context.sendBroadcast(new Intent(Action.CLOSE))
+  def stopSsService(context: Context) {
+    val intent = new Intent(Action.CLOSE)
+    context.sendBroadcast(intent)
   }
 }
 
