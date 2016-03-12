@@ -5,6 +5,7 @@
     <style name="Toolbar.Logo" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">24sp</item>
     </style>
+
     <style name="Theme.Material" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:alertDialogTheme">@style/Theme.Material.Dialog.Alert</item>
         <item name="android:dialogTheme">@style/Theme.Material.Dialog</item>
@@ -14,19 +15,23 @@
         <item name="colorPrimary">@color/material_accent_500</item>
         <item name="colorPrimaryDark">@color/material_accent_700</item>
     </style>
+
     <style name="Theme.Material.DialogBase" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/material_accent_500</item>
         <item name="colorPrimary">@color/material_accent_500</item>
         <item name="colorPrimaryDark">@color/material_accent_700</item>
     </style>
+
     <style name="Theme.Material.Dialog.AlertBase" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorAccent">@color/material_accent_500</item>
         <item name="colorPrimary">@color/material_accent_500</item>
         <item name="colorPrimaryDark">@color/material_accent_700</item>
     </style>
+
     <style name="Theme.Material.Dialog" parent="Theme.Material.DialogBase">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
+
     <style name="Theme.Material.Dialog.Alert" parent="Theme.Material.Dialog.AlertBase">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
@@ -37,6 +42,12 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="PopupTheme.QuickSwitch" parent="PopupTheme">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
 
 </resources>

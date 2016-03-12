@@ -38,6 +38,7 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services-analytics" % "8.4.0",
   "com.android.support" % "design" % "23.2.1",
   "com.android.support" % "gridlayout-v7" % "23.2.1",
+  "com.android.support" % "cardview-v7" % "23.2.1",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",

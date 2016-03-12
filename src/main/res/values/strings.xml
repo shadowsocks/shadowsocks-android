@@ -73,6 +73,7 @@
   <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
   <string name="reboot_required">Failed to start VPN service. You might need to reboot your device.</string>
+  <string name="quick_switch">Quick Switch</string>
 
   <!-- alert category -->
   <string name="close">Close</string>

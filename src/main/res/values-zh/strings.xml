@@ -38,6 +38,7 @@
   <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
   <string name="switch_to_vpn">切换到 VPN 模式</string>
   <string name="stop">停止服务</string>
+  <string name="quick_switch">快速切换</string>
   <string name="stopping">正在关闭……</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="reboot_required">VPN 服务启动失败。你可能需要重启设备。</string>
