@@ -212,10 +212,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null) Parser.parse(scanResult.getContents) match {
-      case Some(profile) => ShadowsocksApplication.profileManager.createProfile(profile)
-      case _ => // ignore
-    }
+    if (scanResult != null)
+      Parser.findAll(scanResult.getContents).foreach(ShadowsocksApplication.profileManager.createProfile)
   }
 
   def onMenuItemClick(item: MenuItem) = item.getItemId match {
