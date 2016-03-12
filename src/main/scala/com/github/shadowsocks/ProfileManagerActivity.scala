@@ -1,6 +1,6 @@
 package com.github.shadowsocks
 
-import android.content.Intent
+import android.content._
 import android.os.{Bundle, Handler}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -14,7 +14,7 @@ import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.{Parser, TrafficMonitor, Utils}
+import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
@@ -24,13 +24,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Mygod
   */
-object ProfileManagerActivity {
-  private final val profileTip = "profileTip"
-}
-
 class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
-  import ProfileManagerActivity._
-
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -38,17 +32,20 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
     {
       val qrcode = itemView.findViewById(R.id.qrcode)
-      qrcode.setOnClickListener((v: View) => {
+      qrcode.setOnClickListener(_ => {
+        val url = Parser.generate(item)
         val image = new ImageView(ProfileManagerActivity.this)
         image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
-        val qrcode = QRCode.from(Parser.generate(item))
+        val qrcode = QRCode.from(url)
           .withSize(Utils.dpToPx(ProfileManagerActivity.this, 250), Utils.dpToPx(ProfileManagerActivity.this, 250))
           .asInstanceOf[QRCode].bitmap()
         image.setImageBitmap(qrcode)
 
         new AlertDialog.Builder(ProfileManagerActivity.this)
           .setCancelable(true)
-          .setNegativeButton(R.string.close, null)
+          .setPositiveButton(R.string.close, null)
+          .setNegativeButton(R.string.copy_url, ((_, _) =>
+            clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
           .setView(image)
           .create()
           .show()
@@ -150,6 +147,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private lazy val profilesAdapter = new ProfilesAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
 
+  private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_profiles)
@@ -193,8 +192,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
         if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
 
-    if (ShadowsocksApplication.settings.getBoolean(profileTip, true)) {
-      ShadowsocksApplication.settings.edit.putBoolean(profileTip, false).commit
+    if (ShadowsocksApplication.settings.getBoolean(Key.profileTip, true)) {
+      ShadowsocksApplication.settings.edit.putBoolean(Key.profileTip, false).commit
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
     }
@@ -218,13 +217,11 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null) Parser.parse(scanResult.getContents) match {
-      case Some(profile) => ShadowsocksApplication.profileManager.createProfile(profile)
-      case _ => // ignore
-    }
+    if (scanResult != null)
+      Parser.findAll(scanResult.getContents).foreach(ShadowsocksApplication.profileManager.createProfile)
   }
 
-  def onMenuItemClick(item: MenuItem) = item.getItemId match {
+  def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.scan_qr_code =>
       val integrator = new IntentIntegrator(this)
       val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
@@ -236,6 +233,25 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       ShadowsocksApplication.profileManager.reload(-1)
       ShadowsocksApplication.switchProfile(ShadowsocksApplication.profileManager.save.id)
       finish
+      true
+    case R.id.action_import =>
+      if (clipboard.hasPrimaryClip) {
+        val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+        if (profiles.nonEmpty) {
+          profiles.foreach(ShadowsocksApplication.profileManager.createProfile)
+          Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show
+          return true
+        }
+      }
+      Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
+      true
+    case R.id.action_export =>
+      ShadowsocksApplication.profileManager.getAllProfiles match {
+        case Some(profiles) =>
+          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.map(Parser.generate).mkString("\n")))
+          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+      }
       true
     case _ => false
   }
