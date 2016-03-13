@@ -396,7 +396,7 @@ class ShadowsocksNatService extends BaseService {
         } catch {
           case ex: Exception =>
             changeState(State.STOPPED, getString(R.string.service_failed))
-            stopRunner(false)
+            stopRunner(true)
             this.config = null
         }
       }
@@ -427,7 +427,7 @@ class ShadowsocksNatService extends BaseService {
           notification = new ShadowsocksNotification(this, config.profileName, true)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
-          stopRunner(false)
+          stopRunner(true)
         }
       }
     }
