@@ -63,7 +63,7 @@ trait BaseService extends Service {
 
   private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-    stopRunner()
+    stopRunner(true)
   }
   var closeReceiverRegistered: Boolean = _
 
@@ -106,8 +106,8 @@ trait BaseService extends Service {
     override def use(config: Config) = synchronized(state match {
       case State.STOPPED => if (config != null) startRunner(config)
       case State.CONNECTED =>
-        if (config == null) stopRunner() else if (config.profileId != BaseService.this.config.profileId) {
-          stopRunner()
+        if (config == null) stopRunner(true) else if (config.profileId != BaseService.this.config.profileId) {
+          stopRunner(false)
           startRunner(config)
         }
       case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
@@ -132,7 +132,7 @@ trait BaseService extends Service {
     }
   }
 
-  def stopRunner() {
+  def stopRunner(stopService: Boolean) {
     // clean up recevier
     if (closeReceiverRegistered) {
       unregisterReceiver(closeReceiver)
@@ -152,7 +152,7 @@ trait BaseService extends Service {
     changeState(State.STOPPED)
 
     // stop the service if nothing has bound to it
-    stopSelf()
+    if (stopService) stopSelf()
   }
 
   def updateTrafficTotal(tx: Long, rx: Long) {

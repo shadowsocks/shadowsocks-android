@@ -106,10 +106,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def onRevoke() {
-    stopRunner()
+    stopRunner(false)
   }
 
-  override def stopRunner() {
+  override def stopRunner(stopService: Boolean) {
 
     if (vpnThread != null) {
       vpnThread.stopThread()
@@ -132,7 +132,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    super.stopRunner()
+    super.stopRunner(stopService)
   }
 
   def getVersionName: String = {
@@ -193,7 +193,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         } catch {
           case ex: Exception =>
             changeState(State.STOPPED, getString(R.string.service_failed))
-            stopRunner()
+            stopRunner(false)
             this.config = null
         }
       }
@@ -221,7 +221,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
           notification = new ShadowsocksNotification(this, config.profileName)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
-          stopRunner()
+          stopRunner(false)
         }
       }
     }
@@ -386,7 +386,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
 
     if (conn == null) {
-      stopRunner()
+      stopRunner(false)
       return -1
     }
 

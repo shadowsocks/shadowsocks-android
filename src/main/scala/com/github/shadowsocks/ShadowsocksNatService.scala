@@ -396,7 +396,7 @@ class ShadowsocksNatService extends BaseService {
         } catch {
           case ex: Exception =>
             changeState(State.STOPPED, getString(R.string.service_failed))
-            stopRunner()
+            stopRunner(false)
             this.config = null
         }
       }
@@ -427,13 +427,13 @@ class ShadowsocksNatService extends BaseService {
           notification = new ShadowsocksNotification(this, config.profileName, true)
         } else {
           changeState(State.STOPPED, getString(R.string.service_failed))
-          stopRunner()
+          stopRunner(false)
         }
       }
     }
   }
 
-  override def stopRunner() {
+  override def stopRunner(stopService: Boolean) {
 
     // channge the state
     changeState(State.STOPPING)
@@ -445,7 +445,7 @@ class ShadowsocksNatService extends BaseService {
     // reset NAT
     killProcesses()
 
-    super.stopRunner()
+    super.stopRunner(stopService)
   }
 
   override def getTag = TAG
