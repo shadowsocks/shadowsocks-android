@@ -50,7 +50,8 @@ import com.github.shadowsocks.utils.Parser
 class ParserActivity extends AppCompatActivity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    val profiles = Parser.findAll(getIntent.getData.toString)
+    val data = getIntent.getData.toString
+    val profiles = Parser.findAll(data)
     if (profiles.isEmpty) {  // ignore
       finish()
       return
@@ -62,7 +63,7 @@ class ParserActivity extends AppCompatActivity {
       .setPositiveButton(android.R.string.yes, ((_, _) =>
         profiles.foreach(ShadowsocksApplication.profileManager.createProfile)): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, null)
-      .setMessage(profiles.mkString("\n"))
+      .setMessage(data)
       .create()
     dialog.setOnDismissListener((dialog: DialogInterface) => finish())  // builder method was added in API 17
     dialog.show()
