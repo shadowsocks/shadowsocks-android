@@ -39,10 +39,11 @@
 
 package com.github.shadowsocks
 
-import android.content.DialogInterface
+import android.content.{Intent, DialogInterface}
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Bundle
+import android.nfc.{NdefMessage, NfcAdapter}
+import android.os.{Parcelable, Bundle}
 import android.support.v7.app.{AppCompatActivity, AlertDialog}
 import android.view.WindowManager
 import com.github.shadowsocks.utils.Parser
@@ -50,9 +51,24 @@ import com.github.shadowsocks.utils.Parser
 class ParserActivity extends AppCompatActivity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    val data = getIntent.getData.toString
-    val profiles = Parser.findAll(data)
-    if (profiles.isEmpty) {  // ignore
+  }
+
+
+  override def onResume() {
+    super.onResume()
+    var sharedStr = ""
+    if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent.getAction)) {
+      val rawMsgs = getIntent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+      if (rawMsgs != null) {
+        val msg = rawMsgs(0).asInstanceOf[NdefMessage]
+        val records = msg.getRecords
+        sharedStr = new String(records(0).getPayload)
+      }
+    } else if (Intent.ACTION_VIEW.equals(getIntent.getAction)) {
+      sharedStr = getIntent.getData.toString
+    }
+    val profiles = Parser.findAll(sharedStr)
+    if (profiles.isEmpty) {
       finish()
       return
     }
@@ -63,9 +79,9 @@ class ParserActivity extends AppCompatActivity {
       .setPositiveButton(android.R.string.yes, ((_, _) =>
         profiles.foreach(ShadowsocksApplication.profileManager.createProfile)): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, null)
-      .setMessage(data)
+      .setMessage(sharedStr)
       .create()
-    dialog.setOnDismissListener((dialog: DialogInterface) => finish())  // builder method was added in API 17
+    dialog.setOnDismissListener((dialog: DialogInterface) => finish()) // builder method was added in API 17
     dialog.show()
   }
 

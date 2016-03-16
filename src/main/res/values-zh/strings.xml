@@ -60,7 +60,8 @@
   <string name="flush_dnscache_summary_root">只需在 NAT 模式下使用，需要 ROOT 权限</string>
   <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">刷新中……</string>
-  <string name="qrcode">二维码</string>
+  <string name="share">分享</string>
+  <string name="share_message">扫描二维码或者使用 NFC（Android Beam）</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>

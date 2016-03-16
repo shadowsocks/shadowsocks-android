@@ -23,11 +23,12 @@
                      android:drawablePadding="20dp"
                      android:maxLines="4"
                      android:scrollHorizontally="false" />
-    <ImageView android:id="@+id/qrcode"
+    <ImageView android:id="@+id/share"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
+               android:padding="5dp"
                android:layout_gravity="center_vertical"
                android:src="@drawable/ic_social_share"
                android:background="?attr/selectableItemBackgroundBorderless"
-               android:contentDescription="@string/qrcode"/>
+               android:contentDescription="@string/share"/>
 </LinearLayout>
