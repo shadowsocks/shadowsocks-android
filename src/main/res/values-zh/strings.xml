@@ -62,6 +62,9 @@
   <string name="flushing">刷新中……</string>
   <string name="share">分享</string>
   <string name="share_message">扫描二维码或者使用 NFC（Android Beam）</string>
+  <string name="share_message_without_nfc">扫描二维码</string>
+  <string name="share_message_nfc_disabled">扫描二维码，NFC（Android Beam）被禁用</string>
+  <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
