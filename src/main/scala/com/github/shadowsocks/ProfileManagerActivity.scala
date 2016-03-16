@@ -5,7 +5,8 @@ import java.nio.charset.Charset
 import android.content._
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
-import android.os.{Bundle, Handler}
+import android.os.{Build, Bundle, Handler}
+import android.provider.Settings
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -36,8 +37,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       val shareBtn = itemView.findViewById(R.id.share)
       shareBtn.setOnClickListener(_ => {
         val url = item.toString
-        if (nfcAdapter != null && nfcAdapter.isEnabled) {
-          nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this, ProfileManagerActivity.this)
+        if (nfcBeamEnable) {
+          nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this,ProfileManagerActivity.this)
           nfcShareItem = url.getBytes(Charset.forName("UTF-8"))
         }
         val image = new ImageView(ProfileManagerActivity.this)
@@ -53,11 +54,26 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
           .setNegativeButton(R.string.copy_url, ((_, _) =>
             clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
           .setView(image)
-          .setMessage(R.string.share_message)
           .setTitle(R.string.share)
           .create()
-        dialog.setOnDismissListener(_ => if (nfcAdapter != null && nfcAdapter.isEnabled)
-          nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this))
+        if (!nfcAvailable){
+          dialog.setMessage(getString(R.string.share_message_without_nfc))
+        } else {
+          if (!nfcBeamEnable) {
+            dialog.setMessage(getString(R.string.share_message_nfc_disabled))
+            dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc), ((_, _) =>
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                startActivity(new Intent(Settings.ACTION_NFC_SETTINGS))
+              } else {
+                startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS))
+              }
+              ): DialogInterface.OnClickListener)
+          } else {
+            dialog.setMessage(getString(R.string.share_message))
+            dialog.setOnDismissListener(_ =>
+              nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this))
+          }
+        }
         dialog.show()
       })
       shareBtn.setOnLongClickListener(_ => {
@@ -158,8 +174,12 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
-  private var nfcAdapter: NfcAdapter = _
+
+  private var nfcAdapter : NfcAdapter = _
   private var nfcShareItem: Array[Byte] = _
+  private var nfcAvailable = false
+  private var nfcEnable = false
+  private var nfcBeamEnable = false
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -174,10 +194,6 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     })
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
-
-    nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-    if (nfcAdapter != null && nfcAdapter.isEnabled)
-      nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this)
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -212,6 +228,31 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       ShadowsocksApplication.settings.edit.putBoolean(Key.profileTip, false).commit
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
+    }
+  }
+
+
+  override def onResume() {
+    super.onResume()
+    nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+    if (nfcAdapter != null){
+      nfcAvailable = true
+      if (nfcAdapter.isEnabled) {
+        nfcEnable = true
+        if (nfcAdapter.isNdefPushEnabled) {
+          nfcBeamEnable = true
+          nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this)
+        } else {
+          nfcBeamEnable = false
+        }
+      } else{
+        nfcEnable = false
+        nfcBeamEnable = false
+      }
+    } else {
+      nfcAvailable = false
+      nfcEnable = false
+      nfcBeamEnable = false
     }
   }
 
