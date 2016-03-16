@@ -43,24 +43,38 @@ import android.content.{DialogInterface, Intent}
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.nfc.{NdefMessage, NfcAdapter}
+import android.os.Bundle
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.text.TextUtils
 import android.view.WindowManager
 import com.github.shadowsocks.utils.Parser
 
 class ParserActivity extends AppCompatActivity {
+
+  override def onCreate(savedInstanceState: Bundle) {
+    super.onCreate(savedInstanceState)
+    handledSharedIntent()
+  }
+
   override def onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
+    setIntent(intent)
+    handledSharedIntent()
+  }
+
+  def handledSharedIntent() {
+    val intent = getIntent()
     val sharedStr = intent.getAction match {
       case Intent.ACTION_VIEW => intent.getData.toString
       case NfcAdapter.ACTION_NDEF_DISCOVERED =>
         val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
         if (rawMsgs != null && rawMsgs.nonEmpty)
-          new String(rawMsgs(0).asInstanceOf[NdefMessage].getRecords()(0).getPayload) else null
+          new String(rawMsgs(0).asInstanceOf[NdefMessage].getRecords()(0).getPayload)
+        else null
       case _ => null
     }
     if (TextUtils.isEmpty(sharedStr)) return
-    val profiles = Parser.findAll(sharedStr)
+    val profiles = Parser.findAll(sharedStr).toList
     if (profiles.isEmpty) {
       finish()
       return

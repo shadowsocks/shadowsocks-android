@@ -51,7 +51,7 @@
                 android:theme="@style/PopupTheme"
                 android:excludeFromRecents="true"
                 android:taskAffinity=""
-                android:launchMode="singleInstance">
+                android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
