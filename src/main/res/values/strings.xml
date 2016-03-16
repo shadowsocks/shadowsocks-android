@@ -91,7 +91,8 @@
   <string name="recovery_summary">Reset all the background services</string>
   <string name="about">About</string>
   <string name="about_title">Shadowsocks %s</string>
-  <string name="qrcode">QR Code</string>
+  <string name="share">Share</string>
+  <string name="share_message">Scan QRCode or Use NFC (Android Beam)</string>
   <string name="flush_dnscache">Flush DNS cache</string>
   <string name="flush_dnscache_summary">Only useful in NAT mode</string>
   <string name="flush_dnscache_summary_root">Only useful in NAT mode. Requires ROOT permission.</string>

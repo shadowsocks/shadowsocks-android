@@ -1,6 +1,10 @@
 package com.github.shadowsocks
 
+import java.nio.charset.Charset
+
 import android.content._
+import android.nfc.{NdefRecord, NdefMessage, NfcEvent, NfcAdapter}
+import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.os.{Bundle, Handler}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -9,7 +13,7 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
-import android.text.{SpannableStringBuilder, Spanned}
+import android.text.{TextUtils, SpannableStringBuilder, Spanned}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -24,16 +28,20 @@ import scala.collection.mutable.ArrayBuffer
 /**
   * @author Mygod
   */
-class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
+class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext with CreateNdefMessageCallback{
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     itemView.setOnClickListener(this)
 
     {
-      val qrcode = itemView.findViewById(R.id.qrcode)
-      qrcode.setOnClickListener(_ => {
+      val shareBtn = itemView.findViewById(R.id.share)
+      shareBtn.setOnClickListener(_ => {
         val url = Parser.generate(item)
+        if (nfcAdapter != null && nfcAdapter.isEnabled) {
+          nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this,ProfileManagerActivity.this)
+          nfcShareItem = url
+        }
         val image = new ImageView(ProfileManagerActivity.this)
         image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
         val qrcode = QRCode.from(url)
@@ -41,17 +49,24 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
           .asInstanceOf[QRCode].bitmap()
         image.setImageBitmap(qrcode)
 
-        new AlertDialog.Builder(ProfileManagerActivity.this)
+        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this)
           .setCancelable(true)
           .setPositiveButton(R.string.close, null)
           .setNegativeButton(R.string.copy_url, ((_, _) =>
             clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
           .setView(image)
+          .setMessage(R.string.share_message)
+          .setTitle(R.string.share)
           .create()
-          .show()
+        dialog.show()
+        dialog.setOnDismissListener((dialog : DialogInterface) => {
+          if (nfcAdapter != null && nfcAdapter.isEnabled) {
+            nfcAdapter.setNdefPushMessageCallback(null,ProfileManagerActivity.this)
+          }
+        })
       })
-      qrcode.setOnLongClickListener((v: View) => {
-        Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.qrcode, Toast.LENGTH_SHORT), qrcode,
+      shareBtn.setOnLongClickListener((v: View) => {
+        Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.share, Toast.LENGTH_SHORT), shareBtn,
           getWindow, 0, Utils.dpToPx(ProfileManagerActivity.this, 8)).show
         true
       })
@@ -148,6 +163,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+  private var nfcAdapter : NfcAdapter = _
+  private var nfcShareItem : String = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -162,6 +179,11 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     })
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
+
+    nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+    if (nfcAdapter != null && nfcAdapter.isEnabled) {
+      nfcAdapter.setNdefPushMessageCallback(null,ProfileManagerActivity.this)
+    }
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -217,8 +239,14 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null)
+    if (scanResult != null && !TextUtils.isEmpty(scanResult.getContents))
       Parser.findAll(scanResult.getContents).foreach(ShadowsocksApplication.profileManager.createProfile)
+  }
+
+  def createNdefMessage(nfcEvent: NfcEvent): NdefMessage = {
+    val ndefRecord = new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI,nfcShareItem.getBytes(Charset.forName("US-ASCII")),Array[Byte](),nfcShareItem.getBytes(Charset.forName("US-ASCII")))
+    val ndefMessage = new NdefMessage(Array[NdefRecord](ndefRecord))
+    ndefMessage
   }
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {

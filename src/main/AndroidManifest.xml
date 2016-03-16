@@ -6,10 +6,13 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.NFC" />
 
     <uses-feature
             android:name="android.hardware.touchscreen"
             android:required="false"/>
+
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
     <uses-sdk
             android:minSdkVersion="16"
@@ -46,12 +49,19 @@
         <activity
                 android:name=".ParserActivity"
                 android:theme="@style/PopupTheme"
-                android:launchMode="singleTask">
+                android:excludeFromRecents="true"
+                android:taskAffinity=""
+                android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="ss"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="ss" />
             </intent-filter>
         </activity>
 
