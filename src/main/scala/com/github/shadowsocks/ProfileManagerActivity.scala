@@ -3,8 +3,8 @@ package com.github.shadowsocks
 import java.nio.charset.Charset
 
 import android.content._
-import android.nfc.{NdefRecord, NdefMessage, NfcEvent, NfcAdapter}
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
+import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
 import android.os.{Bundle, Handler}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -13,7 +13,7 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
-import android.text.{TextUtils, SpannableStringBuilder, Spanned}
+import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -25,10 +25,8 @@ import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
-  * @author Mygod
-  */
-class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext with CreateNdefMessageCallback{
+class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
+  with CreateNdefMessageCallback {
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -37,10 +35,10 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     {
       val shareBtn = itemView.findViewById(R.id.share)
       shareBtn.setOnClickListener(_ => {
-        val url = Parser.generate(item)
+        val url = item.toString
         if (nfcAdapter != null && nfcAdapter.isEnabled) {
-          nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this,ProfileManagerActivity.this)
-          nfcShareItem = url
+          nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this, ProfileManagerActivity.this)
+          nfcShareItem = url.getBytes(Charset.forName("UTF-8"))
         }
         val image = new ImageView(ProfileManagerActivity.this)
         image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
@@ -58,14 +56,11 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
           .setMessage(R.string.share_message)
           .setTitle(R.string.share)
           .create()
+        dialog.setOnDismissListener(_ => if (nfcAdapter != null && nfcAdapter.isEnabled)
+          nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this))
         dialog.show()
-        dialog.setOnDismissListener((dialog : DialogInterface) => {
-          if (nfcAdapter != null && nfcAdapter.isEnabled) {
-            nfcAdapter.setNdefPushMessageCallback(null,ProfileManagerActivity.this)
-          }
-        })
       })
-      shareBtn.setOnLongClickListener((v: View) => {
+      shareBtn.setOnLongClickListener(_ => {
         Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.share, Toast.LENGTH_SHORT), shareBtn,
           getWindow, 0, Utils.dpToPx(ProfileManagerActivity.this, 8)).show
         true
@@ -163,8 +158,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
-  private var nfcAdapter : NfcAdapter = _
-  private var nfcShareItem : String = _
+  private var nfcAdapter: NfcAdapter = _
+  private var nfcShareItem: Array[Byte] = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -181,9 +176,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     toolbar.setOnMenuItemClickListener(this)
 
     nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-    if (nfcAdapter != null && nfcAdapter.isEnabled) {
-      nfcAdapter.setNdefPushMessageCallback(null,ProfileManagerActivity.this)
-    }
+    if (nfcAdapter != null && nfcAdapter.isEnabled)
+      nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this)
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -239,15 +233,15 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null && !TextUtils.isEmpty(scanResult.getContents))
-      Parser.findAll(scanResult.getContents).foreach(ShadowsocksApplication.profileManager.createProfile)
+    if (scanResult != null) {
+      val contents = scanResult.getContents
+      if (!TextUtils.isEmpty(contents))
+        Parser.findAll(contents).foreach(ShadowsocksApplication.profileManager.createProfile)
+    }
   }
 
-  def createNdefMessage(nfcEvent: NfcEvent): NdefMessage = {
-    val ndefRecord = new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI,nfcShareItem.getBytes(Charset.forName("US-ASCII")),Array[Byte](),nfcShareItem.getBytes(Charset.forName("US-ASCII")))
-    val ndefMessage = new NdefMessage(Array[NdefRecord](ndefRecord))
-    ndefMessage
-  }
+  def createNdefMessage(nfcEvent: NfcEvent) =
+    new NdefMessage(Array(new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem)))
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.scan_qr_code =>
@@ -276,7 +270,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     case R.id.action_export =>
       ShadowsocksApplication.profileManager.getAllProfiles match {
         case Some(profiles) =>
-          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.map(Parser.generate).mkString("\n")))
+          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
           Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
         case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
       }

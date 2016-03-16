@@ -39,6 +39,9 @@
 
 package com.github.shadowsocks.database
 
+import java.util.Locale
+
+import android.util.Base64
 import com.j256.ormlite.field.{DataType, DatabaseField}
 
 class Profile {
@@ -95,4 +98,7 @@ class Profile {
 
   @DatabaseField
   var userOrder: Long = _
+
+  override def toString = "ss://" + Base64.encodeToString("%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
+    method, password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP)
 }
