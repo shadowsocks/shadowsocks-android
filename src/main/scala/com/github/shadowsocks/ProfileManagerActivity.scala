@@ -13,7 +13,7 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
-import android.text.{SpannableStringBuilder, Spanned}
+import android.text.{TextUtils, SpannableStringBuilder, Spanned}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -239,7 +239,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null)
+    if (scanResult != null && !TextUtils.isEmpty(scanResult.getContents))
       Parser.findAll(scanResult.getContents).foreach(ShadowsocksApplication.profileManager.createProfile)
   }
 
