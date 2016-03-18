@@ -61,7 +61,7 @@
   <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">刷新中……</string>
   <string name="share">分享</string>
-  <string name="share_message">扫描 QR 代码或者使用 NFC（Android Beam）</string>
+  <string name="share_message">扫码或者使用 NFC（Android Beam）</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
@@ -93,7 +93,7 @@
   <string name="gotcha">好的</string>
   <string name="copy_url">复制 URL</string>
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
-  <string name="add_profile_methods_scan_qr_code">扫描 QR 代码</string>
+  <string name="add_profile_methods_scan_qr_code">扫码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
 
   <string-array name="route_entry">
