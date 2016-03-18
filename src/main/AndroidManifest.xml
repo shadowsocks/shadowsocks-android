@@ -47,11 +47,21 @@
         </activity>
 
         <activity
-                android:name=".ParserActivity"
-                android:theme="@style/PopupTheme"
-                android:excludeFromRecents="true"
-                android:taskAffinity=""
+                android:name=".ShadowsocksRunnerActivity"
+                android:theme="@android:style/Theme.NoDisplay"
                 android:launchMode="singleTask">
+        </activity>
+
+        <activity
+                android:name=".ProfileManagerActivity"
+                android:label="@string/profiles"
+                android:parentActivityName=".Shadowsocks"
+                android:excludeFromRecents="true"
+                android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.ProfileManagerActivity"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -62,24 +72,6 @@
                 <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="ss" />
-            </intent-filter>
-        </activity>
-
-        <activity
-                android:name=".ShadowsocksRunnerActivity"
-                android:theme="@android:style/Theme.NoDisplay"
-                android:launchMode="singleTask">
-        </activity>
-
-        <activity
-                android:name=".ProfileManagerActivity"
-                android:label="@string/profiles"
-                android:parentActivityName=".Shadowsocks"
-                android:exported="false"
-                android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="com.github.shadowsocks.ProfileManagerActivity"/>
-                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 

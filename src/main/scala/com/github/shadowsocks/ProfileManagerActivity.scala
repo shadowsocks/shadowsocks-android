@@ -7,6 +7,7 @@ import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
 import android.os.{Build, Bundle, Handler}
 import android.provider.Settings
+import android.support.v4.app.{NavUtils, TaskStackBuilder}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -113,6 +114,9 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     def onClick(v: View) = {
       ShadowsocksApplication.switchProfile(item.id)
       finish
+      if (isLauncherFromShareIntent){
+        TaskStackBuilder.create(ProfileManagerActivity.this).addNextIntentWithParentStack(NavUtils.getParentActivityIntent(ProfileManagerActivity.this)).startActivities()
+      }
     }
   }
 
@@ -181,6 +185,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private var nfcEnable = false
   private var nfcBeamEnable = false
 
+  private var isLauncherFromShareIntent = false
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_profiles)
@@ -234,6 +240,17 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onResume() {
     super.onResume()
+    isLauncherFromShareIntent = false
+    handledShareIntent()
+    updateNFCState()
+  }
+
+  override def onNewIntent(intent: Intent): Unit ={
+    super.onNewIntent(intent)
+    setIntent(intent)
+  }
+
+  def updateNFCState(): Unit = {
     nfcAdapter = NfcAdapter.getDefaultAdapter(this)
     if (nfcAdapter != null){
       nfcAvailable = true
@@ -254,6 +271,34 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       nfcEnable = false
       nfcBeamEnable = false
     }
+  }
+
+  def handledShareIntent() {
+    val intent = getIntent()
+    val sharedStr = intent.getAction match {
+      case Intent.ACTION_VIEW => intent.getData.toString
+      case NfcAdapter.ACTION_NDEF_DISCOVERED =>
+        val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        if (rawMsgs != null && rawMsgs.nonEmpty)
+          new String(rawMsgs(0).asInstanceOf[NdefMessage].getRecords()(0).getPayload)
+        else null
+      case _ => null
+    }
+    if (TextUtils.isEmpty(sharedStr)) return
+    val profiles = Parser.findAll(sharedStr).toList
+    if (profiles.isEmpty) {
+      finish()
+      return
+    }
+    val dialog = new AlertDialog.Builder(this)
+      .setTitle(R.string.add_profile_dialog)
+      .setPositiveButton(android.R.string.yes, ((_, _) =>
+        profiles.foreach(ShadowsocksApplication.profileManager.createProfile)): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+      .setMessage(profiles.mkString("\n"))
+      .create()
+    dialog.show()
+    isLauncherFromShareIntent = true
   }
 
   override def onStart() {
