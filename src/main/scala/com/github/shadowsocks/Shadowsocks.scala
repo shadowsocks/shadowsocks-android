@@ -443,7 +443,7 @@ class Shadowsocks
       adView = new AdView(this)
       adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
       adView.setAdSize(AdSize.SMART_BANNER)
-      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 0)
+      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 1)
       adView.loadAd(new AdRequest.Builder().build())
     } else adView.setVisibility(View.VISIBLE) else if (adView != null) adView.setVisibility(View.GONE)
 
