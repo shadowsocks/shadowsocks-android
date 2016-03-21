@@ -69,11 +69,11 @@
   <string name="nat_deprecated">WARNING: NAT mode has been deprecated since Android 5.0</string>
   <string name="nat_no_root">NAT mode requires ROOT permission</string>
   <string name="switch_to_vpn">Switch to VPN mode</string>
-  <string name="stop">Stop the service</string>
+  <string name="stop">Stop</string>
   <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
   <string name="reboot_required">Failed to start VPN service. You might need to reboot your device.</string>
-  <string name="quick_switch">Quick Switch</string>
+  <string name="quick_switch">Switch</string>
 
   <!-- alert category -->
   <string name="close">Close</string>
