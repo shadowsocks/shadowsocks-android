@@ -39,8 +39,8 @@
   <string name="nat_deprecated">警告：自 Android 5.0 開始， NAT 模式已過時</string>
   <string name="nat_no_root">NAT 模式需要 ROOT 權限</string>
   <string name="switch_to_vpn">切換至 VPN 模式</string>
-  <string name="stop">停止此服務</string>
-  <string name="quick_switch">快速切換</string>
+  <string name="stop">停止</string>
+  <string name="quick_switch">切換</string>
   <string name="stopping">關閉中……</string>
   <string name="vpn_error">%s</string>
   <string name="reboot_required">VPN 服務啟動失敗。您或許需要重新啟動您的裝置。</string>
