@@ -37,8 +37,8 @@
   <string name="nat_deprecated">警告：在 Android 5.0 及更高版本中不建议使用 NAT 模式</string>
   <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
   <string name="switch_to_vpn">切换到 VPN 模式</string>
-  <string name="stop">停止服务</string>
-  <string name="quick_switch">快速切换</string>
+  <string name="stop">停止</string>
+  <string name="quick_switch">切换</string>
   <string name="stopping">正在关闭……</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="reboot_required">VPN 服务启动失败。你可能需要重启设备。</string>
@@ -60,7 +60,11 @@
   <string name="flush_dnscache_summary_root">只需在 NAT 模式下使用，需要 ROOT 权限</string>
   <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">刷新中……</string>
-  <string name="qrcode">二维码</string>
+  <string name="share">分享</string>
+  <string name="share_message">扫描二维码或者使用 NFC（Android Beam）</string>
+  <string name="share_message_without_nfc">扫描二维码</string>
+  <string name="share_message_nfc_disabled">扫描二维码，NFC（Android Beam）被禁用</string>
+  <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>

@@ -1,7 +1,13 @@
 package com.github.shadowsocks
 
+import java.nio.charset.Charset
+
 import android.content._
-import android.os.{Bundle, Handler}
+import android.nfc.NfcAdapter.CreateNdefMessageCallback
+import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
+import android.os.{Build, Bundle, Handler}
+import android.provider.Settings
+import android.support.v4.app.{NavUtils, TaskStackBuilder}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -9,7 +15,7 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
-import android.text.{SpannableStringBuilder, Spanned}
+import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -21,19 +27,21 @@ import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
 
-/**
-  * @author Mygod
-  */
-class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext {
+class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
+  with CreateNdefMessageCallback {
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     itemView.setOnClickListener(this)
 
     {
-      val qrcode = itemView.findViewById(R.id.qrcode)
-      qrcode.setOnClickListener(_ => {
-        val url = Parser.generate(item)
+      val shareBtn = itemView.findViewById(R.id.share)
+      shareBtn.setOnClickListener(_ => {
+        val url = item.toString
+        if (nfcBeamEnable) {
+          nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this,ProfileManagerActivity.this)
+          nfcShareItem = url.getBytes(Charset.forName("UTF-8"))
+        }
         val image = new ImageView(ProfileManagerActivity.this)
         image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
         val qrcode = QRCode.from(url)
@@ -41,17 +49,36 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
           .asInstanceOf[QRCode].bitmap()
         image.setImageBitmap(qrcode)
 
-        new AlertDialog.Builder(ProfileManagerActivity.this)
+        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this)
           .setCancelable(true)
           .setPositiveButton(R.string.close, null)
           .setNegativeButton(R.string.copy_url, ((_, _) =>
             clipboard.setPrimaryClip(ClipData.newPlainText(null, url))): DialogInterface.OnClickListener)
           .setView(image)
+          .setTitle(R.string.share)
           .create()
-          .show()
+        if (!nfcAvailable){
+          dialog.setMessage(getString(R.string.share_message_without_nfc))
+        } else {
+          if (!nfcBeamEnable) {
+            dialog.setMessage(getString(R.string.share_message_nfc_disabled))
+            dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc), ((_, _) =>
+              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                startActivity(new Intent(Settings.ACTION_NFC_SETTINGS))
+              } else {
+                startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS))
+              }
+              ): DialogInterface.OnClickListener)
+          } else {
+            dialog.setMessage(getString(R.string.share_message))
+            dialog.setOnDismissListener(_ =>
+              nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this))
+          }
+        }
+        dialog.show()
       })
-      qrcode.setOnLongClickListener((v: View) => {
-        Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.qrcode, Toast.LENGTH_SHORT), qrcode,
+      shareBtn.setOnLongClickListener(_ => {
+        Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.share, Toast.LENGTH_SHORT), shareBtn,
           getWindow, 0, Utils.dpToPx(ProfileManagerActivity.this, 8)).show
         true
       })
@@ -87,6 +114,9 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     def onClick(v: View) = {
       ShadowsocksApplication.switchProfile(item.id)
       finish
+      if (isLauncherFromShareIntent){
+        TaskStackBuilder.create(ProfileManagerActivity.this).addNextIntentWithParentStack(NavUtils.getParentActivityIntent(ProfileManagerActivity.this)).startActivities()
+      }
     }
   }
 
@@ -149,6 +179,14 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
 
+  private var nfcAdapter : NfcAdapter = _
+  private var nfcShareItem: Array[Byte] = _
+  private var nfcAvailable = false
+  private var nfcEnable = false
+  private var nfcBeamEnable = false
+
+  private var isLauncherFromShareIntent = false
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_profiles)
@@ -199,6 +237,70 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
+
+  override def onResume() {
+    super.onResume()
+    isLauncherFromShareIntent = false
+    handledShareIntent()
+    updateNFCState()
+  }
+
+  override def onNewIntent(intent: Intent): Unit ={
+    super.onNewIntent(intent)
+    setIntent(intent)
+  }
+
+  def updateNFCState(): Unit = {
+    nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+    if (nfcAdapter != null){
+      nfcAvailable = true
+      if (nfcAdapter.isEnabled) {
+        nfcEnable = true
+        if (nfcAdapter.isNdefPushEnabled) {
+          nfcBeamEnable = true
+          nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this)
+        } else {
+          nfcBeamEnable = false
+        }
+      } else{
+        nfcEnable = false
+        nfcBeamEnable = false
+      }
+    } else {
+      nfcAvailable = false
+      nfcEnable = false
+      nfcBeamEnable = false
+    }
+  }
+
+  def handledShareIntent() {
+    val intent = getIntent()
+    val sharedStr = intent.getAction match {
+      case Intent.ACTION_VIEW => intent.getData.toString
+      case NfcAdapter.ACTION_NDEF_DISCOVERED =>
+        val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        if (rawMsgs != null && rawMsgs.nonEmpty)
+          new String(rawMsgs(0).asInstanceOf[NdefMessage].getRecords()(0).getPayload)
+        else null
+      case _ => null
+    }
+    if (TextUtils.isEmpty(sharedStr)) return
+    val profiles = Parser.findAll(sharedStr).toList
+    if (profiles.isEmpty) {
+      finish()
+      return
+    }
+    val dialog = new AlertDialog.Builder(this)
+      .setTitle(R.string.add_profile_dialog)
+      .setPositiveButton(android.R.string.yes, ((_, _) =>
+        profiles.foreach(ShadowsocksApplication.profileManager.createProfile)): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+      .setMessage(profiles.mkString("\n"))
+      .create()
+    dialog.show()
+    isLauncherFromShareIntent = true
+  }
+
   override def onStart() {
     super.onStart()
     registerCallback
@@ -217,9 +319,15 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null)
-      Parser.findAll(scanResult.getContents).foreach(ShadowsocksApplication.profileManager.createProfile)
+    if (scanResult != null) {
+      val contents = scanResult.getContents
+      if (!TextUtils.isEmpty(contents))
+        Parser.findAll(contents).foreach(ShadowsocksApplication.profileManager.createProfile)
+    }
   }
+
+  def createNdefMessage(nfcEvent: NfcEvent) =
+    new NdefMessage(Array(new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem)))
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.scan_qr_code =>
@@ -248,7 +356,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     case R.id.action_export =>
       ShadowsocksApplication.profileManager.getAllProfiles match {
         case Some(profiles) =>
-          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.map(Parser.generate).mkString("\n")))
+          clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
           Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
         case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
       }

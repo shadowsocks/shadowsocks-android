@@ -1,15 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.github.shadowsocks"
-          android:versionCode="133"
-          android:versionName="2.9.11">
+          android:versionCode="134"
+          android:versionName="2.10.1">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.NFC" />
 
     <uses-feature
             android:name="android.hardware.touchscreen"
             android:required="false"/>
+
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
 
     <uses-sdk
             android:minSdkVersion="16"
@@ -44,18 +47,6 @@
         </activity>
 
         <activity
-                android:name=".ParserActivity"
-                android:theme="@style/PopupTheme"
-                android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="ss"/>
-            </intent-filter>
-        </activity>
-
-        <activity
                 android:name=".ShadowsocksRunnerActivity"
                 android:theme="@android:style/Theme.NoDisplay"
                 android:launchMode="singleTask">
@@ -65,11 +56,22 @@
                 android:name=".ProfileManagerActivity"
                 android:label="@string/profiles"
                 android:parentActivityName=".Shadowsocks"
-                android:exported="false"
+                android:excludeFromRecents="true"
                 android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="com.github.shadowsocks.ProfileManagerActivity"/>
                 <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ss"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="ss" />
             </intent-filter>
         </activity>
 
