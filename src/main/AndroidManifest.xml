@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.github.shadowsocks"
+          xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
           android:versionCode="134"
           android:versionName="2.10.1">
 
@@ -92,7 +92,7 @@
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
                   android:taskAffinity=""
-            android:theme="@style/PopupTheme.QuickSwitch">
+                  android:theme="@style/PopupTheme.QuickSwitch">
             <intent-filter>
                 <action android:name="com.github.shadowsocks.QUICK_SWITCH" />
                 <category android:name="android.intent.category.DEFAULT"/>
@@ -128,7 +128,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".TaskerReceiver">
+        <receiver android:name=".TaskerReceiver" tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
