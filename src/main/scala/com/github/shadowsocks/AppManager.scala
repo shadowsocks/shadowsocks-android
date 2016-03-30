@@ -160,16 +160,20 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
             if (!proxiedAppString.isEmpty) {
               val editor = prefs.edit
               val i = proxiedAppString.indexOf('\n')
-              if (i < 0)
-                editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
-              else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
-                .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
-              Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-              // Restart activity
-              appListView.setVisibility(View.GONE)
-              loadingView.setVisibility(View.VISIBLE)
-              reloadApps()
-              return true
+              try {
+                if (i < 0)
+                  editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
+                else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
+                  .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
+                Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+                // Restart activity
+                appListView.setVisibility(View.GONE)
+                loadingView.setVisibility(View.VISIBLE)
+                reloadApps()
+                return true
+              } catch {
+                case _: java.lang.IllegalArgumentException => // ignore
+              }
             }
           }
         }
