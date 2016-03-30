@@ -5,9 +5,8 @@ import java.nio.charset.Charset
 import android.content._
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
-import android.os.{Build, Bundle, Handler}
+import android.os.{Bundle, Handler}
 import android.provider.Settings
-import android.support.v4.app.{NavUtils, TaskStackBuilder}
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -38,7 +37,7 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       val shareBtn = itemView.findViewById(R.id.share)
       shareBtn.setOnClickListener(_ => {
         val url = item.toString
-        if (nfcBeamEnable) {
+        if (isNfcBeamEnabled) {
           nfcAdapter.setNdefPushMessageCallback(ProfileManagerActivity.this,ProfileManagerActivity.this)
           nfcShareItem = url.getBytes(Charset.forName("UTF-8"))
         }
@@ -57,23 +56,15 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
           .setView(image)
           .setTitle(R.string.share)
           .create()
-        if (!nfcAvailable){
-          dialog.setMessage(getString(R.string.share_message_without_nfc))
+        if (!isNfcAvailable) dialog.setMessage(getString(R.string.share_message_without_nfc))
+        else if (!isNfcBeamEnabled) {
+          dialog.setMessage(getString(R.string.share_message_nfc_disabled))
+          dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc),
+            ((_, _) => startActivity(new Intent(Settings.ACTION_NFC_SETTINGS))): DialogInterface.OnClickListener)
         } else {
-          if (!nfcBeamEnable) {
-            dialog.setMessage(getString(R.string.share_message_nfc_disabled))
-            dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc), ((_, _) =>
-              if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                startActivity(new Intent(Settings.ACTION_NFC_SETTINGS))
-              } else {
-                startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS))
-              }
-              ): DialogInterface.OnClickListener)
-          } else {
-            dialog.setMessage(getString(R.string.share_message))
-            dialog.setOnDismissListener(_ =>
-              nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this))
-          }
+          dialog.setMessage(getString(R.string.share_message))
+          dialog.setOnDismissListener(_ =>
+            nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this))
         }
         dialog.show()
       })
@@ -111,12 +102,9 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       }
     }
 
-    def onClick(v: View) = {
+    def onClick(v: View) {
       ShadowsocksApplication.switchProfile(item.id)
       finish
-      if (isLauncherFromShareIntent){
-        TaskStackBuilder.create(ProfileManagerActivity.this).addNextIntentWithParentStack(NavUtils.getParentActivityIntent(ProfileManagerActivity.this)).startActivities()
-      }
     }
   }
 
@@ -181,11 +169,9 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
 
   private var nfcAdapter : NfcAdapter = _
   private var nfcShareItem: Array[Byte] = _
-  private var nfcAvailable = false
-  private var nfcEnable = false
-  private var nfcBeamEnable = false
-
-  private var isLauncherFromShareIntent = false
+  private var isNfcAvailable: Boolean = _
+  private var isNfcEnabled: Boolean = _
+  private var isNfcBeamEnabled: Boolean = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -235,46 +221,40 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
     }
+
+    val intent = getIntent
+    if (intent != null) handleShareIntent(intent)
   }
 
 
   override def onResume() {
     super.onResume()
-    isLauncherFromShareIntent = false
-    handledShareIntent()
-    updateNFCState()
+    updateNfcState()
   }
 
   override def onNewIntent(intent: Intent): Unit ={
     super.onNewIntent(intent)
-    setIntent(intent)
+    handleShareIntent(intent)
   }
 
-  def updateNFCState(): Unit = {
+  def updateNfcState() {
+    isNfcAvailable = false
+    isNfcEnabled = false
+    isNfcBeamEnabled = false
     nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-    if (nfcAdapter != null){
-      nfcAvailable = true
+    if (nfcAdapter != null) {
+      isNfcAvailable = true
       if (nfcAdapter.isEnabled) {
-        nfcEnable = true
+        isNfcEnabled = true
         if (nfcAdapter.isNdefPushEnabled) {
-          nfcBeamEnable = true
+          isNfcBeamEnabled = true
           nfcAdapter.setNdefPushMessageCallback(null, ProfileManagerActivity.this)
-        } else {
-          nfcBeamEnable = false
         }
-      } else{
-        nfcEnable = false
-        nfcBeamEnable = false
       }
-    } else {
-      nfcAvailable = false
-      nfcEnable = false
-      nfcBeamEnable = false
     }
   }
 
-  def handledShareIntent() {
-    val intent = getIntent()
+  def handleShareIntent(intent: Intent) {
     val sharedStr = intent.getAction match {
       case Intent.ACTION_VIEW => intent.getData.toString
       case NfcAdapter.ACTION_NDEF_DISCOVERED =>
@@ -298,7 +278,6 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       .setMessage(profiles.mkString("\n"))
       .create()
     dialog.show()
-    isLauncherFromShareIntent = true
   }
 
   override def onStart() {
