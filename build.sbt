@@ -42,7 +42,8 @@ libraryDependencies ++= Seq(
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
-  "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2"
+  "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
+  "com.github.clans" % "fab" % "1.6.2"
 )
 
 proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <init>(...); }",

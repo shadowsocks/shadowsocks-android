@@ -97,6 +97,8 @@
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
+  <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
+  <string name="add_profile_nfc_hint">保持两台设备的屏幕亮起，在另外一台设备上，点击配置文件的分享按钮，将它们靠在一起（背靠背）。\n你也可以扫描 NFC 标签。</string>
 
   <string-array name="route_entry">
     <item>全局</item>
