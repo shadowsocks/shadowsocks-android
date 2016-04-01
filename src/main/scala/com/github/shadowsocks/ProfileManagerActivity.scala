@@ -17,6 +17,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
+import com.github.clans.fab.{FloatingActionMenu, FloatingActionButton}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
@@ -26,7 +27,7 @@ import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
 
-class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
+class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext with View.OnClickListener
   with CreateNdefMessageCallback {
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
@@ -162,6 +163,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
+  private var menu : FloatingActionMenu = _
+
   private lazy val profilesAdapter = new ProfilesAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
 
@@ -186,6 +189,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     })
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
+
+    initFab()
 
     ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
@@ -226,6 +231,19 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     if (intent != null) handleShareIntent(intent)
   }
 
+  def initFab() {
+    menu = findViewById(R.id.menu).asInstanceOf[FloatingActionMenu]
+    menu.setClosedOnTouchOutside(true)
+    val manualAddFAB = findViewById(R.id.fab_manual_add).asInstanceOf[FloatingActionButton]
+    manualAddFAB.setOnClickListener(this)
+    val qrcodeAddFAB = findViewById(R.id.fab_qrcode_add).asInstanceOf[FloatingActionButton]
+    qrcodeAddFAB.setOnClickListener(this)
+    val nfcAddFAB = findViewById(R.id.fab_nfc_add).asInstanceOf[FloatingActionButton]
+    nfcAddFAB.setOnClickListener(this)
+    val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
+    importAddFAB.setOnClickListener(this)
+  }
+
 
   override def onResume() {
     super.onResume()
@@ -235,6 +253,50 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
   override def onNewIntent(intent: Intent): Unit ={
     super.onNewIntent(intent)
     handleShareIntent(intent)
+  }
+
+  override def onClick(v: View){
+    v.getId match {
+      case R.id.fab_manual_add =>
+        menu.toggle(true)
+        ShadowsocksApplication.profileManager.reload(-1)
+        ShadowsocksApplication.switchProfile(ShadowsocksApplication.profileManager.save.id)
+        finish
+      case R.id.fab_qrcode_add =>
+        menu.toggle(false)
+        val integrator = new IntentIntegrator(ProfileManagerActivity.this)
+        val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
+        list.add("tw.com.quickmark")
+        integrator.setTargetApplications(list)
+        integrator.initiateScan()
+      case R.id.fab_nfc_add =>
+        menu.toggle(true)
+        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this)
+          .setCancelable(true)
+          .setPositiveButton(R.string.gotcha, null)
+          .setTitle(R.string.add_profile_nfc_hint_title)
+          .create()
+        if (!isNfcBeamEnabled) {
+          dialog.setMessage(getString(R.string.share_message_nfc_disabled))
+          dialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.turn_on_nfc), ((_, _) =>
+              startActivity(new Intent(Settings.ACTION_NFC_SETTINGS))
+            ): DialogInterface.OnClickListener)
+        } else {
+          dialog.setMessage(getString(R.string.add_profile_nfc_hint))
+        }
+        dialog.show
+      case R.id.fab_import_add =>
+        menu.toggle(true)
+        if (clipboard.hasPrimaryClip) {
+          val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+          if (profiles.nonEmpty) {
+            profiles.foreach(ShadowsocksApplication.profileManager.createProfile)
+            Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show
+            return
+          }
+        }
+        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
+    }
   }
 
   def updateNfcState() {
@@ -305,33 +367,14 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
+  override def onBackPressed() {
+    if (menu.isOpened) menu.close(true) else super.onBackPressed()
+  }
+
   def createNdefMessage(nfcEvent: NfcEvent) =
     new NdefMessage(Array(new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem)))
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
-    case R.id.scan_qr_code =>
-      val integrator = new IntentIntegrator(this)
-      val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
-      list.add("tw.com.quickmark")
-      integrator.setTargetApplications(list)
-      integrator.initiateScan()
-      true
-    case R.id.manual_settings =>
-      ShadowsocksApplication.profileManager.reload(-1)
-      ShadowsocksApplication.switchProfile(ShadowsocksApplication.profileManager.save.id)
-      finish
-      true
-    case R.id.action_import =>
-      if (clipboard.hasPrimaryClip) {
-        val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
-        if (profiles.nonEmpty) {
-          profiles.foreach(ShadowsocksApplication.profileManager.createProfile)
-          Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show
-          return true
-        }
-      }
-      Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
-      true
     case R.id.action_export =>
       ShadowsocksApplication.profileManager.getAllProfiles match {
         case Some(profiles) =>
