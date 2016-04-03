@@ -7,7 +7,7 @@
     <include layout="@layout/toolbar_light_dark" />
     <android.support.design.widget.CoordinatorLayout android:layout_width="match_parent"
                                                      android:layout_height="0dp"
-        android:layout_weight="1">
+                                                     android:layout_weight="1">
         <android.support.v7.widget.RecyclerView android:id="@+id/profilesList"
                                                 app:layout_behavior="com.github.shadowsocks.widget.AutoPaddingBehavior"
                                                 android:layout_width="match_parent"
@@ -71,6 +71,7 @@
                 />
         </com.github.clans.fab.FloatingActionMenu>
     </android.support.design.widget.CoordinatorLayout>
+
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/snackbar"
         android:layout_width="match_parent"

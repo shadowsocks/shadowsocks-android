@@ -2,19 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
-    <PreferenceCategory android:title="@string/global_cat">
-
-        <Preference android:key="profiles" android:summary="@string/profile_summary" android:title="@string/profiles">
-            <intent android:action="com.github.shadowsocks.ProfileManagerActivity"/>
-        </Preference>
-
-        <com.github.shadowsocks.preferences.StatusPreference
-                android:key="stat"
-                android:summary="@string/connection_test_pending"
-                android:title="@string/stat"/>
-
-    </PreferenceCategory>
-
     <PreferenceCategory
             android:title="@string/proxy_cat">
 
