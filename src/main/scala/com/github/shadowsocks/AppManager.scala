@@ -172,7 +172,8 @@ class AppManager extends AppCompatActivity with OnCheckedChangeListener with OnC
                 reloadApps()
                 return true
               } catch {
-                case _: java.lang.IllegalArgumentException => // ignore
+                case _: IllegalArgumentException =>
+                  Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
               }
             }
           }

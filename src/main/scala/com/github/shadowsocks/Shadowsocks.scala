@@ -39,6 +39,8 @@
 package com.github.shadowsocks
 
 import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
+import java.lang.System.currentTimeMillis
+import java.net.{HttpURLConnection, URL}
 import java.util
 import java.util.Locale
 
@@ -59,6 +61,7 @@ import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
+import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
@@ -105,7 +108,6 @@ class Shadowsocks
   var progressTag = -1
   var state = State.STOPPED
   var currentProfile = new Profile
-  var vpnEnabled = -1
 
   // Services
   var currentServiceName = classOf[ShadowsocksNatService].getName
@@ -119,6 +121,7 @@ class Shadowsocks
             fab.setEnabled(false)
             fabProgressCircle.show()
             preferences.setEnabled(false)
+            stat.setVisibility(View.GONE)
           case State.CONNECTED =>
             fab.setBackgroundTintList(greenTint)
             if (state == State.CONNECTING) {
@@ -129,6 +132,11 @@ class Shadowsocks
             fab.setEnabled(true)
             changeSwitch(checked = true)
             preferences.setEnabled(false)
+            stat.setVisibility(View.VISIBLE)
+            if (ShadowsocksApplication.isVpnEnabled) {
+              connectionTest.setVisibility(View.VISIBLE)
+              connectionTest.setText(getString(R.string.connection_test_pending))
+            } else connectionTest.setVisibility(View.GONE)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -143,12 +151,14 @@ class Shadowsocks
               Log.e(Shadowsocks.TAG, "Error to start VPN service: " + m)
             }
             preferences.setEnabled(true)
+            stat.setVisibility(View.GONE)
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
             fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
             preferences.setEnabled(false)
+            stat.setVisibility(View.GONE)
         }
         state = s
       })
@@ -158,9 +168,12 @@ class Shadowsocks
     }
   }
 
-  def updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) = preferences.stat
-    .setRate(TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal),
-      TrafficMonitor.formatTraffic(txRate) + "/s", TrafficMonitor.formatTraffic(rxRate) + "/s")
+  def updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+    txText.setText(TrafficMonitor.formatTraffic(txTotal))
+    rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
+    txRateText.setText(TrafficMonitor.formatTraffic(txRate))
+    rxRateText.setText(TrafficMonitor.formatTraffic(rxRate))
+  }
 
   def attachService: Unit = attachService(callback)
 
@@ -202,11 +215,18 @@ class Shadowsocks
     if (fab != null) fab.setEnabled(false)
   }
 
-  private lazy val preferences =
-    getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
-  private var adView: AdView = _
+  private var testCount: Int = _
+  private lazy val stat = findViewById(R.id.stat)
+  private lazy val connectionTest = findViewById(R.id.connection_test).asInstanceOf[TextView]
+  private var txText: TextView = _
+  private var rxText: TextView = _
+  private var txRateText: TextView = _
+  private var rxRateText: TextView = _
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
+  private var adView: AdView = _
+  private lazy val preferences =
+    getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
 
   var handler = new Handler()
 
@@ -350,13 +370,65 @@ class Shadowsocks
     toolbar.setTitleTextAppearance(toolbar.getContext, R.style.Toolbar_Logo)
     val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
     field.setAccessible(true)
-    val title: TextView = field.get(toolbar).asInstanceOf[TextView]
-    val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
+    val title = field.get(toolbar).asInstanceOf[TextView]
+    title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
+    val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
+    title.setBackgroundResource(typedArray.getResourceId(0, 0))
+    typedArray.recycle
+    val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
+
+    val connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
+    txText = findViewById(R.id.tx).asInstanceOf[TextView]
+    txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
+    rxText = findViewById(R.id.rx).asInstanceOf[TextView]
+    rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
+    connectionTestText.setOnClickListener(_ => {
+      val id = synchronized {
+        testCount += 1
+        handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+        testCount
+      }
+      ThrowableFuture {
+        // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
+        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
+          .asInstanceOf[HttpURLConnection]) { conn =>
+          conn.setConnectTimeout(5 * 1000)
+          conn.setReadTimeout(5 * 1000)
+          conn.setInstanceFollowRedirects(false)
+          conn.setUseCaches(false)
+          if (testCount == id) {
+            var result: String = null
+            var success = true
+            try {
+              val start = currentTimeMillis
+              conn.getInputStream
+              val elapsed = currentTimeMillis - start
+              val code = conn.getResponseCode
+              if (code == 204 || code == 200 && conn.getContentLength == 0)
+                result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+            } catch {
+              case e: Exception =>
+                success = false
+                result = getString(R.string.connection_test_error, e.getMessage)
+            }
+            synchronized(if (testCount == id) {
+              if (ShadowsocksApplication.isVpnEnabled) handler.post(() => {
+                if (success) connectionTestText.setText(result) else {
+                  connectionTestText.setText(R.string.connection_test_fail)
+                  Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+                }
+              })
+            })
+          }
+        }
+      }
+    })
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener((v: View) => if (serviceStarted) serviceStop()
+    fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
       else if (checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null) prepareStartService()
       else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
@@ -391,24 +463,32 @@ class Shadowsocks
           fab.setImageResource(R.drawable.ic_start_busy)
           preferences.setEnabled(false)
           fabProgressCircle.show()
+          stat.setVisibility(View.GONE)
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
           serviceStarted = true
           fab.setImageResource(R.drawable.ic_start_connected)
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
+          stat.setVisibility(View.VISIBLE)
+          if (ShadowsocksApplication.isVpnEnabled) {
+            connectionTest.setVisibility(View.VISIBLE)
+            connectionTest.setText(getString(R.string.connection_test_pending))
+          } else connectionTest.setVisibility(View.GONE)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_start_busy)
           preferences.setEnabled(false)
           fabProgressCircle.show()
+          stat.setVisibility(View.GONE)
         case _ =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_start_idle)
           preferences.setEnabled(true)
           fabProgressCircle.postDelayed(hideCircle, 100)
+          stat.setVisibility(View.GONE)
       }
       state = bgService.getState
     }

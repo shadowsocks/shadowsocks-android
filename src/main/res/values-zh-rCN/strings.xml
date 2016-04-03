@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">影梭</string>
-  <string name="global_cat">全局设置</string>
   <string name="misc_cat">其他</string>
   <string name="proxy_cat">服务器设置</string>
   <string name="profile_name">配置名称</string>

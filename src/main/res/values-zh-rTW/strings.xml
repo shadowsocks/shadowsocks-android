@@ -2,7 +2,6 @@
 <resources>
 
   <string name="app_name">Shadowsocks</string>
-  <string name="global_cat">全域設定</string>
   <string name="misc_cat">其他</string>
   <string name="proxy_cat">伺服器設定</string>
   <string name="profile_name">設定檔名稱</string>
