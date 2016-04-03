@@ -350,13 +350,14 @@ class Shadowsocks
     toolbar.setTitleTextAppearance(toolbar.getContext, R.style.Toolbar_Logo)
     val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
     field.setAccessible(true)
-    val title: TextView = field.get(toolbar).asInstanceOf[TextView]
-    val tf: Typeface = Typefaces.get(this, "fonts/Iceland.ttf")
+    val title = field.get(toolbar).asInstanceOf[TextView]
+    title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
+    val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener((v: View) => if (serviceStarted) serviceStop()
+    fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
       else if (checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null) prepareStartService()
       else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {

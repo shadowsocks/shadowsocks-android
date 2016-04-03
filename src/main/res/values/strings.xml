@@ -2,10 +2,9 @@
 <resources>
 
   <string name="app_name">Shadowsocks</string>
-  <string name="screen_name" translatable="false">shadowsocks</string>
+  <string name="screen_name" translatable="false">shadowsocks ▾</string>
 
   <!-- global/misc category -->
-  <string name="global_cat">Global Settings</string>
   <string name="misc_cat">Misc</string>
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
