@@ -4,9 +4,10 @@
                 android:layout_width="match_parent" android:layout_height="match_parent"
                 tools:ignore="UnknownIdInLayout" android:clipChildren="false">
     <LinearLayout android:id="@+id/title_bar" android:layout_width="match_parent" android:layout_height="wrap_content"
-                  android:orientation="vertical" android:layout_below="@+id/toolbar">
+                  android:orientation="vertical" android:layout_below="@+id/toolbar"
+                  android:animateLayoutChanges="true">
         <include layout="@layout/toolbar_light_dark" />
-        <LinearLayout android:id="@+id/stat" android:elevation="4dp"
+        <LinearLayout android:id="@+id/stat" android:elevation="4dp" android:visibility="gone"
                       android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:minHeight="?android:attr/listPreferredItemHeight" android:gravity="center_vertical"
                       android:paddingStart="16dip" android:paddingEnd="88dip"
