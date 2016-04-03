@@ -133,8 +133,10 @@ class Shadowsocks
             changeSwitch(checked = true)
             preferences.setEnabled(false)
             stat.setVisibility(View.VISIBLE)
-            connectionTest.setText(
-              if (ShadowsocksApplication.isVpnEnabled) getString(R.string.connection_test_pending) else null)
+            if (ShadowsocksApplication.isVpnEnabled) {
+              connectionTest.setVisibility(View.VISIBLE)
+              connectionTest.setText(getString(R.string.connection_test_pending))
+            } else connectionTest.setVisibility(View.GONE)
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -469,8 +471,10 @@ class Shadowsocks
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          connectionTest.setText(
-            if (ShadowsocksApplication.isVpnEnabled) getString(R.string.connection_test_pending) else null)
+          if (ShadowsocksApplication.isVpnEnabled) {
+            connectionTest.setVisibility(View.VISIBLE)
+            connectionTest.setText(getString(R.string.connection_test_pending))
+          } else connectionTest.setVisibility(View.GONE)
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
