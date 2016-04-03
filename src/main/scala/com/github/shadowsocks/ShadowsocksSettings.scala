@@ -1,7 +1,5 @@
 package com.github.shadowsocks
 
-import java.lang.System.currentTimeMillis
-import java.net.{HttpURLConnection, URL}
 import java.util.Locale
 
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -9,12 +7,10 @@ import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.net.Uri
 import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences._
-import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.{Key, Utils}
 
 object ShadowsocksSettings {
@@ -69,61 +65,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
   private def activity = getActivity.asInstanceOf[Shadowsocks]
   lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
-  var stat: StatusPreference = _
 
   private var isProxyApps: SwitchPreference = _
-  private var testCount: Int = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
-
-    stat = findPreference(Key.stat).asInstanceOf[StatusPreference]
-    stat.setOnPreferenceClickListener(_ => {
-      val id = synchronized {
-        testCount += 1
-        activity.handler.post(() => stat.setSummary(R.string.connection_test_testing))
-        testCount
-      }
-      ThrowableFuture {
-        // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
-          .asInstanceOf[HttpURLConnection]) { conn =>
-          conn.setConnectTimeout(5 * 1000)
-          conn.setReadTimeout(5 * 1000)
-          conn.setInstanceFollowRedirects(false)
-          conn.setUseCaches(false)
-          if (testCount == id) {
-            var result: String = null
-            var success = true
-            try {
-              val start = currentTimeMillis
-              conn.getInputStream
-              val elapsed = currentTimeMillis - start
-              val code = conn.getResponseCode
-              if (code == 204 || code == 200 && conn.getContentLength == 0)
-                result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
-              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
-            } catch {
-              case e: Exception =>
-                success = false
-                result = getString(R.string.connection_test_error, e.getMessage)
-            }
-            synchronized(if (testCount == id) {
-              if (ShadowsocksApplication.isVpnEnabled) activity.handler.post(() => {
-                if (success) stat.setSummary(result) else {
-                  stat.setSummary(R.string.connection_test_fail)
-                  Snackbar.make(activity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-                }
-              })
-            })
-          }
-        }
-      }
-      true
-    })
-    stat.setSummary(if (ShadowsocksApplication.isVpnEnabled) getString(R.string.connection_test_pending) else null)
 
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
     isProxyApps.setOnPreferenceClickListener((preference: Preference) => {
@@ -189,7 +137,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         activity.deattachService
         activity.attachService
       })
-      stat.setSummary(if (ShadowsocksApplication.isVpnEnabled) getString(R.string.connection_test_pending) else null)
     case _ =>
   }
 
