@@ -39,11 +39,11 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-    .addAction(android.R.drawable.ic_menu_close_clear_cancel, service.getString(R.string.stop),
+    .addAction(R.drawable.ic_close, service.getString(R.string.stop),
       PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   ShadowsocksApplication.profileManager.getAllProfiles match {
     case Some(profiles) => if (profiles.length > 1)
-      builder.addAction(android.R.drawable.ic_menu_manage, service.getString(R.string.quick_switch),
+      builder.addAction(R.drawable.ic_settings, service.getString(R.string.quick_switch),
         PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))
     case _ =>
   }
