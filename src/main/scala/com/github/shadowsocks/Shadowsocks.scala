@@ -370,6 +370,9 @@ class Shadowsocks
     field.setAccessible(true)
     val title = field.get(toolbar).asInstanceOf[TextView]
     title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
+    val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
+    title.setBackgroundResource(typedArray.getResourceId(0, 0))
+    typedArray.recycle
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
