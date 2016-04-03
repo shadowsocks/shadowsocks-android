@@ -16,6 +16,7 @@ import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, Recy
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
+import android.widget.LinearLayout.LayoutParams
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.clans.fab.{FloatingActionMenu, FloatingActionButton}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -29,6 +30,10 @@ import scala.collection.mutable.ArrayBuffer
 
 class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext with View.OnClickListener
   with CreateNdefMessageCallback {
+
+  private val FOOTER_VIEW = 0
+  private val NORMAL_VIEW = 1
+
   private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -109,16 +114,28 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     }
   }
 
-  private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
+  private class EmptyFooterViewHolder(val view: View) extends RecyclerView.ViewHolder(view) {}
+
+  private class ProfilesAdapter extends RecyclerView.Adapter[RecyclerView.ViewHolder] {
     var profiles = new ArrayBuffer[Profile]
     profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
-    def getItemCount = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
+    override def getItemViewType(position: Int): Int = if (position == profiles.size) FOOTER_VIEW else NORMAL_VIEW
 
-    def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
+    def getItemCount = profiles.length + 1
+
+    def onBindViewHolder(vh: RecyclerView.ViewHolder, i: Int) = vh match {
+      case holder: ProfileViewHolder => holder.bind(profiles(i))
+      case _ =>
+    }
+
+    def onCreateViewHolder(vg: ViewGroup, i: Int): RecyclerView.ViewHolder =
+      if (i == NORMAL_VIEW ) {
+        new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
+      } else {
+        new EmptyFooterViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profile_footer, vg, false))
+      }
 
     def add(item: Profile) {
       undoManager.flush
@@ -201,17 +218,23 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == ShadowsocksApplication.profileId => i
     }.getOrElse(-1))
-    undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
+
+    undoManager = new UndoSnackbarManager[Profile](findViewById(R.id.snackbar), profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
       def onSwiped(viewHolder: ViewHolder, direction: Int) = {
-        val index = viewHolder.getAdapterPosition
-        profilesAdapter.remove(index)
-        undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
+        if (viewHolder.getItemViewType == NORMAL_VIEW) {
+          val index = viewHolder.getAdapterPosition
+          profilesAdapter.remove(index)
+          undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
+        }
       }
       def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
-        profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
-        true
+        if (viewHolder.getItemViewType == NORMAL_VIEW) {
+          profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
+          true
+        }
+        false
       }
     }).attachToRecyclerView(profilesList)
 
