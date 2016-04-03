@@ -218,7 +218,8 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == ShadowsocksApplication.profileId => i
     }.getOrElse(-1))
-    undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
+
+    undoManager = new UndoSnackbarManager[Profile](findViewById(R.id.snackbar), profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
       def onSwiped(viewHolder: ViewHolder, direction: Int) = {
