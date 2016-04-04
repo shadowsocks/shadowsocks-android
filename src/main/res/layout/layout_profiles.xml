@@ -8,7 +8,6 @@
     <android.support.design.widget.CoordinatorLayout android:layout_width="match_parent"
                                                      android:layout_height="match_parent">
         <android.support.v7.widget.RecyclerView android:id="@+id/profilesList"
-                                                app:layout_behavior="com.github.shadowsocks.widget.AutoPaddingBehavior"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="match_parent" />
         <com.github.clans.fab.FloatingActionMenu
@@ -22,7 +21,7 @@
             app:menu_colorNormal="@color/material_accent_500"
             app:menu_colorPressed="@color/material_accent_700"
             app:fab_colorRipple="@android:color/white"
-            >
+            app:layout_behavior="com.github.shadowsocks.widget.FloatingActionMenuBehavior">
 
             <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/fab_manual_add"
