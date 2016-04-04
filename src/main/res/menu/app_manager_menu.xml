@@ -1,12 +1,15 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/action_import"
-          android:title="@string/action_import"
-          android:showAsAction="never"
-          android:alphabeticShortcut="i"
-          android:numericShortcut="1"/>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_export"
           android:title="@string/action_export"
-          android:showAsAction="never"
+          android:icon="@drawable/ic_content_copy"
+          app:showAsAction="ifRoom"
           android:alphabeticShortcut="e"
+          android:numericShortcut="1"/>
+    <item android:id="@+id/action_import"
+          android:title="@string/action_import"
+          android:icon="@drawable/ic_content_paste"
+          app:showAsAction="ifRoom"
+          android:alphabeticShortcut="i"
           android:numericShortcut="2"/>
 </menu>

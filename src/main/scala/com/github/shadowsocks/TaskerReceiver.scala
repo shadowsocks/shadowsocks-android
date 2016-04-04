@@ -39,8 +39,7 @@
 package com.github.shadowsocks
 
 import android.content.{BroadcastReceiver, Context, Intent}
-import com.github.shadowsocks.helper.TaskerSettings
-import com.github.shadowsocks.utils.Utils
+import com.github.shadowsocks.utils.{TaskerSettings, Utils}
 
 /**
   * @author CzBiX

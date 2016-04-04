@@ -4,5 +4,7 @@
     <item android:id="@+id/action_export"
           android:title="@string/action_export"
           android:alphabeticShortcut="e"
-          app:showAsAction="never" />
+          android:numericShortcut="1"
+          android:icon="@drawable/ic_content_copy"
+          app:showAsAction="always"/>
 </menu>

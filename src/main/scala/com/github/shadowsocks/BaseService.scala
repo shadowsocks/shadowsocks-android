@@ -44,6 +44,7 @@ import java.util.{Timer, TimerTask}
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.os.{Handler, RemoteCallbackList}
+import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
@@ -104,15 +105,22 @@ trait BaseService extends Service {
     }
 
     override def use(config: Config) = synchronized(state match {
-      case State.STOPPED => if (config != null) startRunner(config)
+      case State.STOPPED => if (config != null && checkConfig(config)) startRunner(config)
       case State.CONNECTED =>
-        if (config == null) stopRunner(true) else if (config.profileId != BaseService.this.config.profileId) {
+        if (config == null) stopRunner(true)
+        else if (config.profileId != BaseService.this.config.profileId && checkConfig(config)) {
           stopRunner(false)
           startRunner(config)
         }
       case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
     })
   }
+
+  def checkConfig(config: Config) = if (TextUtils.isEmpty(config.proxy) || TextUtils.isEmpty(config.sitekey)) {
+    changeState(State.STOPPED)
+    stopRunner(true)
+    false
+  } else true
 
   def startRunner(config: Config) {
     this.config = config

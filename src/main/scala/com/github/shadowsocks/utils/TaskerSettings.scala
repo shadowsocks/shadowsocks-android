@@ -36,7 +36,7 @@
  *                              HERE BE DRAGONS
  *
  */
-package com.github.shadowsocks.helper
+package com.github.shadowsocks.utils
 
 import android.content.{Context, Intent}
 import android.os.Bundle
