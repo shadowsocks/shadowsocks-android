@@ -44,9 +44,9 @@ import android.os.{Build, Bundle}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view.{LayoutInflater, View, ViewGroup}
-import android.widget.{Switch, CheckedTextView}
+import android.widget.{CheckedTextView, Switch}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.helper.TaskerSettings
+import com.github.shadowsocks.utils.TaskerSettings
 
 /**
   * @author CzBiX
