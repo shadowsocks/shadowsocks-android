@@ -6,10 +6,10 @@
               android:layout_height="match_parent">
     <include layout="@layout/toolbar_light_dark" />
     <android.support.design.widget.CoordinatorLayout android:layout_width="match_parent"
-                                                     android:layout_height="match_parent">
+                                                     android:layout_height="0dp" android:layout_weight="1">
         <android.support.v7.widget.RecyclerView android:id="@+id/profilesList"
                                                 android:layout_width="match_parent"
-                                                android:layout_height="match_parent" />
+                                                android:layout_height="match_parent"/>
         <com.github.clans.fab.FloatingActionMenu
             android:id="@+id/menu"
             android:layout_width="match_parent"
