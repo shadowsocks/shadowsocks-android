@@ -21,7 +21,7 @@
             android:layout_marginEnd="16dp"
             app:menu_colorNormal="@color/material_accent_500"
             app:menu_colorPressed="@color/material_accent_700"
-            app:menu_colorRipple="@color/material_accent_500"
+            app:fab_colorRipple="@android:color/white"
             >
 
             <com.github.clans.fab.FloatingActionButton
@@ -31,7 +31,7 @@
                 android:src="@drawable/ic_create"
                 app:fab_colorNormal="@color/material_accent_500"
                 app:fab_colorPressed="@color/material_accent_700"
-                app:fab_colorRipple="@color/material_accent_500"
+                app:fab_colorRipple="@android:color/white"
                 app:fab_size="mini"
                 app:fab_label="@string/add_profile_methods_manual_settings"
                 />
@@ -42,7 +42,7 @@
                 android:src="@drawable/ic_camera_alt"
                 app:fab_colorNormal="@color/material_accent_500"
                 app:fab_colorPressed="@color/material_accent_700"
-                app:fab_colorRipple="@color/material_accent_500"
+                app:fab_colorRipple="@android:color/white"
                 app:fab_size="mini"
                 app:fab_label="@string/add_profile_methods_scan_qr_code"
                 />
@@ -53,7 +53,7 @@
                 android:src="@drawable/ic_nfc"
                 app:fab_colorNormal="@color/material_accent_500"
                 app:fab_colorPressed="@color/material_accent_700"
-                app:fab_colorRipple="@color/material_accent_500"
+                app:fab_colorRipple="@android:color/white"
                 app:fab_size="mini"
                 app:fab_label="NFC"
                 />
@@ -64,7 +64,7 @@
                 android:src="@drawable/ic_content_paste"
                 app:fab_colorNormal="@color/material_accent_500"
                 app:fab_colorPressed="@color/material_accent_700"
-                app:fab_colorRipple="@color/material_accent_500"
+                app:fab_colorRipple="@android:color/white"
                 app:fab_size="mini"
                 app:fab_label="@string/action_import"
                 />
