@@ -19,7 +19,8 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
   private val removedCallback = new Snackbar.Callback {
     override def onDismissed(snackbar: Snackbar, event: Int) = {
       event match {
-        case Snackbar.Callback.DISMISS_EVENT_MANUAL | Snackbar.Callback.DISMISS_EVENT_TIMEOUT =>
+        case Snackbar.Callback.DISMISS_EVENT_SWIPE | Snackbar.Callback.DISMISS_EVENT_MANUAL |
+             Snackbar.Callback.DISMISS_EVENT_TIMEOUT =>
           if (commit != null) commit(recycleBin.iterator)
           recycleBin.clear
         case _ =>
