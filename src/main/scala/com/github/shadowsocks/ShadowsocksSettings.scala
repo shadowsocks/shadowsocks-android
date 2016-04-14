@@ -3,7 +3,7 @@ package com.github.shadowsocks
 import java.util.Locale
 
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.content.{DialogInterface, Intent, SharedPreferences}
+import android.content.{Intent, SharedPreferences}
 import android.net.Uri
 import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
@@ -111,9 +111,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
       new AlertDialog.Builder(activity)
         .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, ShadowsocksApplication.getVersionName))
-        .setCancelable(false)
-        .setNegativeButton(getString(android.R.string.ok),
-          ((dialog: DialogInterface, id: Int) => dialog.cancel()): DialogInterface.OnClickListener)
+        .setNegativeButton(getString(android.R.string.ok), null)
         .setView(web)
         .create()
         .show()
