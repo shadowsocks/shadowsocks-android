@@ -45,22 +45,22 @@ import com.github.shadowsocks.database.Profile
 object Parser {
   val TAG = "ShadowParser"
   private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)".r
+  private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
-  def findAll(data: CharSequence) = pattern.findAllMatchIn(data).map(m => try {
-    val content = new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")
-    val methodIdx = content.indexOf(':')
-    val passwordIdx = content.lastIndexOf('@')
-    val hostIdx = content.lastIndexOf(':')
-    val host = content.substring(passwordIdx + 1, hostIdx)
-
-    val profile = new Profile
-    profile.name = host
-    profile.host = host
-    profile.remotePort = content.substring(hostIdx + 1).toInt
-    profile.method = content.substring(0, methodIdx).toLowerCase
-    profile.password = content.substring(methodIdx + 1, passwordIdx)
-    profile
-  } catch {
+  def findAll(data: CharSequence) = pattern.findAllMatchIn(data).map(m => try
+    decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
+      case Some(ss) =>
+        val profile = new Profile
+        profile.method = ss.group(2).toLowerCase
+        if (ss.group(3) != null) profile.auth = true
+        profile.password = ss.group(4)
+        profile.name = ss.group(5)
+        profile.host = profile.name
+        profile.remotePort = ss.group(6).toInt
+        profile
+      case _ => null
+    }
+  catch {
     case ex: Exception =>
       Log.e(TAG, "parser error: " + m.source, ex)// Ignore
       null

@@ -99,6 +99,6 @@ class Profile {
   @DatabaseField
   var userOrder: Long = _
 
-  override def toString = "ss://" + Base64.encodeToString("%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
-    method, password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP)
+  override def toString = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
+    method, if (auth) "-auth" else "", password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP)
 }
