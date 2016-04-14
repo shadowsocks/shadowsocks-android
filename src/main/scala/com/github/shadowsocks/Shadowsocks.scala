@@ -171,8 +171,8 @@ class Shadowsocks
   def updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
     txText.setText(TrafficMonitor.formatTraffic(txTotal))
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
-    txRateText.setText(TrafficMonitor.formatTraffic(txRate))
-    rxRateText.setText(TrafficMonitor.formatTraffic(rxRate))
+    txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
+    rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
   }
 
   def attachService: Unit = attachService(callback)
