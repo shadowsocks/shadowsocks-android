@@ -36,14 +36,14 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services-base" % "8.4.0",
   "com.google.android.gms" % "play-services-ads" % "8.4.0",
   "com.google.android.gms" % "play-services-analytics" % "8.4.0",
-  "com.android.support" % "design" % "23.2.1",
-  "com.android.support" % "gridlayout-v7" % "23.2.1",
-  "com.android.support" % "cardview-v7" % "23.2.1",
+  "com.android.support" % "design" % "23.3.0",
+  "com.android.support" % "gridlayout-v7" % "23.3.0",
+  "com.android.support" % "cardview-v7" % "23.3.0",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
-  "com.github.clans" % "fab" % "1.6.2"
+  "com.github.clans" % "fab" % "1.6.3"
 )
 
 proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <init>(...); }",
