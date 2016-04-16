@@ -15,9 +15,9 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
-import android.view.{LayoutInflater, MenuItem, View, ViewGroup}
+import android.view._
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
-import com.github.clans.fab.{FloatingActionMenu, FloatingActionButton}
+import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
@@ -27,12 +27,14 @@ import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
 
-class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext with View.OnClickListener
-  with CreateNdefMessageCallback {
-  private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
+final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
+  with View.OnClickListener with CreateNdefMessageCallback {
+  private final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
+    with View.OnClickListener with View.OnKeyListener {
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     itemView.setOnClickListener(this)
+    itemView.setOnKeyListener(this)
 
     {
       val shareBtn = itemView.findViewById(R.id.share)
@@ -107,6 +109,15 @@ class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListe
       ShadowsocksApplication.switchProfile(item.id)
       finish
     }
+
+    def onKey(v: View, keyCode: Int, event: KeyEvent) = if (event.getAction == KeyEvent.ACTION_UP) keyCode match {
+      case KeyEvent.KEYCODE_DPAD_LEFT =>
+        val index = getAdapterPosition
+        profilesAdapter.remove(index)
+        undoManager.remove(index, item)
+        true
+      case _ => false
+    } else false
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {

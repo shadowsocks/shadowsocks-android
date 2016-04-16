@@ -89,7 +89,7 @@
 
   <!-- profile -->
   <string name="profile_manager_dialog">配置文件</string>
-  <string name="profile_manager_dialog_content">&#8226; 点击选择配置文件；\n&#8226; 滑动删除；\n&#8226;
+  <string name="profile_manager_dialog_content">&#8226; 点击选择配置文件；\n&#8226; 向左/右滑动或按左删除；\n&#8226;
     长按拖动改变顺序。</string>
   <string name="gotcha">好的</string>
   <string name="copy_url">复制 URL</string>

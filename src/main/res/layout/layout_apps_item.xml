@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="?android:attr/selectableItemBackground">
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:focusable="true"
+              android:background="?android:attr/selectableItemBackground">
 
     <ImageView
         android:id="@+id/itemicon"
@@ -15,20 +16,19 @@
         android:paddingTop="2dp"
         android:paddingBottom="2dp"/>
 
-    <TextView
-        android:id="@+id/itemtext"
+    <Switch
+        android:id="@+id/itemcheck"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="fill_parent"
         android:gravity="center_vertical"
         android:ellipsize="end"
-        android:textSize="18sp"/>
-
-    <Switch
-        android:id="@+id/itemcheck"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:layout_marginLeft="8dp"
+        android:textSize="18sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
+        android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"/>
 
 </LinearLayout>

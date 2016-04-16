@@ -3,11 +3,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:id="@+id/container"
               android:background="?android:attr/selectableItemBackground"
               android:paddingStart="20dp"
               android:paddingEnd="?attr/dialogPreferredPadding"
               android:paddingLeft="20dp"
-              android:paddingRight="?attr/dialogPreferredPadding">
+              android:paddingRight="?attr/dialogPreferredPadding"
+              android:focusable="true"
+              android:nextFocusRight="@+id/share">
     <CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
                      android:id="@android:id/text1"
                      android:layout_width="0dp"
@@ -30,5 +33,7 @@
                android:layout_gravity="center_vertical"
                android:src="@drawable/ic_social_share"
                android:background="?attr/selectableItemBackgroundBorderless"
-               android:contentDescription="@string/share"/>
+               android:contentDescription="@string/share"
+               android:focusable="true"
+               android:nextFocusLeft="@+id/container"/>
 </LinearLayout>

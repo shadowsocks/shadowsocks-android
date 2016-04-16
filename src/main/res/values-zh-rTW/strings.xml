@@ -90,7 +90,7 @@
 
   <!-- profile -->
   <string name="profile_manager_dialog">設定檔</string>
-  <string name="profile_manager_dialog_content">&#8226; 輕觸選擇一個設定檔；\n&#8226; 向右撥動移除；\n&#8226;
+  <string name="profile_manager_dialog_content">&#8226; 輕觸選擇一個設定檔；\n&#8226; 向左/右撥動或按左移除；\n&#8226;
     按住後上下撥動設定檔重新排序。</string>
   <string name="gotcha">我懂了！</string>
   <string name="copy_url">複製 URL</string>
