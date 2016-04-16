@@ -10,9 +10,9 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ### PREREQUISITES
 
-* JDK 1.7
+* JDK 1.8
 * SBT 0.13.0+
-* Android SDK r24+
+* Android SDK r25+
 * Android NDK r10d+
 
 ### BUILD
