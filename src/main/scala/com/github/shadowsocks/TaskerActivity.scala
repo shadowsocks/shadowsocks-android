@@ -103,7 +103,7 @@ class TaskerActivity extends AppCompatActivity {
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.app_name)
-    toolbar.setNavigationIcon(R.drawable.ic_close)
+    toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => finish())
 
     taskerOption = TaskerSettings.fromIntent(getIntent)
