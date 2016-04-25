@@ -418,11 +418,12 @@ class ShadowsocksNatService extends BaseService {
           resolved = true
         }
 
-        if (resolved && handleConnection) {
-
+        if (!resolved) {
+          changeState(State.STOPPED, getString(R.string.invalid_server))
+          stopRunner(true)
+        } else if (handleConnection) {
           // Set DNS
           flushDns()
-
           changeState(State.CONNECTED)
           notification = new ShadowsocksNotification(this, config.profileName, true)
         } else {

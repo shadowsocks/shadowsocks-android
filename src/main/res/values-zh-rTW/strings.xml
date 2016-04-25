@@ -33,6 +33,7 @@
   <string name="auto_connect_summary">在裝置啟動時啟用 Shadowsocks</string>
   <string name="forward_success">Shadowsocks 已啟動。</string>
   <string name="service_failed">連線至遠端伺服器失敗</string>
+  <string name="invalid_server">伺服器名无效</string>
   <string name="nat_deprecated">警告：自 Android 5.0 開始， NAT 模式已過時</string>
   <string name="nat_no_root">NAT 模式需要 ROOT 權限</string>
   <string name="switch_to_vpn">切換至 VPN 模式</string>
