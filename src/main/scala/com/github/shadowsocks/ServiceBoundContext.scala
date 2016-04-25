@@ -17,10 +17,7 @@ trait ServiceBoundContext extends Context {
       ServiceBoundContext.this.onServiceConnected()
     }
     override def onServiceDisconnected(name: ComponentName) {
-      if (callback != null) {
-        unregisterCallback
-        callback = null
-      }
+      unregisterCallback
       ServiceBoundContext.this.onServiceDisconnected()
       bgService = null
     }
