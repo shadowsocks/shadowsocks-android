@@ -47,7 +47,7 @@ object Parser {
   private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
-  def findAll(data: CharSequence) = pattern.findAllMatchIn(data).map(m => try
+  def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
     decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
       case Some(ss) =>
         val profile = new Profile
@@ -60,9 +60,9 @@ object Parser {
         profile
       case _ => null
     }
-  catch {
-    case ex: Exception =>
-      Log.e(TAG, "parser error: " + m.source, ex)// Ignore
-      null
-  }).filter(_ != null)
+    catch {
+      case ex: Exception =>
+        Log.e(TAG, "parser error: " + m.source, ex)// Ignore
+        null
+    }).filter(_ != null)
 }
