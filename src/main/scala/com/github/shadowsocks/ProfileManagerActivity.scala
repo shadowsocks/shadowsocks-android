@@ -193,7 +193,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.profiles)
-    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
+    toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener((v: View) => {
       val intent = getParentActivityIntent
       if (intent == null) finish else navigateUpTo(intent)
