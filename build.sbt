@@ -46,6 +46,8 @@ libraryDependencies ++= Seq(
   "com.github.clans" % "fab" % "1.6.3"
 )
 
+proguardVersion in Android := "5.2.1"
+
 proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <init>(...); }",
           "-keep class com.github.shadowsocks.System { *; }",
           "-keepattributes *Annotation*",
