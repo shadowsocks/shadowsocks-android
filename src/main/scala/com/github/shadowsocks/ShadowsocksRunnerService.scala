@@ -77,6 +77,6 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
 
   override def onDestroy() {
     super.onDestroy()
-    deattachService()
+    detachService()
   }
 }

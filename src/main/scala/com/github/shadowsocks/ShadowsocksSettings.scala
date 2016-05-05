@@ -132,7 +132,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
     case Key.isNAT =>
       activity.handler.post(() => {
-        activity.deattachService
+        activity.detachService
         activity.attachService
       })
     case _ =>

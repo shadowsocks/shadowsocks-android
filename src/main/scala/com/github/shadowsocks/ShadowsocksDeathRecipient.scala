@@ -15,7 +15,7 @@ class ShadowsocksDeathRecipient(val mContext: ServiceBoundContext)
     Log.d(TAG, "[ShadowsocksDeathRecipient] binder died.")
     mContext match {
       case ss: Shadowsocks =>
-        ss.deattachService
+        ss.detachService
         ss.crashRecovery
         ss.attachService
       case _ =>

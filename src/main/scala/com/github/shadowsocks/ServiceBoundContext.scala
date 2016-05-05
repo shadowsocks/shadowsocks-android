@@ -62,7 +62,7 @@ trait ServiceBoundContext extends Context {
     }
   }
 
-  def deattachService() {
+  def detachService() {
     unregisterCallback
     callback = null
     if (connection != null) {

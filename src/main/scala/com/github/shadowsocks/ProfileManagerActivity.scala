@@ -363,7 +363,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   }
 
   override def onDestroy {
-    deattachService()
+    detachService()
     undoManager.flush
     ShadowsocksApplication.profileManager.setProfileAddedListener(null)
     super.onDestroy

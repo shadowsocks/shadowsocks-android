@@ -90,7 +90,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
 
   override def onDestroy() {
     super.onDestroy()
-    deattachService()
+    detachService()
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
