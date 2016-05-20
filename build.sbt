@@ -51,4 +51,6 @@ proguardVersion in Android := "5.2.1"
 proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <init>(...); }",
           "-keep class com.github.shadowsocks.System { *; }",
           "-keepattributes *Annotation*",
+          "-dontnote com.j256.ormlite.**",
+          "-dontnote org.xbill.**",
           "-dontwarn org.xbill.**")
