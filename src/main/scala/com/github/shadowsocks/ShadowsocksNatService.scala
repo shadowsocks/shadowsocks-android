@@ -45,7 +45,6 @@ import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
 import android.content._
-import android.content.pm.{PackageInfo, PackageManager}
 import android.net.{ConnectivityManager, Network}
 import android.os._
 import android.util.{Log, SparseArray}
@@ -64,7 +63,6 @@ class ShadowsocksNatService extends BaseService {
     "-j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
-  var connReceiver: BroadcastReceiver = _
   val myUid = android.os.Process.myUid()
 
   var sslocalProcess: Process = _
@@ -142,21 +140,6 @@ class ShadowsocksNatService extends BaseService {
     } else {
       Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
     }
-  }
-
-
-  def destroyConnectionReceiver() {
-    if (connReceiver != null) {
-      unregisterReceiver(connReceiver)
-      connReceiver = null
-    }
-    resetDns()
-  }
-
-  def initConnectionReceiver() {
-    val filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-    connReceiver = (context: Context, intent: Intent) => setupDns()
-    registerReceiver(connReceiver, filter)
   }
 
   def startShadowsocksDaemon() {
@@ -250,8 +233,8 @@ class ShadowsocksNatService extends BaseService {
   def startDnsDaemon() {
 
     val conf = if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
-      val reject = ConfigUtils.getRejectList(getContext)
-      val blackList = ConfigUtils.getBlackList(getContext)
+      val reject = ConfigUtils.getRejectList(this)
+      val blackList = ConfigUtils.getBlackList(this)
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
         "127.0.0.1", 8153, reject, blackList, 8163, "")
     } else {
@@ -267,18 +250,6 @@ class ShadowsocksNatService extends BaseService {
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 
     pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
-  }
-
-  def getVersionName: String = {
-    var version: String = null
-    try {
-      val pi: PackageInfo = getPackageManager.getPackageInfo(getPackageName, 0)
-      version = pi.versionName
-    } catch {
-      case e: PackageManager.NameNotFoundException =>
-        version = "Package name not found"
-    }
-    version
   }
 
   def startRedsocksDaemon() {
@@ -337,7 +308,7 @@ class ShadowsocksNatService extends BaseService {
       pdnsdProcess = null
     }
 
-    Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+    Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
   }
 
   def setupIptables() = {
@@ -345,9 +316,9 @@ class ShadowsocksNatService extends BaseService {
     val http_sb = new ArrayBuffer[String]
 
     init_sb.append("ulimit -n 4096")
-    init_sb.append(Utils.getIptables + " -t nat -F OUTPUT")
+    init_sb.append(Utils.iptables + " -t nat -F OUTPUT")
 
-    val cmd_bypass = Utils.getIptables + CMD_IPTABLES_RETURN
+    val cmd_bypass = Utils.iptables + CMD_IPTABLES_RETURN
     if (!InetAddress.getByName(config.proxy.toUpperCase).isInstanceOf[Inet6Address]) {
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
     }
@@ -355,18 +326,18 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
-    init_sb.append(Utils.getIptables
+    init_sb.append(Utils.iptables
       + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
     if (!config.isProxyApps || config.isBypassApps) {
-      http_sb.append(Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+      http_sb.append(Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (config.isProxyApps) {
       val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
       for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
         case Some(uid) =>
           if (!config.isBypassApps) {
-            http_sb.append((Utils.getIptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+            http_sb.append((Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
               .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
           } else {
             init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
@@ -448,8 +419,4 @@ class ShadowsocksNatService extends BaseService {
 
     super.stopRunner(stopService)
   }
-
-  override def getTag = TAG
-  override def getServiceMode = Mode.NAT
-  override def getContext = getBaseContext
 }

@@ -38,19 +38,15 @@
  */
 package com.github.shadowsocks.utils
 
-import java.io._
 import java.net._
 import java.security.MessageDigest
 
 import android.animation.{Animator, AnimatorListenerAdapter}
-import android.app.ActivityManager
-import android.content.pm.{ApplicationInfo, PackageManager}
+import android.content.pm.PackageManager
 import android.content.{Context, Intent}
 import android.graphics._
-import android.graphics.drawable.{BitmapDrawable, Drawable}
 import android.os.Build
 import android.provider.Settings
-import android.support.v4.content.ContextCompat
 import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
@@ -61,12 +57,19 @@ import org.xbill.DNS._
 
 object Utils {
 
-  val TAG: String = "Shadowsocks"
-  val DEFAULT_IPTABLES: String = "/system/bin/iptables"
-  val ALTERNATIVE_IPTABLES: String = "iptables"
-  var initialized: Boolean = false
-  var hasRedirectSupport: Int = -1
-  var iptables: String = null
+  private val TAG = "Shadowsocks"
+
+  /**
+    * Check the system's iptables
+    * Default to use the app's iptables
+    */
+  private val DEFAULT_IPTABLES = "/system/bin/iptables"
+  private val ALTERNATIVE_IPTABLES = "iptables"
+  lazy val iptables = if (Console.isRoot) {
+    val lines = Console.runRootCommand(DEFAULT_IPTABLES + " --version", DEFAULT_IPTABLES + " -L -t nat -n")
+    if (Console.isRoot && lines != null && !lines.contains("OUTPUT") || !lines.contains("v1.4.")) ALTERNATIVE_IPTABLES
+    else DEFAULT_IPTABLES
+  } else DEFAULT_IPTABLES
 
   def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
@@ -86,31 +89,6 @@ object Utils {
      * round or floor depending on whether you are using offsets(floor) or
      * widths(round)
      */
-  def dpToPx(context: Context, dp: Float): Float = {
-    val density = context.getResources.getDisplayMetrics.density
-    dp * density
-  }
-
-  def pxToDp(context: Context, px: Float): Float = {
-    val density = context.getResources.getDisplayMetrics.density
-    px / density
-  }
-
-  def getBitmap(text: String, width: Int, height: Int, background: Int): Bitmap = {
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val size = bitmap.getHeight / 4
-    val canvas = new Canvas(bitmap)
-    canvas.drawColor(background)
-    val paint = new Paint()
-    paint.setColor(Color.WHITE)
-    paint.setTextSize(size)
-    val bounds = new Rect()
-    paint.getTextBounds(text, 0, text.length, bounds)
-    canvas
-      .drawText(text, (bitmap.getWidth - bounds.width()) / 2,
-      bitmap.getHeight - (bitmap.getHeight - bounds.height()) / 2, paint)
-    bitmap
-  }
 
   // Based on: http://stackoverflow.com/a/21026866/2245107
   def positionToast(toast: Toast, view: View, window: Window, offsetX: Int = 0, offsetY: Int = 0) = {
@@ -163,25 +141,6 @@ object Utils {
     val disableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
     disableIntent.putExtra("state", false)
     context.sendBroadcast(disableIntent)
-  }
-
-  def isServiceStarted(name: String, context: Context): Boolean = {
-    import scala.collection.JavaConversions._
-
-    val activityManager = context
-      .getSystemService(Context.ACTIVITY_SERVICE)
-      .asInstanceOf[ActivityManager]
-    val services = activityManager.getRunningServices(Integer.MAX_VALUE)
-
-    if (services != null) {
-      for (service <- services) {
-        if (service.service.getClassName == name) {
-          return true
-        }
-      }
-    }
-
-    false
   }
 
   def resolve(host: String, addrType: Int): Option[String] = {
@@ -241,31 +200,6 @@ object Utils {
   def isNumeric(address: String): Boolean = isNumericMethod.invoke(null, address).asInstanceOf[Boolean]
 
   /**
-   * Get local IPv4 address
-   */
-  def getIPv4Address: Option[String] = {
-    try {
-      val interfaces = NetworkInterface.getNetworkInterfaces
-      while (interfaces.hasMoreElements) {
-        val intf = interfaces.nextElement()
-        val addrs = intf.getInetAddresses
-        while (addrs.hasMoreElements) {
-          val addr = addrs.nextElement()
-          if (!addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
-            if (addr.isInstanceOf[Inet4Address]) {
-              return Some(addr.getHostAddress.toUpperCase)
-            }
-          }
-        }
-      }
-    } catch {
-      case ex: Exception =>
-        Log.e(TAG, "Failed to get interfaces' addresses.", ex)
-    }
-    None
-  }
-
-  /**
    * If there exists a valid IPv6 interface
    */
   def isIPv6Support: Boolean = {
@@ -291,116 +225,6 @@ object Utils {
     false
   }
 
-  /**
-   * Check the system's iptables
-   * Default to use the app's iptables
-   */
-  def checkIptables() {
-
-    if (!Console.isRoot) {
-      iptables = DEFAULT_IPTABLES
-      return
-    }
-
-    iptables = DEFAULT_IPTABLES
-
-    var compatible: Boolean = false
-    var version: Boolean = false
-
-    val lines = Console.runRootCommand(iptables + " --version", iptables + " -L -t nat -n")
-    if (lines == null) return
-
-    if (lines.contains("OUTPUT")) {
-      compatible = true
-    }
-    if (lines.contains("v1.4.")) {
-      version = true
-    }
-    if (!compatible || !version) {
-      iptables = ALTERNATIVE_IPTABLES
-      if (!new File(iptables).exists) iptables = "iptables"
-    }
-  }
-
-  def drawableToBitmap(drawable: Drawable): Bitmap = {
-    drawable match {
-      case d: BitmapDrawable =>
-        return d.getBitmap
-      case _ =>
-    }
-
-    val width = if (drawable.getIntrinsicWidth > 0) drawable.getIntrinsicWidth else 1
-    val height = if (drawable.getIntrinsicWidth > 0) drawable.getIntrinsicWidth else 1
-
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val canvas = new Canvas(bitmap)
-    drawable.setBounds(0, 0, canvas.getWidth, canvas.getHeight)
-    drawable.draw(canvas)
-
-    bitmap
-  }
-
-  def getAppIcon(c: Context, packageName: String): Drawable = {
-    val pm: PackageManager = c.getPackageManager
-    val icon: Drawable = ContextCompat.getDrawable(c, android.R.drawable.sym_def_app_icon)
-    try {
-      pm.getApplicationIcon(packageName)
-    } catch {
-      case e: PackageManager.NameNotFoundException => icon
-    }
-  }
-
-  def getAppIcon(c: Context, uid: Int): Drawable = {
-    val pm: PackageManager = c.getPackageManager
-    val icon: Drawable = ContextCompat.getDrawable(c, android.R.drawable.sym_def_app_icon)
-    val packages: Array[String] = pm.getPackagesForUid(uid)
-    if (packages != null) {
-      if (packages.length >= 1) {
-        try {
-          val appInfo: ApplicationInfo = pm.getApplicationInfo(packages(0), 0)
-          return pm.getApplicationIcon(appInfo)
-        } catch {
-          case e: PackageManager.NameNotFoundException =>
-            Log.e(c.getPackageName, "No package found matching with the uid " + uid)
-        }
-      }
-    } else {
-      Log.e(c.getPackageName, "Package not found for uid " + uid)
-    }
-    icon
-  }
-
-  def getHasRedirectSupport: Boolean = {
-    if (hasRedirectSupport == -1) initHasRedirectSupported()
-    hasRedirectSupport == 1
-  }
-
-  def getIptables: String = {
-    if (iptables == null) checkIptables()
-    iptables
-  }
-
-  def initHasRedirectSupported() {
-    if (!Console.isRoot) return
-    hasRedirectSupport = 1
-
-    val command = Utils.getIptables + " -t nat -A OUTPUT -p udp --dport 54 -j REDIRECT --to 8154"
-    val lines = Console.runRootCommand(command, command.replace("-A", "-D"))
-    if (lines == null) return
-    if (lines.contains("No chain/target/match")) {
-      hasRedirectSupport = 0
-    }
-  }
-
-  def isInitialized: Boolean = {
-    initialized match {
-      case true => true
-      case _ =>
-        initialized = true
-        false
-    }
-  }
-
   def startSsService(context: Context) {
     val isInstalled: Boolean = ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)
     if (!isInstalled) return
@@ -414,5 +238,3 @@ object Utils {
     context.sendBroadcast(intent)
   }
 }
-
-

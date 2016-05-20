@@ -44,15 +44,7 @@ object Executable {
   val PDNSD = "pdnsd"
   val SS_LOCAL = "ss-local"
   val SS_TUNNEL = "ss-tunnel"
-  val IPTABLES = "iptables"
   val TUN2SOCKS = "tun2socks"
-}
-
-object Msg {
-  val CONNECT_FINISH = 1
-  val CONNECT_SUCCESS = 2
-  val CONNECT_FAIL = 3
-  val VPN_ERROR = 6
 }
 
 object Key {
@@ -63,9 +55,7 @@ object Key {
 
   val isNAT = "isNAT"
   val route = "route"
-  val stat = "stat"
 
-  val isRunning = "isRunning"
   val isAutoConnect = "isAutoConnect"
 
   val isProxyApps = "isProxyApps"
@@ -81,17 +71,6 @@ object Key {
   val localPort = "localPortNum"
 
   val profileTip = "profileTip"
-}
-
-object Scheme {
-  val APP = "app://"
-  val PROFILE = "profile://"
-  val SS = "ss"
-}
-
-object Mode {
-  val NAT = 0
-  val VPN = 1
 }
 
 object State {

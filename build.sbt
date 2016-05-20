@@ -29,7 +29,6 @@ resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "6.0",
-  "commons-net" % "commons-net" % "3.5",
   "eu.chainfire" % "libsuperuser" % "1.0.0.201602271131",
   "com.google.zxing" % "android-integration" % "3.2.1",
   "net.glxn.qrgen" % "android" % "2.0",

@@ -56,7 +56,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.{View, ViewGroup, ViewParent}
+import android.view.{View, ViewGroup}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -88,29 +88,25 @@ object Typefaces {
 }
 
 object Shadowsocks {
-
   // Constants
-  val TAG = "Shadowsocks"
-  val REQUEST_CONNECT = 1
-  val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
+  private final val TAG = "Shadowsocks"
+  private final val REQUEST_CONNECT = 1
+  private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS)
-
 }
 
-class Shadowsocks
-  extends AppCompatActivity with ServiceBoundContext {
+class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
+  import Shadowsocks._
 
   // Variables
   var serviceStarted = false
   var fab: FloatingActionButton = _
   var fabProgressCircle: FABProgressCircle = _
   var progressDialog: ProgressDialog = _
-  var progressTag = -1
   var state = State.STOPPED
   var currentProfile = new Profile
 
   // Services
-  var currentServiceName = classOf[ShadowsocksNatService].getName
   private val callback = new IShadowsocksServiceCallback.Stub {
     def stateChanged(s: Int, m: String) {
       handler.post(() => if (state != s) {
@@ -148,7 +144,7 @@ class Shadowsocks
               if (m == getString(R.string.nat_no_root)) snackbar.setAction(R.string.switch_to_vpn,
                 (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
               snackbar.show
-              Log.e(Shadowsocks.TAG, "Error to start VPN service: " + m)
+              Log.e(TAG, "Error to start VPN service: " + m)
             }
             preferences.setEnabled(true)
             stat.setVisibility(View.GONE)
@@ -230,7 +226,7 @@ class Shadowsocks
   private lazy val preferences =
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
 
-  var handler = new Handler()
+  val handler = new Handler()
 
   private def changeSwitch(checked: Boolean) {
     serviceStarted = checked
@@ -244,7 +240,6 @@ class Shadowsocks
   private def showProgress(msg: Int): Handler = {
     clearDialog()
     progressDialog = ProgressDialog.show(this, "", getString(msg), true, false)
-    progressTag = msg
     new Handler {
       override def handleMessage(msg: Message) {
         clearDialog()
@@ -259,7 +254,7 @@ class Shadowsocks
       files = assetManager.list(path)
     } catch {
       case e: IOException =>
-        Log.e(Shadowsocks.TAG, e.getMessage)
+        Log.e(TAG, e.getMessage)
     }
     if (files != null) {
       for (file <- files) {
@@ -280,7 +275,7 @@ class Shadowsocks
           out = null
         } catch {
           case ex: Exception =>
-            Log.e(Shadowsocks.TAG, ex.getMessage)
+            Log.e(TAG, ex.getMessage)
         }
       }
     }
@@ -331,7 +326,7 @@ class Shadowsocks
     }
     if (ShadowsocksApplication.isVpnEnabled) Console.runCommand(cmd.toArray) else {
       Console.runRootCommand(cmd.toArray)
-      Console.runRootCommand(Utils.getIptables + " -t nat -F OUTPUT")
+      Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
     }
   }
 
@@ -345,20 +340,13 @@ class Shadowsocks
       if (ShadowsocksApplication.isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
-          startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
+          startActivityForResult(intent, REQUEST_CONNECT)
         } else {
-          handler.post(() => onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null))
+          handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))
         }
       } else {
         serviceLoad()
       }
-    }
-  }
-
-  def getLayoutView(view: ViewParent): LinearLayout = {
-    view match {
-      case layout: LinearLayout => layout
-      case _ => if (view != null) getLayoutView(view.getParent) else null
     }
   }
 
@@ -565,7 +553,7 @@ class Shadowsocks
     copyAssets(System.getABI)
 
     val ab = new ArrayBuffer[String]
-    for (executable <- Shadowsocks.EXECUTABLES) {
+    for (executable <- EXECUTABLES) {
       ab.append("chmod 755 " + getApplicationInfo.dataDir + "/" + executable)
     }
     Console.runCommand(ab.toArray)
@@ -594,7 +582,7 @@ class Shadowsocks
       serviceLoad()
     case _ =>
       cancelStart()
-      Log.e(Shadowsocks.TAG, "Failed to start VpnService")
+      Log.e(TAG, "Failed to start VpnService")
   }
 
   def serviceStop() {
@@ -621,7 +609,6 @@ class Shadowsocks
     if (progressDialog != null && progressDialog.isShowing) {
       if (!isDestroyed) progressDialog.dismiss()
       progressDialog = null
-      progressTag = -1
     }
   }
 }

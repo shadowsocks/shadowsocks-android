@@ -49,8 +49,6 @@ object TaskerSettings {
 
   def fromIntent(intent: Intent) = new TaskerSettings(if (intent.hasExtra(ApiIntent.EXTRA_BUNDLE))
     intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE) else Bundle.EMPTY)
-
-  def fromBundle(bundle: Bundle) = new TaskerSettings(bundle)
 }
 
 class TaskerSettings(bundle: Bundle) {

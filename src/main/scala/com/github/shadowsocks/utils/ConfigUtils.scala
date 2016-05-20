@@ -96,49 +96,6 @@ object ConfigUtils {
       |}
     """.stripMargin
 
-  val PDNSD_BYPASS =
-    """
-      |global {
-      | perm_cache = 2048;
-      | cache_dir = "%s";
-      | server_ip = %s;
-      | server_port = %d;
-      | query_method = tcp_only;
-      | run_ipv4 = on;
-      | min_ttl = 15m;
-      | max_ttl = 1w;
-      | timeout = 10;
-      | daemon = off;
-      |}
-      |
-      |server {
-      | label = "china-servers";
-      | ip = 114.114.114.114, 223.5.5.5;
-      | uptest = none;
-      | preset = on;
-      | include = %s;
-      | policy = excluded;
-      | timeout = 2;
-      |}
-      |
-      |server {
-      | label = "local-server";
-      | ip = 127.0.0.1;
-      | uptest = none;
-      | preset = on;
-      | port = %d;
-      | timeout = 5;
-      |}
-      |
-      |rr {
-      | name=localhost;
-      | reverse=on;
-      | a=127.0.0.1;
-      | owner=localhost;
-      | soa=localhost,root.localhost,42,86400,900,86400,86400;
-      |}
-    """.stripMargin
-
   val PDNSD_DIRECT =
     """
       |global {
