@@ -44,7 +44,12 @@ import android.util.Log
 import com.github.shadowsocks._
 import com.github.shadowsocks.utils.Key
 
+object ProfileManager {
+  private final val TAG = "ProfileManager"
+}
+
 class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
+  import ProfileManager._
 
   var profileAddedListener: Profile => Any = _
   def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
@@ -72,7 +77,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       profile
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "addProfile", ex)
+        Log.e(TAG, "addProfile", ex)
         p
     }
   }
@@ -83,7 +88,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       true
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "updateProfile", ex)
+        Log.e(TAG, "updateProfile", ex)
         false
     }
   }
@@ -96,7 +101,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       }
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "getProfile", ex)
+        Log.e(TAG, "getProfile", ex)
         None
     }
   }
@@ -107,7 +112,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       true
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "delProfile", ex)
+        Log.e(TAG, "delProfile", ex)
         false
     }
   }
@@ -118,7 +123,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       if (result.size == 1) Option(result.get(0)) else None
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "getAllProfiles", ex)
+        Log.e(TAG, "getAllProfiles", ex)
         None
     }
   }
@@ -129,7 +134,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("userOrder", true).prepare).toList)
     } catch {
       case ex: Exception =>
-        Log.e(Shadowsocks.TAG, "getAllProfiles", ex)
+        Log.e(TAG, "getAllProfiles", ex)
         None
     }
   }

@@ -15,10 +15,11 @@ import com.github.shadowsocks.utils.{Key, Utils}
 
 object ShadowsocksSettings {
   // Constants
-  val PREFS_NAME = "Shadowsocks"
-  val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
+  private final val TAG = "ShadowsocksSettings"
+  private final val PREFS_NAME = "Shadowsocks"
+  private val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
     Key.isAuth)
-  val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
+  private val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
 
   // Helper functions
   def updateDropDownPreference(pref: Preference, value: String) {
@@ -81,7 +82,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
-      ShadowsocksApplication.track(Shadowsocks.TAG, "reset")
+      ShadowsocksApplication.track(TAG, "reset")
       activity.recovery()
       true
     })
@@ -89,13 +90,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     val flush = findPreference("flush_dnscache")
     if (Build.VERSION.SDK_INT < 17) flush.setSummary(R.string.flush_dnscache_summary)
     flush.setOnPreferenceClickListener(_ => {
-      ShadowsocksApplication.track(Shadowsocks.TAG, "flush_dnscache")
+      ShadowsocksApplication.track(TAG, "flush_dnscache")
       activity.flushDnsCache()
       true
     })
 
     findPreference("about").setOnPreferenceClickListener((preference: Preference) => {
-      ShadowsocksApplication.track(Shadowsocks.TAG, "about")
+      ShadowsocksApplication.track(TAG, "about")
       val web = new WebView(activity)
       web.loadUrl("file:///android_asset/pages/about.html")
       web.setWebViewClient(new WebViewClient() {
