@@ -26,12 +26,9 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ```bash
     git submodule update --init
-
-    # Build native binaries
-    ./build.sh
     
     # Build the App
-    sbt clean android:package-release
+    sbt native-build clean android:package-release
 ```
 
 #### BUILD on Mac OS X (with HomeBrew)
