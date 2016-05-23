@@ -13,7 +13,7 @@ addons:
             - libncurses5:i386
 
 scala:
-    - 2.11.7
+    - 2.11.8
 
 before_cache:
     - find $HOME/.sbt -name "*.lock" | xargs rm
@@ -34,5 +34,4 @@ before_install:
     - cp local.properties.travis local.properties
 
 script:
-    - ./build.sh > /dev/null
-    - sbt android:package-release
+    - sbt native-build android:package-release
