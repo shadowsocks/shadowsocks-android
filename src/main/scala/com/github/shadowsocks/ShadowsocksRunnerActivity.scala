@@ -73,7 +73,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
         onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
       }
     } else {
-      bgService.use(ConfigUtils.load(app.settings))
+      bgService.use(ConfigUtils.loadFromSharedPreferences)
       finish()
     }
   }
@@ -109,7 +109,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     resultCode match {
       case Activity.RESULT_OK =>
         if (bgService != null) {
-          bgService.use(ConfigUtils.load(app.settings))
+          bgService.use(ConfigUtils.loadFromSharedPreferences)
         }
       case _ =>
         Log.e(TAG, "Failed to start VpnService")

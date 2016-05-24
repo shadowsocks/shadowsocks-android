@@ -39,7 +39,7 @@
 
 package com.github.shadowsocks.utils
 
-import android.content.{Context, SharedPreferences}
+import android.content.Context
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -200,24 +200,24 @@ object ConfigUtils {
       config.profileName, host, password, method, config.proxiedAppString, config.route, port, config.localPort, 0)
   }
 
-  def load(settings: SharedPreferences): Config = {
-    val isProxyApps = settings.getBoolean(Key.isProxyApps, false)
-    val isBypassApps = settings.getBoolean(Key.isBypassApps, false)
-    val isUdpDns = settings.getBoolean(Key.isUdpDns, false)
-    val isAuth = settings.getBoolean(Key.isAuth, false)
-    val isIpv6 = settings.getBoolean(Key.isIpv6, false)
+  def loadFromSharedPreferences = {
+    val isProxyApps = app.settings.getBoolean(Key.isProxyApps, false)
+    val isBypassApps = app.settings.getBoolean(Key.isBypassApps, false)
+    val isUdpDns = app.settings.getBoolean(Key.isUdpDns, false)
+    val isAuth = app.settings.getBoolean(Key.isAuth, false)
+    val isIpv6 = app.settings.getBoolean(Key.isIpv6, false)
 
-    val profileName = settings.getString(Key.profileName, "default")
-    val proxy = settings.getString(Key.proxy, "127.0.0.1")
-    val sitekey = settings.getString(Key.sitekey, "default")
-    val encMethod = settings.getString(Key.encMethod, "table")
-    val route = settings.getString(Key.route, "all")
+    val profileName = app.settings.getString(Key.profileName, "default")
+    val proxy = app.settings.getString(Key.proxy, "127.0.0.1")
+    val sitekey = app.settings.getString(Key.sitekey, "default")
+    val encMethod = app.settings.getString(Key.encMethod, "table")
+    val route = app.settings.getString(Key.route, "all")
 
-    val remotePort = settings.getInt(Key.remotePort, 1984)
-    val localPort = settings.getInt(Key.localPort, 1984)
-    val proxiedAppString = settings.getString(Key.proxied, "")
+    val remotePort = app.settings.getInt(Key.remotePort, 1984)
+    val localPort = app.settings.getInt(Key.localPort, 1984)
+    val proxiedAppString = app.settings.getString(Key.proxied, "")
 
-    val profileId = settings.getInt(Key.profileId, -1)
+    val profileId = app.settings.getInt(Key.profileId, -1)
 
     new Config(isProxyApps, isBypassApps, isUdpDns, isAuth, isIpv6, profileName, proxy, sitekey, encMethod,
       proxiedAppString, route, remotePort, localPort, profileId)
