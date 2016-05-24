@@ -214,6 +214,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     if (fab != null) fab.setEnabled(false)
   }
 
+  override def binderDied {
+    detachService
+    crashRecovery
+    attachService
+  }
+
   private var testCount: Int = _
   private lazy val stat = findViewById(R.id.stat)
   private var connectionTestText: TextView = _

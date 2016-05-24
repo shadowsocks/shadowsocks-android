@@ -9,10 +9,11 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 /**
   * @author Mygod
   */
-trait ServiceBoundContext extends Context {
+trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
   class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
-      service.linkToDeath(new ShadowsocksDeathRecipient(ServiceBoundContext.this), 0)
+      binder = service
+      service.linkToDeath(ServiceBoundContext.this, 0)
       bgService = IShadowsocksService.Stub.asInterface(service)
       registerCallback
       ServiceBoundContext.this.onServiceConnected()
@@ -21,6 +22,7 @@ trait ServiceBoundContext extends Context {
       unregisterCallback
       ServiceBoundContext.this.onServiceDisconnected()
       bgService = null
+      binder = null
     }
   }
 
@@ -40,12 +42,14 @@ trait ServiceBoundContext extends Context {
 
   def onServiceConnected() = ()
   def onServiceDisconnected() = ()
+  override def binderDied = ()
 
   private var callback: IShadowsocksServiceCallback.Stub = _
   private var connection: ShadowsocksServiceConnection = _
   private var callbackRegistered: Boolean = _
 
   // Variables
+  var binder: IBinder = _
   var bgService: IShadowsocksService = _
 
   def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
@@ -69,6 +73,10 @@ trait ServiceBoundContext extends Context {
     if (connection != null) {
       unbindService(connection)
       connection = null
+    }
+    if (binder != null) {
+      binder.unlinkToDeath(this, 0)
+      binder = null
     }
     bgService = null
   }
