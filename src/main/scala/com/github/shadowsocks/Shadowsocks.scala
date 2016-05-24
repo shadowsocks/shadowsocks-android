@@ -130,10 +130,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             changeSwitch(checked = true)
             preferences.setEnabled(false)
             stat.setVisibility(View.VISIBLE)
-            if (app.isVpnEnabled) {
+            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
-            } else connectionTestText.setVisibility(View.GONE)
+            }
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -178,7 +178,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     // Update the UI
     if (fab != null) fab.setEnabled(true)
     updateState()
-    if (Build.VERSION.SDK_INT >= 21 && !app.isVpnEnabled) {
+    if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
       snackbar.show
@@ -307,11 +307,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       cmd.append("chmod 666 %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
     }
 
-    if (app.isVpnEnabled) {
-      Console.runCommand(cmd.toArray)
-    } else {
-      Console.runRootCommand(cmd.toArray)
-    }
+    if (app.isNatEnabled) Console.runRootCommand(cmd.toArray) else Console.runCommand(cmd.toArray)
 
     cmd.clear()
 
@@ -331,10 +327,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       cmd.append("rm -f %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
       cmd.append("rm -f %s/%s-vpn.conf".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
     }
-    if (app.isVpnEnabled) Console.runCommand(cmd.toArray) else {
+    if (app.isNatEnabled) {
       Console.runRootCommand(cmd.toArray)
       Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
-    }
+    } else Console.runCommand(cmd.toArray)
   }
 
   def cancelStart() {
@@ -344,15 +340,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   def prepareStartService() {
     Utils.ThrowableFuture {
-      if (app.isVpnEnabled) {
+      if (app.isNatEnabled) serviceLoad() else {
         val intent = VpnService.prepare(this)
         if (intent != null) {
           startActivityForResult(intent, REQUEST_CONNECT)
         } else {
           handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))
         }
-      } else {
-        serviceLoad()
       }
     }
   }
@@ -412,14 +406,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
                 success = false
                 result = getString(R.string.connection_test_error, e.getMessage)
             }
-            synchronized(if (testCount == id) {
-              if (app.isVpnEnabled) handler.post(() => {
-                if (success) connectionTestText.setText(result) else {
-                  connectionTestText.setText(R.string.connection_test_fail)
-                  Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
-                }
-              })
-            })
+            synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
+              if (success) connectionTestText.setText(result) else {
+                connectionTestText.setText(R.string.connection_test_fail)
+                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+              }))
           }
         }
       }
@@ -470,10 +461,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          if (app.isVpnEnabled) {
+          if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
             connectionTestText.setVisibility(View.VISIBLE)
             connectionTestText.setText(getString(R.string.connection_test_pending))
-          } else connectionTestText.setVisibility(View.GONE)
+          }
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false

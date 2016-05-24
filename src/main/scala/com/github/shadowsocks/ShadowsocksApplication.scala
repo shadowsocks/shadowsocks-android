@@ -67,7 +67,8 @@ class ShadowsocksApplication extends Application {
   lazy val editor = settings.edit
   lazy val profileManager = new ProfileManager(settings, dbHelper)
 
-  def isVpnEnabled = !settings.getBoolean(Key.isNAT, false)
+  def isNatEnabled = settings.getBoolean(Key.isNAT, false)
+  def isVpnEnabled = !isNatEnabled
 
   def getVersionName = try {
     getPackageManager.getPackageInfo(getPackageName, 0).versionName

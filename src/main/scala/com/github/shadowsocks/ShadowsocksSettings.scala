@@ -156,7 +156,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     for (name <- Key.isNAT #:: PROXY_PREFS.toStream #::: FEATURE_PREFS.toStream) {
       val pref = findPreference(name)
       if (pref != null) pref.setEnabled(enabled &&
-        (name != Key.isProxyApps || Utils.isLollipopOrAbove || !app.isVpnEnabled))
+        (name != Key.isProxyApps || Utils.isLollipopOrAbove || app.isNatEnabled))
     }
   }
 
