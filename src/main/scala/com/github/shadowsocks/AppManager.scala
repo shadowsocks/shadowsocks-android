@@ -232,7 +232,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
   def loadAppsAsync() {
     if (!appsLoading.compareAndSet(false, true)) return
-    ThrowableFuture {
+    Utils.ThrowableFuture {
       var adapter: AppsAdapter = null
       do {
         appsLoading.set(true)

@@ -54,6 +54,9 @@ import android.widget.Toast
 import com.github.shadowsocks.{BuildConfig, ShadowsocksApplication, ShadowsocksRunnerService}
 import org.xbill.DNS._
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Try}
 
 object Utils {
 
@@ -237,4 +240,11 @@ object Utils {
     val intent = new Intent(Action.CLOSE)
     context.sendBroadcast(intent)
   }
+
+  private val handleFailure: Try[_] => Unit = {
+    case Failure(e) => e.printStackTrace()
+    case _ =>
+  }
+
+  def ThrowableFuture[T](f: => T) = Future(f) onComplete handleFailure
 }

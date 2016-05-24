@@ -359,7 +359,7 @@ class ShadowsocksNatService extends BaseService {
     
     changeState(State.CONNECTING)
 
-    ThrowableFuture {
+    Utils.ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
         val holder = ShadowsocksApplication.containerHolder
         try {
