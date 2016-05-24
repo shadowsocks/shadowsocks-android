@@ -125,10 +125,9 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".ShadowsocksReceiver">
+        <receiver android:name=".BootReceiver" android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="com.github.shadowsocks.ACTION_UPDATE_STATE"/>
             </intent-filter>
         </receiver>
 

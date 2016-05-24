@@ -70,6 +70,7 @@
 
         <SwitchPreference
                 android:key="isAutoConnect"
+                android:persistent="false"
                 android:summary="@string/auto_connect_summary"
                 android:title="@string/auto_connect"/>
 

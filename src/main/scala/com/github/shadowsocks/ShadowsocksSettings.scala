@@ -16,7 +16,6 @@ import com.github.shadowsocks.utils.{Key, Utils}
 object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
-  private final val PREFS_NAME = "Shadowsocks"
   private val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
     Key.isAuth)
   private val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
@@ -81,6 +80,17 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       false
     })
 
+    val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
+    switch.setOnPreferenceChangeListener((_, value) => {
+      BootReceiver.setEnabled(activity, value.asInstanceOf[Boolean])
+      true
+    })
+    if (getPreferenceManager.getSharedPreferences.getBoolean(Key.isAutoConnect, false)) {
+      BootReceiver.setEnabled(activity, true)
+      getPreferenceManager.getSharedPreferences.edit.remove(Key.isAutoConnect).apply
+    }
+    switch.setChecked(BootReceiver.getEnabled(activity))
+
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
       ShadowsocksApplication.track(TAG, "reset")
       activity.recovery()
@@ -130,7 +140,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     ShadowsocksApplication.settings.unregisterOnSharedPreferenceChangeListener(this)
   }
 
-  def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) = key match {
+  def onSharedPreferenceChanged(pref: SharedPreferences, key: String) = key match {
     case Key.isNAT =>
       activity.handler.post(() => {
         activity.detachService

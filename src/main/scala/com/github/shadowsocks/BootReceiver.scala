@@ -39,13 +39,19 @@
 
 package com.github.shadowsocks
 
-import android.content.{BroadcastReceiver, Context, Intent}
+import android.content.pm.PackageManager
+import android.content.{BroadcastReceiver, ComponentName, Context, Intent}
 import com.github.shadowsocks.utils._
 
-class ShadowsocksReceiver extends BroadcastReceiver {
-  def onReceive(context: Context, intent: Intent) {
-    if (ShadowsocksApplication.settings.getBoolean(Key.isAutoConnect, false)) {
-      Utils.startSsService(context)
-    }
-  }
+object BootReceiver {
+  def getEnabled(context: Context) = PackageManager.COMPONENT_ENABLED_STATE_ENABLED ==
+    context.getPackageManager.getComponentEnabledSetting(new ComponentName(context, classOf[BootReceiver]))
+  def setEnabled(context: Context, enabled: Boolean) = context.getPackageManager.setComponentEnabledSetting(
+    new ComponentName(context, classOf[BootReceiver]),
+    if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+    PackageManager.DONT_KILL_APP)
+}
+
+class BootReceiver extends BroadcastReceiver {
+  def onReceive(context: Context, intent: Intent) = Utils.startSsService(context)
 }
