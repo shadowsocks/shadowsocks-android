@@ -10,6 +10,7 @@ import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback.Stub
 import com.github.shadowsocks.utils.{TrafficMonitor, Action, State, Utils}
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * @author Mygod
@@ -41,7 +42,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
     .addAction(R.drawable.ic_navigation_close, service.getString(R.string.stop),
       PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
-  ShadowsocksApplication.profileManager.getAllProfiles match {
+  app.profileManager.getAllProfiles match {
     case Some(profiles) => if (profiles.length > 1)
       builder.addAction(R.drawable.ic_action_settings, service.getString(R.string.quick_switch),
         PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))

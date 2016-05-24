@@ -2,7 +2,8 @@ package com.github.shadowsocks.utils
 
 import java.text.DecimalFormat
 
-import com.github.shadowsocks.{R, ShadowsocksApplication}
+import com.github.shadowsocks.R
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 object TrafficMonitor {
   // Bytes per second
@@ -28,7 +29,7 @@ object TrafficMonitor {
       n /= 1024
       i = i + 1
     }
-    if (i < 0) size + " " + ShadowsocksApplication.instance.getResources.getQuantityString(R.plurals.bytes, size.toInt)
+    if (i < 0) size + " " + app.getResources.getQuantityString(R.plurals.bytes, size.toInt)
     else numberFormat.format(n) + ' ' + units(i)
   }
 

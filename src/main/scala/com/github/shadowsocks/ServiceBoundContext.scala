@@ -4,6 +4,7 @@ import android.content.{ComponentName, Context, Intent, ServiceConnection}
 import android.os.{RemoteException, IBinder}
 import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * @author Mygod
@@ -51,7 +52,7 @@ trait ServiceBoundContext extends Context {
     this.callback = callback
     if (bgService == null) {
       val s =
-        if (ShadowsocksApplication.isVpnEnabled) classOf[ShadowsocksVpnService] else classOf[ShadowsocksNatService]
+        if (app.isVpnEnabled) classOf[ShadowsocksVpnService] else classOf[ShadowsocksNatService]
 
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)

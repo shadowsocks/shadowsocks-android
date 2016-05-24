@@ -40,7 +40,8 @@ package com.github.shadowsocks.utils
 
 import android.content.{Context, Intent}
 import android.os.Bundle
-import com.github.shadowsocks.{R, ShadowsocksApplication}
+import com.github.shadowsocks.R
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.twofortyfouram.locale.api.{Intent => ApiIntent}
 
 object TaskerSettings {
@@ -62,7 +63,7 @@ class TaskerSettings(bundle: Bundle) {
     if (!switchOn) bundle.putBoolean(KEY_SWITCH_ON, false)
     if (profileId >= 0) bundle.putInt(KEY_PROFILE_ID, profileId)
     new Intent().putExtra(ApiIntent.EXTRA_BUNDLE, bundle).putExtra(ApiIntent.EXTRA_STRING_BLURB,
-      ShadowsocksApplication.profileManager.getProfile(profileId) match {
+      app.profileManager.getProfile(profileId) match {
         case Some(p) => context.getString(if (switchOn) R.string.start_service else R.string.stop_service, p.name)
         case None => context.getString(if (switchOn) R.string.start_service_default else R.string.stop)
       })

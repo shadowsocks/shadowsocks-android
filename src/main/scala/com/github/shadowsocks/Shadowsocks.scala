@@ -63,6 +63,7 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
 import scala.collection.mutable.ArrayBuffer
@@ -129,7 +130,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             changeSwitch(checked = true)
             preferences.setEnabled(false)
             stat.setVisibility(View.VISIBLE)
-            if (ShadowsocksApplication.isVpnEnabled) {
+            if (app.isVpnEnabled) {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             } else connectionTestText.setVisibility(View.GONE)
@@ -177,31 +178,31 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     // Update the UI
     if (fab != null) fab.setEnabled(true)
     updateState()
-    if (Build.VERSION.SDK_INT >= 21 && !ShadowsocksApplication.isVpnEnabled) {
+    if (Build.VERSION.SDK_INT >= 21 && !app.isVpnEnabled) {
       val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
       snackbar.show
     }
 
-    if (!ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)) {
-      ShadowsocksApplication.settings.edit.putBoolean(ShadowsocksApplication.getVersionName, true).apply()
+    if (!app.settings.getBoolean(app.getVersionName, false)) {
+      app.editor.putBoolean(app.getVersionName, true).apply()
       try {
         // Workaround that convert port(String) to port(Int)
-        val oldLocalPort = ShadowsocksApplication.settings.getString(Key.localPort, "")
-        val oldRemotePort = ShadowsocksApplication.settings.getString(Key.remotePort, "")
+        val oldLocalPort = app.settings.getString(Key.localPort, "")
+        val oldRemotePort = app.settings.getString(Key.remotePort, "")
 
         if (oldLocalPort != "") {
-          ShadowsocksApplication.settings.edit.putInt(Key.localPort, oldLocalPort.toInt).apply()
+          app.editor.putInt(Key.localPort, oldLocalPort.toInt).apply()
         }
         if (oldRemotePort != "") {
-          ShadowsocksApplication.settings.edit.putInt(Key.remotePort, oldRemotePort.toInt).apply()
+          app.editor.putInt(Key.remotePort, oldRemotePort.toInt).apply()
         }
       } catch {
         case ex: Exception => // Ignore
       }
-      val oldProxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "")
-      if (oldProxiedApps.contains('|')) ShadowsocksApplication.settings.edit
-        .putString(Key.proxied, DBHelper.updateProxiedApps(this, oldProxiedApps)).apply()
+      val oldProxiedApps = app.settings.getString(Key.proxied, "")
+      if (oldProxiedApps.contains('|'))
+        app.editor.putString(Key.proxied, DBHelper.updateProxiedApps(this, oldProxiedApps)).apply()
 
       recovery()
 
@@ -300,7 +301,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       cmd.append("chmod 666 %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
     }
 
-    if (ShadowsocksApplication.isVpnEnabled) {
+    if (app.isVpnEnabled) {
       Console.runCommand(cmd.toArray)
     } else {
       Console.runRootCommand(cmd.toArray)
@@ -324,7 +325,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       cmd.append("rm -f %s/%s-vpn.pid".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
       cmd.append("rm -f %s/%s-vpn.conf".formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
     }
-    if (ShadowsocksApplication.isVpnEnabled) Console.runCommand(cmd.toArray) else {
+    if (app.isVpnEnabled) Console.runCommand(cmd.toArray) else {
       Console.runRootCommand(cmd.toArray)
       Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
     }
@@ -337,7 +338,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   def prepareStartService() {
     Utils.ThrowableFuture {
-      if (ShadowsocksApplication.isVpnEnabled) {
+      if (app.isVpnEnabled) {
         val intent = VpnService.prepare(this)
         if (intent != null) {
           startActivityForResult(intent, REQUEST_CONNECT)
@@ -406,7 +407,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
                 result = getString(R.string.connection_test_error, e.getMessage)
             }
             synchronized(if (testCount == id) {
-              if (ShadowsocksApplication.isVpnEnabled) handler.post(() => {
+              if (app.isVpnEnabled) handler.post(() => {
                 if (success) connectionTestText.setText(result) else {
                   connectionTestText.setText(R.string.connection_test_fail)
                   Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
@@ -435,7 +436,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   protected override def onPause() {
     super.onPause()
-    ShadowsocksApplication.profileManager.save
+    app.profileManager.save
   }
 
   private def hideCircle() {
@@ -463,7 +464,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          if (ShadowsocksApplication.isVpnEnabled) {
+          if (app.isVpnEnabled) {
             connectionTestText.setVisibility(View.VISIBLE)
             connectionTestText.setText(getString(R.string.connection_test_pending))
           } else connectionTestText.setVisibility(View.GONE)
@@ -488,13 +489,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   private def updateCurrentProfile() {
     // Check if current profile changed
-    if (ShadowsocksApplication.profileId != currentProfile.id) {
-      currentProfile = ShadowsocksApplication.currentProfile match {
+    if (app.profileId != currentProfile.id) {
+      currentProfile = app.currentProfile match {
         case Some(profile) => profile // updated
         case None =>                  // removed
-          ShadowsocksApplication.profileManager.getFirstProfile match {
-            case Some(first) => ShadowsocksApplication.switchProfile(first.id)
-            case None => ShadowsocksApplication.profileManager.createDefault()
+          app.profileManager.getFirstProfile match {
+            case Some(first) => app.switchProfile(first.id)
+            case None => app.profileManager.createDefault()
           }
       }
 
@@ -590,7 +591,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   def checkText(key: String): Boolean = {
-    val text = ShadowsocksApplication.settings.getString(key, "")
+    val text = app.settings.getString(key, "")
     if (text != null && text.length > 0) return true
     Snackbar.make(findViewById(android.R.id.content), R.string.proxy_empty, Snackbar.LENGTH_LONG).show
     false
@@ -598,9 +599,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   /** Called when connect button is clicked. */
   def serviceLoad() {
-    bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
+    bgService.use(ConfigUtils.load(app.settings))
 
-    if (ShadowsocksApplication.isVpnEnabled) {
+    if (app.isVpnEnabled) {
       changeSwitch(checked = false)
     }
   }

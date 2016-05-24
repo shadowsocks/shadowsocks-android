@@ -51,7 +51,8 @@ import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
 import android.widget.Toast
-import com.github.shadowsocks.{BuildConfig, ShadowsocksApplication, ShadowsocksRunnerService}
+import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.{BuildConfig, ShadowsocksRunnerService}
 import org.xbill.DNS._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -59,7 +60,6 @@ import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
 object Utils {
-
   private val TAG = "Shadowsocks"
 
   /**
@@ -229,7 +229,7 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    val isInstalled: Boolean = ShadowsocksApplication.settings.getBoolean(ShadowsocksApplication.getVersionName, false)
+    val isInstalled: Boolean = app.settings.getBoolean(app.getVersionName, false)
     if (!isInstalled) return
 
     val intent = new Intent(context, classOf[ShadowsocksRunnerService])

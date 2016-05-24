@@ -45,6 +45,7 @@ import android.net.VpnService
 import android.os.{Bundle, Handler}
 import android.util.Log
 import com.github.shadowsocks.utils.ConfigUtils
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 object ShadowsocksRunnerActivity {
   private final val TAG = "ShadowsocksRunnerActivity"
@@ -64,7 +65,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
   }
 
   def startBackgroundService() {
-    if (ShadowsocksApplication.isVpnEnabled) {
+    if (app.isVpnEnabled) {
       val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
       if (intent != null) {
         startActivityForResult(intent, REQUEST_CONNECT)
@@ -72,7 +73,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
         onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
       }
     } else {
-      bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
+      bgService.use(ConfigUtils.load(app.settings))
       finish()
     }
   }
@@ -108,7 +109,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     resultCode match {
       case Activity.RESULT_OK =>
         if (bgService != null) {
-          bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
+          bgService.use(ConfigUtils.load(app.settings))
         }
       case _ =>
         Log.e(TAG, "Failed to start VpnService")

@@ -41,7 +41,7 @@ package com.github.shadowsocks.database
 
 import android.content.SharedPreferences
 import android.util.Log
-import com.github.shadowsocks._
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Key
 
 object ProfileManager {
@@ -58,7 +58,7 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
     try {
       val profile = if (p == null) new Profile else p
       profile.id = 0
-      ShadowsocksApplication.currentProfile match {
+      app.currentProfile match {
         case Some(oldProfile) =>
           // Copy Feature Settings from old profile
           profile.route = oldProfile.route

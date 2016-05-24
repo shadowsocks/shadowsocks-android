@@ -8,6 +8,7 @@ import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.CheckedTextView
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.Utils
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * Created by Lucas on 3/10/16.
@@ -27,18 +28,18 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     def bind(item: Profile) {
       this.item = item
       text.setText(item.name)
-      text.setChecked(item.id == ShadowsocksApplication.profileId)
+      text.setChecked(item.id == app.profileId)
     }
 
     def onClick(v: View) {
-      ShadowsocksApplication.switchProfile(item.id)
+      app.switchProfile(item.id)
       Utils.startSsService(ShadowsocksQuickSwitchActivity.this)
       finish
     }
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    val profiles = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
     def getItemCount = profiles.length
 
@@ -66,8 +67,8 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     profilesList.setLayoutManager(lm)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
-    if (ShadowsocksApplication.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
-      case (profile, i) if profile.id == ShadowsocksApplication.profileId => i + 1
+    if (app.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == app.profileId => i + 1
     }.getOrElse(0))
   }
 }

@@ -53,6 +53,7 @@ import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, Recy
 import android.view._
 import android.widget._
 import com.github.shadowsocks.utils.{Key, Utils}
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -71,7 +72,7 @@ object AppManager {
       val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
       filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
       filter.addDataScheme("package")
-      ShadowsocksApplication.instance.registerReceiver((context: Context, intent: Intent) =>
+      app.registerReceiver((context: Context, intent: Intent) =>
         if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED ||
           !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
           synchronized(cachedApps = null)
@@ -96,13 +97,13 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   private final class AppViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     private val icon = itemView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
     private val check = itemView.findViewById(R.id.itemcheck).asInstanceOf[Switch]
-    private var app: ProxiedApp = _
+    private var item: ProxiedApp = _
     itemView.setOnClickListener(this)
 
-    private def proxied = proxiedApps.contains(app.packageName)
+    private def proxied = proxiedApps.contains(item.packageName)
 
     def bind(app: ProxiedApp) {
-      this.app = app
+      this.item = app
       icon.setImageDrawable(app.icon)
       check.setText(app.name)
       check.setChecked(proxied)
@@ -110,14 +111,14 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
     def onClick(v: View) {
       if (proxied) {
-        proxiedApps.remove(app.packageName)
+        proxiedApps.remove(item.packageName)
         check.setChecked(false)
       } else {
-        proxiedApps.add(app.packageName)
+        proxiedApps.add(item.packageName)
         check.setChecked(true)
       }
       if (!appsLoading.get)
-        ShadowsocksApplication.settings.edit.putString(Key.proxied, proxiedApps.mkString("\n")).apply
+        app.editor.putString(Key.proxied, proxiedApps.mkString("\n")).apply
     }
   }
 
@@ -133,7 +134,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
   }
 
-  private val proxiedApps = ShadowsocksApplication.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
+  private val proxiedApps = app.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
   private var toolbar: Toolbar = _
   private var appListView: RecyclerView = _
   private var loadingView: View = _
@@ -208,17 +209,17 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, true).commit()
+    app.editor.putBoolean(Key.isProxyApps, true).apply
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((_, checked) => {
-        ShadowsocksApplication.settings.edit().putBoolean(Key.isProxyApps, checked).commit()
+        app.editor.putBoolean(Key.isProxyApps, checked).apply
         finish()
       })
 
     val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     bypassSwitch.setOnCheckedChangeListener((_, checked) =>
-      ShadowsocksApplication.settings.edit().putBoolean(Key.isBypassApps, checked).apply())
-    bypassSwitch.setChecked(ShadowsocksApplication.settings.getBoolean(Key.isBypassApps, false))
+      app.editor.putBoolean(Key.isBypassApps, checked).apply())
+    bypassSwitch.setChecked(app.settings.getBoolean(Key.isBypassApps, false))
 
     loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]

@@ -50,6 +50,7 @@ import android.os._
 import android.util.Log
 import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -98,7 +99,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     // channge the state
     changeState(State.STOPPING)
 
-    ShadowsocksApplication.track(TAG, "stop")
+    app.track(TAG, "stop")
 
     // reset VPN
     killProcesses()
@@ -146,13 +147,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       return
     }
 
-    ShadowsocksApplication.track(TAG, "start")
+    app.track(TAG, "start")
 
     changeState(State.CONNECTING)
 
     Utils.ThrowableFuture {
       if (config.proxy == "198.199.101.152") {
-        val holder = ShadowsocksApplication.containerHolder
+        val holder = app.containerHolder
         try {
           this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
         } catch {

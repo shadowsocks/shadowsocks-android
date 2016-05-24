@@ -49,6 +49,7 @@ import android.util.Log
 import android.widget.Toast
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils._
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 trait BaseService extends Service {
 
@@ -162,11 +163,11 @@ trait BaseService extends Service {
   def updateTrafficTotal(tx: Long, rx: Long) {
     val config = this.config  // avoid race conditions without locking
     if (config != null) {
-      ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
+      app.profileManager.getProfile(config.profileId) match {
         case Some(profile) =>
           profile.tx += tx
           profile.rx += rx
-          ShadowsocksApplication.profileManager.updateProfile(profile)
+          app.profileManager.updateProfile(profile)
         case None => // Ignore
       }
     }

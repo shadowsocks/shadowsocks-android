@@ -22,6 +22,7 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
 
@@ -96,7 +97,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     def bind(item: Profile) {
       this.item = item
       updateText()
-      if (item.id == ShadowsocksApplication.profileId) {
+      if (item.id == app.profileId) {
         text.setChecked(true)
         selectedItem = this
       } else {
@@ -106,7 +107,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
 
     def onClick(v: View) {
-      ShadowsocksApplication.switchProfile(item.id)
+      app.switchProfile(item.id)
       finish
     }
 
@@ -122,7 +123,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
-    profiles ++= ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
     def getItemCount = profiles.length
 
@@ -149,11 +150,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         next.userOrder = previousOrder
         previousOrder = order
         profiles(i) = next
-        ShadowsocksApplication.profileManager.updateProfile(next)
+        app.profileManager.updateProfile(next)
       }
       first.userOrder = previousOrder
       profiles(to) = first
-      ShadowsocksApplication.profileManager.updateProfile(first)
+      app.profileManager.updateProfile(first)
       notifyItemMoved(from, to)
     }
 
@@ -166,8 +167,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       notifyItemInserted(index)
     }
     def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
-      ShadowsocksApplication.profileManager.delProfile(item.id)
-      if (item.id == ShadowsocksApplication.profileId) ShadowsocksApplication.profileId(-1)
+      app.profileManager.delProfile(item.id)
+      if (item.id == app.profileId) app.profileId(-1)
     }
   }
 
@@ -203,14 +204,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     initFab()
 
-    ShadowsocksApplication.profileManager.setProfileAddedListener(profilesAdapter.add)
+    app.profileManager.setProfileAddedListener(profilesAdapter.add)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(this)
     profilesList.setLayoutManager(layoutManager)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
-      case (profile, i) if profile.id == ShadowsocksApplication.profileId => i
+      case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(-1))
     undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
@@ -232,8 +233,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
 
-    if (ShadowsocksApplication.settings.getBoolean(Key.profileTip, true)) {
-      ShadowsocksApplication.settings.edit.putBoolean(Key.profileTip, false).commit
+    if (app.settings.getBoolean(Key.profileTip, true)) {
+      app.editor.putBoolean(Key.profileTip, false).commit
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
     }
@@ -270,8 +271,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     v.getId match {
       case R.id.fab_manual_add =>
         menu.toggle(true)
-        ShadowsocksApplication.profileManager.reload(-1)
-        ShadowsocksApplication.switchProfile(ShadowsocksApplication.profileManager.save.id)
+        app.profileManager.reload(-1)
+        app.switchProfile(app.profileManager.save.id)
         finish
       case R.id.fab_qrcode_add =>
         menu.toggle(false)
@@ -301,7 +302,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         if (clipboard.hasPrimaryClip) {
           val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
           if (profiles.nonEmpty) {
-            profiles.foreach(ShadowsocksApplication.profileManager.createProfile)
+            profiles.foreach(app.profileManager.createProfile)
             Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show
             return
           }
@@ -346,7 +347,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val dialog = new AlertDialog.Builder(this)
       .setTitle(R.string.add_profile_dialog)
       .setPositiveButton(android.R.string.yes, ((_, _) =>
-        profiles.foreach(ShadowsocksApplication.profileManager.createProfile)): DialogInterface.OnClickListener)
+        profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
       .setMessage(profiles.mkString("\n"))
       .create()
@@ -365,7 +366,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   override def onDestroy {
     detachService()
     undoManager.flush
-    ShadowsocksApplication.profileManager.setProfileAddedListener(null)
+    app.profileManager.setProfileAddedListener(null)
     super.onDestroy
   }
 
@@ -374,7 +375,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     if (scanResult != null) {
       val contents = scanResult.getContents
       if (!TextUtils.isEmpty(contents))
-        Parser.findAll(contents).foreach(ShadowsocksApplication.profileManager.createProfile)
+        Parser.findAll(contents).foreach(app.profileManager.createProfile)
     }
   }
 
@@ -387,7 +388,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
-      ShadowsocksApplication.profileManager.getAllProfiles match {
+      app.profileManager.getAllProfiles match {
         case Some(profiles) =>
           clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
           Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show

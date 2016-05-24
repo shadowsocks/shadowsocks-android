@@ -44,6 +44,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.{IBinder, Handler}
 import com.github.shadowsocks.utils.ConfigUtils
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 class ShadowsocksRunnerService extends Service with ServiceBoundContext {
   val handler = new Handler()
@@ -57,15 +58,15 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
   }
 
   def startBackgroundService() {
-    if (ShadowsocksApplication.isVpnEnabled) {
+    if (app.isVpnEnabled) {
       val intent = VpnService.prepare(ShadowsocksRunnerService.this)
       if (intent == null) {
         if (bgService != null) {
-          bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
+          bgService.use(ConfigUtils.load(app.settings))
         }
       }
     } else {
-      bgService.use(ConfigUtils.load(ShadowsocksApplication.settings))
+      bgService.use(ConfigUtils.load(app.settings))
     }
     stopSelf()
   }

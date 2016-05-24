@@ -39,11 +39,12 @@
 
 package com.github.shadowsocks.utils
 
-import android.content.{SharedPreferences, Context}
-import com.github.shadowsocks.{R, ShadowsocksApplication}
-import com.google.android.gms.tagmanager.Container
+import android.content.{Context, SharedPreferences}
 import com.github.kevinsawicki.http.HttpRequest
+import com.github.shadowsocks.R
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.Config
+import com.google.android.gms.tagmanager.Container
 
 object ConfigUtils {
   val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
@@ -152,14 +153,14 @@ object ConfigUtils {
   }
 
   def refresh(context: Context) {
-    val holder = ShadowsocksApplication.containerHolder
+    val holder = app.containerHolder
     if (holder != null) holder.refresh()
   }
 
   def getRejectList(context: Context): String = {
     val default = context.getString(R.string.reject)
     try {
-      val container = ShadowsocksApplication.containerHolder.getContainer
+      val container = app.containerHolder.getContainer
       val update = container.getString("reject")
       if (update == null || update.isEmpty) default else update
     } catch {
@@ -170,7 +171,7 @@ object ConfigUtils {
   def getBlackList(context: Context): String = {
     val default = context.getString(R.string.black_list)
     try {
-      val container = ShadowsocksApplication.containerHolder.getContainer
+      val container = app.containerHolder.getContainer
       val update = container.getString("black_list")
       if (update == null || update.isEmpty) default else update
     } catch {

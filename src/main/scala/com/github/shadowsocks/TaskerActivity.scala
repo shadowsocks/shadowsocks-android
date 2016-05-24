@@ -47,6 +47,7 @@ import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{CheckedTextView, Switch}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.TaskerSettings
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * @author CzBiX
@@ -82,7 +83,7 @@ class TaskerActivity extends AppCompatActivity {
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    val profiles = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
     def getItemCount = 1 + profiles.length
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = i match {
       case 0 => vh.bindDefault
