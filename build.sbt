@@ -55,11 +55,7 @@ proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <ini
           "-dontwarn org.xbill.**")
 
 lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")
-lazy val launcher = TaskKey[Unit]("launcher", "Generate launcher icons")
 
 nativeBuild := {
   "./build.sh" !
-}
-launcher := {
-  "./launcher.sh" !
 }
