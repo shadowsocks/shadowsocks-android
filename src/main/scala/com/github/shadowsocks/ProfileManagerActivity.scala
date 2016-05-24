@@ -234,7 +234,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     })
 
     if (app.settings.getBoolean(Key.profileTip, true)) {
-      app.editor.putBoolean(Key.profileTip, false).commit
+      app.editor.putBoolean(Key.profileTip, false).apply
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
     }
