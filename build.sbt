@@ -32,9 +32,9 @@ libraryDependencies ++= Seq(
   "eu.chainfire" % "libsuperuser" % "1.0.0.201602271131",
   "com.google.zxing" % "android-integration" % "3.2.1",
   "net.glxn.qrgen" % "android" % "2.0",
-  "com.google.android.gms" % "play-services-base" % "9.0.0",
-  "com.google.android.gms" % "play-services-ads" % "9.0.0",
-  "com.google.android.gms" % "play-services-analytics" % "9.0.0",
+  "com.google.android.gms" % "play-services-base" % "9.0.1",
+  "com.google.android.gms" % "play-services-ads" % "9.0.1",
+  "com.google.android.gms" % "play-services-analytics" % "9.0.1",
   "com.android.support" % "design" % "23.4.0",
   "com.android.support" % "gridlayout-v7" % "23.4.0",
   "com.android.support" % "cardview-v7" % "23.4.0",
@@ -42,7 +42,7 @@ libraryDependencies ++= Seq(
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
-  "com.github.clans" % "fab" % "1.6.3"
+  "com.github.clans" % "fab" % "1.6.4"
 )
 
 proguardVersion in Android := "5.2.1"
