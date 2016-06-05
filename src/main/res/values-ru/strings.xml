@@ -39,7 +39,7 @@
   <string name="ipv6">IPv6 Маршрут</string>
   <string name="ipv6_summary">Перенаправлять IPv6 траффик на удалённый сервер</string>
   <string name="onetime_auth">Единоразовая Аутентификация</string>
-  <string name="onetime_auth_summary">Включить единоразовую аутентификацию (Экспериментальная функция)</string>
+  <string name="onetime_auth_summary">Включить единоразовую аутентификацию</string>
   <string name="http_proxy">HTTP Прокси</string>
   <string name="http_proxy_summary">Локальный HTTP прокси</string>
   <string name="dns_proxy">DNS Прокси</string>

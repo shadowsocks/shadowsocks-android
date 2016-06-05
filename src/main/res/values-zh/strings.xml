@@ -74,7 +74,7 @@
   <string name="udp_dns_summary">向遠端轉送 UDP 封包</string>
 
   <string name="onetime_auth">單次驗證</string>
-  <string name="onetime_auth_summary">啟用單次驗證 (試驗性)</string>
+  <string name="onetime_auth_summary">啟用單次驗證</string>
 
   <string name="ipv6">IPv6 路由</string>
   <string name="ipv6_summary">向遠端重新導向 IPv6 流量</string>
