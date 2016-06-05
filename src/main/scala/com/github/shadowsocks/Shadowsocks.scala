@@ -177,7 +177,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   override def onServiceConnected() {
     // Update the UI
     if (fab != null) fab.setEnabled(true)
-    updateState()
+    updateState(true)
     if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
@@ -444,7 +444,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  private def updateState() {
+  private def updateState(initial: Boolean = false) {
     if (bgService != null) {
       bgService.getState match {
         case State.CONNECTING =>
@@ -461,7 +461,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
+          if (initial) if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
             connectionTestText.setVisibility(View.VISIBLE)
             connectionTestText.setText(getString(R.string.connection_test_pending))
           }
