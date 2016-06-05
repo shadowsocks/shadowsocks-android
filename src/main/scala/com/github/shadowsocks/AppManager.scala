@@ -134,12 +134,15 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
   }
 
-  private val proxiedApps = app.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
+  private var proxiedApps: mutable.HashSet[String] = _
   private var toolbar: Toolbar = _
   private var appListView: RecyclerView = _
   private var loadingView: View = _
   private val appsLoading = new AtomicBoolean
   private var handler: Handler = null
+
+  private def initProxiedApps(str: String = app.settings.getString(Key.proxied, "")) =
+    proxiedApps = str.split('\n').to[mutable.HashSet]
 
   override def onDestroy() {
     instance = null
@@ -170,14 +173,13 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
               val editor = prefs.edit
               val i = proxiedAppString.indexOf('\n')
               try {
-                if (i < 0)
-                  editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
-                else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
-                  .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
+                val (enabled, apps) = if (i < 0) (proxiedAppString, "")
+                  else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
+                editor.putBoolean(Key.isBypassApps, enabled.toBoolean).putString(Key.proxied, apps).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-                // Restart activity
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
+                initProxiedApps(apps)
                 reloadApps()
                 return true
               } catch {
@@ -221,6 +223,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       app.editor.putBoolean(Key.isBypassApps, checked).apply())
     bypassSwitch.setChecked(app.settings.getBoolean(Key.isBypassApps, false))
 
+    initProxiedApps()
     loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]
     appListView.setLayoutManager(new LinearLayoutManager(this))
