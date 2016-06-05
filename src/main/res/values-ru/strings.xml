@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-  <string name="app_name" translatable="false">Shadowsocks</string>
-  <string name="screen_name" translatable="false">shadowsocks ▾</string>
-
   <!-- global/misc category -->
   <string name="misc_cat">Разное</string>
   <string name="profile">Профиль</string>
