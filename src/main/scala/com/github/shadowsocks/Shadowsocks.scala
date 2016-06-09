@@ -221,7 +221,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   private var testCount: Int = _
-  private lazy val stat = findViewById(R.id.stat)
+  private var stat: View = _
   private var connectionTestText: TextView = _
   private var txText: TextView = _
   private var rxText: TextView = _
@@ -370,13 +370,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
+    stat = findViewById(R.id.stat)
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    connectionTestText.setFocusable(true)
-    connectionTestText.setOnClickListener(_ => {
+    stat.setOnClickListener(_ => {
       val id = synchronized {
         testCount += 1
         handler.post(() => connectionTestText.setText(R.string.connection_test_testing))

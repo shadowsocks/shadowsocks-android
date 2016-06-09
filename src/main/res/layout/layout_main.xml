@@ -10,10 +10,10 @@
         <LinearLayout android:id="@+id/stat" android:elevation="4dp" android:visibility="gone"
                       android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:minHeight="?android:attr/listPreferredItemHeight" android:gravity="center_vertical"
-                      android:paddingStart="16dip" android:paddingEnd="88dip"
+                      android:paddingStart="16dip" android:paddingEnd="88dip" android:focusable="true"
                       android:paddingLeft="16dip" android:paddingRight="88dip"
                       android:paddingTop="16dip" android:paddingBottom="16dip"
-                      android:background="@color/material_accent_300" android:orientation="vertical">
+                      android:background="@drawable/background_stat" android:orientation="vertical">
             <include layout="@layout/layout_main_stat_title"/>
             <android.support.v7.widget.GridLayout android:layout_width="match_parent"
                                                   android:layout_height="wrap_content" app:columnCount="4">
