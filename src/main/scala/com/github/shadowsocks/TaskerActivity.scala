@@ -44,9 +44,10 @@ import android.os.{Build, Bundle}
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view.{LayoutInflater, View, ViewGroup}
-import android.widget.{Switch, CheckedTextView}
+import android.widget.{CheckedTextView, Switch}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.helper.TaskerSettings
+import com.github.shadowsocks.utils.TaskerSettings
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * @author CzBiX
@@ -82,7 +83,7 @@ class TaskerActivity extends AppCompatActivity {
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    private val profiles = ShadowsocksApplication.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    val profiles = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
     def getItemCount = 1 + profiles.length
     def onBindViewHolder(vh: ProfileViewHolder, i: Int) = i match {
       case 0 => vh.bindDefault
@@ -103,16 +104,20 @@ class TaskerActivity extends AppCompatActivity {
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.app_name)
-    toolbar.setNavigationIcon(R.drawable.ic_close)
+    toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => finish())
 
     taskerOption = TaskerSettings.fromIntent(getIntent)
     switch = findViewById(R.id.serviceSwitch).asInstanceOf[Switch]
     switch.setChecked(taskerOption.switchOn)
     val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    profilesList.setLayoutManager(new LinearLayoutManager(this))
+    val lm = new LinearLayoutManager(this)
+    profilesList.setLayoutManager(lm)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
+    if (taskerOption.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == taskerOption.profileId => i + 1
+    }.getOrElse(0))
   }
 }
 

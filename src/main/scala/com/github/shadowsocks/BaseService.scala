@@ -42,10 +42,14 @@ package com.github.shadowsocks
 import java.util.{Timer, TimerTask}
 
 import android.app.Service
-import android.content.{Intent, Context}
+import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.os.{Handler, RemoteCallbackList}
+import android.text.TextUtils
+import android.util.Log
+import android.widget.Toast
 import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils.{State, TrafficMonitor, TrafficMonitorThread}
+import com.github.shadowsocks.utils._
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 trait BaseService extends Service {
 
@@ -57,12 +61,15 @@ trait BaseService extends Service {
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
   var callbacksCount: Int = _
+  lazy val handler = new Handler(getMainLooper)
+
+  private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+    Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+    stopRunner(true)
+  }
+  var closeReceiverRegistered: Boolean = _
 
   val binder = new IShadowsocksService.Stub {
-    override def getMode: Int = {
-      getServiceMode
-    }
-
     override def getState: Int = {
       state
     }
@@ -94,29 +101,49 @@ trait BaseService extends Service {
       }
     }
 
-    override def stop() {
-      if (state == State.CONNECTED) {
-        stopRunner()
-      }
-    }
-
-    override def start(config: Config) {
-      if (state == State.STOPPED) {
-        startRunner(config)
-      }
-    }
+    override def use(config: Config) = synchronized(state match {
+      case State.STOPPED => if (config != null && checkConfig(config)) startRunner(config)
+      case State.CONNECTED =>
+        if (config == null) stopRunner(true)
+        else if (config.profileId != BaseService.this.config.profileId && checkConfig(config)) {
+          stopRunner(false)
+          startRunner(config)
+        }
+      case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
+    })
   }
+
+  def checkConfig(config: Config) = if (TextUtils.isEmpty(config.proxy) || TextUtils.isEmpty(config.sitekey)) {
+    changeState(State.STOPPED)
+    stopRunner(true)
+    false
+  } else true
 
   def startRunner(config: Config) {
     this.config = config
 
-    startService(new Intent(getContext, getClass))
+    startService(new Intent(this, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
     trafficMonitorThread.start()
+
+    if (!closeReceiverRegistered) {
+      // register close receiver
+      val filter = new IntentFilter()
+      filter.addAction(Intent.ACTION_SHUTDOWN)
+      filter.addAction(Action.CLOSE)
+      registerReceiver(closeReceiver, filter)
+      closeReceiverRegistered = true
+    }
   }
 
-  def stopRunner() {
+  def stopRunner(stopService: Boolean) {
+    // clean up recevier
+    if (closeReceiverRegistered) {
+      unregisterReceiver(closeReceiver)
+      closeReceiverRegistered = false
+    }
+
     // Make sure update total traffic when stopping the runner
     updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
 
@@ -130,35 +157,27 @@ trait BaseService extends Service {
     changeState(State.STOPPED)
 
     // stop the service if nothing has bound to it
-    stopSelf()
+    if (stopService) stopSelf()
   }
 
   def updateTrafficTotal(tx: Long, rx: Long) {
     val config = this.config  // avoid race conditions without locking
     if (config != null) {
-      ShadowsocksApplication.profileManager.getProfile(config.profileId) match {
+      app.profileManager.getProfile(config.profileId) match {
         case Some(profile) =>
           profile.tx += tx
           profile.rx += rx
-          ShadowsocksApplication.profileManager.updateProfile(profile)
+          app.profileManager.updateProfile(profile)
         case None => // Ignore
       }
     }
   }
 
-  def getServiceMode: Int
-  def getTag: String
-  def getContext: Context
-
   def getState: Int = {
     state
   }
-  def changeState(s: Int) {
-    changeState(s, null)
-  }
 
   def updateTrafficRate() {
-    val handler = new Handler(getContext.getMainLooper)
     handler.post(() => {
       if (callbacksCount > 0) {
         val txRate = TrafficMonitor.txRate
@@ -181,8 +200,8 @@ trait BaseService extends Service {
   // Service of shadowsocks should always be started explicitly
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_NOT_STICKY
 
-  protected def changeState(s: Int, msg: String) {
-    val handler = new Handler(getContext.getMainLooper)
+  protected def changeState(s: Int, msg: String = null) {
+    val handler = new Handler(getMainLooper)
     handler.post(() => if (state != s) {
       if (callbacksCount > 0) {
         val n = callbacks.beginBroadcast()

@@ -40,13 +40,21 @@
 package com.github.shadowsocks
 
 import android.app.{Activity, KeyguardManager}
-import android.content.{Intent, IntentFilter, Context, BroadcastReceiver}
+import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.net.VpnService
 import android.os.{Bundle, Handler}
 import android.util.Log
 import com.github.shadowsocks.utils.ConfigUtils
+import com.github.shadowsocks.ShadowsocksApplication.app
+
+object ShadowsocksRunnerActivity {
+  private final val TAG = "ShadowsocksRunnerActivity"
+  private final val REQUEST_CONNECT = 1
+}
 
 class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
+  import ShadowsocksRunnerActivity._
+
   val handler = new Handler()
 
   // Variables
@@ -57,16 +65,16 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
   }
 
   def startBackgroundService() {
-    if (ShadowsocksApplication.isVpnEnabled) {
+    if (app.isNatEnabled) {
+      bgService.use(ConfigUtils.loadFromSharedPreferences)
+      finish()
+    } else {
       val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
       if (intent != null) {
-        startActivityForResult(intent, Shadowsocks.REQUEST_CONNECT)
+        startActivityForResult(intent, REQUEST_CONNECT)
       } else {
-        onActivityResult(Shadowsocks.REQUEST_CONNECT, Activity.RESULT_OK, null)
+        onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
       }
-    } else {
-      bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
-      finish()
     }
   }
 
@@ -90,7 +98,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
 
   override def onDestroy() {
     super.onDestroy()
-    deattachService()
+    detachService()
     if (receiver != null) {
       unregisterReceiver(receiver)
       receiver = null
@@ -101,10 +109,10 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     resultCode match {
       case Activity.RESULT_OK =>
         if (bgService != null) {
-          bgService.start(ConfigUtils.load(ShadowsocksApplication.settings))
+          bgService.use(ConfigUtils.loadFromSharedPreferences)
         }
       case _ =>
-        Log.e(Shadowsocks.TAG, "Failed to start VpnService")
+        Log.e(TAG, "Failed to start VpnService")
     }
     finish()
   }

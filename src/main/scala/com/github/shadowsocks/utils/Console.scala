@@ -63,10 +63,6 @@ object Console {
       .open()
   }
 
-  def runCommand(command: String) {
-    runCommand(Array(command))
-  }
-
   def runCommand(commands: Array[String]) {
     val shell = openShell()
     shell.addCommand(commands, 0, ((commandCode: Int, exitCode: Int, output: util.List[String]) =>

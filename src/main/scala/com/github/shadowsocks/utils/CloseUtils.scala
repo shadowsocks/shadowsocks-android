@@ -4,11 +4,14 @@ package com.github.shadowsocks.utils
   * @author Mygod
   */
 object CloseUtils {
+  type Closeable = {
+    def close()
+  }
   type Disconnectable = {
     def disconnect()
   }
 
-  def autoClose[A <: AutoCloseable, B](x: => A)(block: A => B): B = {
+  def autoClose[A <: Closeable, B](x: => A)(block: A => B): B = {
     var a: Option[A] = None
     try {
       a = Some(x)

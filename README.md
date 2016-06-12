@@ -2,9 +2,7 @@
 
 A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
-Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
-
-[![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_45.png)](https://play.google.com/store/apps/details?id=com.github.shadowsocks)
+<a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
 
 ### CI STATUS
 
@@ -12,28 +10,25 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 ### PREREQUISITES
 
-* JDK 1.7
+* JDK 1.8
 * SBT 0.13.0+
-* Android SDK r24+
+* Android SDK r25+
 * Android NDK r10d+
 
 ### BUILD
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
-* Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
+* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore
 * Create `local.properties` from `local.properties.example` with your own key information
 * Invoke the building like this
 
 ```bash
     git submodule update --init
-
-    # Build native binaries
-    ./build.sh
     
     # Build the App
-    sbt clean android:package-release
+    sbt native-build clean android:package-release
 ```
 
 #### BUILD on Mac OS X (with HomeBrew)
@@ -70,7 +65,7 @@ Help to translate shadowsocks: http://crowdin.net/project/shadowsocks/invite
 
 ### LICENSE
 
-Copyright (C) 2015 Max Lv <max.c.lv@gmail.com>
+Copyright (C) 2016 Max Lv <max.c.lv@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
