@@ -369,6 +369,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     typedArray.recycle
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
+    title.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
 
     stat = findViewById(R.id.stat)
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
