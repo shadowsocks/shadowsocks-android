@@ -6,7 +6,7 @@
   <string name="profile_summary">Переключить на другой профиль или добавить новые</string>
   <string name="nat">Режим NAT (не рекомендуется)</string>
   <string name="nat_summary">Использовать режим NAT вместо VPN. Требует ROOT прав.</string>
-  <string name="stat">Сетвая Активность</string>
+  <string name="stat">Сетевая Активность</string>
   <string name="stat_summary">Отправлено: \t\t\t\t\t%3$s\t↑\t%1$s/s\nПолучено: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
