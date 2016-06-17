@@ -43,7 +43,6 @@ import android.app.Service
 import android.content.Intent
 import android.net.VpnService
 import android.os.{IBinder, Handler}
-import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.ConfigUtils
 import com.github.shadowsocks.ShadowsocksApplication.app
 
@@ -73,11 +72,6 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
   override def onCreate() {
     super.onCreate()
     attachService()
-
-    val s = if (app.isNatEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
-    val intent = new Intent(this, s)
-    intent.setAction(Action.SERVICE)
-    startService(intent)
   }
 
   override def onDestroy() {
