@@ -6,7 +6,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ### CI STATUS
 
-[![Build Status](https://travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
+[![Build Status](https://api.travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
 
 ### PREREQUISITES
 
@@ -66,6 +66,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 ### LICENSE
 
 Copyright (C) 2016 by Max Lv <<max.c.lv@gmail.com>>
+
 Copyright (C) 2016 by Mygod Studio <<mygodstudio@gmail.com>>
 
 This program is free software: you can redistribute it and/or modify
