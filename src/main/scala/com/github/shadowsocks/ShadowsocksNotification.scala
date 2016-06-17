@@ -83,7 +83,9 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     show()
   } else if (forceShow) show()
 
+  private lazy val intent = new Intent(service, service.getClass)
   def show() = {
+    service.startService(intent)
     service.startForeground(1, builder.build)
   }
 
@@ -94,6 +96,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     }
     unregisterCallback
     service.stopForeground(true)
+    service.stopService(intent)
     nm.cancel(1)
   }
 }
