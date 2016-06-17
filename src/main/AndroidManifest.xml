@@ -129,6 +129,7 @@
         </service>
 
         <service android:name=".ShadowsocksTileService" android:label="@string/quick_toggle"
+                 android:process=":qstile"
                  android:icon="@drawable/ic_start_connected"
                  android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>

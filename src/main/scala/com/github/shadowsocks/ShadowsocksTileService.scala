@@ -1,5 +1,6 @@
 package com.github.shadowsocks
 
+import android.annotation.TargetApi
 import android.graphics.drawable.Icon
 import android.service.quicksettings.{Tile, TileService}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -9,6 +10,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 /**
   * @author Mygod
   */
+@TargetApi(24)
 final class ShadowsocksTileService extends TileService with ServiceBoundContext {
   private lazy val iconIdle = Icon.createWithResource(this, R.drawable.ic_start_idle).setTint(0x80ffffff)
   private lazy val iconBusy = Icon.createWithResource(this, R.drawable.ic_start_busy)
