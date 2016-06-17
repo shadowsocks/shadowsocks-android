@@ -2,7 +2,6 @@
 <resources>
 
   <string name="app_name">Shadowsocks</string>
-  <string name="screen_name" translatable="false">shadowsocks</string>
 
   <!-- global/misc category -->
   <string name="misc_cat">Misc</string>
