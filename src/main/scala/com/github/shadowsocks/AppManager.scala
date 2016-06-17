@@ -203,7 +203,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     this.setContentView(R.layout.layout_apps)
     toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.proxied_apps)
-    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
+    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
     toolbar.setNavigationOnClickListener((v: View) => {
       val intent = getParentActivityIntent
       if (intent == null) finish else navigateUpTo(intent)

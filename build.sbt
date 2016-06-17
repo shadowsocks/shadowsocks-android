@@ -2,7 +2,7 @@ import android.Keys._
 
 android.Plugin.androidBuild
 
-platformTarget in Android := "android-23"
+platformTarget in Android := "android-24"
 
 name := "shadowsocks"
 
@@ -35,9 +35,9 @@ libraryDependencies ++= Seq(
   "com.google.android.gms" % "play-services-base" % "9.0.2",
   "com.google.android.gms" % "play-services-ads" % "9.0.2",
   "com.google.android.gms" % "play-services-analytics" % "9.0.2",
-  "com.android.support" % "design" % "23.4.0",
-  "com.android.support" % "gridlayout-v7" % "23.4.0",
-  "com.android.support" % "cardview-v7" % "23.4.0",
+  "com.android.support" % "design" % "24.0.0",
+  "com.android.support" % "gridlayout-v7" % "24.0.0",
+  "com.android.support" % "cardview-v7" % "24.0.0",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
