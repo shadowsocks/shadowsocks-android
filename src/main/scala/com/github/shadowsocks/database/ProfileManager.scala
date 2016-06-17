@@ -208,6 +208,5 @@ class ProfileManager(settings: SharedPreferences, dbHelper: DBHelper) {
       password = "u1rRWTssNv0p"
     }
     createProfile(profile)
-    profile
   }
 }

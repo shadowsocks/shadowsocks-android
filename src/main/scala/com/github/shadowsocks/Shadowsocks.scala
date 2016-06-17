@@ -491,10 +491,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       currentProfile = app.currentProfile match {
         case Some(profile) => profile // updated
         case None =>                  // removed
-          app.profileManager.getFirstProfile match {
-            case Some(first) => app.switchProfile(first.id)
+          app.switchProfile((app.profileManager.getFirstProfile match {
+            case Some(first) => first
             case None => app.profileManager.createDefault()
-          }
+          }).id)
       }
 
       updatePreferenceScreen()
