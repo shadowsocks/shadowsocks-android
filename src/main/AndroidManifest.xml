@@ -113,13 +113,13 @@
 
         <service
                 android:name=".ShadowsocksNatService"
-                android:process=":nat"
+                android:process=":bg"
                 android:exported="false">
         </service>
 
         <service
                 android:name=".ShadowsocksVpnService"
-                android:process=":vpn"
+                android:process=":bg"
                 android:label="@string/app_name"
                 android:permission="android.permission.BIND_VPN_SERVICE"
                 android:exported="false">
@@ -129,7 +129,7 @@
         </service>
 
         <service android:name=".ShadowsocksTileService" android:label="@string/quick_toggle"
-                 android:process=":qstile"
+                 android:process=":bg"
                  android:icon="@drawable/ic_start_connected"
                  android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
