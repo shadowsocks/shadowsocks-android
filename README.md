@@ -65,8 +65,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ### LICENSE
 
-Copyright (C) 2016 by Max Lv <<max.c.lv@gmail.com>>
-
+Copyright (C) 2016 by Max Lv <<max.c.lv@gmail.com>> <br/>
 Copyright (C) 2016 by Mygod Studio <<mygodstudio@gmail.com>>
 
 This program is free software: you can redistribute it and/or modify
