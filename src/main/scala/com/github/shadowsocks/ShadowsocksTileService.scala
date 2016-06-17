@@ -1,10 +1,9 @@
 package com.github.shadowsocks
 
-import android.content.Intent
 import android.graphics.drawable.Icon
 import android.service.quicksettings.{Tile, TileService}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
-import com.github.shadowsocks.utils.State
+import com.github.shadowsocks.utils.{State, Utils}
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
@@ -48,10 +47,14 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
 
   override def onStopListening {
     super.onStopListening
-    detachService // just in case the user switches to NAT mode
+    detachService // just in case the user switches to NAT mode, also saves battery
   }
 
-  override def onClick = if (isLocked) unlockAndRun(configure) else configure()
+  override def onClick = if (isLocked) unlockAndRun(toggle) else toggle()
 
-  private def configure() = startActivityAndCollapse(new Intent(this, classOf[Shadowsocks]))
+  private def toggle() = bgService.getState match {
+    case State.STOPPED => Utils.startSsService(this)
+    case State.CONNECTED => Utils.stopSsService(this)
+    case _ => // ignore
+  }
 }

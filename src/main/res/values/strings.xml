@@ -2,6 +2,7 @@
 <resources>
 
   <string name="app_name">Shadowsocks</string>
+  <string name="quick_toggle">Toggle</string>
 
   <!-- global/misc category -->
   <string name="misc_cat">Misc</string>
