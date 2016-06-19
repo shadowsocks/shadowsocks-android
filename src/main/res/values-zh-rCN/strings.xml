@@ -111,8 +111,8 @@
 
   <string name="action_export">导出至剪贴板</string>
   <string name="action_import">从剪贴板导入</string>
-  <string name="action_export_msg">导出成功</string>
-  <string name="action_export_err">导出失败</string>
+  <string name="action_export_msg">导出至剪贴板成功</string>
+  <string name="action_export_err">导出至剪贴板失败</string>
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
 
