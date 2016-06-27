@@ -30,7 +30,6 @@ libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "eu.chainfire" % "libsuperuser" % "1.0.0.201602271131",
-  "com.google.zxing" % "android-integration" % "3.2.1",
   "net.glxn.qrgen" % "android" % "2.0",
   "com.google.android.gms" % "play-services-base" % "9.0.2",
   "com.google.android.gms" % "play-services-ads" % "9.0.2",
@@ -42,7 +41,8 @@ libraryDependencies ++= Seq(
   "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
-  "com.github.clans" % "fab" % "1.6.4"
+  "com.github.clans" % "fab" % "1.6.4",
+  "me.dm7.barcodescanner" % "zxing" % "1.8.4"
 )
 
 proguardVersion in Android := "5.2.1"
