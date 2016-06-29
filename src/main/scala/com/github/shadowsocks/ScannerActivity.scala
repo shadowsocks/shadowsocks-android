@@ -2,14 +2,16 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.Manifest
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.NavUtils
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.ActionBar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -21,54 +23,78 @@ import me.dm7.barcodescanner.core.ViewFinderView
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
 class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHandler {
-    var scannerView: ZXingScannerView = null
 
-    override def onCreate(state: Bundle) {
-        super.onCreate(state)
-        setContentView(R.layout.layout_scanner)
-        setupToolbar()
+  val MY_PERMISSIONS_REQUEST_CAMERA = 1
 
-        scannerView = new ZXingScannerView(this)
-        val contentFrame = findViewById(R.id.content_frame).asInstanceOf[ViewGroup]
-        contentFrame.addView(scannerView)
+  var scannerView: ZXingScannerView = null
+
+  override def onRequestPermissionsResult(requestCode: Int, permissions: Array[String],
+    grantResults: Array[Int]) {
+    if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA) {
+      // If request is cancelled, the result arrays are empty.
+      if (grantResults.length > 0
+        && grantResults(0) == PackageManager.PERMISSION_GRANTED) {
+          scannerView.setResultHandler(this)
+          scannerView.startCamera()
+        }
     }
+  }
 
-    override def onResume() {
-        super.onResume()
-        scannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
-        scannerView.startCamera()          // Start camera on resume
+  override def onCreate(state: Bundle) {
+    super.onCreate(state)
+    setContentView(R.layout.layout_scanner)
+    setupToolbar()
+
+    scannerView = new ZXingScannerView(this)
+    val contentFrame = findViewById(R.id.content_frame).asInstanceOf[ViewGroup]
+    contentFrame.addView(scannerView)
+  }
+
+  override def onResume() {
+    super.onResume()
+    val permissionCheck = ContextCompat.checkSelfPermission(this,
+      Manifest.permission.CAMERA)
+    if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+      scannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
+      scannerView.startCamera()          // Start camera on resume
+    } else {
+      ActivityCompat.requestPermissions(this,
+        Array(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
     }
+  }
 
-    override def onPause() {
-        super.onPause()
-        scannerView.stopCamera()           // Stop camera on pause
+  override def onPause() {
+    super.onPause()
+    scannerView.stopCamera()           // Stop camera on pause
+  }
+
+  override def handleResult(rawResult: Result) = {
+    val intent = new Intent()
+    intent.putExtra("uri", rawResult.getText)
+    setResult(Activity.RESULT_OK, intent)
+    finish()
+  }
+
+  def setupToolbar() {
+    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    setSupportActionBar(toolbar)
+    val ab = getSupportActionBar()
+    if (ab != null) {
+      ab.setDisplayHomeAsUpEnabled(true)
     }
+  }
 
-    override def handleResult(rawResult: Result) = {
-        val intent = new Intent()
-        intent.putExtra("uri", rawResult.getText)
-        setResult(Activity.RESULT_OK, intent)
+  override def onOptionsItemSelected(item: MenuItem): Boolean = {
+    item.getItemId() match {
+      // Respond to the action bar's Up/Home button
+      case android.R.id.home =>
+        setResult(Activity.RESULT_CANCELED, new Intent())
         finish()
+        return true
+      case _ => // Do nothing
     }
+    return super.onOptionsItemSelected(item)
+  }
 
-    def setupToolbar() {
-        val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-        setSupportActionBar(toolbar)
-        val ab = getSupportActionBar()
-        if (ab != null) {
-            ab.setDisplayHomeAsUpEnabled(true)
-        }
-    }
-
-    override def onOptionsItemSelected(item: MenuItem): Boolean = {
-        item.getItemId() match {
-            // Respond to the action bar's Up/Home button
-            case android.R.id.home =>
-                setResult(Activity.RESULT_CANCELED, new Intent())
-                finish()
-                return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
 }
 
