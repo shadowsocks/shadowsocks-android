@@ -234,10 +234,9 @@ class ShadowsocksNatService extends BaseService {
   def startDnsDaemon() {
 
     val conf = if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
-      val reject = ConfigUtils.getRejectList(this)
       val blackList = ConfigUtils.getBlackList(this)
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", 8153, reject, blackList, 8163, "")
+        "127.0.0.1", 8153, blackList, 8163, "")
     } else {
       ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
         "127.0.0.1", 8153, 8163, "")

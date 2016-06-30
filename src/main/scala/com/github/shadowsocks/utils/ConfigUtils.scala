@@ -116,9 +116,6 @@ object ConfigUtils {
       | label = "china-servers";
       | ip = 114.114.114.114, 112.124.47.27;
       | timeout = 4;
-      | reject = %s;
-      | reject_policy = fail;
-      | reject_recursively = on;
       | exclude = %s;
       | policy = included;
       | uptest = none;
@@ -155,17 +152,6 @@ object ConfigUtils {
   def refresh(context: Context) {
     val holder = app.containerHolder
     if (holder != null) holder.refresh()
-  }
-
-  def getRejectList(context: Context): String = {
-    val default = context.getString(R.string.reject)
-    try {
-      val container = app.containerHolder.getContainer
-      val update = container.getString("reject")
-      if (update == null || update.isEmpty) default else update
-    } catch {
-      case ex: Exception => default
-    }
   }
 
   def getBlackList(context: Context): String = {
