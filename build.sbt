@@ -59,5 +59,9 @@ proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <ini
 lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")
 
 nativeBuild := {
-  "./build.sh" !
+  val logger = streams.value.log
+  Process("./build.sh") ! logger match {
+    case 0 => // Success!
+    case n => sys.error(s"Native build script exit code: $n")
+  }
 }
