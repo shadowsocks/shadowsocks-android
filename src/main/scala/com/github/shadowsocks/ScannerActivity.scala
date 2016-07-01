@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 
 import com.google.zxing.Result
 
@@ -36,7 +37,10 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
         && grantResults(0) == PackageManager.PERMISSION_GRANTED) {
           scannerView.setResultHandler(this)
           scannerView.startCamera()
-        }
+      } else {
+        Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
+        finish()
+      }
     }
   }
 

@@ -119,6 +119,7 @@
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add profile</string>
   <string name="add_profile_nfc_hint">Keep both devices screen on, on the other device, click profile\'s share button, bring them together (back to back).\nYou also can scan a nfc tag.</string>
+  <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <string name="copy_url">Copy URL</string>
   <plurals name="removed">
     <item quantity="one">Removed</item>

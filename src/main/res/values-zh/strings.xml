@@ -100,6 +100,10 @@
   <string name="add_profile_dialog">為 Shadowsocks 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>
   <string name="add_profile_methods_manual_settings">手動設定</string>
+  <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 來新增設定檔</string>
+  <string name="add_profile_nfc_hint">
+    保持兩台設備的屏幕亮起，在另外一台設備上，點擊設定檔的分享按鈕，將它們靠在一起（背靠背）。\n你也可以掃描 NFC 標籤。</string>
+  <string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 
   <string-array name="route_entry">
     <item>全域</item>
