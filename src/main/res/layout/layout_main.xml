@@ -66,7 +66,7 @@
         <android.support.design.widget.FloatingActionButton android:id="@+id/fab" android:layout_width="wrap_content"
                                                             android:layout_height="wrap_content"
                                                             app:backgroundTint="@color/material_blue_grey_700"
-                                                            android:src="@drawable/ic_start_idle"
+                                                            app:srcCompat="@drawable/ic_start_idle"
                                                             app:pressedTranslationZ="6dp" app:borderWidth="0dp" />
     </com.github.jorgecastilloprz.FABProgressCircle>
 </RelativeLayout>

@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit
 import android.app.Application
 import android.content.pm.PackageManager
 import android.preference.PreferenceManager
+import android.support.v7.app.AppCompatDelegate
 import com.github.shadowsocks.database.{DBHelper, ProfileManager}
 import com.github.shadowsocks.utils.{Key, Utils}
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders}
@@ -95,6 +96,7 @@ class ShadowsocksApplication extends Application {
   override def onCreate() {
     java.lang.System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
     app = this
+    AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     val tm = TagManager.getInstance(this)
     val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
     val callback = new ResultCallback[ContainerHolder] {

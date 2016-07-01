@@ -13,7 +13,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
-import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
+import android.support.v7.widget._
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.util.Log
@@ -251,13 +251,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   def initFab() {
     menu = findViewById(R.id.menu).asInstanceOf[FloatingActionMenu]
     menu.setClosedOnTouchOutside(true)
+    val dm = AppCompatDrawableManager.get
     val manualAddFAB = findViewById(R.id.fab_manual_add).asInstanceOf[FloatingActionButton]
+    manualAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_create))
     manualAddFAB.setOnClickListener(this)
     val qrcodeAddFAB = findViewById(R.id.fab_qrcode_add).asInstanceOf[FloatingActionButton]
+    qrcodeAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_image_camera_alt))
     qrcodeAddFAB.setOnClickListener(this)
     val nfcAddFAB = findViewById(R.id.fab_nfc_add).asInstanceOf[FloatingActionButton]
+    nfcAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_device_nfc))
     nfcAddFAB.setOnClickListener(this)
     val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
+    importAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_paste))
     importAddFAB.setOnClickListener(this)
   }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Based on: https://github.com/android/platform_frameworks_base/blob/master/core/res/res/layout/select_dialog_singlechoice_material.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:id="@+id/container"
@@ -31,7 +32,7 @@
                android:layout_height="wrap_content"
                android:padding="5dp"
                android:layout_gravity="center_vertical"
-               android:src="@drawable/ic_social_share"
+               app:srcCompat="@drawable/ic_social_share"
                android:background="?attr/selectableItemBackgroundBorderless"
                android:contentDescription="@string/share"
                android:focusable="true"

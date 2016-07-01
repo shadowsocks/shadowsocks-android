@@ -26,19 +26,19 @@ resolvers += Resolver.jcenterRepo
 
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
 
+useSupportVectors
+
 libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "eu.chainfire" % "libsuperuser" % "1.0.0.201602271131",
   "net.glxn.qrgen" % "android" % "2.0",
-  "com.google.android.gms" % "play-services-base" % "9.0.2",
-  "com.google.android.gms" % "play-services-ads" % "9.0.2",
-  "com.google.android.gms" % "play-services-analytics" % "9.0.2",
+  "com.google.android.gms" % "play-services-ads" % "9.2.0",
+  "com.google.android.gms" % "play-services-analytics" % "9.2.0",
   "com.android.support" % "design" % "24.0.0",
   "com.android.support" % "gridlayout-v7" % "24.0.0",
   "com.android.support" % "cardview-v7" % "24.0.0",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
-  "com.j256.ormlite" % "ormlite-core" % "4.48",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
   "com.github.clans" % "fab" % "1.6.4",
