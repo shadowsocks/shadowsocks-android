@@ -157,6 +157,18 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
     val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     item.getItemId match {
+      case R.id.action_apply_all =>
+        app.profileManager.getAllProfiles match {
+          case Some(profiles) =>
+            val proxiedAppString = prefs.getString(Key.proxied, "")
+            profiles.foreach(profile =>
+              profile.individual = proxiedAppString
+              app.profileManager.updateProfile(profile)
+            )
+            Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show
+          case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+        }
+        return true
       case R.id.action_export =>
         val bypass = prefs.getBoolean(Key.isBypassApps, false)
         val proxiedAppString = prefs.getString(Key.proxied, "")

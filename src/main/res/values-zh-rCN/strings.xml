@@ -113,6 +113,7 @@
     <item>绕过局域网及中国大陆地址</item>
   </string-array>
 
+  <string name="action_apply_all">应用设置到所有配置文件</string>
   <string name="action_export">导出至剪贴板</string>
   <string name="action_import">从剪贴板导入</string>
   <string name="action_export_msg">导出至剪贴板成功</string>

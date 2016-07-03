@@ -115,6 +115,7 @@
     <item>略過區域網路及中國大陸位址</item>
   </string-array>
 
+  <string name="action_apply_all">應用設置到所有配置文件</string>
   <string name="action_export">匯出至剪貼簿</string>
   <string name="action_import">從剪貼簿匯入</string>
   <string name="action_export_msg">匯出至剪貼簿成功</string>
