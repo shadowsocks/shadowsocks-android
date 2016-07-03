@@ -161,10 +161,10 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         app.profileManager.getAllProfiles match {
           case Some(profiles) =>
             val proxiedAppString = prefs.getString(Key.proxied, "")
-            profiles.foreach(profile =>
+            profiles.foreach(profile => {
               profile.individual = proxiedAppString
               app.profileManager.updateProfile(profile)
-            )
+            })
             Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show
           case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
         }
