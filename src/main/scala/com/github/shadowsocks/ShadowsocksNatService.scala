@@ -48,9 +48,9 @@ import android.content._
 import android.net.{ConnectivityManager, Network}
 import android.os._
 import android.util.{Log, SparseArray}
-import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.database.Profile
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -144,22 +144,22 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startShadowsocksDaemon() {
-    if (config.route != Route.ALL) {
-      val acl: Array[Array[String]] = config.route match {
+    if (profile.route != Route.ALL) {
+      val acl: Array[Array[String]] = profile.route match {
         case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
         case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
         case Route.BYPASS_LAN_CHN =>
           Array(getResources.getStringArray(R.array.private_route), getResources.getStringArray(R.array.chn_route))
       }
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
         acl.flatten.foreach(p.println)
       })
     }
 
     val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
-        config.sitekey, config.encMethod, 600)
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        profile.password, profile.method, 600)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
 
@@ -170,9 +170,9 @@ class ShadowsocksNatService extends BaseService {
           , "-P", getApplicationInfo.dataDir
           , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
 
-    if (config.isAuth) cmd += "-A"
+    if (profile.auth) cmd += "-A"
 
-    if (config.route != Route.ALL) {
+    if (profile.route != Route.ALL) {
       cmd += "--acl"
       cmd += (getApplicationInfo.dataDir + "/acl.list")
     }
@@ -182,11 +182,11 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startTunnel() {
-    if (config.isUdpDns) {
+    if (profile.udpdns) {
       val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8153,
-          config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8153,
+          profile.password, profile.method, 10)
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
@@ -200,7 +200,7 @@ class ShadowsocksNatService extends BaseService {
 
       cmd += ("-l" , "8153")
 
-      if (config.isAuth) cmd += "-A"
+      if (profile.auth) cmd += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
@@ -208,9 +208,9 @@ class ShadowsocksNatService extends BaseService {
 
     } else {
       val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
-          config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8163,
+          profile.password, profile.method, 10)
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
@@ -223,7 +223,7 @@ class ShadowsocksNatService extends BaseService {
         , "-P", getApplicationInfo.dataDir
         , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
 
-      if (config.isAuth) cmdBuf += "-A"
+      if (profile.auth) cmdBuf += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
 
@@ -233,16 +233,15 @@ class ShadowsocksNatService extends BaseService {
 
   def startDnsDaemon() {
 
-    val conf = if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
-      val blackList = ConfigUtils.getBlackList(this)
+    val conf = if (profile.route == Route.BYPASS_CHN || profile.route == Route.BYPASS_LAN_CHN) {
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", 8153, blackList, 8163, "")
+        "127.0.0.1", 8153, getBlackList, 8163, "")
     } else {
       ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
         "127.0.0.1", 8153, 8163, "")
     }
 
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
     val cmd = getApplicationInfo.dataDir + "/pdnsd -c " + getApplicationInfo.dataDir + "/pdnsd-nat.conf"
@@ -253,10 +252,10 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startRedsocksDaemon() {
-    val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, config.localPort)
+    val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort)
     val cmd = "%s/redsocks -c %s/redsocks-nat.conf"
       .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, getApplicationInfo.dataDir)
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
@@ -268,7 +267,7 @@ class ShadowsocksNatService extends BaseService {
   def handleConnection: Boolean = {
 
     startTunnel()
-    if (!config.isUdpDns) startDnsDaemon()
+    if (!profile.udpdns) startDnsDaemon()
     startRedsocksDaemon()
     startShadowsocksDaemon()
     setupIptables()
@@ -283,11 +282,6 @@ class ShadowsocksNatService extends BaseService {
     } else {
       null
     }
-  }
-
-  override def onCreate() {
-    super.onCreate()
-    ConfigUtils.refresh(this)
   }
 
   def killProcesses() {
@@ -319,8 +313,8 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(Utils.iptables + " -t nat -F OUTPUT")
 
     val cmd_bypass = Utils.iptables + CMD_IPTABLES_RETURN
-    if (!InetAddress.getByName(config.proxy.toUpperCase).isInstanceOf[Inet6Address]) {
-      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
+    if (!InetAddress.getByName(profile.host.toUpperCase).isInstanceOf[Inet6Address]) {
+      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + profile.host))
     }
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 127.0.0.1"))
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
@@ -329,14 +323,14 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(Utils.iptables
       + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
-    if (!config.isProxyApps || config.isBypassApps) {
+    if (!profile.proxyApps || profile.bypass) {
       http_sb.append(Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
-    if (config.isProxyApps) {
+    if (profile.proxyApps) {
       val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
-      for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
+      for (pn <- profile.individual.split('\n')) uidMap.get(pn) match {
         case Some(uid) =>
-          if (!config.isBypassApps) {
+          if (!profile.bypass) {
             http_sb.append((Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
               .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
           } else {
@@ -348,59 +342,46 @@ class ShadowsocksNatService extends BaseService {
     Console.runRootCommand((init_sb ++ http_sb).toArray)
   }
 
-  override def startRunner(config: Config) {
+  override def startRunner(profile: Profile) {
     if (!Console.isRoot) {
       changeState(State.STOPPED, getString(R.string.nat_no_root))
+      stopRunner(true)
       return
     }
-    super.startRunner(config)
+    super.startRunner(profile)
+  }
 
-    app.track(TAG, "start")
-    
-    changeState(State.CONNECTING)
+  override def connect() {
+    super.connect()
 
-    Utils.ThrowableFuture {
-      if (config.proxy == "198.199.101.152") {
-        val holder = app.containerHolder
-        try {
-          this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
-        } catch {
-          case ex: Exception =>
-            changeState(State.STOPPED, getString(R.string.service_failed))
-            stopRunner(true)
-            this.config = null
+    if (this.profile != null) {
+
+      // Clean up
+      killProcesses()
+
+      var resolved: Boolean = false
+      if (!Utils.isNumeric(this.profile.host)) {
+        Utils.resolve(this.profile.host, enableIPv6 = true) match {
+          case Some(a) =>
+            this.profile.host = a
+            resolved = true
+          case None => resolved = false
         }
+      } else {
+        resolved = true
       }
 
-      if (this.config != null) {
-
-        // Clean up
-        killProcesses()
-
-        var resolved: Boolean = false
-        if (!Utils.isNumeric(config.proxy)) {
-          Utils.resolve(config.proxy, enableIPv6 = true) match {
-            case Some(a) =>
-              config.proxy = a
-              resolved = true
-            case None => resolved = false
-          }
-        } else {
-          resolved = true
-        }
-
-        if (!resolved) {
-          changeState(State.STOPPED, getString(R.string.invalid_server))
-          stopRunner(true)
-        } else if (handleConnection) {
-          // Set DNS
-          flushDns()
-          changeState(State.CONNECTED)
-          notification = new ShadowsocksNotification(this, config.profileName, true)
-        } else {
-          changeState(State.STOPPED, getString(R.string.service_failed))
-          stopRunner(true)
-        }
+      if (!resolved) {
+        changeState(State.STOPPED, getString(R.string.invalid_server))
+        stopRunner(true)
+      } else if (handleConnection) {
+        // Set DNS
+        flushDns()
+        changeState(State.CONNECTED)
+        notification = new ShadowsocksNotification(this, profile.name, true)
+      } else {
+        changeState(State.STOPPED, getString(R.string.service_failed))
+        stopRunner(true)
       }
     }
   }

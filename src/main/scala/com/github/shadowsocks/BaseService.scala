@@ -47,17 +47,19 @@ import android.os.{Handler, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-import com.github.shadowsocks.aidl.{Config, IShadowsocksService, IShadowsocksServiceCallback}
+import com.github.kevinsawicki.http.HttpRequest
+import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.database.Profile
 
 trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
-  @volatile protected var config: Config = null
+  @volatile protected var profile: Profile = _
 
-  var timer: Timer = null
-  var trafficMonitorThread: TrafficMonitorThread = null
+  var timer: Timer = _
+  var trafficMonitorThread: TrafficMonitorThread = _
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
   var callbacksCount: Int = _
@@ -101,26 +103,50 @@ trait BaseService extends Service {
       }
     }
 
-    override def use(config: Config) = synchronized(state match {
-      case State.STOPPED => if (config != null && checkConfig(config)) startRunner(config)
-      case State.CONNECTED =>
-        if (config == null) stopRunner(true)
-        else if (config.profileId != BaseService.this.config.profileId && checkConfig(config)) {
+    override def use(profileId: Int) = synchronized(if (profileId < 0) stopRunner(true) else {
+      val profile = app.profileManager.getProfile(profileId).orNull
+      if (profile == null) stopRunner(true) else state match {
+        case State.STOPPED => if (checkProfile(profile)) startRunner(profile)
+        case State.CONNECTED => if (profileId != BaseService.this.profile.id && checkProfile(profile)) {
           stopRunner(false)
-          startRunner(config)
+          startRunner(profile)
         }
-      case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
+        case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
+      }
     })
   }
 
-  def checkConfig(config: Config) = if (TextUtils.isEmpty(config.proxy) || TextUtils.isEmpty(config.sitekey)) {
+  def checkProfile(profile: Profile) = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
     changeState(State.STOPPED)
     stopRunner(true)
     false
   } else true
 
-  def startRunner(config: Config) {
-    this.config = config
+  def connect() = if (profile.host == "198.199.101.152") try {
+    val holder = app.containerHolder
+    val container = holder.getContainer
+    val url = container.getString("proxy_url")
+    val sig = Utils.getSignature(this)
+    val list = HttpRequest
+      .post(url)
+      .connectTimeout(2000)
+      .readTimeout(2000)
+      .send("sig="+sig)
+      .body
+    val proxies = util.Random.shuffle(list.split('|').toSeq)
+    val proxy = proxies.head.split(':')
+    profile.host = proxy(0).trim
+    profile.remotePort = proxy(1).trim.toInt
+    profile.password = proxy(2).trim
+    profile.method = proxy(3).trim
+  } catch {
+    case ex: Exception =>
+      changeState(State.STOPPED, getString(R.string.service_failed))
+      stopRunner(true)
+  }
+
+  def startRunner(profile: Profile) {
+    this.profile = profile
 
     startService(new Intent(this, getClass))
     TrafficMonitor.reset()
@@ -135,6 +161,12 @@ trait BaseService extends Service {
       registerReceiver(closeReceiver, filter)
       closeReceiverRegistered = true
     }
+
+    app.track(getClass.getSimpleName, "start")
+
+    changeState(State.CONNECTING)
+
+    Utils.ThrowableFuture(connect)
   }
 
   def stopRunner(stopService: Boolean) {
@@ -158,17 +190,19 @@ trait BaseService extends Service {
 
     // stop the service if nothing has bound to it
     if (stopService) stopSelf()
+
+    profile = null
   }
 
   def updateTrafficTotal(tx: Long, rx: Long) {
-    val config = this.config  // avoid race conditions without locking
-    if (config != null) {
-      app.profileManager.getProfile(config.profileId) match {
-        case Some(profile) =>
-          profile.tx += tx
-          profile.rx += rx
-          app.profileManager.updateProfile(profile)
-        case None => // Ignore
+    val profile = this.profile  // avoid race conditions without locking
+    if (profile != null) {
+      app.profileManager.getProfile(profile.id) match {
+        case Some(p) =>         // default profile may have host, etc. modified
+          p.tx += tx
+          p.rx += rx
+          app.profileManager.updateProfile(p)
+        case None =>
       }
     }
   }
@@ -197,6 +231,12 @@ trait BaseService extends Service {
     })
   }
 
+
+  override def onCreate() {
+    super.onCreate()
+    app.refreshContainerHolder
+  }
+
   // Service of shadowsocks should always be started explicitly
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_NOT_STICKY
 
@@ -216,5 +256,16 @@ trait BaseService extends Service {
       }
       state = s
     })
+  }
+
+  def getBlackList = {
+    val default = getString(R.string.black_list)
+    try {
+      val container = app.containerHolder.getContainer
+      val update = container.getString("black_list")
+      if (update == null || update.isEmpty) default else update
+    } catch {
+      case ex: Exception => default
+    }
   }
 }

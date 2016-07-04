@@ -11,20 +11,19 @@ import android.provider.Settings
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
+import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
-import android.support.v7.widget._
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
-import android.util.Log
 import android.view._
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.github.shadowsocks.ShadowsocksApplication.app
 import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
@@ -281,8 +280,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     v.getId match {
       case R.id.fab_manual_add =>
         menu.toggle(true)
-        app.profileManager.reload(-1)
-        app.switchProfile(app.profileManager.save.id)
+        val profile = app.profileManager.createProfile()
+        app.profileManager.updateProfile(profile)
+        app.switchProfile(profile.id)
         finish
       case R.id.fab_qrcode_add =>
         menu.toggle(false)

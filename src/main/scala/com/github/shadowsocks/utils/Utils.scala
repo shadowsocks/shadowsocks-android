@@ -120,6 +120,15 @@ object Utils {
     })
   }
 
+  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+    val p = new java.io.PrintWriter(f)
+    try {
+      op(p)
+    } finally {
+      p.close()
+    }
+  }
+
   // Blocked > 3 seconds
   def toggleAirplaneMode(context: Context) = {
     if (Console.isRoot) {

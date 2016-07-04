@@ -9,10 +9,10 @@ import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.{Key, Utils}
-import com.github.shadowsocks.ShadowsocksApplication.app
 
 object ShadowsocksSettings {
   // Constants
@@ -74,11 +74,57 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
+    findPreference(Key.profileName).setOnPreferenceChangeListener((_, value) => {
+      profile.name = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.proxy).setOnPreferenceChangeListener((_, value) => {
+      profile.host = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.remotePort).setOnPreferenceChangeListener((_, value) => {
+      profile.remotePort = value.asInstanceOf[Int]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.localPort).setOnPreferenceChangeListener((_, value) => {
+      profile.localPort = value.asInstanceOf[Int]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.sitekey).setOnPreferenceChangeListener((_, value) => {
+      profile.password = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.encMethod).setOnPreferenceChangeListener((_, value) => {
+      profile.method = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
+      profile.route = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
     isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
-    isProxyApps.setOnPreferenceClickListener((preference: Preference) => {
+    isProxyApps.setOnPreferenceClickListener(_ => {
       startActivity(new Intent(activity, classOf[AppManager]))
       isProxyApps.setChecked(true)
       false
+    })
+    isProxyApps.setOnPreferenceChangeListener((_, value) => {
+      profile.proxyApps = value.asInstanceOf[Boolean]
+      app.profileManager.updateProfile(profile)
+    })
+
+    findPreference(Key.isUdpDns).setOnPreferenceChangeListener((_, value) => {
+      profile.udpdns = value.asInstanceOf[Boolean]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.isAuth).setOnPreferenceChangeListener((_, value) => {
+      profile.auth = value.asInstanceOf[Boolean]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.isIpv6).setOnPreferenceChangeListener((_, value) => {
+      profile.ipv6 = value.asInstanceOf[Boolean]
+      app.profileManager.updateProfile(profile)
     })
 
     val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
@@ -131,9 +177,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
   }
 
-  override def onResume {
-    super.onResume()
-    isProxyApps.setChecked(app.settings.getBoolean(Key.isProxyApps, false))  // update
+  def refreshProfile() {
+    profile = app.currentProfile.get
+    isProxyApps.setChecked(profile.proxyApps)
   }
 
   override def onDestroy {
@@ -160,14 +206,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     }
   }
 
-  def update(profile: Profile) {
-    for (name <- PROXY_PREFS) {
-      val pref = findPreference(name)
-      updatePreference(pref, name, profile)
-    }
-    for (name <- FEATURE_PREFS) {
-      val pref = findPreference(name)
-      updatePreference(pref, name, profile)
-    }
+  var profile: Profile = _
+  def setProfile(profile: Profile) {
+    this.profile = profile
+    for (name <- Array(PROXY_PREFS, FEATURE_PREFS).flatten) updatePreference(findPreference(name), name, profile)
   }
 }
