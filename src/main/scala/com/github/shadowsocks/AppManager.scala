@@ -84,7 +84,7 @@ object AppManager {
     synchronized {
       if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
         .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
-        .map(p => new ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
+        .map(p => ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
           p.applicationInfo.loadIcon(pm))).toArray
       cachedApps
     }
@@ -136,10 +136,11 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
   private var proxiedApps: mutable.HashSet[String] = _
   private var toolbar: Toolbar = _
+  private var bypassSwitch: Switch = _
   private var appListView: RecyclerView = _
   private var loadingView: View = _
   private val appsLoading = new AtomicBoolean
-  private var handler: Handler = null
+  private var handler: Handler = _
 
   private def initProxiedApps(str: String = app.settings.getString(Key.proxied, "")) =
     proxiedApps = str.split('\n').to[mutable.HashSet]
@@ -187,7 +188,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
               try {
                 val (enabled, apps) = if (i < 0) (proxiedAppString, "")
                   else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
-                editor.putBoolean(Key.isBypassApps, enabled.toBoolean).putString(Key.proxied, apps).apply()
+                bypassSwitch.setChecked(enabled.toBoolean)
+                editor.putString(Key.proxied, apps).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
@@ -230,10 +232,10 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         finish()
       })
 
-    val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
+    bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
+    bypassSwitch.setChecked(app.settings.getBoolean(Key.isBypassApps, false))
     bypassSwitch.setOnCheckedChangeListener((_, checked) =>
       app.editor.putBoolean(Key.isBypassApps, checked).apply())
-    bypassSwitch.setChecked(app.settings.getBoolean(Key.isBypassApps, false))
 
     initProxiedApps()
     loadingView = findViewById(R.id.loading)
