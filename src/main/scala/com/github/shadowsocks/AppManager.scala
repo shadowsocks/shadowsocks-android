@@ -163,7 +163,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       case R.id.action_apply_all =>
         app.profileManager.getAllProfiles match {
           case Some(profiles) =>
-            val proxiedAppString = prefs.getString(Key.proxied, "")
+            val proxiedAppString = prefs.getString(Key.individual, "")
             profiles.foreach(profile => {
               profile.individual = proxiedAppString
               app.profileManager.updateProfile(profile)
@@ -173,9 +173,9 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         }
         return true
       case R.id.action_export =>
-        val bypass = prefs.getBoolean(Key.isBypassApps, false)
-        val proxiedAppString = prefs.getString(Key.proxied, "")
-        val clip = ClipData.newPlainText(Key.proxied, bypass + "\n" + proxiedAppString)
+        val bypass = prefs.getBoolean(Key.bypass, false)
+        val proxiedAppString = prefs.getString(Key.individual, "")
+        val clip = ClipData.newPlainText(Key.individual, bypass + "\n" + proxiedAppString)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
         return true
@@ -191,7 +191,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
                 val (enabled, apps) = if (i < 0) (proxiedAppString, "")
                   else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
                 bypassSwitch.setChecked(enabled.toBoolean)
-                editor.putString(Key.proxied, apps).apply()
+                editor.putString(Key.individual, apps).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)

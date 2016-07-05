@@ -83,8 +83,8 @@ class ShadowsocksApplication extends Application {
     .setLabel(getVersionName)
     .build())
 
-  def profileId = settings.getInt(Key.profileId, -1)
-  def profileId(i: Int) = editor.putInt(Key.profileId, i).apply
+  def profileId = settings.getInt(Key.id, -1)
+  def profileId(i: Int) = editor.putInt(Key.id, i).apply
   def currentProfile = profileManager.getProfile(profileId)
 
   def switchProfile(id: Int) = {

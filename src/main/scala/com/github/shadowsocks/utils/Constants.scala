@@ -143,25 +143,25 @@ object ConfigUtils {
 }
 
 object Key {
-  val profileId = "profileId"
-  val profileName = "profileName"
+  val id = "profileId"
+  val name = "profileName"
 
-  val proxied = "Proxyed"
+  val individual = "Proxyed"
 
   val isNAT = "isNAT"
   val route = "route"
 
   val isAutoConnect = "isAutoConnect"
 
-  val isProxyApps = "isProxyApps"
-  val isBypassApps = "isBypassApps"
-  val isUdpDns = "isUdpDns"
-  val isAuth = "isAuth"
-  val isIpv6 = "isIpv6"
+  val proxyApps = "isProxyApps"
+  val bypass = "isBypassApps"
+  val udpdns = "isUdpDns"
+  val auth = "isAuth"
+  val ipv6 = "isIpv6"
 
-  val proxy = "proxy"
-  val sitekey = "sitekey"
-  val encMethod = "encMethod"
+  val host = "proxy"
+  val password = "sitekey"
+  val method = "encMethod"
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
 

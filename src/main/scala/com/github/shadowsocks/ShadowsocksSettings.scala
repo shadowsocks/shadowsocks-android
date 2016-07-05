@@ -17,9 +17,9 @@ import com.github.shadowsocks.utils.{Key, Utils}
 object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
-  private val PROXY_PREFS = Array(Key.profileName, Key.proxy, Key.remotePort, Key.localPort, Key.sitekey, Key.encMethod,
-    Key.isAuth)
-  private val FEATURE_PREFS = Array(Key.route, Key.isProxyApps, Key.isUdpDns, Key.isIpv6)
+  private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
+    Key.auth)
+  private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
   def updateDropDownPreference(pref: Preference, value: String) {
@@ -46,17 +46,17 @@ object ShadowsocksSettings {
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
     name match {
-      case Key.profileName => updateSummaryEditTextPreference(pref, profile.name)
-      case Key.proxy => updateSummaryEditTextPreference(pref, profile.host)
+      case Key.name => updateSummaryEditTextPreference(pref, profile.name)
+      case Key.host => updateSummaryEditTextPreference(pref, profile.host)
       case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
       case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
-      case Key.sitekey => updatePasswordEditTextPreference(pref, profile.password)
-      case Key.encMethod => updateDropDownPreference(pref, profile.method)
+      case Key.password => updatePasswordEditTextPreference(pref, profile.password)
+      case Key.method => updateDropDownPreference(pref, profile.method)
       case Key.route => updateDropDownPreference(pref, profile.route)
-      case Key.isProxyApps => updateSwitchPreference(pref, profile.proxyApps)
-      case Key.isUdpDns => updateSwitchPreference(pref, profile.udpdns)
-      case Key.isAuth => updateSwitchPreference(pref, profile.auth)
-      case Key.isIpv6 => updateSwitchPreference(pref, profile.ipv6)
+      case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
+      case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
+      case Key.auth => updateSwitchPreference(pref, profile.auth)
+      case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
     }
   }
 }
@@ -74,11 +74,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
-    findPreference(Key.profileName).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.name).setOnPreferenceChangeListener((_, value) => {
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
-    findPreference(Key.proxy).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.host).setOnPreferenceChangeListener((_, value) => {
       profile.host = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
@@ -90,11 +90,11 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.localPort = value.asInstanceOf[Int]
       app.profileManager.updateProfile(profile)
     })
-    findPreference(Key.sitekey).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.password).setOnPreferenceChangeListener((_, value) => {
       profile.password = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
-    findPreference(Key.encMethod).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.method).setOnPreferenceChangeListener((_, value) => {
       profile.method = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
@@ -103,7 +103,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       app.profileManager.updateProfile(profile)
     })
 
-    isProxyApps = findPreference(Key.isProxyApps).asInstanceOf[SwitchPreference]
+    isProxyApps = findPreference(Key.proxyApps).asInstanceOf[SwitchPreference]
     isProxyApps.setOnPreferenceClickListener(_ => {
       startActivity(new Intent(activity, classOf[AppManager]))
       isProxyApps.setChecked(true)
@@ -114,15 +114,15 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       app.profileManager.updateProfile(profile)
     })
 
-    findPreference(Key.isUdpDns).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.udpdns).setOnPreferenceChangeListener((_, value) => {
       profile.udpdns = value.asInstanceOf[Boolean]
       app.profileManager.updateProfile(profile)
     })
-    findPreference(Key.isAuth).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.auth).setOnPreferenceChangeListener((_, value) => {
       profile.auth = value.asInstanceOf[Boolean]
       app.profileManager.updateProfile(profile)
     })
-    findPreference(Key.isIpv6).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.ipv6).setOnPreferenceChangeListener((_, value) => {
       profile.ipv6 = value.asInstanceOf[Boolean]
       app.profileManager.updateProfile(profile)
     })
@@ -202,7 +202,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     for (name <- Key.isNAT #:: PROXY_PREFS.toStream #::: FEATURE_PREFS.toStream) {
       val pref = findPreference(name)
       if (pref != null) pref.setEnabled(enabled &&
-        (name != Key.isProxyApps || Utils.isLollipopOrAbove || app.isNatEnabled))
+        (name != Key.proxyApps || Utils.isLollipopOrAbove || app.isNatEnabled))
     }
   }
 

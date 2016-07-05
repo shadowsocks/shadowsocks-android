@@ -405,7 +405,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
-      else if (checkText(Key.proxy) && checkText(Key.sitekey) && bgService != null) prepareStartService()
+      else if (checkText(Key.host) && checkText(Key.password) && bgService != null) prepareStartService()
       else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
