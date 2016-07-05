@@ -58,11 +58,11 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
   }
 
   def startBackgroundService() {
-    if (app.isNatEnabled) bgService.use(ConfigUtils.loadFromSharedPreferences) else {
+    if (app.isNatEnabled) bgService.use(app.profileId) else {
       val intent = VpnService.prepare(ShadowsocksRunnerService.this)
       if (intent == null) {
         if (bgService != null) {
-          bgService.use(ConfigUtils.loadFromSharedPreferences)
+          bgService.use(app.profileId)
         }
       }
     }

@@ -117,8 +117,10 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         proxiedApps.add(item.packageName)
         check.setChecked(true)
       }
-      if (!appsLoading.get)
-        app.editor.putString(Key.proxied, proxiedApps.mkString("\n")).apply
+      if (!appsLoading.get) {
+        profile.individual = proxiedApps.mkString("\n")
+        app.profileManager.updateProfile(profile)
+      }
     }
   }
 
@@ -141,9 +143,9 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   private var loadingView: View = _
   private val appsLoading = new AtomicBoolean
   private var handler: Handler = _
+  private val profile = app.currentProfile.get
 
-  private def initProxiedApps(str: String = app.settings.getString(Key.proxied, "")) =
-    proxiedApps = str.split('\n').to[mutable.HashSet]
+  private def initProxiedApps(str: String = profile.individual) = proxiedApps = str.split('\n').to[mutable.HashSet]
 
   override def onDestroy() {
     instance = null
@@ -225,17 +227,23 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    app.editor.putBoolean(Key.isProxyApps, true).apply
+    if (!profile.proxyApps) {
+      profile.proxyApps = true
+      app.profileManager.updateProfile(profile)
+    }
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((_, checked) => {
-        app.editor.putBoolean(Key.isProxyApps, checked).apply
+        profile.proxyApps = checked
+        app.profileManager.updateProfile(profile)
         finish()
       })
 
     bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
-    bypassSwitch.setChecked(app.settings.getBoolean(Key.isBypassApps, false))
-    bypassSwitch.setOnCheckedChangeListener((_, checked) =>
-      app.editor.putBoolean(Key.isBypassApps, checked).apply())
+    bypassSwitch.setChecked(profile.bypass)
+    bypassSwitch.setOnCheckedChangeListener((_, checked) => {
+      profile.bypass = checked
+      app.profileManager.updateProfile(profile)
+    })
 
     initProxiedApps()
     loadingView = findViewById(R.id.loading)

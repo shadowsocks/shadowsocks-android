@@ -100,7 +100,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   import Shadowsocks._
 
   // Variables
-  var serviceStarted = false
+  var serviceStarted: Boolean = _
   var fab: FloatingActionButton = _
   var fabProgressCircle: FABProgressCircle = _
   var progressDialog: ProgressDialog = _
@@ -186,23 +186,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
     if (!app.settings.getBoolean(app.getVersionName, false)) {
       app.editor.putBoolean(app.getVersionName, true).apply()
-      try {
-        // Workaround that convert port(String) to port(Int)
-        val oldLocalPort = app.settings.getString(Key.localPort, "")
-        val oldRemotePort = app.settings.getString(Key.remotePort, "")
-
-        if (oldLocalPort != "") {
-          app.editor.putInt(Key.localPort, oldLocalPort.toInt).apply()
-        }
-        if (oldRemotePort != "") {
-          app.editor.putInt(Key.remotePort, oldRemotePort.toInt).apply()
-        }
-      } catch {
-        case ex: Exception => // Ignore
-      }
-      val oldProxiedApps = app.settings.getString(Key.proxied, "")
-      if (oldProxiedApps.contains('|'))
-        app.editor.putString(Key.proxied, DBHelper.updateProxiedApps(this, oldProxiedApps)).apply()
 
       recovery()
 
@@ -364,7 +347,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     val title = field.get(toolbar).asInstanceOf[TextView]
     title.setFocusable(true)
     title.setGravity(0x10)
-    title.getLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+    title.getLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
     title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
     val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
     title.setBackgroundResource(typedArray.getResourceId(0, 0))
@@ -434,11 +417,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     handler.post(() => attachService)
   }
 
-  protected override def onPause() {
-    super.onPause()
-    app.profileManager.save
-  }
-
   private def hideCircle() {
     try {
       fabProgressCircle.hide()
@@ -489,34 +467,34 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   private def updateCurrentProfile() = {
     // Check if current profile changed
-    if (app.profileId != currentProfile.id) {
-      currentProfile = app.currentProfile match {
+    if (preferences.profile == null || app.profileId != preferences.profile.id) {
+      updatePreferenceScreen(app.currentProfile match {
         case Some(profile) => profile // updated
         case None =>                  // removed
           app.switchProfile((app.profileManager.getFirstProfile match {
             case Some(first) => first
             case None => app.profileManager.createDefault()
           }).id)
-      }
-
-      updatePreferenceScreen()
+      })
 
       if (serviceStarted) serviceLoad()
 
       true
-    } else false
+    } else {
+      preferences.refreshProfile()
+      false
+    }
   }
 
   protected override def onResume() {
     super.onResume()
 
-    ConfigUtils.refresh(this)
+    app.refreshContainerHolder
 
     updateState(updateCurrentProfile())
   }
 
-  private def updatePreferenceScreen() {
-    val profile = currentProfile
+  private def updatePreferenceScreen(profile: Profile) {
     if (profile.host == "198.199.101.152") if (adView == null) {
       adView = new AdView(this)
       adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
@@ -525,7 +503,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       adView.loadAd(new AdRequest.Builder().build())
     } else adView.setVisibility(View.VISIBLE) else if (adView != null) adView.setVisibility(View.GONE)
 
-    preferences.update(profile)
+    preferences.setProfile(profile)
   }
 
   override def onStart() {
@@ -587,7 +565,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   def serviceStop() {
-    if (bgService != null) bgService.use(null)
+    if (bgService != null) bgService.use(-1)
   }
 
   def checkText(key: String): Boolean = {
@@ -599,7 +577,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   /** Called when connect button is clicked. */
   def serviceLoad() {
-    bgService.use(ConfigUtils.loadFromSharedPreferences)
+    bgService.use(app.profileId)
 
     if (app.isVpnEnabled) {
       changeSwitch(checked = false)

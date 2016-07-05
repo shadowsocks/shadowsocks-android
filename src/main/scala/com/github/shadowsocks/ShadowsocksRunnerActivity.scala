@@ -66,7 +66,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
 
   def startBackgroundService() {
     if (app.isNatEnabled) {
-      bgService.use(ConfigUtils.loadFromSharedPreferences)
+      bgService.use(app.profileId)
       finish()
     } else {
       val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
@@ -109,7 +109,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     resultCode match {
       case Activity.RESULT_OK =>
         if (bgService != null) {
-          bgService.use(ConfigUtils.loadFromSharedPreferences)
+          bgService.use(app.profileId)
         }
       case _ =>
         Log.e(TAG, "Failed to start VpnService")

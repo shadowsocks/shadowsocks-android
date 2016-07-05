@@ -60,13 +60,12 @@ object ShadowsocksApplication {
 class ShadowsocksApplication extends Application {
   import ShadowsocksApplication._
 
-  lazy val dbHelper = new DBHelper(this)
   final val SIG_FUNC = "getSignature"
   var containerHolder: ContainerHolder = _
   lazy val tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val editor = settings.edit
-  lazy val profileManager = new ProfileManager(settings, dbHelper)
+  lazy val profileManager = new ProfileManager(new DBHelper(this))
 
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
   def isVpnEnabled = !isNatEnabled
@@ -85,12 +84,12 @@ class ShadowsocksApplication extends Application {
     .build())
 
   def profileId = settings.getInt(Key.profileId, -1)
-  def profileId(i: Int) = settings.edit.putInt(Key.profileId, i).apply
+  def profileId(i: Int) = editor.putInt(Key.profileId, i).apply
   def currentProfile = profileManager.getProfile(profileId)
 
   def switchProfile(id: Int) = {
     profileId(id)
-    profileManager.load(id)
+    profileManager.getProfile(id) getOrElse profileManager.createProfile()
   }
 
   override def onCreate() {
@@ -116,5 +115,10 @@ class ShadowsocksApplication extends Application {
       }
     }
     pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
+  }
+
+  def refreshContainerHolder {
+    val holder = app.containerHolder
+    if (holder != null) holder.refresh()
   }
 }
