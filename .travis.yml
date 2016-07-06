@@ -36,9 +36,5 @@ install:
     - export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
     - cp local.properties.travis local.properties
 
-before_script:
-    - echo $JAVA_OPTS
-    - export JAVA_OPTS="-Xmx2048m $JAVA_OPTS"
-
 script:
     - sbt native-build android:package-release
