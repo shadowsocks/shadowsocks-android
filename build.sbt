@@ -49,8 +49,10 @@ libraryDependencies ++= Seq(
 
 proguardVersion in Android := "5.2.1"
 
-proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.** { <init>(...); }",
+proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.**",
           "-keep class com.github.shadowsocks.System { *; }",
+          "-keep class me.dm7.**",
+          "-keep class com.google.android.gms.**",
           "-keepattributes *Annotation*",
           "-dontnote com.j256.ormlite.**",
           "-dontnote org.xbill.**",
