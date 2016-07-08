@@ -117,7 +117,7 @@ trait BaseService extends Service {
   }
 
   def checkProfile(profile: Profile) = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
-    changeState(State.STOPPED)
+    changeState(State.STOPPED, getString(R.string.proxy_empty))
     stopRunner(true)
     false
   } else true

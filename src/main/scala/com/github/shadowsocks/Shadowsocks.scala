@@ -405,7 +405,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
-      else if (checkText(Key.host) && checkText(Key.password) && bgService != null) prepareStartService()
+      else if (bgService != null) prepareStartService()
       else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
@@ -566,13 +566,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   def serviceStop() {
     if (bgService != null) bgService.use(-1)
-  }
-
-  def checkText(key: String): Boolean = {
-    val text = app.settings.getString(key, "")
-    if (text != null && text.length > 0) return true
-    Snackbar.make(findViewById(android.R.id.content), R.string.proxy_empty, Snackbar.LENGTH_LONG).show
-    false
   }
 
   /** Called when connect button is clicked. */
