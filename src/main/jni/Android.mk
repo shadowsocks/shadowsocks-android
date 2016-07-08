@@ -389,7 +389,6 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/include \
-					-I$(LOCAL_PATH)/libev \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/openssl/include  \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
@@ -397,6 +396,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libudns libsodium libancillary
@@ -418,7 +418,6 @@ LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
-					-I$(LOCAL_PATH)/libev \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
@@ -426,6 +425,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/openssl/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium libcork libudns libancillary
