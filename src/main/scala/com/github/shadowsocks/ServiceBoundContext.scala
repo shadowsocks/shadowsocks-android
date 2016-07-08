@@ -69,7 +69,9 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     unregisterCallback
     callback = null
     if (connection != null) {
-      unbindService(connection)
+      try unbindService(connection) catch {
+        case _: IllegalArgumentException => // ignore
+      }
       connection = null
     }
     if (binder != null) {
