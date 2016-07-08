@@ -331,10 +331,11 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libev
-LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H
+LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H \
+				-I$(LOCAL_PATH)/include/libev
 LOCAL_SRC_FILES := \
-	libev/ev.c \
-	libev/event.c 
+	shadowsocks-libev/libev/ev.c \
+	shadowsocks-libev/libev/event.c 
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -395,7 +396,8 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include
+					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
+					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libudns libsodium libancillary
 
@@ -423,7 +425,8 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/openssl/include 
+					-I$(LOCAL_PATH)/openssl/include \
+					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium libcork libudns libancillary
 
