@@ -62,6 +62,7 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
 
       connection = new ShadowsocksServiceConnection()
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
+      startService(intent)
     }
   }
 
