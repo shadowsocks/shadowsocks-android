@@ -104,6 +104,12 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
   /**
     * Sets the value to the given index from the entry values.
     *
+    * Remember to callChangeListener() if this extends Preference directly
+    *
+    * https://github.com/android/platform_frameworks_base/blob/
+    * 4535e11fb7010f2b104d3f8b3954407b9f330e0f/core/java/
+    * android/preference/ListPreference.java#L282
+    *
     * @param index The index of the value to set.
     */
   def setValueIndex(index: Int) {
@@ -113,8 +119,8 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
       mValueSet = true
       if (mEntryValues != null) {
         val value = mEntryValues(index).toString
+        if (changed) callChangeListener(value)
         persistString(value)
-        setValue(value)
       }
       if (changed) notifyChanged
     }
