@@ -50,6 +50,9 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     setupToolbar()
 
     scannerView = new ZXingScannerView(this)
+    scannerView.setAutoFocus(false)
+    scannerView.setFlash(false)
+
     val contentFrame = findViewById(R.id.content_frame).asInstanceOf[ViewGroup]
     contentFrame.addView(scannerView)
   }
