@@ -83,9 +83,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     show()
   } else if (forceShow) show()
 
-  def show() = {
-    service.startForeground(1, builder.build)
-  }
+  def show() = service.startForeground(1, builder.build)
 
   def destroy() {
     if (lockReceiver != null) {
