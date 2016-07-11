@@ -120,7 +120,7 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     *
     * @return The value of the key.
     */
-  def getValue = if (mEntryValues == null) null else mEntryValues(mSelectedIndex).toString
+  def getValue = if (mEntryValues == null || mSelectedIndex < 0) null else mEntryValues(mSelectedIndex).toString
 
   /**
     * Returns the entry corresponding to the current value.
