@@ -37,8 +37,8 @@
         <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="encMethod"
                 android:persistent="false"
-                app:entries="@array/enc_method_entry"
-                app:entryValues="@array/enc_method_value"
+                android:entries="@array/enc_method_entry"
+                android:entryValues="@array/enc_method_value"
                 android:summary="%s"
                 android:title="@string/enc_method"/>
         <SwitchPreference
@@ -55,8 +55,8 @@
         <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="route"
                 android:persistent="false"
-                app:entries="@array/route_entry"
-                app:entryValues="@array/route_value"
+                android:entries="@array/route_entry"
+                android:entryValues="@array/route_value"
                 android:summary="%s"
                 android:title="@string/route_list"/>
         <SwitchPreference
