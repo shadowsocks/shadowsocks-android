@@ -51,8 +51,12 @@ final class NumberPickerPreference(context: Context, attrs: AttributeSet = null)
     super.onDialogClosed(positiveResult)  // forward compatibility
     if (positiveResult) {
       val value = picker.getValue
-      if (callChangeListener(value)) setValue(value)
-    } else picker.setValue(value)
+      if (callChangeListener(value)) {
+        setValue(value)
+        return
+      }
+    }
+    picker.setValue(value)
   }
   override protected def onGetDefaultValue(a: TypedArray, index: Int) = a.getInt(index, getMin).asInstanceOf[AnyRef]
   override protected def onSetInitialValue(restorePersistedValue: Boolean, defaultValue: Any) {
