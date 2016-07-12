@@ -45,12 +45,11 @@ import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
 import android.content._
-import android.net.{ConnectivityManager, Network}
 import android.os._
-import android.util.{Log, SparseArray}
-import com.github.shadowsocks.utils._
+import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.utils._
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -70,78 +69,6 @@ class ShadowsocksNatService extends BaseService {
   var sstunnelProcess: Process = _
   var redsocksProcess: Process = _
   var pdnsdProcess: Process = _
-
-  private val dnsAddressCache = new SparseArray[String]
-
-  def getNetId(network: Network): Int = {
-    network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
-  }
-
-  def restoreDnsForAllNetwork() {
-    val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-    val networks = manager.getAllNetworks
-    val cmdBuf = new ArrayBuffer[String]()
-    networks.foreach(network => {
-      val netId = getNetId(network)
-      val oldDns = dnsAddressCache.get(netId)
-      if (oldDns != null) {
-        cmdBuf.append("ndc resolver setnetdns %d \"\" %s".formatLocal(Locale.ENGLISH, netId, oldDns))
-        dnsAddressCache.remove(netId)
-      }
-    })
-    if (cmdBuf.nonEmpty) Console.runRootCommand(cmdBuf.toArray)
-  }
-
-  def setDnsForAllNetwork(dns: String) {
-    val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-    val networks = manager.getAllNetworks
-    if (networks == null) return
-
-    val cmdBuf = new ArrayBuffer[String]()
-    networks.foreach(network => {
-      val networkInfo = manager.getNetworkInfo(network)
-      if (networkInfo == null) return
-      if (networkInfo.isConnected) {
-        val netId = getNetId(network)
-        val curDnsList = manager.getLinkProperties(network).getDnsServers
-        if (curDnsList != null) {
-          import scala.collection.JavaConverters._
-          val curDns = curDnsList.asScala.map(ip => ip.getHostAddress).mkString(" ")
-          if (curDns != dns) {
-            dnsAddressCache.put(netId, curDns)
-            cmdBuf.append("ndc resolver setnetdns %d \"\" %s".formatLocal(Locale.ENGLISH, netId, dns))
-          }
-        }
-      }
-    })
-    if (cmdBuf.nonEmpty) Console.runRootCommand(cmdBuf.toArray)
-  }
-
-  def setupDns() {
-    setDnsForAllNetwork("127.0.0.1")
-  }
-
-  def resetDns() = {
-    restoreDnsForAllNetwork()
-  }
-
-  def flushDns() {
-    if (Utils.isLollipopOrAbove) {
-      val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-      val networks = manager.getAllNetworks
-      val cmdBuf = new ArrayBuffer[String]()
-      networks.foreach(network => {
-        val networkInfo = manager.getNetworkInfo(network)
-        if (networkInfo.isAvailable) {
-          val netId = network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
-          cmdBuf.append("ndc resolver flushnet %d".formatLocal(Locale.ENGLISH, netId))
-        }
-      })
-      Console.runRootCommand(cmdBuf.toArray)
-    } else {
-      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
-    }
-  }
 
   def startShadowsocksDaemon() {
     if (profile.route != Route.ALL) {
@@ -376,7 +303,7 @@ class ShadowsocksNatService extends BaseService {
         stopRunner(true)
       } else if (handleConnection) {
         // Set DNS
-        flushDns()
+        Utils.flushDns()
         changeState(State.CONNECTED)
         notification = new ShadowsocksNotification(this, profile.name, true)
       } else {

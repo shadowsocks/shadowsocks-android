@@ -129,10 +129,17 @@ object Utils {
     }
   }
 
+  // Because /sys/class/net/* isn't accessible since API level 24
+  def flushDns() = Console.runRootCommand("for if in /sys/class/net/*; do " +
+    "if [ \"down\" != $(cat $if/operstate) ]; then " +  // up or unknown
+      "ndc resolver flushif ${if##*/}; " +
+    "fi " +
+  "done")
+
   // Blocked > 3 seconds
   def toggleAirplaneMode(context: Context) = {
     if (Console.isRoot) {
-      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
+      flushDns()
       true
     } else if (Build.VERSION.SDK_INT < 17) {
       toggleBelowApiLevel17(context)

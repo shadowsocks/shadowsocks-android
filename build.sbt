@@ -51,14 +51,13 @@ proguardVersion in Android := "5.2.1"
 
 proguardCache in Android := Seq()
 
-proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.**",
-          "-keep class com.github.shadowsocks.System { *; }",
-          "-keep class me.dm7.**",
-          "-keep class com.google.android.gms.**",
-          "-keepattributes *Annotation*",
-          "-dontnote com.j256.ormlite.**",
-          "-dontnote org.xbill.**",
-          "-dontwarn org.xbill.**")
+proguardOptions in Android ++= Seq(
+  "-keep class com.github.shadowsocks.System { *; }",
+  "-dontnote com.google.android.gms.internal.**",
+  "-dontnote com.j256.ormlite.**",
+  "-dontnote me.dm7.barcodescannerview.**",
+  "-dontnote org.xbill.**",
+  "-dontwarn org.xbill.**")
 
 lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")
 
