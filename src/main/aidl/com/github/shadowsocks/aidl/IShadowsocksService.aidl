@@ -9,4 +9,5 @@ interface IShadowsocksService {
   oneway void unregisterCallback(IShadowsocksServiceCallback cb);
 
   oneway void use(in int profileId);
+  void useSync(in int profileId);
 }

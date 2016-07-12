@@ -114,6 +114,8 @@ trait BaseService extends Service {
         case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
       }
     })
+
+    override def useSync(profileId: Int) = use(profileId)
   }
 
   def checkProfile(profile: Profile) = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
