@@ -49,6 +49,8 @@ libraryDependencies ++= Seq(
 
 proguardVersion in Android := "5.2.1"
 
+proguardCache in Android := Seq()
+
 proguardOptions in Android ++= Seq("-keep class com.github.shadowsocks.**",
           "-keep class com.github.shadowsocks.System { *; }",
           "-keep class me.dm7.**",
