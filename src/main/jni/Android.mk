@@ -552,14 +552,5 @@ openssl_subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
 	))
 include $(openssl_subdirs)
 
-# Iptables
-# LOCAL_PATH := $(ROOT_PATH)
-# iptables_subdirs := $(addprefix $(LOCAL_PATH)/iptables/,$(addsuffix /Android.mk, \
-# 	iptables \
-# 	extensions \
-# 	libiptc \
-# 	))
-# include $(iptables_subdirs)
-
 # Import cpufeatures
 $(call import-module,android/cpufeatures)

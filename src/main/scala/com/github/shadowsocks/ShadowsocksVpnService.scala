@@ -82,7 +82,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     stopRunner(true)
   }
 
-  override def stopRunner(stopService: Boolean) {
+  override def stopRunner(stopService: Boolean, msg: String = null) {
 
     if (vpnThread != null) {
       vpnThread.stopThread()
@@ -105,7 +105,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    super.stopRunner(stopService)
+    super.stopRunner(stopService, msg)
   }
 
   def killProcesses() {
@@ -165,10 +165,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         resolved = true
       }
 
-      if (!resolved) {
-        changeState(State.STOPPED, getString(R.string.invalid_server))
-        stopRunner(true)
-      } else if (handleConnection) {
+      if (!resolved) stopRunner(true, getString(R.string.invalid_server)) else if (handleConnection) {
         changeState(State.CONNECTED)
         notification = new ShadowsocksNotification(this, profile.name)
       } else {

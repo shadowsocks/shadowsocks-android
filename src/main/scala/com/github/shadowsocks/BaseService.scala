@@ -142,9 +142,7 @@ trait BaseService extends Service {
     profile.password = proxy(2).trim
     profile.method = proxy(3).trim
   } catch {
-    case ex: Exception =>
-      changeState(State.STOPPED, getString(R.string.service_failed))
-      stopRunner(true)
+    case ex: Exception => stopRunner(true, getString(R.string.service_failed))
   }
 
   def startRunner(profile: Profile) {
@@ -171,7 +169,7 @@ trait BaseService extends Service {
     Utils.ThrowableFuture(connect)
   }
 
-  def stopRunner(stopService: Boolean) {
+  def stopRunner(stopService: Boolean, msg: String = null) {
     // clean up recevier
     if (closeReceiverRegistered) {
       unregisterReceiver(closeReceiver)
@@ -188,7 +186,7 @@ trait BaseService extends Service {
     }
 
     // change the state
-    changeState(State.STOPPED)
+    changeState(State.STOPPED, msg)
 
     // stop the service if nothing has bound to it
     if (stopService) stopSelf()
@@ -244,7 +242,7 @@ trait BaseService extends Service {
 
   protected def changeState(s: Int, msg: String = null) {
     val handler = new Handler(getMainLooper)
-    handler.post(() => if (state != s) {
+    handler.post(() => if (state != s || msg != null) {
       if (callbacksCount > 0) {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {

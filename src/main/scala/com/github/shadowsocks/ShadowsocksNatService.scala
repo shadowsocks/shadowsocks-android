@@ -50,6 +50,7 @@ import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
+import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -58,8 +59,7 @@ class ShadowsocksNatService extends BaseService {
 
   val TAG = "ShadowsocksNatService"
 
-  val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN"
-  val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
+  val CMD_IPTABLES_DNAT_ADD_SOCKS = "iptables -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
@@ -69,6 +69,7 @@ class ShadowsocksNatService extends BaseService {
   var sstunnelProcess: Process = _
   var redsocksProcess: Process = _
   var pdnsdProcess: Process = _
+  var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
     if (profile.route != Route.ALL) {
@@ -191,7 +192,7 @@ class ShadowsocksNatService extends BaseService {
   }
 
   /** Called when the activity is first created. */
-  def handleConnection: Boolean = {
+  def handleConnection {
 
     startTunnel()
     if (!profile.udpdns) startDnsDaemon()
@@ -199,7 +200,6 @@ class ShadowsocksNatService extends BaseService {
     startShadowsocksDaemon()
     setupIptables()
 
-    true
   }
 
   def onBind(intent: Intent): IBinder = {
@@ -229,7 +229,7 @@ class ShadowsocksNatService extends BaseService {
       pdnsdProcess = null
     }
 
-    Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
+    su.addCommand("iptables -t nat -F OUTPUT")
   }
 
   def setupIptables() = {
@@ -237,9 +237,9 @@ class ShadowsocksNatService extends BaseService {
     val http_sb = new ArrayBuffer[String]
 
     init_sb.append("ulimit -n 4096")
-    init_sb.append(Utils.iptables + " -t nat -F OUTPUT")
+    init_sb.append("iptables -t nat -F OUTPUT")
 
-    val cmd_bypass = Utils.iptables + CMD_IPTABLES_RETURN
+    val cmd_bypass = "iptables -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN"
     if (!InetAddress.getByName(profile.host.toUpperCase).isInstanceOf[Inet6Address]) {
       init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + profile.host))
     }
@@ -247,18 +247,17 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
-    init_sb.append(Utils.iptables
-      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
+    init_sb.append("iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
     if (!profile.proxyApps || profile.bypass) {
-      http_sb.append(Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+      http_sb.append(CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
     if (profile.proxyApps) {
       val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
       for (pn <- profile.individual.split('\n')) uidMap.get(pn) match {
         case Some(uid) =>
           if (!profile.bypass) {
-            http_sb.append((Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+            http_sb.append(CMD_IPTABLES_DNAT_ADD_SOCKS
               .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
           } else {
             init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
@@ -266,31 +265,38 @@ class ShadowsocksNatService extends BaseService {
         case _ => // probably removed package, ignore
       }
     }
-    Console.runRootCommand((init_sb ++ http_sb).toArray)
+    su.addCommand((init_sb ++ http_sb).toArray)
   }
 
-  override def startRunner(profile: Profile) {
-    if (!Console.isRoot) {
-      changeState(State.STOPPED, getString(R.string.nat_no_root))
-      stopRunner(true)
-      return
+  override def startRunner(profile: Profile) = if (su == null) {
+    su = new Shell.Builder().useSU().setWantSTDERR(true).setWatchdogTimeout(10).open((_, exitCode, _) =>
+      if (exitCode == 0) super.startRunner(profile) else {
+        Log.wtf(TAG, "libsuperuser#55 has been fixed. Please remove the redundant code.")
+        su.close()
+        su = null
+        super.stopRunner(true, getString(R.string.nat_no_root))
+      })
+    su.waitForIdle()
+    if (!su.isRunning) {
+      su.close()
+      su = null
+      super.stopRunner(true, getString(R.string.nat_no_root))
     }
-    super.startRunner(profile)
   }
 
   override def connect() {
     super.connect()
 
-    if (this.profile != null) {
+    if (profile != null) {
 
       // Clean up
       killProcesses()
 
-      var resolved: Boolean = false
-      if (!Utils.isNumeric(this.profile.host)) {
-        Utils.resolve(this.profile.host, enableIPv6 = true) match {
+      var resolved = false
+      if (!Utils.isNumeric(profile.host)) {
+        Utils.resolve(profile.host, enableIPv6 = true) match {
           case Some(a) =>
-            this.profile.host = a
+            profile.host = a
             resolved = true
           case None => resolved = false
         }
@@ -298,33 +304,31 @@ class ShadowsocksNatService extends BaseService {
         resolved = true
       }
 
-      if (!resolved) {
-        changeState(State.STOPPED, getString(R.string.invalid_server))
-        stopRunner(true)
-      } else if (handleConnection) {
+      if (!resolved) stopRunner(true, getString(R.string.invalid_server)) else {
+        handleConnection
         // Set DNS
-        Utils.flushDns()
+        su.addCommand(Utils.FLUSH_DNS)
         changeState(State.CONNECTED)
         notification = new ShadowsocksNotification(this, profile.name, true)
-      } else {
-        changeState(State.STOPPED, getString(R.string.service_failed))
-        stopRunner(true)
       }
     }
   }
 
-  override def stopRunner(stopService: Boolean) {
+  override def stopRunner(stopService: Boolean, msg: String = null) {
+
+    if (notification != null) notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
-
-    if (notification != null) notification.destroy()
 
     app.track(TAG, "stop")
 
     // reset NAT
     killProcesses()
 
-    super.stopRunner(stopService)
+    su.close()
+    su = null
+
+    super.stopRunner(stopService, msg)
   }
 }
