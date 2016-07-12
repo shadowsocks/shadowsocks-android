@@ -79,7 +79,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
 
   def setVisible(visible: Boolean, forceShow: Boolean = false) = if (isVisible != visible) {
     isVisible = visible
-    builder.setPriority(if (visible) NotificationCompat.PRIORITY_DEFAULT else NotificationCompat.PRIORITY_MIN)
+    builder.setPriority(if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN)
     show()
   } else if (forceShow) show()
 
