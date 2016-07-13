@@ -4,6 +4,7 @@ import java.nio.charset.Charset
 
 import android.app.Activity
 import android.content._
+import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
 import android.os.{Bundle, Handler}
@@ -263,6 +264,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
     importAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_paste))
     importAddFAB.setOnClickListener(this)
+    menu.setOnMenuToggleListener(opened => if (opened) qrcodeAddFAB.setVisibility(
+      if (getPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) View.VISIBLE else View.GONE))
   }
 
 
