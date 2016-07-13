@@ -82,9 +82,6 @@
 
   <string name="stat">网络流量</string>
   <string name="stat_summary">发送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
-  <plurals name="bytes">
-    <item quantity="other">字节</item>
-  </plurals>
 
   <string name="connection_test_pending">检查网络连接</string>
   <string name="connection_test_testing">测试中……</string>

@@ -83,9 +83,6 @@
 
   <string name="stat">網路流量</string>
   <string name="stat_summary">傳送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
-  <plurals name="bytes">
-    <item quantity="other">位元組</item>
-  </plurals>
 
   <string name="connection_test_pending">檢查連線能力</string>
   <string name="connection_test_testing">測試中……</string>
