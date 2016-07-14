@@ -47,26 +47,121 @@ object Executable {
   val TUN2SOCKS = "tun2socks"
 }
 
-object Key {
-  val profileId = "profileId"
-  val profileName = "profileName"
+object ConfigUtils {
+  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
+  val REDSOCKS = "base {\n" +
+    " log_debug = off;\n" +
+    " log_info = off;\n" +
+    " log = stderr;\n" +
+    " daemon = off;\n" +
+    " redirector = iptables;\n" +
+    "}\n" +
+    "redsocks {\n" +
+    " local_ip = 127.0.0.1;\n" +
+    " local_port = 8123;\n" +
+    " ip = 127.0.0.1;\n" +
+    " port = %d;\n" +
+    " type = socks5;\n" +
+    "}\n"
 
-  val proxied = "Proxyed"
+  val PDNSD_LOCAL =
+    """
+      |global {
+      | perm_cache = 2048;
+      | cache_dir = "%s";
+      | server_ip = %s;
+      | server_port = %d;
+      | query_method = tcp_only;
+      | run_ipv4 = on;
+      | min_ttl = 15m;
+      | max_ttl = 1w;
+      | timeout = 10;
+      | daemon = off;
+      |}
+      |
+      |server {
+      | label = "local";
+      | ip = 127.0.0.1;
+      | port = %d;
+      | %s
+      | reject_policy = negate;
+      | reject_recursively = on;
+      | timeout = 5;
+      |}
+      |
+      |rr {
+      | name=localhost;
+      | reverse=on;
+      | a=127.0.0.1;
+      | owner=localhost;
+      | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+    """.stripMargin
+
+  val PDNSD_DIRECT =
+    """
+      |global {
+      | perm_cache = 2048;
+      | cache_dir = "%s";
+      | server_ip = %s;
+      | server_port = %d;
+      | query_method = tcp_only;
+      | run_ipv4 = on;
+      | min_ttl = 15m;
+      | max_ttl = 1w;
+      | timeout = 10;
+      | daemon = off;
+      |}
+      |
+      |server {
+      | label = "china-servers";
+      | ip = 114.114.114.114, 112.124.47.27;
+      | timeout = 4;
+      | exclude = %s;
+      | policy = included;
+      | uptest = none;
+      | preset = on;
+      |}
+      |
+      |server {
+      | label = "local-server";
+      | ip = 127.0.0.1;
+      | port = %d;
+      | %s
+      | reject_policy = negate;
+      | reject_recursively = on;
+      |}
+      |
+      |rr {
+      | name=localhost;
+      | reverse=on;
+      | a=127.0.0.1;
+      | owner=localhost;
+      | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+    """.stripMargin
+}
+
+object Key {
+  val id = "profileId"
+  val name = "profileName"
+
+  val individual = "Proxyed"
 
   val isNAT = "isNAT"
   val route = "route"
 
   val isAutoConnect = "isAutoConnect"
 
-  val isProxyApps = "isProxyApps"
-  val isBypassApps = "isBypassApps"
-  val isUdpDns = "isUdpDns"
-  val isAuth = "isAuth"
-  val isIpv6 = "isIpv6"
+  val proxyApps = "isProxyApps"
+  val bypass = "isBypassApps"
+  val udpdns = "isUdpDns"
+  val auth = "isAuth"
+  val ipv6 = "isIpv6"
 
-  val proxy = "proxy"
-  val sitekey = "sitekey"
-  val encMethod = "encMethod"
+  val host = "proxy"
+  val password = "sitekey"
+  val method = "encMethod"
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
 

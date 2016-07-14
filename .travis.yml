@@ -1,5 +1,8 @@
 language: scala
 
+jdk:
+  - oraclejdk8
+
 sudo: false
 
 addons:
@@ -24,11 +27,11 @@ cache:
         - $HOME/.ivy2/cache
         - $HOME/.sbt/boot
 
-before_install:
+install:
     - ./travis-ci/setup.sh
     - export NDK_CCACHE=ccache
     - export ARCH=`uname -m`
-    - export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r10d
+    - export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
     - export ANDROID_HOME=$HOME/.android/android-sdk-linux
     - export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
     - cp local.properties.travis local.properties

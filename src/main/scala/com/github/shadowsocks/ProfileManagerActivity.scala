@@ -2,7 +2,9 @@ package com.github.shadowsocks
 
 import java.nio.charset.Charset
 
+import android.app.Activity
 import android.content._
+import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
 import android.os.{Bundle, Handler}
@@ -10,28 +12,29 @@ import android.provider.Settings
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
+import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
-import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.github.shadowsocks.ShadowsocksApplication.app
-import com.google.zxing.integration.android.IntentIntegrator
 import net.glxn.qrgen.android.QRCode
 
 import scala.collection.mutable.ArrayBuffer
 
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
   with View.OnClickListener with CreateNdefMessageCallback {
+
   private final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with View.OnKeyListener {
+
     var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     itemView.setOnClickListener(this)
@@ -188,6 +191,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var isNfcEnabled: Boolean = _
   private var isNfcBeamEnabled: Boolean = _
 
+  private val REQUEST_QRCODE = 1
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_profiles)
@@ -246,14 +251,21 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   def initFab() {
     menu = findViewById(R.id.menu).asInstanceOf[FloatingActionMenu]
     menu.setClosedOnTouchOutside(true)
+    val dm = AppCompatDrawableManager.get
     val manualAddFAB = findViewById(R.id.fab_manual_add).asInstanceOf[FloatingActionButton]
+    manualAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_create))
     manualAddFAB.setOnClickListener(this)
     val qrcodeAddFAB = findViewById(R.id.fab_qrcode_add).asInstanceOf[FloatingActionButton]
+    qrcodeAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_image_camera_alt))
     qrcodeAddFAB.setOnClickListener(this)
     val nfcAddFAB = findViewById(R.id.fab_nfc_add).asInstanceOf[FloatingActionButton]
+    nfcAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_device_nfc))
     nfcAddFAB.setOnClickListener(this)
     val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
+    importAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_paste))
     importAddFAB.setOnClickListener(this)
+    menu.setOnMenuToggleListener(opened => if (opened) qrcodeAddFAB.setVisibility(
+      if (getPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) View.VISIBLE else View.GONE))
   }
 
 
@@ -271,16 +283,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     v.getId match {
       case R.id.fab_manual_add =>
         menu.toggle(true)
-        app.profileManager.reload(-1)
-        app.switchProfile(app.profileManager.save.id)
+        val profile = app.profileManager.createProfile()
+        app.profileManager.updateProfile(profile)
+        app.switchProfile(profile.id)
         finish
       case R.id.fab_qrcode_add =>
         menu.toggle(false)
-        val integrator = new IntentIntegrator(ProfileManagerActivity.this)
-        val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
-        list.add("tw.com.quickmark")
-        integrator.setTargetApplications(list)
-        integrator.initiateScan()
+        val intent = new Intent(this, classOf[ScannerActivity])
+        startActivityForResult(intent, REQUEST_QRCODE)
       case R.id.fab_nfc_add =>
         menu.toggle(true)
         val dialog = new AlertDialog.Builder(ProfileManagerActivity.this)
@@ -371,9 +381,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-    val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-    if (scanResult != null) {
-      val contents = scanResult.getContents
+    if (requestCode == REQUEST_QRCODE && resultCode == Activity.RESULT_OK) {
+      val contents = data.getStringExtra("uri")
       if (!TextUtils.isEmpty(contents))
         Parser.findAll(contents).foreach(app.profileManager.createProfile)
     }

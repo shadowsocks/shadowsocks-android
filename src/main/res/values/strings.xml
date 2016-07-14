@@ -2,7 +2,7 @@
 <resources>
 
   <string name="app_name">Shadowsocks</string>
-  <string name="screen_name" translatable="false">shadowsocks ▾</string>
+  <string name="quick_toggle">Toggle</string>
 
   <!-- global/misc category -->
   <string name="misc_cat">Misc</string>
@@ -14,7 +14,7 @@
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
-  <plurals name="bytes">
+  <plurals name="bytes" translatable="false">
     <item quantity="one">Byte</item>
     <item quantity="other">Bytes</item>
   </plurals>
@@ -43,7 +43,7 @@
   <string name="ipv6">IPv6 Route</string>
   <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
   <string name="onetime_auth">One-time Authentication</string>
-  <string name="onetime_auth_summary">Enable one-time authentication (Experimental)</string>
+  <string name="onetime_auth_summary">Enable one-time authentication</string>
   <string name="http_proxy">HTTP Proxy</string>
   <string name="http_proxy_summary">Local HTTP Proxy</string>
   <string name="dns_proxy">DNS Proxy</string>
@@ -102,6 +102,7 @@
   <string name="flush_dnscache_no_root">Flush DNS cache cannot proceed without ROOT permission</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
+  <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
   <string name="action_export_msg">Successfully export!</string>
@@ -119,6 +120,7 @@
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add profile</string>
   <string name="add_profile_nfc_hint">Keep both devices screen on, on the other device, click profile\'s share button, bring them together (back to back).\nYou also can scan a nfc tag.</string>
+  <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <string name="copy_url">Copy URL</string>
   <plurals name="removed">
     <item quantity="one">Removed</item>

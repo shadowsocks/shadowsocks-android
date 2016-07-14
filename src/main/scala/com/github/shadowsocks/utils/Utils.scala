@@ -53,6 +53,7 @@ import android.view.{Gravity, View, Window}
 import android.widget.Toast
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.{BuildConfig, ShadowsocksRunnerService}
+import eu.chainfire.libsuperuser.Shell
 import org.xbill.DNS._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,18 +62,6 @@ import scala.util.{Failure, Try}
 
 object Utils {
   private val TAG = "Shadowsocks"
-
-  /**
-    * Check the system's iptables
-    * Default to use the app's iptables
-    */
-  private val DEFAULT_IPTABLES = "/system/bin/iptables"
-  private val ALTERNATIVE_IPTABLES = "iptables"
-  lazy val iptables = if (Console.isRoot) {
-    val lines = Console.runRootCommand(DEFAULT_IPTABLES + " --version", DEFAULT_IPTABLES + " -L -t nat -n")
-    if (Console.isRoot && lines != null && !lines.contains("OUTPUT") || !lines.contains("v1.4.")) ALTERNATIVE_IPTABLES
-    else DEFAULT_IPTABLES
-  } else DEFAULT_IPTABLES
 
   def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
@@ -120,12 +109,26 @@ object Utils {
     })
   }
 
+  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+    val p = new java.io.PrintWriter(f)
+    try {
+      op(p)
+    } finally {
+      p.close()
+    }
+  }
+
+  // Because /sys/class/net/* isn't accessible since API level 24
+  final val FLUSH_DNS = "for if in /sys/class/net/*; do " +
+    "if [ \"down\" != $(cat $if/operstate) ]; then " +  // up or unknown
+      "ndc resolver flushif ${if##*/}; " +
+    "fi " +
+  "done; echo done"
+
   // Blocked > 3 seconds
   def toggleAirplaneMode(context: Context) = {
-    if (Console.isRoot) {
-      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
-      true
-    } else if (Build.VERSION.SDK_INT < 17) {
+    val result = Shell.SU.run(FLUSH_DNS)
+    if (result != null && !result.isEmpty) true else if (Build.VERSION.SDK_INT < 17) {
       toggleBelowApiLevel17(context)
       true
     } else false

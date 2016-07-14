@@ -45,12 +45,12 @@ import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
 import android.content._
-import android.net.{ConnectivityManager, Network}
 import android.os._
-import android.util.{Log, SparseArray}
-import com.github.shadowsocks.aidl.Config
-import com.github.shadowsocks.utils._
+import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.utils._
+import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -59,8 +59,7 @@ class ShadowsocksNatService extends BaseService {
 
   val TAG = "ShadowsocksNatService"
 
-  val CMD_IPTABLES_RETURN = " -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN"
-  val CMD_IPTABLES_DNAT_ADD_SOCKS = " -t nat -A OUTPUT -p tcp " +
+  val CMD_IPTABLES_DNAT_ADD_SOCKS = "iptables -t nat -A OUTPUT -p tcp " +
     "-j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
@@ -70,96 +69,25 @@ class ShadowsocksNatService extends BaseService {
   var sstunnelProcess: Process = _
   var redsocksProcess: Process = _
   var pdnsdProcess: Process = _
-
-  private val dnsAddressCache = new SparseArray[String]
-
-  def getNetId(network: Network): Int = {
-    network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
-  }
-
-  def restoreDnsForAllNetwork() {
-    val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-    val networks = manager.getAllNetworks
-    val cmdBuf = new ArrayBuffer[String]()
-    networks.foreach(network => {
-      val netId = getNetId(network)
-      val oldDns = dnsAddressCache.get(netId)
-      if (oldDns != null) {
-        cmdBuf.append("ndc resolver setnetdns %d \"\" %s".formatLocal(Locale.ENGLISH, netId, oldDns))
-        dnsAddressCache.remove(netId)
-      }
-    })
-    if (cmdBuf.nonEmpty) Console.runRootCommand(cmdBuf.toArray)
-  }
-
-  def setDnsForAllNetwork(dns: String) {
-    val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-    val networks = manager.getAllNetworks
-    if (networks == null) return
-
-    val cmdBuf = new ArrayBuffer[String]()
-    networks.foreach(network => {
-      val networkInfo = manager.getNetworkInfo(network)
-      if (networkInfo == null) return
-      if (networkInfo.isConnected) {
-        val netId = getNetId(network)
-        val curDnsList = manager.getLinkProperties(network).getDnsServers
-        if (curDnsList != null) {
-          import scala.collection.JavaConverters._
-          val curDns = curDnsList.asScala.map(ip => ip.getHostAddress).mkString(" ")
-          if (curDns != dns) {
-            dnsAddressCache.put(netId, curDns)
-            cmdBuf.append("ndc resolver setnetdns %d \"\" %s".formatLocal(Locale.ENGLISH, netId, dns))
-          }
-        }
-      }
-    })
-    if (cmdBuf.nonEmpty) Console.runRootCommand(cmdBuf.toArray)
-  }
-
-  def setupDns() {
-    setDnsForAllNetwork("127.0.0.1")
-  }
-
-  def resetDns() = {
-    restoreDnsForAllNetwork()
-  }
-
-  def flushDns() {
-    if (Utils.isLollipopOrAbove) {
-      val manager = getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-      val networks = manager.getAllNetworks
-      val cmdBuf = new ArrayBuffer[String]()
-      networks.foreach(network => {
-        val networkInfo = manager.getNetworkInfo(network)
-        if (networkInfo.isAvailable) {
-          val netId = network.getClass.getDeclaredField("netId").get(network).asInstanceOf[Int]
-          cmdBuf.append("ndc resolver flushnet %d".formatLocal(Locale.ENGLISH, netId))
-        }
-      })
-      Console.runRootCommand(cmdBuf.toArray)
-    } else {
-      Console.runRootCommand("ndc resolver flushdefaultif", "ndc resolver flushif wlan0")
-    }
-  }
+  var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
-    if (config.route != Route.ALL) {
-      val acl: Array[Array[String]] = config.route match {
+    if (profile.route != Route.ALL) {
+      val acl: Array[Array[String]] = profile.route match {
         case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
         case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
         case Route.BYPASS_LAN_CHN =>
           Array(getResources.getStringArray(R.array.private_route), getResources.getStringArray(R.array.chn_route))
       }
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
         acl.flatten.foreach(p.println)
       })
     }
 
     val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
-        config.sitekey, config.encMethod, 600)
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        profile.password, profile.method, 600)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
 
@@ -170,9 +98,9 @@ class ShadowsocksNatService extends BaseService {
           , "-P", getApplicationInfo.dataDir
           , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
 
-    if (config.isAuth) cmd += "-A"
+    if (profile.auth) cmd += "-A"
 
-    if (config.route != Route.ALL) {
+    if (profile.route != Route.ALL) {
       cmd += "--acl"
       cmd += (getApplicationInfo.dataDir + "/acl.list")
     }
@@ -182,11 +110,11 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startTunnel() {
-    if (config.isUdpDns) {
+    if (profile.udpdns) {
       val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8153,
-          config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8153,
+          profile.password, profile.method, 10)
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
@@ -200,7 +128,7 @@ class ShadowsocksNatService extends BaseService {
 
       cmd += ("-l" , "8153")
 
-      if (config.isAuth) cmd += "-A"
+      if (profile.auth) cmd += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
@@ -208,9 +136,9 @@ class ShadowsocksNatService extends BaseService {
 
     } else {
       val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
-          config.sitekey, config.encMethod, 10)
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8163,
+          profile.password, profile.method, 10)
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
@@ -223,7 +151,7 @@ class ShadowsocksNatService extends BaseService {
         , "-P", getApplicationInfo.dataDir
         , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
 
-      if (config.isAuth) cmdBuf += "-A"
+      if (profile.auth) cmdBuf += "-A"
 
       if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
 
@@ -233,17 +161,15 @@ class ShadowsocksNatService extends BaseService {
 
   def startDnsDaemon() {
 
-    val conf = if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
-      val reject = ConfigUtils.getRejectList(this)
-      val blackList = ConfigUtils.getBlackList(this)
+    val conf = if (profile.route == Route.BYPASS_CHN || profile.route == Route.BYPASS_LAN_CHN) {
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", 8153, reject, blackList, 8163, "")
+        "127.0.0.1", 8153, getBlackList, 8163, "")
     } else {
       ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
         "127.0.0.1", 8153, 8163, "")
     }
 
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
     val cmd = getApplicationInfo.dataDir + "/pdnsd -c " + getApplicationInfo.dataDir + "/pdnsd-nat.conf"
@@ -254,10 +180,10 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startRedsocksDaemon() {
-    val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, config.localPort)
+    val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort)
     val cmd = "%s/redsocks -c %s/redsocks-nat.conf"
       .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, getApplicationInfo.dataDir)
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
@@ -266,15 +192,14 @@ class ShadowsocksNatService extends BaseService {
   }
 
   /** Called when the activity is first created. */
-  def handleConnection: Boolean = {
+  def handleConnection {
 
     startTunnel()
-    if (!config.isUdpDns) startDnsDaemon()
+    if (!profile.udpdns) startDnsDaemon()
     startRedsocksDaemon()
     startShadowsocksDaemon()
     setupIptables()
 
-    true
   }
 
   def onBind(intent: Intent): IBinder = {
@@ -284,11 +209,6 @@ class ShadowsocksNatService extends BaseService {
     } else {
       null
     }
-  }
-
-  override def onCreate() {
-    super.onCreate()
-    ConfigUtils.refresh(this)
   }
 
   def killProcesses() {
@@ -309,7 +229,7 @@ class ShadowsocksNatService extends BaseService {
       pdnsdProcess = null
     }
 
-    Console.runRootCommand(Utils.iptables + " -t nat -F OUTPUT")
+    su.addCommand("iptables -t nat -F OUTPUT")
   }
 
   def setupIptables() = {
@@ -317,28 +237,27 @@ class ShadowsocksNatService extends BaseService {
     val http_sb = new ArrayBuffer[String]
 
     init_sb.append("ulimit -n 4096")
-    init_sb.append(Utils.iptables + " -t nat -F OUTPUT")
+    init_sb.append("iptables -t nat -F OUTPUT")
 
-    val cmd_bypass = Utils.iptables + CMD_IPTABLES_RETURN
-    if (!InetAddress.getByName(config.proxy.toUpperCase).isInstanceOf[Inet6Address]) {
-      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + config.proxy))
+    val cmd_bypass = "iptables -t nat -A OUTPUT -p tcp -d 0.0.0.0 -j RETURN"
+    if (!InetAddress.getByName(profile.host.toUpperCase).isInstanceOf[Inet6Address]) {
+      init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d " + profile.host))
     }
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-d 127.0.0.1"))
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
-    init_sb.append(Utils.iptables
-      + " -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
+    init_sb.append("iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
 
-    if (!config.isProxyApps || config.isBypassApps) {
-      http_sb.append(Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+    if (!profile.proxyApps || profile.bypass) {
+      http_sb.append(CMD_IPTABLES_DNAT_ADD_SOCKS)
     }
-    if (config.isProxyApps) {
+    if (profile.proxyApps) {
       val uidMap = getPackageManager.getInstalledApplications(0).map(ai => ai.packageName -> ai.uid).toMap
-      for (pn <- config.proxiedAppString.split('\n')) uidMap.get(pn) match {
+      for (pn <- profile.individual.split('\n')) uidMap.get(pn) match {
         case Some(uid) =>
-          if (!config.isBypassApps) {
-            http_sb.append((Utils.iptables + CMD_IPTABLES_DNAT_ADD_SOCKS)
+          if (!profile.bypass) {
+            http_sb.append(CMD_IPTABLES_DNAT_ADD_SOCKS
               .replace("-t nat", "-t nat -m owner --uid-owner " + uid))
           } else {
             init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "-m owner --uid-owner " + uid))
@@ -346,78 +265,70 @@ class ShadowsocksNatService extends BaseService {
         case _ => // probably removed package, ignore
       }
     }
-    Console.runRootCommand((init_sb ++ http_sb).toArray)
+    su.addCommand((init_sb ++ http_sb).toArray)
   }
 
-  override def startRunner(config: Config) {
-    if (!Console.isRoot) {
-      changeState(State.STOPPED, getString(R.string.nat_no_root))
-      return
+  override def startRunner(profile: Profile) = if (su == null) {
+    su = new Shell.Builder().useSU().setWantSTDERR(true).setWatchdogTimeout(10).open((_, exitCode, _) =>
+      if (exitCode == 0) super.startRunner(profile) else {
+        Log.wtf(TAG, "libsuperuser#55 has been fixed. Please remove the redundant code.")
+        su.close()
+        su = null
+        super.stopRunner(true, getString(R.string.nat_no_root))
+      })
+    su.waitForIdle()
+    if (!su.isRunning) {
+      su.close()
+      su = null
+      super.stopRunner(true, getString(R.string.nat_no_root))
     }
-    super.startRunner(config)
+  }
 
-    app.track(TAG, "start")
-    
-    changeState(State.CONNECTING)
+  override def connect() {
+    super.connect()
 
-    Utils.ThrowableFuture {
-      if (config.proxy == "198.199.101.152") {
-        val holder = app.containerHolder
-        try {
-          this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
-        } catch {
-          case ex: Exception =>
-            changeState(State.STOPPED, getString(R.string.service_failed))
-            stopRunner(true)
-            this.config = null
+    if (profile != null) {
+
+      // Clean up
+      killProcesses()
+
+      var resolved = false
+      if (!Utils.isNumeric(profile.host)) {
+        Utils.resolve(profile.host, enableIPv6 = true) match {
+          case Some(a) =>
+            profile.host = a
+            resolved = true
+          case None => resolved = false
         }
+      } else {
+        resolved = true
       }
 
-      if (this.config != null) {
-
-        // Clean up
-        killProcesses()
-
-        var resolved: Boolean = false
-        if (!Utils.isNumeric(config.proxy)) {
-          Utils.resolve(config.proxy, enableIPv6 = true) match {
-            case Some(a) =>
-              config.proxy = a
-              resolved = true
-            case None => resolved = false
-          }
-        } else {
-          resolved = true
-        }
-
-        if (!resolved) {
-          changeState(State.STOPPED, getString(R.string.invalid_server))
-          stopRunner(true)
-        } else if (handleConnection) {
-          // Set DNS
-          flushDns()
-          changeState(State.CONNECTED)
-          notification = new ShadowsocksNotification(this, config.profileName, true)
-        } else {
-          changeState(State.STOPPED, getString(R.string.service_failed))
-          stopRunner(true)
-        }
+      if (!resolved) stopRunner(true, getString(R.string.invalid_server)) else {
+        handleConnection
+        // Set DNS
+        su.addCommand(Utils.FLUSH_DNS)
+        changeState(State.CONNECTED)
+        notification = new ShadowsocksNotification(this, profile.name, true)
       }
     }
   }
 
-  override def stopRunner(stopService: Boolean) {
+  override def stopRunner(stopService: Boolean, msg: String = null) {
+
+    if (notification != null) notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
-
-    if (notification != null) notification.destroy()
 
     app.track(TAG, "stop")
 
     // reset NAT
     killProcesses()
 
-    super.stopRunner(stopService)
+    su.close()
+    su = null
+
+    super.stopRunner(stopService, msg)
   }
 }

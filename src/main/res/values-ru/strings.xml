@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name" translatable="false">Shadowsocks</string>
-  <string name="screen_name" translatable="false">shadowsocks ▾</string>
+  <string name="quick_toggle">Подключение</string>
 
   <!-- global/misc category -->
   <string name="misc_cat">Разное</string>
@@ -10,14 +9,10 @@
   <string name="profile_summary">Переключить на другой профиль или добавить новые</string>
   <string name="nat">Режим NAT (не рекомендуется)</string>
   <string name="nat_summary">Использовать режим NAT вместо VPN. Требует ROOT прав.</string>
-  <string name="stat">Сетвая Активность</string>
+  <string name="stat">Сетевая Активность</string>
   <string name="stat_summary">Отправлено: \t\t\t\t\t%3$s\t↑\t%1$s/s\nПолучено: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
-  <plurals name="bytes">
-    <item quantity="one">Byte</item>
-    <item quantity="other">Bytes</item>
-  </plurals>
   <string name="connection_test_pending">Проверить подключение</string>
   <string name="connection_test_testing">Проверка…</string>
   <string name="connection_test_available">Успешно: %dms задержка</string>
@@ -43,7 +38,7 @@
   <string name="ipv6">IPv6 Маршрут</string>
   <string name="ipv6_summary">Перенаправлять IPv6 траффик на удалённый сервер</string>
   <string name="onetime_auth">Единоразовая Аутентификация</string>
-  <string name="onetime_auth_summary">Включить единоразовую аутентификацию (Экспериментальная функция)</string>
+  <string name="onetime_auth_summary">Включить единоразовую аутентификацию</string>
   <string name="http_proxy">HTTP Прокси</string>
   <string name="http_proxy_summary">Локальный HTTP прокси</string>
   <string name="dns_proxy">DNS Прокси</string>
@@ -101,6 +96,8 @@
   <string name="flush_dnscache_no_root">Очистка кэша DNS не работает без налиичя ROOT прав</string>
   <string name="flushing">Очистка</string>
   <string name="add_profile">Добавить Профиль</string>
+
+  <string name="action_apply_all">Применить настройки для всех профилей</string>
   <string name="action_export">Экспортировать в буфер обмена</string>
   <string name="action_import">Импортировать из буфера обмена</string>
   <string name="action_export_msg">Успешный экспорт!</string>
@@ -118,6 +115,7 @@
   <string name="add_profile_methods_manual_settings">Настройка вручную</string>
   <string name="add_profile_nfc_hint_title">Использовать Android Beam (NFC) для добавления профиля</string>
   <string name="add_profile_nfc_hint">Оставьте экран включённым на обоих устройствах, на втором устойстве нажмите кнопку профиля "поделиться", поднисите устройства друг к другу (тыльными сторонами).\nТак же Вы можете сканировать nfc метку.</string>
+  <string name="add_profile_scanner_permission_required">Разрешение камеры требуется для сканирования QR код.</string>
   <string name="copy_url">Копировать URL</string>
   <plurals name="removed">
     <item quantity="one">Удалён</item>

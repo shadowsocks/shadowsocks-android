@@ -331,10 +331,11 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libev
-LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H
+LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H \
+				-I$(LOCAL_PATH)/include/libev
 LOCAL_SRC_FILES := \
-	libev/ev.c \
-	libev/event.c 
+	shadowsocks-libev/libev/ev.c \
+	shadowsocks-libev/libev/event.c 
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -386,15 +387,17 @@ LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
+					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/include \
-					-I$(LOCAL_PATH)/libev \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/openssl/include  \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include
+					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
+					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libudns libsodium libancillary
 
@@ -414,14 +417,16 @@ LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
-					-I$(LOCAL_PATH)/libev \
+					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/openssl/include 
+					-I$(LOCAL_PATH)/openssl/include \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
+					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium libcork libudns libancillary
 
@@ -546,15 +551,6 @@ openssl_subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
 	ssl \
 	))
 include $(openssl_subdirs)
-
-# Iptables
-# LOCAL_PATH := $(ROOT_PATH)
-# iptables_subdirs := $(addprefix $(LOCAL_PATH)/iptables/,$(addsuffix /Android.mk, \
-# 	iptables \
-# 	extensions \
-# 	libiptc \
-# 	))
-# include $(iptables_subdirs)
 
 # Import cpufeatures
 $(call import-module,android/cpufeatures)

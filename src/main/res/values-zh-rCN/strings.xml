@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="app_name">影梭</string>
+  <string name="quick_toggle">开关</string>
+
   <string name="misc_cat">其他</string>
   <string name="proxy_cat">服务器设置</string>
   <string name="profile_name">配置名称</string>
@@ -73,7 +75,7 @@
   <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>
 
   <string name="onetime_auth">一次性认证</string>
-  <string name="onetime_auth_summary">启用一次性认证（实验性）</string>
+  <string name="onetime_auth_summary">启用一次性认证</string>
 
   <string name="ipv6">IPv6 路由</string>
   <string name="ipv6_summary">向远程服务器转发 IPv6 流量</string>
@@ -99,6 +101,7 @@
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
   <string name="add_profile_nfc_hint">保持两台设备的屏幕亮起，在另外一台设备上，点击配置文件的分享按钮，将它们靠在一起（背靠背）。\n你也可以扫描 NFC 标签。</string>
+  <string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
 
   <string-array name="route_entry">
     <item>全局</item>
@@ -107,10 +110,11 @@
     <item>绕过局域网及中国大陆地址</item>
   </string-array>
 
+  <string name="action_apply_all">应用设置到所有配置文件</string>
   <string name="action_export">导出至剪贴板</string>
   <string name="action_import">从剪贴板导入</string>
-  <string name="action_export_msg">导出成功</string>
-  <string name="action_export_err">导出失败</string>
+  <string name="action_export_msg">导出至剪贴板成功</string>
+  <string name="action_export_err">导出至剪贴板失败</string>
   <string name="action_import_msg">导入成功</string>
   <string name="action_import_err">导入失败</string>
 

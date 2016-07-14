@@ -54,20 +54,14 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
   }
 
   override def onServiceConnected() {
-    handler.postDelayed(() => if (bgService != null) startBackgroundService(), 1000)
+    handler.postDelayed(() => if (bgService != null) {
+      if (app.isNatEnabled) startBackgroundService()
+      else if (VpnService.prepare(ShadowsocksRunnerService.this) == null) startBackgroundService()
+      stopSelf()
+    }, 1000)
   }
 
-  def startBackgroundService() {
-    if (app.isNatEnabled) bgService.use(ConfigUtils.loadFromSharedPreferences) else {
-      val intent = VpnService.prepare(ShadowsocksRunnerService.this)
-      if (intent == null) {
-        if (bgService != null) {
-          bgService.use(ConfigUtils.loadFromSharedPreferences)
-        }
-      }
-    }
-    stopSelf()
-  }
+  def startBackgroundService() = bgService.useSync(app.profileId)
 
   override def onCreate() {
     super.onCreate()

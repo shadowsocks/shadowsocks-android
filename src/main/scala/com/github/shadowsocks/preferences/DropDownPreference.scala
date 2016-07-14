@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.os.Build
 import android.preference.Preference
-import android.support.annotation.NonNull
+import android.support.annotation.{ArrayRes, NonNull}
 import android.support.v7.widget.AppCompatSpinner
 import android.util.AttributeSet
 import android.view.{View, ViewGroup}
@@ -23,14 +23,16 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
   private val mSpinner = new AppCompatSpinner(mContext)
   private var mEntries: Array[CharSequence] = _
   private var mEntryValues: Array[CharSequence] = _
-  private var mSelectedIndex: Int = _
-  private var mValueSet: Boolean = _
+  private var mSelectedIndex: Int = -1
 
   mSpinner.setVisibility(View.INVISIBLE)
   mSpinner.setAdapter(mAdapter)
   mSpinner.setOnItemSelectedListener(new OnItemSelectedListener {
-    override def onNothingSelected(parent: AdapterView[_]) { }
-    override def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long) = setValueIndex(position)
+    def onNothingSelected(parent: AdapterView[_]) { }
+    def onItemSelected(parent: AdapterView[_], view: View, position: Int, id: Long) = {
+      val value = getValue(position)
+      if (position != mSelectedIndex && callChangeListener(value)) setValue(position, value)
+    }
   })
   setOnPreferenceClickListener((preference: Preference) => {
     // TODO: not working with scrolling
@@ -39,8 +41,8 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     true
   })
   val a: TypedArray = mContext.obtainStyledAttributes(attrs, R.styleable.DropDownPreference)
-  setEntries(a.getTextArray(R.styleable.DropDownPreference_entries))
-  mEntryValues = a.getTextArray(R.styleable.DropDownPreference_entryValues)
+  setEntries(a.getTextArray(R.styleable.DropDownPreference_android_entries))
+  setEntryValues(a.getTextArray(R.styleable.DropDownPreference_android_entryValues))
   a.recycle
 
   protected override def getSummaryValue = getEntry
@@ -62,7 +64,7 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     * @see #setEntries(CharSequence[])
     * @param entriesResId The entries array as a resource.
     */
-  def setEntries(entriesResId: Int): Unit = setEntries(getContext.getResources.getTextArray(entriesResId))
+  def setEntries(@ArrayRes entriesResId: Int): Unit = setEntries(getContext.getResources.getTextArray(entriesResId))
   /**
     * The list of entries to be shown in the list in subsequent dialogs.
     *
@@ -82,7 +84,7 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     * @see #setEntryValues(CharSequence[])
     * @param entryValuesResId The entry values array as a resource.
     */
-  def setEntryValues(entryValuesResId: Int): Unit =
+  def setEntryValues(@ArrayRes entryValuesResId: Int): Unit =
     setEntryValues(getContext.getResources.getTextArray(entryValuesResId))
   /**
     * Returns the array of values to be saved for the preference.
@@ -91,34 +93,26 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     */
   def getEntryValues: Array[CharSequence] = mEntryValues
 
+  private def getValue(index: Int) = (if (mEntryValues == null) index else mEntryValues(index)).toString
   /**
     * Sets the value of the key. This should be one of the entries in [[getEntryValues]].
     *
     * @param value The value to set for the key.
     */
-  def setValue(value: String) {
-    val i = findIndexOfValue(value)
-    if (i > -1) setValueIndex(i)
-  }
+  def setValue(value: String): Unit = setValue(findIndexOfValue(value), value)
 
   /**
     * Sets the value to the given index from the entry values.
     *
     * @param index The index of the value to set.
     */
-  def setValueIndex(index: Int) {
-    val changed = mSelectedIndex != index
-    if (changed || !mValueSet) {
-      mSelectedIndex = index
-      mValueSet = true
-      if (mEntryValues != null) {
-        val value = mEntryValues(index).toString
-        persistString(value)
-        setValue(value)
-      }
-      if (changed) notifyChanged
-    }
+  def setValueIndex(index: Int) = setValue(index, getValue(index))
+
+  private def setValue(index: Int, value: String) {
+    persistString(value)
+    mSelectedIndex = index
     mSpinner.setSelection(index)
+    notifyChanged
   }
 
   /**
@@ -126,7 +120,7 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
     *
     * @return The value of the key.
     */
-  def getValue = if (mEntryValues == null) null else mEntryValues(mSelectedIndex).toString
+  def getValue = if (mEntryValues == null || mSelectedIndex < 0) null else mEntryValues(mSelectedIndex).toString
 
   /**
     * Returns the entry corresponding to the current value.

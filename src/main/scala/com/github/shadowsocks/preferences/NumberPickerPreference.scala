@@ -28,7 +28,7 @@ final class NumberPickerPreference(context: Context, attrs: AttributeSet = null)
   def getMin = if (picker == null) 0 else picker.getMinValue
   def getMax = picker.getMaxValue
   def setValue(i: Int) {
-    if (i == getValue || !callChangeListener(i)) return
+    if (i == getValue) return
     picker.setValue(i)
     value = picker.getValue
     persistInt(value)
@@ -49,7 +49,14 @@ final class NumberPickerPreference(context: Context, attrs: AttributeSet = null)
   override protected def onDialogClosed(positiveResult: Boolean) {
     picker.clearFocus // commit changes
     super.onDialogClosed(positiveResult)  // forward compatibility
-    if (positiveResult) setValue(picker.getValue) else picker.setValue(value)
+    if (positiveResult) {
+      val value = picker.getValue
+      if (callChangeListener(value)) {
+        setValue(value)
+        return
+      }
+    }
+    picker.setValue(value)
   }
   override protected def onGetDefaultValue(a: TypedArray, index: Int) = a.getInt(index, getMin).asInstanceOf[AnyRef]
   override protected def onSetInitialValue(restorePersistedValue: Boolean, defaultValue: Any) {

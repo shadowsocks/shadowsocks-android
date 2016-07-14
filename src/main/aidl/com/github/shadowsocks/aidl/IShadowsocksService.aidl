@@ -1,6 +1,5 @@
 package com.github.shadowsocks.aidl;
 
-import com.github.shadowsocks.aidl.Config;
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback;
 
 interface IShadowsocksService {
@@ -9,5 +8,6 @@ interface IShadowsocksService {
   oneway void registerCallback(IShadowsocksServiceCallback cb);
   oneway void unregisterCallback(IShadowsocksServiceCallback cb);
 
-  oneway void use(in Config config);
+  oneway void use(in int profileId);
+  void useSync(in int profileId);
 }

@@ -62,7 +62,6 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
 
       connection = new ShadowsocksServiceConnection()
       bindService(intent, connection, Context.BIND_AUTO_CREATE)
-      startService(intent)
     }
   }
 
@@ -70,7 +69,9 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     unregisterCallback
     callback = null
     if (connection != null) {
-      unbindService(connection)
+      try unbindService(connection) catch {
+        case _: IllegalArgumentException => // ignore
+      }
       connection = null
     }
     if (binder != null) {

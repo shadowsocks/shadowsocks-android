@@ -48,9 +48,9 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
 import android.os._
 import android.util.Log
-import com.github.shadowsocks.aidl.Config
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.database.Profile
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -78,16 +78,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     null
   }
 
-  override def onCreate() {
-    super.onCreate()
-    ConfigUtils.refresh(this)
-  }
-
   override def onRevoke() {
     stopRunner(true)
   }
 
-  override def stopRunner(stopService: Boolean) {
+  override def stopRunner(stopService: Boolean, msg: String = null) {
 
     if (vpnThread != null) {
       vpnThread.stopThread()
@@ -110,7 +105,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = null
     }
 
-    super.stopRunner(stopService)
+    super.stopRunner(stopService, msg)
   }
 
   def killProcesses() {
@@ -132,66 +127,50 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
-  override def startRunner(config: Config) {
-
-    super.startRunner(config)
-
-    vpnThread = new ShadowsocksVpnThread(this)
-    vpnThread.start()
+  override def startRunner(profile: Profile) {
 
     // ensure the VPNService is prepared
     if (VpnService.prepare(this) != null) {
       val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       startActivity(i)
+      stopRunner(true)
       return
     }
 
-    app.track(TAG, "start")
+    super.startRunner(profile)
+  }
 
-    changeState(State.CONNECTING)
+  override def connect() = {
+    super.connect()
 
-    Utils.ThrowableFuture {
-      if (config.proxy == "198.199.101.152") {
-        val holder = app.containerHolder
-        try {
-          this.config = ConfigUtils.getPublicConfig(getBaseContext, holder.getContainer, config)
-        } catch {
-          case ex: Exception =>
-            changeState(State.STOPPED, getString(R.string.service_failed))
-            stopRunner(true)
-            this.config = null
+    if (profile != null) {
+
+      vpnThread = new ShadowsocksVpnThread(this)
+      vpnThread.start()
+
+      // reset the context
+      killProcesses()
+
+      // Resolve the server address
+      var resolved: Boolean = false
+      if (!Utils.isNumeric(profile.host)) {
+        Utils.resolve(profile.host, enableIPv6 = true) match {
+          case Some(addr) =>
+            profile.host = addr
+            resolved = true
+          case None => resolved = false
         }
+      } else {
+        resolved = true
       }
 
-      if (config != null) {
-
-        // reset the context
-        killProcesses()
-
-        // Resolve the server address
-        var resolved: Boolean = false
-        if (!Utils.isNumeric(config.proxy)) {
-          Utils.resolve(config.proxy, enableIPv6 = true) match {
-            case Some(addr) =>
-              config.proxy = addr
-              resolved = true
-            case None => resolved = false
-          }
-        } else {
-          resolved = true
-        }
-
-        if (!resolved) {
-          changeState(State.STOPPED, getString(R.string.invalid_server))
-          stopRunner(true)
-        } else if (handleConnection) {
-          changeState(State.CONNECTED)
-          notification = new ShadowsocksNotification(this, config.profileName)
-        } else {
-          changeState(State.STOPPED, getString(R.string.service_failed))
-          stopRunner(true)
-        }
+      if (!resolved) stopRunner(true, getString(R.string.invalid_server)) else if (handleConnection) {
+        changeState(State.CONNECTED)
+        notification = new ShadowsocksNotification(this, profile.name)
+      } else {
+        changeState(State.STOPPED, getString(R.string.service_failed))
+        stopRunner(true)
       }
     }
   }
@@ -199,7 +178,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
     startShadowsocksDaemon()
-    if (!config.isUdpDns) {
+    if (!profile.udpdns) {
       startDnsDaemon()
       startDnsTunnel()
     }
@@ -210,22 +189,22 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
 
-    if (config.route != Route.ALL) {
-      val acl: Array[Array[String]] = config.route match {
+    if (profile.route != Route.ALL) {
+      val acl: Array[Array[String]] = profile.route match {
         case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
         case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
         case Route.BYPASS_LAN_CHN =>
           Array(getResources.getStringArray(R.array.private_route), getResources.getStringArray(R.array.chn_route))
       }
-      ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
+      Utils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
         acl.flatten.foreach(p.println)
       })
     }
 
     val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, config.localPort,
-        config.sitekey, config.encMethod, 600)
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        profile.password, profile.method, 600)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
       p.println(conf)
     })
 
@@ -236,9 +215,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")
 
-    if (config.isAuth) cmd += "-A"
+    if (profile.auth) cmd += "-A"
 
-    if (config.route != Route.ALL) {
+    if (profile.route != Route.ALL) {
       cmd += "--acl"
       cmd += (getApplicationInfo.dataDir + "/acl.list")
     }
@@ -250,9 +229,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsTunnel() = {
     val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, config.proxy, config.remotePort, 8163,
-        config.sitekey, config.encMethod, 10)
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8163,
+        profile.password, profile.method, 10)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
     val cmd = new ArrayBuffer[String]
@@ -266,7 +245,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")
 
-    if (config.isAuth) cmd += "-A"
+    if (profile.auth) cmd += "-A"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
@@ -274,19 +253,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsDaemon() {
-    val ipv6 = if (config.isIpv6) "" else "reject = ::/0;"
+    val ipv6 = if (profile.ipv6) "" else "reject = ::/0;"
     val conf = {
-      if (config.route == Route.BYPASS_CHN || config.route == Route.BYPASS_LAN_CHN) {
-        val reject = ConfigUtils.getRejectList(this)
-        val blackList = ConfigUtils.getBlackList(this)
+      if (profile.route == Route.BYPASS_CHN || profile.route == Route.BYPASS_LAN_CHN) {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", 8153, reject, blackList, 8163, ipv6)
+          "0.0.0.0", 8153, getBlackList, 8163, ipv6)
       } else {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
           "0.0.0.0", 8153, 8163, ipv6)
       }
     }
-    ConfigUtils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
     })
     val cmd = getApplicationInfo.dataDir + "/pdnsd -c " + getApplicationInfo.dataDir + "/pdnsd-vpn.conf"
@@ -300,22 +277,22 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val builder = new Builder()
     builder
-      .setSession(config.profileName)
+      .setSession(profile.name)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
       .addDnsServer("8.8.8.8")
 
-    if (config.isIpv6) {
+    if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
       builder.addRoute("::", 0)
     }
 
     if (Utils.isLollipopOrAbove) {
 
-      if (config.isProxyApps) {
-        for (pkg <- config.proxiedAppString.split('\n')) {
+      if (profile.proxyApps) {
+        for (pkg <- profile.individual.split('\n')) {
           try {
-            if (!config.isBypassApps) {
+            if (!profile.bypass) {
               builder.addAllowedApplication(pkg)
             } else {
               builder.addDisallowedApplication(pkg)
@@ -328,7 +305,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    if (config.route == Route.ALL || config.route == Route.BYPASS_CHN) {
+    if (profile.route == Route.ALL || profile.route == Route.BYPASS_CHN) {
       builder.addRoute("0.0.0.0", 0)
     } else {
       val privateList = getResources.getStringArray(R.array.bypass_private_route)
@@ -369,12 +346,12 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       + "--loglevel 3")
       .formatLocal(Locale.ENGLISH,
         PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
-        config.localPort, fd, VPN_MTU, getApplicationInfo.dataDir + "/sock_path")
+        profile.localPort, fd, VPN_MTU, getApplicationInfo.dataDir + "/sock_path")
 
-    if (config.isIpv6)
+    if (profile.ipv6)
       cmd += " --netif-ip6addr " + PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "2")
 
-    if (config.isUdpDns)
+    if (profile.udpdns)
       cmd += " --enable-udprelay"
     else
       cmd += " --dnsgw %s:8153".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"))

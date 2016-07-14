@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="proxied_apps_summary">Установить прокси для выбранных приложений</string>
+</resources>

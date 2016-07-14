@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="DropDownPreference">
-        <attr name="entries" format="reference" />
-        <attr name="entryValues" format="reference" />
+        <attr name="android:entries" />
+        <attr name="android:entryValues" />
     </declare-styleable>
     <declare-styleable name="NumberPickerPreference">
         <attr name="max" format="integer" />

@@ -84,7 +84,7 @@ object AppManager {
     synchronized {
       if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
         .filter(p => p.requestedPermissions != null && p.requestedPermissions.contains(permission.INTERNET))
-        .map(p => new ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
+        .map(p => ProxiedApp(pm.getApplicationLabel(p.applicationInfo).toString, p.packageName,
           p.applicationInfo.loadIcon(pm))).toArray
       cachedApps
     }
@@ -117,8 +117,10 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         proxiedApps.add(item.packageName)
         check.setChecked(true)
       }
-      if (!appsLoading.get)
-        app.editor.putString(Key.proxied, proxiedApps.mkString("\n")).apply
+      if (!appsLoading.get) {
+        profile.individual = proxiedApps.mkString("\n")
+        app.profileManager.updateProfile(profile)
+      }
     }
   }
 
@@ -134,12 +136,16 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
   }
 
-  private val proxiedApps = app.settings.getString(Key.proxied, "").split('\n').to[mutable.HashSet]
+  private var proxiedApps: mutable.HashSet[String] = _
   private var toolbar: Toolbar = _
+  private var bypassSwitch: Switch = _
   private var appListView: RecyclerView = _
   private var loadingView: View = _
   private val appsLoading = new AtomicBoolean
-  private var handler: Handler = null
+  private var handler: Handler = _
+  private val profile = app.currentProfile.get
+
+  private def initProxiedApps(str: String = profile.individual) = proxiedApps = str.split('\n').to[mutable.HashSet]
 
   override def onDestroy() {
     instance = null
@@ -152,12 +158,23 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
   def onMenuItemClick(item: MenuItem): Boolean = {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
-    val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     item.getItemId match {
+      case R.id.action_apply_all =>
+        app.profileManager.getAllProfiles match {
+          case Some(profiles) =>
+            val proxiedAppString = profile.individual
+            profiles.foreach(p => {
+              p.individual = proxiedAppString
+              app.profileManager.updateProfile(p)
+            })
+            Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show
+          case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+        }
+        return true
       case R.id.action_export =>
-        val bypass = prefs.getBoolean(Key.isBypassApps, false)
-        val proxiedAppString = prefs.getString(Key.proxied, "")
-        val clip = ClipData.newPlainText(Key.proxied, bypass + "\n" + proxiedAppString)
+        val bypass = profile.bypass
+        val proxiedAppString = profile.individual
+        val clip = ClipData.newPlainText(Key.individual, bypass + "\n" + proxiedAppString)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
         return true
@@ -167,17 +184,17 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
           if (proxiedAppSequence != null) {
             val proxiedAppString = proxiedAppSequence.toString
             if (!proxiedAppString.isEmpty) {
-              val editor = prefs.edit
               val i = proxiedAppString.indexOf('\n')
               try {
-                if (i < 0)
-                  editor.putBoolean(Key.isBypassApps, proxiedAppString.toBoolean).putString(Key.proxied, "").apply()
-                else editor.putBoolean(Key.isBypassApps, proxiedAppString.substring(0, i).toBoolean)
-                  .putString(Key.proxied, proxiedAppString.substring(i + 1)).apply()
+                val (enabled, apps) = if (i < 0) (proxiedAppString, "")
+                  else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
+                bypassSwitch.setChecked(enabled.toBoolean)
+                profile.individual = apps
+                app.profileManager.updateProfile(profile)
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-                // Restart activity
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
+                initProxiedApps(apps)
                 reloadApps()
                 return true
               } catch {
@@ -201,7 +218,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     this.setContentView(R.layout.layout_apps)
     toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.proxied_apps)
-    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha)
+    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
     toolbar.setNavigationOnClickListener((v: View) => {
       val intent = getParentActivityIntent
       if (intent == null) finish else navigateUpTo(intent)
@@ -209,18 +226,25 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    app.editor.putBoolean(Key.isProxyApps, true).apply
+    if (!profile.proxyApps) {
+      profile.proxyApps = true
+      app.profileManager.updateProfile(profile)
+    }
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((_, checked) => {
-        app.editor.putBoolean(Key.isProxyApps, checked).apply
+        profile.proxyApps = checked
+        app.profileManager.updateProfile(profile)
         finish()
       })
 
-    val bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
-    bypassSwitch.setOnCheckedChangeListener((_, checked) =>
-      app.editor.putBoolean(Key.isBypassApps, checked).apply())
-    bypassSwitch.setChecked(app.settings.getBoolean(Key.isBypassApps, false))
+    bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
+    bypassSwitch.setChecked(profile.bypass)
+    bypassSwitch.setOnCheckedChangeListener((_, checked) => {
+      profile.bypass = checked
+      app.profileManager.updateProfile(profile)
+    })
 
+    initProxiedApps()
     loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]
     appListView.setLayoutManager(new LinearLayoutManager(this))

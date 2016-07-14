@@ -7,36 +7,43 @@
 
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="profileName"
+                android:persistent="false"
                 android:title="@string/profile_name"/>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="proxy"
+                android:persistent="false"
                 android:summary="@string/proxy_summary"
                 android:title="@string/proxy"/>
         <com.github.shadowsocks.preferences.NumberPickerPreference
                 app:min="1"
                 app:max="65535"
                 android:key="remotePortNum"
+                android:persistent="false"
                 android:summary="@string/remote_port_summary"
                 android:title="@string/remote_port"/>
         <com.github.shadowsocks.preferences.NumberPickerPreference
                 app:min="1025"
                 app:max="65535"
                 android:key="localPortNum"
+                android:persistent="false"
                 android:summary="@string/port_summary"
                 android:title="@string/port"/>
         <com.github.shadowsocks.preferences.PasswordEditTextPreference
                 android:inputType="textPassword"
                 android:key="sitekey"
+                android:persistent="false"
                 android:summary="@string/sitekey_summary"
                 android:title="@string/sitekey"/>
         <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="encMethod"
-                app:entries="@array/enc_method_entry"
-                app:entryValues="@array/enc_method_value"
+                android:persistent="false"
+                android:entries="@array/enc_method_entry"
+                android:entryValues="@array/enc_method_value"
                 android:summary="%s"
                 android:title="@string/enc_method"/>
         <SwitchPreference
                 android:key="isAuth"
+                android:persistent="false"
                 android:summary="@string/onetime_auth_summary"
                 android:title="@string/onetime_auth"/>
 
@@ -47,20 +54,24 @@
 
         <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="route"
-                app:entries="@array/route_entry"
-                app:entryValues="@array/route_value"
+                android:persistent="false"
+                android:entries="@array/route_entry"
+                android:entryValues="@array/route_value"
                 android:summary="%s"
                 android:title="@string/route_list"/>
         <SwitchPreference
                 android:key="isIpv6"
+                android:persistent="false"
                 android:summary="@string/ipv6_summary"
                 android:title="@string/ipv6"/>
         <SwitchPreference
                 android:key="isProxyApps"
+                android:persistent="false"
                 android:summary="@string/proxied_apps_summary"
                 android:title="@string/proxied_apps"/>
         <SwitchPreference
                 android:key="isUdpDns"
+                android:persistent="false"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
 

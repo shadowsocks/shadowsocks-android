@@ -40,8 +40,8 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-    .addAction(R.drawable.ic_navigation_close, service.getString(R.string.stop),
-      PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
+  if (!ShadowsocksTileService.running) builder.addAction(R.drawable.ic_navigation_close,
+    service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   app.profileManager.getAllProfiles match {
     case Some(profiles) => if (profiles.length > 1)
       builder.addAction(R.drawable.ic_action_settings, service.getString(R.string.quick_switch),
@@ -79,13 +79,11 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
 
   def setVisible(visible: Boolean, forceShow: Boolean = false) = if (isVisible != visible) {
     isVisible = visible
-    builder.setPriority(if (visible) NotificationCompat.PRIORITY_DEFAULT else NotificationCompat.PRIORITY_MIN)
+    builder.setPriority(if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN)
     show()
   } else if (forceShow) show()
 
-  def show() = {
-    service.startForeground(1, builder.build)
-  }
+  def show() = service.startForeground(1, builder.build)
 
   def destroy() {
     if (lockReceiver != null) {
