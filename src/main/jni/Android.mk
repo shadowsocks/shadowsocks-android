@@ -318,7 +318,8 @@ UDNS_SOURCES := udns_dn.c udns_dntosp.c udns_parse.c udns_resolver.c udns_init.c
 
 LOCAL_MODULE := libudns
 LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libudns \
-				-DHAVE_DECL_INET_NTOP
+				-DHAVE_DECL_INET_NTOP \
+				-DHAVE_IPv6=1
 
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libudns/,$(UDNS_SOURCES))
 
