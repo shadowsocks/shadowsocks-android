@@ -158,23 +158,22 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
   def onMenuItemClick(item: MenuItem): Boolean = {
     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
-    val prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext)
     item.getItemId match {
       case R.id.action_apply_all =>
         app.profileManager.getAllProfiles match {
           case Some(profiles) =>
-            val proxiedAppString = prefs.getString(Key.individual, "")
-            profiles.foreach(profile => {
-              profile.individual = proxiedAppString
-              app.profileManager.updateProfile(profile)
+            val proxiedAppString = profile.individual
+            profiles.foreach(p => {
+              p.individual = proxiedAppString
+              app.profileManager.updateProfile(p)
             })
             Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show
           case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
         }
         return true
       case R.id.action_export =>
-        val bypass = prefs.getBoolean(Key.bypass, false)
-        val proxiedAppString = prefs.getString(Key.individual, "")
+        val bypass = profile.bypass
+        val proxiedAppString = profile.individual
         val clip = ClipData.newPlainText(Key.individual, bypass + "\n" + proxiedAppString)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
@@ -185,13 +184,13 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
           if (proxiedAppSequence != null) {
             val proxiedAppString = proxiedAppSequence.toString
             if (!proxiedAppString.isEmpty) {
-              val editor = prefs.edit
               val i = proxiedAppString.indexOf('\n')
               try {
                 val (enabled, apps) = if (i < 0) (proxiedAppString, "")
                   else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
                 bypassSwitch.setChecked(enabled.toBoolean)
-                editor.putString(Key.individual, apps).apply()
+                profile.individual = apps
+                app.profileManager.updateProfile(profile)
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)

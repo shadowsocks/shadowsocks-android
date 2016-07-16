@@ -24,6 +24,8 @@ typedResources in Android := false
 
 resConfigs in Android := Seq("ru", "zh", "zh-rCN")
 
+dexMaxHeap in Android := "4g"
+
 resolvers += Resolver.jcenterRepo
 
 resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
