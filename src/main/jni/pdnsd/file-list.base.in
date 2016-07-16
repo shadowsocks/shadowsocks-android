@@ -1,5 +1,0 @@
-%defattr(-,root,root)
-%doc AUTHORS THANKS COPYING COPYING.BSD ChangeLog ChangeLog.old INSTALL NEWS README README.par README.par.old TODO
-%config /etc/pdnsd.conf.sample
-%attr(750, @def_id@, @def_id@) %dir @cachedir@
-%attr(640, @def_id@, @def_id@) %config @cachedir@/pdnsd.cache

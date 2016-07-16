@@ -20,3 +20,7 @@
 	path = src/main/jni/redsocks
 	url = https://github.com/shadowsocks/redsocks.git
 	branch = shadowsocks-android
+[submodule "src/main/jni/pdnsd"]
+	path = src/main/jni/pdnsd
+	url = https://github.com/shadowsocks/pdnsd.git
+	branch = shadowsocks-android
