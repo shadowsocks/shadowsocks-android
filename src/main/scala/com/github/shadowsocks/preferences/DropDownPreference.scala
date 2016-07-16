@@ -1,9 +1,7 @@
 package com.github.shadowsocks.preferences
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.res.TypedArray
-import android.os.Build
 import android.preference.Preference
 import android.support.annotation.{ArrayRes, NonNull}
 import android.support.v7.widget.AppCompatSpinner
@@ -155,7 +153,6 @@ final class DropDownPreference(private val mContext: Context, attrs: AttributeSe
   protected override def onSetInitialValue (restoreValue: Boolean, defaultValue: AnyRef) =
     setValue(if (restoreValue) getPersistedString(getValue) else defaultValue.asInstanceOf[String])
 
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   def setDropDownWidth(dimenResId: Int) =
     mSpinner.setDropDownWidth(mContext.getResources.getDimensionPixelSize(dimenResId))
 
