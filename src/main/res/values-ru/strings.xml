@@ -60,6 +60,7 @@
   <string name="forward_success">Shadowsocks запущен.</string>
   <string name="invalid_server">Неправильное имя сервера</string>
   <string name="service_failed">Ошибка при подключении к удалённому серверу</string>
+  <string name="method_unsafe">ВНИМАНИЕ:В настоящее время метод шифрования является небезопасным</string>
   <string name="nat_deprecated">ВНИМАНИЕ:режим NAT не работает в Android 5.0</string>
   <string name="nat_no_root">Режим NAT требует наличия ROOT прав</string>
   <string name="switch_to_vpn">Переключить на режим VPN</string>
