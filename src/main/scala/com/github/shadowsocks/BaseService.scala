@@ -166,7 +166,7 @@ trait BaseService extends Service {
 
     changeState(State.CONNECTING)
 
-    if (profile.isMethodUnsafe) Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show
+    if (profile.isMethodUnsafe) handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show)
 
     Utils.ThrowableFuture(connect)
   }
