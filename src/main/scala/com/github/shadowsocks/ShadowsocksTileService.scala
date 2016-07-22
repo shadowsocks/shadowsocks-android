@@ -46,7 +46,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
     }
   }
 
-  override def onServiceConnected = callback.stateChanged(bgService.getState, null)
+  override def onServiceConnected() = callback.stateChanged(bgService.getState, null)
 
   override def onCreate {
     super.onCreate
@@ -66,9 +66,9 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
     detachService // just in case the user switches to NAT mode, also saves battery
   }
 
-  override def onClick = if (isLocked) unlockAndRun(toggle) else toggle()
+  override def onClick() = if (isLocked) unlockAndRun(toggle) else toggle()
 
-  private def toggle() = bgService.getState match {
+  private def toggle() = if (bgService != null) bgService.getState match {
     case State.STOPPED => Utils.startSsService(this)
     case State.CONNECTED => Utils.stopSsService(this)
     case _ => // ignore
