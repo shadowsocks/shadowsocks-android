@@ -10,13 +10,31 @@
         <LinearLayout android:id="@+id/stat" android:elevation="4dp" android:visibility="gone"
                       android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:minHeight="?android:attr/listPreferredItemHeight" android:gravity="center_vertical"
-                      android:paddingStart="16dip" android:paddingEnd="88dip" android:focusable="true"
-                      android:paddingLeft="16dip" android:paddingRight="88dip"
+                      android:paddingStart="16dip" android:paddingEnd="16dip" android:focusable="true"
+                      android:paddingLeft="16dip" android:paddingRight="16dip"
                       android:paddingTop="16dip" android:paddingBottom="16dip"
                       android:background="@drawable/background_stat" android:orientation="vertical">
-            <include layout="@layout/layout_main_stat_title"/>
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content">
+                <TextView android:text="@string/stat"
+                          android:textSize="16sp"
+                          android:textColor="?android:attr/textColorPrimary"
+                          android:ellipsize="marquee"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/connection_test"
+                          android:gravity="end"
+                          android:textSize="14sp"
+                          android:textColor="?android:attr/textColorSecondary"
+                          android:layout_width="0dp"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"/>
+            </LinearLayout>
             <android.support.v7.widget.GridLayout android:layout_width="match_parent"
-                                                  android:layout_height="wrap_content" app:columnCount="4">
+                                                  android:layout_height="wrap_content"
+                                                  android:paddingEnd="72dip"
+                                                  android:paddingRight="72dip"
+                                                  app:columnCount="4">
                 <TextView app:layout_column="0" style="@style/TextAppearance.AppCompat.Body2"
                           android:ellipsize="marquee" android:text="@string/sent"
                           android:layout_width="wrap_content" android:layout_height="wrap_content"
