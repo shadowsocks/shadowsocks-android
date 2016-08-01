@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">影梭</string>
+  <string name="app_name">Shadowsocks R</string>
   <string name="quick_toggle">开关</string>
 
   <string name="misc_cat">其他</string>
@@ -62,7 +62,7 @@
   <string name="recovery">重置</string>
   <string name="recovery_summary">重置所有后台服务</string>
   <string name="about">关于</string>
-  <string name="about_title">影梭（shadowsocks）%s</string>
+  <string name="about_title">Shadowsocks R %s</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>
   <string name="flush_dnscache_summary">只需在 NAT 模式下使用</string>
   <string name="flush_dnscache_summary_root">只需在 NAT 模式下使用，需要 ROOT 权限</string>

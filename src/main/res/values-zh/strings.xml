@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Shadowsocks</string>
+  <string name="app_name">Shadowsocks R</string>
   <string name="quick_toggle">開關</string>
 
   <string name="misc_cat">其他</string>
@@ -63,7 +63,7 @@
   <string name="recovery">重設</string>
   <string name="recovery_summary">重設一切背景服務</string>
   <string name="about">關於</string>
-  <string name="about_title">Shadowsocks %s</string>
+  <string name="about_title">Shadowsocks R %s</string>
   <string name="flush_dnscache">清除 DNS 快取</string>
   <string name="flush_dnscache_summary">僅在 NAT 模式可用</string>
   <string name="flush_dnscache_summary_root">僅在 NAT 模式可用，需要 ROOT 權限</string>

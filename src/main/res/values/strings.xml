@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Shadowsocks</string>
+  <string name="app_name">Shadowsocks R</string>
   <string name="quick_toggle">Toggle</string>
 
   <!-- global/misc category -->
@@ -97,7 +97,7 @@
   <string name="recovery">Reset</string>
   <string name="recovery_summary">Reset all the background services</string>
   <string name="about">About</string>
-  <string name="about_title">Shadowsocks %s</string>
+  <string name="about_title">Shadowsocks R %s</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>

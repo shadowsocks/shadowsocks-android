@@ -18,7 +18,7 @@ object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
-    Key.auth, Key.protocol, Key.obfs, Key.obfs_param)
+    Key.protocol, Key.obfs, Key.obfs_param)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
@@ -54,11 +54,10 @@ object ShadowsocksSettings {
       case Key.method => updateDropDownPreference(pref, profile.method)
       case Key.protocol => updateDropDownPreference(pref, profile.protocol)
       case Key.obfs => updateDropDownPreference(pref, profile.obfs)
-	  case Key.obfs_param => updateSummaryEditTextPreference(pref, profile.obfs_param)
+      case Key.obfs_param => updateSummaryEditTextPreference(pref, profile.obfs_param)
       case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
-      case Key.auth => updateSwitchPreference(pref, profile.auth)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
     }
   }
@@ -101,15 +100,15 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.method = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
-	findPreference(Key.protocol).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.protocol).setOnPreferenceChangeListener((_, value) => {
       profile.protocol = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
-	findPreference(Key.obfs).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.obfs).setOnPreferenceChangeListener((_, value) => {
       profile.obfs = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
-	findPreference(Key.obfs_param).setOnPreferenceChangeListener((_, value) => {
+    findPreference(Key.obfs_param).setOnPreferenceChangeListener((_, value) => {
       profile.obfs_param = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
@@ -131,10 +130,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     findPreference(Key.udpdns).setOnPreferenceChangeListener((_, value) => {
       profile.udpdns = value.asInstanceOf[Boolean]
-      app.profileManager.updateProfile(profile)
-    })
-    findPreference(Key.auth).setOnPreferenceChangeListener((_, value) => {
-      profile.auth = value.asInstanceOf[Boolean]
       app.profileManager.updateProfile(profile)
     })
     findPreference(Key.ipv6).setOnPreferenceChangeListener((_, value) => {

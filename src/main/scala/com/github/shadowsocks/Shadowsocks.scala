@@ -328,7 +328,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     setContentView(R.layout.layout_main)
     // Initialize Toolbar
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    toolbar.setTitle("shadowsocks") // non-translatable logo
+    toolbar.setTitle("shadowsocks R") // non-translatable logo
     toolbar.setTitleTextAppearance(toolbar.getContext, R.style.Toolbar_Logo)
     val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
     field.setAccessible(true)
@@ -484,7 +484,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
 
   private def updatePreferenceScreen(profile: Profile) {
-    preferences.update(profile)
+    preferences.setProfile(profile)
   }
 
   override def onStart() {

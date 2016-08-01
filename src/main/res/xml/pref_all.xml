@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
+                  xmlns:app="http://schemas.android.com/apk/res/in.zhaoj.shadowsocksr">
 
     <PreferenceCategory
             android:title="@string/proxy_cat">
@@ -41,30 +41,25 @@
                 android:entryValues="@array/enc_method_value"
                 android:summary="%s"
                 android:title="@string/enc_method"/>
-		<com.github.shadowsocks.preferences.DropDownPreference
+        <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="protocol"
                 android:persistent="false"
                 android:entries="@array/protocol_entry"
                 android:entryValues="@array/protocol_value"
                 android:summary="%s"
                 android:title="@string/protocol"/>
-		<com.github.shadowsocks.preferences.DropDownPreference
+        <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="obfs"
                 android:persistent="false"
                 android:entries="@array/obfs_entry"
                 android:entryValues="@array/obfs_value"
                 android:summary="%s"
                 android:title="@string/obfs"/>
-		<com.github.shadowsocks.preferences.SummaryEditTextPreference
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="obfs_param"
                 android:persistent="false"
                 android:summary="@string/obfs_param_summary"
                 android:title="@string/obfs_param"/>
-        <SwitchPreference
-                android:key="isAuth"
-                android:persistent="false"
-                android:summary="@string/onetime_auth_summary"
-                android:title="@string/onetime_auth"/>
 
     </PreferenceCategory>
 

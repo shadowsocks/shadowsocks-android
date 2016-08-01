@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="enc_method_entry">
-        <item>TABLE</item>
-        <item>RC4</item>
-        <item>RC4-MD5</item>
-        <item>AES-128-CFB</item>
-        <item>AES-192-CFB</item>
-        <item>AES-256-CFB</item>
-        <item>BF-CFB</item>
-        <item>CAMELLIA-128-CFB</item>
-        <item>CAMELLIA-192-CFB</item>
-        <item>CAMELLIA-256-CFB</item>
-        <item>CAST5-CFB</item>
-        <item>DES-CFB</item>
-        <item>IDEA-CFB</item>
-        <item>RC2-CFB</item>
-        <item>SEED-CFB</item>
-        <item>SALSA20</item>
-        <item>CHACHA20</item>
-        <item>CHACHA20-IETF</item>
+        <item>table</item>
+        <item>rc4</item>
+        <item>rc4-md5</item>
+        <item>aes-128-cfb</item>
+        <item>aes-192-cfb</item>
+        <item>aes-256-cfb</item>
+        <item>bf-cfb</item>
+        <item>camellia-128-cfb</item>
+        <item>camellia-192-cfb</item>
+        <item>camellia-256-cfb</item>
+        <item>cast5-cfb</item>
+        <item>des-cfb</item>
+        <item>idea-cfb</item>
+        <item>rc2-cfb</item>
+        <item>seed-cfb</item>
+        <item>salsa20</item>
+        <item>chacha20</item>
+        <item>chacha20-ietf</item>
     </string-array>
 
     <string-array name="enc_method_value">
@@ -41,16 +41,16 @@
         <item>chacha20</item>
         <item>chacha20-ietf</item>
     </string-array>
-	
-	
-	<string-array name="protocol_entry">
-        <item>ORIGIN</item>
-        <item>VERIFY_SIMPLE</item>
-        <item>VERIFY_DEFLATE</item>
-        <item>VERIFY_SHA1</item>
-        <item>AUTH_SIMPLE</item>
-        <item>AUTH_SHA1</item>
-        <item>AUTH_SHA1_V2</item>
+    
+    
+    <string-array name="protocol_entry">
+        <item>origin</item>
+        <item>verify_simple</item>
+        <item>verify_deflate</item>
+        <item>verify_sha1</item>
+        <item>auth_simple</item>
+        <item>auth_sha1</item>
+        <item>auth_sha1_v2</item>
     </string-array>
 
     <string-array name="protocol_value">
@@ -62,15 +62,15 @@
         <item>auth_sha1</item>
         <item>auth_sha1_v2</item>
     </string-array>
-	
-	
-	<string-array name="obfs_entry">
-        <item>PLAIN</item>
-        <item>HTTP_SIMPLE</item>
-        <item>TLS_SIMPLE</item>
-        <item>RANDOM_HEAD</item>
-        <item>TLS1.0_SESSION_AUTH</item>
-        <item>TLS1.2_TICKET_AUTH</item>
+    
+    
+    <string-array name="obfs_entry">
+        <item>plain</item>
+        <item>http_simple</item>
+        <item>tls_simple</item>
+        <item>random_head</item>
+        <item>tls1.0_session_auth</item>
+        <item>tls1.2_ticket_auth</item>
     </string-array>
 
     <string-array name="obfs_value">

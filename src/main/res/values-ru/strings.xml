@@ -91,7 +91,7 @@
   <string name="recovery">Сброс</string>
   <string name="recovery_summary">Сброс всех фоновых задач</string>
   <string name="about">О приложении</string>
-  <string name="about_title">Shadowsocks %s</string>
+  <string name="about_title">Shadowsocks R %s</string>
   <string name="share">Поделиться</string>
   <string name="share_message">Сканировать QR код или использовать Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Сканировать QR код</string>

@@ -215,7 +215,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")
 
-    if (profile.auth) cmd += "-A"
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
@@ -236,8 +235,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     })
     val cmd = new ArrayBuffer[String]
     cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
-      , "-V"
       , "-u"
+      , "-V"
       , "-t", "10"
       , "-b", "127.0.0.1"
       , "-l", "8163"
@@ -245,7 +244,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")
 
-    if (profile.auth) cmd += "-A"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 

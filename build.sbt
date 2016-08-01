@@ -4,7 +4,9 @@ android.Plugin.androidBuild
 
 platformTarget in Android := "android-24"
 
-name := "shadowsocks"
+name := "shadowsocksr"
+
+applicationId  := "in.zhaoj.shadowsocksr"
 
 scalaVersion := "2.11.8"
 
