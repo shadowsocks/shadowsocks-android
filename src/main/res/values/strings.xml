@@ -36,6 +36,12 @@
   <string name="port_summary">%d (port number of the local server)</string>
   <string name="sitekey">Password</string>
   <string name="sitekey_summary">Password of the remote server</string>
+  <string name="protocol">Protocol</string>
+  <string name="protocol_summary">Protocol you selected in panel</string>
+  <string name="obfs">Obfs</string>
+  <string name="obfs_summary">Obfs you selected in panel</string>
+  <string name="obfs_param">Obfs Param</string>
+  <string name="obfs_param_summary">Obfs param you input in panel</string>
   <string name="enc_method">Encrypt Method</string>
 
   <!-- feature category -->

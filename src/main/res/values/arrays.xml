@@ -41,6 +41,46 @@
         <item>chacha20</item>
         <item>chacha20-ietf</item>
     </string-array>
+	
+	
+	<string-array name="protocol_entry">
+        <item>ORIGIN</item>
+        <item>VERIFY_SIMPLE</item>
+        <item>VERIFY_DEFLATE</item>
+        <item>VERIFY_SHA1</item>
+        <item>AUTH_SIMPLE</item>
+        <item>AUTH_SHA1</item>
+        <item>AUTH_SHA1_V2</item>
+    </string-array>
+
+    <string-array name="protocol_value">
+        <item>origin</item>
+        <item>verify_simple</item>
+        <item>verify_deflate</item>
+        <item>verify_sha1</item>
+        <item>auth_simple</item>
+        <item>auth_sha1</item>
+        <item>auth_sha1_v2</item>
+    </string-array>
+	
+	
+	<string-array name="obfs_entry">
+        <item>PLAIN</item>
+        <item>HTTP_SIMPLE</item>
+        <item>TLS_SIMPLE</item>
+        <item>RANDOM_HEAD</item>
+        <item>TLS1.0_SESSION_AUTH</item>
+        <item>TLS1.2_TICKET_AUTH</item>
+    </string-array>
+
+    <string-array name="obfs_value">
+        <item>plain</item>
+        <item>http_simple</item>
+        <item>tls_simple</item>
+        <item>random_head</item>
+        <item>tls1.0_session_auth</item>
+        <item>tls1.2_ticket_auth</item>
+    </string-array>
 
     <string-array name="route_entry">
         <item>All</item>

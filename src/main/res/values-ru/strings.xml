@@ -31,6 +31,12 @@
   <string name="port_summary">%d (номер порта локального сервера)</string>
   <string name="sitekey">Пароль</string>
   <string name="sitekey_summary">Пароль удалённого сервера</string>
+  <string name="protocol">Протокол</string>
+  <string name="protocol_summary">Вы можете настроить пересмотренный протокол Magic (SSR характеристика)</string>
+  <string name="obfs">путано</string>
+  <string name="obfs_summary">Вы можете настроить ревизию волшебную запутанным способом (SSR характеристика) настройки панели</string>
+  <string name="obfs_param">запутанные параметры</string>
+  <string name="obfs_param_summary">Вы можете настроить входные Волшебное редакция панели параметров путанице (SSR характеристика)</string>
   <string name="enc_method">Метод Шифрования</string>
 
   <!-- feature category -->

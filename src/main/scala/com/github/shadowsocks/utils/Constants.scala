@@ -48,7 +48,7 @@ object Executable {
 }
 
 object ConfigUtils {
-  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
+  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\"}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +
     " log_info = off;\n" +
@@ -162,6 +162,9 @@ object Key {
   val host = "proxy"
   val password = "sitekey"
   val method = "encMethod"
+  val obfs = "obfs"
+  val obfs_param = "obfs_param"
+  val protocol = "protocol"
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
 

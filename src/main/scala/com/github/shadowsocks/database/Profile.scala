@@ -62,6 +62,15 @@ class Profile {
 
   @DatabaseField
   var password: String = ""
+  
+  @DatabaseField
+  var protocol: String = "origin"
+  
+  @DatabaseField
+  var obfs: String = "plain"
+  
+  @DatabaseField
+  var obfs_param: String = ""
 
   @DatabaseField
   var method: String = "aes-256-cfb"

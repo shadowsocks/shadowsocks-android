@@ -18,7 +18,7 @@ object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
-    Key.auth)
+    Key.auth, Key.protocol, Key.obfs, Key.obfs_param)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
@@ -52,6 +52,9 @@ object ShadowsocksSettings {
       case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
       case Key.password => updatePasswordEditTextPreference(pref, profile.password)
       case Key.method => updateDropDownPreference(pref, profile.method)
+      case Key.protocol => updateDropDownPreference(pref, profile.protocol)
+      case Key.obfs => updateDropDownPreference(pref, profile.obfs)
+	  case Key.obfs_param => updateSummaryEditTextPreference(pref, profile.obfs_param)
       case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
@@ -96,6 +99,18 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
     findPreference(Key.method).setOnPreferenceChangeListener((_, value) => {
       profile.method = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+	findPreference(Key.protocol).setOnPreferenceChangeListener((_, value) => {
+      profile.protocol = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+	findPreference(Key.obfs).setOnPreferenceChangeListener((_, value) => {
+      profile.obfs = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+	findPreference(Key.obfs_param).setOnPreferenceChangeListener((_, value) => {
+      profile.obfs_param = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {

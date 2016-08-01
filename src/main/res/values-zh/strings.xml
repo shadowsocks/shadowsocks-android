@@ -17,6 +17,12 @@
   <string name="port_summary">%d（本機伺服器的連接埠號碼）</string>
   <string name="sitekey">密碼</string>
   <string name="sitekey_summary">遠端伺服器的密碼</string>
+  <string name="protocol">協議</string>
+  <string name="protocol_summary">您在魔改版面板裡設置的自定義協議（SSR 特性）</string>
+  <string name="obfs">混淆方式</string>
+  <string name="obfs_summary">您在魔改版面板裡設置的自定義混淆方式（SSR 特性）</string>
+  <string name="obfs_param">混淆參數</string>
+  <string name="obfs_param_summary">您在魔改版面板裡輸入的自定義混淆參數（SSR 特性）</string>
   <string name="enc_method">加密方法</string>
   <string name="feature_cat">功能設定</string>
   <string name="http_proxy">HTTP Proxy</string>
