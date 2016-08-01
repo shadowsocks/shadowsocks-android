@@ -63,9 +63,11 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
+
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
+//import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import eu.chainfire.libsuperuser.Shell
+
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -198,6 +200,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     if (fab != null) fab.setEnabled(false)
   }
 
+
   override def binderDied {
     detachService
     crashRecovery
@@ -211,9 +214,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   private var rxText: TextView = _
   private var txRateText: TextView = _
   private var rxRateText: TextView = _
+
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
-  private var adView: AdView = _
+  //private var adView: AdView = _
   private lazy val preferences =
     getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
 
@@ -478,16 +482,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     updateState(updateCurrentProfile())
   }
 
-  private def updatePreferenceScreen(profile: Profile) {
-    if (profile.host == "198.199.101.152") if (adView == null) {
-      adView = new AdView(this)
-      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-      adView.setAdSize(AdSize.SMART_BANNER)
-      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 1)
-      adView.loadAd(new AdRequest.Builder().build())
-    } else adView.setVisibility(View.VISIBLE) else if (adView != null) adView.setVisibility(View.GONE)
 
-    preferences.setProfile(profile)
+  private def updatePreferenceScreen(profile: Profile) {
+    preferences.update(profile)
   }
 
   override def onStart() {

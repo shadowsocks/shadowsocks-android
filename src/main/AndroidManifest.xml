@@ -37,9 +37,9 @@
         <meta-data android:name="com.google.android.backup.api_key"
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
 
-        <activity
-                android:name="com.google.android.gms.ads.AdActivity"
-                android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+        <!--<activity-->
+                <!--android:name="com.google.android.gms.ads.AdActivity"-->
+                <!--android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>-->
 
         <activity
                 android:name=".Shadowsocks"

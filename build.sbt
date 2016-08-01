@@ -37,11 +37,13 @@ libraryDependencies ++= Seq(
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "eu.chainfire" % "libsuperuser" % "1.0.0.201607041850",
   "net.glxn.qrgen" % "android" % "2.0",
-  "com.google.android.gms" % "play-services-ads" % "9.2.1",
+
+  //"com.google.android.gms" % "play-services-ads" % "9.2.1",
   "com.google.android.gms" % "play-services-analytics" % "9.2.1",
   "com.android.support" % "design" % "24.1.0",
   "com.android.support" % "gridlayout-v7" % "24.1.0",
   "com.android.support" % "cardview-v7" % "24.1.0",
+
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.j256.ormlite" % "ormlite-android" % "4.48",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
