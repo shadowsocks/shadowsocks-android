@@ -55,6 +55,8 @@ proguardCache in Android := Seq()
 
 proguardOptions in Android ++= Seq(
   "-keep class com.github.shadowsocks.System { *; }",
+  "-dontwarn com.google.android.gms.**",
+  "-keep class com.google.android.gms.**",
   "-dontnote com.google.android.gms.internal.**",
   "-dontnote com.j256.ormlite.**",
   "-dontnote me.dm7.barcodescannerview.**",

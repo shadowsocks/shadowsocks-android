@@ -77,6 +77,23 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            android:title="@string/kcp">
+
+        <SwitchPreference
+                android:key="kcp"
+                android:persistent="false"
+                android:summary="@string/kcp_summary"
+                android:title="@string/kcp"/>
+
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                android:key="kcpcli"
+                android:persistent="false"
+                android:summary="@string/kcpcli_summary"
+                android:title="@string/kcpcli"/>
+
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/misc_cat">
 
         <SwitchPreference

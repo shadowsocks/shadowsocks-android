@@ -134,4 +134,9 @@
   <!-- status -->
   <string name="sent">Отправлено:</string>
   <string name="received">Получено:</string>
+
+  <!-- kcp -->
+  <string name="kcp_summary">Включить KCP</string>
+  <string name="kcpcli">KCP параметры</string>
+  <string name="kcpcli_summary">Командная строка KCPTUN</string>
 </resources>
