@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Shadowsocks R</string>
+  <string name="app_name">SSR</string>
   <string name="quick_toggle">開關</string>
 
   <string name="misc_cat">其他</string>
@@ -104,7 +104,7 @@
     按住後上下撥動設定檔重新排序。</string>
   <string name="gotcha">我懂了！</string>
   <string name="copy_url">複製 URL</string>
-  <string name="add_profile_dialog">為 Shadowsocks 新增此設定檔？</string>
+  <string name="add_profile_dialog">為 SSR 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>
   <string name="add_profile_methods_manual_settings">手動設定</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 來新增設定檔</string>

@@ -117,7 +117,7 @@
   <string name="profile_manager_dialog_content">&#8226; Нажмите для выбора профиля;\n&#8226; Сдвиньте влево/вправо или нажмите влево
     чтобы удалить;\n&#8226; Подержите чтобы изменить порядок профилей.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Добавить этот Профиль Shadowsocks?</string>
+  <string name="add_profile_dialog">Добавить этот Профиль SSR?</string>
   <string name="add_profile_methods_scan_qr_code">Сканировать QR код</string>
   <string name="add_profile_methods_manual_settings">Настройка вручную</string>
   <string name="add_profile_nfc_hint_title">Использовать Android Beam (NFC) для добавления профиля</string>
