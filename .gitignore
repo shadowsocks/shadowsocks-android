@@ -26,8 +26,8 @@ out/
 #NDK
 src/main/obj
 src/main/libs
-src/main/assets/armeabi
-src/main/assets/armeabi-v7a
-src/main/assets/x86
-src/main/assets/api-16/
+src/main/assets/armeabi-v7a/*
+!src/main/assets/armeabi-v7a/kcptun
+src/main/assets/x86/*
+!src/main/assets/x86/kcptun
 jni/Application.mk

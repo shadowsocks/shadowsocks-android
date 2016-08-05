@@ -45,6 +45,7 @@ object Executable {
   val SS_LOCAL = "ss-local"
   val SS_TUNNEL = "ss-tunnel"
   val TUN2SOCKS = "tun2socks"
+  val KCPTUN = "kcptun"
 }
 
 object ConfigUtils {
@@ -166,6 +167,10 @@ object Key {
   val localPort = "localPortNum"
 
   val profileTip = "profileTip"
+
+  val kcp = "kcp"
+  val kcpPort = "kcpPort"
+  val kcpcli = "kcpcli"
 }
 
 object State {
