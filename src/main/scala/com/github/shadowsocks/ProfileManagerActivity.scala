@@ -55,7 +55,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           .asInstanceOf[QRCode].bitmap()
         image.setImageBitmap(qrcode)
 
-        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this)
+        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
           .setCancelable(true)
           .setPositiveButton(R.string.close, null)
           .setNegativeButton(R.string.copy_url, ((_, _) =>
@@ -240,7 +240,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     if (app.settings.getBoolean(Key.profileTip, true)) {
       app.editor.putBoolean(Key.profileTip, false).apply
-      new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
+      new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert).setTitle(R.string.profile_manager_dialog)
         .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
     }
 
@@ -293,7 +293,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         startActivityForResult(intent, REQUEST_QRCODE)
       case R.id.fab_nfc_add =>
         menu.toggle(true)
-        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this)
+        val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
           .setCancelable(true)
           .setPositiveButton(R.string.gotcha, null)
           .setTitle(R.string.add_profile_nfc_hint_title)
@@ -358,7 +358,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       finish()
       return
     }
-    val dialog = new AlertDialog.Builder(this)
+    val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
       .setTitle(R.string.add_profile_dialog)
       .setPositiveButton(android.R.string.yes, ((_, _) =>
         profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
