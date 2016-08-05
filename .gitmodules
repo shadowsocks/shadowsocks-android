@@ -25,3 +25,7 @@
 	path = src/main/jni/shadowsocks-libev
 	url = https://github.com/glzjin/shadowsocks-libev.git
 	branch = master
+[submodule "shadowsocks-libev"]
+	path = shadowsocks-libev
+	url = git@github.com:glzjin/shadowsocks-libev.git
+	branch = master

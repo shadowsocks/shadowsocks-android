@@ -110,6 +110,16 @@ class Profile {
     password).getBytes, Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
     obfs_param).getBytes, Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
     name).getBytes, Base64.URL_SAFE | Base64.NO_WRAP)).getBytes, Base64.URL_SAFE | Base64.NO_WRAP)
+  
+  @DatabaseField
+  var kcp: Boolean = false
+
+  @DatabaseField
+  var kcpPort: Int = 8399
+
+  @DatabaseField
+  var kcpcli: String = ""
+
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 }

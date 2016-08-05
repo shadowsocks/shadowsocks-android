@@ -64,7 +64,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 16) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 18) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -124,6 +124,15 @@ class DBHelper(val context: Context)
 
       if (oldVersion < 16) {
         profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'bypass-lan-china' WHERE route = 'bypass-china'")
+      }
+
+      if (oldVersion < 17) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR;")
+      }
+
+      if (oldVersion < 18) {
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpPort INTEGER;")
       }
     }
   }
