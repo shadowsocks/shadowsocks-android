@@ -190,6 +190,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     startShadowsocksDaemon()
 
+    if (profile.udpdns) {
+      startShadowsocksUDPDaemon()
+    }
+
     val fd = startVpn()
     val ret = sendFd(fd)
 
@@ -201,10 +205,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startKcptunDaemon() {
-
     val cmd = new ArrayBuffer[String]
     cmd += (getApplicationInfo.dataDir + "/kcptun"
-      , "-r", profile.host + ":" + profile.remotePort
+      , "-r", profile.host + ":" + profile.kcpPort
       , "-l", "127.0.0.1:" + (profile.localPort + 90)
       , "--path", getApplicationInfo.dataDir + "/protect_path"
       , profile.kcpcli)
@@ -215,8 +218,29 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     kcptunProcess = new GuardedProcess(cmd.mkString(" ").split(" ").toSeq).start()
   }
 
-  def startShadowsocksDaemon() {
+  def startShadowsocksUDPDaemon() {
+    val conf = ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        profile.password, profile.method, 600)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf"))(p => {
+      p.println(conf)
+    })
 
+    val cmd = new ArrayBuffer[String]
+    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
+      , "-b", "127.0.0.1"
+      , "-t", "600"
+      , "-P", getApplicationInfo.dataDir
+      , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
+
+    if (profile.auth) cmd += "-A"
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    sstunnelProcess = new GuardedProcess(cmd).start()
+  }
+
+  def startShadowsocksDaemon() {
     if (profile.route != Route.ALL) {
       val acl: Array[Array[String]] = profile.route match {
         case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
@@ -243,7 +267,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     })
 
     val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-u"
+    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir

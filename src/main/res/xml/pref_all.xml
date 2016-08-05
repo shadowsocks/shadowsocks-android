@@ -86,6 +86,14 @@
                 android:summary="@string/kcp_summary"
                 android:title="@string/kcp"/>
 
+        <com.github.shadowsocks.preferences.NumberPickerPreference
+                app:min="1"
+                app:max="65535"
+                android:key="kcpPort"
+                android:persistent="false"
+                android:summary="@string/kcp_port_summary"
+                android:title="@string/kcp_port"/>
+
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="kcpcli"
                 android:persistent="false"

@@ -169,6 +169,7 @@ object Key {
   val profileTip = "profileTip"
 
   val kcp = "kcp"
+  val kcpPort = "kcpPort"
   val kcpcli = "kcpcli"
 }
 

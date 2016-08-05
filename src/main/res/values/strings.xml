@@ -143,6 +143,8 @@
   <!-- kcp -->
   <string name="kcp" translatable="false">KCP</string>
   <string name="kcp_summary">Enable Shadowsocks over KCP</string>
+  <string name="kcp_port">KCPTUN Port</string>
+  <string name="kcp_port_summary">%d (port number of the remote KCPTUN server)</string>
   <string name="kcpcli">KCP Parameters (CLI)</string>
   <string name="kcpcli_summary">The command line of KCPTUN</string>
 </resources>

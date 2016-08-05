@@ -120,7 +120,7 @@ class ShadowsocksNatService extends BaseService {
 
     val cmd = new ArrayBuffer[String]
     cmd += (getApplicationInfo.dataDir + "/kcptun"
-      , "-r", profile.host + ":" + profile.remotePort
+      , "-r", profile.host + ":" + profile.kcpPort
       , "-l", "127.0.0.1:" + (profile.localPort + 90)
       , profile.kcpcli)
 
@@ -129,22 +129,17 @@ class ShadowsocksNatService extends BaseService {
     kcptunProcess = new GuardedProcess(cmd.mkString(" ").split(" ").toSeq).start()
   }
 
-  def startTunnel() {
+  def startDNSTunnel() {
     if (profile.udpdns) {
-      val conf = if (profile.kcp) {
-        ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90,
-          profile.localPort + 53, profile.password, profile.method, 10)
-      } else {
-        ConfigUtils
+      val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
           profile.password, profile.method, 10)
-      }
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmd = new ArrayBuffer[String]
       cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
+        , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-L" , "8.8.8.8:53"
@@ -159,15 +154,20 @@ class ShadowsocksNatService extends BaseService {
       sstunnelProcess = new GuardedProcess(cmd).start()
 
     } else {
-      val conf = ConfigUtils
+      val conf = if (profile.kcp) {
+        ConfigUtils
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90,
+          profile.localPort + 63, profile.password, profile.method, 10)
+      } else {
+        ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
           profile.password, profile.method, 10)
+      }
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
       cmdBuf += (getApplicationInfo.dataDir + "/ss-tunnel"
-        , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-l" , (profile.localPort + 63).toString
@@ -218,7 +218,7 @@ class ShadowsocksNatService extends BaseService {
   /** Called when the activity is first created. */
   def handleConnection {
 
-    startTunnel()
+    startDNSTunnel()
     startRedsocksDaemon()
     startShadowsocksDaemon()
 

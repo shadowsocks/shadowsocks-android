@@ -103,6 +103,9 @@ class Profile {
   var kcp: Boolean = false
 
   @DatabaseField
+  var kcpPort: Int = 8399
+
+  @DatabaseField
   var kcpcli: String = ""
 
   override def toString = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
