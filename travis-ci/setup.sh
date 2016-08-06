@@ -26,7 +26,7 @@ if [ ! -d "$GOROOT_BOOTSTRAP" ]; then
     mkdir -p $GOROOT_BOOTSTRAP
     pushd $HOME/.android
     wget https://storage.googleapis.com/golang/go1.6.3.linux-amd64.tar.gz
-    tar xvf go1.6.3.linux-amd64.tar.gz
+    tar xf go1.6.3.linux-amd64.tar.gz
     popd
 fi
 

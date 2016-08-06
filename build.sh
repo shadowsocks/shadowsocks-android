@@ -4,23 +4,22 @@ function try () {
 "$@" || exit -1
 }
 
-pushd kcptun
-try ./make.bash
-popd
-
-try pushd src/main
-
-# Build
-#try $ANDROID_NDK_HOME/ndk-build clean
+# Build native binaries
+pushd src/main
 try $ANDROID_NDK_HOME/ndk-build -j8
-
 # copy executables
 for app in pdnsd redsocks ss-local ss-tunnel tun2socks
 do
-    rm -f assets/armeabi-v7a/$app
-    rm -f assets/x86/$app
+    rm -f assets/armeabi-v7a
+    rm -f assets/x86
+    mkdir -p assets/armeabi-v7a
+    mkdir -p assets/x86
     try mv libs/armeabi-v7a/$app assets/armeabi-v7a/
     try mv libs/x86/$app assets/x86/
 done
+popd
 
-try popd
+# Build kcptun
+pushd kcptun
+try ./make.bash
+popd
