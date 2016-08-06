@@ -44,7 +44,7 @@ if [ ! -d "$DIR/go/bin" ]; then
 fi
 
 export GOROOT=$DIR/go
-export GOPATH=$DIR/kcptun
+export GOPATH=$DEPS
 export PATH=$GOROOT/bin:$PATH
 
 pushd kcptun/client
