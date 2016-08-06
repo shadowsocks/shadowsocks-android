@@ -10,8 +10,8 @@ try $ANDROID_NDK_HOME/ndk-build -j8
 # copy executables
 for app in pdnsd redsocks ss-local ss-tunnel tun2socks
 do
-    rm -f assets/armeabi-v7a
-    rm -f assets/x86
+    rm -rf assets/armeabi-v7a
+    rm -rf assets/x86
     mkdir -p assets/armeabi-v7a
     mkdir -p assets/x86
     try mv libs/armeabi-v7a/$app assets/armeabi-v7a/
