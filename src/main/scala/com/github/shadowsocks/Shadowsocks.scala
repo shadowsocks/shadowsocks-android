@@ -481,7 +481,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   private def updatePreferenceScreen(profile: Profile) {
     if (profile.host == "198.199.101.152") if (adView == null) {
       adView = new AdView(this)
-      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
+      adView.setAdUnitId("ca-app-pub-4984938374218635/1433320509")
       adView.setAdSize(AdSize.SMART_BANNER)
       preferences.getView.asInstanceOf[ViewGroup].addView(adView, 1)
       adView.loadAd(new AdRequest.Builder().build())
