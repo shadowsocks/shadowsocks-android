@@ -14,6 +14,7 @@ gen_*
 *.class
 *.o
 local.sbt
+.deps
 
 #Intellij IDEA
 *.iml
@@ -27,7 +28,5 @@ out/
 src/main/obj
 src/main/libs
 src/main/assets/armeabi-v7a/*
-!src/main/assets/armeabi-v7a/kcptun
 src/main/assets/x86/*
-!src/main/assets/x86/kcptun
 jni/Application.mk
