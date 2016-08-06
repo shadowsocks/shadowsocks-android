@@ -174,7 +174,7 @@ trait BaseService extends Service {
       closeReceiverRegistered = true
     }
 
-    if (!networkReceiverRegistered) {
+    if (profile.kcp && !networkReceiverRegistered) {
       // register network change receiver
       val filter = new IntentFilter()
       filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
