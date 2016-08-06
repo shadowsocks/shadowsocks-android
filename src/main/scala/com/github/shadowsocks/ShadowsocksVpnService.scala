@@ -63,7 +63,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var vpnThread: ShadowsocksVpnThread = _
   private var notification: ShadowsocksNotification = _
 
-  var kcptunProcess: Process = _
   var sslocalProcess: Process = _
   var sstunnelProcess: Process = _
   var pdnsdProcess: Process = _
