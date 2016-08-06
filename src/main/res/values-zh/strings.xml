@@ -81,6 +81,9 @@
 
   <string name="udp_dns">UDP 轉送</string>
   <string name="udp_dns_summary">向遠端轉送 UDP 封包</string>
+  
+  <string name="dns">DNS</string>
+  <string name="dns_summary">您要使用的DNS，如 8.8.8.8:53</string>
 
   <string name="onetime_auth">單次驗證</string>
   <string name="onetime_auth_summary">啟用單次驗證</string>

@@ -88,7 +88,11 @@
                 android:persistent="false"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
-
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                android:key="dns"
+                android:persistent="false"
+                android:summary="@string/dns_summary"
+                android:title="@string/dns"/>
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -18,7 +18,7 @@ object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
-    Key.kcp, Key.kcpPort, Key.kcpcli, Key.protocol, Key.obfs, Key.obfs_param)
+    Key.kcp, Key.kcpPort, Key.kcpcli, Key.protocol, Key.obfs, Key.obfs_param, Key.dns)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
@@ -60,6 +60,7 @@ object ShadowsocksSettings {
       case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
+      case Key.dns => updateSwitchPreference(pref, profile.dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
       case Key.kcp => updateSwitchPreference(pref, profile.kcp)
       case Key.kcpPort => updateNumberPickerPreference(pref, profile.kcpPort)
@@ -148,6 +149,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
     findPreference(Key.udpdns).setOnPreferenceChangeListener((_, value) => {
       profile.udpdns = value.asInstanceOf[Boolean]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.dns).setOnPreferenceChangeListener((_, value) => {
+      profile.dns = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
     findPreference(Key.ipv6).setOnPreferenceChangeListener((_, value) => {
