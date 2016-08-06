@@ -61,6 +61,8 @@
   <string name="auto_connect_summary">Запускать Shadowsocks при включении</string>
   <string name="udp_dns">Проброс UDP</string>
   <string name="udp_dns_summary">Пробрасывать UDP пакеты на удалённый сервер</string>
+  <string name="dns">DNS</string>
+  <string name="dns_summary">DNS вы хотите использовать , например, 8.8.8.8:53</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks запущен.</string>

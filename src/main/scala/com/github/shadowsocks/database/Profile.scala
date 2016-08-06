@@ -86,6 +86,9 @@ class Profile {
 
   @DatabaseField
   var udpdns: Boolean = false
+  
+  @DatabaseField
+  var dns: String = "8.8.8.8:53"
 
   @DatabaseField
   var ipv6: Boolean = false

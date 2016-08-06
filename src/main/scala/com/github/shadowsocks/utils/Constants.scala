@@ -156,6 +156,7 @@ object Key {
   val proxyApps = "isProxyApps"
   val bypass = "isBypassApps"
   val udpdns = "isUdpDns"
+  val dns = "dns"
   val auth = "isAuth"
   val ipv6 = "isIpv6"
 
