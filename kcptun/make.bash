@@ -30,7 +30,6 @@ fi
 
 if [ ! -d "$ANDROID_X86_TOOLCHAIN" ]; then
     echo "Make standalone toolchain for X86 arch"
-    $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch arm \
     $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch x86 \
         --api 16 --install-dir $ANDROID_X86_TOOLCHAIN
 fi
