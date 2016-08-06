@@ -24,3 +24,9 @@
 	path = src/main/jni/pdnsd
 	url = https://github.com/shadowsocks/pdnsd.git
 	branch = shadowsocks-android
+[submodule "kcptun/kcptun"]
+	path = kcptun/kcptun
+	url = https://github.com/shadowsocks/kcptun
+[submodule "kcptun/go"]
+	path = kcptun/go
+	url = https://github.com/shadowsocks/go

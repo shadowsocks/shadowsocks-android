@@ -4,6 +4,10 @@ function try () {
 "$@" || exit -1
 }
 
+pushd kcptun
+try ./make.bash
+popd
+
 try pushd src/main
 
 # Build

@@ -12,6 +12,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 * JDK 1.8
 * SBT 0.13.0+
+* GO 1.4+
 * Android SDK r25+
 * Android NDK r12b+
 
@@ -19,6 +20,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
+* Set environment variable `GOROOT_BOOTSTRAP` to `/path/to/go`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore
 * Create `local.properties` from `local.properties.example` with your own key information
@@ -26,31 +28,9 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ```bash
     git submodule update --init
-    
+
     # Build the App
     sbt native-build clean android:package-release
-```
-
-#### BUILD on Mac OS X (with HomeBrew)
-
-* Install Android SDK and NDK by run `brew install android-ndk android-sdk`
-* Add `export ANDROID_HOME=/usr/local/Cellar/android-sdk/$version` to your .bashrc , then reopen the shell to load it.
-* Add `export ANDROID_NDK_HOME=/usr/local/Cellar/android-ndk/$version` to your .bashrc , then reopen the shell to load it.
-* echo "y" | android update sdk --filter tools,platform-tools,build-tools-23.0.2,android-23,extra-google-m2repository --no-ui -a
-* echo "y" | android update sdk --filter extra-android-m2repository --no-ui --no-https -a
-* Create your key following the instructions at http://developer.android.com/guide/publishing/app-signing.html#cert
-* Put your key in ~/.keystore
-* Create `local.properties` from `local.properties.example` with your own key information .
-* Invoke the building like this
-
-```bash
-    git submodule update --init
-
-    # Build native binaries
-    ./build.sh
-
-    # Build the apk
-    sbt clean android:package-release
 ```
 
 ## OPEN SOURCE LICENSES
