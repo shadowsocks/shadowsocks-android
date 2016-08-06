@@ -42,6 +42,7 @@ A [shadowsocks R](https://github.com/breakwa11/shadowsocks-rss/) client for Andr
 * pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
 * libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
 * libevent: [BSD](https://github.com/shadowsocks/libevent/blob/master/LICENSE)
+* kcptun: [MIT](https://github.com/xtaci/kcptun)
 
 ### LICENSE
 
