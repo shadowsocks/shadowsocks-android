@@ -43,10 +43,12 @@ import java.util.{Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
+import android.net.ConnectivityManager
 import android.os.{Handler, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
+
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils._
@@ -70,6 +72,16 @@ trait BaseService extends Service {
     stopRunner(true)
   }
   var closeReceiverRegistered: Boolean = _
+
+  var kcptunProcess: GuardedProcess = _
+  private val networkReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+   val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
+   val activeNetwork = cm.getActiveNetworkInfo()
+   val isConnected = activeNetwork != null && activeNetwork.isConnected()
+
+   if (isConnected && profile.kcp && kcptunProcess != null) kcptunProcess.restart()
+  }
+  var networkReceiverRegistered: Boolean = _
 
   val binder = new IShadowsocksService.Stub {
     override def getState: Int = {
@@ -162,6 +174,14 @@ trait BaseService extends Service {
       closeReceiverRegistered = true
     }
 
+    if (!networkReceiverRegistered) {
+      // register network change receiver
+      val filter = new IntentFilter()
+      filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+      registerReceiver(networkReceiver, filter)
+      networkReceiverRegistered = true
+    }
+
     app.track(getClass.getSimpleName, "start")
 
     changeState(State.CONNECTING)
@@ -176,6 +196,10 @@ trait BaseService extends Service {
     if (closeReceiverRegistered) {
       unregisterReceiver(closeReceiver)
       closeReceiverRegistered = false
+    }
+    if (networkReceiverRegistered) {
+      unregisterReceiver(networkReceiver)
+      networkReceiverRegistered = false
     }
 
     // Make sure update total traffic when stopping the runner

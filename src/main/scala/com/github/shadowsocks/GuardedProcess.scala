@@ -56,6 +56,7 @@ class GuardedProcess(cmd: Seq[String]) extends Process {
   @volatile private var guardThread: Thread = _
   @volatile private var isDestroyed: Boolean = _
   @volatile private var process: Process = _
+  @volatile private var isRestart = false
 
   def start(onRestartCallback: () => Unit = null): GuardedProcess = {
     val semaphore = new Semaphore(1)
@@ -76,9 +77,13 @@ class GuardedProcess(cmd: Seq[String]) extends Process {
           semaphore.release
           process.waitFor
 
-          if (currentTimeMillis - startTime < 1000) {
-            Log.w(TAG, "process exit too fast, stop guard: " + cmd)
-            isDestroyed = true
+          if (isRestart) {
+            isRestart = false
+          } else {
+            if (currentTimeMillis - startTime < 1000) {
+              Log.w(TAG, "process exit too fast, stop guard: " + cmd)
+              isDestroyed = true
+            }
           }
         }
       } catch {
@@ -106,6 +111,11 @@ class GuardedProcess(cmd: Seq[String]) extends Process {
     try guardThread.join() catch {
       case ignored: InterruptedException =>
     }
+  }
+
+  def restart() {
+    isRestart = true
+    process.destroy()
   }
 
   def exitValue: Int = throw new UnsupportedOperationException

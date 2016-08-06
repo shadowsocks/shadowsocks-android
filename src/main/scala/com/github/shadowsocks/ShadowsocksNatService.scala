@@ -65,7 +65,6 @@ class ShadowsocksNatService extends BaseService {
   private var notification: ShadowsocksNotification = _
   val myUid = android.os.Process.myUid()
 
-  var kcptunProcess: Process = _
   var sslocalProcess: Process = _
   var sstunnelProcess: Process = _
   var redsocksProcess: Process = _
