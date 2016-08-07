@@ -1,11 +1,5 @@
 #!/bin/bash
 
-export ARCH=`uname -m`
-export GOROOT_BOOTSTRAP=$HOME/.android/go
-export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
-export ANDROID_HOME=$HOME/.android/android-sdk-linux
-export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
-
 if [ ! -d "$ANDROID_HOME" ]; then
     mkdir -p $ANDROID_HOME
     pushd $HOME/.android
@@ -32,3 +26,4 @@ fi
 
 ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-24.0.0,android-23,android-24,extra-google-m2repository --no-ui -a
 ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a
+cp local.properties.travis local.properties
