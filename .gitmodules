@@ -23,7 +23,7 @@
 	branch = shadowsocks-android
 [submodule "src/main/jni/shadowsocks-libev"]
 	path = src/main/jni/shadowsocks-libev
-	url = git@github.com:glzjin/shadowsocks-libev.git
+	url = https://github.com/glzjin/shadowsocks-libev.git
 	branch = master
 [submodule "kcptun/kcptun"]
 	path = kcptun/kcptun
