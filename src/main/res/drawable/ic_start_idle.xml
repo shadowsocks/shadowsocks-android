@@ -7,19 +7,19 @@
 
     <path
         android:fillColor="#fff"
-        android:pathData="M12.4,17.6l-2.6,0.9l2.6,3.6L12.4,17.6L12.4,17.6z" />
+        android:pathData="M13.3,17.9l-2.6,0.9l2.6,3.6L13.3,17.9L13.3,17.9z" />
     <path
         android:strokeColor="#fff"
         android:strokeWidth="2"
         android:strokeMiterLimit="10"
-        android:pathData="M0,23.3L21.2,2.1L0,23.3z" />
+        android:pathData="M0.9,23.6L22,2.4L0.9,23.6z" />
     <path
         android:fillColor="#fff"
-        android:pathData="M11.4,7.6L0.6,2.3l3,13.2l1.7-1.7L4.2,9l2.7,3.2l1.4-1.4l-3-3.6l3.6,3L11.4,7.6z" />
+        android:pathData="M12.3,7.9L1.5,2.6l3,13.1l1.7-1.7L5.1,9.3l2.7,3.2L9.2,11l-3-3.6l3.6,3L12.3,7.9z" />
     <path
         android:fillColor="#fff"
-        android:pathData="M4.1,17.7l0.2,0.8l8.3-2.7l-3-3.6l-1.4,1.4l1,1.2l-3.2,1L4.1,17.7z" />
+        android:pathData="M5,18l0.2,0.8l8.3-2.7l-3-3.6L9.1,14l1,1.2l-3.2,1L5,18z" />
     <path
         android:fillColor="#fff"
-        android:pathData="M10.4,11.5l4.6,3.9l6.8-2.6l-8.6-4.2L10.4,11.5z M11.9,10.1l5,2.5l-1.4,0.5L11.9,10.1z" />
+        android:pathData="M11.3,11.8l4.6,3.9l6.8-2.6l-8.6-4.2L11.3,11.8z M12.8,10.4l5,2.5l-1.4,0.5L12.8,10.4z" />
 </vector>
