@@ -24,6 +24,6 @@ if [ ! -d "$GOROOT_BOOTSTRAP" ]; then
     popd
 fi
 
-( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-24.0.0,android-23,android-24,extra-google-m2repository --no-ui -a
+( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter tools,platform-tools,build-tools-24.0.0,android-24,extra-google-m2repository --no-ui -a
 ( sleep 5 && while [ 1 ]; do sleep 1; echo y; done ) | android update sdk --filter extra-android-m2repository --no-ui -a
 cp local.properties.travis local.properties
