@@ -109,6 +109,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def killProcesses() {
+    if (kcptunProcess != null) {
+      kcptunProcess.destroy()
+      kcptunProcess = null
+    }
     if (sslocalProcess != null) {
       sslocalProcess.destroy()
       sslocalProcess = null
@@ -177,18 +181,65 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
+    
+    val fd = startVpn()
+    if (!sendFd(fd)) return false
+
+    if (profile.kcp) {
+      startKcptunDaemon()
+    }
+
     startShadowsocksDaemon()
+
+    if (profile.udpdns && profile.kcp) {
+      startShadowsocksUDPDaemon()
+    }
+
     if (!profile.udpdns) {
       startDnsDaemon()
       startDnsTunnel()
     }
 
-    val fd = startVpn()
-    sendFd(fd)
+    true
+  }
+
+  def startKcptunDaemon() {
+    val cmd = new ArrayBuffer[String]
+    cmd += (getApplicationInfo.dataDir + "/kcptun"
+      , "-r", profile.host + ":" + profile.kcpPort
+      , "-l", "127.0.0.1:" + (profile.localPort + 90)
+      , "--path", getApplicationInfo.dataDir + "/protect_path"
+      , profile.kcpcli)
+
+    if (BuildConfig.DEBUG)
+      Log.d(TAG, cmd.mkString(" "))
+
+    kcptunProcess = new GuardedProcess(cmd.mkString(" ").split(" ").toSeq).start()
+  }
+
+  def startShadowsocksUDPDaemon() {
+    val conf = ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        profile.password, profile.method, 600)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf"))(p => {
+      p.println(conf)
+    })
+
+    val cmd = new ArrayBuffer[String]
+    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
+      , "-b", "127.0.0.1"
+      , "-t", "600"
+      , "-P", getApplicationInfo.dataDir
+      , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
+
+    if (profile.auth) cmd += "-A"
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    sstunnelProcess = new GuardedProcess(cmd).start()
   }
 
   def startShadowsocksDaemon() {
-
     if (profile.route != Route.ALL) {
       val acl: Array[Array[String]] = profile.route match {
         case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
@@ -201,21 +252,29 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       })
     }
 
-    val conf = ConfigUtils
+    val conf = if (profile.kcp) {
+      ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort,
+        profile.password, profile.method, 600)
+    } else {
+      ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
         profile.password, profile.method, 600)
+    }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
       p.println(conf)
     })
 
     val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-u"
+    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")
 
     if (profile.auth) cmd += "-A"
+
+    if (profile.udpdns && !profile.kcp) cmd += "-u"
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
@@ -228,19 +287,23 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsTunnel() = {
-    val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8163,
+    val conf = if (profile.kcp) {
+      ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort + 63,
         profile.password, profile.method, 10)
+    } else {
+      ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
+        profile.password, profile.method, 10)
+    }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
     val cmd = new ArrayBuffer[String]
     cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
       , "-V"
-      , "-u"
       , "-t", "10"
       , "-b", "127.0.0.1"
-      , "-l", "8163"
       , "-L", "8.8.8.8:53"
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")
@@ -257,10 +320,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val conf = {
       if (profile.route == Route.BYPASS_CHN || profile.route == Route.BYPASS_LAN_CHN) {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", 8153, getBlackList, 8163, ipv6)
+          "0.0.0.0", profile.localPort + 53, getBlackList, profile.localPort + 63, ipv6)
       } else {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", 8153, 8163, ipv6)
+          "0.0.0.0", profile.localPort + 53, profile.localPort + 63, ipv6)
       }
     }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
@@ -354,7 +417,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.udpdns)
       cmd += " --enable-udprelay"
     else
-      cmd += " --dnsgw %s:8153".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"))
+      cmd += " --dnsgw %s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 
+        profile.localPort + 53)
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd)
 

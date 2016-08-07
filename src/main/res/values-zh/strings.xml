@@ -136,4 +136,11 @@
   <string name="sent">傳送:</string>
   <string name="received">接收:</string>
 
+  <!-- kcp -->
+  <string name="kcp_summary">啟用 KCP 協定</string>
+  <string name="kcp_port">KCP 連接埠</string>
+  <string name="kcp_port_summary">%d（遠端 KCPTUN 伺服器的連接埠號碼）</string>
+  <string name="kcpcli">KCP 參數</string>
+  <string name="kcpcli_summary">KCPTUN 的命令行參數</string>
+
 </resources>

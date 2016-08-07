@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export ARCH=`uname -m`
+export GOROOT_BOOTSTRAP=$HOME/.android/go
 export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
 export ANDROID_HOME=$HOME/.android/android-sdk-linux
 export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
@@ -18,6 +19,14 @@ if [ ! -d "$ANDROID_NDK_HOME" ]; then
     pushd $HOME/.android
     wget -q http://dl.google.com/android/repository/android-ndk-r12b-linux-${ARCH}.zip
     unzip -q android-ndk-r12b-linux-${ARCH}.zip
+    popd
+fi
+
+if [ ! -d "$GOROOT_BOOTSTRAP" ]; then
+    mkdir -p $GOROOT_BOOTSTRAP
+    pushd $HOME/.android
+    wget https://storage.googleapis.com/golang/go1.6.3.linux-amd64.tar.gz
+    tar xf go1.6.3.linux-amd64.tar.gz
     popd
 fi
 

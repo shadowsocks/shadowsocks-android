@@ -94,7 +94,7 @@ object Shadowsocks {
   private final val TAG = "Shadowsocks"
   private final val REQUEST_CONNECT = 1
   private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
-    Executable.TUN2SOCKS)
+    Executable.TUN2SOCKS, Executable.KCPTUN)
 }
 
 class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
@@ -286,7 +286,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks")) {
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun")) {
       cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
       cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
         .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
@@ -481,7 +481,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   private def updatePreferenceScreen(profile: Profile) {
     if (profile.host == "198.199.101.152") if (adView == null) {
       adView = new AdView(this)
-      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
+      adView.setAdUnitId("ca-app-pub-4984938374218635/1433320509")
       adView.setAdSize(AdSize.SMART_BANNER)
       preferences.getView.asInstanceOf[ViewGroup].addView(adView, 1)
       adView.loadAd(new AdRequest.Builder().build())

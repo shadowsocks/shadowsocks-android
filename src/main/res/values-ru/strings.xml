@@ -134,4 +134,11 @@
   <!-- status -->
   <string name="sent">Отправлено:</string>
   <string name="received">Получено:</string>
+
+  <!-- kcp -->
+  <string name="kcp_summary">Включить Shadowsocks над KCPTUN</string>
+  <string name="kcp_port">KCP порт</string>
+  <string name="kcp_port_summary">%d (KCPTUN омер порта удалённого сервера)</string>
+  <string name="kcpcli">KCP параметры</string>
+  <string name="kcpcli_summary">Командная строка KCPTUN</string>
 </resources>

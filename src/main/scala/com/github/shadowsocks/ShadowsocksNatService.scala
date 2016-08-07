@@ -84,9 +84,15 @@ class ShadowsocksNatService extends BaseService {
       })
     }
 
-    val conf = ConfigUtils
+    val conf = if (profile.kcp) {
+      ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort,
+        profile.password, profile.method, 600)
+    } else {
+      ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
         profile.password, profile.method, 600)
+    }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
@@ -109,10 +115,23 @@ class ShadowsocksNatService extends BaseService {
     sslocalProcess = new GuardedProcess(cmd).start()
   }
 
-  def startTunnel() {
+  def startKcptunDaemon() {
+
+    val cmd = new ArrayBuffer[String]
+    cmd += (getApplicationInfo.dataDir + "/kcptun"
+      , "-r", profile.host + ":" + profile.kcpPort
+      , "-l", "127.0.0.1:" + (profile.localPort + 90)
+      , profile.kcpcli)
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    kcptunProcess = new GuardedProcess(cmd.mkString(" ").split(" ").toSeq).start()
+  }
+
+  def startDNSTunnel() {
     if (profile.udpdns) {
       val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8153,
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
           profile.password, profile.method, 10)
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
@@ -123,10 +142,9 @@ class ShadowsocksNatService extends BaseService {
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-L" , "8.8.8.8:53"
+        , "-l" , (profile.localPort + 53).toString
         , "-P" , getApplicationInfo.dataDir
         , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
-
-      cmd += ("-l" , "8153")
 
       if (profile.auth) cmd += "-A"
 
@@ -135,18 +153,23 @@ class ShadowsocksNatService extends BaseService {
       sstunnelProcess = new GuardedProcess(cmd).start()
 
     } else {
-      val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8163,
+      val conf = if (profile.kcp) {
+        ConfigUtils
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90,
+          profile.localPort + 63, profile.password, profile.method, 10)
+      } else {
+        ConfigUtils
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
           profile.password, profile.method, 10)
+      }
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
       val cmdBuf = new ArrayBuffer[String]
       cmdBuf += (getApplicationInfo.dataDir + "/ss-tunnel"
-        , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
-        , "-l" , "8163"
+        , "-l" , (profile.localPort + 63).toString
         , "-L" , "8.8.8.8:53"
         , "-P", getApplicationInfo.dataDir
         , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
@@ -163,10 +186,10 @@ class ShadowsocksNatService extends BaseService {
 
     val conf = if (profile.route == Route.BYPASS_CHN || profile.route == Route.BYPASS_LAN_CHN) {
       ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", 8153, getBlackList, 8163, "")
+        "127.0.0.1", profile.localPort + 53, getBlackList, profile.localPort + 63, "")
     } else {
       ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", 8153, 8163, "")
+        "127.0.0.1", profile.localPort + 53, profile.localPort + 63, "")
     }
 
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
@@ -194,10 +217,13 @@ class ShadowsocksNatService extends BaseService {
   /** Called when the activity is first created. */
   def handleConnection {
 
-    startTunnel()
-    if (!profile.udpdns) startDnsDaemon()
+    startDNSTunnel()
     startRedsocksDaemon()
     startShadowsocksDaemon()
+
+    if (!profile.udpdns) startDnsDaemon()
+    if (profile.kcp) startKcptunDaemon()
+
     setupIptables()
 
   }
@@ -212,6 +238,10 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def killProcesses() {
+    if (kcptunProcess != null) {
+      kcptunProcess.destroy()
+      kcptunProcess = null
+    }
     if (sslocalProcess != null) {
       sslocalProcess.destroy()
       sslocalProcess = null
@@ -247,7 +277,8 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
-    init_sb.append("iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:8153")
+    init_sb.append("iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:"
+      + (profile.localPort + 53))
 
     if (!profile.proxyApps || profile.bypass) {
       http_sb.append(CMD_IPTABLES_DNAT_ADD_SOCKS)

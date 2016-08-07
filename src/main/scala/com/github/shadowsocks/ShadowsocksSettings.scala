@@ -18,7 +18,7 @@ object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
-    Key.auth)
+    Key.auth, Key.kcp, Key.kcpPort, Key.kcpcli)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
@@ -36,8 +36,10 @@ object ShadowsocksSettings {
   }
 
   def updateSummaryEditTextPreference(pref: Preference, value: String) {
-    pref.setSummary(value)
-    pref.asInstanceOf[SummaryEditTextPreference].setText(value)
+    if (value != null) {
+      pref.setSummary(value)
+      pref.asInstanceOf[SummaryEditTextPreference].setText(value)
+    }
   }
 
   def updateSwitchPreference(pref: Preference, value: Boolean) {
@@ -57,6 +59,9 @@ object ShadowsocksSettings {
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
       case Key.auth => updateSwitchPreference(pref, profile.auth)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
+      case Key.kcp => updateSwitchPreference(pref, profile.kcp)
+      case Key.kcpPort => updateNumberPickerPreference(pref, profile.kcpPort)
+      case Key.kcpcli => updateSummaryEditTextPreference(pref, profile.kcpcli)
     }
   }
 }
@@ -100,6 +105,19 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
       profile.route = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+
+    findPreference(Key.kcp).setOnPreferenceChangeListener((_, value) => {
+      profile.kcp = value.asInstanceOf[Boolean]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.kcpPort).setOnPreferenceChangeListener((_, value) => {
+      profile.kcpPort = value.asInstanceOf[Int]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.kcpcli).setOnPreferenceChangeListener((_, value) => {
+      profile.kcpcli = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
 
