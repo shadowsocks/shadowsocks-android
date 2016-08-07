@@ -182,25 +182,25 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   /** Called when the activity is first created. */
   def handleConnection: Boolean = {
     
+    val fd = startVpn()
+    if (!sendFd(fd)) return false
+
+    if (profile.kcp) {
+      startKcptunDaemon()
+    }
+
+    startShadowsocksDaemon()
+
+    if (profile.udpdns && profile.kcp) {
+      startShadowsocksUDPDaemon()
+    }
+
     if (!profile.udpdns) {
       startDnsDaemon()
       startDnsTunnel()
     }
 
-    startShadowsocksDaemon()
-
-    if (profile.udpdns) {
-      startShadowsocksUDPDaemon()
-    }
-
-    val fd = startVpn()
-    val ret = sendFd(fd)
-
-    if (ret && profile.kcp) {
-      startKcptunDaemon()
-    }
-
-    ret
+    true
   }
 
   def startKcptunDaemon() {
@@ -273,6 +273,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")
 
     if (profile.auth) cmd += "-A"
+
+    if (profile.udpdns && !profile.kcp) cmd += "-u"
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
