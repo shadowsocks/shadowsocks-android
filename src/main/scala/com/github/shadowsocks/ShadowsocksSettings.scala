@@ -58,7 +58,7 @@ object ShadowsocksSettings {
       case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
-      case Key.dns => updateSwitchPreference(pref, profile.dns)
+      case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
     }
   }
