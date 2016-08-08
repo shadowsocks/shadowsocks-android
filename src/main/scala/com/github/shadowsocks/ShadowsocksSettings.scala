@@ -36,10 +36,8 @@ object ShadowsocksSettings {
   }
 
   def updateSummaryEditTextPreference(pref: Preference, value: String) {
-    if (value != null) {
-      pref.setSummary(value)
-      pref.asInstanceOf[SummaryEditTextPreference].setText(value)
-    }
+    pref.setSummary(value)
+    pref.asInstanceOf[SummaryEditTextPreference].setText(value)
   }
 
   def updateSwitchPreference(pref: Preference, value: Boolean) {

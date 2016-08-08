@@ -204,6 +204,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startKcptunDaemon() {
+    if (profile.kcpcli == null) profile.kcpcli = ""
+
     val cmd = new ArrayBuffer[String]
     cmd += (getApplicationInfo.dataDir + "/kcptun"
       , "-r", profile.host + ":" + profile.kcpPort

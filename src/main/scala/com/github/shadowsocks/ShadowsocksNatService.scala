@@ -116,6 +116,7 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startKcptunDaemon() {
+    if (profile.kcpcli == null) profile.kcpcli = ""
 
     val cmd = new ArrayBuffer[String]
     cmd += (getApplicationInfo.dataDir + "/kcptun"

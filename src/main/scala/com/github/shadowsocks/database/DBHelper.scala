@@ -64,7 +64,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 18) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 19) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -83,10 +83,11 @@ class DBHelper(val context: Context)
       }
       if (oldVersion < 8) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
       }
       if (oldVersion < 9) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR DEFAULT 'all';")
+      } else if (oldVersion < 19) {
+        profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'all' WHERE route IS NULL;")
       }
       if (oldVersion < 10) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
@@ -128,11 +129,13 @@ class DBHelper(val context: Context)
 
       if (oldVersion < 17) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT '';")
       }
 
       if (oldVersion < 18) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpPort INTEGER;")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpPort INTEGER DEFAULT 8399;")
+      } else if (oldVersion < 19) {
+        profileDao.executeRawNoArgs("UPDATE `profile` SET kcpPort = 8399 WHERE kcpPort = 0;")
       }
     }
   }
