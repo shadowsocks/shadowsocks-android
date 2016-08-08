@@ -1,19 +1,16 @@
-language: scala
+language: android
 
 jdk:
   - oraclejdk8
 
-sudo: false
-
-addons:
-    apt:
-        packages:
-            - gcc-multilib
-            - g++-multilib
-            - libstdc++6:i386
-            - libgcc1:i386
-            - zlib1g:i386
-            - libncurses5:i386
+env:
+    global:
+        - NDK_VERSION=r12b
+        - NDK_CCACHE=ccache
+        - GOROOT_BOOTSTRAP=$GOROOT
+        - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
+        - SBTPATH=$HOME/.sbt
+        - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
 scala:
     - 2.11.8
@@ -24,17 +21,34 @@ before_cache:
 
 cache:
     directories:
-        - $HOME/.ivy2/cache
-        - $HOME/.sbt/boot
+        - $HOME/.ivy2
+        - $HOME/.sbt
+
+android:
+    components:
+        - platform-tools
+        - tools
+        - build-tools-24.0.1
+        - extra-google-m2repository
 
 install:
-    - export NDK_CCACHE=ccache
-    - export ARCH=`uname -m`
-    - export GOROOT_BOOTSTRAP=$HOME/.android/go
-    - export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r12b
-    - export ANDROID_HOME=$HOME/.android/android-sdk-linux
-    - export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
-    - ./.travis-setup.sh
+    - >
+      if [ ! -d "$ANDROID_NDK_HOME" ]; then
+          mkdir -p $ANDROID_NDK_HOME;
+          pushd $HOME/.android;
+          export ARCH=`uname -m`;
+          wget -q http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
+          unzip -q android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
+          popd;
+      fi
+    - >
+      if [ ! -f "$SBTPATH/sbt" ]; then
+          pushd $SBTPATH;
+          wget -q https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt;
+          chmod a+x sbt;
+          popd;
+      fi
 
 script:
-    - sbt native-build android:package-release
+    - cp local.properties.travis local.properties
+    - $SBTPATH/sbt native-build android:package-release
