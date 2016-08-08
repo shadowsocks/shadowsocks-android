@@ -44,6 +44,8 @@ fi
 
 export GOROOT=$DIR/go
 export GOPATH=$HOME
+export GOBIN=$GOPATH/bin
+mkdir $GOBIN
 export PATH=$GOROOT/bin:$PATH
 
 pushd kcptun/client
