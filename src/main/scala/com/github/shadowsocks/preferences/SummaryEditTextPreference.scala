@@ -41,6 +41,7 @@ package com.github.shadowsocks.preferences
 
 import android.content.Context
 import android.preference.EditTextPreference
+import android.text.TextUtils
 import android.util.AttributeSet
 
 class SummaryEditTextPreference(context: Context, attrs: AttributeSet, defStyle: Int)
@@ -60,7 +61,7 @@ class SummaryEditTextPreference(context: Context, attrs: AttributeSet, defStyle:
   }
 
   override def setSummary(summary: CharSequence) {
-    if (summary.toString.isEmpty) {
+    if (TextUtils.isEmpty(summary)) {
       super.setSummary(mDefaultSummary)
     } else {
       super.setSummary(summary)
