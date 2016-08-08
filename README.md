@@ -12,8 +12,10 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 * JDK 1.8
 * SBT 0.13.0+
-* GO 1.4+
-* Android SDK r25+
+* Go 1.4+
+* Android SDK
+  - Build Tools 24+ (as required by [`sbt-android`](https://github.com/scala-android/sbt-android))
+  - Google Repository (see `build.sbt` for version)
 * Android NDK r12b+
 
 ### BUILD
@@ -46,7 +48,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ### LICENSE
 
-Copyright (C) 2016 by Max Lv <<max.c.lv@gmail.com>> <br/>
+Copyright (C) 2016 by Max Lv <<max.c.lv@gmail.com>>  
 Copyright (C) 2016 by Mygod Studio <<mygodstudio@gmail.com>>
 
 This program is free software: you can redistribute it and/or modify
