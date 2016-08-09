@@ -49,4 +49,4 @@ install:
       fi
 
 script:
-    - $SBTPATH/sbt native-build android:package-debug
+    - $SBTPATH/sbt android-update native-build android:package-debug
