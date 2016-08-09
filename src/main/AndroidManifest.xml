@@ -131,7 +131,6 @@
                 android:name=".ShadowsocksVpnService"
                 android:process=":bg"
                 android:label="@string/app_name"
-                android:permission="android.permission.BIND_VPN_SERVICE"
                 android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
