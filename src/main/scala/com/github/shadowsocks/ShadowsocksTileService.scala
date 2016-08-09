@@ -25,24 +25,26 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
     def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) = ()
     def stateChanged(state: Int, msg: String) {
       val tile = getQsTile
-      state match {
-        case State.STOPPED =>
-          tile.setIcon(iconIdle)
-          tile.setLabel(getString(R.string.app_name))
-          tile.setState(Tile.STATE_INACTIVE)
-        case State.CONNECTED =>
-          tile.setIcon(iconConnected)
-          tile.setLabel(app.currentProfile match {
-            case Some(profile) => profile.name
-            case None => getString(R.string.app_name)
-          })
-          tile.setState(Tile.STATE_ACTIVE)
-        case _ =>
-          tile.setIcon(iconBusy)
-          tile.setLabel(getString(R.string.app_name))
-          tile.setState(Tile.STATE_UNAVAILABLE)
+      if (tile != null) {
+        state match {
+          case State.STOPPED =>
+            tile.setIcon(iconIdle)
+            tile.setLabel(getString(R.string.app_name))
+            tile.setState(Tile.STATE_INACTIVE)
+          case State.CONNECTED =>
+            tile.setIcon(iconConnected)
+            tile.setLabel(app.currentProfile match {
+              case Some(profile) => profile.name
+              case None => getString(R.string.app_name)
+            })
+            tile.setState(Tile.STATE_ACTIVE)
+          case _ =>
+            tile.setIcon(iconBusy)
+            tile.setLabel(getString(R.string.app_name))
+            tile.setState(Tile.STATE_UNAVAILABLE)
+        }
+        tile.updateTile
       }
-      tile.updateTile
     }
   }
 
