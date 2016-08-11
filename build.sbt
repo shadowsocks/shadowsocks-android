@@ -30,8 +30,6 @@ dexMaxHeap in Android := "4g"
 
 resolvers += Resolver.jcenterRepo
 
-resolvers += "JRAF" at "http://JRAF.org/static/maven/2"
-
 useSupportVectors
 
 libraryDependencies ++= Seq(
