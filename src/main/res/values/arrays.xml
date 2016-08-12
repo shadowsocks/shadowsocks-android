@@ -14,11 +14,6 @@
         <item>CAMELLIA-128-CFB</item>
         <item>CAMELLIA-192-CFB</item>
         <item>CAMELLIA-256-CFB</item>
-        <item>CAST5-CFB</item>
-        <item>DES-CFB</item>
-        <item>IDEA-CFB</item>
-        <item>RC2-CFB</item>
-        <item>SEED-CFB</item>
         <item>SALSA20</item>
         <item>CHACHA20</item>
         <item>CHACHA20-IETF</item>
@@ -38,11 +33,6 @@
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
         <item>camellia-256-cfb</item>
-        <item>cast5-cfb</item>
-        <item>des-cfb</item>
-        <item>idea-cfb</item>
-        <item>rc2-cfb</item>
-        <item>seed-cfb</item>
         <item>salsa20</item>
         <item>chacha20</item>
         <item>chacha20-ietf</item>
