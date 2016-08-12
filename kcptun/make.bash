@@ -51,6 +51,7 @@ export PATH=$GOROOT/bin:$PATH
 pushd kcptun/client
 
 echo "Get dependences for kcptun"
+go get -u github.com/xtaci/kcp-go
 go get
 
 echo "Cross compile kcptun for arm"
