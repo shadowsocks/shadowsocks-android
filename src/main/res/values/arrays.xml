@@ -15,11 +15,6 @@
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
         <item>camellia-256-cfb</item>
-        <item>cast5-cfb</item>
-        <item>des-cfb</item>
-        <item>idea-cfb</item>
-        <item>rc2-cfb</item>
-        <item>seed-cfb</item>
         <item>salsa20</item>
         <item>chacha20</item>
         <item>chacha20-ietf</item>
@@ -40,11 +35,6 @@
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
         <item>camellia-256-cfb</item>
-        <item>cast5-cfb</item>
-        <item>des-cfb</item>
-        <item>idea-cfb</item>
-        <item>rc2-cfb</item>
-        <item>seed-cfb</item>
         <item>salsa20</item>
         <item>chacha20</item>
         <item>chacha20-ietf</item>

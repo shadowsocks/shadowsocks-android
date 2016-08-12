@@ -222,7 +222,7 @@ include $(CLEAR_VARS)
 LIBEVENT_SOURCES := \
 	buffer.c \
 	bufferevent.c bufferevent_filter.c \
-	bufferevent_openssl.c bufferevent_pair.c bufferevent_ratelim.c \
+	bufferevent_pair.c bufferevent_ratelim.c \
 	bufferevent_sock.c epoll.c \
 	epoll_sub.c evdns.c event.c \
     event_tagging.c evmap.c \
@@ -236,7 +236,6 @@ LOCAL_MODULE := event
 LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
 LOCAL_CFLAGS := -O2 -I$(LOCAL_PATH)/libevent \
 	-I$(LOCAL_PATH)/libevent/include \
-	-I$(LOCAL_PATH)/openssl/include
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -387,11 +386,11 @@ SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c netutils.c j
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
-					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H \
+					-DUSE_CRYPTO_MBEDTLS -DANDROID -DHAVE_CONFIG_H \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/include \
 					-I$(LOCAL_PATH)/libancillary \
-					-I$(LOCAL_PATH)/openssl/include  \
+					-I$(LOCAL_PATH)/mbedtls/include  \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
@@ -400,7 +399,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
-LOCAL_STATIC_LIBRARIES := libev libcrypto libipset libcork libudns libsodium libancillary
+LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns libsodium libancillary
 
 LOCAL_LDLIBS := -llog
 
@@ -417,7 +416,7 @@ SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
-					-DUSE_CRYPTO_OPENSSL -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
+					-DUSE_CRYPTO_MBEDTLS -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/include \
@@ -425,11 +424,11 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/openssl/include \
+					-I$(LOCAL_PATH)/mbedtls/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
-LOCAL_STATIC_LIBRARIES := libev libcrypto libsodium libcork libudns libancillary
+LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libudns libancillary
 
 LOCAL_LDLIBS := -llog
 
@@ -546,12 +545,23 @@ LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES))
 
 include $(BUILD_EXECUTABLE)
 
-# OpenSSL
-openssl_subdirs := $(addprefix $(LOCAL_PATH)/openssl/,$(addsuffix /Android.mk, \
-	crypto \
-	ssl \
-	))
-include $(openssl_subdirs)
+########################################################
+## mbed TLS 
+########################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE:= mbedtls
+
+LOCAL_C_INCLUDES:= $(LOCAL_PATH)/mbedtls/include
+
+MBEDTLS_SOURCES  := $(wildcard $(LOCAL_PATH)/mbedtls/library/*.c)
+
+LOCAL_SRC_FILES := $(MBEDTLS_SOURCES:$(LOCAL_PATH)/%=%)
+
+LOCAL_LDLIBS := -ldl -llog
+
+include $(BUILD_STATIC_LIBRARY)
 
 # Import cpufeatures
 $(call import-module,android/cpufeatures)
