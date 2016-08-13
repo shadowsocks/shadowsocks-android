@@ -8,7 +8,7 @@
         <item>aes-128-cfb</item>
         <item>aes-192-cfb</item>
         <item>aes-256-cfb</item>
-	<item>aes-128-ctr</item>
+        <item>aes-128-ctr</item>
         <item>aes-192-ctr</item>
         <item>aes-256-ctr</item>
         <item>bf-cfb</item>
@@ -28,7 +28,7 @@
         <item>aes-128-cfb</item>
         <item>aes-192-cfb</item>
         <item>aes-256-cfb</item>
-	<item>aes-128-ctr</item>
+        <item>aes-128-ctr</item>
         <item>aes-192-ctr</item>
         <item>aes-256-ctr</item>
         <item>bf-cfb</item>
@@ -65,7 +65,6 @@
         <item>http_simple</item>
         <item>tls_simple</item>
         <item>random_head</item>
-        <item>tls1.0_session_auth</item>
         <item>tls1.2_ticket_auth</item>
     </string-array>
 
@@ -74,7 +73,6 @@
         <item>http_simple</item>
         <item>tls_simple</item>
         <item>random_head</item>
-        <item>tls1.0_session_auth</item>
         <item>tls1.2_ticket_auth</item>
     </string-array>
 
