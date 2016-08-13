@@ -211,7 +211,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-r", profile.host + ":" + profile.kcpPort
       , "-l", "127.0.0.1:" + (profile.localPort + 90)
       , "--path", getApplicationInfo.dataDir + "/protect_path"
-      , profile.kcpcli.trim)
+      , profile.kcpcli.trim.replaceAll("[\"']", ""))
 
     if (BuildConfig.DEBUG)
       Log.d(TAG, cmd.mkString(" "))

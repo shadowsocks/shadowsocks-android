@@ -55,12 +55,12 @@ go get -u github.com/xtaci/kcp-go
 go get
 
 echo "Cross compile kcptun for arm"
-try env CGO_ENABLED=1 CC=$ANDROID_ARM_CC GOOS=android GOARCH=arm GOARM=7 go build
+try env CGO_ENABLED=1 CC=$ANDROID_ARM_CC GOOS=android GOARCH=arm GOARM=7 go build -ldflags="-s -w"
 try $ANDROID_ARM_STRIP client
 try mv client $DIR/../src/main/assets/armeabi-v7a/kcptun
 
 echo "Cross compile kcptun for x86"
-try env CGO_ENABLED=1 CC=$ANDROID_X86_CC GOOS=android GOARCH=386 go build
+try env CGO_ENABLED=1 CC=$ANDROID_X86_CC GOOS=android GOARCH=386 go build -ldflags="-s -w"
 try $ANDROID_X86_STRIP client
 try mv client $DIR/../src/main/assets/x86/kcptun
 popd

@@ -122,7 +122,7 @@ class ShadowsocksNatService extends BaseService {
     cmd += (getApplicationInfo.dataDir + "/kcptun"
       , "-r", profile.host + ":" + profile.kcpPort
       , "-l", "127.0.0.1:" + (profile.localPort + 90)
-      , profile.kcpcli.trim)
+      , profile.kcpcli.trim.replaceAll("[\"']", ""))
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
