@@ -22,6 +22,3 @@
 	path = src/main/jni/shadowsocks-libev
 	url = https://github.com/glzjin/shadowsocks-libev.git
 	branch = master
-[submodule "src/main/jni/mbedtls"]
-	path = src/main/jni/mbedtls
-	url = https://github.com/shadowsocks/mbedtls
