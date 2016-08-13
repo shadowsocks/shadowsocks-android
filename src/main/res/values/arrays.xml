@@ -8,6 +8,9 @@
         <item>aes-128-cfb</item>
         <item>aes-192-cfb</item>
         <item>aes-256-cfb</item>
+	<item>aes-128-ctr</item>
+        <item>aes-192-ctr</item>
+        <item>aes-256-ctr</item>
         <item>bf-cfb</item>
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
@@ -30,6 +33,9 @@
         <item>aes-128-cfb</item>
         <item>aes-192-cfb</item>
         <item>aes-256-cfb</item>
+	<item>aes-128-ctr</item>
+        <item>aes-192-ctr</item>
+        <item>aes-256-ctr</item>
         <item>bf-cfb</item>
         <item>camellia-128-cfb</item>
         <item>camellia-192-cfb</item>
