@@ -33,7 +33,6 @@ object TcpFastOpen {
       "echo '#!/system/bin/sh\nsysctl -w net.ipv4.tcp_fastopen=" + fastopen + "' > /etc/init.d/tcp_fastopen",
       "chmod 755 /etc/init.d/tcp_fastopen",
       "sysctl -w net.ipv4.tcp_fastopen=" + fastopen,
-      "mount -o remount,ro /system",
-      "echo done"))
+      "mount -o remount,ro /system"))
   }
 }
