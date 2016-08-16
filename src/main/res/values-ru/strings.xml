@@ -92,8 +92,7 @@
   <string name="share_message_nfc_disabled">Сканировать QR код\nAndroid Beam отключен</string>
   <string name="turn_on_nfc">Включить NFC &amp; Android Beam</string>
   <string name="flush_dnscache">Очистить кэш DNS</string>
-  <string name="flush_dnscache_summary">Работает только в режиме NAT</string>
-  <string name="flush_dnscache_summary_root">Работает только в режиме NAT. Требует наличия ROOT прав.</string>
+  <string name="flush_dnscache_summary">Работает только в режиме NAT. Требует наличия ROOT прав.</string>
   <string name="flush_dnscache_no_root">Очистка кэша DNS не работает без налиичя ROOT прав</string>
   <string name="flushing">Очистка</string>
   <string name="add_profile">Добавить Профиль</string>

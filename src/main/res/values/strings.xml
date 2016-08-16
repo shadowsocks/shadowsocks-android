@@ -98,8 +98,7 @@
   <string name="share_message_nfc_disabled">Scan QR code\nAndroid Beam is disabled</string>
   <string name="turn_on_nfc">Turn on NFC &amp; Android Beam</string>
   <string name="flush_dnscache">Flush DNS cache</string>
-  <string name="flush_dnscache_summary">Only useful in NAT mode</string>
-  <string name="flush_dnscache_summary_root">Only useful in NAT mode. Requires ROOT permission.</string>
+  <string name="flush_dnscache_summary">Only useful in NAT mode. Requires ROOT permission.</string>
   <string name="flush_dnscache_no_root">Flush DNS cache cannot proceed without ROOT permission</string>
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>

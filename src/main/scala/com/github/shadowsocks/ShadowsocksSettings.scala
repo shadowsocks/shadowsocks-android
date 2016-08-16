@@ -5,7 +5,7 @@ import java.util.Locale
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.{Intent, SharedPreferences}
 import android.net.Uri
-import android.os.{Build, Bundle}
+import android.os.Bundle
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
@@ -160,9 +160,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
-    val flush = findPreference("flush_dnscache")
-    if (Build.VERSION.SDK_INT < 17) flush.setSummary(R.string.flush_dnscache_summary)
-    flush.setOnPreferenceClickListener(_ => {
+    findPreference("flush_dnscache").setOnPreferenceClickListener(_ => {
       app.track(TAG, "flush_dnscache")
       activity.flushDnsCache()
       true

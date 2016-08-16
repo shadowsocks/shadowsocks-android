@@ -46,7 +46,6 @@ import android.content.pm.PackageManager
 import android.content.{Context, Intent}
 import android.graphics._
 import android.os.Build
-import android.provider.Settings
 import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
@@ -128,25 +127,7 @@ object Utils {
   // Blocked > 3 seconds
   def toggleAirplaneMode(context: Context) = {
     val result = Shell.SU.run(FLUSH_DNS)
-    if (result != null && !result.isEmpty) true else if (Build.VERSION.SDK_INT < 17) {
-      toggleBelowApiLevel17(context)
-      true
-    } else false
-  }
-
-  //noinspection ScalaDeprecation
-  private def toggleBelowApiLevel17(context: Context) {
-    // Android 4.2 below
-    Settings.System.putInt(context.getContentResolver, Settings.System.AIRPLANE_MODE_ON, 1)
-    val enableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-    enableIntent.putExtra("state", true)
-    context.sendBroadcast(enableIntent)
-    Thread.sleep(3000)
-
-    Settings.System.putInt(context.getContentResolver, Settings.System.AIRPLANE_MODE_ON, 0)
-    val disableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-    disableIntent.putExtra("state", false)
-    context.sendBroadcast(disableIntent)
+    result != null && !result.isEmpty
   }
 
   def resolve(host: String, addrType: Int): Option[String] = {

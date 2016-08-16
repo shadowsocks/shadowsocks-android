@@ -59,8 +59,7 @@
   <string name="about">關於</string>
   <string name="about_title">Shadowsocks %s</string>
   <string name="flush_dnscache">清除 DNS 快取</string>
-  <string name="flush_dnscache_summary">僅在 NAT 模式可用</string>
-  <string name="flush_dnscache_summary_root">僅在 NAT 模式可用，需要 ROOT 權限</string>
+  <string name="flush_dnscache_summary">僅在 NAT 模式可用，需要 ROOT 權限</string>
   <string name="flush_dnscache_no_root">在無 ROOT 權限時清除 DNS 快取無法進行</string>
   <string name="flushing">清除中……</string>
   <string name="share">分享</string>

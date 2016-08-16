@@ -117,7 +117,7 @@
             android:summary="@string/recovery_summary"/>
         <Preference android:key="flush_dnscache"
                     android:title="@string/flush_dnscache"
-                    android:summary="@string/flush_dnscache_summary_root"/>
+                    android:summary="@string/flush_dnscache_summary"/>
         <Preference android:key="about" android:title="@string/about"/>
 
     </PreferenceCategory>
