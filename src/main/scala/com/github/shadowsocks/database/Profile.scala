@@ -106,7 +106,7 @@ class Profile {
   var kcpPort: Int = 8399
 
   @DatabaseField
-  var kcpcli: String = "--nocomp"
+  var kcpcli: String = "--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0"
 
   override def toString = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
     method, if (auth) "-auth" else "", password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP)
