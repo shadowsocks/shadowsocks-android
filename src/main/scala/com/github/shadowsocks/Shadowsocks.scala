@@ -78,6 +78,7 @@ object Typefaces {
         } catch {
           case e: Exception =>
             Log.e(TAG, "Could not get typeface '" + assetPath + "' because " + e.getMessage)
+            app.track(e)
             return null
         }
       }
@@ -185,8 +186,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       snackbar.show
     }
 
-    if (!app.settings.getBoolean(app.getVersionName, false)) {
-      app.editor.putBoolean(app.getVersionName, true).apply()
+    if (!app.settings.getBoolean(BuildConfig.VERSION_NAME, false)) {
+      app.editor.putBoolean(BuildConfig.VERSION_NAME, true).apply()
 
       recovery()
 
@@ -246,6 +247,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     } catch {
       case e: IOException =>
         Log.e(TAG, e.getMessage)
+        app.track(e)
     }
     if (files != null) {
       for (file <- files) {
@@ -267,6 +269,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         } catch {
           case ex: Exception =>
             Log.e(TAG, ex.getMessage)
+            app.track(ex)
         }
       }
     }

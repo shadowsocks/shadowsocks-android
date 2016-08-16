@@ -44,6 +44,7 @@ import java.util.concurrent.Executors
 
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 object ShadowsocksVpnThread {
   val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
@@ -56,7 +57,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   lazy val PATH = vpnService.getApplicationInfo.dataDir + "/protect_path"
 
   @volatile var isRunning: Boolean = true
-  @volatile var serverSocket: LocalServerSocket = null
+  @volatile var serverSocket: LocalServerSocket = _
 
   def closeServerSocket() {
     if (serverSocket != null) {
@@ -76,11 +77,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   override def run() {
 
-    try {
-      new File(PATH).delete()
-    } catch {
-      case _: Exception => // ignore
-    }
+    new File(PATH).delete()
 
     try {
       val localSocket = new LocalSocket
@@ -89,6 +86,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
     } catch {
       case e: IOException =>
         Log.e(TAG, "unable to bind", e)
+        app.track(e)
         return
     }
 
@@ -127,6 +125,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
           } catch {
             case e: Exception =>
               Log.e(TAG, "Error when protect socket", e)
+              app.track(e)
           }
 
           // close socket
@@ -140,6 +139,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
       } catch {
         case e: IOException =>
           Log.e(TAG, "Error when accept socket", e)
+          app.track(e)
           return
       }
     }

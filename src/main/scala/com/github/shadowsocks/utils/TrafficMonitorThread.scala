@@ -46,13 +46,14 @@ import java.util.concurrent.Executors
 import android.content.Context
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 class TrafficMonitorThread(context: Context) extends Thread {
 
   val TAG = "TrafficMonitorThread"
   lazy val PATH = context.getApplicationInfo.dataDir + "/stat_path"
 
-  @volatile var serverSocket: LocalServerSocket = null
+  @volatile var serverSocket: LocalServerSocket = _
   @volatile var isRunning: Boolean = true
 
   def closeServerSocket() {
@@ -73,11 +74,7 @@ class TrafficMonitorThread(context: Context) extends Thread {
 
   override def run() {
 
-    try {
-      new File(PATH).delete()
-    } catch {
-      case _: Exception => // ignore
-    }
+    new File(PATH).delete()
 
     try {
       val localSocket = new LocalSocket
@@ -113,6 +110,7 @@ class TrafficMonitorThread(context: Context) extends Thread {
           } catch {
             case e: Exception =>
               Log.e(TAG, "Error when recv traffic stat", e)
+              app.track(e)
           }
 
           // close socket
@@ -126,6 +124,7 @@ class TrafficMonitorThread(context: Context) extends Thread {
       } catch {
         case e: IOException =>
           Log.e(TAG, "Error when accept socket", e)
+          app.track(e)
           return
       }
     }
