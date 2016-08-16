@@ -129,11 +129,9 @@ class DBHelper(val context: Context)
 
       if (oldVersion < 17) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT " +
-          "'--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0';")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT '--nocomp';")
       } else if (oldVersion < 20) {
-        profileDao.executeRawNoArgs("UPDATE `profile` SET kcpcli = '--crypt none --mode normal --mtu 1200 --nocomp " +
-          "--dscp 46 --parityshard 0' WHERE kcpcli IS NULL;")
+        profileDao.executeRawNoArgs("UPDATE `profile` SET kcpcli = '--nocomp' WHERE kcpcli IS NULL;")
       }
 
       if (oldVersion < 18) {
