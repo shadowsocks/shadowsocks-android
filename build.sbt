@@ -10,9 +10,9 @@ scalaVersion := "2.11.8"
 
 compileOrder in Compile := CompileOrder.JavaThenScala
 
-javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
+javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
-scalacOptions ++= Seq("-target:jvm-1.6", "-Xexperimental")
+scalacOptions ++= Seq("-target:jvm-1.7", "-Xexperimental")
 
 ndkJavah in Android := List()
 
