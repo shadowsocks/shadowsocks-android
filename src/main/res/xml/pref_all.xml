@@ -94,7 +94,7 @@
                 android:summary="@string/kcp_port_summary"
                 android:title="@string/kcp_port"/>
 
-        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+        <com.github.shadowsocks.preferences.KcpCliPreference
                 android:key="kcpcli"
                 android:persistent="false"
                 android:summary="@string/kcpcli_summary"
