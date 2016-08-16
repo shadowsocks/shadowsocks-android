@@ -21,6 +21,12 @@ class KcpCliPreference(context: Context, attrs: AttributeSet) extends SummaryEdi
           .dropWhile(line => line != "GLOBAL OPTIONS:")
           .drop(1)
           .takeWhile(line => line.length() > 3)
+          .filter(line =>
+            !line.startsWith("   --localaddr ") &&
+            !line.startsWith("   --remoteaddr ") &&
+            !line.startsWith("   --path ") &&
+            !line.startsWith("   --help,") &&
+            !line.startsWith("   --version,"))
           .mkString("\n"))
         .show()
       val window = dialog.getWindow
