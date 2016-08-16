@@ -64,7 +64,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 19) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 20) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -129,7 +129,11 @@ class DBHelper(val context: Context)
 
       if (oldVersion < 17) {
         profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT '';")
+        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT " +
+          "'--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 -datashard 10 -parityshard 0';")
+      } else if (oldVersion < 20) {
+        profileDao.executeRawNoArgs("UPDATE `profile` SET kcpcli = '--crypt none --mode normal --mtu 1200 --nocomp " +
+          "--dscp 46 -datashard 10 -parityshard 0' WHERE kcpcli IS NULL;")
       }
 
       if (oldVersion < 18) {
