@@ -76,6 +76,7 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "addProfile", ex)
+        app.track(ex)
         p
     }
   }
@@ -87,6 +88,7 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "updateProfile", ex)
+        app.track(ex)
         false
     }
   }
@@ -100,6 +102,7 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getProfile", ex)
+        app.track(ex)
         None
     }
   }
@@ -111,6 +114,7 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "delProfile", ex)
+        app.track(ex)
         false
     }
   }
@@ -122,6 +126,7 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
         None
     }
   }
@@ -133,6 +138,7 @@ class ProfileManager(dbHelper: DBHelper) {
     } catch {
       case ex: Exception =>
         Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
         None
     }
   }

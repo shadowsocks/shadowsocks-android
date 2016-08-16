@@ -57,6 +57,7 @@ import com.github.shadowsocks.{BuildConfig, ShadowsocksRunnerService}
 import eu.chainfire.libsuperuser.Shell
 import org.xbill.DNS._
 
+import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
@@ -200,29 +201,22 @@ object Utils {
    */
   def isIPv6Support: Boolean = {
     try {
-      val interfaces = NetworkInterface.getNetworkInterfaces
-      while (interfaces.hasMoreElements) {
-        val intf = interfaces.nextElement()
-        val addrs = intf.getInetAddresses
-        while (addrs.hasMoreElements) {
-          val addr = addrs.nextElement()
-          if (!addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
-            if (addr.isInstanceOf[Inet6Address]) {
-              if (BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
-              return true
-            }
+      for (intf <- enumerationAsScalaIterator(NetworkInterface.getNetworkInterfaces))
+        for (addr <- enumerationAsScalaIterator(intf.getInetAddresses))
+          if (addr.isInstanceOf[Inet6Address] && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
+            if (BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
+            return true
           }
-        }
-      }
     } catch {
       case ex: Exception =>
         Log.e(TAG, "Failed to get interfaces' addresses.", ex)
+        app.track(ex)
     }
     false
   }
 
   def startSsService(context: Context) {
-    val isInstalled: Boolean = app.settings.getBoolean(app.getVersionName, false)
+    val isInstalled: Boolean = app.settings.getBoolean(BuildConfig.VERSION_NAME, false)
     if (!isInstalled) return
 
     val intent = new Intent(context, classOf[ShadowsocksRunnerService])
@@ -235,7 +229,9 @@ object Utils {
   }
 
   private val handleFailure: Try[_] => Unit = {
-    case Failure(e) => e.printStackTrace()
+    case Failure(e) =>
+      e.printStackTrace()
+      app.track(e)
     case _ =>
   }
 

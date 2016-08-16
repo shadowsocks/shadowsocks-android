@@ -48,9 +48,9 @@ import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
 import android.os._
 import android.util.Log
-import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.utils._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -368,7 +368,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
             }
           } catch {
             case ex: NameNotFoundException =>
-              Log.e(TAG, "Invalid package name", ex);
+              Log.e(TAG, "Invalid package name", ex)
           }
         }
       }
@@ -390,17 +390,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       conn = builder.establish()
       if (conn == null) changeState(State.STOPPED, getString(R.string.reboot_required))
     } catch {
-      case ex: IllegalStateException =>
-        changeState(State.STOPPED, ex.getMessage)
-        conn = null
       case ex: Exception =>
         ex.printStackTrace()
-        conn = null
-    }
-
-    if (conn == null) {
-      stopRunner(true)
-      return -1
+        app.track(ex)
+        stopRunner(true, ex.getMessage)
+        return -1
     }
 
     val fd = conn.getFd

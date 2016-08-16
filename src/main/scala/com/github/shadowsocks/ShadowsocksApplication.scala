@@ -43,12 +43,11 @@ import java.util
 import java.util.concurrent.TimeUnit
 
 import android.app.Application
-import android.content.pm.PackageManager
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import com.github.shadowsocks.database.{DBHelper, ProfileManager}
 import com.github.shadowsocks.utils.{Key, Utils}
-import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders}
+import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser}
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
@@ -70,17 +69,14 @@ class ShadowsocksApplication extends Application {
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
   def isVpnEnabled = !isNatEnabled
 
-  def getVersionName = try {
-    getPackageManager.getPackageInfo(getPackageName, 0).versionName
-  } catch {
-    case _: PackageManager.NameNotFoundException => "Package name not found"
-    case _: Throwable => null
-  }
-
   // send event
   def track(category: String, action: String) = tracker.send(new HitBuilders.EventBuilder()
     .setAction(action)
-    .setLabel(getVersionName)
+    .setLabel(BuildConfig.VERSION_NAME)
+    .build())
+  def track(t: Throwable) = tracker.send(new HitBuilders.ExceptionBuilder()
+    .setDescription(new StandardExceptionParser(this, null).getDescription(Thread.currentThread.getName, t))
+    .setFatal(false)
     .build())
 
   def profileId = settings.getInt(Key.id, -1)
