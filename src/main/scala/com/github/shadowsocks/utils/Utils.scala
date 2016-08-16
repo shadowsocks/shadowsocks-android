@@ -38,8 +38,10 @@
  */
 package com.github.shadowsocks.utils
 
+import java.io.File
 import java.net._
 import java.security.MessageDigest
+import java.util.Scanner
 
 import android.animation.{Animator, AnimatorListenerAdapter}
 import android.content.pm.PackageManager
@@ -108,6 +110,13 @@ object Utils {
     })
   }
 
+  def readAllLines(f: File) = {
+    val scanner = new Scanner(f)
+    try {
+      scanner.useDelimiter("\\Z")
+      scanner.next()
+    } finally scanner.close()
+  }
   def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
     val p = new java.io.PrintWriter(f)
     try {

@@ -33,6 +33,8 @@
   <string name="bypass_apps_summary">啟用此選項，會略過已選擇的應用程式</string>
   <string name="auto_connect">自動連線</string>
   <string name="auto_connect_summary">在裝置啟動時啟用 Shadowsocks</string>
+  <string name="tcp_fastopen_summary">切換需要 ROOT 權限</string>
+  <string name="tcp_fastopen_summary_unsupported">不支持的內核版本：%s &lt; 3.7.1</string>
   <string name="forward_success">Shadowsocks 已啟動。</string>
   <string name="service_failed">連線至遠端伺服器失敗</string>
   <string name="invalid_server">伺服器名稱無效</string>

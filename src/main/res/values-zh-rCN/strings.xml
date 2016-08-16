@@ -32,6 +32,8 @@
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自动连接</string>
   <string name="auto_connect_summary">随系统启动后台服务</string>
+  <string name="tcp_fastopen_summary">切换需要 ROOT 权限</string>
+  <string name="tcp_fastopen_summary_unsupported">不支持的内核版本：%s &lt; 3.7.1</string>
   <string name="forward_success">后台服务已开始运行。</string>
   <string name="service_failed">无法连接远程服务器</string>
   <string name="invalid_server">服务器名无效</string>
