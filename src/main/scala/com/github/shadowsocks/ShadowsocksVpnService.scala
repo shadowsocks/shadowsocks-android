@@ -185,6 +185,32 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val fd = startVpn()
     sendFd(fd)
+    true
+  }
+
+
+  def startShadowsocksUDPDaemon() {
+    val conf = ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        profile.password, profile.method, 600)
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf"))(p => {
+      p.println(conf)
+    })
+
+    val cmd = new ArrayBuffer[String]
+    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
+      , "-b", "127.0.0.1"
+      , "-t", "600"
+      , "-P", getApplicationInfo.dataDir
+      , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
+
+    if (profile.auth) cmd += "-A"
+
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    sstunnelProcess = new GuardedProcess(cmd).start()
   }
 
   def startShadowsocksDaemon() {
@@ -243,6 +269,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")
 
+
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
