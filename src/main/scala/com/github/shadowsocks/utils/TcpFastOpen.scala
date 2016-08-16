@@ -27,7 +27,7 @@ object TcpFastOpen {
   }
 
   def enabled(value: Boolean) = if (supported) {
-    val fastopen = "sysctl -w net.ipv4.tcp_fastopen=" + (if (value) 3 else 0)
+    val fastopen = "echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen"
     Shell.SU.run(Array(
       "mount -o remount,rw /system && " + fastopen + " && echo '#!/system/bin/sh\n" + fastopen +
         "' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen",
