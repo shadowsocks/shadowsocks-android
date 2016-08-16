@@ -236,6 +236,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.auth) cmd += "-A"
 
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
     sstunnelProcess = new GuardedProcess(cmd).start()
@@ -311,6 +313,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")
 
     if (profile.auth) cmd += "-A"
+
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 

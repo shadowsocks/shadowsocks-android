@@ -12,7 +12,7 @@ import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences._
-import com.github.shadowsocks.utils.{Key, Utils}
+import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
 
 object ShadowsocksSettings {
   // Constants
@@ -153,6 +153,18 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       getPreferenceManager.getSharedPreferences.edit.remove(Key.isAutoConnect).apply
     }
     switch.setChecked(BootReceiver.getEnabled(activity))
+
+    val tfo = findPreference("tcp_fastopen").asInstanceOf[SwitchPreference]
+    tfo.setChecked(TcpFastOpen.sendEnabled)
+    tfo.setOnPreferenceChangeListener((_, v) => {
+      val value = v.asInstanceOf[Boolean]
+      TcpFastOpen.enabled(value)
+      value == TcpFastOpen.sendEnabled
+    })
+    if (!TcpFastOpen.supported) {
+      tfo.setEnabled(false)
+      tfo.setSummary(getString(R.string.tcp_fastopen_summary_unsupported, java.lang.System.getProperty("os.version")))
+    }
 
     findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
       app.track(TAG, "reset")
