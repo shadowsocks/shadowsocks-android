@@ -305,9 +305,11 @@ class ShadowsocksNatService extends BaseService {
   override def startRunner(profile: Profile) = if (su == null) {
     su = new Shell.Builder().useSU().setWantSTDERR(true).setWatchdogTimeout(10).open((_, exitCode, _) =>
       if (exitCode == 0) super.startRunner(profile) else {
-        Log.wtf(TAG, "libsuperuser#55 has been fixed. Please remove the redundant code.")
-        su.close()
-        su = null
+        if (su != null) {
+          Log.wtf(TAG, "libsuperuser#55 has been fixed. Please remove the redundant code.")
+          su.close()
+          su = null
+        }
         super.stopRunner(true, getString(R.string.nat_no_root))
       })
     su.waitForIdle()
