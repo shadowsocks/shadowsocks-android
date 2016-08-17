@@ -114,12 +114,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       finish
     }
 
-    def onKey(v: View, keyCode: Int, event: KeyEvent) = if (event.getAction == KeyEvent.ACTION_UP) keyCode match {
+    def onKey(v: View, keyCode: Int, event: KeyEvent) = if (event.getAction == KeyEvent.ACTION_DOWN) keyCode match {
       case KeyEvent.KEYCODE_DPAD_LEFT =>
         val index = getAdapterPosition
-        profilesAdapter.remove(index)
-        undoManager.remove(index, item)
-        true
+        if (index >= 0) {
+          profilesAdapter.remove(index)
+          undoManager.remove(index, item)
+          true
+        } else false
       case _ => false
     } else false
   }
