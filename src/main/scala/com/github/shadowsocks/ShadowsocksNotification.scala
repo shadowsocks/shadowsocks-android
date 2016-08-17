@@ -49,7 +49,6 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     case _ =>
   }
   private lazy val style = new BigTextStyle(builder)
-  private val showOnUnlock = visible && Utils.isLollipopOrAbove
   private var isVisible = true
   update(if (service.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager].isScreenOn)
     Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
@@ -57,19 +56,19 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   val screenFilter = new IntentFilter()
   screenFilter.addAction(Intent.ACTION_SCREEN_ON)
   screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-  if (showOnUnlock) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
+  if (visible && Utils.isLollipopOrAbove) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
   service.registerReceiver(lockReceiver, screenFilter)
 
   private def update(action: String, forceShow: Boolean = false) =
     if (forceShow || service.getState == State.CONNECTED) action match {
       case Intent.ACTION_SCREEN_OFF =>
-        setVisible(false, forceShow)
+        setVisible(visible && !Utils.isLollipopOrAbove, forceShow)
         unregisterCallback  // unregister callback to save battery
       case Intent.ACTION_SCREEN_ON =>
-        setVisible(showOnUnlock && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
+        setVisible(visible && Utils.isLollipopOrAbove && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
         service.binder.registerCallback(callback)
         callbackRegistered = true
-      case Intent.ACTION_USER_PRESENT => setVisible(showOnUnlock, forceShow)
+      case Intent.ACTION_USER_PRESENT => setVisible(true, forceShow)
     }
 
   private def unregisterCallback = if (callbackRegistered) {
