@@ -53,9 +53,9 @@ class ProfileManager(dbHelper: DBHelper) {
   def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
 
   def createProfile(p: Profile = null): Profile = {
+    val profile = if (p == null) new Profile else p
+    profile.id = 0
     try {
-      val profile = if (p == null) new Profile else p
-      profile.id = 0
       app.currentProfile match {
         case Some(oldProfile) =>
           // Copy Feature Settings from old profile
@@ -72,13 +72,12 @@ class ProfileManager(dbHelper: DBHelper) {
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
       dbHelper.profileDao.createOrUpdate(profile)
       if (profileAddedListener != null) profileAddedListener(profile)
-      profile
     } catch {
       case ex: Exception =>
         Log.e(TAG, "addProfile", ex)
         app.track(ex)
-        p
     }
+    profile
   }
 
   def updateProfile(profile: Profile): Boolean = {
