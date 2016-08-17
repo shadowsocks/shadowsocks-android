@@ -28,7 +28,8 @@ class KcpCliPreference(context: Context, attrs: AttributeSet) extends SummaryEdi
             !line.startsWith("   --help,") &&
             !line.startsWith("   --version,"))
           .mkString("\n")
-          .replaceAll("[ ]{2,}", "\n"))
+          .replaceAll("[ ]{2,}", "\n")
+          .substring(1))  // remove 1st \n
         .show()
       val window = dialog.getWindow
       val attrs = window.getAttributes
