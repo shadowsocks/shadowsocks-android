@@ -128,7 +128,7 @@ class ShadowsocksNatService extends BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    kcptunProcess = new GuardedProcess(cmd.mkString(" ").split(" ").toSeq).start()
+    kcptunProcess = new GuardedProcess(cmd.mkString(" ").split("[ ]{1,}").toSeq).start()
   }
 
   def startDNSTunnel() {
