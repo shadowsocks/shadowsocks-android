@@ -16,7 +16,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="bottom|end"
             android:layout_marginBottom="16dp"
-            android:layout_marginRight="16dp"
             android:layout_marginEnd="16dp"
             app:menu_colorNormal="@color/material_accent_500"
             app:menu_colorPressed="@color/material_accent_700"

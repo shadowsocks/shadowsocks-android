@@ -8,8 +8,6 @@
               android:background="?android:attr/selectableItemBackground"
               android:paddingStart="20dp"
               android:paddingEnd="?attr/dialogPreferredPadding"
-              android:paddingLeft="20dp"
-              android:paddingRight="?attr/dialogPreferredPadding"
               android:focusable="true"
               android:nextFocusRight="@+id/share">
     <CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -23,7 +21,6 @@
                      android:textColor="?android:attr/textColorAlertDialogListItem"
                      android:gravity="center_vertical"
                      android:drawableStart="?android:attr/listChoiceIndicatorSingle"
-                     android:drawableLeft="?android:attr/listChoiceIndicatorSingle"
                      android:drawablePadding="20dp"
                      android:maxLines="4"
                      android:scrollHorizontally="false" />

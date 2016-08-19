@@ -11,7 +11,6 @@
                       android:layout_width="match_parent" android:layout_height="wrap_content"
                       android:minHeight="?android:attr/listPreferredItemHeight" android:gravity="center_vertical"
                       android:paddingStart="16dip" android:paddingEnd="16dip" android:focusable="true"
-                      android:paddingLeft="16dip" android:paddingRight="16dip"
                       android:paddingTop="16dip" android:paddingBottom="16dip"
                       android:background="@drawable/background_stat" android:orientation="vertical"
                       android:nextFocusRight="@+id/fab">
@@ -34,12 +33,12 @@
             <android.support.v7.widget.GridLayout android:layout_width="match_parent"
                                                   android:layout_height="wrap_content"
                                                   android:paddingEnd="72dip"
-                                                  android:paddingRight="72dip"
                                                   app:columnCount="4">
                 <TextView app:layout_column="0" style="@style/TextAppearance.AppCompat.Body2"
                           android:ellipsize="marquee" android:text="@string/sent"
                           android:layout_width="wrap_content" android:layout_height="wrap_content"
-                          android:layout_marginRight="24dp" android:layout_marginEnd="24dp" android:gravity="end"/>
+                          android:layout_marginEnd="24dp"
+                          android:gravity="end"/>
                 <TextView app:layout_column="1" android:id="@+id/tx" android:textSize="14sp"
                           android:textColor="?android:attr/textColorSecondary" android:ellipsize="marquee"
                           android:layout_width="0dp" android:layout_height="wrap_content"
@@ -54,7 +53,8 @@
                           app:layout_gravity="fill_horizontal" android:gravity="end"/>
                 <TextView app:layout_row="1" app:layout_column="0" style="@style/TextAppearance.AppCompat.Body2"
                           android:layout_width="wrap_content" android:layout_height="wrap_content"
-                          android:layout_marginRight="24dp" android:layout_marginEnd="24dp" android:gravity="end"
+                          android:layout_marginEnd="24dp"
+                          android:gravity="end"
                           android:ellipsize="marquee" android:text="@string/received"/>
                 <TextView app:layout_row="1" app:layout_column="1" android:id="@+id/rx" android:textSize="14sp"
                           android:textColor="?android:attr/textColorSecondary" android:ellipsize="marquee"
@@ -77,9 +77,7 @@
                                                    android:layout_width="wrap_content"
                                                    android:layout_height="wrap_content" android:elevation="6dp"
                                                    android:layout_alignBottom="@+id/title_bar"
-                                                   android:layout_alignParentRight="true"
                                                    android:layout_alignParentEnd="true"
-                                                   android:layout_marginRight="16dp"
                                                    android:layout_marginEnd="16dp"
                                                    android:layout_marginBottom="@dimen/fab_margin_bottom">
         <android.support.design.widget.FloatingActionButton android:id="@+id/fab" android:layout_width="wrap_content"
