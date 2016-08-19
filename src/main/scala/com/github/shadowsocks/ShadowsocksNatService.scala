@@ -91,8 +91,7 @@ class ShadowsocksNatService extends BaseService {
       p.println(conf)
     })
 
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-local"
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
           , "-P", getApplicationInfo.dataDir
@@ -119,8 +118,7 @@ class ShadowsocksNatService extends BaseService {
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
-      val cmd = new ArrayBuffer[String]
-      cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
+      val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
         , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
@@ -143,9 +141,8 @@ class ShadowsocksNatService extends BaseService {
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
-      val cmdBuf = new ArrayBuffer[String]
-      cmdBuf += (getApplicationInfo.dataDir + "/ss-tunnel"
-        , "-u"
+
+      val cmdBuf = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-l" , "8163"
@@ -173,27 +170,26 @@ class ShadowsocksNatService extends BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
-    val cmd = getApplicationInfo.dataDir + "/pdnsd -c " + getApplicationInfo.dataDir + "/pdnsd-nat.conf"
+    val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
+    pdnsdProcess = new GuardedProcess(cmd).start()
   }
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort)
-    val cmd = "%s/redsocks -c %s/redsocks-nat.conf"
-      .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, getApplicationInfo.dataDir)
+    val cmd = Array(getApplicationInfo.dataDir + "/redsocks", "-c", getApplicationInfo.dataDir + "/redsocks-nat.conf")
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
-    redsocksProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+    redsocksProcess = new GuardedProcess(cmd).start()
   }
 
   /** Called when the activity is first created. */
-  def handleConnection {
+  def handleConnection() {
 
     startTunnel()
     if (!profile.udpdns) startDnsDaemon()
@@ -290,31 +286,19 @@ class ShadowsocksNatService extends BaseService {
   override def connect() {
     super.connect()
 
-    if (profile != null) {
+    // Clean up
+    killProcesses()
 
-      // Clean up
-      killProcesses()
-
-      var resolved = false
-      if (!Utils.isNumeric(profile.host)) {
-        Utils.resolve(profile.host, enableIPv6 = true) match {
-          case Some(a) =>
-            profile.host = a
-            resolved = true
-          case None => resolved = false
-        }
-      } else {
-        resolved = true
-      }
-
-      if (!resolved) stopRunner(true, getString(R.string.invalid_server)) else {
-        handleConnection
-        // Set DNS
-        su.addCommand(Utils.FLUSH_DNS)
-        changeState(State.CONNECTED)
-        notification = new ShadowsocksNotification(this, profile.name, true)
-      }
+    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
+      case Some(a) => profile.host = a
+      case None => throw NameNotResolvedException()
     }
+
+    handleConnection()
+    // Set DNS
+    su.addCommand(Utils.FLUSH_DNS)
+    changeState(State.CONNECTED)
+    notification = new ShadowsocksNotification(this, profile.name, true)
   }
 
   override def stopRunner(stopService: Boolean, msg: String = null) {
