@@ -31,9 +31,9 @@ resolvers += Resolver.jcenterRepo
 useSupportVectors
 
 libraryDependencies ++= Seq(
-  "com.android.support" % "cardview-v7" % "24.1.1",
-  "com.android.support" % "design" % "24.1.1",
-  "com.android.support" % "gridlayout-v7" % "24.1.1",
+  "com.android.support" % "cardview-v7" % "24.2.0",
+  "com.android.support" % "design" % "24.2.0",
+  "com.android.support" % "gridlayout-v7" % "24.2.0",
   "com.github.clans" % "fab" % "1.6.4",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.github.kevinsawicki" % "http-request" % "6.0",
