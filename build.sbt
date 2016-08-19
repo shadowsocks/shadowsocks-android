@@ -39,7 +39,6 @@ libraryDependencies ++= Seq(
   "net.glxn.qrgen" % "android" % "2.0",
   //"com.google.android.gms" % "play-services-ads" % "9.4.0",
   "com.google.android.gms" % "play-services-analytics" % "9.4.0",
-  "com.android.support" % "cardview-v7" % "24.2.0",
   "com.android.support" % "design" % "24.2.0",
   "com.android.support" % "gridlayout-v7" % "24.2.0",
   "com.github.clans" % "fab" % "1.6.4",
