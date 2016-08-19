@@ -148,42 +148,28 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   override def connect() = {
     super.connect()
 
-    if (profile != null) {
+    vpnThread = new ShadowsocksVpnThread(this)
+    vpnThread.start()
 
-      vpnThread = new ShadowsocksVpnThread(this)
-      vpnThread.start()
+    // reset the context
+    killProcesses()
 
-      // reset the context
-      killProcesses()
-
-      // Resolve the server address
-      var resolved: Boolean = false
-      if (!Utils.isNumeric(profile.host)) {
-        Utils.resolve(profile.host, enableIPv6 = true) match {
-          case Some(addr) =>
-            profile.host = addr
-            resolved = true
-          case None => resolved = false
-        }
-      } else {
-        resolved = true
-      }
-
-      if (!resolved) stopRunner(true, getString(R.string.invalid_server)) else if (handleConnection) {
-        changeState(State.CONNECTED)
-        notification = new ShadowsocksNotification(this, profile.name)
-      } else {
-        changeState(State.STOPPED, getString(R.string.service_failed))
-        stopRunner(true)
-      }
+    // Resolve the server address
+    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
+      case Some(addr) => profile.host = addr
+      case None => throw NameNotResolvedException()
     }
+
+    handleConnection()
+    changeState(State.CONNECTED)
+    notification = new ShadowsocksNotification(this, profile.name)
   }
 
   /** Called when the activity is first created. */
-  def handleConnection: Boolean = {
+  def handleConnection() {
     
     val fd = startVpn()
-    if (!sendFd(fd)) return false
+    if (!sendFd(fd)) throw new Exception("sendFd failed")
 
     if (profile.kcp) {
       startKcptunDaemon()
@@ -199,24 +185,23 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       startDnsDaemon()
       startDnsTunnel()
     }
-
-    true
   }
 
   def startKcptunDaemon() {
     if (profile.kcpcli == null) profile.kcpcli = ""
 
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/kcptun"
+    val cmd = ArrayBuffer(getApplicationInfo.dataDir + "/kcptun"
       , "-r", profile.host + ":" + profile.kcpPort
       , "-l", "127.0.0.1:" + (profile.localPort + 90)
-      , "--path", getApplicationInfo.dataDir + "/protect_path"
-      , profile.kcpcli.replaceAll("^\\s*([\"'])(.*)\\1\\s*$", "$2"))
+      , "--path", getApplicationInfo.dataDir + "/protect_path")
+    try cmd ++= Utils.translateCommandline(profile.kcpcli) catch {
+      case exc: Exception => throw KcpcliParseException(exc)
+    }
 
     if (BuildConfig.DEBUG)
       Log.d(TAG, cmd.mkString(" "))
 
-    kcptunProcess = new GuardedProcess(cmd.mkString(" ").split("[ ]{1,}").toSeq).start()
+    kcptunProcess = new GuardedProcess(cmd).start()
   }
 
   def startShadowsocksUDPDaemon() {
@@ -227,8 +212,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
 
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
@@ -267,8 +251,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
 
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V"
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
@@ -303,8 +286,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
       , "-V"
       , "-t", "10"
       , "-b", "127.0.0.1"
@@ -333,11 +315,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)
     })
-    val cmd = getApplicationInfo.dataDir + "/pdnsd -c " + getApplicationInfo.dataDir + "/pdnsd-vpn.conf"
+    val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-vpn.conf")
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    pdnsdProcess = new GuardedProcess(cmd.split(" ").toSeq).start()
+    pdnsdProcess = new GuardedProcess(cmd).start()
   }
 
   def startVpn(): Int = {
@@ -397,30 +379,27 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val fd = conn.getFd
 
-    var cmd = (getApplicationInfo.dataDir +
-      "/tun2socks --netif-ipaddr %s "
-      + "--netif-netmask 255.255.255.0 "
-      + "--socks-server-addr 127.0.0.1:%d "
-      + "--tunfd %d "
-      + "--tunmtu %d "
-      + "--sock-path %s "
-      + "--loglevel 3")
-      .formatLocal(Locale.ENGLISH,
-        PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
-        profile.localPort, fd, VPN_MTU, getApplicationInfo.dataDir + "/sock_path")
+    var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/tun2socks",
+      "--netif-ipaddr", PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
+      "--netif-netmask", "255.255.255.0",
+      "--socks-server-addr", "127.0.0.1:" + profile.localPort,
+      "--tunfd", fd.toString,
+      "--tunmtu", VPN_MTU.toString,
+      "--sock-path", getApplicationInfo.dataDir + "/sock_path",
+      "--loglevel", "3")
 
     if (profile.ipv6)
-      cmd += " --netif-ip6addr " + PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "2")
+      cmd += ("--netif-ip6addr", PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "2"))
 
     if (profile.udpdns)
-      cmd += " --enable-udprelay"
+      cmd += "--enable-udprelay"
     else
-      cmd += " --dnsgw %s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 
-        profile.localPort + 53)
+      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"),
+        profile.localPort + 53))
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd)
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
-    tun2socksProcess = new GuardedProcess(cmd.split(" ").toSeq).start(() => sendFd(fd))
+    tun2socksProcess = new GuardedProcess(cmd).start(() => sendFd(fd))
 
     fd
   }

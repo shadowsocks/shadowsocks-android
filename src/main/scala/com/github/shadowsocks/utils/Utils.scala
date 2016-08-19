@@ -41,7 +41,7 @@ package com.github.shadowsocks.utils
 import java.io.File
 import java.net._
 import java.security.MessageDigest
-import java.util.Scanner
+import java.util.{Scanner, StringTokenizer}
 
 import android.animation.{Animator, AnimatorListenerAdapter}
 import android.content.pm.PackageManager
@@ -58,6 +58,7 @@ import eu.chainfire.libsuperuser.Shell
 import org.xbill.DNS._
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
@@ -125,6 +126,48 @@ object Utils {
     } finally {
       p.close()
     }
+  }
+
+  /**
+    * Crack a command line.
+    * Based on: https://github.com/apache/ant/blob/588ce1f/src/main/org/apache/tools/ant/types/Commandline.java#L471
+    * @param toProcess the command line to process.
+    * @return the command line broken into strings.
+    * An empty or null toProcess parameter results in a zero sized ArrayBuffer.
+    */
+  def translateCommandline(toProcess: String): ArrayBuffer[String] = {
+    if (toProcess == null || toProcess.length == 0) return ArrayBuffer[String]()
+    val tok = new StringTokenizer(toProcess, "\"' ", true)
+    val result = ArrayBuffer[String]()
+    val current = new StringBuilder()
+    var quote = ' '
+    var last = " "
+    while (tok.hasMoreTokens) {
+      val nextTok = tok.nextToken
+      quote match {
+        case '\'' => nextTok match {
+          case "'" => quote = ' '
+          case _ => current.append(nextTok)
+        }
+        case '"' => nextTok match {
+          case "\"" => quote = ' '
+          case _ => current.append(nextTok)
+        }
+        case _ => nextTok match {
+          case "'" => quote = '\''
+          case "\"" => quote = '"'
+          case " " => if (last != " ") {
+            result.append(current.toString)
+            current.setLength(0)
+          }
+          case _ => current.append(nextTok)
+        }
+      }
+      last = nextTok
+    }
+    if (current.nonEmpty) result.append(current.toString)
+    if (quote == '\'' || quote == '"') throw new Exception("Unbalanced quotes in " + toProcess)
+    result
   }
 
   // Because /sys/class/net/* isn't accessible since API level 24

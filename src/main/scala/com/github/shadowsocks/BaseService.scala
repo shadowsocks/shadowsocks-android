@@ -39,6 +39,7 @@
 
 package com.github.shadowsocks
 
+import java.io.IOException
 import java.util.{Timer, TimerTask}
 
 import android.app.Service
@@ -48,7 +49,6 @@ import android.os.{Handler, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils._
@@ -59,6 +59,9 @@ trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
   @volatile protected var profile: Profile = _
+
+  case class NameNotResolvedException() extends IOException
+  case class KcpcliParseException(cause: Throwable) extends Exception(cause)
 
   var timer: Timer = _
   var trafficMonitorThread: TrafficMonitorThread = _
@@ -136,7 +139,7 @@ trait BaseService extends Service {
     false
   } else true
 
-  def connect() = if (profile.host == "198.199.101.152") try {
+  def connect() = if (profile.host == "198.199.101.152") {
     val holder = app.containerHolder
     val container = holder.getContainer
     val url = container.getString("proxy_url")
@@ -153,8 +156,6 @@ trait BaseService extends Service {
     profile.remotePort = proxy(1).trim.toInt
     profile.password = proxy(2).trim
     profile.method = proxy(3).trim
-  } catch {
-    case ex: Exception => stopRunner(true, getString(R.string.service_failed))
   }
 
   def startRunner(profile: Profile) {
@@ -188,7 +189,15 @@ trait BaseService extends Service {
 
     if (profile.isMethodUnsafe) handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show)
 
-    Utils.ThrowableFuture(connect)
+    Utils.ThrowableFuture(try connect catch {
+      case _: NameNotResolvedException => stopRunner(true, getString(R.string.invalid_server))
+      case exc: KcpcliParseException =>
+        stopRunner(true, getString(R.string.service_failed) + ": " + exc.cause.getMessage)
+      case exc: Throwable =>
+        stopRunner(true, getString(R.string.service_failed) + ": " + exc.getMessage)
+        exc.printStackTrace()
+        app.track(exc)
+    })
   }
 
   def stopRunner(stopService: Boolean, msg: String = null) {
