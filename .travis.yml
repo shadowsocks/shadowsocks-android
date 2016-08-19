@@ -24,8 +24,15 @@ before_cache:
 
 cache:
     directories:
-        - $HOME/.ivy2/cache
-        - $HOME/.sbt/boot
+        - $HOME/.ivy2
+        - $HOME/.sbt
+
+android:
+    components:
+        - tools
+        - build-tools-24.0.1
+        - extra-android-m2repository
+        - extra-google-m2repository
 
 install:
     - ./travis-ci/setup.sh

@@ -12,14 +12,16 @@ A [shadowsocks R](https://github.com/breakwa11/shadowsocks-rss/) client for Andr
 
 * JDK 1.8
 * SBT 0.13.0+
-* Android SDK r25+
+* Android SDK
+  - Build Tools 24+ (as required by [`sbt-android`](https://github.com/scala-android/sbt-android))
+  - Android Support Repository and Google Repository (see `build.sbt` for version)
 * Android NDK r12b+
 
 ### BUILD
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
-* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
+* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.htmlf
 * Put your key in ~/.keystore
 * Create `local.properties` from `local.properties.example` with your own key information
 * Invoke the building like this
