@@ -7,6 +7,7 @@ import android.content.{Intent, SharedPreferences}
 import android.net.Uri
 import android.os.Bundle
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -158,7 +159,9 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     tfo.setChecked(TcpFastOpen.sendEnabled)
     tfo.setOnPreferenceChangeListener((_, v) => {
       val value = v.asInstanceOf[Boolean]
-      TcpFastOpen.enabled(value)
+      val result = TcpFastOpen.enabled(value)
+      if (result != null && result != "Success.")
+        Snackbar.make(activity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
       value == TcpFastOpen.sendEnabled
     })
     if (!TcpFastOpen.supported) {

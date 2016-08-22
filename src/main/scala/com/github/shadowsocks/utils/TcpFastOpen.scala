@@ -4,6 +4,8 @@ import java.io.File
 
 import eu.chainfire.libsuperuser.Shell
 
+import scala.collection.JavaConverters._
+
 /**
   * @author Mygod
   */
@@ -26,11 +28,24 @@ object TcpFastOpen {
     file.canRead && (Utils.readAllLines(file).toInt & 1) > 0
   }
 
-  def enabled(value: Boolean) = if (supported) {
+  def enabled(value: Boolean) = if (true) {
     val fastopen = "echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen"
-    Shell.SU.run(Array(
-      "mount -o remount,rw /system && " + fastopen + " && echo '#!/system/bin/sh\n" + fastopen +
-        "' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen",
-      "mount -o remount,ro /system"))
-  }
+    Shell.run("su", Array(
+      "if " + fastopen + "; then",
+      "  success=-1",
+      "  if mount -o remount,rw /system; then",
+      "    echo '#!/system/bin/sh",
+        fastopen + "' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen",
+      "    success=$?",
+      "    mount -o remount,ro /system",
+      "  fi",
+      "  if [ $success -eq 0 ]; then",
+      "    echo Success.",
+      "  else",
+      "    echo Warning: Unable to create boot script.",
+      "  fi",
+      "else",
+      "  echo Failed.",
+      "fi"), null, true).asScala.mkString("\n")
+  } else null
 }
