@@ -33,11 +33,11 @@ object TcpFastOpen {
     Shell.run("su", Array(
       "if " + fastopen + "; then",
       "  success=-1",
-      "  if mount -o remount,rw /system; then",
+      "  if mount -o rw,remount /dev/block/platform/msm_sdcc.1/by-name/system /system; then",
       "    echo '#!/system/bin/sh",
         fastopen + "' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen",
       "    success=$?",
-      "    mount -o remount,ro /system",
+      "    mount -o ro,remount /dev/block/platform/msm_sdcc.1/by-name/system /system",
       "  fi",
       "  if [ $success -eq 0 ]; then",
       "    echo Success.",
