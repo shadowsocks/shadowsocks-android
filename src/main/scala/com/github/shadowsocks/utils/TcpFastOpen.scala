@@ -28,14 +28,14 @@ object TcpFastOpen {
     file.canRead && (Utils.readAllLines(file).toInt & 1) > 0
   }
 
-  def enabled(value: Boolean) = if (true) {
-    val fastopen = "echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen"
+  def enabled(value: Boolean) =
     Shell.run("su", Array(
-      "if " + fastopen + "; then",
+      "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
       "  success=-1",
       "  if mount -o rw,remount /dev/block/platform/msm_sdcc.1/by-name/system /system; then",
-      "    echo '#!/system/bin/sh",
-        fastopen + "' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen",
+      if (value) "    echo '#!/system/bin/sh\n" +
+        "echo 3 > /proc/sys/net/ipv4/tcp_fastopen' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen"
+      else "rm -f /etc/init.d/tcp_fastopen",
       "    success=$?",
       "    mount -o ro,remount /dev/block/platform/msm_sdcc.1/by-name/system /system",
       "  fi",
@@ -47,5 +47,4 @@ object TcpFastOpen {
       "else",
       "  echo Failed.",
       "fi"), null, true).asScala.mkString("\n")
-  } else null
 }
