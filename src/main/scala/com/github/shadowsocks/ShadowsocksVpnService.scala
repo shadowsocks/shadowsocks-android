@@ -266,7 +266,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       cmd += (getApplicationInfo.dataDir + "/acl.list")
     }
 
-    if (TcpFastOpen.isEnabled) cmd += "--fast-open"
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 

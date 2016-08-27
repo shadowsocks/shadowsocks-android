@@ -105,7 +105,7 @@ class ShadowsocksNatService extends BaseService {
 
     if (profile.auth) cmd += "-A"
 
-    if (TcpFastOpen.isEnabled) cmd += "--fast-open"
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"

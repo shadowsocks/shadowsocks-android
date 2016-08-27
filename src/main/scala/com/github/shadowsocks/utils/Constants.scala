@@ -171,8 +171,6 @@ object Key {
   val kcp = "kcp"
   val kcpPort = "kcpPort"
   val kcpcli = "kcpcli"
-
-  val tfo = "tcp_fastopen"
 }
 
 object State {
