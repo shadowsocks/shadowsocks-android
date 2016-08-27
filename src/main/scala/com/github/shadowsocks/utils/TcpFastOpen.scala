@@ -23,12 +23,12 @@ object TcpFastOpen {
     case _ => false
   }
 
-  def isEnabled = {
+  def sendEnabled = {
     val file = new File("/proc/sys/net/ipv4/tcp_fastopen")
     file.canRead && (Utils.readAllLines(file).toInt & 1) > 0
   }
 
-  def enabled(value: Boolean): String = {
+  def enabled(value: Boolean): String = if (sendEnabled != value) {
     val res = Shell.run("su", Array(
       "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
       "  echo Success.",
@@ -36,5 +36,5 @@ object TcpFastOpen {
       "  echo Failed.",
       "fi"), null, true)
     if (res != null) res.asScala.mkString("\n") else null
-  }
+  } else null
 }
