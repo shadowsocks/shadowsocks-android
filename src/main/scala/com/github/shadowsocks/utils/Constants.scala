@@ -170,6 +170,9 @@ object Key {
   val localPort = "localPortNum"
 
   val profileTip = "profileTip"
+
+  val tfo = "tcp_fastopen"
+
 }
 
 object State {
