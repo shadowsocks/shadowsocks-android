@@ -23,18 +23,28 @@ object TcpFastOpen {
     case _ => false
   }
 
-  def isEnabled = {
+  def sendEnabled = {
     val file = new File("/proc/sys/net/ipv4/tcp_fastopen")
     file.canRead && (Utils.readAllLines(file).toInt & 1) > 0
   }
 
-  def enabled(value: Boolean): String = {
-    val res = Shell.run("su", Array(
+  def enabled(value: Boolean) =
+    Shell.run("su", Array(
       "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
-      "  echo Success.",
+      "  success=-1",
+      "  if mount -o rw,remount /dev/block/platform/msm_sdcc.1/by-name/system /system; then",
+      if (value) "    echo '#!/system/bin/sh\n" +
+        "echo 3 > /proc/sys/net/ipv4/tcp_fastopen' > /etc/init.d/tcp_fastopen && chmod 755 /etc/init.d/tcp_fastopen"
+      else "rm -f /etc/init.d/tcp_fastopen",
+      "    success=$?",
+      "    mount -o ro,remount /dev/block/platform/msm_sdcc.1/by-name/system /system",
+      "  fi",
+      "  if [ $success -eq 0 ]; then",
+      "    echo Success.",
+      "  else",
+      "    echo Warning: Unable to create boot script.",
+      "  fi",
       "else",
       "  echo Failed.",
-      "fi"), null, true)
-    if (res != null) res.asScala.mkString("\n") else null
-  }
+      "fi"), null, true).asScala.mkString("\n")
 }
