@@ -559,8 +559,6 @@ MBEDTLS_SOURCES  := $(wildcard $(LOCAL_PATH)/mbedtls/library/*.c)
 
 LOCAL_SRC_FILES := $(MBEDTLS_SOURCES:$(LOCAL_PATH)/%=%)
 
-LOCAL_LDLIBS := -ldl -llog
-
 include $(BUILD_STATIC_LIBRARY)
 
 # Import cpufeatures
