@@ -28,8 +28,8 @@ object TcpFastOpen {
     file.canRead && (Utils.readAllLines(file).toInt & 1) > 0
   }
 
-  def enabled(value: Boolean) = {
-    val result = Shell.run("su", Array(
+  def enabled(value: Boolean) =
+    Shell.run("su", Array(
       "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
       "  success=-1",
       "  if mount -o rw,remount /dev/block/platform/msm_sdcc.1/by-name/system /system; then",
@@ -46,7 +46,5 @@ object TcpFastOpen {
       "  fi",
       "else",
       "  echo Failed.",
-      "fi"), null, true)
-    if (result == null) "Root access failed." else result.asScala.mkString("\n")
-  }
+      "fi"), null, true).asScala.mkString("\n")
 }
