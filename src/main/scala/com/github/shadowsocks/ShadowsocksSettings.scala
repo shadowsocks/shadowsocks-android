@@ -155,14 +155,17 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     }
     switch.setChecked(BootReceiver.getEnabled(activity))
 
-    val tfo = findPreference("tcp_fastopen").asInstanceOf[SwitchPreference]
-    tfo.setChecked(TcpFastOpen.sendEnabled)
+    if (getPreferenceManager.getSharedPreferences.getBoolean(Key.tfo, false) && !TcpFastOpen.isEnabled) {
+      TcpFastOpen.enabled(true)
+    }
+    val tfo = findPreference(Key.tfo).asInstanceOf[SwitchPreference]
+    tfo.setChecked(TcpFastOpen.isEnabled)
     tfo.setOnPreferenceChangeListener((_, v) => {
       val value = v.asInstanceOf[Boolean]
       val result = TcpFastOpen.enabled(value)
       if (result != null && result != "Success.")
         Snackbar.make(activity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
-      value == TcpFastOpen.sendEnabled
+      value == TcpFastOpen.isEnabled
     })
     if (!TcpFastOpen.supported) {
       tfo.setEnabled(false)

@@ -112,7 +112,6 @@
 
         <SwitchPreference
                 android:key="tcp_fastopen"
-                android:persistent="false"
                 android:summary="@string/tcp_fastopen_summary"
                 android:title="TCP Fast Open"/>
 
