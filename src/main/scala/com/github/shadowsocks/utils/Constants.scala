@@ -171,6 +171,7 @@ object Key {
 
   val profileTip = "profileTip"
 
+  val tfo = "tcp_fastopen"
 }
 
 object State {
