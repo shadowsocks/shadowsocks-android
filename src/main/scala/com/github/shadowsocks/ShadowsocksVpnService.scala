@@ -40,7 +40,6 @@
 package com.github.shadowsocks
 
 import java.io.File
-import java.lang.Process
 import java.util.Locale
 
 import android.content._
@@ -63,10 +62,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var vpnThread: ShadowsocksVpnThread = _
   private var notification: ShadowsocksNotification = _
 
-  var sslocalProcess: Process = _
-  var sstunnelProcess: Process = _
-  var pdnsdProcess: Process = _
-  var tun2socksProcess: Process = _
+  var sslocalProcess: GuardedProcess = _
+  var sstunnelProcess: GuardedProcess = _
+  var pdnsdProcess: GuardedProcess = _
+  var tun2socksProcess: GuardedProcess = _
 
   override def onBind(intent: Intent): IBinder = {
     val action = intent.getAction

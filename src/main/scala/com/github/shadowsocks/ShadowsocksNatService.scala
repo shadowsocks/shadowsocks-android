@@ -40,7 +40,6 @@
 package com.github.shadowsocks
 
 import java.io.File
-import java.lang.Process
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
@@ -65,10 +64,10 @@ class ShadowsocksNatService extends BaseService {
   private var notification: ShadowsocksNotification = _
   val myUid = android.os.Process.myUid()
 
-  var sslocalProcess: Process = _
-  var sstunnelProcess: Process = _
-  var redsocksProcess: Process = _
-  var pdnsdProcess: Process = _
+  var sslocalProcess: GuardedProcess = _
+  var sstunnelProcess: GuardedProcess = _
+  var redsocksProcess: GuardedProcess = _
+  var pdnsdProcess: GuardedProcess = _
   var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
