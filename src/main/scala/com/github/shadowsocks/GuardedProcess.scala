@@ -39,18 +39,33 @@
 
 package com.github.shadowsocks
 
-import java.io.{IOException, InputStream, OutputStream}
+import java.io._
 import java.lang.System.currentTimeMillis
 import java.util.concurrent.Semaphore
 
 import android.util.Log
 
 import scala.collection.JavaConversions._
+import scala.collection.immutable.Stream
+import scala.util.control.Exception._
+
+class StreamLogger(is: InputStream, tag: String) extends Thread {
+
+  def withCloseable[T <: Closeable, R](t: T)(f: T => R): R = {
+    allCatch.andFinally{t.close} apply { f(t) }
+  }
+
+  override def run() {
+    withCloseable(new BufferedReader(new InputStreamReader(is))) {
+      br => Stream.continually(br.readLine()).takeWhile(_ != null).foreach(Log.i(tag, _))
+    }
+  }
+}
 
 /**
   * @author ayanamist@gmail.com
   */
-class GuardedProcess(cmd: Seq[String]) extends Process {
+class GuardedProcess(cmd: Seq[String]) {
   private val TAG = classOf[GuardedProcess].getSimpleName
 
   @volatile private var guardThread: Thread = _
@@ -71,6 +86,9 @@ class GuardedProcess(cmd: Seq[String]) extends Process {
           val startTime = currentTimeMillis
 
           process = new ProcessBuilder(cmd).redirectErrorStream(true).start
+
+          val is = process.getInputStream
+          new StreamLogger(is, TAG).start
 
           if (callback == null) callback = onRestartCallback else callback()
 
@@ -117,11 +135,6 @@ class GuardedProcess(cmd: Seq[String]) extends Process {
     isRestart = true
     process.destroy()
   }
-
-  def exitValue: Int = throw new UnsupportedOperationException
-  def getErrorStream: InputStream = throw new UnsupportedOperationException
-  def getInputStream: InputStream = throw new UnsupportedOperationException
-  def getOutputStream: OutputStream = throw new UnsupportedOperationException
 
   @throws(classOf[InterruptedException])
   def waitFor = {
