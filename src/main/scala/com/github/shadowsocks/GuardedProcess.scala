@@ -57,7 +57,9 @@ class StreamLogger(is: InputStream, tag: String) extends Thread {
 
   override def run() {
     withCloseable(new BufferedReader(new InputStreamReader(is))) {
-      br => Stream.continually(br.readLine()).takeWhile(_ != null).foreach(Log.i(tag, _))
+      br => try Stream.continually(br.readLine()).takeWhile(_ != null).foreach(Log.i(tag, _)) catch {
+        case ignore: IOException =>
+      }
     }
   }
 }
