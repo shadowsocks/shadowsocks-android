@@ -68,7 +68,7 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
     if (app.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
-      case (profile, i) if profile.id == app.profileId => i + 1
+      case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(0))
   }
 }
