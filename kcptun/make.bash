@@ -52,6 +52,7 @@ pushd kcptun/client
 
 echo "Get dependences for kcptun"
 go get -u github.com/xtaci/kcp-go
+go get -u github.com/xtaci/smux
 go get
 
 echo "Cross compile kcptun for arm"
