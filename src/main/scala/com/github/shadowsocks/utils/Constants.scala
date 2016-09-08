@@ -194,4 +194,5 @@ object Route {
   val BYPASS_LAN = "bypass-lan"
   val BYPASS_CHN = "bypass-china"
   val BYPASS_LAN_CHN = "bypass-lan-china"
+  val GFWLIST = "gfwlist"
 }

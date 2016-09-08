@@ -381,7 +381,9 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c acl.c android.c
+SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
+	utils.c netutils.c json.c jconf.c acl.c http.c tls.c rule.c \
+	android.c
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
@@ -391,6 +393,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/include \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/mbedtls/include  \
+					-I$(LOCAL_PATH)/pcre \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
@@ -399,7 +402,8 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
-LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns libsodium libancillary
+LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns \
+	libsodium libancillary libpcre
 
 LOCAL_LDLIBS := -llog
 
@@ -551,15 +555,55 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE:= mbedtls
+LOCAL_MODULE := mbedtls
 
-LOCAL_C_INCLUDES:= $(LOCAL_PATH)/mbedtls/include
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/mbedtls/include
 
-MBEDTLS_SOURCES  := $(wildcard $(LOCAL_PATH)/mbedtls/library/*.c)
+MBEDTLS_SOURCES := $(wildcard $(LOCAL_PATH)/mbedtls/library/*.c)
 
 LOCAL_SRC_FILES := $(MBEDTLS_SOURCES:$(LOCAL_PATH)/%=%)
 
 include $(BUILD_STATIC_LIBRARY)
 
+########################################################
+## pcre 
+########################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := pcre 
+
+LOCAL_CFLAGS += -DHAVE_CONFIG_H
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/pcre/dist $(LOCAL_PATH)/pcre
+
+libpcre_src_files := \
+    pcre_chartables.c \
+    dist/pcre_byte_order.c \
+    dist/pcre_compile.c \
+    dist/pcre_config.c \
+    dist/pcre_dfa_exec.c \
+    dist/pcre_exec.c \
+    dist/pcre_fullinfo.c \
+    dist/pcre_get.c \
+    dist/pcre_globals.c \
+    dist/pcre_jit_compile.c \
+    dist/pcre_maketables.c \
+    dist/pcre_newline.c \
+    dist/pcre_ord2utf8.c \
+    dist/pcre_refcount.c \
+    dist/pcre_string_utils.c \
+    dist/pcre_study.c \
+    dist/pcre_tables.c \
+    dist/pcre_ucd.c \
+    dist/pcre_valid_utf8.c \
+    dist/pcre_version.c \
+    dist/pcre_xclass.c
+
+LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files))
+
+include $(BUILD_STATIC_LIBRARY)
+
 # Import cpufeatures
 $(call import-module,android/cpufeatures)
+

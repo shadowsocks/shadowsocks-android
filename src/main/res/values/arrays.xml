@@ -43,6 +43,7 @@
         <item>Bypass LAN</item>
         <item>Bypass China</item>
         <item>Bypass LAN &amp; China</item>
+        <item>GFW List</item>
     </string-array>
 
     <string-array name="route_value">
@@ -50,6 +51,7 @@
         <item>bypass-lan</item>
         <item>bypass-china</item>
         <item>bypass-lan-china</item>
+        <item>gfwlist</item>
     </string-array>
 
     <string-array name="private_route">

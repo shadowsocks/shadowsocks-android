@@ -71,7 +71,7 @@ class ShadowsocksNatService extends BaseService {
   var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
-    if (profile.route != Route.ALL) {
+    if (profile.route != Route.ALL && profile.route != Route.GFWLIST) {
       val acl: Array[Array[String]] = profile.route match {
         case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
         case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
@@ -108,7 +108,10 @@ class ShadowsocksNatService extends BaseService {
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
-      cmd += (getApplicationInfo.dataDir + "/acl.list")
+      if (profile.route == Route.GFWLIST)
+        cmd += (getApplicationInfo.dataDir + "/gfwlist.acl")
+      else
+        cmd += (getApplicationInfo.dataDir + "/acl.list")
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
@@ -184,12 +187,15 @@ class ShadowsocksNatService extends BaseService {
 
   def startDnsDaemon() {
 
-    val conf = if (profile.route == Route.BYPASS_CHN || profile.route == Route.BYPASS_LAN_CHN) {
-      ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", profile.localPort + 53, getBlackList, profile.localPort + 63, "")
-    } else {
-      ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-        "127.0.0.1", profile.localPort + 53, profile.localPort + 63, "")
+    val conf = profile.route match {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "127.0.0.1", profile.localPort + 53, getBlackList, profile.localPort + 63, "")
+      }
+      case _ => {
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "127.0.0.1", profile.localPort + 53, profile.localPort + 63, "")
+      }
     }
 
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {

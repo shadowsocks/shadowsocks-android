@@ -30,3 +30,6 @@
 [submodule "src/main/jni/mbedtls"]
 	path = src/main/jni/mbedtls
 	url = https://github.com/ARMmbed/mbedtls
+[submodule "src/main/jni/pcre"]
+	path = src/main/jni/pcre
+	url = https://android.googlesource.com/platform/external/pcre
