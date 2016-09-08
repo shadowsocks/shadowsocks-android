@@ -514,6 +514,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     crashRecovery()
 
     copyAssets(System.getABI)
+    copyAssets("acl")
 
     val ab = new ArrayBuffer[String]
     for (executable <- EXECUTABLES) {
