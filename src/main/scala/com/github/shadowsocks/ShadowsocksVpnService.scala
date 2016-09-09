@@ -42,6 +42,7 @@ package com.github.shadowsocks
 import java.io.File
 import java.util.Locale
 
+import android.annotation.SuppressLint
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
@@ -325,6 +326,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     pdnsdProcess = new GuardedProcess(cmd).start()
   }
 
+  @SuppressLint(Array("NewApi"))
   def startVpn(): Int = {
 
     val builder = new Builder()
