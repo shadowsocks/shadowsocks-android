@@ -94,10 +94,17 @@ class GuardedProcess(cmd: Seq[String]) {
           semaphore.release
           process.waitFor
 
-          if (currentTimeMillis - startTime < 1000) {
-            Log.w(TAG, "process exit too fast, stop guard: " + cmd)
-            isDestroyed = true
+          this.synchronized {
+            if (isRestart) {
+              isRestart = false
+            } else {
+              if (currentTimeMillis - startTime < 1000) {
+                Log.w(TAG, "process exit too fast, stop guard: " + cmd)
+                isDestroyed = true
+              }
+            }
           }
+
         }
       } catch {
         case ignored: InterruptedException =>
@@ -127,8 +134,10 @@ class GuardedProcess(cmd: Seq[String]) {
   }
 
   def restart() {
-    isRestart = true
-    process.destroy()
+    this.synchronized {
+      isRestart = true
+      process.destroy()
+    }
   }
 
   @throws(classOf[InterruptedException])
