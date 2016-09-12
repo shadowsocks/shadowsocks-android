@@ -207,7 +207,22 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   def refreshProfile() {
-    profile = app.currentProfile.get
+    val profile = app.currentProfile match {
+      case Some(profile) => profile
+      case None => {
+        app.profileManager.getFirstProfile match {
+          case Some(profile) => {
+            app.profileId(profile.id)
+            profile
+          }
+          case None => {
+            val default = app.profileManager.createDefault()
+            app.profileId(default.id)
+            default
+          }
+        }
+      }
+    }
     isProxyApps.setChecked(profile.proxyApps)
   }
 
