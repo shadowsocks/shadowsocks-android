@@ -110,6 +110,7 @@
     <item>绕过局域网地址</item>
     <item>绕过中国大陆地址</item>
     <item>绕过局域网及中国大陆地址</item>
+    <item>仅代理国内无法访问的地址</item>
   </string-array>
 
   <string name="action_apply_all">应用设置到所有配置文件</string>
