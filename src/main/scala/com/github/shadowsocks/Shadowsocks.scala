@@ -186,8 +186,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       snackbar.show
     }
 
-    if (!app.settings.getBoolean(BuildConfig.VERSION_NAME, false)) {
-      app.editor.putBoolean(BuildConfig.VERSION_NAME, true).apply()
+    if (app.settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) {
+      app.editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
 
       recovery()
 
