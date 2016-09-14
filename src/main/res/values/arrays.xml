@@ -38,14 +38,6 @@
         <item>chacha20-ietf</item>
     </string-array>
 
-    <string-array name="route_entry">
-        <item>All</item>
-        <item>Bypass LAN</item>
-        <item>Bypass China</item>
-        <item>Bypass LAN &amp; China</item>
-        <item>GFW List</item>
-    </string-array>
-
     <string-array name="route_value">
         <item>all</item>
         <item>bypass-lan</item>

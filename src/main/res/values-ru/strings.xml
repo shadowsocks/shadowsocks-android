@@ -46,6 +46,13 @@
   <string name="auto_set_gfwlist">CHN Маршрут</string>
   <string name="auto_set_gfwlist_summary">Игнорировать все сайты находящиеся в Китае</string>
   <string name="route_list">Маршрут</string>
+  <string-array name="route_entry">
+    <item>Все</item>
+    <item>Обход LAN</item>
+    <item>Обходной Китай</item>
+    <item>Обход LAN и Китай</item>
+    <item>Список GFW</item>
+  </string-array>
   <string name="proxied_apps">Прокси для выбранных приложений</string>
   <string name="proxied_apps_summary">Установить прокси для выбранных приложений, требует режим NAT под Android 4.x</string>
   <string name="on">Вкл</string>
