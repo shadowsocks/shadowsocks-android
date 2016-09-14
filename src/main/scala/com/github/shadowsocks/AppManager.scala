@@ -46,14 +46,13 @@ import android.content._
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.{Bundle, Handler}
-import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view._
 import android.widget._
-import com.github.shadowsocks.utils.{Key, Utils}
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -143,7 +142,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   private var loadingView: View = _
   private val appsLoading = new AtomicBoolean
   private var handler: Handler = _
-  private val profile = app.currentProfile.get
+  private val profile = app.currentProfile.orNull
 
   private def initProxiedApps(str: String = profile.individual) = proxiedApps = str.split('\n').to[mutable.HashSet]
 
@@ -212,6 +211,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
   protected override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+
+    if (profile == null) finish()
 
     handler = new Handler()
 
