@@ -235,7 +235,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }).attachToRecyclerView(profilesList)
 
     attachService(new IShadowsocksServiceCallback.Stub {
-      def stateChanged(state: Int, msg: String) = () // ignore
+      def stateChanged(state: Int, profileName: String, msg: String) = () // ignore
       def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) =
         if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
@@ -276,7 +276,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     updateNfcState()
   }
 
-  override def onNewIntent(intent: Intent): Unit ={
+  override def onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     handleShareIntent(intent)
   }

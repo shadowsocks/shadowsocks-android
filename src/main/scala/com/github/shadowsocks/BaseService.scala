@@ -91,6 +91,8 @@ trait BaseService extends Service {
       state
     }
 
+    override def getProfileName: String = if (profile == null) null else profile.name
+
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
       if (cb != null && callbacks.unregister(cb)) {
         callbacksCount -= 1
@@ -282,7 +284,7 @@ trait BaseService extends Service {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
-            callbacks.getBroadcastItem(i).stateChanged(s, msg)
+            callbacks.getBroadcastItem(i).stateChanged(s, binder.getProfileName, msg)
           } catch {
             case _: Exception => // Ignore
           }

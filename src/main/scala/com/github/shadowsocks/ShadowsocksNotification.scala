@@ -19,7 +19,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
-    override def stateChanged(state: Int, msg: String) = () // ignore
+    override def stateChanged(state: Int, profileName: String, msg: String) = ()  // ignore
     override def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
       val txr = TrafficMonitor.formatTraffic(txRate)
       val rxr = TrafficMonitor.formatTraffic(rxRate)

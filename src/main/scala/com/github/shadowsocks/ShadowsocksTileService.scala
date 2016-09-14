@@ -5,7 +5,6 @@ import android.graphics.drawable.Icon
 import android.service.quicksettings.{Tile, TileService}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.utils.{State, Utils}
-import com.github.shadowsocks.ShadowsocksApplication.app
 
 /**
   * @author Mygod
@@ -23,7 +22,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
   private lazy val iconConnected = Icon.createWithResource(this, R.drawable.ic_start_connected)
   private lazy val callback = new IShadowsocksServiceCallback.Stub {
     def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) = ()
-    def stateChanged(state: Int, msg: String) {
+    def stateChanged(state: Int, profileName: String, msg: String) {
       val tile = getQsTile
       if (tile != null) {
         state match {
@@ -33,10 +32,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
             tile.setState(Tile.STATE_INACTIVE)
           case State.CONNECTED =>
             tile.setIcon(iconConnected)
-            tile.setLabel(app.currentProfile match {
-              case Some(profile) => profile.name
-              case None => getString(R.string.app_name)
-            })
+            tile.setLabel(if (profileName == null) getString(R.string.app_name) else profileName)
             tile.setState(Tile.STATE_ACTIVE)
           case _ =>
             tile.setIcon(iconBusy)
@@ -48,7 +44,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
     }
   }
 
-  override def onServiceConnected() = callback.stateChanged(bgService.getState, null)
+  override def onServiceConnected() = callback.stateChanged(bgService.getState, bgService.getProfileName, null)
 
   override def onCreate {
     super.onCreate
