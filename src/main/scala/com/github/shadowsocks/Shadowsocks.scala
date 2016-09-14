@@ -113,7 +113,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   // Services
   private val callback = new IShadowsocksServiceCallback.Stub {
-    def stateChanged(s: Int, m: String) {
+    def stateChanged(s: Int, profileName: String, m: String) {
       handler.post(() => {
         s match {
           case State.CONNECTING =>
