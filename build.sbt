@@ -41,7 +41,7 @@ libraryDependencies ++= Seq(
   "com.j256.ormlite" % "ormlite-android" % "5.0",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
   "dnsjava" % "dnsjava" % "2.1.7",
-  "eu.chainfire" % "libsuperuser" % "1.0.0.201607041850",
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809",
   "me.dm7.barcodescanner" % "zxing" % "1.9",
   "net.glxn.qrgen" % "android" % "2.0"
 )

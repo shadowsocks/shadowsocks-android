@@ -304,23 +304,15 @@ class ShadowsocksNatService extends BaseService {
     su.addCommand((init_sb ++ http_sb).toArray)
   }
 
-  override def startRunner(profile: Profile) = if (su == null) {
+  override def startRunner(profile: Profile) = if (su == null)
     su = new Shell.Builder().useSU().setWantSTDERR(true).setWatchdogTimeout(10).open((_, exitCode, _) =>
       if (exitCode == 0) super.startRunner(profile) else {
         if (su != null) {
-          Log.wtf(TAG, "libsuperuser#55 has been fixed. Please remove the redundant code.")
           su.close()
           su = null
         }
         super.stopRunner(true, getString(R.string.nat_no_root))
       })
-    su.waitForIdle()
-    if (!su.isRunning) {
-      su.close()
-      su = null
-      super.stopRunner(true, getString(R.string.nat_no_root))
-    }
-  }
 
   override def connect() {
     super.connect()
