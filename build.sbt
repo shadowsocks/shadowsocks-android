@@ -35,7 +35,7 @@ useSupportVectors
 libraryDependencies ++= Seq(
   "dnsjava" % "dnsjava" % "2.1.7",
   "com.github.kevinsawicki" % "http-request" % "6.0",
-  "eu.chainfire" % "libsuperuser" % "1.0.0.201607041850",
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809",
   "net.glxn.qrgen" % "android" % "2.0",
   //"com.google.android.gms" % "play-services-ads" % "9.4.0",
   "com.google.android.gms" % "play-services-analytics" % "9.4.0",
