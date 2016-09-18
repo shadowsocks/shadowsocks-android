@@ -1,3 +1,7 @@
+## issue feedback
+
+[https://goo.gl/forms/wcZaZmrcgewWIiPn2](https://goo.gl/forms/wcZaZmrcgewWIiPn2)
+
 ## Shadowsocks R for Android
 
 A [shadowsocks R](https://github.com/breakwa11/shadowsocks-rss/) client for Android, written in Scala.
