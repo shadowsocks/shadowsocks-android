@@ -113,6 +113,7 @@
     <item>略過中國大陸位址</item>
     <item>略過區域網路及中國大陸位址</item>
     <item>僅代理大陸屏蔽位址</item>
+    <item>僅代理大陸位址</item>
   </string-array>
 
   <string name="action_apply_all">應用設置到所有配置文件</string>

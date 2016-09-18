@@ -58,6 +58,7 @@
     <item>Bypass China</item>
     <item>Bypass LAN &amp; China</item>
     <item>GFW List</item>
+    <item>China List</item>
   </string-array>
   <string name="proxied_apps">Per-App Proxy</string>
   <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
