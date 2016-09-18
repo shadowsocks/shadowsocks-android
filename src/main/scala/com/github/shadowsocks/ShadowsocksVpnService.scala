@@ -162,51 +162,19 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   /** Called when the activity is first created. */
-<<<<<<< HEAD
-  def handleConnection: Boolean = {
-=======
   def handleConnection() {
     
     val fd = startVpn()
     if (!sendFd(fd)) throw new Exception("sendFd failed")
 
-    if (profile.kcp) {
-      startKcptunDaemon()
-    }
-
->>>>>>> 25bd534... Refine #816 and error handling in startRunner
     startShadowsocksDaemon()
     if (!profile.udpdns) {
       startDnsDaemon()
       startDnsTunnel()
     }
-<<<<<<< HEAD
 
-    val fd = startVpn()
-    sendFd(fd)
-    true
   }
 
-=======
-  }
-
-  def startKcptunDaemon() {
-    if (profile.kcpcli == null) profile.kcpcli = ""
-
-    val cmd = ArrayBuffer(getApplicationInfo.dataDir + "/kcptun"
-      , "-r", profile.host + ":" + profile.kcpPort
-      , "-l", "127.0.0.1:" + (profile.localPort + 90)
-      , "--path", getApplicationInfo.dataDir + "/protect_path")
-    try cmd ++= Utils.translateCommandline(profile.kcpcli) catch {
-      case exc: Exception => throw KcpcliParseException(exc)
-    }
-
-    if (BuildConfig.DEBUG)
-      Log.d(TAG, cmd.mkString(" "))
-
-    kcptunProcess = new GuardedProcess(cmd).start()
-  }
->>>>>>> 25bd534... Refine #816 and error handling in startRunner
 
   def startShadowsocksUDPDaemon() {
     val conf = ConfigUtils
@@ -230,16 +198,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startShadowsocksDaemon() {
-
-    if (profile.route != Route.ALL) {
-      val acl: Array[Array[String]] = profile.route match {
-        case Route.BYPASS_LAN => Array(getResources.getStringArray(R.array.private_route))
-        case Route.BYPASS_CHN => Array(getResources.getStringArray(R.array.chn_route))
+    if (profile.route != Route.ALL && profile.route != Route.GFWLIST) {
+      val acl: Array[String] = profile.route match {
+        case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
+        case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route)
         case Route.BYPASS_LAN_CHN =>
-          Array(getResources.getStringArray(R.array.private_route), getResources.getStringArray(R.array.chn_route))
+          getResources.getStringArray(R.array.private_route) ++ getResources.getStringArray(R.array.chn_route)
+        case Route.CHINALIST =>
+          Array("[bypass_all]", "[white_list]") ++ getResources.getStringArray(R.array.chn_route)
       }
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
-        acl.flatten.foreach(p.println)
+        acl.foreach(p.println)
       })
     }
 
@@ -250,12 +219,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
 
-<<<<<<< HEAD
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-local", "-V", "-u"
-=======
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V"
->>>>>>> 25bd534... Refine #816 and error handling in startRunner
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
@@ -284,13 +248,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
-<<<<<<< HEAD
-    val cmd = new ArrayBuffer[String]
-    cmd += (getApplicationInfo.dataDir + "/ss-tunnel"
-      , "-u"
-=======
+
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
->>>>>>> 25bd534... Refine #816 and error handling in startRunner
       , "-V"
       , "-t", "10"
       , "-b", "127.0.0.1"
@@ -309,14 +268,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-<<<<<<< HEAD
-          "0.0.0.0", 8153, getBlackList, 8163, ipv6)
-      } else {
-=======
           "0.0.0.0", profile.localPort + 53, getBlackList, profile.localPort + 63, ipv6)
       }
       case _ => {
->>>>>>> 122ca59... Add GFWList support
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
           "0.0.0.0", 8153, 8163, ipv6)
       }
@@ -404,12 +358,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.udpdns)
       cmd += "--enable-udprelay"
     else
-<<<<<<< HEAD
-      cmd += " --dnsgw %s:8153".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"))
-=======
       cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"),
         profile.localPort + 53))
->>>>>>> 25bd534... Refine #816 and error handling in startRunner
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
