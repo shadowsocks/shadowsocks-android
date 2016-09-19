@@ -141,6 +141,47 @@ object ConfigUtils {
       | soa=localhost,root.localhost,42,86400,900,86400,86400;
       |}
     """.stripMargin
+
+  val PDNSD_UDP =
+    """
+      |global {
+      | perm_cache = 2048;
+      | cache_dir = "%s";
+      | server_ip = %s;
+      | server_port = %d;
+      | query_method = udp_tcp;
+      | run_ipv4 = on;
+      | min_ttl = 15m;
+      | max_ttl = 1w;
+      | timeout = 10;
+      | daemon = off;
+      |}
+      |
+      |server {
+      | label = "remote-servers";
+      | ip = %s;
+      | timeout = 5;
+      | uptest = none;
+      | preset = on;
+      |}
+      |
+      |server {
+      | label = "local-server";
+      | ip = 127.0.0.1;
+      | port = %d;
+      | %s
+      | reject_policy = negate;
+      | reject_recursively = on;
+      |}
+      |
+      |rr {
+      | name=localhost;
+      | reverse=on;
+      | a=127.0.0.1;
+      | owner=localhost;
+      | soa=localhost,root.localhost,42,86400,900,86400,86400;
+      |}
+    """.stripMargin
 }
 
 object Key {

@@ -309,9 +309,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsDaemon() {
     val ipv6 = if (profile.ipv6) "" else "reject = ::/0;"
     val conf = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, getBlackList, profile.localPort + 63, ipv6)
+      }
+      case Route.GFWLIST => {
+        ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "0.0.0.0", profile.localPort + 53, "119.29.29.29, 1.2.4.8", profile.localPort + 63, ipv6)
+      }
+      case Route.CHINALIST => {
+        ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "0.0.0.0", profile.localPort + 53, "8.8.8.8, 208.67.222.222", profile.localPort + 63, ipv6)
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
