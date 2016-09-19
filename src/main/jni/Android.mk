@@ -371,7 +371,9 @@ PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
 LOCAL_MODULE    := pdnsd
 LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
 LOCAL_CFLAGS    := -DANDROID -Wall -O2 -I$(LOCAL_PATH)/pdnsd \
-				   -I$(LOCAL_PATH)/include/pdnsd
+				   -I$(LOCAL_PATH)/include/pdnsd -I$(LOCAL_PATH)/libancillary
+LOCAL_STATIC_LIBRARIES := libancillary
+LOCAL_LDLIBS := -llog
 
 include $(BUILD_EXECUTABLE)
 
