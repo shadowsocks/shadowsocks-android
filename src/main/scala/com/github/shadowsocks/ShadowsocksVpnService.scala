@@ -301,7 +301,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setSession(profile.name)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
-      .addDnsServer(profile.dns.split(":")(0))
+
+    if (profile.route != Route.GFWLIST && profile.route != Route.CHINALIST) {
+      builder.addDnsServer(profile.dns.split(":")(0))
+    }
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
