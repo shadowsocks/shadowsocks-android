@@ -196,11 +196,11 @@ class ShadowsocksNatService extends BaseService {
       }
       case Route.GFWLIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, "119.29.29.29, 1.2.4.8", profile.localPort + 63, "")
+          "127.0.0.1", profile.localPort + 53, "1.2.4.8, 208.67.222.222", profile.localPort + 63, "")
       }
       case Route.CHINALIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, "8.8.8.8, 208.67.222.222", profile.localPort + 63, "")
+          "127.0.0.1", profile.localPort + 53, "8.8.8.8, 208.67.222.222", profile.localPort + 63, "")
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
@@ -292,10 +292,8 @@ class ShadowsocksNatService extends BaseService {
     init_sb.append(cmd_bypass.replace("-p tcp -d 0.0.0.0", "-m owner --uid-owner " + myUid))
     init_sb.append(cmd_bypass.replace("-d 0.0.0.0", "--dport 53"))
 
-    if (profile.route != Route.GFWLIST && profile.route != Route.CHINALIST) {
-      init_sb.append("iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:"
-        + (profile.localPort + 53))
-    }
+    init_sb.append("iptables -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:"
+      + (profile.localPort + 53))
 
     if (!profile.proxyApps || profile.bypass) {
       http_sb.append(CMD_IPTABLES_DNAT_ADD_SOCKS)

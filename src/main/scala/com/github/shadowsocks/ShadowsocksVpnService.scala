@@ -315,7 +315,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
       case Route.GFWLIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, "119.29.29.29, 1.2.4.8", profile.localPort + 63, ipv6)
+          "0.0.0.0", profile.localPort + 53, "1.2.4.8, 208.67.222.222", profile.localPort + 63, "")
       }
       case Route.CHINALIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
@@ -345,9 +345,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 
-    if (profile.route != Route.GFWLIST && profile.route != Route.CHINALIST) {
-      builder.addDnsServer("8.8.8.8")
-    }
+    builder.addDnsServer("8.8.8.8")
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
