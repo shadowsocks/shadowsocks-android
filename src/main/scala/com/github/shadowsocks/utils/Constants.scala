@@ -121,6 +121,9 @@ object ConfigUtils {
       | policy = included;
       | uptest = none;
       | preset = on;
+      | %s
+      | reject_policy = negate;
+      | reject_recursively = on;
       |}
       |
       |server {
@@ -162,6 +165,9 @@ object ConfigUtils {
       | timeout = 5;
       | uptest = none;
       | preset = on;
+      | %s
+      | reject_policy = negate;
+      | reject_recursively = on;
       |}
       |
       |server {
