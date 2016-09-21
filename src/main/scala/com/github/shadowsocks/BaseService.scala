@@ -69,6 +69,7 @@ trait BaseService extends Service {
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
   var callbacksCount: Int = _
   lazy val handler = new Handler(getMainLooper)
+  lazy val restartHanlder = new Handler(getMainLooper)
 
   private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
@@ -82,7 +83,10 @@ trait BaseService extends Service {
    val activeNetwork = cm.getActiveNetworkInfo()
    val isConnected = activeNetwork != null && activeNetwork.isConnected()
 
-   if (isConnected && profile.kcp && kcptunProcess != null) kcptunProcess.restart()
+   if (isConnected && profile.kcp && kcptunProcess != null) {
+     restartHanlder.removeCallbacks(null)
+     restartHanlder.postDelayed(() => kcptunProcess.restart(), 2000)
+   }
   }
   var networkReceiverRegistered: Boolean = _
 
