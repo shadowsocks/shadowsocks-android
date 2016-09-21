@@ -311,15 +311,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, getBlackList, profile.localPort + 63, ipv6)
+          "0.0.0.0", profile.localPort + 53, getBlackList, ipv6, profile.localPort + 63, ipv6)
       }
       case Route.GFWLIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, "1.2.4.8, 208.67.222.222", profile.localPort + 63, "")
+          "0.0.0.0", profile.localPort + 53, "1.2.4.8, 208.67.222.222", ipv6, profile.localPort + 63, ipv6)
       }
       case Route.CHINALIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, "8.8.8.8, 208.67.222.222", profile.localPort + 63, ipv6)
+          "0.0.0.0", profile.localPort + 53, "8.8.8.8, 208.67.222.222", ipv6, profile.localPort + 63, ipv6)
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
