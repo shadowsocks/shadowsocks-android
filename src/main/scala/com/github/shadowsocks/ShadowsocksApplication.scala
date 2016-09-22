@@ -112,7 +112,7 @@ class ShadowsocksApplication extends Application {
     }
     pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
 
-    TcpFastOpen.enabled(settings.getBoolean(Key.tfo, false))
+    TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
   }
 
   def refreshContainerHolder {
