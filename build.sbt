@@ -33,6 +33,7 @@ useSupportVectors
 libraryDependencies ++= Seq(
   "com.android.support" % "design" % "24.2.1",
   "com.android.support" % "gridlayout-v7" % "24.2.1",
+  "com.android.support" % "preference-v14" % "24.2.1",
   "com.github.clans" % "fab" % "1.6.4",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.github.kevinsawicki" % "http-request" % "6.0",

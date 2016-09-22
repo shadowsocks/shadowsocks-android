@@ -15,6 +15,7 @@ gen_*
 *.o
 local.sbt
 .deps
+/proguard-sbt.txt
 
 #Intellij IDEA
 *.iml

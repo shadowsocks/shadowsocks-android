@@ -6,14 +6,16 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.{Intent, SharedPreferences}
 import android.net.Uri
 import android.os.Bundle
-import android.preference.{Preference, PreferenceFragment, SwitchPreference}
 import android.support.design.widget.Snackbar
+import android.support.v14.preference.SwitchPreference
 import android.support.v7.app.AlertDialog
+import android.support.v7.preference.{DropDownPreference, Preference}
 import android.webkit.{WebView, WebViewClient}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.preferences._
+import com.github.shadowsocks.preferences.KcpCliPreferenceDialogFragment
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
+import tk.mygod.preference._
 
 object ShadowsocksSettings {
   // Constants
@@ -27,18 +29,12 @@ object ShadowsocksSettings {
     pref.asInstanceOf[DropDownPreference].setValue(value)
   }
 
-  def updatePasswordEditTextPreference(pref: Preference, value: String) {
-    pref.setSummary(value)
-    pref.asInstanceOf[PasswordEditTextPreference].setText(value)
+  def updateEditTextPreference(pref: Preference, value: String) {
+    pref.asInstanceOf[EditTextPreference].setText(value)
   }
 
   def updateNumberPickerPreference(pref: Preference, value: Int) {
     pref.asInstanceOf[NumberPickerPreference].setValue(value)
-  }
-
-  def updateSummaryEditTextPreference(pref: Preference, value: String) {
-    pref.setSummary(value)
-    pref.asInstanceOf[SummaryEditTextPreference].setText(value)
   }
 
   def updateSwitchPreference(pref: Preference, value: Boolean) {
@@ -47,11 +43,11 @@ object ShadowsocksSettings {
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
     name match {
-      case Key.name => updateSummaryEditTextPreference(pref, profile.name)
-      case Key.host => updateSummaryEditTextPreference(pref, profile.host)
+      case Key.name => updateEditTextPreference(pref, profile.name)
+      case Key.host => updateEditTextPreference(pref, profile.host)
       case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
       case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
-      case Key.password => updatePasswordEditTextPreference(pref, profile.password)
+      case Key.password => updateEditTextPreference(pref, profile.password)
       case Key.method => updateDropDownPreference(pref, profile.method)
       case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
@@ -60,7 +56,7 @@ object ShadowsocksSettings {
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
       case Key.kcp => updateSwitchPreference(pref, profile.kcp)
       case Key.kcpPort => updateNumberPickerPreference(pref, profile.kcpPort)
-      case Key.kcpcli => updateSummaryEditTextPreference(pref, profile.kcpcli)
+      case Key.kcpcli => updateEditTextPreference(pref, profile.kcpcli)
     }
   }
 }
@@ -73,8 +69,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
   private var isProxyApps: SwitchPreference = _
 
-  override def onCreate(savedInstanceState: Bundle) {
-    super.onCreate(savedInstanceState)
+  override def onCreatePreferences(bundle: Bundle, key: String) {
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
@@ -204,6 +199,15 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         .show()
       true
     })
+  }
+
+  override def onDisplayPreferenceDialog(preference: Preference) = preference match {
+    case _: EditTextPreference => displayPreferenceDialog(preference.getKey,
+      if (preference.getKey == Key.kcpcli) new KcpCliPreferenceDialogFragment()
+      else new EditTextPreferenceDialogFragment())
+    case _: NumberPickerPreference =>
+      displayPreferenceDialog(preference.getKey, new NumberPickerPreferenceDialogFragment())
+    case _ => super.onDisplayPreferenceDialog(preference)
   }
 
   def refreshProfile() {

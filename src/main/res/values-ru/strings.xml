@@ -24,13 +24,9 @@
   <string name="proxy_cat">Настройки Сервера</string>
   <string name="profile_name">Имя Профиля</string>
   <string name="proxy">Сервер</string>
-  <string name="proxy_summary">Имя или IP удалённого сервера</string>
   <string name="remote_port">Удалённый порт</string>
-  <string name="remote_port_summary">%d (номер порта удалённого сервера)</string>
   <string name="port">Локальный порт</string>
-  <string name="port_summary">%d (номер порта локального сервера)</string>
   <string name="sitekey">Пароль</string>
-  <string name="sitekey_summary">Пароль удалённого сервера</string>
   <string name="enc_method">Метод Шифрования</string>
 
   <!-- feature category -->
@@ -148,5 +144,4 @@
   <string name="kcp_port">KCP порт</string>
   <string name="kcp_port_summary">%d (KCPTUN омер порта удалённого сервера)</string>
   <string name="kcpcli">KCP параметры</string>
-  <string name="kcpcli_summary">Командная строка KCPTUN</string>
 </resources>

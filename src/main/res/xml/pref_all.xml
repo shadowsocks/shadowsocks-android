@@ -2,39 +2,40 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
-    <PreferenceCategory
+    <tk.mygod.preference.PreferenceCategory
             android:title="@string/proxy_cat">
 
-        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+        <tk.mygod.preference.EditTextPreference
                 android:key="profileName"
                 android:persistent="false"
+                android:summary="%s"
                 android:title="@string/profile_name"/>
-        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+        <tk.mygod.preference.EditTextPreference
                 android:key="proxy"
                 android:persistent="false"
-                android:summary="@string/proxy_summary"
+                android:summary="%s"
                 android:title="@string/proxy"/>
-        <com.github.shadowsocks.preferences.NumberPickerPreference
+        <tk.mygod.preference.NumberPickerPreference
                 app:min="1"
                 app:max="65535"
                 android:key="remotePortNum"
                 android:persistent="false"
-                android:summary="@string/remote_port_summary"
+                android:summary="%d"
                 android:title="@string/remote_port"/>
-        <com.github.shadowsocks.preferences.NumberPickerPreference
+        <tk.mygod.preference.NumberPickerPreference
                 app:min="1025"
                 app:max="65535"
                 android:key="localPortNum"
                 android:persistent="false"
-                android:summary="@string/port_summary"
+                android:summary="%d"
                 android:title="@string/port"/>
-        <com.github.shadowsocks.preferences.PasswordEditTextPreference
+        <tk.mygod.preference.EditTextPreference
                 android:inputType="textPassword"
                 android:key="sitekey"
                 android:persistent="false"
-                android:summary="@string/sitekey_summary"
+                android:summary="%s"
                 android:title="@string/sitekey"/>
-        <com.github.shadowsocks.preferences.DropDownPreference
+        <android.support.v7.preference.DropDownPreference
                 android:key="encMethod"
                 android:persistent="false"
                 android:entries="@array/enc_method_entry"
@@ -47,12 +48,12 @@
                 android:summary="@string/onetime_auth_summary"
                 android:title="@string/onetime_auth"/>
 
-    </PreferenceCategory>
+    </tk.mygod.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <tk.mygod.preference.PreferenceCategory
             android:title="@string/feature_cat">
 
-        <com.github.shadowsocks.preferences.DropDownPreference
+        <android.support.v7.preference.DropDownPreference
                 android:key="route"
                 android:persistent="false"
                 android:entries="@array/route_entry"
@@ -75,9 +76,9 @@
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
 
-    </PreferenceCategory>
+    </tk.mygod.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <tk.mygod.preference.PreferenceCategory
             android:title="@string/kcp">
 
         <SwitchPreference
@@ -86,7 +87,7 @@
                 android:summary="@string/kcp_summary"
                 android:title="@string/kcp"/>
 
-        <com.github.shadowsocks.preferences.NumberPickerPreference
+        <tk.mygod.preference.NumberPickerPreference
                 app:min="1"
                 app:max="65535"
                 android:key="kcpPort"
@@ -94,15 +95,15 @@
                 android:summary="@string/kcp_port_summary"
                 android:title="@string/kcp_port"/>
 
-        <com.github.shadowsocks.preferences.KcpCliPreference
+        <tk.mygod.preference.EditTextPreference
                 android:key="kcpcli"
                 android:persistent="false"
-                android:summary="@string/kcpcli_summary"
+                android:summary="%s"
                 android:title="@string/kcpcli"/>
 
-    </PreferenceCategory>
+    </tk.mygod.preference.PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/misc_cat">
+    <tk.mygod.preference.PreferenceCategory android:title="@string/misc_cat">
 
         <SwitchPreference
                 android:key="isAutoConnect"
@@ -125,7 +126,7 @@
                     android:summary="@string/flush_dnscache_summary"/>
         <Preference android:key="about" android:title="@string/about"/>
 
-    </PreferenceCategory>
+    </tk.mygod.preference.PreferenceCategory>
 
 
 </PreferenceScreen>

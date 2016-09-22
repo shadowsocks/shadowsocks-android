@@ -29,13 +29,9 @@
   <string name="proxy_cat">Server Settings</string>
   <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
-  <string name="proxy_summary">Hostname or IP of the remote server</string>
   <string name="remote_port">Remote Port</string>
-  <string name="remote_port_summary">%d (port number of the remote server)</string>
   <string name="port">Local Port</string>
-  <string name="port_summary">%d (port number of the local server)</string>
   <string name="sitekey">Password</string>
-  <string name="sitekey_summary">Password of the remote server</string>
   <string name="enc_method">Encrypt Method</string>
 
   <!-- feature category -->
@@ -155,5 +151,4 @@
   <string name="kcp_port">KCP Port</string>
   <string name="kcp_port_summary">%d (port number of the remote KCPTUN server)</string>
   <string name="kcpcli">KCP Parameters (CLI)</string>
-  <string name="kcpcli_summary">The command line of KCPTUN</string>
 </resources>

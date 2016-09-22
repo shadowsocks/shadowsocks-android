@@ -1,21 +1,22 @@
 package com.github.shadowsocks.preferences
 
 import android.app.AlertDialog
-import android.content.{Context, DialogInterface}
-import android.util.AttributeSet
+import android.content.DialogInterface
 import eu.chainfire.libsuperuser.Shell
+import tk.mygod.preference.EditTextPreferenceDialogFragment
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
   * @author Mygod
   */
-class KcpCliPreference(context: Context, attrs: AttributeSet) extends SummaryEditTextPreference(context, attrs) {
+class KcpCliPreferenceDialogFragment extends EditTextPreferenceDialogFragment {
   override def onPrepareDialogBuilder(builder: AlertDialog.Builder) {
     super.onPrepareDialogBuilder(builder)
-    builder.setNeutralButton("?", ((_, _) => new AlertDialog.Builder(context)
+    builder.setNeutralButton("?", ((_, _) => new AlertDialog.Builder(builder.getContext)
       .setTitle("?")
-      .setMessage(asScalaBuffer(Shell.SH.run(context.getApplicationInfo.dataDir + "/kcptun --help"))
+      .setMessage(Shell.SH.run(builder.getContext.getApplicationInfo.dataDir + "/kcptun --help")
+        .asScala
         .dropWhile(line => line != "GLOBAL OPTIONS:")
         .drop(1)
         .takeWhile(line => line.length() > 3)
