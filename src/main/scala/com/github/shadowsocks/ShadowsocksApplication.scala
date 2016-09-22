@@ -89,7 +89,7 @@ class ShadowsocksApplication extends Application {
   }
 
   override def onCreate() {
-    java.lang.System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
+    if (!BuildConfig.DEBUG) java.lang.System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
     app = this
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     val tm = TagManager.getInstance(this)
