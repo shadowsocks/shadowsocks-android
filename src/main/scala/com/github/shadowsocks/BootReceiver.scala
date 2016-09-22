@@ -53,5 +53,7 @@ object BootReceiver {
 }
 
 class BootReceiver extends BroadcastReceiver {
-  def onReceive(context: Context, intent: Intent) = Utils.startSsService(context)
+  def onReceive(context: Context, intent: Intent) = {
+    Utils.startSsService(context)
+  }
 }

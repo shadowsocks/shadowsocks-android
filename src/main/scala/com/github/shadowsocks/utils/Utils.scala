@@ -259,7 +259,7 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    val isInstalled: Boolean = app.settings.getBoolean(BuildConfig.VERSION_NAME, false)
+    val isInstalled = app.settings.getInt(Key.currentVersionCode, -1) == BuildConfig.VERSION_CODE
     if (!isInstalled) return
 
     val intent = new Intent(context, classOf[ShadowsocksRunnerService])

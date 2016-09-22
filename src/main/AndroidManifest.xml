@@ -118,6 +118,7 @@
 
         <service
                 android:name=".ShadowsocksRunnerService"
+                android:process=":bg"
                 android:exported="false">
         </service>
 
@@ -147,7 +148,7 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".BootReceiver" android:enabled="false">
+        <receiver android:name=".BootReceiver" android:process=":bg" android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
