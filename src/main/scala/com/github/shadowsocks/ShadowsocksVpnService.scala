@@ -293,6 +293,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     })
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
       , "-V"
+      , "-u"
       , "-t", "10"
       , "-b", "127.0.0.1"
       , "-L", "8.8.8.8:53"
