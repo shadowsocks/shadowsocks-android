@@ -42,6 +42,7 @@
         <item>auth_simple</item>
         <item>auth_sha1</item>
         <item>auth_sha1_v2</item>
+	<item>auth_sha1_v4</item>
     </string-array>
 
     <string-array name="protocol_value">
@@ -51,6 +52,7 @@
         <item>auth_simple</item>
         <item>auth_sha1</item>
         <item>auth_sha1_v2</item>
+	<item>auth_sha1_v4</item>
     </string-array>
     
     
