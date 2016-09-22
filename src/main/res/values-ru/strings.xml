@@ -48,6 +48,7 @@
     <item>Обходной Китай</item>
     <item>Обход LAN и Китай</item>
     <item>Список GFW</item>
+    <item>Список Китай</item>
   </string-array>
   <string name="proxied_apps">Прокси для выбранных приложений</string>
   <string name="proxied_apps_summary">Установить прокси для выбранных приложений, требует режим NAT под Android 4.x</string>
