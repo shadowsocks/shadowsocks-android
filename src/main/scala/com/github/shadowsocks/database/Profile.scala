@@ -41,6 +41,7 @@ package com.github.shadowsocks.database
 
 import java.util.Locale
 
+import android.os.Binder
 import android.util.Base64
 import com.j256.ormlite.field.{DataType, DatabaseField}
 
@@ -54,8 +55,9 @@ class Profile {
   @DatabaseField
   var host: String = ""
 
+  // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
   @DatabaseField
-  var localPort: Int = 1080
+  var localPort: Int = 1080 + Binder.getCallingUserHandle.hashCode
 
   @DatabaseField
   var remotePort: Int = 8388

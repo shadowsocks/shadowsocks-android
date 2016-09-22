@@ -59,11 +59,11 @@ import android.util.Log
 import android.view.{View, ViewGroup}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
-import com.github.shadowsocks.ShadowsocksApplication.app
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import eu.chainfire.libsuperuser.Shell
 
