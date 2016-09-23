@@ -71,6 +71,7 @@ class GuardedProcess(cmd: Seq[String]) {
   @volatile private var guardThread: Thread = _
   @volatile private var isDestroyed: Boolean = _
   @volatile private var process: Process = _
+  @volatile private var isRestart = false
 
   def start(onRestartCallback: () => Unit = null): GuardedProcess = {
     val semaphore = new Semaphore(1)
