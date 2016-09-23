@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <style name="Theme.Material.Dialog" parent="Theme.Material.DialogBase"/>
+    <style name="Theme.Material.Dialog.Alert" parent="Theme.Material.Dialog.AlertBase"/>
+
+</resources>
