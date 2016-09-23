@@ -190,8 +190,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
 
-    if (profile.auth) cmd += "-A"
-
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
     sstunnelProcess = new GuardedProcess(cmd).start()

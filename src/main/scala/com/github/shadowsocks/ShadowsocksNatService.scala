@@ -98,8 +98,6 @@ class ShadowsocksNatService extends BaseService {
           , "-P", getApplicationInfo.dataDir
           , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
 
-    if (profile.auth) cmd += "-A"
-
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (profile.route != Route.ALL) {
