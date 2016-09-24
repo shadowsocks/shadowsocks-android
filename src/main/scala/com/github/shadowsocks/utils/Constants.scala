@@ -118,8 +118,6 @@ object ConfigUtils {
       | label = "china-servers";
       | ip = 1.2.4.8, 208.67.222.222, 114.114.114.114;
       | timeout = 4;
-      | exclude = %s;
-      | policy = included;
       | uptest = none;
       | preset = on;
       | %s
