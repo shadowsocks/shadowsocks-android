@@ -41,7 +41,8 @@ package com.github.shadowsocks
 import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
 import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
-import java.util
+import java.util.Date
+import java.util.Hashtable
 import java.util.Locale
 
 import android.app.backup.BackupManager
@@ -68,6 +69,7 @@ import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
 
 object Typefaces {
   def get(c: Context, assetPath: String): Typeface = {
@@ -87,7 +89,7 @@ object Typefaces {
   }
 
   private final val TAG = "Typefaces"
-  private final val cache = new util.Hashtable[String, Typeface]
+  private final val cache = new Hashtable[String, Typeface]
 }
 
 object Shadowsocks {
@@ -487,7 +489,18 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
       adView.setAdSize(AdSize.SMART_BANNER)
       preferences.getView.asInstanceOf[ViewGroup].addView(adView, 1)
-      adView.loadAd(new AdRequest.Builder().build())
+
+      // Demographics
+      val random = new Random()
+      val adBuilder = new AdRequest.Builder()
+      adBuilder.setGender(AdRequest.GENDER_MALE)
+      val year = 1975 + random.nextInt(40)
+      val month = 1 + random.nextInt(12)
+      val day = random.nextInt(28)
+      adBuilder.setBirthday(new Date(year, month, day))
+
+      // Load Ad
+      adView.loadAd(adBuilder.build())
     } else adView.setVisibility(View.VISIBLE) else if (adView != null) adView.setVisibility(View.GONE)
 
     preferences.setProfile(profile)
