@@ -241,7 +241,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsTunnel() = {
     val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, 8163,
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
         profile.password, profile.method, 10, profile.protocol, profile.obfs, profile.obfs_param)
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
@@ -267,7 +267,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, getBlackList, ipv6, profile.localPort + 63, ipv6)
+          "0.0.0.0", profile.localPort + 53, ipv6, profile.localPort + 63, ipv6)
       }
       case Route.GFWLIST => {
         ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
@@ -279,7 +279,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", 8153, 8163, ipv6)
+          "0.0.0.0", profile.localPort + 53, profile.localPort + 63, ipv6)
       }
     }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
