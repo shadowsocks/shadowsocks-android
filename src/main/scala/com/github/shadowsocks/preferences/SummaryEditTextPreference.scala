@@ -53,11 +53,8 @@ class SummaryEditTextPreference(context: Context, attrs: AttributeSet, defStyle:
   }
 
   override def setText(text: String) {
-    if(text != null)
-    {
-      super.setText(text)
-      setSummary(text)
-    }
+    super.setText(text)
+    setSummary(text)
   }
 
   override def setSummary(summary: CharSequence) {
