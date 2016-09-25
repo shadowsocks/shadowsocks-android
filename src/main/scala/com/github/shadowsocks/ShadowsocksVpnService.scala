@@ -163,7 +163,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   /** Called when the activity is first created. */
   def handleConnection() {
-    
+
     val fd = startVpn()
     if (!sendFd(fd)) throw new Exception("sendFd failed")
 
@@ -320,7 +320,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       })
     }
 
-    builder.addRoute("8.8.0.0", 16)
+    builder.addRoute(profile.dns.split(":")(0), 32)
 
     try {
       conn = builder.establish()
