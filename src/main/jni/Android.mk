@@ -384,7 +384,7 @@ include $(BUILD_EXECUTABLE)
 include $(CLEAR_VARS)
 
 SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
-	utils.c netutils.c json.c jconf.c acl.c http.c tls.c rule.c \
+	utils.c netutils.c json.c jconf.c acl.c \
 	android.c
 
 LOCAL_MODULE    := ss-local
