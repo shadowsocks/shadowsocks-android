@@ -168,6 +168,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (!sendFd(fd)) throw new Exception("sendFd failed")
 
     startShadowsocksDaemon()
+
+    if (profile.udpdns) {
+      startShadowsocksUDPDaemon()
+    }
+
     if (!profile.udpdns) {
       startDnsDaemon()
       startDnsTunnel()
@@ -223,6 +228,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")
 
+    if (profile.udpdns) cmd += "-u"
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
