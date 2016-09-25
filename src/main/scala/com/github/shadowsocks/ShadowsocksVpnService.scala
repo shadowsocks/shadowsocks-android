@@ -168,11 +168,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (!sendFd(fd)) throw new Exception("sendFd failed")
 
     startShadowsocksDaemon()
-
-    if (profile.udpdns) {
-      startShadowsocksUDPDaemon()
-    }
-
     if (!profile.udpdns) {
       startDnsDaemon()
       startDnsTunnel()
@@ -221,8 +216,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
       p.println(conf)
     })
-
-    if (profile.udpdns && !profile.kcp) cmd += "-u"
 
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V"
       , "-b", "127.0.0.1"
