@@ -184,7 +184,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startShadowsocksUDPDaemon() {
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
-        profile.password, profile.method, 600)
+        profile.password, profile.method, 600, profile.protocol, profile.obfs, profile.obfs_param)
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf"))(p => {
       p.println(conf)
     })
