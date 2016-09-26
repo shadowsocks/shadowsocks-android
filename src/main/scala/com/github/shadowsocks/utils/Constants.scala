@@ -116,7 +116,7 @@ object ConfigUtils {
       |server {
       | label = "remote-servers";
       | ip = %s;
-      | timeout = 5;
+      | timeout = 3;
       | uptest = none;
       | preset = on;
       | %s
