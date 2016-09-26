@@ -159,8 +159,24 @@ class ShadowsocksNatService extends BaseService {
 
   def startDnsDaemon() {
 
-    val conf = ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-       "127.0.0.1", profile.localPort + 53, profile.localPort + 63, "")
+    val conf = profile.route match {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN => {
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "127.0.0.1", profile.localPort + 53, "", profile.localPort + 63, "")
+      }
+      case Route.GFWLIST => {
+        ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "127.0.0.1", profile.localPort + 53, "1.2.4.8, 208.67.222.222", "", profile.localPort + 63, "")
+      }
+      case Route.CHINALIST => {
+        ConfigUtils.PDNSD_UDP.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "127.0.0.1", profile.localPort + 53, "8.8.8.8, 208.67.222.222", "", profile.localPort + 63, "")
+      }
+      case _ => {
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+          "127.0.0.1", profile.localPort + 53, profile.localPort + 63, "")
+      }
+    }
 
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
