@@ -72,6 +72,7 @@ object ConfigUtils {
       | server_ip = %s;
       | server_port = %d;
       | query_method = tcp_only;
+      | run_ipv4 = on;
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
@@ -85,6 +86,7 @@ object ConfigUtils {
       | %s
       | reject_policy = negate;
       | reject_recursively = on;
+      | timeout = 5;
       |}
       |
       |rr {
@@ -103,32 +105,28 @@ object ConfigUtils {
       | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
-      | query_method = udp_only;
+      | query_method = tcp_only;
+      | run_ipv4 = on;
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = off;
-      | par_queries = 4;
       |}
       |
       |server {
       | label = "remote-servers";
       | ip = %s;
       | timeout = 3;
-      | query_method = udp_only;
+      | uptest = none;
+      | preset = on;
       | %s
-      | reject_policy = negate;
-      | reject_recursively = on;
       |}
       |
       |server {
       | label = "local-server";
       | ip = 127.0.0.1;
-      | query_method = tcp_only;
       | port = %d;
       | %s
-      | reject_policy = negate;
-      | reject_recursively = on;
       |}
       |
       |rr {
