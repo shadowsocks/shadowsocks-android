@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809",
   "net.glxn.qrgen" % "android" % "2.0",
   //"com.google.android.gms" % "play-services-ads" % "9.4.0",
-  "com.google.android.gms" % "play-services-analytics" % "9.4.0",
+  "com.google.android.gms" % "play-services-analytics" % "9.6.1",
   "com.android.support" % "cardview-v7" % "24.2.0",
   "com.android.support" % "design" % "24.2.0",
   "com.android.support" % "gridlayout-v7" % "24.2.0",
@@ -49,7 +49,7 @@ libraryDependencies ++= Seq(
   "me.dm7.barcodescanner" % "zxing" % "1.9"
 )
 
-proguardVersion in Android := "5.2.1"
+proguardVersion in Android := "5.3"
 
 proguardCache in Android := Seq()
 
