@@ -37,8 +37,8 @@ libraryDependencies ++= Seq(
   "com.github.clans" % "fab" % "1.6.4",
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01",
   "com.github.kevinsawicki" % "http-request" % "6.0",
-  "com.google.android.gms" % "play-services-ads" % "9.6.0",
-  "com.google.android.gms" % "play-services-analytics" % "9.6.0",
+  "com.google.android.gms" % "play-services-ads" % "9.6.1",
+  "com.google.android.gms" % "play-services-analytics" % "9.6.1",
   "com.j256.ormlite" % "ormlite-android" % "5.0",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
   "dnsjava" % "dnsjava" % "2.1.7",
@@ -47,7 +47,7 @@ libraryDependencies ++= Seq(
   "net.glxn.qrgen" % "android" % "2.0"
 )
 
-proguardVersion in Android := "5.2.1"
+proguardVersion in Android := "5.3"
 
 proguardCache in Android := Seq()
 
