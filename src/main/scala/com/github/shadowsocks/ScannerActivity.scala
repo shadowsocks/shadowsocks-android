@@ -1,6 +1,5 @@
 package com.github.shadowsocks
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -48,13 +47,13 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
   override def onResume() {
     super.onResume()
     val permissionCheck = ContextCompat.checkSelfPermission(this,
-      Manifest.permission.CAMERA)
+      android.Manifest.permission.CAMERA)
     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
       scannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
       scannerView.startCamera()          // Start camera on resume
     } else {
       ActivityCompat.requestPermissions(this,
-        Array(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+        Array(android.Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
     }
   }
 
