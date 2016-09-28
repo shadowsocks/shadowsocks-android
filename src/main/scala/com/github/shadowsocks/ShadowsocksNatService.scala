@@ -71,7 +71,7 @@ class ShadowsocksNatService extends BaseService {
   var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
-    
+
     if (profile.route != Route.ALL && profile.route != Route.GFWLIST) {
       val acl: Array[String] = profile.route match {
         case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
@@ -163,18 +163,22 @@ class ShadowsocksNatService extends BaseService {
 
   def startDnsDaemon() {
 
+    val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
+
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "127.0.0.1", profile.localPort + 53, "1.2.4.8, 114.114.114.114, 208.67.222.222", "", profile.localPort + 63, "")
+          "127.0.0.1", profile.localPort + 53, profile.dns.split(":")(0) + "1.2.4.8, 114.114.114.114",
+          reject, profile.localPort + 63, reject)
       }
       case Route.CHINALIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "127.0.0.1", profile.localPort + 53, "8.8.8.8, 208.67.222.222", "", profile.localPort + 63, "")
+          "127.0.0.1", profile.localPort + 53, profile.dns.split(":")(0) + "8.8.8.8, 208.67.222.222",
+          reject, profile.localPort + 63, reject)
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "127.0.0.1", profile.localPort + 53, profile.localPort + 63, "")
+          "127.0.0.1", profile.localPort + 53, profile.localPort + 63, reject)
       }
     }
 

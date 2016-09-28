@@ -45,10 +45,11 @@ object Executable {
   val SS_LOCAL = "ss-local"
   val SS_TUNNEL = "ss-tunnel"
   val TUN2SOCKS = "tun2socks"
+  val KCPTUN = "kcptun"
 }
 
 object ConfigUtils {
-  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\"}"
+  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +
     " log_info = off;\n" +
@@ -72,7 +73,6 @@ object ConfigUtils {
       | server_ip = %s;
       | server_port = %d;
       | query_method = tcp_only;
-      | run_ipv4 = on;
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
@@ -83,10 +83,9 @@ object ConfigUtils {
       | label = "local";
       | ip = 127.0.0.1;
       | port = %d;
-      | %s
+      | reject = %s;
       | reject_policy = negate;
       | reject_recursively = on;
-      | timeout = 5;
       |}
       |
       |rr {
@@ -105,28 +104,32 @@ object ConfigUtils {
       | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
-      | query_method = tcp_only;
-      | run_ipv4 = on;
+      | query_method = udp_only;
       | min_ttl = 15m;
       | max_ttl = 1w;
       | timeout = 10;
       | daemon = off;
+      | par_queries = 4;
       |}
       |
       |server {
       | label = "remote-servers";
       | ip = %s;
       | timeout = 3;
-      | uptest = none;
-      | preset = on;
-      | %s
+      | query_method = udp_only;
+      | reject = %s;
+      | reject_policy = fail;
+      | reject_recursively = on;
       |}
       |
       |server {
       | label = "local-server";
       | ip = 127.0.0.1;
+      | query_method = tcp_only;
       | port = %d;
-      | %s
+      | reject = %s;
+      | reject_policy = negate;
+      | reject_recursively = on;
       |}
       |
       |rr {
@@ -153,20 +156,20 @@ object Key {
   val proxyApps = "isProxyApps"
   val bypass = "isBypassApps"
   val udpdns = "isUdpDns"
-  val dns = "dns"
   val auth = "isAuth"
   val ipv6 = "isIpv6"
 
   val host = "proxy"
   val password = "sitekey"
   val method = "encMethod"
-  val obfs = "obfs"
-  val obfs_param = "obfs_param"
-  val protocol = "protocol"
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
 
   val profileTip = "profileTip"
+
+  val kcp = "kcp"
+  val kcpPort = "kcpPort"
+  val kcpcli = "kcpcli"
 
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"
