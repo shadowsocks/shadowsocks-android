@@ -83,7 +83,7 @@ object ConfigUtils {
       | label = "local";
       | ip = 127.0.0.1;
       | port = %d;
-      | %s
+      | reject = %s;
       | reject_policy = negate;
       | reject_recursively = on;
       |}
@@ -117,8 +117,8 @@ object ConfigUtils {
       | ip = %s;
       | timeout = 3;
       | query_method = udp_only;
-      | %s
-      | reject_policy = negate;
+      | reject = %s;
+      | reject_policy = fail;
       | reject_recursively = on;
       |}
       |
@@ -127,7 +127,7 @@ object ConfigUtils {
       | ip = 127.0.0.1;
       | query_method = tcp_only;
       | port = %d;
-      | %s
+      | reject = %s;
       | reject_policy = negate;
       | reject_recursively = on;
       |}
