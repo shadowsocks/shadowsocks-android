@@ -117,6 +117,8 @@ object ConfigUtils {
       | ip = %s;
       | timeout = 3;
       | query_method = udp_only;
+      | %s
+      | policy = included;
       | reject = %s;
       | reject_policy = fail;
       | reject_recursively = on;
