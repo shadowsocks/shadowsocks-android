@@ -271,5 +271,15 @@ trait BaseService extends Service {
       state = s
     })
   }
-  
+
+  def getBlackList = {
+    val default = getString(R.string.black_list)
+    try {
+      val container = app.containerHolder.getContainer
+      val update = container.getString("black_list")
+      if (update == null || update.isEmpty) default else update
+    } catch {
+      case ex: Exception => default
+    }
+  }
 }
