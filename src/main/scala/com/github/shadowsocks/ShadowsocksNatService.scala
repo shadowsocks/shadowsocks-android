@@ -133,7 +133,6 @@ class ShadowsocksNatService extends BaseService {
         , "-P" , getApplicationInfo.dataDir
         , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
 
-
       if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
       sstunnelProcess = new GuardedProcess(cmd).start()
