@@ -177,6 +177,24 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       startDnsDaemon()
       startDnsTunnel()
     }
+<<<<<<< HEAD
+=======
+  }
+
+  def startKcptunDaemon() {
+    if (profile.kcpcli == null) profile.kcpcli = ""
+
+    val cmd = ArrayBuffer(getApplicationInfo.dataDir + "/kcptun"
+      , "-r", profile.host + ":" + profile.kcpPort
+      , "-l", "127.0.0.1:" + (profile.localPort + 90)
+      , "--path", protectPath)
+    try cmd ++= Utils.translateCommandline(profile.kcpcli) catch {
+      case exc: Exception => throw KcpcliParseException(exc)
+    }
+
+    if (BuildConfig.DEBUG)
+      Log.d(TAG, cmd.mkString(" "))
+>>>>>>> c842f7f... Bump version
 
   }
 
@@ -273,19 +291,20 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
+    val protect = "protect = \"" + protectPath +"\";"
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, profile.dns.split(":")(0) + ", 114.114.114.114, 119.29.29.29, 1.2.4.8",
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
+          "0.0.0.0", profile.localPort + 53, profile.dns.split(":")(0) + ", 119.29.29.29, 1.2.4.8",
           getBlackList, reject, profile.localPort + 63, reject)
       }
       case Route.CHINALIST => {
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, profile.dns.split(":")(0) + ", 8.8.4.4, 208.67.222.222",
           "", reject, profile.localPort + 63, reject)
       }
       case _ => {
-        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject)
       }
     }

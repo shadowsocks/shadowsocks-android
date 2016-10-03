@@ -68,6 +68,8 @@ trait BaseService extends Service {
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
   var callbacksCount: Int = _
   lazy val handler = new Handler(getMainLooper)
+  lazy val restartHanlder = new Handler(getMainLooper)
+  lazy val protectPath = getApplicationInfo.dataDir + "/protect_path"
 
   private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
@@ -283,5 +285,5 @@ trait BaseService extends Service {
       case ex: Exception => "exclude = " + default + ";"
     }
   }
-  
+
 }
