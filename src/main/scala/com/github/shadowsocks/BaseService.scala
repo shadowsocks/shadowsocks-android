@@ -70,6 +70,7 @@ trait BaseService extends Service {
   var callbacksCount: Int = _
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
+  lazy val protectPath = getApplicationInfo.dataDir + "/protect_path"
 
   private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()

@@ -187,17 +187,17 @@ class ShadowsocksNatService extends BaseService {
 
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, "1.2.4.8, 114.114.114.114",
           getBlackList, reject, profile.localPort + 63, reject)
       }
       case Route.CHINALIST => {
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, "8.8.8.8, 208.67.222.222",
           "", reject, profile.localPort + 63, reject)
       }
       case _ => {
-        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, profile.localPort + 63, reject)
       }
     }

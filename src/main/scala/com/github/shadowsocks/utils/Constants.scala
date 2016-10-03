@@ -69,6 +69,7 @@ object ConfigUtils {
     """
       |global {
       | perm_cache = 2048;
+      | %s
       | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
@@ -101,6 +102,7 @@ object ConfigUtils {
     """
       |global {
       | perm_cache = 2048;
+      | %s
       | cache_dir = "%s";
       | server_ip = %s;
       | server_port = %d;
