@@ -1,3 +1,4 @@
+# 敬告:这个工程仅仅是当初将ss for android的功能用java改写的而已,仅仅是调通了而已,没有实际意义!
 # shadowsocks-android-pro
 A Shadowsocks client for Android
 
