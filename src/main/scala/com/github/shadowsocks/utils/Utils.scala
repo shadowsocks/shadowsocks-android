@@ -78,7 +78,9 @@ object Utils {
   }
 
   def dpToPx(context: Context, dp: Int): Int =
-    Math.round(dp * (context.getResources.getDisplayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
+    Math.round(dp * context.getResources.getDisplayMetrics.density)
+  def spToPx(context: Context, sp: Int): Int =
+    Math.round(sp * context.getResources.getDisplayMetrics.scaledDensity)
 
   /*
      * round or floor depending on whether you are using offsets(floor) or

@@ -6,30 +6,18 @@ import android.support.v7.preference.DialogPreference
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup.LayoutParams
-import android.widget.NumberPicker
-import android.widget.EditText
+import android.widget.{EditText, NumberPicker}
 import com.github.shadowsocks.R
+import com.github.shadowsocks.utils.Utils
 
-class MyNumberPicker(private val context: Context, attrs: AttributeSet = null)
-  extends NumberPicker(context, attrs) {
-  override def addView(child: View) {
-    super.addView(child)
-    updateView(child)
-  }
-  override def addView(child: View, params: LayoutParams) {
-    super.addView(child, params)
-    updateView(child)
-  }
+class MyNumberPicker(private val context: Context, attrs: AttributeSet = null) extends NumberPicker(context, attrs) {
   override def addView(child: View, index: Int, params: LayoutParams) {
     super.addView(child, index, params)
-    updateView(child)
-  }
-  def updateView(child: View) {
-    if (child.isInstanceOf[EditText]) {
-      child.asInstanceOf[EditText].setTextSize(dp2px(6))
+    child match {
+      case et: EditText => et.setTextSize(Utils.spToPx(context, 6))
+      case _ =>
     }
   }
-  def dp2px(dp: Float): Int = (dp*getResources().getDisplayMetrics().density).toInt
 }
 
 class NumberPickerPreference(private val context: Context, attrs: AttributeSet = null)
