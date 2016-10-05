@@ -1,4 +1,4 @@
-package tk.mygod.preference
+package be.mygod.preference
 
 import android.content.Context
 import android.support.v7.preference.{PreferenceViewHolder, PreferenceCategory => Base}

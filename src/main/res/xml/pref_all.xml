@@ -2,34 +2,34 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
-    <tk.mygod.preference.PreferenceCategory
+    <be.mygod.preference.PreferenceCategory
             android:title="@string/proxy_cat">
 
-        <tk.mygod.preference.EditTextPreference
+        <be.mygod.preference.EditTextPreference
                 android:key="profileName"
                 android:persistent="false"
                 android:summary="%s"
                 android:title="@string/profile_name"/>
-        <tk.mygod.preference.EditTextPreference
+        <be.mygod.preference.EditTextPreference
                 android:key="proxy"
                 android:persistent="false"
                 android:summary="%s"
                 android:title="@string/proxy"/>
-        <tk.mygod.preference.NumberPickerPreference
+        <be.mygod.preference.NumberPickerPreference
                 app:min="1"
                 app:max="65535"
                 android:key="remotePortNum"
                 android:persistent="false"
                 android:summary="%d"
                 android:title="@string/remote_port"/>
-        <tk.mygod.preference.NumberPickerPreference
+        <be.mygod.preference.NumberPickerPreference
                 app:min="1025"
                 app:max="65535"
                 android:key="localPortNum"
                 android:persistent="false"
                 android:summary="%d"
                 android:title="@string/port"/>
-        <tk.mygod.preference.EditTextPreference
+        <be.mygod.preference.EditTextPreference
                 android:inputType="textPassword"
                 android:key="sitekey"
                 android:persistent="false"
@@ -48,9 +48,9 @@
                 android:summary="@string/onetime_auth_summary"
                 android:title="@string/onetime_auth"/>
 
-    </tk.mygod.preference.PreferenceCategory>
+    </be.mygod.preference.PreferenceCategory>
 
-    <tk.mygod.preference.PreferenceCategory
+    <be.mygod.preference.PreferenceCategory
             android:title="@string/feature_cat">
 
         <android.support.v7.preference.DropDownPreference
@@ -76,9 +76,9 @@
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
 
-    </tk.mygod.preference.PreferenceCategory>
+    </be.mygod.preference.PreferenceCategory>
 
-    <tk.mygod.preference.PreferenceCategory
+    <be.mygod.preference.PreferenceCategory
             android:title="@string/kcp">
 
         <SwitchPreference
@@ -87,7 +87,7 @@
                 android:summary="@string/kcp_summary"
                 android:title="@string/kcp"/>
 
-        <tk.mygod.preference.NumberPickerPreference
+        <be.mygod.preference.NumberPickerPreference
                 app:min="1"
                 app:max="65535"
                 android:key="kcpPort"
@@ -95,15 +95,15 @@
                 android:summary="@string/kcp_port_summary"
                 android:title="@string/kcp_port"/>
 
-        <tk.mygod.preference.EditTextPreference
+        <be.mygod.preference.EditTextPreference
                 android:key="kcpcli"
                 android:persistent="false"
                 android:summary="%s"
                 android:title="@string/kcpcli"/>
 
-    </tk.mygod.preference.PreferenceCategory>
+    </be.mygod.preference.PreferenceCategory>
 
-    <tk.mygod.preference.PreferenceCategory android:title="@string/misc_cat">
+    <be.mygod.preference.PreferenceCategory android:title="@string/misc_cat">
 
         <SwitchPreference
                 android:key="isAutoConnect"
@@ -126,7 +126,7 @@
                     android:summary="@string/flush_dnscache_summary"/>
         <Preference android:key="about" android:title="@string/about"/>
 
-    </tk.mygod.preference.PreferenceCategory>
+    </be.mygod.preference.PreferenceCategory>
 
 
 </PreferenceScreen>

@@ -1,4 +1,4 @@
-package tk.mygod.preference
+package be.mygod.preference
 
 import java.lang.reflect.Field
 import java.util.List

@@ -1,4 +1,4 @@
-package tk.mygod.preference
+package be.mygod.preference
 
 import android.content.Context
 import android.content.res.TypedArray

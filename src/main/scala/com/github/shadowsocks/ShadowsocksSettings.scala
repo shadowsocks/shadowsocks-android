@@ -15,7 +15,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences.KcpCliPreferenceDialogFragment
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
-import tk.mygod.preference._
+import be.mygod.preference._
 
 object ShadowsocksSettings {
   // Constants

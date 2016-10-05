@@ -3,7 +3,7 @@ package com.github.shadowsocks.preferences
 import android.app.AlertDialog
 import android.content.DialogInterface
 import eu.chainfire.libsuperuser.Shell
-import tk.mygod.preference.EditTextPreferenceDialogFragment
+import be.mygod.preference.EditTextPreferenceDialogFragment
 
 import scala.collection.JavaConverters._
 
