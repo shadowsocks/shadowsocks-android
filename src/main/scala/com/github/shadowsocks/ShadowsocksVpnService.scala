@@ -177,25 +177,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       startDnsDaemon()
       startDnsTunnel()
     }
-<<<<<<< HEAD
-=======
-  }
-
-  def startKcptunDaemon() {
-    if (profile.kcpcli == null) profile.kcpcli = ""
-
-    val cmd = ArrayBuffer(getApplicationInfo.dataDir + "/kcptun"
-      , "-r", profile.host + ":" + profile.kcpPort
-      , "-l", "127.0.0.1:" + (profile.localPort + 90)
-      , "--path", protectPath)
-    try cmd ++= Utils.translateCommandline(profile.kcpcli) catch {
-      case exc: Exception => throw KcpcliParseException(exc)
-    }
-
-    if (BuildConfig.DEBUG)
-      Log.d(TAG, cmd.mkString(" "))
->>>>>>> c842f7f... Bump version
-
   }
 
 
