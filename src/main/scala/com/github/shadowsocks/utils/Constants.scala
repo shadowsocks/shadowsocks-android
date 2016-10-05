@@ -174,6 +174,7 @@ object Key {
   val obfs = "obfs"
   val obfs_param = "obfs_param"
   val protocol = "protocol"
+  val dns = "dns"
 
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"
