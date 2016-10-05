@@ -44,5 +44,8 @@
         <item name="android:fadeScrollbars">true</item>
         <item name="android:scrollbars">vertical</item>
     </style>
+    <style name="NumberPickerStyle">
+        <item name="android:textSize">14sp</item>
+    </style>
 
 </resources>
