@@ -117,6 +117,7 @@ object ConfigUtils {
       |server {
       | label = "remote-servers";
       | ip = %s;
+      | port = %d;
       | timeout = 3;
       | query_method = udp_only;
       | %s
@@ -175,6 +176,7 @@ object Key {
   val obfs_param = "obfs_param"
   val protocol = "protocol"
   val dns = "dns"
+  val china_dns = "china_dns"
 
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"

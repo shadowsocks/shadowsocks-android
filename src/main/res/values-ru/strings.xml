@@ -71,7 +71,9 @@
   <string name="udp_dns">Проброс UDP</string>
   <string name="udp_dns_summary">Пробрасывать UDP пакеты на удалённый сервер</string>
   <string name="dns">DNS</string>
-  <string name="dns_summary">DNS вы хотите использовать , например, 8.8.8.8:53</string>
+  <string name="dns_summary">DNS используется для разрешения конкретного доменного имени, например, 8.8.8.8:53</string>
+  <string name="china_dns">China DNS</string>
+  <string name="china_dns_summary">Общие используется для разрешения доменных имен DNS , например, 223.5.5.5:53</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks запущен.</string>

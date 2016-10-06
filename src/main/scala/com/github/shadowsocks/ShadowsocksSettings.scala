@@ -19,7 +19,7 @@ object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
-    Key.protocol, Key.obfs, Key.obfs_param, Key.dns)
+    Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
@@ -60,6 +60,7 @@ object ShadowsocksSettings {
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
       case Key.udpdns => updateSwitchPreference(pref, profile.udpdns)
       case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
+      case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
     }
   }
@@ -136,6 +137,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
     findPreference(Key.dns).setOnPreferenceChangeListener((_, value) => {
       profile.dns = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.china_dns).setOnPreferenceChangeListener((_, value) => {
+      profile.china_dns = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
     findPreference(Key.ipv6).setOnPreferenceChangeListener((_, value) => {

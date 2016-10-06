@@ -89,6 +89,11 @@
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                        android:key="china_dns"
+                        android:persistent="false"
+                        android:summary="@string/china_dns_summary"
+                        android:title="@string/china_dns"/>
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="dns"
                 android:persistent="false"
                 android:summary="@string/dns_summary"
