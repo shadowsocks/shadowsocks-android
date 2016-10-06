@@ -1,10 +1,31 @@
-Please answer these questions before submitting your issue. Thanks!
+Please read FAQ in wiki then answer these questions before submitting your issue. Thanks!
 
-### What version of Shadowsocks are you using?
+### Environment
 
+* Android version: *e.g. "7.0.0_r14", more detailed description is preferred*
+* Device: *e.g. Google Pixel XL*
+* Shadowsocks version: *version code "v3.0.0" or commit ID "a073f85"*
 
-### What Android OS version and device are you using?
+### Configuration
 
+_Put an `x` inside the [ ] that applies._
+
+* [ ] IPv4 server address
+* [ ] IPv6 server address
+* [ ] Client IPv4 availability
+* [ ] Client IPv6 availability
+* Local port: 1080
+* Encrypt method:
+* [ ] One-time authentication
+* Route:
+* [ ] IPv6 route
+* [ ] Per-App Proxy
+  * [ ] Bypass mode
+* [ ] UDP Forwarding
+* KCP Parameters: (leave blank if not enabled)
+* [ ] Auto Connect
+* [ ] TCP Fast Open
+* [ ] NAT mode
 
 ### What did you do?
 
@@ -14,5 +35,3 @@ Please answer these questions before submitting your issue. Thanks!
 
 ### What did you see instead?
 
-
-### What is your config in detail (with all sensitive info masked)?
