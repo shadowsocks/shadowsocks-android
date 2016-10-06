@@ -272,7 +272,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
-    val protect = "protect = \"" + protectPath +"\";"
+    val protect = ""
+    if (Build.VERSION.SDK_INT >= 21) {
+      val protect = "protect = \"" + protectPath +"\";"
+    }
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
