@@ -114,18 +114,7 @@ object ConfigUtils {
       | par_queries = 4;
       |}
       |
-      |server {
-      | label = "remote-servers";
-      | ip = %s;
-      | port = %d;
-      | timeout = 3;
-      | query_method = udp_only;
-      | %s
-      | policy = included;
-      | reject = %s;
-      | reject_policy = fail;
-      | reject_recursively = on;
-      |}
+      |%s
       |
       |server {
       | label = "local-server";
@@ -145,6 +134,22 @@ object ConfigUtils {
       | soa=localhost,root.localhost,42,86400,900,86400,86400;
       |}
     """.stripMargin
+
+    val REMOTE_SERVER =
+      """
+        |server {
+        | label = "remote-servers";
+        | ip = %s;
+        | port = %d;
+        | timeout = 3;
+        | query_method = udp_only;
+        | %s
+        | policy = included;
+        | reject = %s;
+        | reject_policy = fail;
+        | reject_recursively = on;
+        |}
+      """.stripMargin
 }
 
 object Key {
