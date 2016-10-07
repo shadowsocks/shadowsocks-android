@@ -190,8 +190,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startKcptunDaemon() {
     if (profile.kcpcli == null) profile.kcpcli = ""
 
+    val host = if (profile.host.contains(":")) {
+      "[" + profile.host + "]"
+    } else {
+      profile.host
+    }
+
     val cmd = ArrayBuffer(getApplicationInfo.dataDir + "/kcptun"
-      , "-r", profile.host + ":" + profile.kcpPort
+      , "-r", host + ":" + profile.kcpPort
       , "-l", "127.0.0.1:" + (profile.localPort + 90)
       , "--path", protectPath)
     try cmd ++= Utils.translateCommandline(profile.kcpcli) catch {
