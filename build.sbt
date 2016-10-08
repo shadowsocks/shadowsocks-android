@@ -24,7 +24,7 @@ shrinkResources in Android := true
 
 typedResources in Android := false
 
-resConfigs in Android := Seq("ru", "zh", "zh-rCN")
+resConfigs in Android := Seq("ru", "zh-rCN", "zh-rTW")
 
 dexMaxHeap in Android := "4g"
 
