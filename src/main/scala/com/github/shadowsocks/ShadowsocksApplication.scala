@@ -68,6 +68,7 @@ object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
   private final val TAG = "ShadowsocksApplication"
+  
   private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS, Executable.KCPTUN)
 
@@ -116,6 +117,15 @@ class ShadowsocksApplication extends Application {
     case _ => locale.getScript match {  // fallback to the corresponding script
       case "Hans" => SIMPLIFIED_CHINESE
       case "Hant" => TRADITIONAL_CHINESE
+      case script =>
+        Log.w(TAG, "Unknown zh locale script: %s. Falling back to trying countries...".format(script))
+        locale.getCountry match {
+          case "SG" => SIMPLIFIED_CHINESE
+          case "HK" | "MO" => TRADITIONAL_CHINESE
+          case _ =>
+            Log.w(TAG, "Unknown zh locale: %s. Falling back to zh-Hans-CN...".format(locale.toLanguageTag))
+            SIMPLIFIED_CHINESE
+        }
     }
   } else null
 
