@@ -48,6 +48,7 @@ import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
+import android.util.Log
 import com.github.shadowsocks.database.{DBHelper, ProfileManager}
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser}
@@ -58,6 +59,9 @@ import com.j256.ormlite.logger.LocalLog
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
+  private final val TAG = "ShadowsocksApplication"
+
+  // The ones in Locale doesn't have script included
   private final lazy val SIMPLIFIED_CHINESE = Locale.forLanguageTag("zh-Hans-CN")
   private final lazy val TRADITIONAL_CHINESE = Locale.forLanguageTag("zh-Hant-TW")
 }
@@ -99,6 +103,15 @@ class ShadowsocksApplication extends Application {
     case _ => locale.getScript match {  // fallback to the corresponding script
       case "Hans" => SIMPLIFIED_CHINESE
       case "Hant" => TRADITIONAL_CHINESE
+      case script =>
+        Log.w(TAG, "Unknown zh locale script: %s. Falling back to trying countries...".format(script))
+        locale.getCountry match {
+          case "SG" => SIMPLIFIED_CHINESE
+          case "HK" | "MO" => TRADITIONAL_CHINESE
+          case _ =>
+            Log.w(TAG, "Unknown zh locale: %s. Falling back to zh-Hans-CN...".format(locale.toLanguageTag))
+            SIMPLIFIED_CHINESE
+        }
     }
   } else null
 
