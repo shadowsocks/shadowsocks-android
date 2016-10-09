@@ -169,19 +169,6 @@ object Utils {
     result
   }
 
-  // Because /sys/class/net/* isn't accessible since API level 24
-  final val FLUSH_DNS = "for if in /sys/class/net/*; do " +
-    "if [ \"down\" != $(cat $if/operstate) ]; then " +  // up or unknown
-      "ndc resolver flushif ${if##*/}; " +
-    "fi " +
-  "done; echo done"
-
-  // Blocked > 3 seconds
-  def toggleAirplaneMode(context: Context) = {
-    val result = Shell.SU.run(FLUSH_DNS)
-    result != null && !result.isEmpty
-  }
-
   def resolve(host: String, addrType: Int): Option[String] = {
     try {
       val lookup = new Lookup(host, addrType)

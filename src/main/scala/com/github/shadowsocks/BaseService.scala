@@ -39,6 +39,7 @@
 
 package com.github.shadowsocks
 
+import java.io.File
 import java.io.IOException
 import java.util.{Timer, TimerTask}
 
@@ -54,6 +55,10 @@ import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCall
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+
+import com.google.firebase.FirebaseApp
+import com.google.firebase.storage.FileDownloadTask
+import com.google.firebase.storage.FirebaseStorage
 
 trait BaseService extends Service {
 
@@ -276,6 +281,7 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
+    FirebaseApp.initializeApp(this)
     app.refreshContainerHolder
   }
 
@@ -310,5 +316,29 @@ trait BaseService extends Service {
     } catch {
       case ex: Exception => "exclude = " + default + ";"
     }
+  }
+
+  def getAcl(route: String) {
+      val localAcl = route match {
+        case Route.BYPASS_LAN => "bypass_lan.acl"
+        case Route.BYPASS_CHN => "bypass_chn.acl"
+        case Route.BYPASS_LAN_CHN => "bypass_lan_chn.acl"
+        case Route.GFWLIST => "gfwlist.acl"
+        case Route.CHINALIST => "chinalist.acl"
+      }
+      val cloudAclFile = new File(getApplicationInfo.dataDir + "/" + localAcl)
+      if (!cloudAclFile.exists) cloudAclFile.createNewFile
+      val tempFile = File.createTempFile(localAcl, "acl")
+      val storage = FirebaseStorage.getInstance
+      val storageRef = storage.getReferenceFromUrl("gs://admob-app-id-3330146721.appspot.com/acl/")
+      val aclRef = storageRef.child(localAcl)
+
+      val task = aclRef.getFile(tempFile)
+      task.addOnSuccessListener((_) => {
+        tempFile.renameTo(cloudAclFile)
+        return
+      })
+      task.addOnFailureListener((_) => Log.e("shadowsocks", "Unable to download " + localAcl))
+      tempFile.deleteOnExit()
   }
 }

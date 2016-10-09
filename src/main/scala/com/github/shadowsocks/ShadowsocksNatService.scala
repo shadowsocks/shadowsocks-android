@@ -96,6 +96,7 @@ class ShadowsocksNatService extends BaseService {
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
+
       profile.route match {
         case Route.BYPASS_LAN => cmd += (getApplicationInfo.dataDir + "/bypass_lan.acl")
         case Route.BYPASS_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_chn.acl")
@@ -336,8 +337,10 @@ class ShadowsocksNatService extends BaseService {
     }
 
     handleConnection()
-    // Set DNS
-    su.addCommand(Utils.FLUSH_DNS)
+
+    // lazily get ACL from cloud
+    getAcl(profile.route)
+
     changeState(State.CONNECTED)
     notification = new ShadowsocksNotification(this, profile.name, true)
   }

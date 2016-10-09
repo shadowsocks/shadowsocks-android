@@ -162,6 +162,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     handleConnection()
     changeState(State.CONNECTED)
+
+    // lazily get ACL from cloud
+    getAcl(profile.route)
+
     notification = new ShadowsocksNotification(this, profile.name)
   }
 
@@ -257,6 +261,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
+
       profile.route match {
         case Route.BYPASS_LAN => cmd += (getApplicationInfo.dataDir + "/bypass_lan.acl")
         case Route.BYPASS_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_chn.acl")

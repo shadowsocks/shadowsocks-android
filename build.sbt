@@ -30,6 +30,8 @@ resolvers += Resolver.jcenterRepo
 
 useSupportVectors
 
+googleServicesSettings
+
 libraryDependencies ++= Seq(
   "com.android.support" % "design" % "24.2.1",
   "com.android.support" % "gridlayout-v7" % "24.2.1",
@@ -39,6 +41,8 @@ libraryDependencies ++= Seq(
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "com.google.android.gms" % "play-services-ads" % "9.6.1",
   "com.google.android.gms" % "play-services-analytics" % "9.6.1",
+  "com.google.firebase" % "firebase-core" % "9.6.1",
+  "com.google.firebase" % "firebase-storage" % "9.6.1",
   "com.j256.ormlite" % "ormlite-android" % "5.0",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
   "dnsjava" % "dnsjava" % "2.1.7",
@@ -52,6 +56,7 @@ proguardVersion in Android := "5.3"
 proguardCache in Android := Seq()
 
 proguardOptions in Android ++= Seq(
+  "-keepattributes Signature",
   "-keep class com.github.shadowsocks.System { *; }",
   "-dontwarn com.google.android.gms.internal.**",
   "-dontwarn com.j256.ormlite.**",

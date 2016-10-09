@@ -545,15 +545,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  def flushDnsCache() {
-    val h = showProgress(R.string.flushing)
-    Utils.ThrowableFuture {
-      if (!Utils.toggleAirplaneMode(getBaseContext)) h.post(() => Snackbar.make(findViewById(android.R.id.content),
-        R.string.flush_dnscache_no_root, Snackbar.LENGTH_LONG).show)
-      h.sendEmptyMessage(0)
-    }
-  }
-
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) = resultCode match {
     case Activity.RESULT_OK =>
       serviceLoad()
