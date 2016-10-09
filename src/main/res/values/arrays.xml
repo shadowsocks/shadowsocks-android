@@ -59,6 +59,7 @@
         <item>http_simple</item>
         <item>http_post</item>
         <item>tls_simple</item>
+        <item>tls1.2_ticket_auth</item>
     </string-array>
 
     <string-array name="obfs_value">
@@ -66,6 +67,7 @@
         <item>http_simple</item>
         <item>http_post</item>
         <item>tls_simple</item>
+        <item>tls1.2_ticket_auth</item>
     </string-array>
 
     <string-array name="route_value">
