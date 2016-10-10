@@ -43,6 +43,7 @@ import java.util
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
@@ -58,8 +59,14 @@ import com.j256.ormlite.logger.LocalLog
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
-  private final lazy val SIMPLIFIED_CHINESE = Locale.forLanguageTag("zh-Hans-CN")
-  private final lazy val TRADITIONAL_CHINESE = Locale.forLanguageTag("zh-Hant-TW")
+  private final val TAG = "ShadowsocksApplication"
+
+  // The ones in Locale doesn't have script included
+  private final lazy val SIMPLIFIED_CHINESE =
+    if (Build.VERSION.SDK_INT >= 21) Locale.forLanguageTag("zh-Hans-CN") else Locale.SIMPLIFIED_CHINESE
+  private final lazy val TRADITIONAL_CHINESE =
+    if (Build.VERSION.SDK_INT >= 21) Locale.forLanguageTag("zh-Hant-TW") else Locale.TRADITIONAL_CHINESE
+    
 }
 
 class ShadowsocksApplication extends Application {
@@ -102,6 +109,7 @@ class ShadowsocksApplication extends Application {
     }
   } else null
 
+  @SuppressLint(Array("NewApi"))
   private def checkChineseLocale(config: Configuration): Unit = if (Build.VERSION.SDK_INT >= 24) {
     val localeList = config.getLocales
     val newList = new Array[Locale](localeList.size())
