@@ -39,8 +39,7 @@
 
 package com.github.shadowsocks
 
-import java.io.File
-import java.io.IOException
+import java.io.{File, IOException}
 import java.util.{Timer, TimerTask}
 
 import android.app.Service
@@ -51,13 +50,11 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import com.github.kevinsawicki.http.HttpRequest
-import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
-import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database.Profile
-
+import com.github.shadowsocks.utils._
 import com.google.firebase.FirebaseApp
-import com.google.firebase.storage.FileDownloadTask
 import com.google.firebase.storage.FirebaseStorage
 
 trait BaseService extends Service {
@@ -318,7 +315,7 @@ trait BaseService extends Service {
     }
   }
 
-  def getAcl(route: String) {
+  def fetchAcl(route: String) {
       val localAcl = route match {
         case Route.BYPASS_LAN => "bypass_lan.acl"
         case Route.BYPASS_CHN => "bypass_chn.acl"
@@ -334,11 +331,16 @@ trait BaseService extends Service {
       val aclRef = storageRef.child(localAcl)
 
       val task = aclRef.getFile(tempFile)
-      task.addOnSuccessListener((_) => {
-        tempFile.renameTo(cloudAclFile)
+      task.addOnSuccessListener(_ => {
+        if (!tempFile.renameTo(cloudAclFile)) {
+          Log.d("shadowsocks", "Failed to rename acl file")
+          if (!tempFile.delete()) tempFile.deleteOnExit()
+        }
         return
       })
-      task.addOnFailureListener((_) => Log.e("shadowsocks", "Unable to download " + localAcl))
-      tempFile.deleteOnExit()
+      task.addOnFailureListener(_ => {
+        Log.e("shadowsocks", "Unable to download " + localAcl)
+        if (!tempFile.delete()) tempFile.deleteOnExit()
+      })
   }
 }

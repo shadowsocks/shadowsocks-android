@@ -164,7 +164,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     changeState(State.CONNECTED)
 
     // lazily get ACL from cloud
-    getAcl(profile.route)
+    fetchAcl(profile.route)
 
     notification = new ShadowsocksNotification(this, profile.name)
   }

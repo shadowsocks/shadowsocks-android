@@ -41,7 +41,6 @@ libraryDependencies ++= Seq(
   "com.github.kevinsawicki" % "http-request" % "6.0",
   "com.google.android.gms" % "play-services-ads" % "9.6.1",
   "com.google.android.gms" % "play-services-analytics" % "9.6.1",
-  "com.google.firebase" % "firebase-core" % "9.6.1",
   "com.google.firebase" % "firebase-storage" % "9.6.1",
   "com.j256.ormlite" % "ormlite-android" % "5.0",
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2",
