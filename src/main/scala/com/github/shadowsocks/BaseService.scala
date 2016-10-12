@@ -62,6 +62,7 @@ trait BaseService extends Service {
 
   case class NameNotResolvedException() extends IOException
   case class KcpcliParseException(cause: Throwable) extends Exception(cause)
+  case class NullConnectionException() extends NullPointerException
 
   var timer: Timer = _
   var trafficMonitorThread: TrafficMonitorThread = _
@@ -141,8 +142,7 @@ trait BaseService extends Service {
   }
 
   def checkProfile(profile: Profile) = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
-    changeState(State.STOPPED, getString(R.string.proxy_empty))
-    stopRunner(true)
+    stopRunner(true, getString(R.string.proxy_empty))
     false
   } else true
 
@@ -200,6 +200,7 @@ trait BaseService extends Service {
       case _: NameNotResolvedException => stopRunner(true, getString(R.string.invalid_server))
       case exc: KcpcliParseException =>
         stopRunner(true, getString(R.string.service_failed) + ": " + exc.cause.getMessage)
+      case _: NullConnectionException => stopRunner(true, getString(R.string.reboot_required))
       case exc: Throwable =>
         stopRunner(true, getString(R.string.service_failed) + ": " + exc.getMessage)
         exc.printStackTrace()

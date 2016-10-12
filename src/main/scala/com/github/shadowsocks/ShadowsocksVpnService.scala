@@ -379,16 +379,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     builder.addRoute("8.8.0.0", 16)
 
-    try {
-      conn = builder.establish()
-      if (conn == null) changeState(State.STOPPED, getString(R.string.reboot_required))
-    } catch {
-      case ex: Exception =>
-        ex.printStackTrace()
-        app.track(ex)
-        stopRunner(true, ex.getMessage)
-        return -1
-    }
+    conn = builder.establish()
+    if (conn == null) throw new NullConnectionException
 
     val fd = conn.getFd
 
