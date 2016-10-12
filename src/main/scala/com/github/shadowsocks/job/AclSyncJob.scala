@@ -2,6 +2,7 @@ package com.github.shadowsocks.job
 
 import java.io.IOException
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 import com.evernote.android.job.Job.{Params, Result}
 import com.evernote.android.job.{Job, JobRequest}
@@ -16,7 +17,7 @@ object AclSyncJob {
   final val TAG = "AclSyncJob"
 
   def schedule(route: String) = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
-    .setExecutionWindow(1, 10000)
+    .setExecutionWindow(1, TimeUnit.DAYS.toMillis(28))
     .setRequirementsEnforced(true)
     .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
     .setRequiresCharging(true)
