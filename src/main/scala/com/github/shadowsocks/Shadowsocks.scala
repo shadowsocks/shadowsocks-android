@@ -41,7 +41,7 @@ package com.github.shadowsocks
 import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
 import java.util
-import java.util.{Date, Locale}
+import java.util.{GregorianCalendar, Locale}
 
 import android.app.backup.BackupManager
 import android.app.{Activity, ProgressDialog}
@@ -437,7 +437,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       val year = 1975 + random.nextInt(40)
       val month = 1 + random.nextInt(12)
       val day = random.nextInt(28)
-      adBuilder.setBirthday(new Date(year, month, day))
+      adBuilder.setBirthday(new GregorianCalendar(year, month, day).getTime)
 
       // Load Ad
       adView.loadAd(adBuilder.build())
