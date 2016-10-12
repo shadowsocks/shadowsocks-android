@@ -60,8 +60,6 @@ import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
-import scala.collection.mutable.ArrayBuffer
-
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
@@ -217,13 +215,7 @@ class ShadowsocksApplication extends Application {
   def copyAssets() {
     copyAssets(System.getABI)
     copyAssets("acl")
-
-    val ab = new ArrayBuffer[String]
-    for (executable <- EXECUTABLES) {
-      ab.append("chmod 755 " + getApplicationInfo.dataDir + "/" + executable)
-    }
-    Shell.SH.run(ab.toArray)
-
+    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }
 
