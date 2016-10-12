@@ -50,6 +50,7 @@ import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.job.AclSyncJob
 import com.github.shadowsocks.utils._
 
 import scala.collection.mutable.ArrayBuffer
@@ -158,6 +159,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     handleConnection()
     changeState(State.CONNECTED)
+
+    AclSyncJob.schedule(profile.route)
+
     notification = new ShadowsocksNotification(this, profile.name)
   }
 
@@ -232,6 +236,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
+<<<<<<< HEAD
       profile.route match {
         case Route.BYPASS_LAN => cmd += (getApplicationInfo.dataDir + "/bypass_lan.acl")
         case Route.BYPASS_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_chn.acl")
@@ -239,6 +244,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         case Route.GFWLIST => cmd += (getApplicationInfo.dataDir + "/gfwlist.acl")
         case Route.CHINALIST => cmd += (getApplicationInfo.dataDir + "/chinalist.acl")
       }
+=======
+      cmd += getApplicationInfo.dataDir + '/' + profile.route + ".acl"
+>>>>>>> 0191d1d... Download acl files from GitHub
     }
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
