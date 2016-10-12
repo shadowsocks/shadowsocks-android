@@ -17,7 +17,7 @@ object DonaldTrump extends JobCreator {
     parts(0) match {
       case AclSyncJob.TAG => new AclSyncJob(parts(1))
       case _ =>
-        Log.w("BillClinton", "Unknown job tag: " + tag)
+        Log.w("DonaldTrump", "Unknown job tag: " + tag)
         null
     }
   }
