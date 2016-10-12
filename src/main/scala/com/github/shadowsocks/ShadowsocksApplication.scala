@@ -39,7 +39,7 @@
 
 package com.github.shadowsocks
 
-import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
+import java.io.{FileOutputStream, IOException}
 import java.util
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -51,9 +51,11 @@ import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
+import com.evernote.android.job.JobManager
 import com.github.shadowsocks.database.{DBHelper, ProfileManager}
+import com.github.shadowsocks.job.DonaldTrump
 import com.github.shadowsocks.utils.CloseUtils._
-import com.github.shadowsocks.utils.{Executable, Key, TcpFastOpen, Utils}
+import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser}
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
@@ -181,6 +183,7 @@ class ShadowsocksApplication extends Application {
       }
     }
     pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
+    JobManager.create(this).addJobCreator(DonaldTrump)
 
     TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
   }
@@ -188,14 +191,6 @@ class ShadowsocksApplication extends Application {
   def refreshContainerHolder {
     val holder = app.containerHolder
     if (holder != null) holder.refresh()
-  }
-
-  private def copyStream(in: InputStream, out: OutputStream) {
-    val buffer = new Array[Byte](1024)
-    while (true) {
-      val count = in.read(buffer)
-      if (count < 0) return else out.write(buffer, 0, count)
-    }
   }
 
   private def copyAssets(path: String) {
@@ -209,7 +204,7 @@ class ShadowsocksApplication extends Application {
     if (files != null) for (file <- files)
       autoClose(assetManager.open(if (path.nonEmpty) path + '/' + file else file))(in =>
         autoClose(new FileOutputStream(getApplicationInfo.dataDir + '/' + file))(out =>
-          copyStream(in, out)))
+          IOUtils.copy(in, out)))
   }
 
   def copyAssets() {

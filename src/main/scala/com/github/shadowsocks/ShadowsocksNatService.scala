@@ -48,6 +48,7 @@ import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.job.AclSyncJob
 import com.github.shadowsocks.utils._
 import eu.chainfire.libsuperuser.Shell
 
@@ -96,14 +97,7 @@ class ShadowsocksNatService extends BaseService {
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
-
-      profile.route match {
-        case Route.BYPASS_LAN => cmd += (getApplicationInfo.dataDir + "/bypass_lan.acl")
-        case Route.BYPASS_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_chn.acl")
-        case Route.BYPASS_LAN_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_lan_chn.acl")
-        case Route.GFWLIST => cmd += (getApplicationInfo.dataDir + "/gfwlist.acl")
-        case Route.CHINALIST => cmd += (getApplicationInfo.dataDir + "/chinalist.acl")
-      }
+      cmd += getApplicationInfo.dataDir + '/' + profile.route + ".acl"
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
@@ -338,8 +332,7 @@ class ShadowsocksNatService extends BaseService {
 
     handleConnection()
 
-    // lazily get ACL from cloud
-    fetchAcl(profile.route)
+    AclSyncJob.schedule(profile.route)
 
     changeState(State.CONNECTED)
     notification = new ShadowsocksNotification(this, profile.name, true)
