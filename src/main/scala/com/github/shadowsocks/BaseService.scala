@@ -251,6 +251,7 @@ trait BaseService extends Service {
   override def onCreate() {
     super.onCreate()
     app.refreshContainerHolder
+    app.updateAssets()
   }
 
   // Service of shadowsocks should always be started explicitly

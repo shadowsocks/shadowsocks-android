@@ -55,7 +55,6 @@ import android.view.{Gravity, View, Window}
 import android.widget.Toast
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.{BuildConfig, ShadowsocksRunnerService}
-import eu.chainfire.libsuperuser.Shell
 import org.xbill.DNS._
 
 import scala.collection.JavaConversions._
@@ -278,9 +277,6 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    val isInstalled = app.settings.getInt(Key.currentVersionCode, -1) == BuildConfig.VERSION_CODE
-    if (!isInstalled) return
-
     val intent = new Intent(context, classOf[ShadowsocksRunnerService])
     context.startService(intent)
   }
