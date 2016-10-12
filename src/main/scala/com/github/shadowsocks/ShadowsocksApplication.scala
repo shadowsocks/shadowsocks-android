@@ -39,6 +39,7 @@
 
 package com.github.shadowsocks
 
+import java.io.{FileOutputStream, IOException, InputStream, OutputStream}
 import java.util
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -51,16 +52,22 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.github.shadowsocks.database.{DBHelper, ProfileManager}
-import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
+import com.github.shadowsocks.utils.CloseUtils._
+import com.github.shadowsocks.utils.{Executable, Key, TcpFastOpen, Utils}
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser}
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
+import eu.chainfire.libsuperuser.Shell
+
+import scala.collection.mutable.ArrayBuffer
 
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
   private final val TAG = "ShadowsocksApplication"
+  private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
+    Executable.TUN2SOCKS, Executable.KCPTUN)
 
   // The ones in Locale doesn't have script included
   private final lazy val SIMPLIFIED_CHINESE =
@@ -184,4 +191,41 @@ class ShadowsocksApplication extends Application {
     val holder = app.containerHolder
     if (holder != null) holder.refresh()
   }
+
+  private def copyStream(in: InputStream, out: OutputStream) {
+    val buffer = new Array[Byte](1024)
+    while (true) {
+      val count = in.read(buffer)
+      if (count < 0) return else out.write(buffer, 0, count)
+    }
+  }
+
+  private def copyAssets(path: String) {
+    val assetManager = getAssets
+    var files: Array[String] = null
+    try files = assetManager.list(path) catch {
+      case e: IOException =>
+        Log.e(TAG, e.getMessage)
+        app.track(e)
+    }
+    if (files != null) for (file <- files)
+      autoClose(assetManager.open(if (path.nonEmpty) path + '/' + file else file))(in =>
+        autoClose(new FileOutputStream(getApplicationInfo.dataDir + '/' + file))(out =>
+          copyStream(in, out)))
+  }
+
+  def copyAssets() {
+    copyAssets(System.getABI)
+    copyAssets("acl")
+
+    val ab = new ArrayBuffer[String]
+    for (executable <- EXECUTABLES) {
+      ab.append("chmod 755 " + getApplicationInfo.dataDir + "/" + executable)
+    }
+    Shell.SH.run(ab.toArray)
+
+    editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
+  }
+
+  def updateAssets() = if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
 }

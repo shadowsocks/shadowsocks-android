@@ -280,6 +280,7 @@ trait BaseService extends Service {
     super.onCreate()
     FirebaseApp.initializeApp(this)
     app.refreshContainerHolder
+    app.updateAssets()
   }
 
   // Service of shadowsocks should always be started explicitly
