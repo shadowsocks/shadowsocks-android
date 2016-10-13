@@ -30,7 +30,8 @@ class NumberPickerPreferenceDialogFragment extends PreferenceDialogFragment {
       val value = picker.getValue
       if (preference.callChangeListener(value)) preference.setValue(value)
     }
-    inputMethodManager.hideSoftInputFromWindow(getActivity.getCurrentFocus.getWindowToken,
-      InputMethodManager.HIDE_NOT_ALWAYS)
+    val focus = getActivity.getCurrentFocus
+    if (focus != null)
+      inputMethodManager.hideSoftInputFromWindow(focus.getWindowToken, InputMethodManager.HIDE_NOT_ALWAYS)
   }
 }
