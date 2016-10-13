@@ -146,7 +146,7 @@ class ShadowsocksApplication extends Application {
     }
   } else {
     val newLocale = checkChineseLocale(config.locale)
-    if (newLocale != null && config.locale != newLocale) {
+    if (newLocale != null) {
       val newConfig = new Configuration(config)
       newConfig.locale = newLocale
       val res = getResources
