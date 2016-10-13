@@ -5,6 +5,7 @@ Please read FAQ in wiki then answer these questions before submitting your issue
 * Android version: *e.g. "7.0.0_r14", more detailed description is preferred*
 * Device: *e.g. Google Pixel XL*
 * Shadowsocks version: *version code "v3.0.0" or commit ID "a073f85"*
+* Last version that did not exhibit the issue (if applicable):
 
 ### Configuration
 
