@@ -17,7 +17,13 @@ _Put an `x` inside the [ ] that applies._
 * Local port: 1080
 * Encrypt method:
 * [ ] One-time authentication
-* Route:
+* Route
+  * [ ] All
+  * [ ] Bypass LAN
+  * [ ] Bypass China
+  * [ ] Bypass LAN & China
+  * [ ] GFW List
+  * [ ] China List
 * [ ] IPv6 route
 * [ ] Per-App Proxy
   * [ ] Bypass mode
