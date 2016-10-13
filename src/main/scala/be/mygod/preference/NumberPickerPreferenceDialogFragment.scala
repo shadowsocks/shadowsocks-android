@@ -2,14 +2,11 @@ package be.mygod.preference
 
 import android.content.Context
 import android.support.v14.preference.PreferenceDialogFragment
-import android.view.inputmethod.InputMethodManager
 import android.view.{View, ViewGroup}
 
 class NumberPickerPreferenceDialogFragment extends PreferenceDialogFragment {
   private lazy val preference = getPreference.asInstanceOf[NumberPickerPreference]
   private lazy val picker = preference.picker
-  private lazy val inputMethodManager =
-    getActivity.getSystemService(Context.INPUT_METHOD_SERVICE).asInstanceOf[InputMethodManager]
 
   override protected def onCreateDialogView(context: Context) = {
     val parent = picker.getParent.asInstanceOf[ViewGroup]
@@ -30,8 +27,5 @@ class NumberPickerPreferenceDialogFragment extends PreferenceDialogFragment {
       val value = picker.getValue
       if (preference.callChangeListener(value)) preference.setValue(value)
     }
-    val focus = getActivity.getCurrentFocus
-    if (focus != null)
-      inputMethodManager.hideSoftInputFromWindow(focus.getWindowToken, InputMethodManager.HIDE_NOT_ALWAYS)
   }
 }
