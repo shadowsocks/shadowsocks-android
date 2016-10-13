@@ -63,9 +63,7 @@ import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
-import eu.chainfire.libsuperuser.Shell
 
-import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 object Typefaces {
@@ -189,8 +187,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   override def binderDied {
-    detachService
-    crashRecovery
+    detachService()
+    app.crashRecovery()
     attachService
   }
 
@@ -226,23 +224,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
         clearDialog()
       }
     }
-  }
-
-  def crashRecovery() {
-    val cmd = new ArrayBuffer[String]()
-
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun")) {
-      cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
-      cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
-        .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
-    }
-    if (app.isNatEnabled) {
-      cmd.append("iptables -t nat -F OUTPUT")
-      cmd.append("echo done")
-      val result = Shell.SU.run(cmd.toArray)
-      if (result != null && !result.isEmpty) return // fallback to SH
-    }
-    Shell.SH.run(cmd.toArray)
   }
 
   def cancelStart() {
@@ -463,17 +444,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     handler.removeCallbacksAndMessages(null)
   }
 
-  def reset() {
-    crashRecovery()
-
-    app.copyAssets()
-  }
-
   def recovery() {
     if (serviceStarted) serviceStop()
     val h = showProgress(R.string.recovering)
     Utils.ThrowableFuture {
-      reset()
+      app.copyAssets()
       h.sendEmptyMessage(0)
     }
   }

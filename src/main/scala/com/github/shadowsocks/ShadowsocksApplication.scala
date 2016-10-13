@@ -62,6 +62,8 @@ import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
+import scala.collection.mutable.ArrayBuffer
+
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
@@ -207,7 +209,25 @@ class ShadowsocksApplication extends Application {
           IOUtils.copy(in, out)))
   }
 
+  def crashRecovery() {
+    val cmd = new ArrayBuffer[String]()
+
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun")) {
+      cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
+      cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
+        .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
+    }
+    if (app.isNatEnabled) {
+      cmd.append("iptables -t nat -F OUTPUT")
+      cmd.append("echo done")
+      val result = Shell.SU.run(cmd.toArray)
+      if (result != null && !result.isEmpty) return // fallback to SH
+    }
+    Shell.SH.run(cmd.toArray)
+  }
+
   def copyAssets() {
+    crashRecovery() // ensure executables are killed before writing to them
     copyAssets(System.getABI)
     copyAssets("acl")
     Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
