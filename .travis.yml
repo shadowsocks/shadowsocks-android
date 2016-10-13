@@ -27,7 +27,7 @@ cache:
 android:
     components:
         - tools
-        - build-tools-24.0.1
+        - build-tools-24.0.3
         - extra-android-m2repository
         - extra-google-m2repository
 
