@@ -58,7 +58,7 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
       if (bgService != null) {
         if (app.isNatEnabled) startBackgroundService()
         else if (VpnService.prepare(ShadowsocksRunnerService.this) == null) startBackgroundService()
-        handler.postDelayed(() => stopSelf(), 10000)
+        handler.postDelayed(() => stopSelf(), 3000)
       }
     }, 1000)
   }
