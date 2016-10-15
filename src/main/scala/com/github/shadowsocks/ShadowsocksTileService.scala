@@ -9,10 +9,6 @@ import com.github.shadowsocks.utils.{State, Utils}
 /**
   * @author Mygod
   */
-object ShadowsocksTileService {
-  var running: Boolean = _
-}
-
 @TargetApi(24)
 final class ShadowsocksTileService extends TileService with ServiceBoundContext {
   import ShadowsocksTileService._
@@ -45,15 +41,6 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
   }
 
   override def onServiceConnected() = callback.stateChanged(bgService.getState, bgService.getProfileName, null)
-
-  override def onCreate {
-    super.onCreate
-    running = true
-  }
-  override def onDestroy {
-    super.onDestroy
-    running = false
-  }
 
   override def onStartListening {
     super.onStartListening
