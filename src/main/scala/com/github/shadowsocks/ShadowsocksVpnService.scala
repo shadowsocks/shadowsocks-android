@@ -236,17 +236,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.route != Route.ALL) {
       cmd += "--acl"
-<<<<<<< HEAD
-      profile.route match {
-        case Route.BYPASS_LAN => cmd += (getApplicationInfo.dataDir + "/bypass_lan.acl")
-        case Route.BYPASS_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_chn.acl")
-        case Route.BYPASS_LAN_CHN => cmd += (getApplicationInfo.dataDir + "/bypass_lan_chn.acl")
-        case Route.GFWLIST => cmd += (getApplicationInfo.dataDir + "/gfwlist.acl")
-        case Route.CHINALIST => cmd += (getApplicationInfo.dataDir + "/chinalist.acl")
-      }
-=======
       cmd += getApplicationInfo.dataDir + '/' + profile.route + ".acl"
->>>>>>> 0191d1d... Download acl files from GitHub
     }
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"

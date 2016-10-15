@@ -326,7 +326,7 @@ class ShadowsocksNatService extends BaseService {
     changeState(State.CONNECTED)
 
     AclSyncJob.schedule(profile.route)
-    
+
     notification = new ShadowsocksNotification(this, profile.name, true)
   }
 
