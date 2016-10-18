@@ -320,8 +320,6 @@ class ShadowsocksNatService extends BaseService {
     }
 
     handleConnection()
-    // Set DNS
-    su.addCommand(Utils.FLUSH_DNS)
 
     changeState(State.CONNECTED)
 

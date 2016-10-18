@@ -179,14 +179,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
-    val flush = findPreference("flush_dnscache")
-    if (Build.VERSION.SDK_INT < 17) flush.setSummary(R.string.flush_dnscache_summary)
-    flush.setOnPreferenceClickListener(_ => {
-      app.track(TAG, "flush_dnscache")
-      activity.flushDnsCache()
-      true
-    })
-
     findPreference("about").setOnPreferenceClickListener((preference: Preference) => {
       app.track(TAG, "about")
       val web = new WebView(activity)

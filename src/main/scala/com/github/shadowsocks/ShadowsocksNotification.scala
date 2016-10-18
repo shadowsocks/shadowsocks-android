@@ -40,13 +40,13 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-  if (!ShadowsocksTileService.running) builder.addAction(R.drawable.ic_navigation_close,
+  builder.addAction(R.drawable.ic_navigation_close,
     service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   app.profileManager.getAllProfiles match {
     case Some(profiles) => if (profiles.length > 1)
       builder.addAction(R.drawable.ic_action_settings, service.getString(R.string.quick_switch),
         PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))
-    case _ =>
+  case _ =>
   }
   private lazy val style = new BigTextStyle(builder)
   private var isVisible = true

@@ -170,37 +170,6 @@ object Utils {
     result
   }
 
-  // Because /sys/class/net/* isn't accessible since API level 24
-  final val FLUSH_DNS = "for if in /sys/class/net/*; do " +
-    "if [ \"down\" != $(cat $if/operstate) ]; then " +  // up or unknown
-      "ndc resolver flushif ${if##*/}; " +
-    "fi " +
-  "done; echo done"
-
-  // Blocked > 3 seconds
-  def toggleAirplaneMode(context: Context) = {
-    val result = Shell.SU.run(FLUSH_DNS)
-    if (result != null && !result.isEmpty) true else if (Build.VERSION.SDK_INT < 17) {
-      toggleBelowApiLevel17(context)
-      true
-    } else false
-  }
-
-  //noinspection ScalaDeprecation
-  private def toggleBelowApiLevel17(context: Context) {
-    // Android 4.2 below
-    Settings.System.putInt(context.getContentResolver, Settings.System.AIRPLANE_MODE_ON, 1)
-    val enableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-    enableIntent.putExtra("state", true)
-    context.sendBroadcast(enableIntent)
-    Thread.sleep(3000)
-
-    Settings.System.putInt(context.getContentResolver, Settings.System.AIRPLANE_MODE_ON, 0)
-    val disableIntent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
-    disableIntent.putExtra("state", false)
-    context.sendBroadcast(disableIntent)
-  }
-
   def resolve(host: String, addrType: Int): Option[String] = {
     try {
       val lookup = new Lookup(host, addrType)
