@@ -46,7 +46,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     case Some(profiles) => if (profiles.length > 1)
       builder.addAction(R.drawable.ic_action_settings, service.getString(R.string.quick_switch),
         PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))
-  case _ =>
+    case _ =>
   }
   private lazy val style = new BigTextStyle(builder)
   private var isVisible = true
