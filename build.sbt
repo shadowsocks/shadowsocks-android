@@ -18,6 +18,7 @@ scalacOptions ++= Seq("-target:jvm-1.7", "-Xexperimental")
 
 ndkJavah in Android := List()
 
+
 ndkBuild in Android := List()
 
 shrinkResources in Android := true
