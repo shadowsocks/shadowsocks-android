@@ -15,7 +15,6 @@ object ShadowsocksTileService {
 
 @TargetApi(24)
 final class ShadowsocksTileService extends TileService with ServiceBoundContext {
-  import ShadowsocksTileService._
 
   private lazy val iconIdle = Icon.createWithResource(this, R.drawable.ic_start_idle).setTint(0x80ffffff)
   private lazy val iconBusy = Icon.createWithResource(this, R.drawable.ic_start_busy)
