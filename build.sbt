@@ -36,6 +36,7 @@ useSupportVectors
 libraryDependencies ++= Seq(
   "com.android.support" % "design" % "24.2.1",
   "com.android.support" % "gridlayout-v7" % "24.2.1",
+  "com.android.support" % "cardview-v7" % "24.2.1",
   "com.android.support" % "preference-v14" % "24.2.1",
   "com.evernote" % "android-job" % "1.1.0",
   "com.github.clans" % "fab" % "1.6.4",
