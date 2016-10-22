@@ -8,7 +8,7 @@ name := "shadowsocks"
 version := "3.2.7"
 versionCode := Some(167)
 
-platformTarget := "android-24"
+platformTarget := "android-25"
 
 compileOrder := CompileOrder.JavaThenScala
 javacOptions ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil
@@ -31,16 +31,16 @@ resConfigs := Seq("ru", "zh-rCN", "zh-rTW")
 
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
-  "com.android.support" % "design" % "24.2.1" ::
-  "com.android.support" % "gridlayout-v7" % "24.2.1" ::
-  "com.android.support" % "preference-v14" % "24.2.1" ::
+  "com.android.support" % "design" % "25.0.0" ::
+  "com.android.support" % "gridlayout-v7" % "25.0.0" ::
+  "com.android.support" % "preference-v14" % "25.0.0" ::
   "com.evernote" % "android-job" % "1.1.2" ::
   "com.github.clans" % "fab" % "1.6.4" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.github.kevinsawicki" % "http-request" % "6.0" ::
-  "com.google.android.gms" % "play-services-ads" % "9.6.1" ::
-  "com.google.android.gms" % "play-services-analytics" % "9.6.1" ::
-  "com.google.android.gms" % "play-services-gcm" % "9.6.1" ::
+  "com.google.android.gms" % "play-services-ads" % "9.8.00" ::
+  "com.google.android.gms" % "play-services-analytics" % "9.8.00" ::
+  "com.google.android.gms" % "play-services-gcm" % "9.8.00" ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.7" ::
