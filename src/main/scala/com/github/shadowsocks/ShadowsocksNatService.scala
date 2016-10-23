@@ -321,9 +321,10 @@ class ShadowsocksNatService extends BaseService {
 
     handleConnection()
 
-    changeState(State.CONNECTED)
+    if (profile.route != Route.ALL)
+      AclSyncJob.schedule(profile.route)
 
-    AclSyncJob.schedule(profile.route)
+    changeState(State.CONNECTED)
 
     notification = new ShadowsocksNotification(this, profile.name, true)
   }
