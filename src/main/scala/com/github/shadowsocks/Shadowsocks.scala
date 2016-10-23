@@ -352,10 +352,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          if (resetConnectionTest) if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
-            connectionTestText.setVisibility(View.VISIBLE)
-            connectionTestText.setText(getString(R.string.connection_test_pending))
-          }
+          if (resetConnectionTest || state != State.CONNECTED)
+            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
+              connectionTestText.setVisibility(View.VISIBLE)
+              connectionTestText.setText(getString(R.string.connection_test_pending))
+            }
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
