@@ -62,7 +62,7 @@
 
         <activity
                 android:name=".ShadowsocksRunnerActivity"
-                android:theme="@android:style/Theme.NoDisplay"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:excludeFromRecents="true"
                 android:launchMode="singleTask">
         </activity>
@@ -135,7 +135,7 @@
         <activity
                 android:name=".QuickToggleShortcut"
                 android:label="@string/quick_toggle"
-                android:theme="@android:style/Theme.NoDisplay"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:excludeFromRecents="true"
                 android:launchMode="singleTask">
             <intent-filter>
