@@ -7,7 +7,7 @@ import android.content._
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
-import android.os.{Bundle, Handler}
+import android.os.{Build, Bundle, Handler, UserManager}
 import android.provider.Settings
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -86,7 +86,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val builder = new SpannableStringBuilder
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
-      builder.append(item.name)
+      builder.append(if (isDemoMode) "Profile #" + item.id else item.name)
       if (tx != 0 || rx != 0) {
         val start = builder.length
         builder.append(getString(R.string.stat_profiles,
@@ -186,6 +186,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
+  private lazy val isDemoMode = Build.VERSION.SDK_INT >= 25 && getSystemService(classOf[UserManager]).isDemoUser
 
   private var nfcAdapter : NfcAdapter = _
   private var nfcShareItem: Array[Byte] = _
