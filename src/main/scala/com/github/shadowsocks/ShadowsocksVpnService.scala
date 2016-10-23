@@ -164,7 +164,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     handleConnection()
     changeState(State.CONNECTED)
 
-    AclSyncJob.schedule(profile.route)
+    if (profile.route != Route.ALL)
+      AclSyncJob.schedule(profile.route)
 
     notification = new ShadowsocksNotification(this, profile.name)
   }
