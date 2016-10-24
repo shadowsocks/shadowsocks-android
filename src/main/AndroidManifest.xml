@@ -109,6 +109,7 @@
         </activity>
 
         <activity android:name=".ShadowsocksQuickSwitchActivity"
+                  android:label="@string/quick_switch"
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
                   android:taskAffinity=""
