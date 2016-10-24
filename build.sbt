@@ -2,7 +2,7 @@ scalaVersion := "2.11.8"
 dexMaxHeap := "4g"
 
 enablePlugins(AndroidApp)
-useSupportVectors
+android.useSupportVectors
 
 name := "shadowsocks"
 version := "3.2.7"
