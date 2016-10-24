@@ -61,6 +61,7 @@
                 android:name=".ShadowsocksRunnerActivity"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:excludeFromRecents="true"
+		android:taskAffinity=""
                 android:launchMode="singleTask">
         </activity>
 
@@ -123,6 +124,7 @@
                 android:label="@string/quick_toggle"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:excludeFromRecents="true"
+		android:taskAffinity=""
                 android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
