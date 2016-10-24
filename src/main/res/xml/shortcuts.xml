@@ -4,9 +4,8 @@
               android:enabled="true"
               android:icon="@mipmap/ic_launcher"
               android:shortcutShortLabel="@string/quick_toggle"
-              android:shortcutLongLabel="@string/quick_toggle"
-              android:shortcutDisabledMessage="@string/quick_toggle">
-        <intent android:action="android.intent.action.VIEW"
+              android:shortcutLongLabel="@string/quick_toggle">
+        <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="com.github.shadowsocks"
                 android:targetClass="com.github.shadowsocks.QuickToggleShortcut" />
     </shortcut>
