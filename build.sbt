@@ -38,9 +38,9 @@ libraryDependencies ++=
   "com.github.clans" % "fab" % "1.6.4" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.github.kevinsawicki" % "http-request" % "6.0" ::
-  "com.google.android.gms" % "play-services-ads" % "9.8.00" ::
-  "com.google.android.gms" % "play-services-analytics" % "9.8.00" ::
-  "com.google.android.gms" % "play-services-gcm" % "9.8.00" ::
+  "com.google.android.gms" % "play-services-ads" % "9.8.0" ::
+  "com.google.android.gms" % "play-services-analytics" % "9.8.0" ::
+  "com.google.android.gms" % "play-services-gcm" % "9.8.0" ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.7" ::
