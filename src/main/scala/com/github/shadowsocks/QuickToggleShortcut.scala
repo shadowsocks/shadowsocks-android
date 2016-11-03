@@ -2,7 +2,8 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
+import android.content.pm.ShortcutManager
+import android.os.{Build, Bundle}
 import com.github.shadowsocks.utils.{State, Utils}
 
 /**
@@ -19,7 +20,9 @@ class QuickToggleShortcut extends Activity with ServiceBoundContext {
           .putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
             Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher)))
         finish()
-      case _ => attachService()
+      case _ =>
+        attachService()
+        if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("toggle")
     }
   }
 

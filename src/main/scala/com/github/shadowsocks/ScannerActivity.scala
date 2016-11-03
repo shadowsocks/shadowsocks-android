@@ -2,8 +2,8 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Bundle
+import android.content.pm.{PackageManager, ShortcutManager}
+import android.os.{Build, Bundle}
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
@@ -42,6 +42,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     scannerView = new ZXingScannerView(this)
     val contentFrame = findViewById(R.id.content_frame).asInstanceOf[ViewGroup]
     contentFrame.addView(scannerView)
+    if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("scan")
   }
 
   override def onResume() {
@@ -66,7 +67,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     val intent = new Intent()
     intent.putExtra("uri", rawResult.getText)
     setResult(Activity.RESULT_OK, intent)
-    finish()
+    navigateUpTo(getParentActivityIntent)
   }
 
   def setupToolbar() {
