@@ -11,9 +11,11 @@ import android.util.AttributeSet
   * Based on: https://github.com/Gericop/Android-Support-Preference-V7-Fix/tree/master/app/src/main/java/android/support/v7/preference
   */
 class EditTextPreference(context: Context, attrs: AttributeSet = null) extends Parent(context, attrs)
-  with SummaryPreference {
+  with DialogPreferencePlus with SummaryPreference {
   val editText = new AppCompatEditText(context, attrs)
   editText.setId(android.R.id.edit)
+
+  override def createDialog() = new EditTextPreferenceDialogFragment()
 
   override protected def getSummaryValue = {
     var text = getText

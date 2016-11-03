@@ -3,7 +3,7 @@ package be.mygod.preference
 import android.app.DialogFragment
 import android.os.Bundle
 import android.support.v14.preference.{PreferenceFragment => Base}
-import android.support.v7.preference.PreferenceScreen
+import android.support.v7.preference.{Preference, PreferenceScreen}
 import android.view.{LayoutInflater, ViewGroup}
 
 abstract class PreferenceFragment extends Base {
@@ -18,6 +18,11 @@ abstract class PreferenceFragment extends Base {
     getFragmentManager.beginTransaction()
       .add(fragment, "android.support.v14.preference.PreferenceFragment.DIALOG")
       .commitAllowingStateLoss()
+  }
+
+  override def onDisplayPreferenceDialog(preference: Preference) = preference match {
+    case dpp: DialogPreferencePlus => displayPreferenceDialog(preference.getKey, dpp.createDialog())
+    case _ => super.onDisplayPreferenceDialog(preference)
   }
 
   override protected def onCreateAdapter(screen: PreferenceScreen) = new PreferenceGroupAdapter(screen)
