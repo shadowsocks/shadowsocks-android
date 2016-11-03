@@ -1,6 +1,6 @@
 package com.github.shadowsocks
 
-import android.app.Activity
+import android.app.{Activity, TaskStackBuilder}
 import android.content.Intent
 import android.content.pm.{PackageManager, ShortcutManager}
 import android.os.{Build, Bundle}
@@ -8,16 +8,18 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.view.{MenuItem, ViewGroup}
 import android.widget.Toast
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
+object ScannerActivity {
+  private final val MY_PERMISSIONS_REQUEST_CAMERA = 1
+}
+
 class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHandler {
+  import ScannerActivity._
 
-  val MY_PERMISSIONS_REQUEST_CAMERA = 1
-
-  var scannerView: ZXingScannerView = _
+  private var scannerView: ZXingScannerView = _
 
   override def onRequestPermissionsResult(requestCode: Int, permissions: Array[String],
     grantResults: Array[Int]) {
@@ -34,14 +36,21 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     }
   }
 
+  def navigateUp() {
+    val intent = getParentActivityIntent
+    if (shouldUpRecreateTask(intent) || isTaskRoot)
+      TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
+    else finish()
+  }
+
   override def onCreate(state: Bundle) {
     super.onCreate(state)
     setContentView(R.layout.layout_scanner)
-    setupToolbar()
-
-    scannerView = new ZXingScannerView(this)
-    val contentFrame = findViewById(R.id.content_frame).asInstanceOf[ViewGroup]
-    contentFrame.addView(scannerView)
+    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar.setTitle(getTitle)
+    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
+    toolbar.setNavigationOnClickListener(_ => navigateUp())
+    scannerView = findViewById(R.id.scanner).asInstanceOf[ZXingScannerView]
     if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("scan")
   }
 
@@ -67,29 +76,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     val intent = new Intent()
     intent.putExtra("uri", rawResult.getText)
     setResult(Activity.RESULT_OK, intent)
-    navigateUpTo(getParentActivityIntent)
+    navigateUp()
   }
-
-  def setupToolbar() {
-    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    setSupportActionBar(toolbar)
-    val ab = getSupportActionBar()
-    if (ab != null) {
-      ab.setDisplayHomeAsUpEnabled(true)
-    }
-  }
-
-  override def onOptionsItemSelected(item: MenuItem): Boolean = {
-    item.getItemId() match {
-      // Respond to the action bar's Up/Home button
-      case android.R.id.home =>
-        setResult(Activity.RESULT_CANCELED, new Intent())
-        finish()
-        return true
-      case _ => // Do nothing
-    }
-    return super.onOptionsItemSelected(item)
-  }
-
 }
 

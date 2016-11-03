@@ -2,7 +2,7 @@ package com.github.shadowsocks
 
 import java.nio.charset.Charset
 
-import android.app.Activity
+import android.app.{Activity, TaskStackBuilder}
 import android.content._
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
@@ -203,9 +203,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.profiles)
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-    toolbar.setNavigationOnClickListener((v: View) => {
+    toolbar.setNavigationOnClickListener(_ => {
       val intent = getParentActivityIntent
-      if (intent == null) finish else navigateUpTo(intent)
+      if (shouldUpRecreateTask(intent) || isTaskRoot)
+        TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
+      else finish()
     })
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
