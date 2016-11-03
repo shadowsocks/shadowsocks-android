@@ -42,6 +42,7 @@ package com.github.shadowsocks
 import java.util.concurrent.atomic.AtomicBoolean
 
 import android.Manifest.permission
+import android.app.TaskStackBuilder
 import android.content._
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
@@ -220,9 +221,11 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(R.string.proxied_apps)
     toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
-    toolbar.setNavigationOnClickListener((v: View) => {
+    toolbar.setNavigationOnClickListener(_ => {
       val intent = getParentActivityIntent
-      if (intent == null) finish else navigateUpTo(intent)
+      if (shouldUpRecreateTask(intent) || isTaskRoot)
+        TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
+      else finish()
     })
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
