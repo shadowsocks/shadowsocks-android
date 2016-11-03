@@ -1,5 +1,6 @@
 package com.github.shadowsocks
 
+import android.content.pm.ShortcutManager
 import android.content.res.Resources
 import android.os.{Build, Bundle}
 import android.support.v7.app.AppCompatActivity
@@ -70,5 +71,6 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     if (app.profileId >= 0) lm.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(0))
+    if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("switch")
   }
 }
