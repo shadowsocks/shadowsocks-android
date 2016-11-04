@@ -5,7 +5,7 @@
           android:icon="@drawable/ic_done_all"
           android:alphabeticShortcut="a"
           android:numericShortcut="1"
-          app:showAsAction="always"/>
+          app:showAsAction="never"/>
     <item android:id="@+id/action_export"
           android:title="@string/action_export"
           android:icon="@drawable/ic_content_copy"
