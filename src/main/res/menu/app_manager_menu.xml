@@ -2,7 +2,6 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_apply_all"
           android:title="@string/action_apply_all"
-          android:icon="@drawable/ic_done_all"
           android:alphabeticShortcut="a"
           android:numericShortcut="1"
           app:showAsAction="never"/>
