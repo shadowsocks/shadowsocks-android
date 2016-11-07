@@ -1,5 +1,6 @@
 package com.github.shadowsocks
 
+import android.annotation.SuppressLint
 import android.content.pm.ShortcutManager
 import android.content.res.Resources
 import android.os.{Build, Bundle}
@@ -56,6 +57,7 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
 
   private val profilesAdapter = new ProfilesAdapter
 
+  @SuppressLint(Array("NewApi"))
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_quick_switch)
