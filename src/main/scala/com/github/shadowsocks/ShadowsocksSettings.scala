@@ -204,7 +204,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   }
 
   override def onDisplayPreferenceDialog(preference: Preference) = preference.getKey match {
-    case Key.kcpcli => displayPreferenceDialog (Key.kcpcli, new KcpCliPreferenceDialogFragment () )
+    case Key.kcpcli => displayPreferenceDialog(Key.kcpcli, new KcpCliPreferenceDialogFragment())
     case _ => super.onDisplayPreferenceDialog(preference)
   }
 

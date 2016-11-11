@@ -34,7 +34,7 @@ libraryDependencies ++=
   "com.android.support" % "design" % "25.0.0" ::
   "com.android.support" % "gridlayout-v7" % "25.0.0" ::
   "com.android.support" % "preference-v14" % "25.0.0" ::
-  "com.evernote" % "android-job" % "1.1.2" ::
+  "com.evernote" % "android-job" % "1.1.3" ::
   "com.github.clans" % "fab" % "1.6.4" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.github.kevinsawicki" % "http-request" % "6.0" ::
