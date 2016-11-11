@@ -20,10 +20,10 @@ proguardVersion := "5.3.1"
 proguardCache := Seq()
 proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
-    "-dontwarn com.google.android.gms.internal.**" ::
-    "-dontwarn com.j256.ormlite.**" ::
-    "-dontwarn org.xbill.**" ::
-    Nil
+  "-dontwarn com.google.android.gms.internal.**" ::
+  "-dontwarn com.j256.ormlite.**" ::
+  "-dontwarn org.xbill.**" ::
+  Nil
 
 shrinkResources := true
 typedResources := false
