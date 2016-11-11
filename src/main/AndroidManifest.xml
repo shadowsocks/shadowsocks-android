@@ -38,10 +38,6 @@
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
 
         <activity
-                android:name="com.google.android.gms.ads.AdActivity"
-                android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
-
-        <activity
                 android:name=".Shadowsocks"
                 android:label="@string/app_name"
                 android:launchMode="singleTask">
@@ -186,6 +182,9 @@
                   android:process=":bg"/>
         <receiver android:name="com.evernote.android.job.JobBootReceiver"
                   android:process=":bg"/>
+
+        <!-- Strip useless components -->
+        <activity android:name="com.google.android.gms.ads.purchase.InAppPurchaseActivity" tools:node="remove"/>
     </application>
 
 </manifest>
