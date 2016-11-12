@@ -5,8 +5,8 @@ import java.util.Locale
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.{Intent, SharedPreferences}
 import android.net.Uri
+import android.os.{Build, Bundle}
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
-import android.os.{Build, Bundle, UserManager}
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.webkit.{WebView, WebViewClient}
@@ -45,21 +45,13 @@ object ShadowsocksSettings {
     pref.asInstanceOf[SwitchPreference].setChecked(value)
   }
 
-  def updatePreference(pref: Preference, name: String, profile: Profile, demo: Boolean = false) {
+  def updatePreference(pref: Preference, name: String, profile: Profile) {
     name match {
-      case Key.name =>
-        updateEditTextPreference(pref, profile.name)
-        pref.setSummary(if (demo) "Profile #" + profile.id else "%s")
-      case Key.host =>
-        updateEditTextPreference(pref, profile.host)
-        pref.setSummary(if (demo) "shadowsocks.example.org" else "%s")
-      case Key.remotePort =>
-        updateNumberPickerPreference(pref, profile.remotePort)
-        pref.setSummary(if (demo) "1337" else "%d")
+      case Key.name => updateSummaryEditTextPreference(pref, profile.name)
+      case Key.host => updateSummaryEditTextPreference(pref, profile.host)
+      case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
       case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
-      case Key.password =>
-        updateEditTextPreference(pref, profile.password)
-        pref.setSummary(if (demo) "\u2022" * 32 else "%s")
+      case Key.password => updatePasswordEditTextPreference(pref, profile.password)
       case Key.method => updateDropDownPreference(pref, profile.method)
       case Key.protocol => updateDropDownPreference(pref, profile.protocol)
       case Key.obfs => updateDropDownPreference(pref, profile.obfs)
@@ -257,7 +249,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   var profile: Profile = _
   def setProfile(profile: Profile) {
     this.profile = profile
-    val demo = Build.VERSION.SDK_INT >= 25 && activity.getSystemService(classOf[UserManager]).isDemoUser
-    for (name <- Array(PROXY_PREFS, FEATURE_PREFS).flatten) updatePreference(findPreference(name), name, profile, demo)
+    for (name <- Array(PROXY_PREFS, FEATURE_PREFS).flatten) updatePreference(findPreference(name), name, profile)
   }
 }
