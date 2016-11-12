@@ -4,9 +4,9 @@ dexMaxHeap := "4g"
 enablePlugins(AndroidApp)
 android.useSupportVectors
 
-name := "shadowsocks"
-version := "3.2.7"
-versionCode := Some(167)
+name := "shadowsocksr"
+
+applicationId := "in.zhaoj.shadowsocksr"
 
 platformTarget := "android-25"
 
