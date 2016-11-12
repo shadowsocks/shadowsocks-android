@@ -206,20 +206,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startShadowsocksDaemon() {
 
-    if (profile.route != Route.ALL && profile.route != Route.GFWLIST) {
-      val acl: Array[String] = profile.route match {
-        case Route.BYPASS_LAN => getResources.getStringArray(R.array.private_route)
-        case Route.BYPASS_CHN => getResources.getStringArray(R.array.chn_route)
-        case Route.BYPASS_LAN_CHN =>
-          getResources.getStringArray(R.array.private_route) ++ getResources.getStringArray(R.array.chn_route)
-        case Route.CHINALIST =>
-          Array("[bypass_all]", "[white_list]") ++ getResources.getStringArray(R.array.chn_route)
-      }
-      Utils.printToFile(new File(getApplicationInfo.dataDir + "/acl.list"))(p => {
-        acl.foreach(p.println)
-      })
-    }
-
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
         profile.password, profile.method, 600, profile.protocol, profile.obfs, profile.obfs_param)
