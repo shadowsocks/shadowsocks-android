@@ -23,7 +23,7 @@
   <string name="route_list">ルーティング</string>
   <string name="proxied_apps">分应用代理</string>
   <string name="proxied_apps_summary">为应用程序分别设置代理，在 4.x 下需要启用 NAT 模式</string>
-  <string name="on">开</string>
+  <string name="on">オン</string>
   <string name="bypass_apps">バイパスモード</string>
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自動接続</string>
