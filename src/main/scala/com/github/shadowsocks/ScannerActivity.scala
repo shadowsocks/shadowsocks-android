@@ -8,8 +8,11 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.text.TextUtils
 import android.widget.Toast
 import com.google.zxing.Result
+import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.Parser
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
 object ScannerActivity {
@@ -73,9 +76,9 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
   }
 
   override def handleResult(rawResult: Result) = {
-    val intent = new Intent()
-    intent.putExtra("uri", rawResult.getText)
-    setResult(Activity.RESULT_OK, intent)
+    val uri = rawResult.getText
+    if (!TextUtils.isEmpty(uri))
+      Parser.findAll(uri).foreach(app.profileManager.createProfile)
     navigateUp()
   }
 }
