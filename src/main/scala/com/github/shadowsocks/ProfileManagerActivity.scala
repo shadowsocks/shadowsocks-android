@@ -294,7 +294,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case R.id.fab_qrcode_add =>
         menu.toggle(false)
         val intent = new Intent(this, classOf[ScannerActivity])
-        startActivityForResult(intent, REQUEST_QRCODE)
+        startActivity(intent)
       case R.id.fab_nfc_add =>
         menu.toggle(true)
         val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
@@ -387,16 +387,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     app.profileManager.setProfileAddedListener(null)
     super.onDestroy
   }
-
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-    if (requestCode == REQUEST_QRCODE && resultCode == Activity.RESULT_OK) {
-      val contents = data.getStringExtra("uri")
-      if (!TextUtils.isEmpty(contents))
-        Parser.findAll_ssr(contents).foreach(app.profileManager.createProfile)
-        Parser.findAll(contents).foreach(app.profileManager.createProfile)
-    }
-  }
-
+  
   override def onBackPressed() {
     if (menu.isOpened) menu.close(true) else super.onBackPressed()
   }
