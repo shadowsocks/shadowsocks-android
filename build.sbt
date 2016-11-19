@@ -27,7 +27,7 @@ proguardOptions ++=
 
 shrinkResources := true
 typedResources := false
-resConfigs := Seq("ru", "zh-rCN", "zh-rTW")
+resConfigs := Seq("jp", "ru", "zh-rCN", "zh-rTW")
 
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
