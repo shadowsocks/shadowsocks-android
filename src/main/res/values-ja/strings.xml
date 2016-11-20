@@ -14,28 +14,28 @@
   <string name="sitekey">パスワード</string>
   <string name="enc_method">暗号方式</string>
   <string name="feature_cat">機能設定</string>
-  <string name="http_proxy">HTTP プロキシサーバー</string>
-  <string name="http_proxy_summary">ローカル HTTP プロキシ</string>
-  <string name="dns_proxy">DNS プロキシ</string>
+  <string name="http_proxy">HTTP 代理サーバー</string>
+  <string name="http_proxy_summary">ローカル HTTP 代理</string>
+  <string name="dns_proxy">DNS 代理</string>
   <string name="dns_proxy_summary">重定向 DNS 查询到远程服务器</string>
   <string name="auto_set_gfwlist">中国ルーティング</string>
   <string name="auto_set_gfwlist_summary">中国本土アドレスをバイパス</string>
   <string name="route_list">ルーティング</string>
-  <string name="proxied_apps">分应用代理</string>
+  <string name="proxied_apps">選択したアプリにプロキシ</string>
   <string name="proxied_apps_summary">为应用程序分别设置代理，在 4.x 下需要启用 NAT 模式</string>
   <string name="on">オン</string>
   <string name="bypass_apps">バイパスモード</string>
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
   <string name="auto_connect">自動接続</string>
   <string name="auto_connect_summary">随系统启动后台服务</string>
-  <string name="tcp_fastopen_summary">切换需要 ROOT 权限</string>
+  <string name="tcp_fastopen_summary">切り替えるはROOT権限が必要です</string>
   <string name="tcp_fastopen_summary_unsupported">不支持的内核版本：%s &lt; 3.7.1</string>
   <string name="forward_success">后台服务已开始运行。</string>
-  <string name="service_failed">无法连接远程服务器</string>
+  <string name="service_failed">リモートサーバーを接続できません</string>
   <string name="invalid_server">サーバー名が無効です</string>
-  <string name="method_unsafe">警告：この暗号化アルゴリズムは不安です</string>
+  <string name="method_unsafe">警告する：この暗号化アルゴリズムは不安です</string>
   <string name="nat_deprecated">警告：在 Android 5.0 及更高版本中不建议使用 NAT 模式</string>
-  <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
+  <string name="nat_no_root">NAT モードは ROOT権限が必要です</string>
   <string name="switch_to_vpn">VPN モードに切り替える</string>
   <string name="stop">止める</string>
   <string name="quick_switch">切り替える</string>
@@ -43,19 +43,19 @@
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="reboot_required">VPN 服务启动失败。你可能需要重启设备。</string>
   <string name="close">閉じる</string>
-  <string name="proxy_empty">代理服务器地址及密码不能为空</string>
+  <string name="proxy_empty">代理サーバのアドレスやパスワードは空白がいけません</string>
   <string name="connect">接続</string>
-  <string name="initializing">正在初始化……</string>
-  <string name="recovering">重置中……</string>
-  <string name="loading">正在加载……</string>
+  <string name="initializing">初期化します……</string>
+  <string name="recovering">リセットします……</string>
+  <string name="loading">読み込み中……</string>
   <string name="profiles">配置ファイル</string>
   <string name="settings">オプションの設定</string>
-  <string name="remove_profile">删除此配置文件「%s」?</string>
+  <string name="remove_profile">このサーバーの設定を削除する「%s」?</string>
   <string name="recovery">リセット</string>
   <string name="recovery_summary">すべてのバックグラウンドサービスをリセットする</string>
   <string name="about">関する</string>
   <string name="about_title">シャドーソックス（shadowsocks）%s</string>
-  <string name="flush_dnscache">刷新 DNS 缓存</string>
+  <string name="flush_dnscache">DNS キャッシングをリフレッシュする</string>
   <string name="flush_dnscache_summary">只需在 NAT 模式下使用，需要 ROOT 权限</string>
   <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">リフレッシュします……</string>
@@ -63,8 +63,8 @@
   <string name="share_message">QRコードを読み取るやAndroid Beam (NFC) 使用する</string>
   <string name="share_message_without_nfc">QRコードを読み取る</string>
   <string name="share_message_nfc_disabled">QRコードを読み取る\nAndroid Beam が無効にする</string>
-  <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
-  <string name="add_profile">添加配置文件</string>
+  <string name="turn_on_nfc">NFC を付ける &amp; Android Beam</string>
+  <string name="add_profile">配置ファイルを加える</string>
 
   <string name="nat">NAT モード (デバッギングだけ)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
@@ -76,7 +76,7 @@
   <string name="onetime_auth_summary">ワンタイム認証を付ける</string>
 
   <string name="ipv6">IPv6 ルーティング</string>
-  <string name="ipv6_summary">リモートサーバーにIPv6トラフィックを転送</string>
+  <string name="ipv6_summary">リモートサーバーに IPv6 トラフィックを転送</string>
 
   <string name="stat">ネットワークトラフィック</string>
   <string name="stat_summary">送信済み: \t%3$s\t↑\t%1$s/s\n受け取る: \t%4$s\t↓\t%2$s/s</string>
@@ -90,15 +90,15 @@
 
   <!-- profile -->
   <string name="profile_manager_dialog">配置ファイル</string>
-  <string name="profile_manager_dialog_content">&#8226; 点击选择配置文件；\n&#8226; 向左/右滑动或按左删除；\n&#8226;
-    长按拖动改变顺序。</string>
+  <string name="profile_manager_dialog_content">&#8226; クリックで配置ファイルに選択する；\n&#8226; 左/右へ滑るか左にクリックするで削除する；\n&#8226;
+    長押しやドラッグで順序を変える。</string>
   <string name="gotcha">分かる</string>
   <string name="copy_url">コピー URL</string>
-  <string name="add_profile_dialog">为影梭添加此配置文件？</string>
+  <string name="add_profile_dialog">シャドーソックスに配置ファイルを加えますか</string>
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
   <string name="add_profile_nfc_hint_title">Android Beam (NFC) で配置ファイルを加える</string>
-  <string name="add_profile_nfc_hint">2台の設備を保持すると同時に、また別の設備に、配置ファイルの共有ボタンをクリックし、彼らをいっしょに置きます。\n NFC ラベルスがキャニングもできる。</string>
+  <string name="add_profile_nfc_hint">2台の設備を保持すると同時に、また別の設備に、配置ファイルの共有ボタンをクリックし、彼らをいっしょに置きます。\nNFC ラベルスがキャニングもできる。</string>
   <string name="add_profile_scanner_permission_required">QRコードを読み取るはカメラ権限が必要である。</string>
 
   <string-array name="route_entry">
@@ -106,8 +106,8 @@
     <item>LANアドレスをバイパス</item>
     <item>中国本土アドレスをバイパス</item>
     <item>LANアドレスや中国本土アドレスをバイパス</item>
-    <item>中国本土で接続できないのアドレスだけをプロキシー</item>
-    <item>中国本土のアドレスだけをプロキシー</item>
+    <item>中国本土で接続できないのアドレスだけを代理する</item>
+    <item>中国本土のアドレスだけを代理する</item>
   </string-array>
 
   <string name="action_apply_all">すべでの配置ファイルに使用する</string>
@@ -124,10 +124,10 @@
   </plurals>
   <string name="undo">取り消し</string>
   <string name="toggle_service_state">サービスを開始する</string>
-  <string name="start_service_default">現在のサーバー接続する</string>
+  <string name="start_service_default">当面のサーバー接続する</string>
   <string name="start_service">%s に接続する</string>
   <string name="stop_service">%s に切り替える</string>
-  <string name="profile_default">現在のプロファイルを使用する</string>
+  <string name="profile_default">当面の配置を使用する</string>
 
   <!-- status -->
   <string name="sent">送信済み:</string>
