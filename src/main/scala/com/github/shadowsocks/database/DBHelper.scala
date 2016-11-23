@@ -46,6 +46,7 @@ import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -81,65 +82,74 @@ class DBHelper(val context: Context)
         onCreate(database, connectionSource)
         return
       }
-      if (oldVersion < 8) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
-      }
-      if (oldVersion < 9) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR DEFAULT 'all';")
-      } else if (oldVersion < 19) {
-        profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'all' WHERE route IS NULL;")
-      }
-      if (oldVersion < 10) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
-      }
-      if (oldVersion < 11) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
-      }
-      if (oldVersion < 12) {
-        profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
-        TableUtils.createTable(connectionSource, classOf[Profile])
-        profileDao.executeRawNoArgs(
-          "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
-            " udpdns, auth, ipv6, individual) " +
-          "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
-          " ipv6, individual FROM `tmp`;")
-        profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
-        profileDao.executeRawNoArgs("COMMIT;")
-      } else if (oldVersion < 13) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
-      }
 
-      if (oldVersion < 15) {
-        if (oldVersion >= 12) profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
-        var i = 0
-        for (profile <- profileDao.queryForAll.asScala) {
-          if (oldVersion < 14) profile.individual = updateProxiedApps(context, profile.individual)
-          profile.userOrder = i
-          profileDao.update(profile)
-          i += 1
+      try {
+        if (oldVersion < 8) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
         }
-      }
+        if (oldVersion < 9) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR DEFAULT 'all';")
+        } else if (oldVersion < 19) {
+          profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'all' WHERE route IS NULL;")
+        }
+        if (oldVersion < 10) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN auth SMALLINT;")
+        }
+        if (oldVersion < 11) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
+        }
+        if (oldVersion < 12) {
+          profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
+          TableUtils.createTable(connectionSource, classOf[Profile])
+          profileDao.executeRawNoArgs(
+            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
+              " udpdns, auth, ipv6, individual) " +
+            "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
+            " ipv6, individual FROM `tmp`;")
+          profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
+          profileDao.executeRawNoArgs("COMMIT;")
+        } else if (oldVersion < 13) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
+        }
 
-      if (oldVersion < 16) {
-        profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'bypass-lan-china' WHERE route = 'bypass-china'")
-      }
+        if (oldVersion < 15) {
+          if (oldVersion >= 12) profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
+          var i = 0
+          for (profile <- profileDao.queryForAll.asScala) {
+            if (oldVersion < 14) profile.individual = updateProxiedApps(context, profile.individual)
+            profile.userOrder = i
+            profileDao.update(profile)
+            i += 1
+          }
+        }
 
-      if (oldVersion < 17) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT " +
-          "'--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0';")
-      } else if (oldVersion < 20) {
-        profileDao.executeRawNoArgs("UPDATE `profile` SET kcpcli = '--crypt none --mode normal --mtu 1200 --nocomp " +
-          "--dscp 46 --parityshard 0' WHERE kcpcli IS NULL;")
-      }
+        if (oldVersion < 16) {
+          profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'bypass-lan-china' WHERE route = 'bypass-china'")
+        }
 
-      if (oldVersion < 18) {
-        profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpPort INTEGER DEFAULT 8399;")
-      } else if (oldVersion < 19) {
-        profileDao.executeRawNoArgs("UPDATE `profile` SET kcpPort = 8399 WHERE kcpPort = 0;")
+        if (oldVersion < 17) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT " +
+            "'--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0';")
+        } else if (oldVersion < 20) {
+          profileDao.executeRawNoArgs("UPDATE `profile` SET kcpcli = '--crypt none --mode normal --mtu 1200 --nocomp " +
+            "--dscp 46 --parityshard 0' WHERE kcpcli IS NULL;")
+        }
+
+        if (oldVersion < 18) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpPort INTEGER DEFAULT 8399;")
+        } else if (oldVersion < 19) {
+          profileDao.executeRawNoArgs("UPDATE `profile` SET kcpPort = 8399 WHERE kcpPort = 0;")
+        }
+      } catch {
+        case ex: Exception =>
+          app.track(ex)
+          profileDao.executeRawNoArgs("DROP TABLE IF EXISTS 'profile';")
+          onCreate(database, connectionSource)
+          return
       }
     }
   }
