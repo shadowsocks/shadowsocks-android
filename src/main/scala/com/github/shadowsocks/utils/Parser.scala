@@ -20,12 +20,14 @@
 
 package com.github.shadowsocks.utils
 
+import java.net.URLDecoder
+
 import android.util.{Base64, Log}
 import com.github.shadowsocks.database.Profile
 
 object Parser {
   val TAG = "ShadowParser"
-  private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#.+)?".r
+  private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
   def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
@@ -38,7 +40,7 @@ object Parser {
         profile.name = ss.group(5)
         profile.host = profile.name
         profile.remotePort = ss.group(6).toInt
-        if (m.group(2) != null) profile.name = m.group(2).substring(1)
+        if (m.group(2) != null) profile.name = URLDecoder.decode(m.group(3), "utf-8")
         profile
       case _ => null
     }
