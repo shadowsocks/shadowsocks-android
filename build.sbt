@@ -31,7 +31,7 @@ resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
 
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
-  "com.android.support" % "cardview-v7" % "25.0.0" ::
+  "com.android.support" % "cardview-v7" % "25.0.1" ::
   "com.android.support" % "design" % "25.0.1" ::
   "com.android.support" % "gridlayout-v7" % "25.0.1" ::
   "com.android.support" % "preference-v14" % "25.0.1" ::
