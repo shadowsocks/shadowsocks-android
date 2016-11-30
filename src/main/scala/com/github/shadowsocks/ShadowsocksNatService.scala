@@ -123,10 +123,11 @@ class ShadowsocksNatService extends BaseService {
         , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
 
       cmd += "-L"
-      if (profile.route == Route.CHINALIST)
-        cmd += "114.114.114.114:53"
-      else
+
+      if (profile.remoteDns == null)
         cmd += "8.8.8.8:53"
+      else
+        cmd += profile.remoteDns + ":53"
 
       if (profile.auth) cmd += "-A"
 

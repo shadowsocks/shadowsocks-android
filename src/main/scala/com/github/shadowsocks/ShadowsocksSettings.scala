@@ -42,7 +42,7 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.auth, Key.kcp, Key.kcpPort, Key.kcpcli)
-  private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
+  private val FEATURE_PREFS = Array(Key.route, Key.remoteDns, Key.proxyApps, Key.udpdns, Key.ipv6)
 
   // Helper functions
   def updateDropDownPreference(pref: Preference, value: String) {
@@ -76,6 +76,10 @@ object ShadowsocksSettings {
       case Key.password =>
         updateEditTextPreference(pref, profile.password)
         pref.setSummary(if (demo) "\u2022" * 32 else "%s")
+      case Key.remoteDns =>
+        updateEditTextPreference(pref, profile.remoteDns)
+        if (profile.remoteDns != null)
+          pref.setSummary(if (demo) "8.8.8.8" else "%s")
       case Key.method => updateDropDownPreference(pref, profile.method)
       case Key.route => updateDropDownPreference(pref, profile.route)
       case Key.proxyApps => updateSwitchPreference(pref, profile.proxyApps)
@@ -127,6 +131,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
       profile.route = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
+    findPreference(Key.remoteDns).setOnPreferenceChangeListener((_, value) => {
+      profile.remoteDns = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
 

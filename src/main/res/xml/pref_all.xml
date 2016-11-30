@@ -60,6 +60,10 @@
                 android:entryValues="@array/route_value"
                 android:summary="%s"
                 android:title="@string/route_list"/>
+        <be.mygod.preference.EditTextPreference
+                android:key="remoteDns"
+                android:title="@string/remote_dns"
+                android:summary="@string/remote_dns_summary"/>
         <SwitchPreference
                 android:key="isIpv6"
                 android:persistent="false"
@@ -119,8 +123,10 @@
         <SwitchPreference android:key="isNAT"
                           android:title="@string/nat"
                           android:summary="@string/nat_summary"/>
+
         <Preference android:key="recovery" android:title="@string/recovery"
             android:summary="@string/recovery_summary"/>
+
         <Preference android:key="about" android:title="@string/about"/>
 
     </be.mygod.preference.PreferenceCategory>

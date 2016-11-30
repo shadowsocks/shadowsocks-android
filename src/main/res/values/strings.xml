@@ -10,6 +10,8 @@
   <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
   <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
+  <string name="remote_dns">Remote DNS</string>
+  <string name="remote_dns_summary">DNS server for remote hostname resolution. (Default 8.8.8.8)</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>

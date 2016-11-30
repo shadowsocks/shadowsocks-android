@@ -53,6 +53,9 @@ class Profile {
   var route: String = "all"
 
   @DatabaseField
+  var remoteDns: String = "8.8.8.8"
+
+  @DatabaseField
   var proxyApps: Boolean = false
 
   @DatabaseField

@@ -69,6 +69,8 @@
 
   <string name="nat">NAT 模式 (已過時)</string>
   <string name="nat_summary">使用 NAT 模式代替 VPN 模式，需要 ROOT 權限</string>
+  <string name="remote_dns">遠程 DNS</string>
+  <string name="remote_dns_summary">用於遠程域名解析的 DNS 伺服器 (默認為 8.8.8.8) </string>
 
   <string name="udp_dns">UDP 轉送</string>
   <string name="udp_dns_summary">向遠端轉送 UDP 封包</string>

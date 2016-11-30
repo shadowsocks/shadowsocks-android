@@ -149,6 +149,7 @@ object Key {
   val method = "encMethod"
   val remotePort = "remotePortNum"
   val localPort = "localPortNum"
+  val remoteDns = "remoteDns"
 
   val profileTip = "profileTip"
 
