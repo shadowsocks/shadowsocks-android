@@ -39,6 +39,7 @@
 
 package com.github.shadowsocks.database
 
+import java.net.URLEncoder
 import java.util.Locale
 
 import android.util.Base64
@@ -111,6 +112,7 @@ class Profile {
   @DatabaseField
   var userOrder: Long = _
 
+  
   override def toString = "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&remarks=%s".formatLocal(Locale.ENGLISH,
     host, remotePort, protocol, method, obfs, Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
     password).getBytes, Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
