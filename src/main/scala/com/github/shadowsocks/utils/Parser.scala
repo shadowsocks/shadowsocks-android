@@ -44,7 +44,7 @@ import com.github.shadowsocks.database.Profile
 
 object Parser {
   val TAG = "ShadowParser"
-  private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)".r
+  private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#.+)?".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
   private val pattern_ssr = "(?i)ssr://([A-Za-z0-9_=-]+)".r
@@ -62,6 +62,7 @@ object Parser {
         profile.name = ss.group(5)
         profile.host = profile.name
         profile.remotePort = ss.group(6).toInt
+        if (m.group(2) != null) profile.name = m.group(2).substring(1)
         profile
       case _ => null
     }
