@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks
 
+import android.annotation.SuppressLint
 import android.app.{Activity, TaskStackBuilder}
 import android.content.Intent
 import android.content.pm.{PackageManager, ShortcutManager}
@@ -66,6 +67,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     else finish()
   }
 
+  @SuppressLint(Array("NewApi"))
   override def onCreate(state: Bundle) {
     super.onCreate(state)
     setContentView(R.layout.layout_scanner)

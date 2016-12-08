@@ -91,6 +91,7 @@ class ShadowsocksApplication extends Application {
     profileManager.getProfile(id) getOrElse profileManager.createProfile()
   }
 
+  @SuppressLint(Array("NewApi"))
   private def checkChineseLocale(locale: Locale): Locale = if (locale.getLanguage == "zh") locale.getCountry match {
     case "CN" | "TW" => null            // already supported
     case _ => locale.getScript match {  // fallback to the corresponding script

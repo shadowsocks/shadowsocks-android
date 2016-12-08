@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ShortcutManager
@@ -30,6 +31,7 @@ import com.github.shadowsocks.utils.{State, Utils}
   * @author Mygod
   */
 class QuickToggleShortcut extends Activity with ServiceBoundContext {
+  @SuppressLint(Array("NewApi"))
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     getIntent.getAction match {
