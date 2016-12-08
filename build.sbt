@@ -16,7 +16,7 @@ scalacOptions ++= "-target:jvm-1.7" :: "-Xexperimental" :: Nil
 ndkJavah := Seq()
 ndkBuild := Seq()
 
-proguardVersion := "5.3.1"
+proguardVersion := "5.3.2"
 proguardCache := Seq()
 proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
