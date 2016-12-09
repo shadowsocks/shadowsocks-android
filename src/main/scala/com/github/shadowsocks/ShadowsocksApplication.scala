@@ -27,17 +27,18 @@ import java.util.concurrent.TimeUnit
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
-import com.github.shadowsocks.database.{DBHelper, ProfileManager}
+import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
 import com.github.shadowsocks.job.DonaldTrump
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
-import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser}
+import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser, Tracker}
 import com.google.android.gms.common.api.ResultCallback
 import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
 import com.j256.ormlite.logger.LocalLog
@@ -64,29 +65,29 @@ class ShadowsocksApplication extends Application {
 
   final val SIG_FUNC = "getSignature"
   var containerHolder: ContainerHolder = _
-  lazy val tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
-  lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
-  lazy val editor = settings.edit
+  lazy val tracker: Tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
+  lazy val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+  lazy val editor: SharedPreferences.Editor = settings.edit
   lazy val profileManager = new ProfileManager(new DBHelper(this))
 
-  def isNatEnabled = settings.getBoolean(Key.isNAT, false)
-  def isVpnEnabled = !isNatEnabled
+  def isNatEnabled: Boolean = settings.getBoolean(Key.isNAT, false)
+  def isVpnEnabled: Boolean = !isNatEnabled
 
   // send event
-  def track(category: String, action: String) = tracker.send(new HitBuilders.EventBuilder()
+  def track(category: String, action: String): Unit = tracker.send(new HitBuilders.EventBuilder()
     .setAction(action)
     .setLabel(BuildConfig.VERSION_NAME)
     .build())
-  def track(t: Throwable) = tracker.send(new HitBuilders.ExceptionBuilder()
+  def track(t: Throwable): Unit = tracker.send(new HitBuilders.ExceptionBuilder()
     .setDescription(new StandardExceptionParser(this, null).getDescription(Thread.currentThread.getName, t))
     .setFatal(false)
     .build())
 
-  def profileId = settings.getInt(Key.id, -1)
-  def profileId(i: Int) = editor.putInt(Key.id, i).apply
-  def currentProfile = profileManager.getProfile(profileId)
+  def profileId: Int = settings.getInt(Key.id, -1)
+  def profileId(i: Int): Unit = editor.putInt(Key.id, i).apply()
+  def currentProfile: Option[Profile] = profileManager.getProfile(profileId)
 
-  def switchProfile(id: Int) = {
+  def switchProfile(id: Int): Profile = {
     profileId(id)
     profileManager.getProfile(id) getOrElse profileManager.createProfile()
   }
@@ -128,9 +129,11 @@ class ShadowsocksApplication extends Application {
       res.updateConfiguration(newConfig, res.getDisplayMetrics)
     }
   } else {
+    //noinspection ScalaDeprecation
     val newLocale = checkChineseLocale(config.locale)
     if (newLocale != null) {
       val newConfig = new Configuration(config)
+      //noinspection ScalaDeprecation
       newConfig.locale = newLocale
       val res = getResources
       res.updateConfiguration(newConfig, res.getDisplayMetrics)
@@ -171,7 +174,7 @@ class ShadowsocksApplication extends Application {
     TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
   }
 
-  def refreshContainerHolder {
+  def refreshContainerHolder() {
     val holder = app.containerHolder
     if (holder != null) holder.refresh()
   }
@@ -215,5 +218,5 @@ class ShadowsocksApplication extends Application {
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }
 
-  def updateAssets() = if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
+  def updateAssets(): Unit = if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
 }

@@ -38,7 +38,7 @@ trait SummaryPreference extends Preference {
    *
    * @return the summary with appropriate string substitution
    */
-  override def getSummary = {
+  override def getSummary: String = {
     val summary = super.getSummary
     if (summary == null) null else String.format(summary.toString, getSummaryValue)
   }

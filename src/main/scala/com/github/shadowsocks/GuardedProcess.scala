@@ -25,24 +25,16 @@ import java.lang.System.currentTimeMillis
 import java.util.concurrent.Semaphore
 
 import android.util.Log
+import com.github.shadowsocks.utils.CloseUtils._
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.Stream
-import scala.util.control.Exception._
 
 class StreamLogger(is: InputStream, tag: String) extends Thread {
-
-  def withCloseable[T <: Closeable, R](t: T)(f: T => R): R = {
-    allCatch.andFinally{t.close} apply { f(t) }
-  }
-
-  override def run() {
-    withCloseable(new BufferedReader(new InputStreamReader(is))) {
-      br => try Stream.continually(br.readLine()).takeWhile(_ != null).foreach(Log.i(tag, _)) catch {
-        case ignore: IOException =>
-      }
-    }
-  }
+  override def run(): Unit = autoClose(new BufferedReader(new InputStreamReader(is)))(br =>
+    try Stream.continually(br.readLine()).takeWhile(_ != null).foreach(Log.i(tag, _)) catch {
+      case _: IOException =>
+    })
 }
 
 /**
@@ -58,7 +50,7 @@ class GuardedProcess(cmd: Seq[String]) {
 
   def start(onRestartCallback: () => Unit = null): GuardedProcess = {
     val semaphore = new Semaphore(1)
-    semaphore.acquire
+    semaphore.acquire()
     @volatile var ioException: IOException = null
 
     guardThread = new Thread(() => {
@@ -71,11 +63,11 @@ class GuardedProcess(cmd: Seq[String]) {
           process = new ProcessBuilder(cmd).redirectErrorStream(true).start
 
           val is = process.getInputStream
-          new StreamLogger(is, TAG).start
+          new StreamLogger(is, TAG).start()
 
           if (callback == null) callback = onRestartCallback else callback()
 
-          semaphore.release
+          semaphore.release()
           process.waitFor
 
           this.synchronized {
@@ -88,22 +80,19 @@ class GuardedProcess(cmd: Seq[String]) {
               }
             }
           }
-
         }
       } catch {
-        case ignored: InterruptedException =>
+        case _: InterruptedException =>
           Log.i(TAG, "thread interrupt, destroy process: " + cmd)
           process.destroy()
         case e: IOException => ioException = e
-      } finally semaphore.release
+      } finally semaphore.release()
     }, "GuardThread-" + cmd)
 
     guardThread.start()
-    semaphore.acquire
+    semaphore.acquire()
 
-    if (ioException != null) {
-      throw ioException
-    }
+    if (ioException != null) throw ioException
 
     this
   }
@@ -113,7 +102,7 @@ class GuardedProcess(cmd: Seq[String]) {
     guardThread.interrupt()
     process.destroy()
     try guardThread.join() catch {
-      case ignored: InterruptedException =>
+      case _: InterruptedException =>
     }
   }
 
@@ -125,7 +114,7 @@ class GuardedProcess(cmd: Seq[String]) {
   }
 
   @throws(classOf[InterruptedException])
-  def waitFor = {
+  def waitFor: Int = {
     guardThread.join()
     0
   }

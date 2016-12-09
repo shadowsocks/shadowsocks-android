@@ -30,11 +30,9 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 class TaskerReceiver extends BroadcastReceiver {
   override def onReceive(context: Context, intent: Intent) {
     val settings = TaskerSettings.fromIntent(intent)
-    val switched = app.profileManager.getProfile(settings.profileId) match {
-      case Some(p) =>
-        app.switchProfile(settings.profileId)
-        true
-      case _ => false
+    app.profileManager.getProfile(settings.profileId) match {
+      case Some(_) => app.switchProfile(settings.profileId)
+      case _ =>
     }
     if (settings.switchOn) Utils.startSsService(context) else Utils.stopSsService(context)
   }

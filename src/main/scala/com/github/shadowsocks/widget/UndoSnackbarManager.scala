@@ -37,12 +37,12 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
                              commit: Iterator[(Int, T)] => Unit = null) {
   private val recycleBin = new ArrayBuffer[(Int, T)]
   private val removedCallback = new Snackbar.Callback {
-    override def onDismissed(snackbar: Snackbar, event: Int) = {
+    override def onDismissed(snackbar: Snackbar, event: Int) {
       event match {
         case Snackbar.Callback.DISMISS_EVENT_SWIPE | Snackbar.Callback.DISMISS_EVENT_MANUAL |
              Snackbar.Callback.DISMISS_EVENT_TIMEOUT =>
           if (commit != null) commit(recycleBin.iterator)
-          recycleBin.clear
+          recycleBin.clear()
         case _ =>
       }
       last = null
@@ -50,7 +50,7 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
   }
   private var last: Snackbar = _
 
-  def remove(index: Int, item: T) = {
+  def remove(index: Int, item: T) {
     recycleBin.append((index, item))
     val count = recycleBin.length
     last = Snackbar
@@ -59,8 +59,8 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
       undo(recycleBin.reverseIterator)
       recycleBin.clear
     }): View.OnClickListener)
-    last.show
+    last.show()
   }
 
-  def flush = if (last != null) last.dismiss
+  def flush(): Unit = if (last != null) last.dismiss()
 }

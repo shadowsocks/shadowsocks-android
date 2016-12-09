@@ -52,19 +52,19 @@ trait BaseService extends Service {
   var callbacksCount: Int = _
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
-  lazy val protectPath = getApplicationInfo.dataDir + "/protect_path"
+  lazy val protectPath: String = getApplicationInfo.dataDir + "/protect_path"
 
-  private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+  private val closeReceiver: BroadcastReceiver = (context: Context, _: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-    stopRunner(true)
+    stopRunner(stopService = true)
   }
   var closeReceiverRegistered: Boolean = _
 
   var kcptunProcess: GuardedProcess = _
-  private val networkReceiver: BroadcastReceiver = (context: Context, intent: Intent) => {
+  private val networkReceiver: BroadcastReceiver = (context: Context, _: Intent) => {
    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-   val activeNetwork = cm.getActiveNetworkInfo()
-   val isConnected = activeNetwork != null && activeNetwork.isConnected()
+   val activeNetwork = cm.getActiveNetworkInfo
+   val isConnected = activeNetwork != null && activeNetwork.isConnected
 
    if (isConnected && profile.kcp && kcptunProcess != null) {
      restartHanlder.removeCallbacks(null)
@@ -95,7 +95,7 @@ trait BaseService extends Service {
         callbacksCount += 1
         if (callbacksCount != 0 && timer == null) {
           val task = new TimerTask {
-            def run {
+            def run() {
               if (TrafficMonitor.updateRate()) updateTrafficRate()
             }
           }
@@ -107,27 +107,27 @@ trait BaseService extends Service {
       }
     }
 
-    override def use(profileId: Int) = synchronized(if (profileId < 0) stopRunner(true) else {
+    override def use(profileId: Int): Unit = synchronized(if (profileId < 0) stopRunner(stopService = true) else {
       val profile = app.profileManager.getProfile(profileId).orNull
-      if (profile == null) stopRunner(true) else state match {
+      if (profile == null) stopRunner(stopService = true) else state match {
         case State.STOPPED => if (checkProfile(profile)) startRunner(profile)
         case State.CONNECTED => if (profileId != BaseService.this.profile.id && checkProfile(profile)) {
-          stopRunner(false)
+          stopRunner(stopService = false)
           startRunner(profile)
         }
         case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
       }
     })
 
-    override def useSync(profileId: Int) = use(profileId)
+    override def useSync(profileId: Int): Unit = use(profileId)
   }
 
-  def checkProfile(profile: Profile) = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
-    stopRunner(true, getString(R.string.proxy_empty))
+  def checkProfile(profile: Profile): Boolean = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
+    stopRunner(stopService = true, getString(R.string.proxy_empty))
     false
   } else true
 
-  def connect() = if (profile.host == "198.199.101.152") {
+  def connect(): Unit = if (profile.host == "198.199.101.152") {
     val holder = app.containerHolder
     val container = holder.getContainer
     val url = container.getString("proxy_url")
@@ -175,15 +175,16 @@ trait BaseService extends Service {
 
     changeState(State.CONNECTING)
 
-    if (profile.isMethodUnsafe) handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show)
+    if (profile.isMethodUnsafe)
+      handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show())
 
-    Utils.ThrowableFuture(try connect catch {
-      case _: NameNotResolvedException => stopRunner(true, getString(R.string.invalid_server))
+    Utils.ThrowableFuture(try connect() catch {
+      case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
       case exc: KcpcliParseException =>
-        stopRunner(true, getString(R.string.service_failed) + ": " + exc.cause.getMessage)
-      case _: NullConnectionException => stopRunner(true, getString(R.string.reboot_required))
+        stopRunner(stopService = true, getString(R.string.service_failed) + ": " + exc.cause.getMessage)
+      case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
       case exc: Throwable =>
-        stopRunner(true, getString(R.string.service_failed) + ": " + exc.getMessage)
+        stopRunner(stopService = true, getString(R.string.service_failed) + ": " + exc.getMessage)
         exc.printStackTrace()
         app.track(exc)
     })
@@ -283,7 +284,7 @@ trait BaseService extends Service {
     })
   }
 
-  def getBlackList = {
+  def getBlackList: String = {
     val default = getString(R.string.black_list)
     try {
       val container = app.containerHolder.getContainer
@@ -291,7 +292,7 @@ trait BaseService extends Service {
       val list = if (update == null || update.isEmpty) default else update
       "exclude = " + list + ";"
     } catch {
-      case ex: Exception => "exclude = " + default + ";"
+      case _: Exception => "exclude = " + default + ";"
     }
   }
 }

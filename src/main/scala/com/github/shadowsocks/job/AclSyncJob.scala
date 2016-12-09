@@ -36,7 +36,7 @@ import com.github.shadowsocks.utils.IOUtils
 object AclSyncJob {
   final val TAG = "AclSyncJob"
 
-  def schedule(route: String) = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
+  def schedule(route: String): Int = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
     .setExecutionWindow(1, TimeUnit.DAYS.toMillis(28))
     .setRequirementsEnforced(true)
     .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)

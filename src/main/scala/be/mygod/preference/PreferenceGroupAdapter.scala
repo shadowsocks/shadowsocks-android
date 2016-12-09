@@ -21,7 +21,7 @@
 package be.mygod.preference
 
 import java.lang.reflect.Field
-import java.util.List
+import java.util
 
 import android.os.Build
 import android.support.v4.content.ContextCompat
@@ -57,29 +57,31 @@ object PreferenceGroupAdapter {
 class PreferenceGroupAdapter(group: PreferenceGroup) extends Old(group) {
   import PreferenceGroupAdapter._
 
-  protected lazy val preferenceLayouts = preferenceLayoutsField.get(this).asInstanceOf[List[AnyRef]]
+  protected lazy val preferenceLayouts: util.List[AnyRef] =
+    preferenceLayoutsField.get(this).asInstanceOf[util.List[AnyRef]]
 
-  override def onCreateViewHolder(parent: ViewGroup, viewType: Int) = if (Build.VERSION.SDK_INT < 21) {
-    val context = parent.getContext
-    val inflater = LayoutInflater.from(context)
-    val pl = preferenceLayouts.get(viewType)
-    val view = inflater.inflate(fieldResId.get(pl).asInstanceOf[Int], parent, false)
-    if (view.getBackground == null) {
-      val array = context.obtainStyledAttributes(null, R.styleable.BackgroundStyle)
-      var background = array.getDrawable(R.styleable.BackgroundStyle_android_selectableItemBackground)
-      if (background == null)
-        background = ContextCompat.getDrawable(context, android.R.drawable.list_selector_background)
-      array.recycle
-      val (s, t, e, b) = (ViewCompat.getPaddingStart(view), view.getPaddingTop,
-        ViewCompat.getPaddingEnd(view), view.getPaddingBottom)
-      view.setBackground(background)
-      ViewCompat.setPaddingRelative(view, s, t, e, b)
-    }
-    val widgetFrame = view.findViewById(android.R.id.widget_frame).asInstanceOf[ViewGroup]
-    if (widgetFrame != null) {
-      val widgetResId = fieldWidgetResId.get(pl).asInstanceOf[Int]
-      if (widgetResId != 0) inflater.inflate(widgetResId, widgetFrame) else widgetFrame.setVisibility(View.GONE)
-    }
-    preferenceViewHolderConstructor.newInstance(view)
-  } else super.onCreateViewHolder(parent, viewType)
+  override def onCreateViewHolder(parent: ViewGroup, viewType: Int): PreferenceViewHolder =
+    if (Build.VERSION.SDK_INT < 21) {
+      val context = parent.getContext
+      val inflater = LayoutInflater.from(context)
+      val pl = preferenceLayouts.get(viewType)
+      val view = inflater.inflate(fieldResId.get(pl).asInstanceOf[Int], parent, false)
+      if (view.getBackground == null) {
+        val array = context.obtainStyledAttributes(null, R.styleable.BackgroundStyle)
+        var background = array.getDrawable(R.styleable.BackgroundStyle_android_selectableItemBackground)
+        if (background == null)
+          background = ContextCompat.getDrawable(context, android.R.drawable.list_selector_background)
+        array.recycle()
+        val (s, t, e, b) = (ViewCompat.getPaddingStart(view), view.getPaddingTop,
+          ViewCompat.getPaddingEnd(view), view.getPaddingBottom)
+        view.setBackground(background)
+        ViewCompat.setPaddingRelative(view, s, t, e, b)
+      }
+      val widgetFrame = view.findViewById(android.R.id.widget_frame).asInstanceOf[ViewGroup]
+      if (widgetFrame != null) {
+        val widgetResId = fieldWidgetResId.get(pl).asInstanceOf[Int]
+        if (widgetResId != 0) inflater.inflate(widgetResId, widgetFrame) else widgetFrame.setVisibility(View.GONE)
+      }
+      preferenceViewHolderConstructor.newInstance(view)
+    } else super.onCreateViewHolder(parent, viewType)
 }

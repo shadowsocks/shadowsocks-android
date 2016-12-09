@@ -31,7 +31,7 @@ class ProfileManager(dbHelper: DBHelper) {
   import ProfileManager._
 
   var profileAddedListener: Profile => Any = _
-  def setProfileAddedListener(listener: Profile => Any) = this.profileAddedListener = listener
+  def setProfileAddedListener(listener: Profile => Any): Unit = this.profileAddedListener = listener
 
   def createProfile(p: Profile = null): Profile = {
     val profile = if (p == null) new Profile else p
@@ -99,7 +99,7 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
-  def getFirstProfile = {
+  def getFirstProfile: Option[Profile] = {
     try {
       val result = dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.limit(1L).prepare)
       if (result.size == 1) Option(result.get(0)) else None

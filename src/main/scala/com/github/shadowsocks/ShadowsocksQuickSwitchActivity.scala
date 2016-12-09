@@ -40,7 +40,7 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     {
       val typedArray = obtainStyledAttributes(Array(android.R.attr.selectableItemBackground))
       view.setBackgroundResource(typedArray.getResourceId(0, 0))
-      typedArray.recycle
+      typedArray.recycle()
     }
     private var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
@@ -55,16 +55,16 @@ class ShadowsocksQuickSwitchActivity extends AppCompatActivity {
     def onClick(v: View) {
       app.switchProfile(item.id)
       Utils.startSsService(ShadowsocksQuickSwitchActivity.this)
-      finish
+      finish()
     }
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    val profiles = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    val profiles: List[Profile] = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
-    def getItemCount = profiles.length
+    def getItemCount: Int = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = i match {
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int): Unit = i match {
       case _ => vh.bind(profiles(i))
     }
 

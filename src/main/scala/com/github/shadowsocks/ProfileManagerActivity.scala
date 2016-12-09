@@ -22,7 +22,7 @@ package com.github.shadowsocks
 
 import java.nio.charset.Charset
 
-import android.app.{Activity, TaskStackBuilder}
+import android.app.TaskStackBuilder
 import android.content._
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
@@ -97,7 +97,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       })
       shareBtn.setOnLongClickListener(_ => {
         Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.share, Toast.LENGTH_SHORT), shareBtn,
-          getWindow, 0, Utils.dpToPx(ProfileManagerActivity.this, 8)).show
+          getWindow, 0, Utils.dpToPx(ProfileManagerActivity.this, 8)).show()
         true
       })
     }
@@ -131,41 +131,42 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     def onClick(v: View) {
       app.switchProfile(item.id)
-      finish
+      finish()
     }
 
-    def onKey(v: View, keyCode: Int, event: KeyEvent) = if (event.getAction == KeyEvent.ACTION_DOWN) keyCode match {
-      case KeyEvent.KEYCODE_DPAD_LEFT =>
-        val index = getAdapterPosition
-        if (index >= 0) {
-          profilesAdapter.remove(index)
-          undoManager.remove(index, item)
-          true
-        } else false
-      case _ => false
-    } else false
+    def onKey(v: View, keyCode: Int, event: KeyEvent): Boolean =
+      if (event.getAction == KeyEvent.ACTION_DOWN) keyCode match {
+        case KeyEvent.KEYCODE_DPAD_LEFT =>
+          val index = getAdapterPosition
+          if (index >= 0) {
+            profilesAdapter.remove(index)
+            undoManager.remove(index, item)
+            true
+          } else false
+        case _ => false
+      } else false
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
     profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
-    def getItemCount = profiles.length
+    def getItemCount: Int = profiles.length
 
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = vh.bind(profiles(i))
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int): Unit = vh.bind(profiles(i))
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
 
     def add(item: Profile) {
-      undoManager.flush
+      undoManager.flush()
       val pos = getItemCount
       profiles += item
       notifyItemInserted(pos)
     }
 
     def move(from: Int, to: Int) {
-      undoManager.flush
+      undoManager.flush()
       val step = if (from < to) 1 else -1
       val first = profiles(from)
       var previousOrder = profiles(from).userOrder
@@ -187,11 +188,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       profiles.remove(pos)
       notifyItemRemoved(pos)
     }
-    def undo(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
+    def undo(actions: Iterator[(Int, Profile)]): Unit = for ((index, item) <- actions) {
       profiles.insert(index, item)
       notifyItemInserted(index)
     }
-    def commit(actions: Iterator[(Int, Profile)]) = for ((index, item) <- actions) {
+    def commit(actions: Iterator[(Int, Profile)]): Unit = for ((_, item) <- actions) {
       app.profileManager.delProfile(item.id)
       if (item.id == app.profileId) app.profileId(-1)
     }
@@ -213,8 +214,6 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var isNfcAvailable: Boolean = _
   private var isNfcEnabled: Boolean = _
   private var isNfcBeamEnabled: Boolean = _
-
-  private val REQUEST_QRCODE = 1
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -246,27 +245,27 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
-      def onSwiped(viewHolder: ViewHolder, direction: Int) = {
+      def onSwiped(viewHolder: ViewHolder, direction: Int) {
         val index = viewHolder.getAdapterPosition
         profilesAdapter.remove(index)
         undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
       }
-      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean = {
         profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
         true
       }
     }).attachToRecyclerView(profilesList)
 
     attachService(new IShadowsocksServiceCallback.Stub {
-      def stateChanged(state: Int, profileName: String, msg: String) = () // ignore
-      def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) =
+      def stateChanged(state: Int, profileName: String, msg: String): Unit = () // ignore
+      def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
         if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
     })
 
     if (app.settings.getBoolean(Key.profileTip, true)) {
-      app.editor.putBoolean(Key.profileTip, false).apply
+      app.editor.putBoolean(Key.profileTip, false).apply()
       new AlertDialog.Builder(this).setTitle(R.string.profile_manager_dialog)
-        .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create.show
+        .setMessage(R.string.profile_manager_dialog_content).setPositiveButton(R.string.gotcha, null).create().show()
     }
 
     val intent = getIntent
@@ -311,7 +310,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val profile = app.profileManager.createProfile()
         app.profileManager.updateProfile(profile)
         app.switchProfile(profile.id)
-        finish
+        finish()
       case R.id.fab_qrcode_add =>
         menu.toggle(false)
         val intent = new Intent(this, classOf[ScannerActivity])
@@ -331,18 +330,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         } else {
           dialog.setMessage(getString(R.string.add_profile_nfc_hint))
         }
-        dialog.show
+        dialog.show()
       case R.id.fab_import_add =>
         menu.toggle(true)
         if (clipboard.hasPrimaryClip) {
           val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
           if (profiles.nonEmpty) {
             profiles.foreach(app.profileManager.createProfile)
-            Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show
+            Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
             return
           }
         }
-        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
+        Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
     }
   }
 
@@ -398,11 +397,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     unregisterCallback
   }
 
-  override def onDestroy {
+  override def onDestroy() {
     detachService()
-    undoManager.flush
+    undoManager.flush()
     app.profileManager.setProfileAddedListener(null)
-    super.onDestroy
+    super.onDestroy()
   }
 
   override def onBackPressed() {
@@ -417,8 +416,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       app.profileManager.getAllProfiles match {
         case Some(profiles) =>
           clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
-          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
-        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+          Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
+        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show()
       }
       true
     case _ => false

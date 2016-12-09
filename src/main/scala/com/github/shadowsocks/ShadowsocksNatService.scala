@@ -40,11 +40,11 @@ class ShadowsocksNatService extends BaseService {
 
   val TAG = "ShadowsocksNatService"
 
-  val CMD_IPTABLES_DNAT_ADD_SOCKS = "iptables -t nat -A OUTPUT -p tcp " +
-    "-j DNAT --to-destination 127.0.0.1:8123"
+  val CMD_IPTABLES_DNAT_ADD_SOCKS =
+    "iptables -t nat -A OUTPUT -p tcp -j DNAT --to-destination 127.0.0.1:8123"
 
   private var notification: ShadowsocksNotification = _
-  val myUid = android.os.Process.myUid()
+  val myUid: Int = android.os.Process.myUid()
 
   var sslocalProcess: GuardedProcess = _
   var sstunnelProcess: GuardedProcess = _
@@ -169,20 +169,17 @@ class ShadowsocksNatService extends BaseService {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
 
     val conf = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, "114.114.114.114, 223.5.5.5, 1.2.4.8",
           getBlackList, reject, profile.localPort + 63, reject)
-      }
-      case Route.CHINALIST => {
+      case Route.CHINALIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, "8.8.8.8, 8.8.4.4, 208.67.222.222",
           "", reject, profile.localPort + 63, reject)
-      }
-      case _ => {
+      case _ =>
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, profile.localPort + 63, reject)
-      }
     }
 
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
@@ -254,7 +251,7 @@ class ShadowsocksNatService extends BaseService {
     su.addCommand("iptables -t nat -F OUTPUT")
   }
 
-  def setupIptables() = {
+  def setupIptables() {
     val init_sb = new ArrayBuffer[String]
     val http_sb = new ArrayBuffer[String]
 
@@ -291,14 +288,14 @@ class ShadowsocksNatService extends BaseService {
     su.addCommand((init_sb ++ http_sb).toArray)
   }
 
-  override def startRunner(profile: Profile) = if (su == null)
+  override def startRunner(profile: Profile): Unit = if (su == null)
     su = new Shell.Builder().useSU().setWantSTDERR(true).setWatchdogTimeout(10).open((_, exitCode, _) =>
       if (exitCode == 0) super.startRunner(profile) else {
         if (su != null) {
           su.close()
           su = null
         }
-        super.stopRunner(true, getString(R.string.nat_no_root))
+        super.stopRunner(stopService = true, getString(R.string.nat_no_root))
       })
 
   override def connect() {

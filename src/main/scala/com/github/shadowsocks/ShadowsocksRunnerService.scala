@@ -23,8 +23,7 @@ package com.github.shadowsocks
 import android.app.Service
 import android.content.Intent
 import android.net.VpnService
-import android.os.{IBinder, Handler}
-import com.github.shadowsocks.utils.ConfigUtils
+import android.os.{Handler, IBinder}
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 class ShadowsocksRunnerService extends Service with ServiceBoundContext {
@@ -44,7 +43,7 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
     }, 1000)
   }
 
-  def startBackgroundService() = bgService.useSync(app.profileId)
+  def startBackgroundService(): Unit = bgService.useSync(app.profileId)
 
   override def onCreate() {
     super.onCreate()

@@ -36,7 +36,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
   private lazy val iconBusy = Icon.createWithResource(this, R.drawable.ic_start_busy)
   private lazy val iconConnected = Icon.createWithResource(this, R.drawable.ic_start_connected)
   private lazy val callback = new IShadowsocksServiceCallback.Stub {
-    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) = ()
+    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()
     def stateChanged(state: Int, profileName: String, msg: String) {
       val tile = getQsTile
       if (tile != null) {
@@ -54,23 +54,23 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
             tile.setLabel(getString(R.string.app_name))
             tile.setState(Tile.STATE_UNAVAILABLE)
         }
-        tile.updateTile
+        tile.updateTile()
       }
     }
   }
 
-  override def onServiceConnected() = callback.stateChanged(bgService.getState, bgService.getProfileName, null)
+  override def onServiceConnected(): Unit = callback.stateChanged(bgService.getState, bgService.getProfileName, null)
 
-  override def onStartListening {
-    super.onStartListening
+  override def onStartListening() {
+    super.onStartListening()
     attachService(callback)
   }
-  override def onStopListening {
-    super.onStopListening
-    detachService // just in case the user switches to NAT mode, also saves battery
+  override def onStopListening() {
+    super.onStopListening()
+    detachService() // just in case the user switches to NAT mode, also saves battery
   }
 
-  override def onClick() = if (isLocked) unlockAndRun(toggle) else toggle()
+  override def onClick(): Unit = if (isLocked) unlockAndRun(toggle) else toggle()
 
   private def toggle() = if (bgService != null) bgService.getState match {
     case State.STOPPED => Utils.startSsService(this)

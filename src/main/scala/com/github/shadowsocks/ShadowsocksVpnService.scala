@@ -61,7 +61,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   override def onRevoke() {
-    stopRunner(true)
+    stopRunner(stopService = true)
   }
 
   override def stopRunner(stopService: Boolean, msg: String = null) {
@@ -120,14 +120,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       startActivity(i)
-      stopRunner(true)
+      stopRunner(stopService = true)
       return
     }
 
     super.startRunner(profile)
   }
 
-  override def connect() = {
+  override def connect() {
     super.connect()
 
     vpnThread = new ShadowsocksVpnThread(this)
@@ -253,7 +253,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     sslocalProcess = new GuardedProcess(cmd).start()
   }
 
-  def startDnsTunnel() = {
+  def startDnsTunnel() {
     val conf = if (profile.kcp) {
       ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort + 63,
@@ -291,20 +291,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
     val protect = "protect = \"" + protectPath +"\";"
     val conf = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
+      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, "114.114.114.114, 223.5.5.5, 1.2.4.8",
           getBlackList, reject, profile.localPort + 63, reject)
-      }
-      case Route.CHINALIST => {
+      case Route.CHINALIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, "8.8.8.8, 8.8.4.4, 208.67.222.222",
           "", reject, profile.localPort + 63, reject)
-      }
-      case _ => {
+      case _ =>
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject)
-      }
     }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)

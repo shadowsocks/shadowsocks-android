@@ -35,9 +35,9 @@ object CloseUtils {
       block(a.get)
     } finally if (a.nonEmpty) try {
       val v = a.get
-      if (v ne null) v.close
+      if (v ne null) v.close()
     } catch {
-      case ignore: Exception =>
+      case _: Exception =>
     }
   }
   def autoDisconnect[A <: Disconnectable, B](x: => A)(block: A => B): B = {
@@ -47,9 +47,9 @@ object CloseUtils {
       block(a.get)
     } finally if (a.nonEmpty) try {
       val v = a.get
-      if (v ne null) v.disconnect
+      if (v ne null) v.disconnect()
     } catch {
-      case ignore: Exception =>
+      case _: Exception =>
     }
   }
 }

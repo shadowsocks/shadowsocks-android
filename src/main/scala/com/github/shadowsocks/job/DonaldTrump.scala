@@ -32,7 +32,7 @@ import com.evernote.android.job.JobCreator
   * @author !Mygod
   */
 object DonaldTrump extends JobCreator {
-  def create(tag: String) = {
+  def create(tag: String): AclSyncJob = {
     val parts = tag.split(":")
     parts(0) match {
       case AclSyncJob.TAG => new AclSyncJob(parts(1))

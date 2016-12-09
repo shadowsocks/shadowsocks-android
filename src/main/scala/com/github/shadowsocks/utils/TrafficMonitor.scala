@@ -53,7 +53,7 @@ object TrafficMonitor {
     else numberFormat.format(n) + ' ' + units(i)
   }
 
-  def updateRate() = {
+  def updateRate(): Boolean = {
     val now = System.currentTimeMillis()
     val delta = now - timestampLast
     var updated = false

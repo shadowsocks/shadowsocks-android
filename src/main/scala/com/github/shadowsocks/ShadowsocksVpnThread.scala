@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import java.io.{File, FileDescriptor, IOException}
+import java.lang.reflect.Method
 import java.util.concurrent.Executors
 
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
@@ -28,14 +29,14 @@ import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 object ShadowsocksVpnThread {
-  val getInt = classOf[FileDescriptor].getDeclaredMethod("getInt$")
+  val getInt: Method = classOf[FileDescriptor].getDeclaredMethod("getInt$")
 }
 
 class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
   import ShadowsocksVpnThread._
 
   val TAG = "ShadowsocksVpnService"
-  lazy val PATH = vpnService.getApplicationInfo.dataDir + "/protect_path"
+  lazy val PATH: String = vpnService.getApplicationInfo.dataDir + "/protect_path"
 
   @volatile var isRunning: Boolean = true
   @volatile var serverSocket: LocalServerSocket = _

@@ -22,13 +22,14 @@ package be.mygod.preference
 
 import android.content.Context
 import android.support.v14.preference.PreferenceDialogFragment
+import android.support.v7.widget.AppCompatEditText
 import android.view.{View, ViewGroup}
 
 class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
   private lazy val preference = getPreference.asInstanceOf[EditTextPreference]
   private lazy val editText = preference.editText
 
-  override protected def onCreateDialogView(context: Context) = {
+  override protected def onCreateDialogView(context: Context): AppCompatEditText = {
     val parent = editText.getParent.asInstanceOf[ViewGroup]
     if (parent != null) parent.removeView(editText)
     editText
@@ -43,7 +44,7 @@ class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
 
   override protected def needInputMethod = true
 
-  def onDialogClosed(positiveResult: Boolean) = if (positiveResult) {
+  def onDialogClosed(positiveResult: Boolean): Unit = if (positiveResult) {
     val value = editText.getText.toString
     if (preference.callChangeListener(value)) preference.setText(value)
   }

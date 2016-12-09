@@ -39,7 +39,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
-    override def stateChanged(state: Int, profileName: String, msg: String) = ()  // ignore
+    override def stateChanged(state: Int, profileName: String, msg: String): Unit = ()  // ignore
     override def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
       val txr = TrafficMonitor.formatTraffic(txRate)
       val rxr = TrafficMonitor.formatTraffic(rxRate)
@@ -71,8 +71,8 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private lazy val style = new BigTextStyle(builder)
   private var isVisible = true
   update(if (service.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager].isScreenOn)
-    Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
-  lockReceiver = (context: Context, intent: Intent) => update(intent.getAction)
+    Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, forceShow = true)
+  lockReceiver = (_: Context, intent: Intent) => update(intent.getAction)
   val screenFilter = new IntentFilter()
   screenFilter.addAction(Intent.ACTION_SCREEN_ON)
   screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
@@ -83,33 +83,33 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     if (forceShow || service.getState == State.CONNECTED) action match {
       case Intent.ACTION_SCREEN_OFF =>
         setVisible(visible && !Utils.isLollipopOrAbove, forceShow)
-        unregisterCallback  // unregister callback to save battery
+        unregisterCallback()  // unregister callback to save battery
       case Intent.ACTION_SCREEN_ON =>
         setVisible(visible && Utils.isLollipopOrAbove && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
         service.binder.registerCallback(callback)
         callbackRegistered = true
-      case Intent.ACTION_USER_PRESENT => setVisible(true, forceShow)
+      case Intent.ACTION_USER_PRESENT => setVisible(visible = true, forceShow = forceShow)
     }
 
-  private def unregisterCallback = if (callbackRegistered) {
+  private def unregisterCallback() = if (callbackRegistered) {
     service.binder.unregisterCallback(callback)
     callbackRegistered = false
   }
 
-  def setVisible(visible: Boolean, forceShow: Boolean = false) = if (isVisible != visible) {
+  def setVisible(visible: Boolean, forceShow: Boolean = false): Unit = if (isVisible != visible) {
     isVisible = visible
     builder.setPriority(if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN)
     show()
   } else if (forceShow) show()
 
-  def show() = service.startForeground(1, builder.build)
+  def show(): Unit = service.startForeground(1, builder.build)
 
   def destroy() {
     if (lockReceiver != null) {
       service.unregisterReceiver(lockReceiver)
       lockReceiver = null
     }
-    unregisterCallback
+    unregisterCallback()
     service.stopForeground(true)
     nm.cancel(1)
   }

@@ -42,10 +42,11 @@ class FloatingActionMenuBehavior(context: Context, attrs: AttributeSet)
   private var fabTranslationYAnimator: ValueAnimator = _
   private var fabTranslationY: Float = _
 
-  override def layoutDependsOn(parent: CoordinatorLayout, child: FloatingActionMenu, dependency: View) =
+  override def layoutDependsOn(parent: CoordinatorLayout, child: FloatingActionMenu, dependency: View): Boolean =
     dependency.isInstanceOf[SnackbarLayout]
 
-  override def onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionMenu, dependency: View) = {
+  override def onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionMenu,
+                                      dependency: View): Boolean = {
     dependency match {
       case _: SnackbarLayout =>
         var targetTransY = parent.getDependencies(child).asScala
@@ -54,7 +55,7 @@ class FloatingActionMenuBehavior(context: Context, attrs: AttributeSet)
         if (targetTransY > 0) targetTransY = 0
         if (fabTranslationY != targetTransY) {
           val currentTransY = child.getTranslationY
-          if (fabTranslationYAnimator != null && fabTranslationYAnimator.isRunning) fabTranslationYAnimator.cancel
+          if (fabTranslationYAnimator != null && fabTranslationYAnimator.isRunning) fabTranslationYAnimator.cancel()
           if (child.isShown && Math.abs(currentTransY - targetTransY) > child.getHeight * 0.667F) {
             if (fabTranslationYAnimator == null) {
               fabTranslationYAnimator = new ValueAnimator
@@ -63,7 +64,7 @@ class FloatingActionMenuBehavior(context: Context, attrs: AttributeSet)
                 child.setTranslationY(animation.getAnimatedValue.asInstanceOf[Float]))
             }
             fabTranslationYAnimator.setFloatValues(currentTransY, targetTransY)
-            fabTranslationYAnimator.start
+            fabTranslationYAnimator.start()
           } else child.setTranslationY(targetTransY)
           fabTranslationY = targetTransY
         }
@@ -74,7 +75,7 @@ class FloatingActionMenuBehavior(context: Context, attrs: AttributeSet)
   override def onStartNestedScroll(parent: CoordinatorLayout, child: FloatingActionMenu, directTargetChild: View,
                                    target: View, nestedScrollAxes: Int) = true
   override def onNestedScroll(parent: CoordinatorLayout, child: FloatingActionMenu, target: View, dxConsumed: Int,
-                              dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) = {
+                              dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int) {
     super.onNestedScroll(parent, child, target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed)
     val dy = dyConsumed + dyUnconsumed
     if (child.isMenuButtonHidden) {

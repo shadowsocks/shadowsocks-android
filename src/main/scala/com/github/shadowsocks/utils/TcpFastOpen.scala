@@ -33,7 +33,7 @@ object TcpFastOpen {
   /**
     * Is kernel version >= 3.7.1.
     */
-  lazy val supported = "^(\\d+)\\.(\\d+)\\.(\\d+)".r.findFirstMatchIn(System.getProperty("os.version")) match {
+  lazy val supported: Boolean = "^(\\d+)\\.(\\d+)\\.(\\d+)".r.findFirstMatchIn(System.getProperty("os.version")) match {
     case Some(m) =>
       val kernel = m.group(1).toInt
       if (kernel < 3) false else if (kernel > 3) true else {
@@ -43,7 +43,7 @@ object TcpFastOpen {
     case _ => false
   }
 
-  def sendEnabled = {
+  def sendEnabled: Boolean = {
     val file = new File("/proc/sys/net/ipv4/tcp_fastopen")
     file.canRead && (Utils.readAllLines(file).toInt & 1) > 0
   }

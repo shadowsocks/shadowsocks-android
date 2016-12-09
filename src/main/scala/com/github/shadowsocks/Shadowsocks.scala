@@ -123,7 +123,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
                 getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
               if (m == getString(R.string.nat_no_root)) snackbar.setAction(R.string.switch_to_vpn,
                 (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
-              snackbar.show
+              snackbar.show()
               Log.e(TAG, "Error to start VPN service: " + m)
             }
             preferences.setEnabled(true)
@@ -151,7 +151,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
   }
 
-  def attachService: Unit = attachService(callback)
+  def attachServiceCallback(): Unit = attachService(callback)
 
   override def onServiceConnected() {
     // Update the UI
@@ -160,7 +160,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
-      snackbar.show
+      snackbar.show()
     }
   }
 
@@ -168,10 +168,10 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     if (fab != null) fab.setEnabled(false)
   }
 
-  override def binderDied {
+  override def binderDied() {
     detachService()
     app.crashRecovery()
-    attachService
+    attachServiceCallback()
   }
 
   private var testCount: Int = _
@@ -243,7 +243,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
     val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
     title.setBackgroundResource(typedArray.getResourceId(0, 0))
-    typedArray.recycle
+    typedArray.recycle()
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
     title.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
@@ -287,7 +287,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
               if (success) connectionTestText.setText(result) else {
                 connectionTestText.setText(R.string.connection_test_fail)
-                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
               }))
           }
         }
@@ -301,12 +301,12 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
-        Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show
+        Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show()
       true
     })
     updateTraffic(0, 0, 0, 0)
 
-    handler.post(() => attachService)
+    handler.post(attachServiceCallback)
   }
 
   private def hideCircle() {
@@ -412,11 +412,11 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   override def onStart() {
     super.onStart()
-    registerCallback
+    registerCallback()
   }
   override def onStop() {
     super.onStop()
-    unregisterCallback
+    unregisterCallback()
     clearDialog()
   }
 
@@ -436,7 +436,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) = resultCode match {
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
     case Activity.RESULT_OK =>
       serviceLoad()
     case _ =>

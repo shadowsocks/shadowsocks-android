@@ -35,34 +35,34 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
       binder = service
       service.linkToDeath(ServiceBoundContext.this, 0)
       bgService = IShadowsocksService.Stub.asInterface(service)
-      registerCallback
+      registerCallback()
       ServiceBoundContext.this.onServiceConnected()
     }
     override def onServiceDisconnected(name: ComponentName) {
-      unregisterCallback
+      unregisterCallback()
       ServiceBoundContext.this.onServiceDisconnected()
       bgService = null
       binder = null
     }
   }
 
-  protected def registerCallback = if (bgService != null && callback != null && !callbackRegistered) try {
+  protected def registerCallback(): Unit = if (bgService != null && callback != null && !callbackRegistered) try {
     bgService.registerCallback(callback)
     callbackRegistered = true
   } catch {
-    case ignored: RemoteException => // Nothing
+    case _: RemoteException => // Nothing
   }
 
-  protected def unregisterCallback = {
+  protected def unregisterCallback() {
     if (bgService != null && callback != null && callbackRegistered) try bgService.unregisterCallback(callback) catch {
-      case ignored: RemoteException =>
+      case _: RemoteException =>
     }
     callbackRegistered = false
   }
 
-  def onServiceConnected() = ()
-  def onServiceDisconnected() = ()
-  override def binderDied = ()
+  def onServiceConnected(): Unit = ()
+  def onServiceDisconnected(): Unit = ()
+  override def binderDied(): Unit = ()
 
   private var callback: IShadowsocksServiceCallback.Stub = _
   private var connection: ShadowsocksServiceConnection = _
@@ -86,7 +86,7 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
   }
 
   def detachService() {
-    unregisterCallback
+    unregisterCallback()
     callback = null
     if (connection != null) {
       try unbindService(connection) catch {

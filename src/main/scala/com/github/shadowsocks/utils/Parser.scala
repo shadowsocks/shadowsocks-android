@@ -30,23 +30,23 @@ object Parser {
   private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?".r
   private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
 
-  def findAll(data: CharSequence) = pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
-    decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
-      case Some(ss) =>
-        val profile = new Profile
-        profile.method = ss.group(2).toLowerCase
-        if (ss.group(3) != null) profile.auth = true
-        profile.password = ss.group(4)
-        profile.name = ss.group(5)
-        profile.host = profile.name
-        profile.remotePort = ss.group(6).toInt
-        if (m.group(2) != null) profile.name = URLDecoder.decode(m.group(3), "utf-8")
-        profile
-      case _ => null
-    }
-    catch {
-      case ex: Exception =>
-        Log.e(TAG, "parser error: " + m.source, ex)// Ignore
-        null
-    }).filter(_ != null)
+  def findAll(data: CharSequence): Iterator[Profile] =
+    pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
+      decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
+        case Some(ss) =>
+          val profile = new Profile
+          profile.method = ss.group(2).toLowerCase
+          if (ss.group(3) != null) profile.auth = true
+          profile.password = ss.group(4)
+          profile.name = ss.group(5)
+          profile.host = profile.name
+          profile.remotePort = ss.group(6).toInt
+          if (m.group(2) != null) profile.name = URLDecoder.decode(m.group(3), "utf-8")
+          profile
+        case _ => null
+      } catch {
+        case ex: Exception =>
+          Log.e(TAG, "parser error: " + m.source, ex)// Ignore
+          null
+      }).filter(_ != null)
 }

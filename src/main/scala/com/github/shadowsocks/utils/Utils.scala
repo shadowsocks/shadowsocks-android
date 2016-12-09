@@ -66,7 +66,7 @@ object Utils {
      */
 
   // Based on: http://stackoverflow.com/a/21026866/2245107
-  def positionToast(toast: Toast, view: View, window: Window, offsetX: Int = 0, offsetY: Int = 0) = {
+  def positionToast(toast: Toast, view: View, window: Window, offsetX: Int = 0, offsetY: Int = 0): Toast = {
     val rect = new Rect
     window.getDecorView.getWindowVisibleDisplayFrame(rect)
     val viewLocation = new Array[Int](2)
@@ -88,11 +88,11 @@ object Utils {
     to.setVisibility(View.VISIBLE)
     to.animate().alpha(1).setDuration(shortAnimTime)
     from.animate().alpha(0).setDuration(shortAnimTime).setListener(new AnimatorListenerAdapter {
-      override def onAnimationEnd(animation: Animator) = from.setVisibility(View.GONE)
+      override def onAnimationEnd(animation: Animator): Unit = from.setVisibility(View.GONE)
     })
   }
 
-  def readAllLines(f: File) = {
+  def readAllLines(f: File): String = {
     val scanner = new Scanner(f)
     try {
       scanner.useDelimiter("\\Z")
@@ -168,40 +168,18 @@ object Utils {
         }
       }
     } catch {
-      case e: Exception =>
+      case _: Exception =>
     }
     None
   }
 
-  def resolve(host: String): Option[String] = {
-    try {
-      val addr = InetAddress.getByName(host)
-      Some(addr.getHostAddress)
-    } catch {
-      case e: UnknownHostException => None
-    }
+  def resolve(host: String): Option[String] = try Some(InetAddress.getByName(host).getHostAddress) catch {
+    case _: UnknownHostException => None
   }
 
-  def resolve(host: String, enableIPv6: Boolean): Option[String] = {
-    if (enableIPv6 && Utils.isIPv6Support) {
-      resolve(host, Type.AAAA) match {
-        case Some(addr) =>
-          return Some(addr)
-        case None =>
-      }
-    }
-    resolve(host, Type.A) match {
-      case Some(addr) =>
-        return Some(addr)
-      case None =>
-    }
-    resolve(host) match {
-      case Some(addr) =>
-        return Some(addr)
-      case None =>
-    }
-    None
-  }
+  def resolve(host: String, enableIPv6: Boolean): Option[String] =
+    (if (enableIPv6 && Utils.isIPv6Support) resolve(host, Type.AAAA) else None).orElse(resolve(host, Type.A))
+      .orElse(resolve(host))
 
   private lazy val isNumericMethod = classOf[InetAddress].getMethod("isNumeric", classOf[String])
   def isNumeric(address: String): Boolean = isNumericMethod.invoke(null, address).asInstanceOf[Boolean]
@@ -242,5 +220,5 @@ object Utils {
     case _ =>
   }
 
-  def ThrowableFuture[T](f: => T) = Future(f) onComplete handleFailure
+  def ThrowableFuture[T](f: => T): Unit = Future(f) onComplete handleFailure
 }

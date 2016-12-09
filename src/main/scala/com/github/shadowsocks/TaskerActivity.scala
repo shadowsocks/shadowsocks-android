@@ -39,13 +39,13 @@ class TaskerActivity extends AppCompatActivity {
     {
       val typedArray = obtainStyledAttributes(Array(android.R.attr.selectableItemBackground))
       view.setBackgroundResource(typedArray.getResourceId(0, 0))
-      typedArray.recycle
+      typedArray.recycle()
     }
     private var item: Profile = _
     private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
     itemView.setOnClickListener(this)
 
-    def bindDefault {
+    def bindDefault() {
       item = null
       text.setText(R.string.profile_default)
       text.setChecked(taskerOption.profileId < 0)
@@ -60,15 +60,15 @@ class TaskerActivity extends AppCompatActivity {
       taskerOption.switchOn = switch.isChecked
       taskerOption.profileId = if (item == null) -1 else item.id
       setResult(Activity.RESULT_OK, taskerOption.toIntent(TaskerActivity.this))
-      finish
+      finish()
     }
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
-    val profiles = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
-    def getItemCount = 1 + profiles.length
-    def onBindViewHolder(vh: ProfileViewHolder, i: Int) = i match {
-      case 0 => vh.bindDefault
+    val profiles: List[Profile] = app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    def getItemCount: Int = 1 + profiles.length
+    def onBindViewHolder(vh: ProfileViewHolder, i: Int): Unit = i match {
+      case 0 => vh.bindDefault()
       case _ => vh.bind(profiles(i - 1))
     }
     private val name = "select_dialog_singlechoice_" + (if (Build.VERSION.SDK_INT >= 21) "material" else "holo")

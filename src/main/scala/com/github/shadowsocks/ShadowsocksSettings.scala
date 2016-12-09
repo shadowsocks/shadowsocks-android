@@ -97,7 +97,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
   import ShadowsocksSettings._
 
   private def activity = getActivity.asInstanceOf[Shadowsocks]
-  lazy val natSwitch = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
+  lazy val natSwitch: SwitchPreference = findPreference(Key.isNAT).asInstanceOf[SwitchPreference]
 
   private var isProxyApps: SwitchPreference = _
 
@@ -182,7 +182,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
     if (getPreferenceManager.getSharedPreferences.getBoolean(Key.isAutoConnect, false)) {
       BootReceiver.setEnabled(activity, true)
-      getPreferenceManager.getSharedPreferences.edit.remove(Key.isAutoConnect).apply
+      getPreferenceManager.getSharedPreferences.edit.remove(Key.isAutoConnect).apply()
     }
     switch.setChecked(BootReceiver.getEnabled(activity))
 
@@ -200,13 +200,13 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       tfo.setSummary(getString(R.string.tcp_fastopen_summary_unsupported, java.lang.System.getProperty("os.version")))
     }
 
-    findPreference("recovery").setOnPreferenceClickListener((preference: Preference) => {
+    findPreference("recovery").setOnPreferenceClickListener(_ => {
       app.track(TAG, "reset")
       activity.recovery()
       true
     })
 
-    findPreference("about").setOnPreferenceClickListener((preference: Preference) => {
+    findPreference("about").setOnPreferenceClickListener(_ => {
       app.track(TAG, "about")
       val web = new WebView(activity)
       web.loadUrl("file:///android_asset/pages/about.html")
@@ -231,7 +231,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
   }
 
-  override def onDisplayPreferenceDialog(preference: Preference) = preference.getKey match {
+  override def onDisplayPreferenceDialog(preference: Preference): Unit = preference.getKey match {
     case Key.kcpcli => displayPreferenceDialog(Key.kcpcli, new KcpCliPreferenceDialogFragment())
     case _ => super.onDisplayPreferenceDialog(preference)
   }
@@ -253,16 +253,16 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     isProxyApps.setChecked(profile.proxyApps)
   }
 
-  override def onDestroy {
+  override def onDestroy() {
     super.onDestroy()
     app.settings.unregisterOnSharedPreferenceChangeListener(this)
   }
 
-  def onSharedPreferenceChanged(pref: SharedPreferences, key: String) = key match {
+  def onSharedPreferenceChanged(pref: SharedPreferences, key: String): Unit = key match {
     case Key.isNAT =>
       activity.handler.post(() => {
-        activity.detachService
-        activity.attachService
+        activity.detachService()
+        activity.attachServiceCallback()
       })
     case _ =>
   }

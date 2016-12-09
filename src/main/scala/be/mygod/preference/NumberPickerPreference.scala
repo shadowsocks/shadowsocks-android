@@ -37,23 +37,23 @@ class NumberPickerPreference(private val context: Context, attrs: AttributeSet =
     val a: TypedArray = context.obtainStyledAttributes(attrs, R.styleable.NumberPickerPreference)
     setMin(a.getInt(R.styleable.NumberPickerPreference_min, 0))
     setMax(a.getInt(R.styleable.NumberPickerPreference_max, Int.MaxValue - 1))
-    a.recycle
+    a.recycle()
   }
 
   override def createDialog() = new NumberPickerPreferenceDialogFragment()
 
-  def getValue = value
-  def getMin = if (picker == null) 0 else picker.getMinValue
-  def getMax = picker.getMaxValue
+  def getValue: Int = value
+  def getMin: Int = if (picker == null) 0 else picker.getMinValue
+  def getMax: Int = picker.getMaxValue
   def setValue(i: Int) {
     if (i == value) return
     picker.setValue(i)
     value = picker.getValue
     persistInt(value)
-    notifyChanged
+    notifyChanged()
   }
-  def setMin(value: Int) = picker.setMinValue(value)
-  def setMax(value: Int) = picker.setMaxValue(value)
+  def setMin(value: Int): Unit = picker.setMinValue(value)
+  def setMax(value: Int): Unit = picker.setMaxValue(value)
 
   override protected def onGetDefaultValue(a: TypedArray, index: Int): AnyRef =
     a.getInt(index, getMin).asInstanceOf[AnyRef]

@@ -53,7 +53,7 @@ object AppManager {
       val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
       filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
       filter.addDataScheme("package")
-      app.registerReceiver((context: Context, intent: Intent) =>
+      app.registerReceiver((_: Context, intent: Intent) =>
         if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED ||
           !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
           synchronized(cachedApps = null)
@@ -111,8 +111,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
     })
 
-    def getItemCount = apps.length
-    def onBindViewHolder(vh: AppViewHolder, i: Int) = vh.bind(apps(i))
+    def getItemCount: Int = apps.length
+    def onBindViewHolder(vh: AppViewHolder, i: Int): Unit = vh.bind(apps(i))
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
   }
@@ -148,8 +148,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
               p.individual = proxiedAppString
               app.profileManager.updateProfile(p)
             })
-            Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show
-          case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+            Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show()
+          case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show()
         }
         return true
       case R.id.action_export =>
@@ -180,7 +180,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
                 return true
               } catch {
                 case _: IllegalArgumentException =>
-                  Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
+                  Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
               }
             }
           }
@@ -239,7 +239,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     loadAppsAsync()
   }
 
-  def reloadApps() = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
+  def reloadApps(): Unit = if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
   def loadAppsAsync() {
     if (!appsLoading.compareAndSet(false, true)) return
     Utils.ThrowableFuture {
@@ -255,7 +255,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     }
   }
 
-  override def onKeyUp(keyCode: Int, event: KeyEvent) = keyCode match {
+  override def onKeyUp(keyCode: Int, event: KeyEvent): Boolean = keyCode match {
     case KeyEvent.KEYCODE_MENU =>
       if (toolbar.isOverflowMenuShowing) toolbar.hideOverflowMenu else toolbar.showOverflowMenu
     case _ => super.onKeyUp(keyCode, event)

@@ -37,10 +37,10 @@ object TaskerSettings {
 class TaskerSettings(bundle: Bundle) {
   import TaskerSettings._
 
-  var switchOn = bundle.getBoolean(KEY_SWITCH_ON, true)
-  var profileId = bundle.getInt(KEY_PROFILE_ID, -1)
+  var switchOn: Boolean = bundle.getBoolean(KEY_SWITCH_ON, true)
+  var profileId: Int = bundle.getInt(KEY_PROFILE_ID, -1)
 
-  def toIntent(context: Context) = {
+  def toIntent(context: Context): Intent = {
     val bundle = new Bundle()
     if (!switchOn) bundle.putBoolean(KEY_SWITCH_ON, false)
     if (profileId >= 0) bundle.putInt(KEY_PROFILE_ID, profileId)

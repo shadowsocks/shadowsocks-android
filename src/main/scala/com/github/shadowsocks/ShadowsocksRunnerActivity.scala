@@ -25,7 +25,6 @@ import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.net.VpnService
 import android.os.{Bundle, Handler}
 import android.util.Log
-import com.github.shadowsocks.utils.ConfigUtils
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 object ShadowsocksRunnerActivity {
@@ -65,7 +64,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     val locked = km.inKeyguardRestrictedInputMode
     if (locked) {
       val filter = new IntentFilter(Intent.ACTION_USER_PRESENT)
-      receiver = (context: Context, intent: Intent) => {
+      receiver = (_: Context, intent: Intent) => {
         if (intent.getAction == Intent.ACTION_USER_PRESENT) {
           attachService()
         }
@@ -74,7 +73,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     } else {
       attachService()
     }
-    finish
+    finish()
   }
 
   override def onDestroy() {

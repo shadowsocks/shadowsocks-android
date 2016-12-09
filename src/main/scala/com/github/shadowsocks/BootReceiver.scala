@@ -25,16 +25,16 @@ import android.content.{BroadcastReceiver, ComponentName, Context, Intent}
 import com.github.shadowsocks.utils._
 
 object BootReceiver {
-  def getEnabled(context: Context) = PackageManager.COMPONENT_ENABLED_STATE_ENABLED ==
+  def getEnabled(context: Context): Boolean = PackageManager.COMPONENT_ENABLED_STATE_ENABLED ==
     context.getPackageManager.getComponentEnabledSetting(new ComponentName(context, classOf[BootReceiver]))
-  def setEnabled(context: Context, enabled: Boolean) = context.getPackageManager.setComponentEnabledSetting(
+  def setEnabled(context: Context, enabled: Boolean): Unit = context.getPackageManager.setComponentEnabledSetting(
     new ComponentName(context, classOf[BootReceiver]),
     if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
     PackageManager.DONT_KILL_APP)
 }
 
 class BootReceiver extends BroadcastReceiver {
-  def onReceive(context: Context, intent: Intent) = {
+  def onReceive(context: Context, intent: Intent): Unit = {
     Utils.startSsService(context)
   }
 }

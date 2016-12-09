@@ -32,7 +32,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 class TrafficMonitorThread(context: Context) extends Thread {
 
   val TAG = "TrafficMonitorThread"
-  lazy val PATH = context.getApplicationInfo.dataDir + "/stat_path"
+  lazy val PATH: String = context.getApplicationInfo.dataDir + "/stat_path"
 
   @volatile var serverSocket: LocalServerSocket = _
   @volatile var isRunning: Boolean = true
