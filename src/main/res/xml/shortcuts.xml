@@ -6,7 +6,7 @@
               android:shortcutLongLabel="@string/quick_toggle">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="in.zhaoj.shadowsocksr"
-                android:targetClass="in.zhaoj.shadowsocksr.QuickToggleShortcut" />
+                android:targetClass="com.github.shadowsocks.QuickToggleShortcut" />
     </shortcut>
     <shortcut android:shortcutId="switch"
               android:icon="@drawable/ic_qu_shadowsocks_launcher"
@@ -14,7 +14,7 @@
               android:shortcutLongLabel="@string/quick_switch">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="in.zhaoj.shadowsocksr"
-                android:targetClass="in.zhaoj.shadowsocksr.ShadowsocksQuickSwitchActivity" />
+                android:targetClass="com.github.shadowsocks.ShadowsocksQuickSwitchActivity" />
     </shortcut>
     <shortcut android:shortcutId="scan"
               android:icon="@drawable/ic_qu_camera_launcher"
@@ -22,6 +22,6 @@
               android:shortcutLongLabel="@string/add_profile_methods_scan_qr_code">
         <intent android:action="android.intent.action.MAIN"
                 android:targetPackage="in.zhaoj.shadowsocksr"
-                android:targetClass="in.zhaoj.shadowsocksr.ScannerActivity" />
+                android:targetClass="com.github.shadowsocks.ScannerActivity" />
     </shortcut>
 </shortcuts>
