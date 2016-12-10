@@ -79,7 +79,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     val uri = rawResult.getText
     if (!TextUtils.isEmpty(uri))
       Parser.findAll(uri).foreach(app.profileManager.createProfile)
+      Parser.findAll_ssr(uri).foreach(app.profileManager.createProfile)
     navigateUp()
   }
 }
-
