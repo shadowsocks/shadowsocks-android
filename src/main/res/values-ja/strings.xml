@@ -13,6 +13,12 @@
   <string name="port">ローカルポート</string>
   <string name="sitekey">パスワード</string>
   <string name="enc_method">暗号方式</string>
+  <string name="protocol">プロトコル</string>
+  <string name="protocol_summary">きみのプロトコル（SSR プロパティ）</string>
+  <string name="obfs">Obfs ウェイ</string>
+  <string name="obfs_summary">きみの Obfs ウェイ（SSR プロパティ）</string>
+  <string name="obfs_param">Obfs パラメータ</string>
+  <string name="obfs_param_summary">きみの Obfs パラメータ（SSR プロパティ）</string>
   <string name="feature_cat">機能設定</string>
   <string name="http_proxy">HTTP 代理サーバー</string>
   <string name="http_proxy_summary">ローカル HTTP 代理</string>
@@ -68,6 +74,12 @@
 
   <string name="nat">NAT モード (デバッギングだけ)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
+
+  <string name="dns">DNS</string>
+  <string name="dns_summary">特定のドメイン名の解決のためにDNSサーバ，として 8.8.8.8:53</string>
+
+  <string name="china_dns">China DNS</string>
+  <string name="china_dns_summary">一般的には、ドメイン名の解決のためにDNSサーバ，として 223.5.5.5:53</string>
 
   <string name="udp_dns">UDP 転送</string>
   <string name="udp_dns_summary">リモートサーバーでUDPプロトコルのパケット</string>
