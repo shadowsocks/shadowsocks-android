@@ -81,7 +81,7 @@
   <string name="ipv6_summary">リモートサーバーに IPv6 トラフィックを転送</string>
 
   <string name="stat">ネットワークトラフィック</string>
-  <string name="stat_summary">送信済み: \t%3$s\t↑\t%1$s/s\n受け取る: \t%4$s\t↓\t%2$s/s</string>
+  <string name="stat_summary">送信済み: \t%3$s\t↑\t%1$s/s\n受信済み: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">接続状況確認</string>
   <string name="connection_test_testing">テスト中...</string>
