@@ -4,132 +4,132 @@
   <string name="quick_toggle">スイッチ</string>
 
   <string name="misc_cat">その他</string>
-  <string name="proxy_cat">サーバーの設定</string>
+  <string name="proxy_cat">サーバー設定</string>
   <string name="profile_name">サーバー名</string>
-  <string name="profile">配置ファイル</string>
-  <string name="profile_summary">配置ファイルを新規作成か他のを切り替える</string>
+  <string name="profile">プロファイル</string>
+  <string name="profile_summary">新規作成または既存ファイルを開く</string>
   <string name="proxy">サーバーアドレス</string>
   <string name="remote_port">リモートポート</string>
   <string name="port">ローカルポート</string>
   <string name="sitekey">パスワード</string>
   <string name="enc_method">暗号化方式</string>
   <string name="feature_cat">ファンクション設定</string>
-  <string name="http_proxy">HTTP 代理サーバー</string>
-  <string name="http_proxy_summary">ローカル HTTP 代理</string>
-  <string name="dns_proxy">DNS 代理</string>
-  <string name="dns_proxy_summary">重定向 DNS 查询到远程服务器</string>
-  <string name="auto_set_gfwlist">中国ルーティング</string>
-  <string name="auto_set_gfwlist_summary">中国本土アドレスをバイパス</string>
+  <string name="http_proxy">HTTP プロキシサーバー</string>
+  <string name="http_proxy_summary">ローカル HTTP プロキシ</string>
+  <string name="dns_proxy">DNS プロキシ</string>
+  <string name="dns_proxy_summary">DNS解析をリモートサーバーにリダイレクト</string>
+  <string name="auto_set_gfwlist">中国本土のアドレスをプロキシ</string>
+  <string name="auto_set_gfwlist_summary">中国本土のアドレスを迂回</string>
   <string name="route_list">プロキシ方式</string>
-  <string name="proxied_apps">選択したアプリにプロキシ</string>
-  <string name="proxied_apps_summary">为应用程序分别设置代理，在 4.x 下需要启用 NAT 模式</string>
-  <string name="on">オン</string>
-  <string name="bypass_apps">バイパスモード</string>
-  <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
+  <string name="proxied_apps">アプリ別のプロキシを使用</string>
+  <string name="proxied_apps_summary">アプリ別でプロキシを指定、Android 4.x ではNATモードの使用が必須</string>
+  <string name="on">ON</string>
+  <string name="bypass_apps">バイパスモード（迂回モード）</string>
+  <string name="bypass_apps_summary">このモードを選択した場合、指定したアプリのパケットはプロキシを経由しない</string>
   <string name="auto_connect">自動接続</string>
   <string name="auto_connect_summary">システム起動時にバックグラウンドで本サービスを開始</string>
   <string name="tcp_fastopen_summary">ONするにはROOT権限が必要</string>
   <string name="tcp_fastopen_summary_unsupported">ご利用のカーネルバージョンはサポートしておりません：%s &lt; 3.7.1</string>
   <string name="forward_success">バックグラウンドでサービスを開始しました</string>
-  <string name="service_failed">リモートサーバーを接続できません</string>
+  <string name="service_failed">リモートサーバーに接続できません</string>
   <string name="invalid_server">サーバー名が無効です</string>
-  <string name="method_unsafe">警告する：この暗号化アルゴリズムは不安です</string>
-  <string name="nat_deprecated">警告：在 Android 5.0 及更高版本中不建议使用 NAT 模式</string>
+  <string name="method_unsafe">注意：この暗号化アルゴリズムは不安です</string>
+  <string name="nat_deprecated">注意：Android 5.0及びそれ以降のバージョンではNATモードの使用はお勧めしません</string>
   <string name="nat_no_root">NAT モードは ROOT権限が必要です</string>
   <string name="switch_to_vpn">VPN モードに切り替える</string>
-  <string name="stop">止める</string>
-  <string name="quick_switch">切り替える</string>
-  <string name="stopping">閉じます……</string>
-  <string name="vpn_error">后台服务启动失败：%s</string>
-  <string name="reboot_required">VPN 服务启动失败。你可能需要重启设备。</string>
+  <string name="stop">中止</string>
+  <string name="quick_switch">切り替え</string>
+  <string name="stopping">中止中……</string>
+  <string name="vpn_error">バックグランドサービスの起動に失敗しました：%s</string>
+  <string name="reboot_required">VPNサービスの起動に失敗しました、デバイスの再起動が必要かもしれません。</string>
   <string name="close">閉じる</string>
-  <string name="proxy_empty">代理サーバのアドレスやパスワードは空白がいけません</string>
+  <string name="proxy_empty">サーバアドレスやパスワードを入力する必要があります</string>
   <string name="connect">接続</string>
-  <string name="initializing">初期化します……</string>
-  <string name="recovering">リセットします……</string>
+  <string name="initializing">初期化中……</string>
+  <string name="recovering">リセット中……</string>
   <string name="loading">読み込み中……</string>
-  <string name="profiles">配置ファイル</string>
+  <string name="profiles">プロファイル</string>
   <string name="settings">オプションの設定</string>
-  <string name="remove_profile">このサーバーの設定を削除する「%s」?</string>
+  <string name="remove_profile">このプロファイルを削除「%s」?</string>
   <string name="recovery">リセット</string>
-  <string name="recovery_summary">すべてのバックグラウンドサービスをリセットする</string>
+  <string name="recovery_summary">すべてのバックグラウンドサービスをリセット</string>
   <string name="about">本アプリについて</string>
   <string name="about_title">シャドーソックス（shadowsocks）%s</string>
-  <string name="flush_dnscache">DNS キャッシングをリフレッシュする</string>
-  <string name="flush_dnscache_summary">只需在 NAT 模式下使用，需要 ROOT 权限</string>
-  <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
-  <string name="flushing">リフレッシュします……</string>
+  <string name="flush_dnscache">DNS キャッシュをリフレッシュ</string>
+  <string name="flush_dnscache_summary">NATモードの場合のみ使用、ROOT権限が必要です</string>
+  <string name="flush_dnscache_no_root">ROOT権限がない場合はDNSキャッシュをリフレッシュできません</string>
+  <string name="flushing">リフレッシュ中……</string>
   <string name="share">共有</string>
   <string name="share_message">QRコードを読み取る或いはAndroid Beam (NFC) を使用。</string>
   <string name="share_message_without_nfc">QRコードを読み取る</string>
   <string name="share_message_nfc_disabled">QRコードを読み取る\nAndroid Beam が無効になっています</string>
   <string name="turn_on_nfc">NFC 及び Android Beam を有効にする</string>
-  <string name="add_profile">配置ファイルを加える</string>
+  <string name="add_profile">プロファイルを追加</string>
 
   <string name="nat">NAT モード (デバックのみ)</string>
-  <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
+  <string name="nat_summary">VPNモードからNATモードに切り替えるにはROOT権限が必要です</string>
   <string name="remote_dns">リモート DNS</string>
   <string name="remote_dns_summary">リモート解析に使用する DNS(デフォルトネームサーバー 8.8.8.8)</string>
 
   <string name="udp_dns">UDP 転送</string>
-  <string name="udp_dns_summary">UDP プロトコルでリモードサーバーにバケットを転送</string>
+  <string name="udp_dns_summary">UDP プロトコルでリモードサーバーにパケットを転送</string>
 
   <string name="onetime_auth">ワンタイム認証</string>
   <string name="onetime_auth_summary">ワンタイム認証を使用する</string>
 
-  <string name="ipv6">IPv6 プーロキシ</string>
-  <string name="ipv6_summary">リモートサーバーに IPv6 トラフィックを転送</string>
+  <string name="ipv6">IPv6 プロキシ</string>
+  <string name="ipv6_summary">リモートサーバーに IPv6 パケットを転送</string>
 
   <string name="stat">ネットワークトラフィック</string>
   <string name="stat_summary">送信済み: \t%3$s\t↑\t%1$s/s\n受信済み: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">接続状況確認</string>
   <string name="connection_test_testing">テスト中...</string>
-  <string name="connection_test_available">成功: %d ms秒の遅延</string>
+  <string name="connection_test_available">成功: %d msの遅延</string>
   <string name="connection_test_fail">インターネット利用不可</string>
-  <string name="connection_test_error">失敗します：%s</string>
-  <string name="connection_test_error_status_code">状態コード無効（#%d）</string>
+  <string name="connection_test_error">失敗しました：%s</string>
+  <string name="connection_test_error_status_code">ステータスコード無効（#%d）</string>
 
   <!-- profile -->
-  <string name="profile_manager_dialog">配置ファイル</string>
-  <string name="profile_manager_dialog_content">&#8226; クリックで配置ファイルに選択する；\n&#8226; 左/右へ滑るか左にクリックするで削除する；\n&#8226;
-    長押しやドラッグで順序を変える。</string>
+  <string name="profile_manager_dialog">プロファイル</string>
+  <string name="profile_manager_dialog_content">&#8226; タッチしてプロファイルを選択；\n&#8226; 左或いは右にフリックで削除；\n&#8226;
+    長押し後にドラッグして順序を変更。</string>
   <string name="gotcha">承知</string>
   <string name="copy_url">URL をコピー</string>
-  <string name="add_profile_dialog">シャドーソックスに配置ファイルを加えますか</string>
+  <string name="add_profile_dialog">シャドーソックスにプロファイルを追加しますか</string>
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
   <string name="add_profile_nfc_hint_title">Android Beam (NFC) でプロファイルを追加</string>
-  <string name="add_profile_nfc_hint">2台の設備を保持すると同時に、また別の設備に、配置ファイルの共有ボタンをクリックし、彼らをいっしょに置きます。\nNFC ラベルスがキャニングもできる。</string>
-  <string name="add_profile_scanner_permission_required">QRコードを読み取るはカメラ権限が必要である。</string>
+  <string name="add_profile_nfc_hint">デバイス2台の画面を立ち上げ、もう一方のデバイスでプロファイルの共有アイコンをタッチし、2台とも背中合わせにして下さい\nNFC またはNFCラベルを直接スキャン</string>
+  <string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの権限が必要です。</string>
 
   <string-array name="route_entry">
     <item>すべて</item>
-    <item>LAN IPはプロキシを経由しない</item>
-    <item>中国本土 IPはプロキシを経由しない</item>
-    <item>LAN IP及び中国本土のIPはプロキシを経由しない</item>
-    <item>中国本土からのアクセスガできないIPのみプロキシを経由する</item>
-    <item>中国本土のIPのみプロキシを経由する</item>
+    <item>LAN アドレスはプロキシを経由しない</item>
+    <item>中国本土 アドレスはプロキシを経由しない</item>
+    <item>LAN 及び中国本土のアドレスはプロキシを経由しない</item>
+    <item>中国本土からのアクセスができないアドレスのみプロキシを経由する</item>
+    <item>中国本土のアドレスのみプロキシを経由する</item>
   </string-array>
 
-  <string name="action_apply_all">すべでの配置ファイルに使用する</string>
-  <string name="action_export">クリップボードに輸出</string>
+  <string name="action_apply_all">設定をすべてのプロファイルに適応する</string>
+  <string name="action_export">クリップボードに出力</string>
   <string name="action_import">クリップボードからインポート</string>
-  <string name="action_export_msg">クリップボードに輸出成功</string>
-  <string name="action_export_err">クリップボードに輸出失敗</string>
-  <string name="action_import_msg">インポート成功</string>
-  <string name="action_import_err">インポート失敗</string>
+  <string name="action_export_msg">クリップボードの出力に成功しました</string>
+  <string name="action_export_err">クリップボードの出力に失敗しました</string>
+  <string name="action_import_msg">インポートは成功しました</string>
+  <string name="action_import_err">インポートは失敗しました</string>
 
   <plurals name="removed">
-    <item quantity="one">削除しました</item>
-    <item quantity="other">%d アイテムを削除しました</item>
+    <item quantity="one">削除済み</item>
+    <item quantity="other">%d を削除しました</item>
   </plurals>
-  <string name="undo">取り消し</string>
-  <string name="toggle_service_state">サービスを開始する</string>
-  <string name="start_service_default">当面のサーバー接続する</string>
-  <string name="start_service">%s に接続する</string>
-  <string name="stop_service">%s に切り替える</string>
-  <string name="profile_default">当面の配置を使用する</string>
+  <string name="undo">戻る</string>
+  <string name="toggle_service_state">サービスを開始</string>
+  <string name="start_service_default">現在のサーバーに接続する</string>
+  <string name="start_service">%s に接続</string>
+  <string name="stop_service">%s に切り替え</string>
+  <string name="profile_default">現在のプロファイルを使用する</string>
 
   <!-- status -->
   <string name="sent">送信済み:</string>
