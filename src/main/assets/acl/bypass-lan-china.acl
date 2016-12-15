@@ -1,6 +1,6 @@
 [proxy_all]
 
-[black_list]
+[bypass_list]
 0.0.0.0/8
 10.0.0.0/8
 100.64.0.0/10
@@ -4438,7 +4438,7 @@
 223.255.236.0/22
 223.255.252.0/23
 
-[white_list]
+[proxy_list]
 ^(.*\.)?4tern\.com$
 ^(.*\.)?adorama\.com$
 ^(.*\.)?akiba-web\.com$

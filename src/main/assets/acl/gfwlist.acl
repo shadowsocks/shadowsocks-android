@@ -2,7 +2,7 @@
 # updated on 2016-09-08 12:09:55$
 [bypass_all]
 
-[white_list]
+[proxy_list]
 # Telegram IPs$
 91.108.4.0/22
 91.108.56.0/22
