@@ -91,7 +91,12 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       }
     }
 
-    def onClick(v: View): Unit = app.switchProfile(item.id)
+    def onClick(v: View) {
+      val old = app.profileId
+      app.switchProfile(item.id)
+      profilesAdapter.refreshId(old)
+      bind(item)
+    }
   }
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
