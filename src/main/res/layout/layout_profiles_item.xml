@@ -27,16 +27,16 @@
                       android:gravity="center_vertical"
                       android:maxLines="2"
                       android:ellipsize="end"/>
-            <ImageView android:id="@+id/edit"
-                       android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:padding="4dp"
-                       android:layout_gravity="top"
-                       app:srcCompat="@drawable/ic_image_edit"
-                       android:background="?attr/selectableItemBackgroundBorderless"
-                       android:contentDescription="Edit"
-                       android:focusable="true"
-                       android:nextFocusLeft="@+id/container"/>
+            <android.support.v7.widget.AppCompatImageView android:id="@+id/edit"
+                                                          android:layout_width="wrap_content"
+                                                          android:layout_height="wrap_content"
+                                                          android:padding="4dp"
+                                                          android:layout_gravity="top"
+                                                          app:srcCompat="@drawable/ic_image_edit"
+                                                          android:background="?attr/selectableItemBackgroundBorderless"
+                                                          android:contentDescription="Edit"
+                                                          android:focusable="true"
+                                                          android:nextFocusLeft="@+id/container"/>
         </LinearLayout>
         <TextView android:id="@android:id/text2"
                   android:layout_width="match_parent"
