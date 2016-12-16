@@ -340,7 +340,7 @@
 ^(.*\.)?gmodules\.com$
 ^(.*\.)?goo\.gl$
 ^(.*\.)?google(\..*)?$
-^(.*\.)?googleapis\.com$
+^(.*\.)?googleapis(\..*)?$
 ^(.*\.)?googleapps\.com$
 ^(.*\.)?googleartproject\.com$
 ^(.*\.)?googleblog\.com$
