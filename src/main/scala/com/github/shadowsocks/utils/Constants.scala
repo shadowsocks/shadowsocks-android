@@ -173,7 +173,6 @@ object Action {
   final val CONNECTED = "com.github.shadowsocks.CONNECTED"  // TODO
   final val PROFILE_CHANGED = "com.github.shadowsocks.PROFILE_CHANGED"
   final val PROFILE_REMOVED = "com.github.shadowsocks.PROFILE_REMOVED"
-  final val QUICK_SWITCH = "com.github.shadowsocks.QUICK_SWITCH"
 
   final val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }
