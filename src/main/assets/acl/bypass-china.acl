@@ -4756,8 +4756,8 @@
 ^(.*\.)?gmail\.com$
 ^(.*\.)?gmodules\.com$
 ^(.*\.)?goo\.gl$
-^(.*\.)?google\..*$
-^(.*\.)?googleapis\..*$
+^(.*\.)?google(\.[^.]{2,4}){1,2}$
+^(.*\.)?googleapis(\.[^.]{2,4}){1,2}$
 ^(.*\.)?googleapps\.com$
 ^(.*\.)?googleartproject\.com$
 ^(.*\.)?googleblog\.com$
