@@ -46,14 +46,14 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     }
   }
 
-  protected def registerCallback(): Unit = if (bgService != null && callback != null && !callbackRegistered) try {
+  def registerCallback(): Unit = if (bgService != null && callback != null && !callbackRegistered) try {
     bgService.registerCallback(callback)
     callbackRegistered = true
   } catch {
     case _: RemoteException => // Nothing
   }
 
-  protected def unregisterCallback() {
+  def unregisterCallback() {
     if (bgService != null && callback != null && callbackRegistered) try bgService.unregisterCallback(callback) catch {
       case _: RemoteException =>
     }

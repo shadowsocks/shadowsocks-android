@@ -22,69 +22,58 @@ package com.github.shadowsocks
 
 import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
-import java.util
-import java.util.{GregorianCalendar, Locale}
+import java.util.Locale
 
+import android.app.Activity
 import android.app.backup.BackupManager
-import android.app.{Activity, ProgressDialog}
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
-import android.graphics.Typeface
-import android.net.VpnService
-import android.os._
+import android.net.{Uri, VpnService}
+import android.nfc.{NdefMessage, NfcAdapter}
+import android.os.{Build, Bundle, Handler}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import android.support.v7.app.AlertDialog
+import android.support.v7.widget.RecyclerView.ViewHolder
+import android.text.TextUtils
 import android.util.Log
-import android.view.{View, ViewGroup}
-import android.widget._
+import android.view.View
+import android.webkit.{WebView, WebViewClient}
+import android.widget.{TextView, Toast}
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
-import com.github.shadowsocks.database._
-import com.github.shadowsocks.utils.CloseUtils._
+import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
-import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
+import com.google.android.gms.ads.AdView
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
+import com.mikepenz.materialdrawer.model.{PrimaryDrawerItem, SecondaryDrawerItem}
+import com.mikepenz.materialdrawer.{Drawer, DrawerBuilder}
 
-import scala.util.Random
-
-object Typefaces {
-  def get(c: Context, assetPath: String): Typeface = {
-    cache synchronized {
-      if (!cache.containsKey(assetPath)) {
-        try {
-          cache.put(assetPath, Typeface.createFromAsset(c.getAssets, assetPath))
-        } catch {
-          case e: Exception =>
-            Log.e(TAG, "Could not get typeface '" + assetPath + "' because " + e.getMessage)
-            app.track(e)
-            return null
-        }
-      }
-      return cache.get(assetPath)
-    }
-  }
-
-  private final val TAG = "Typefaces"
-  private final val cache = new util.Hashtable[String, Typeface]
-}
-
-object Shadowsocks {
-  // Constants
-  private final val TAG = "Shadowsocks"
+object MainActivity {
+  private final val TAG = "MainActivity"
   private final val REQUEST_CONNECT = 1
+
+  private final val DRAWER_PROFILES = 0L
+  // sticky drawer items have negative ids
+  private final val DRAWER_GLOBAL_SETTINGS = -1L
+  private final val DRAWER_ABOUT = -2L
 }
 
-class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
-  import Shadowsocks._
+class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
+  with OnSharedPreferenceChangeListener {
+  import MainActivity._
 
   // Variables
   var serviceStarted: Boolean = _
   var fab: FloatingActionButton = _
   var fabProgressCircle: FABProgressCircle = _
-  var progressDialog: ProgressDialog = _
   var state = State.STOPPED
   var currentProfile = new Profile
+  var drawer: Drawer = _
+  private lazy val profilesFragment = new ProfilesFragment()
+  private lazy val globalSettingsFragment = new GlobalSettingsFragment()
 
   // Services
   private val callback = new IShadowsocksServiceCallback.Stub {
@@ -96,8 +85,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             fabProgressCircle.show()
-            preferences.setEnabled(false)
-            stat.setVisibility(View.GONE)
+            //stat.setVisibility(View.GONE)
           case State.CONNECTED =>
             fab.setBackgroundTintList(greenTint)
             if (state == State.CONNECTING) {
@@ -107,7 +95,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             }
             fab.setEnabled(true)
             changeSwitch(checked = true)
-            preferences.setEnabled(false)
             stat.setVisibility(View.VISIBLE)
             if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
               connectionTestText.setVisibility(View.VISIBLE)
@@ -121,20 +108,17 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             if (m != null) {
               val snackbar = Snackbar.make(findViewById(android.R.id.content),
                 getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
-              if (m == getString(R.string.nat_no_root)) snackbar.setAction(R.string.switch_to_vpn,
-                (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
+              if (m == getString(R.string.nat_no_root)) addDisableNatToSnackbar(snackbar)
               snackbar.show()
               Log.e(TAG, "Error to start VPN service: " + m)
             }
-            preferences.setEnabled(true)
-            stat.setVisibility(View.GONE)
+            //stat.setVisibility(View.GONE)
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
             fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-            preferences.setEnabled(false)
-            stat.setVisibility(View.GONE)
+            //stat.setVisibility(View.GONE)
         }
         state = s
       })
@@ -159,10 +143,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     updateState()
     if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(android.R.id.content), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
-      snackbar.setAction(R.string.switch_to_vpn, (_ => preferences.natSwitch.setChecked(false)): View.OnClickListener)
+      addDisableNatToSnackbar(snackbar)
       snackbar.show()
     }
   }
+
+  private def addDisableNatToSnackbar(snackbar: Snackbar) = snackbar.setAction(R.string.switch_to_vpn, (_ =>
+    if (state == State.STOPPED) app.editor.putBoolean(Key.isNAT, false)): View.OnClickListener)
 
   override def onServiceDisconnected() {
     if (fab != null) fab.setEnabled(false)
@@ -184,10 +171,13 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
   private var adView: AdView = _
-  private lazy val preferences =
-    getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
 
   val handler = new Handler()
+  private val connectedListener: BroadcastReceiver = (_, _) =>
+    if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
+      connectionTestText.setVisibility(View.VISIBLE)
+      connectionTestText.setText(getString(R.string.connection_test_pending))
+    }
 
   private def changeSwitch(checked: Boolean) {
     serviceStarted = checked
@@ -196,21 +186,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       fab.setEnabled(false)
       handler.postDelayed(() => fab.setEnabled(true), 1000)
     }
-  }
-
-  private def showProgress(msg: Int): Handler = {
-    clearDialog()
-    progressDialog = ProgressDialog.show(this, "", getString(msg), true, false)
-    new Handler {
-      override def handleMessage(msg: Message) {
-        clearDialog()
-      }
-    }
-  }
-
-  def cancelStart() {
-    clearDialog()
-    changeSwitch(checked = false)
   }
 
   def prepareStartService() {
@@ -227,27 +202,30 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   override def onCreate(savedInstanceState: Bundle) {
-
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_main)
-    // Initialize Toolbar
-    val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    toolbar.setTitle("shadowsocks") // non-translatable logo
-    toolbar.setTitleTextAppearance(toolbar.getContext, R.style.Toolbar_Logo)
-    val field = classOf[Toolbar].getDeclaredField("mTitleTextView")
-    field.setAccessible(true)
-    val title = field.get(toolbar).asInstanceOf[TextView]
-    title.setFocusable(true)
-    title.setGravity(0x10)
-    title.getLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-    title.setOnClickListener(_ => startActivity(new Intent(this, classOf[ProfileManagerActivity])))
-    val typedArray = obtainStyledAttributes(Array(R.attr.selectableItemBackgroundBorderless))
-    title.setBackgroundResource(typedArray.getResourceId(0, 0))
-    typedArray.recycle()
-    val tf = Typefaces.get(this, "fonts/Iceland.ttf")
-    if (tf != null) title.setTypeface(tf)
-    title.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_arrow_drop_down, 0)
-
+    drawer = new DrawerBuilder()
+      .withActivity(this)
+      // TODO: .withHeader(R.drawable.some_header)
+      .addDrawerItems(
+        new PrimaryDrawerItem()
+          .withIdentifier(DRAWER_PROFILES)
+          .withName(R.string.profiles)
+        // TODO: withIcons
+      )
+      .addStickyDrawerItems(
+        new SecondaryDrawerItem()
+          .withIdentifier(DRAWER_GLOBAL_SETTINGS)
+          .withName(R.string.settings),
+        new SecondaryDrawerItem()
+          .withIdentifier(DRAWER_ABOUT)
+          .withName(R.string.about)
+          .withSelectable(false)
+      )
+      .withOnDrawerItemClickListener(this)
+      .withActionBarDrawerToggle(true)
+      .build()
+    if (savedInstanceState == null) displayFragment(profilesFragment)
     stat = findViewById(R.id.stat)
     connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
@@ -297,8 +275,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
-      else if (bgService != null) prepareStartService()
-      else changeSwitch(checked = false))
+    else if (bgService != null) prepareStartService()
+    else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
         Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show()
@@ -307,6 +285,81 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     updateTraffic(0, 0, 0, 0)
 
     handler.post(attachServiceCallback)
+    app.settings.registerOnSharedPreferenceChangeListener(this)
+    registerReceiver(connectedListener, new IntentFilter(Action.CONNECTED))
+
+    val intent = getIntent
+    if (intent != null) handleShareIntent(intent)
+  }
+
+  override def onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    handleShareIntent(intent)
+  }
+
+  def handleShareIntent(intent: Intent) {
+    val sharedStr = intent.getAction match {
+      case Intent.ACTION_VIEW => intent.getData.toString
+      case NfcAdapter.ACTION_NDEF_DISCOVERED =>
+        val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+        if (rawMsgs != null && rawMsgs.nonEmpty)
+          new String(rawMsgs(0).asInstanceOf[NdefMessage].getRecords()(0).getPayload)
+        else null
+      case _ => null
+    }
+    if (TextUtils.isEmpty(sharedStr)) return
+    val profiles = Parser.findAll(sharedStr).toList
+    if (profiles.isEmpty) {
+      // TODO: show error msg
+      return
+    }
+    val dialog = new AlertDialog.Builder(this)
+      .setTitle(R.string.add_profile_dialog)
+      .setPositiveButton(android.R.string.yes, ((_, _) =>
+        profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, null)
+      .setMessage(profiles.mkString("\n"))
+      .create()
+    dialog.show()
+  }
+
+  def onSharedPreferenceChanged(pref: SharedPreferences, key: String): Unit = key match {
+    case Key.isNAT => handler.post(() => {
+      detachService()
+      attachServiceCallback()
+    })
+    case _ =>
+  }
+
+  private def displayFragment(fragment: ToolbarFragment) {
+    getFragmentManager.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss()
+    drawer.closeDrawer()
+  }
+
+  override def onItemClick(view: View, position: Int, drawerItem: IDrawerItem[_, _ <: ViewHolder]): Boolean = {
+    drawerItem.getIdentifier match {
+      case DRAWER_PROFILES => displayFragment(profilesFragment)
+      case DRAWER_GLOBAL_SETTINGS => displayFragment(globalSettingsFragment)
+      case DRAWER_ABOUT =>
+        app.track(TAG, "about")
+        val web = new WebView(this)
+        web.loadUrl("file:///android_asset/pages/about.html")
+        web.setWebViewClient(new WebViewClient() {
+          override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
+            try startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))) catch {
+              case _: android.content.ActivityNotFoundException => // Ignore
+            }
+            true
+          }
+        })
+        new AlertDialog.Builder(this)
+          .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
+          .setNegativeButton(getString(android.R.string.ok), null)
+          .setView(web)
+          .create()
+          .show()
+    }
+    true  // unexpected cases will throw exception
   }
 
   private def hideCircle() {
@@ -317,97 +370,44 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
-  private def updateState(resetConnectionTest: Boolean = true) {
+  private def updateState() {
     if (bgService != null) {
       bgService.getState match {
         case State.CONNECTING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_start_busy)
-          preferences.setEnabled(false)
           fabProgressCircle.show()
-          stat.setVisibility(View.GONE)
+          //stat.setVisibility(View.GONE)
         case State.CONNECTED =>
           fab.setBackgroundTintList(greenTint)
           serviceStarted = true
           fab.setImageResource(R.drawable.ic_start_connected)
-          preferences.setEnabled(false)
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
-          if (resetConnectionTest || state != State.CONNECTED)
-            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
-              connectionTestText.setVisibility(View.VISIBLE)
-              connectionTestText.setText(getString(R.string.connection_test_pending))
-            }
         case State.STOPPING =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_start_busy)
-          preferences.setEnabled(false)
           fabProgressCircle.show()
-          stat.setVisibility(View.GONE)
+          //stat.setVisibility(View.GONE)
         case _ =>
           fab.setBackgroundTintList(greyTint)
           serviceStarted = false
           fab.setImageResource(R.drawable.ic_start_idle)
-          preferences.setEnabled(true)
           fabProgressCircle.postDelayed(hideCircle, 100)
-          stat.setVisibility(View.GONE)
+          //stat.setVisibility(View.GONE)
       }
       state = bgService.getState
-    }
-  }
-
-  private def updateCurrentProfile() = {
-    // Check if current profile changed
-    if (preferences.profile == null || app.profileId != preferences.profile.id) {
-      updatePreferenceScreen(app.currentProfile match {
-        case Some(profile) => profile // updated
-        case None =>                  // removed
-          app.switchProfile((app.profileManager.getFirstProfile match {
-            case Some(first) => first
-            case None => app.profileManager.createDefault()
-          }).id)
-      })
-
-      if (serviceStarted) serviceLoad()
-
-      true
-    } else {
-      preferences.refreshProfile()
-      false
     }
   }
 
   protected override def onResume() {
     super.onResume()
 
-    app.refreshContainerHolder
+    app.refreshContainerHolder()
 
-    updateState(updateCurrentProfile())
-  }
-
-  private def updatePreferenceScreen(profile: Profile) {
-    if (profile.host == "198.199.101.152") if (adView == null) {
-      adView = new AdView(this)
-      adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-      adView.setAdSize(AdSize.SMART_BANNER)
-      preferences.getView.asInstanceOf[ViewGroup].addView(adView, 1)
-
-      // Demographics
-      val random = new Random()
-      val adBuilder = new AdRequest.Builder()
-      adBuilder.setGender(AdRequest.GENDER_MALE)
-      val year = 1975 + random.nextInt(40)
-      val month = 1 + random.nextInt(12)
-      val day = random.nextInt(28)
-      adBuilder.setBirthday(new GregorianCalendar(year, month, day).getTime)
-
-      // Load Ad
-      adView.loadAd(adBuilder.build())
-    } else adView.setVisibility(View.VISIBLE) else if (adView != null) adView.setVisibility(View.GONE)
-
-    preferences.setProfile(profile)
+    updateState()
   }
 
   override def onStart() {
@@ -417,30 +417,22 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   override def onStop() {
     super.onStop()
     unregisterCallback()
-    clearDialog()
   }
 
   override def onDestroy() {
     super.onDestroy()
+    unregisterReceiver(connectedListener)
+    app.settings.unregisterOnSharedPreferenceChangeListener(this)
     detachService()
     new BackupManager(this).dataChanged()
     handler.removeCallbacksAndMessages(null)
-  }
-
-  def recovery() {
-    if (serviceStarted) serviceStop()
-    val h = showProgress(R.string.recovering)
-    Utils.ThrowableFuture {
-      app.copyAssets()
-      h.sendEmptyMessage(0)
-    }
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
     case Activity.RESULT_OK =>
       serviceLoad()
     case _ =>
-      cancelStart()
+      changeSwitch(checked = false)
       Log.e(TAG, "Failed to start VpnService")
   }
 
@@ -454,13 +446,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
     if (app.isVpnEnabled) {
       changeSwitch(checked = false)
-    }
-  }
-
-  def clearDialog() {
-    if (progressDialog != null && progressDialog.isShowing) {
-      if (!isDestroyed) progressDialog.dismiss()
-      progressDialog = null
     }
   }
 }

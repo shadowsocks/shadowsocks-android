@@ -151,8 +151,6 @@ object Key {
   val localPort = "localPortNum"
   val remoteDns = "remoteDns"
 
-  val profileTip = "profileTip"
-
   val kcp = "kcp"
   val kcpPort = "kcpPort"
   val kcpcli = "kcpcli"
@@ -170,9 +168,14 @@ object State {
 }
 
 object Action {
-  val SERVICE = "com.github.shadowsocks.SERVICE"
-  val CLOSE = "com.github.shadowsocks.CLOSE"
-  val QUICK_SWITCH = "com.github.shadowsocks.QUICK_SWITCH"
+  final val SERVICE = "com.github.shadowsocks.SERVICE"
+  final val CLOSE = "com.github.shadowsocks.CLOSE"
+  final val CONNECTED = "com.github.shadowsocks.CONNECTED"  // TODO
+  final val PROFILE_CHANGED = "com.github.shadowsocks.PROFILE_CHANGED"
+  final val PROFILE_REMOVED = "com.github.shadowsocks.PROFILE_REMOVED"
+  final val QUICK_SWITCH = "com.github.shadowsocks.QUICK_SWITCH"
+
+  final val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }
 
 object Route {

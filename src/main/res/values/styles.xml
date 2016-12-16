@@ -6,11 +6,11 @@
         <item name="android:textSize">24sp</item>
     </style>
 
-    <style name="Theme.MaterialBase" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.MaterialBase" parent="MaterialDrawerTheme.Light.DarkToolbar">
         <!--suppress NewApi -->
         <item name="android:navigationBarColor">@color/material_primary_700</item>
         <item name="colorAccent">@color/material_primary_500</item>
-        <item name="colorButtonNormal">@color/material_primary_500</item>
+        <item name="colorButtonNormal">@color/material_accent_200</item>
         <item name="colorPrimary">@color/material_primary_500</item>
         <item name="colorPrimaryDark">@color/material_primary_700</item>
         <item name="preferenceTheme">@style/Theme.Material.PreferenceThemeOverlay</item>

@@ -57,7 +57,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setColor(ContextCompat.getColor(service, R.color.material_primary_500))
     .setTicker(service.getString(R.string.forward_success))
     .setContentTitle(profileName)
-    .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
+    .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[MainActivity])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
   builder.addAction(R.drawable.ic_navigation_close,

@@ -23,8 +23,10 @@ package com.github.shadowsocks.database
 import java.net.URLEncoder
 import java.util.Locale
 
+import android.content.SharedPreferences
 import android.os.Binder
 import android.util.Base64
+import com.github.shadowsocks.utils.Key
 import com.j256.ormlite.field.{DataType, DatabaseField}
 
 class Profile {
@@ -32,7 +34,7 @@ class Profile {
   var id: Int = 0
 
   @DatabaseField
-  var name: String = "Untitled"
+  var name: String = ""
 
   @DatabaseField
   var host: String = ""
@@ -100,4 +102,41 @@ class Profile {
     '#' + URLEncoder.encode(name, "utf-8")
 
   def isMethodUnsafe: Boolean = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
+
+  def serialize(editor: SharedPreferences.Editor): SharedPreferences.Editor = editor
+    .putString(Key.name, name)
+    .putString(Key.host, host)
+    .putInt(Key.localPort, localPort)
+    .putInt(Key.remotePort, remotePort)
+    .putString(Key.password, password)
+    .putString(Key.route, route)
+    .putString(Key.remoteDns, remoteDns)
+    .putBoolean(Key.proxyApps, proxyApps)
+    .putBoolean(Key.bypass, bypass)
+    .putBoolean(Key.udpdns, udpdns)
+    .putBoolean(Key.auth, auth)
+    .putBoolean(Key.ipv6, ipv6)
+    .putString(Key.individual, individual)
+    .putBoolean(Key.kcp, kcp)
+    .putInt(Key.kcpPort, kcpPort)
+    .putString(Key.kcpcli, kcpcli)
+  def deserialize(pref: SharedPreferences) {
+    // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
+    name = pref.getString(Key.name, null)
+    host = pref.getString(Key.host, null)
+    localPort = pref.getInt(Key.localPort, 0)
+    remotePort = pref.getInt(Key.remotePort, 0)
+    password = pref.getString(Key.password, null)
+    route = pref.getString(Key.route, null)
+    remoteDns = pref.getString(Key.remoteDns, null)
+    proxyApps = pref.getBoolean(Key.proxyApps, false)
+    bypass = pref.getBoolean(Key.bypass, false)
+    udpdns = pref.getBoolean(Key.udpdns, false)
+    auth = pref.getBoolean(Key.auth, false)
+    ipv6 = pref.getBoolean(Key.ipv6, false)
+    individual = pref.getString(Key.individual, null)
+    kcp = pref.getBoolean(Key.kcp, false)
+    kcpPort = pref.getInt(Key.kcpPort, 0)
+    kcpcli = pref.getString(Key.kcpcli, null)
+  }
 }

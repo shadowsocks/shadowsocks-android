@@ -38,7 +38,7 @@
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
 
         <activity
-                android:name=".Shadowsocks"
+                android:name=".MainActivity"
                 android:label="@string/app_name"
                 android:launchMode="singleTask">
             <intent-filter>
@@ -48,28 +48,6 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
-            </intent-filter>
-            <meta-data android:name="android.app.shortcuts"
-                       android:resource="@xml/shortcuts"/>
-        </activity>
-
-        <activity
-                android:name=".ShadowsocksRunnerActivity"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"
-                android:excludeFromRecents="true"
-		android:taskAffinity=""
-                android:launchMode="singleTask">
-        </activity>
-
-        <activity
-                android:name=".ProfileManagerActivity"
-                android:label="@string/profiles"
-                android:parentActivityName=".Shadowsocks"
-                android:excludeFromRecents="true"
-                android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="com.github.shadowsocks.ProfileManagerActivity"/>
-                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -82,18 +60,34 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:scheme="ss" />
             </intent-filter>
+            <meta-data android:name="android.app.shortcuts"
+                       android:resource="@xml/shortcuts"/>
         </activity>
+
+        <activity
+                android:name=".ProfileConfigActivity"
+                android:excludeFromRecents="true"
+                android:label="Profile config"
+                android:launchMode="singleTask"
+                android:parentActivityName=".MainActivity"/>
+
+        <activity
+                android:name=".ShadowsocksRunnerActivity"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                android:excludeFromRecents="true"
+		android:taskAffinity=""
+                android:launchMode="singleTask"/>
 
         <activity
                 android:name=".ScannerActivity"
                 android:label="@string/add_profile_methods_scan_qr_code"
-                android:parentActivityName=".ProfileManagerActivity"
+                android:parentActivityName=".MainActivity"
                 android:excludeFromRecents="true"/>
 
         <activity
                 android:name=".AppManager"
                 android:label="@string/proxied_apps"
-                android:parentActivityName=".Shadowsocks"
+                android:parentActivityName=".ProfileConfigActivity"
                 android:excludeFromRecents="true"
                 android:launchMode="singleTask"/>
 
