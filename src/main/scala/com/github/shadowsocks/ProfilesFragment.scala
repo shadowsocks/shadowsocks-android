@@ -216,25 +216,22 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
 
   override def onAttach(activity: Activity) {
     super.onAttach(activity)
-    activity.asInstanceOf[ServiceBoundContext].attachService(new IShadowsocksServiceCallback.Stub {
-      def stateChanged(state: Int, profileName: String, msg: String): Unit = () // ignore
-      def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
+    activity.asInstanceOf[MainActivity].trafficCallback = new TrafficCallback {
+      def update(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
         if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
-    })
+    }
   }
 
   override def onStart() {
     super.onStart()
-    getActivity.asInstanceOf[ServiceBoundContext].registerCallback()
   }
 
   override def onStop() {
     super.onStop()
-    getActivity.asInstanceOf[ServiceBoundContext].unregisterCallback()
   }
 
   override def onDetach() {
-    getActivity.asInstanceOf[ServiceBoundContext].detachService()
+    getActivity.asInstanceOf[MainActivity].trafficCallback = null
     undoManager.flush()
     super.onDetach()
   }

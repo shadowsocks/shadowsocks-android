@@ -51,8 +51,12 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import com.mikepenz.materialdrawer.model.{PrimaryDrawerItem, SecondaryDrawerItem}
 import com.mikepenz.materialdrawer.{Drawer, DrawerBuilder}
 
+trait TrafficCallback {
+  def update(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long)
+}
+
 object MainActivity {
-  private final val TAG = "MainActivity"
+  private final val TAG = "ShadowsocksMainActivity"
   private final val REQUEST_CONNECT = 1
 
   private final val DRAWER_PROFILES = 0L
@@ -72,6 +76,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   var state = State.STOPPED
   var currentProfile = new Profile
   var drawer: Drawer = _
+
+  @volatile var trafficCallback: TrafficCallback = _
+
   private lazy val profilesFragment = new ProfilesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
 
@@ -133,6 +140,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
     txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
+    if (trafficCallback != null) trafficCallback.update(txRate, rxRate, txTotal, rxTotal)
   }
 
   def attachServiceCallback(): Unit = attachService(callback)
@@ -372,6 +380,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   private def updateState() {
     if (bgService != null) {
+      Log.d(TAG, "bgService " + bgService.getState)
       bgService.getState match {
         case State.CONNECTING =>
           fab.setBackgroundTintList(greyTint)
