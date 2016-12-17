@@ -155,6 +155,8 @@ object Key {
   val kcpPort = "kcpPort"
   val kcpcli = "kcpcli"
 
+  val dirty = "profileDirty"
+
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"
 }

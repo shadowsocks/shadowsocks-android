@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks
 
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
 import android.os._
 import android.support.v14.preference.SwitchPreference
@@ -34,7 +35,8 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences.KcpCliPreferenceDialogFragment
 import com.github.shadowsocks.utils.{Action, Key, Utils}
 
-class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener {
+class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener
+  with OnSharedPreferenceChangeListener {
   private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
   private var profile: Profile = _
   private var isProxyApps: SwitchPreference = _
@@ -59,6 +61,15 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       isProxyApps.setChecked(true)
       false
     })
+    app.settings.registerOnSharedPreferenceChangeListener(this)
+  }
+
+  override def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String): Unit =
+    if (findPreference(key) != null) app.editor.putBoolean(Key.dirty, true).apply()
+
+  override def onDestroy() {
+    app.settings.unregisterOnSharedPreferenceChangeListener(this)
+    super.onDestroy()
   }
 
   override def onResume() {

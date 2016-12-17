@@ -68,8 +68,7 @@
                 android:name=".ProfileConfigActivity"
                 android:excludeFromRecents="true"
                 android:label="Profile config"
-                android:launchMode="singleTask"
-                android:parentActivityName=".MainActivity"/>
+                android:launchMode="singleTask"/>
 
         <activity
                 android:name=".ShadowsocksRunnerActivity"
