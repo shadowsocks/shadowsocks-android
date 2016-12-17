@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks
 
-import android.app.Activity
 import android.content._
 import android.graphics.Typeface
 import android.os.{Build, Bundle, Handler, UserManager}
@@ -33,7 +32,6 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.view._
 import android.widget.{TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Action, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
@@ -214,24 +212,10 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     LocalBroadcastManager.getInstance(getActivity).registerReceiver(profilesListener, filter)
   }
 
-  override def onAttach(activity: Activity) {
-    super.onAttach(activity)
-    activity.asInstanceOf[MainActivity].trafficCallback = new TrafficCallback {
-      def update(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
-        if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
-    }
-  }
-
-  override def onStart() {
-    super.onStart()
-  }
-
-  override def onStop() {
-    super.onStop()
-  }
+  override def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
+    if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
 
   override def onDetach() {
-    getActivity.asInstanceOf[MainActivity].trafficCallback = null
     undoManager.flush()
     super.onDetach()
   }
