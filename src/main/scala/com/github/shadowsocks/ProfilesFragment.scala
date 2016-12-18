@@ -45,6 +45,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     var item: Profile = _
     private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+    private val indicator = itemView.findViewById(R.id.indicator).asInstanceOf[ViewGroup]
     itemView.setOnClickListener(this)
 
     {
@@ -65,15 +66,14 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       val builder = new StringBuilder()
       val address = (if (item.host.contains(":")) "[%s]:%d" else "%s:%d").format(item.host, item.remotePort)
       if (title == null || title.isEmpty) title = address else builder.append(address)
-      if (tx != 0 || rx != 0) {
+      // if (tx != 0 || rx != 0) {
         if (builder.nonEmpty) builder.append('\n')
         builder.append(getString(R.string.stat_profiles,
           TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
-      }
+      // }
       handler.post(() => {
         text1.setText(title)
         text2.setText(builder)
-        text2.setVisibility(if (builder.isEmpty) View.GONE else View.VISIBLE)
       })
     }
 
@@ -81,10 +81,12 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       this.item = item
       updateText()
       if (item.id == app.profileId) {
-        text1.setTypeface(null, Typeface.BOLD)
+        // text1.setTypeface(null, Typeface.BOLD)
+        indicator.setBackgroundResource(R.drawable.background_selected)
         selectedItem = this
       } else {
-        text1.setTypeface(null, Typeface.NORMAL)
+        // text1.setTypeface(null, Typeface.NORMAL)
+        indicator.setBackgroundResource(R.drawable.background_selectable)
         if (selectedItem eq this) selectedItem = null
       }
     }
