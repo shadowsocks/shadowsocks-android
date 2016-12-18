@@ -33,7 +33,7 @@ import android.view._
 import android.widget.{TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.utils.{Action, Parser, TrafficMonitor, Utils}
+import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
 
 import scala.collection.mutable.ArrayBuffer
@@ -92,10 +92,12 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     }
 
     def onClick(v: View) {
-      val old = app.profileId
-      app.switchProfile(item.id)
-      profilesAdapter.refreshId(old)
-      bind(item)
+      if (getActivity.asInstanceOf[MainActivity].state == State.STOPPED) {
+        val old = app.profileId
+        app.switchProfile(item.id)
+        profilesAdapter.refreshId(old)
+        bind(item)
+      }
     }
   }
 
