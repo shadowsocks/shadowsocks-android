@@ -43,8 +43,9 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     with View.OnClickListener {
 
     var item: Profile = _
-    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
-    private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+    private val text1 = itemView.findViewById(R.id.title).asInstanceOf[TextView]
+    private val text2 = itemView.findViewById(R.id.address).asInstanceOf[TextView]
+    private val text3 = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     private val indicator = itemView.findViewById(R.id.indicator).asInstanceOf[ViewGroup]
     itemView.setOnClickListener(this)
 
@@ -63,17 +64,15 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
       var title = if (isDemoMode) "Profile #" + item.id else item.name
-      val builder = new StringBuilder()
       val address = (if (item.host.contains(":")) "[%s]:%d" else "%s:%d").format(item.host, item.remotePort)
-      if (title == null || title.isEmpty) title = address else builder.append(address)
-      // if (tx != 0 || rx != 0) {
-        if (builder.nonEmpty) builder.append('\n')
-        builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
-      // }
+      if (title == null || title.isEmpty) title = address
+      val traffic = getString(R.string.stat_profiles,
+        TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx))
+
       handler.post(() => {
         text1.setText(title)
-        text2.setText(builder)
+        text2.setText(address)
+        text3.setText(traffic)
       })
     }
 
@@ -92,11 +91,14 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     }
 
     def onClick(v: View) {
-      if (getActivity.asInstanceOf[MainActivity].state == State.STOPPED) {
+      val activity = getActivity.asInstanceOf[MainActivity]
+      val state = activity.state
+      if (state == State.STOPPED || state == State.CONNECTED) {
         val old = app.profileId
         app.switchProfile(item.id)
         profilesAdapter.refreshId(old)
         bind(item)
+        if (state == State.CONNECTED) activity.serviceLoad()
       }
     }
   }
