@@ -66,4 +66,5 @@ class GlobalConfigFragment extends PreferenceFragment {
       progressDialog = null
     }
   }
+
 }

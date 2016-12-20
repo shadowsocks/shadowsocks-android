@@ -44,7 +44,7 @@
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:id="@+id/details">
             <TextView android:id="@+id/address"
                 android:layout_width="match_parent"
@@ -54,7 +54,7 @@
                 android:layout_weight="1"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:attr/textColorSecondary"/>
             <TextView android:id="@+id/traffic"
                 android:layout_width="match_parent"
@@ -64,7 +64,7 @@
                 android:layout_weight="1"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:attr/textColorSecondary"/>
         </LinearLayout>
     </LinearLayout>
