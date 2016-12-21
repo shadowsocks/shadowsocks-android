@@ -31,11 +31,16 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.view._
 import android.widget.{TextView, Toast}
+
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
+import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
 
+import java.util.GregorianCalendar
+
+import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
 
 final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListener {
@@ -43,11 +48,15 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     with View.OnClickListener {
 
     var item: Profile = _
+
     private val text1 = itemView.findViewById(R.id.title).asInstanceOf[TextView]
     private val text2 = itemView.findViewById(R.id.address).asInstanceOf[TextView]
     private val text3 = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     private val indicator = itemView.findViewById(R.id.indicator).asInstanceOf[ViewGroup]
+
     itemView.setOnClickListener(this)
+
+    private var adView: NativeExpressAdView = _
 
     {
       val edit = itemView.findViewById(R.id.edit)
@@ -79,6 +88,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     def bind(item: Profile) {
       this.item = item
       updateText()
+
       if (item.id == app.profileId) {
         // text1.setTypeface(null, Typeface.BOLD)
         indicator.setBackgroundResource(R.drawable.background_selected)
@@ -87,6 +97,31 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
         // text1.setTypeface(null, Typeface.NORMAL)
         indicator.setBackgroundResource(R.drawable.background_selectable)
         if (selectedItem eq this) selectedItem = null
+      }
+
+      if (item.host == "198.199.101.152") {
+        if (adView == null) {
+          adView = itemView.findViewById(R.id.adView).asInstanceOf[NativeExpressAdView]
+
+          // Demographics
+          val random = new Random()
+          val adBuilder = new AdRequest.Builder()
+          adBuilder.setGender(AdRequest.GENDER_MALE)
+          val year = 1975 + random.nextInt(40)
+          val month = 1 + random.nextInt(12)
+          val day = random.nextInt(28)
+          adBuilder.setBirthday(new GregorianCalendar(year, month,
+            day).getTime)
+
+          adView.setVisibility(View.VISIBLE)
+
+          // Load Ad
+          adView.loadAd(adBuilder.build())
+        } else {
+          adView.setVisibility(View.VISIBLE)
+        }
+      } else if (adView != null) {
+        adView.setVisibility(View.GONE)
       }
     }
 
@@ -216,6 +251,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     val filter = new IntentFilter(Action.PROFILE_CHANGED)
     filter.addAction(Action.PROFILE_REMOVED)
     LocalBroadcastManager.getInstance(getActivity).registerReceiver(profilesListener, filter)
+
   }
 
   override def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
