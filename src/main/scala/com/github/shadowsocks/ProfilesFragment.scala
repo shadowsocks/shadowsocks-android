@@ -195,8 +195,10 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
 
     def refreshId(id: Int) {
       val index = profiles.indexWhere(_.id == id)
-      profiles(index) = app.profileManager.getProfile(id).get
-      notifyItemChanged(index)
+      if (index >= 0) {
+        profiles(index) = app.profileManager.getProfile(id).get
+        notifyItemChanged(index)
+      }
     }
     def removeId(id: Int) {
       val index = profiles.indexWhere(_.id == id)
