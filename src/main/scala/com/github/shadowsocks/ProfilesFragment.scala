@@ -58,8 +58,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
 
     {
       val edit = itemView.findViewById(R.id.edit)
-      edit.setOnClickListener(_ => startActivity(new Intent(getActivity, classOf[ProfileConfigActivity])
-        .putExtra(Action.EXTRA_PROFILE_ID, item.id)))
+      edit.setOnClickListener(_ => startConfig(item.id))
       edit.setOnLongClickListener(_ => {
         Utils.positionToast(Toast.makeText(getActivity, edit.getContentDescription, Toast.LENGTH_SHORT), edit,
           getActivity.getWindow, 0, Utils.dpToPx(getActivity, 8)).show()
@@ -224,6 +223,9 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
   private lazy val isDemoMode = Build.VERSION.SDK_INT >= 25 &&
     getActivity.getSystemService(classOf[UserManager]).isDemoUser
 
+  private def startConfig(id: Int) = startActivity(new Intent(getActivity, classOf[ProfileConfigActivity])
+    .putExtra(Action.EXTRA_PROFILE_ID, id))
+
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View =
     inflater.inflate(R.layout.layout_profiles, container, false)
 
@@ -292,6 +294,8 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     case R.id.action_manual_settings =>
       val profile = app.profileManager.createProfile()
       app.profileManager.updateProfile(profile)
+      startConfig(profile.id)
+      true
     case R.id.action_export =>
       app.profileManager.getAllProfiles match {
         case Some(profiles) =>
