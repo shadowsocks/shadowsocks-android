@@ -22,13 +22,12 @@ package com.github.shadowsocks
 
 import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
-import java.util.{Locale, Hashtable}
+import java.util.Locale
 
 import android.app.Activity
 import android.app.backup.BackupManager
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
-import android.graphics.Typeface
 import android.net.{Uri, VpnService}
 import android.nfc.{NdefMessage, NfcAdapter}
 import android.os.{Build, Bundle, Handler}
@@ -41,7 +40,6 @@ import android.util.Log
 import android.view.View
 import android.webkit.{WebView, WebViewClient}
 import android.widget.{TextView, Toast}
-
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -52,27 +50,6 @@ import com.google.android.gms.ads.AdView
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import com.mikepenz.materialdrawer.model.{PrimaryDrawerItem, SecondaryDrawerItem}
 import com.mikepenz.materialdrawer.{Drawer, DrawerBuilder}
-
-object Typefaces {
-  def get(c: Context, assetPath: String): Typeface = {
-    cache synchronized {
-      if (!cache.containsKey(assetPath)) {
-        try {
-          cache.put(assetPath, Typeface.createFromAsset(c.getAssets, assetPath))
-        } catch {
-          case e: Exception =>
-            Log.e(TAG, "Could not get typeface '" + assetPath + "' because " + e.getMessage)
-            app.track(e)
-            return null
-        }
-      }
-      return cache.get(assetPath)
-    }
-  }
-
-  private final val TAG = "Typefaces"
-  private final val cache = new Hashtable[String, Typeface]
-}
 
 object MainActivity {
   private final val TAG = "ShadowsocksMainActivity"
