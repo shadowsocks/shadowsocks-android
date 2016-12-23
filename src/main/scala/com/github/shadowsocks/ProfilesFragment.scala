@@ -31,12 +31,12 @@ import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.view._
-import android.widget.{TextView, Toast}
+import android.widget.{LinearLayout, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.google.android.gms.ads.{AdRequest, NativeExpressAdView}
+import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -100,7 +100,14 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
 
       if (item.host == "198.199.101.152") {
         if (adView == null) {
-          adView = itemView.findViewById(R.id.adView).asInstanceOf[NativeExpressAdView]
+          val params =
+            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+          params.gravity = Gravity.CENTER_HORIZONTAL
+          adView = new NativeExpressAdView(getActivity)
+          adView.setLayoutParams(params)
+          adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
+          adView.setAdSize(AdSize.LARGE_BANNER)
+          itemView.findViewById(R.id.content).asInstanceOf[LinearLayout].addView(adView)
 
           // Demographics
           val random = new Random()
@@ -109,8 +116,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
           val year = 1975 + random.nextInt(40)
           val month = 1 + random.nextInt(12)
           val day = random.nextInt(28)
-          adBuilder.setBirthday(new GregorianCalendar(year, month,
-            day).getTime)
+          adBuilder.setBirthday(new GregorianCalendar(year, month, day).getTime)
 
           adView.setVisibility(View.VISIBLE)
 

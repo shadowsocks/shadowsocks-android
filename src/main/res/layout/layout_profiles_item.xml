@@ -64,15 +64,5 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="?android:attr/textColorSecondary"/>
         </LinearLayout>
-        <com.google.android.gms.ads.NativeExpressAdView
-            android:id="@+id/adView"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone"
-            app:adSize="320x132"
-            app:adUnitId="ca-app-pub-9097031975646651/5224027521" />
     </LinearLayout>
 </android.support.v7.widget.CardView>
