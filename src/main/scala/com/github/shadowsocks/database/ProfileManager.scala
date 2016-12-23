@@ -122,14 +122,4 @@ class ProfileManager(dbHelper: DBHelper) {
         None
     }
   }
-
-  def createDefault(): Profile = {
-    val profile = new Profile {
-      name = "Default"
-      host = "198.199.101.152"
-      remotePort = 443
-      password = "u1rRWTssNv0p"
-    }
-    createProfile(profile)
-  }
 }
