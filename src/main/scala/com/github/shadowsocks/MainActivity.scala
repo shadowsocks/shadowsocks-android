@@ -365,10 +365,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   private def displayFragment(fragment: ToolbarFragment) {
     val transaction = getFragmentManager.beginTransaction().replace(R.id.content, fragment)
-    if (fragment != profilesFragment)
-      transaction.addToBackStack(null).commitAllowingStateLoss()
-    else
-      transaction.commitAllowingStateLoss()
+    if (fragment != profilesFragment) transaction.addToBackStack(null)
+    transaction.commitAllowingStateLoss()
     drawer.closeDrawer()
   }
 
