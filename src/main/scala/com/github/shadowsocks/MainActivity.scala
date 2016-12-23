@@ -73,6 +73,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   var currentProfile = new Profile
   var drawer: Drawer = _
 
+  private var currentFragment: ToolbarFragment = _
   private lazy val profilesFragment = new ProfilesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
 
@@ -341,9 +342,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   }
 
   private def displayFragment(fragment: ToolbarFragment) {
-    val transaction = getFragmentManager.beginTransaction().replace(R.id.content, fragment)
-    if (fragment != profilesFragment) transaction.addToBackStack(null)
-    transaction.commitAllowingStateLoss()
+    currentFragment = fragment
+    getFragmentManager.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss()
     drawer.closeDrawer()
   }
 
@@ -426,6 +426,10 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     super.onStart()
     registerCallback()
   }
+
+  override def onBackPressed(): Unit =
+    if (currentFragment != profilesFragment) displayFragment(profilesFragment) else super.onBackPressed()
+
   override def onStop() {
     super.onStop()
     unregisterCallback()
