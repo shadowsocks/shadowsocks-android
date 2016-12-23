@@ -105,7 +105,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
           adView = new NativeExpressAdView(getActivity)
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-          adView.setAdSize(AdSize.LARGE_BANNER)
+          adView.setAdSize(AdSize.BANNER)
           itemView.findViewById(R.id.content).asInstanceOf[LinearLayout].addView(adView)
 
           // Demographics
@@ -117,16 +117,10 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
           val day = random.nextInt(28)
           adBuilder.setBirthday(new GregorianCalendar(year, month, day).getTime)
 
-          adView.setVisibility(View.VISIBLE)
-
           // Load Ad
           adView.loadAd(adBuilder.build())
-        } else {
-          adView.setVisibility(View.VISIBLE)
-        }
-      } else if (adView != null) {
-        adView.setVisibility(View.GONE)
-      }
+        } else adView.setVisibility(View.VISIBLE)
+      } else if (adView != null) adView.setVisibility(View.GONE)
     }
 
     def onClick(v: View) {
