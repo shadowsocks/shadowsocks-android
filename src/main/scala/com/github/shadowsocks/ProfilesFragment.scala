@@ -20,8 +20,9 @@
 
 package com.github.shadowsocks
 
+import java.util.GregorianCalendar
+
 import android.content._
-import android.graphics.Typeface
 import android.os.{Build, Bundle, Handler, UserManager}
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -31,17 +32,14 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.view._
 import android.widget.{TextView, Toast}
-
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
+import com.google.android.gms.ads.{AdRequest, NativeExpressAdView}
 
-import java.util.GregorianCalendar
-
-import scala.util.Random
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
 
 final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListener {
   private final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
@@ -49,9 +47,9 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
 
     var item: Profile = _
 
-    private val text1 = itemView.findViewById(R.id.title).asInstanceOf[TextView]
-    private val text2 = itemView.findViewById(R.id.address).asInstanceOf[TextView]
-    private val text3 = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
+    private val title = itemView.findViewById(R.id.title).asInstanceOf[TextView]
+    private val address = itemView.findViewById(R.id.address).asInstanceOf[TextView]
+    private val traffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     private val indicator = itemView.findViewById(R.id.indicator).asInstanceOf[ViewGroup]
 
     itemView.setOnClickListener(this)
@@ -73,15 +71,18 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
       var title = if (isDemoMode) "Profile #" + item.id else item.name
-      val address = (if (item.host.contains(":")) "[%s]:%d" else "%s:%d").format(item.host, item.remotePort)
-      if (title == null || title.isEmpty) title = address
+      var address = (if (item.host.contains(":")) "[%s]:%d" else "%s:%d").format(item.host, item.remotePort)
+      if ((title == null || title.isEmpty) && address.nonEmpty) {
+        title = address
+        address = ""
+      }
       val traffic = getString(R.string.stat_profiles,
         TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx))
 
       handler.post(() => {
-        text1.setText(title)
-        text2.setText(address)
-        text3.setText(traffic)
+        this.title.setText(title)
+        this.address.setText(address)
+        this.traffic.setText(traffic)
       })
     }
 
@@ -90,11 +91,9 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       updateText()
 
       if (item.id == app.profileId) {
-        // text1.setTypeface(null, Typeface.BOLD)
         indicator.setBackgroundResource(R.drawable.background_selected)
         selectedItem = this
       } else {
-        // text1.setTypeface(null, Typeface.NORMAL)
         indicator.setBackgroundResource(R.drawable.background_selectable)
         if (selectedItem eq this) selectedItem = null
       }
