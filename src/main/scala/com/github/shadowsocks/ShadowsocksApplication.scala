@@ -83,7 +83,7 @@ class ShadowsocksApplication extends Application {
     .setFatal(false)
     .build())
 
-  def profileId: Int = settings.getInt(Key.id, -1)
+  def profileId: Int = settings.getInt(Key.id, 0)
   def profileId(i: Int): Unit = editor.putInt(Key.id, i).apply()
   def currentProfile: Option[Profile] = profileManager.getProfile(profileId)
 

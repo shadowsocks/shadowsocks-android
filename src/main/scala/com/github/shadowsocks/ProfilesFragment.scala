@@ -181,10 +181,8 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       profiles.insert(index, item)
       notifyItemInserted(index)
     }
-    def commit(actions: Iterator[(Int, Profile)]): Unit = for ((_, item) <- actions) {
-      app.profileManager.delProfile(item.id)
-      if (item.id == app.profileId) app.profileId(-1)
-    }
+    def commit(actions: Iterator[(Int, Profile)]): Unit =
+      for ((_, item) <- actions) app.profileManager.delProfile(item.id)
 
     def refreshId(id: Int) {
       val index = profiles.indexWhere(_.id == id)
@@ -197,6 +195,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
       val index = profiles.indexWhere(_.id == id)
       profiles.remove(index)
       notifyItemRemoved(index)
+      if (id == app.profileId) app.profileId(0)
     }
   }
 
