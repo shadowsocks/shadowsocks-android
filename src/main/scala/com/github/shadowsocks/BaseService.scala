@@ -107,9 +107,9 @@ trait BaseService extends Service {
       }
     }
 
-    override def use(profileId: Int): Unit = synchronized(if (profileId < 0) stopRunner(stopService = true) else {
+    override def use(profileId: Int): Unit = synchronized {
       val profile = app.profileManager.getProfile(profileId).orNull
-      if (profile == null) stopRunner(stopService = true) else state match {
+      if (profile == null) stopRunner(stopService = true, "Please select a profile.") else state match {  // TODO: localize
         case State.STOPPED => if (checkProfile(profile)) startRunner(profile)
         case State.CONNECTED => if (profileId != BaseService.this.profile.id && checkProfile(profile)) {
           stopRunner(stopService = false)
@@ -117,7 +117,7 @@ trait BaseService extends Service {
         }
         case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
       }
-    })
+    }
 
     override def useSync(profileId: Int): Unit = use(profileId)
   }
