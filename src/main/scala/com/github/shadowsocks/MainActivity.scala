@@ -45,7 +45,6 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
-import com.google.android.gms.ads.AdView
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import com.mikepenz.materialdrawer.model.{PrimaryDrawerItem, SecondaryDrawerItem}
 import com.mikepenz.materialdrawer.{Drawer, DrawerBuilder}
@@ -89,7 +88,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
             fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             fabProgressCircle.show()
-            //stat.setVisibility(View.GONE)
+            statusText.setText("Connecting...")
           case State.CONNECTED =>
             fab.setBackgroundTintList(greenTint)
             if (state == State.CONNECTING) {
@@ -99,11 +98,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
             }
             fab.setEnabled(true)
             changeSwitch(checked = true)
-            stat.setVisibility(View.VISIBLE)
-            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
-              connectionTestText.setVisibility(View.VISIBLE)
-              connectionTestText.setText(getString(R.string.connection_test_pending))
-            }
+            statusText.setText(if (app.isNatEnabled) "Connected" else "Connected, tap to check connection")
           case State.STOPPED =>
             fab.setBackgroundTintList(greyTint)
             fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -116,13 +111,13 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
               snackbar.show()
               Log.e(TAG, "Error to start VPN service: " + m)
             }
-            //stat.setVisibility(View.GONE)
+            statusText.setText("Not connected")
           case State.STOPPING =>
             fab.setBackgroundTintList(greyTint)
             fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
             if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-            //stat.setVisibility(View.GONE)
+            statusText.setText("Shutting down...")
         }
         state = s
       })
@@ -168,22 +163,17 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   }
 
   private var testCount: Int = _
-  private var stat: View = _
-  private var connectionTestText: TextView = _
+  private var statusText: TextView = _  // TODO: localize texts for statusText in this file
   private var txText: TextView = _
   private var rxText: TextView = _
   private var txRateText: TextView = _
   private var rxRateText: TextView = _
   private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
-  private var adView: AdView = _
 
   val handler = new Handler()
   private val connectedListener: BroadcastReceiver = (_, _) =>
-    if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
-      connectionTestText.setVisibility(View.VISIBLE)
-      connectionTestText.setText(getString(R.string.connection_test_pending))
-    }
+    statusText.setText(if (app.isNatEnabled) "Connected" else "Connected, tap to check connection")
 
   private def changeSwitch(checked: Boolean) {
     serviceStarted = checked
@@ -248,16 +238,15 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     if (tf != null) title.setTypeface(tf)
 
     if (savedInstanceState == null) displayFragment(profilesFragment)
-    stat = findViewById(R.id.stat)
-    connectionTestText = findViewById(R.id.connection_test).asInstanceOf[TextView]
+    statusText = findViewById(R.id.status).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    stat.setOnClickListener(_ => {
+    findViewById(R.id.stat).setOnClickListener(_ => {
       val id = synchronized {
         testCount += 1
-        handler.post(() => connectionTestText.setText(R.string.connection_test_testing))
+        handler.post(() => statusText.setText(R.string.connection_test_testing))
         testCount
       }
       Utils.ThrowableFuture {
@@ -284,9 +273,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
                 success = false
                 result = getString(R.string.connection_test_error, e.getMessage)
             }
-            synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
-              if (success) connectionTestText.setText(result) else {
-                connectionTestText.setText(R.string.connection_test_fail)
+            synchronized(if (serviceStarted && testCount == id && app.isVpnEnabled) handler.post(() =>
+              if (success) statusText.setText(result) else {
+                statusText.setText(R.string.connection_test_fail)
                 Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
               }))
           }
@@ -404,32 +393,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private def updateState() {
     if (bgService != null) {
       Log.d(TAG, "bgService " + bgService.getState)
-      bgService.getState match {
-        case State.CONNECTING =>
-          fab.setBackgroundTintList(greyTint)
-          serviceStarted = false
-          fab.setImageResource(R.drawable.ic_start_busy)
-          fabProgressCircle.show()
-          //stat.setVisibility(View.GONE)
-        case State.CONNECTED =>
-          fab.setBackgroundTintList(greenTint)
-          serviceStarted = true
-          fab.setImageResource(R.drawable.ic_start_connected)
-          fabProgressCircle.postDelayed(hideCircle, 100)
-          stat.setVisibility(View.VISIBLE)
-        case State.STOPPING =>
-          fab.setBackgroundTintList(greyTint)
-          serviceStarted = false
-          fab.setImageResource(R.drawable.ic_start_busy)
-          fabProgressCircle.show()
-          //stat.setVisibility(View.GONE)
-        case _ =>
-          fab.setBackgroundTintList(greyTint)
-          serviceStarted = false
-          fab.setImageResource(R.drawable.ic_start_idle)
-          fabProgressCircle.postDelayed(hideCircle, 100)
-          //stat.setVisibility(View.GONE)
-      }
+      callback.stateChanged(bgService.getState, null, null)
       state = bgService.getState
     }
   }

@@ -20,9 +20,15 @@
                   android:orientation="vertical"
                   android:nextFocusRight="@+id/fab"
                   android:layout_alignParentBottom="true">
+        <TextView android:id="@+id/status"
+                  android:textSize="16sp"
+                  android:textColor="?android:attr/textColorPrimary"
+                  android:ellipsize="marquee"
+                  android:paddingEnd="72dip"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"/>
         <android.support.v7.widget.GridLayout android:layout_width="match_parent"
                                               android:layout_height="wrap_content"
-                                              android:paddingEnd="72dip"
                                               app:columnCount="4">
             <TextView app:layout_column="0" style="@style/TextAppearance.AppCompat.Body2"
                       android:ellipsize="marquee" android:text="@string/sent"
@@ -58,23 +64,6 @@
                       android:layout_width="0dp" android:layout_height="wrap_content" app:layout_columnWeight="1"
                       app:layout_gravity="fill_horizontal" android:gravity="end"/>
         </android.support.v7.widget.GridLayout>
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginTop="8dp">
-            <TextView android:text="@string/stat"
-                      android:textSize="16sp"
-                      android:textColor="?android:attr/textColorPrimary"
-                      android:ellipsize="marquee"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"/>
-            <TextView android:id="@+id/connection_test"
-                      android:gravity="end"
-                      android:textSize="14sp"
-                      android:textColor="?android:attr/textColorSecondary"
-                      android:layout_width="0dp"
-                      android:layout_height="wrap_content"
-                      android:layout_weight="1"/>
-        </LinearLayout>
     </LinearLayout>
     <com.github.jorgecastilloprz.FABProgressCircle android:id="@+id/fabProgressCircle"
                                                    app:reusable="true"
