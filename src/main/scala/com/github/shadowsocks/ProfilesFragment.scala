@@ -102,7 +102,7 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
           adView = new NativeExpressAdView(getActivity)
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/5224027521")
-          adView.setAdSize(new AdSize(320, 132))
+          adView.setAdSize(new AdSize(328, 132))
           itemView.findViewById(R.id.content).asInstanceOf[LinearLayout].addView(adView)
 
           // Demographics
