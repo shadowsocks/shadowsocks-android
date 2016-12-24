@@ -23,7 +23,7 @@ package com.github.shadowsocks
 import java.util.GregorianCalendar
 
 import android.content._
-import android.os.{Build, Bundle, Handler, UserManager}
+import android.os.{Bundle, Handler}
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -69,12 +69,8 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     def updateText(txTotal: Long = 0, rxTotal: Long = 0) {
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
-      var title = if (isDemoMode) "Profile #" + item.id else item.name
-      var address = (if (item.host.contains(":")) "[%s]:%d" else "%s:%d").format(item.host, item.remotePort)
-      if ((title == null || title.isEmpty) && address.nonEmpty) {
-        title = address
-        address = ""
-      }
+      val title = item.getName
+      val address = if (item.nameIsEmpty) "" else item.formattedAddress
       val traffic = getString(R.string.stat_profiles,
         TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx))
 
@@ -214,8 +210,6 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
-  private lazy val isDemoMode = Build.VERSION.SDK_INT >= 25 &&
-    getActivity.getSystemService(classOf[UserManager]).isDemoUser
 
   private def startConfig(id: Int) = startActivity(new Intent(getActivity, classOf[ProfileConfigActivity])
     .putExtra(Action.EXTRA_PROFILE_ID, id))

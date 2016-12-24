@@ -46,7 +46,7 @@ class TaskerSettings(bundle: Bundle) {
     if (profileId >= 0) bundle.putInt(KEY_PROFILE_ID, profileId)
     new Intent().putExtra(ApiIntent.EXTRA_BUNDLE, bundle).putExtra(ApiIntent.EXTRA_STRING_BLURB,
       app.profileManager.getProfile(profileId) match {
-        case Some(p) => context.getString(if (switchOn) R.string.start_service else R.string.stop_service, p.name)
+        case Some(p) => context.getString(if (switchOn) R.string.start_service else R.string.stop_service, p.getName)
         case None => context.getString(if (switchOn) R.string.start_service_default else R.string.stop)
       })
   }

@@ -78,7 +78,7 @@ trait BaseService extends Service {
       state
     }
 
-    override def getProfileName: String = if (profile == null) null else profile.name
+    override def getProfileName: String = if (profile == null) null else profile.getName
 
     override def unregisterCallback(cb: IShadowsocksServiceCallback) {
       if (cb != null && callbacks.unregister(cb)) {

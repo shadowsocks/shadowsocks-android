@@ -52,7 +52,7 @@ class TaskerActivity extends AppCompatActivity {
     }
     def bind(item: Profile) {
       this.item = item
-      text.setText(item.name)
+      text.setText(item.getName)
       text.setChecked(taskerOption.profileId == item.id)
     }
 

@@ -97,6 +97,10 @@ class Profile {
   @DatabaseField
   var kcpcli: String = "--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0"
 
+  def formattedAddress: String = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
+  def nameIsEmpty: Boolean = name == null || name.isEmpty
+  def getName: String = if (nameIsEmpty) formattedAddress else name
+
   override def toString: String = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
     method, if (auth) "-auth" else "", password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP) +
     '#' + URLEncoder.encode(name, "utf-8")
