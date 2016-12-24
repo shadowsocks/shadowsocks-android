@@ -124,6 +124,7 @@ class Profile {
     .putString(Key.individual, individual)
     .putBoolean(Key.kcp, kcp)
     .putInt(Key.kcpPort, kcpPort)
+    .putString(Key.kcpcli, kcpcli)
     .remove(Key.dirty)
   def deserialize(pref: SharedPreferences) {
     // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
