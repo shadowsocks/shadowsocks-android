@@ -5,11 +5,12 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Key
 
 class ProfileConfigActivity extends Activity {
+  private lazy val child = getFragmentManager.findFragmentById(R.id.content).asInstanceOf[ProfileConfigFragment]
+
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_profile_config)
@@ -18,14 +19,14 @@ class ProfileConfigActivity extends Activity {
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => onBackPressed())
     toolbar.inflateMenu(R.menu.profile_config_menu)
-    toolbar.setOnMenuItemClickListener(getFragmentManager.findFragmentById(R.id.content)
-      .asInstanceOf[OnMenuItemClickListener])
+    toolbar.setOnMenuItemClickListener(child)
   }
 
   override def onBackPressed(): Unit = if (app.settings.getBoolean(Key.dirty, false)) new AlertDialog.Builder(this)
-    .setTitle("Confirm?") // TODO
-    .setPositiveButton(android.R.string.yes, ((_, _) => finish()): DialogInterface.OnClickListener)
-    .setNegativeButton(android.R.string.no, null)
+    .setTitle("Changes not saved. Do you want to save?") // TODO: localizations
+    .setPositiveButton("Yes", ((_, _) => child.saveAndExit()): DialogInterface.OnClickListener)
+    .setNegativeButton("No", ((_, _) => finish()): DialogInterface.OnClickListener)
+    .setNeutralButton(android.R.string.cancel, null)
     .create()
     .show() else super.onBackPressed()
 }

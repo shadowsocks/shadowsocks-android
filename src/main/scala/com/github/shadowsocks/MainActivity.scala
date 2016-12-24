@@ -327,9 +327,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     }
     val dialog = new AlertDialog.Builder(this)
       .setTitle(R.string.add_profile_dialog)
-      .setPositiveButton(android.R.string.yes, ((_, _) =>
+      .setPositiveButton("Yes", ((_, _) =>  // TODO
         profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
-      .setNegativeButton(android.R.string.no, null)
+      .setNegativeButton("No", null)
       .setMessage(profiles.mkString("\n"))
       .create()
     dialog.show()

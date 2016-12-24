@@ -92,23 +92,27 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
     case R.id.action_delete =>
       new AlertDialog.Builder(getActivity)
         .setTitle("Confirm?") // TODO
-        .setPositiveButton(android.R.string.yes, ((_, _) => {
+        .setPositiveButton("Yes", ((_, _) => {
           app.profileManager.delProfile(profile.id)
           LocalBroadcastManager.getInstance(getActivity)
             .sendBroadcast(new Intent(Action.PROFILE_REMOVED).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
           getActivity.finish()
         }): DialogInterface.OnClickListener)
-        .setNegativeButton(android.R.string.no, null)
+        .setNegativeButton("No", null)
         .create()
         .show()
       true
     case R.id.action_apply =>
-      profile.deserialize(app.settings)
-      app.profileManager.updateProfile(profile)
-      LocalBroadcastManager.getInstance(getActivity)
-        .sendBroadcast(new Intent(Action.PROFILE_CHANGED).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
-      getActivity.finish()
+      saveAndExit()
       true
     case _ => false
+  }
+
+  def saveAndExit() {
+    profile.deserialize(app.settings)
+    app.profileManager.updateProfile(profile)
+    LocalBroadcastManager.getInstance(getActivity)
+      .sendBroadcast(new Intent(Action.PROFILE_CHANGED).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
+    getActivity.finish()
   }
 }

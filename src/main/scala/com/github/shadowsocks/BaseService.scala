@@ -259,7 +259,7 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    app.refreshContainerHolder
+    app.refreshContainerHolder()
     app.updateAssets()
   }
 
