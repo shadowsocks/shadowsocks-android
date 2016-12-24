@@ -448,7 +448,10 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   }
 
   override def onBackPressed(): Unit =
-    if (currentFragment != profilesFragment) displayFragment(profilesFragment) else super.onBackPressed()
+    if (drawer.isDrawerOpen) drawer.closeDrawer() else if (currentFragment != profilesFragment) {
+      displayFragment(profilesFragment)
+      drawer.setSelection(DRAWER_PROFILES)
+    } else super.onBackPressed()
 
   override def onStop() {
     super.onStop()
