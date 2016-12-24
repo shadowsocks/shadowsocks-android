@@ -1,22 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:title="@string/share"
-          android:icon="@drawable/abc_ic_menu_share_mtrl_alpha"
-          android:alphabeticShortcut="s"
-          android:numericShortcut="1"
-          app:showAsAction="always">
-        <menu>
-            <item android:id="@+id/action_qr_code_nfc"
-                  android:title="QR code/NFC"
-                  android:alphabeticShortcut="q"
-                  android:numericShortcut="1"/>
-            <item android:id="@+id/action_export"
-                  android:title="@string/action_export"
-                  android:alphabeticShortcut="e"
-                  android:numericShortcut="2"/>
-        </menu>
-    </item>
     <item android:id="@+id/action_delete"
           android:title="Delete"
           android:icon="@drawable/ic_action_delete"

@@ -25,13 +25,13 @@ import java.util.GregorianCalendar
 import android.content._
 import android.os.{Bundle, Handler}
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.support.v7.widget.RecyclerView.ViewHolder
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener
-import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.view._
-import android.widget.{LinearLayout, TextView, Toast}
+import android.view.View.OnLongClickListener
+import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
@@ -41,9 +41,15 @@ import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListener {
+final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickListener {
+  private val cardButtonLongClickListener: OnLongClickListener = view => {
+    Utils.positionToast(Toast.makeText(getActivity, view.getContentDescription, Toast.LENGTH_SHORT), view,
+      getActivity.getWindow, 0, Utils.dpToPx(getActivity, 8)).show()
+    true
+  }
+
   private final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
-    with View.OnClickListener {
+    with View.OnClickListener with PopupMenu.OnMenuItemClickListener {
 
     var item: Profile = _
 
@@ -59,11 +65,15 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
     {
       val edit = itemView.findViewById(R.id.edit)
       edit.setOnClickListener(_ => startConfig(item.id))
-      edit.setOnLongClickListener(_ => {
-        Utils.positionToast(Toast.makeText(getActivity, edit.getContentDescription, Toast.LENGTH_SHORT), edit,
-          getActivity.getWindow, 0, Utils.dpToPx(getActivity, 8)).show()
-        true
+      edit.setOnLongClickListener(cardButtonLongClickListener)
+      val share = itemView.findViewById(R.id.share)
+      share.setOnClickListener(_ => {
+        val popup = new PopupMenu(getActivity, share)
+        popup.getMenuInflater.inflate(R.menu.profile_share_popup, popup.getMenu)
+        popup.setOnMenuItemClickListener(this)
+        popup.show()
       })
+      share.setOnLongClickListener(cardButtonLongClickListener)
     }
 
     def updateText(txTotal: Long = 0, rxTotal: Long = 0) {
@@ -130,6 +140,16 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
         bind(item)
         if (state == State.CONNECTED) activity.serviceLoad()
       }
+    }
+
+    override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
+      case R.id.action_qr_code_nfc =>
+        getFragmentManager.beginTransaction().add(new QRCodeDialog(item.toString), "").commitAllowingStateLoss()
+        true
+      case R.id.action_export =>
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, item.toString))
+        true
+      case _ => false
     }
   }
 

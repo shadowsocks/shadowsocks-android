@@ -20,16 +20,16 @@
 
 package com.github.shadowsocks
 
+import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.content._
-import android.os._
+import android.os.{Build, Bundle, UserManager}
 import android.support.v14.preference.SwitchPreference
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.preference.Preference
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.view.MenuItem
-import be.mygod.preference._
+import be.mygod.preference.PreferenceFragment
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences.KcpCliPreferenceDialogFragment
@@ -37,7 +37,6 @@ import com.github.shadowsocks.utils.{Action, Key, Utils}
 
 class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener
   with OnSharedPreferenceChangeListener {
-  private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
   private var profile: Profile = _
   private var isProxyApps: SwitchPreference = _
 
@@ -83,12 +82,6 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   }
 
   override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
-    case R.id.action_qr_code_nfc =>
-      getFragmentManager.beginTransaction().add(new QRCodeDialog(profile.toString), "").commitAllowingStateLoss()
-      true
-    case R.id.action_export =>
-      clipboard.setPrimaryClip(ClipData.newPlainText(null, profile.toString))
-      true
     case R.id.action_delete =>
       new AlertDialog.Builder(getActivity)
         .setTitle("Confirm?") // TODO
