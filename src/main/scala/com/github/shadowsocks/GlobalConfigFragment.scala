@@ -1,16 +1,12 @@
 package com.github.shadowsocks
 
-import android.app.ProgressDialog
-import android.os.{Bundle, Handler, Message}
+import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
 import be.mygod.preference.PreferenceFragment
-import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
+import com.github.shadowsocks.utils.{Key, TcpFastOpen}
 
 class GlobalConfigFragment extends PreferenceFragment {
-  private var progressDialog: ProgressDialog = _
-
   override def onCreatePreferences(bundle: Bundle, key: String) {
     addPreferencesFromResource(R.xml.pref_global)
     val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
@@ -36,34 +32,6 @@ class GlobalConfigFragment extends PreferenceFragment {
     if (!TcpFastOpen.supported) {
       tfo.setEnabled(false)
       tfo.setSummary(getString(R.string.tcp_fastopen_summary_unsupported, java.lang.System.getProperty("os.version")))
-    }
-
-    findPreference("recovery").setOnPreferenceClickListener(_ => {
-      app.track("GlobalConfigFragment", "reset")
-      Utils.stopSsService(getActivity)
-      val h = showProgress(R.string.recovering)
-      Utils.ThrowableFuture {
-        app.copyAssets()
-        h.sendEmptyMessage(0)
-      }
-      true
-    })
-  }
-
-  private def showProgress(msg: Int): Handler = {
-    clearDialog()
-    progressDialog = ProgressDialog.show(getActivity, "", getString(msg), true, false)
-    new Handler {
-      override def handleMessage(msg: Message) {
-        clearDialog()
-      }
-    }
-  }
-
-  def clearDialog() {
-    if (progressDialog != null && progressDialog.isShowing) {
-      if (!getActivity.isDestroyed) progressDialog.dismiss()
-      progressDialog = null
     }
   }
 }

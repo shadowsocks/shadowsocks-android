@@ -10,7 +10,4 @@
     <SwitchPreference android:key="isNAT"
                       android:title="@string/nat"
                       android:summary="@string/nat_summary"/>
-    <Preference android:key="recovery"
-                android:title="@string/recovery"
-                android:summary="@string/recovery_summary"/>
 </PreferenceScreen>

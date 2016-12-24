@@ -24,13 +24,13 @@ import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
 import java.util.Locale
 
-import android.app.Activity
+import android.app.{Activity, ProgressDialog}
 import android.app.backup.BackupManager
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
 import android.net.{Uri, VpnService}
 import android.nfc.{NdefMessage, NfcAdapter}
-import android.os.{Build, Bundle, Handler}
+import android.os.{Build, Bundle, Handler, Message}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -57,8 +57,9 @@ object MainActivity {
 
   private final val DRAWER_PROFILES = 0L
   // sticky drawer items have negative ids
-  private final val DRAWER_GLOBAL_SETTINGS = -1L
-  private final val DRAWER_ABOUT = -2L
+  private final val DRAWER_RECOVERY = -1L
+  private final val DRAWER_GLOBAL_SETTINGS = -2L
+  private final val DRAWER_ABOUT = -3L
 }
 
 class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
@@ -73,6 +74,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   var currentProfile = new Profile
   var drawer: Drawer = _
 
+  private var progressDialog: ProgressDialog = _
   private var currentFragment: ToolbarFragment = _
   private lazy val profilesFragment = new ProfilesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
@@ -220,6 +222,12 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       )
       .addStickyDrawerItems(
         new SecondaryDrawerItem()
+          .withIdentifier(DRAWER_RECOVERY)
+          .withName(R.string.recovery)
+          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_navigation_refresh))
+          .withIconTintingEnabled(true)
+          .withSelectable(false),
+        new SecondaryDrawerItem()
           .withIdentifier(DRAWER_GLOBAL_SETTINGS)
           .withName(R.string.settings)
           .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_settings))
@@ -355,6 +363,14 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onItemClick(view: View, position: Int, drawerItem: IDrawerItem[_, _ <: ViewHolder]): Boolean = {
     drawerItem.getIdentifier match {
       case DRAWER_PROFILES => displayFragment(profilesFragment)
+      case DRAWER_RECOVERY =>
+        app.track("GlobalConfigFragment", "reset")
+        serviceStop()
+        val handler = showProgress(R.string.recovering)
+        Utils.ThrowableFuture {
+          app.copyAssets()
+          handler.sendEmptyMessage(0)
+        }
       case DRAWER_GLOBAL_SETTINGS => displayFragment(globalSettingsFragment)
       case DRAWER_ABOUT =>
         app.track(TAG, "about")
@@ -376,6 +392,21 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .show()
     }
     true  // unexpected cases will throw exception
+  }
+
+  private def showProgress(msg: Int): Handler = {
+    clearDialog()
+    progressDialog = ProgressDialog.show(this, "", getString(msg), true, false)
+    new Handler {
+      override def handleMessage(msg: Message): Unit = clearDialog()
+    }
+  }
+
+  private def clearDialog() {
+    if (progressDialog != null && progressDialog.isShowing) {
+      if (!isDestroyed) progressDialog.dismiss()
+      progressDialog = null
+    }
   }
 
   private def hideCircle() {
