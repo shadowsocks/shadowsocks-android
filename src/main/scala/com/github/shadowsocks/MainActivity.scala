@@ -216,16 +216,19 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withIdentifier(DRAWER_PROFILES)
           .withName(R.string.profiles)
           .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_description))
+          .withIconTintingEnabled(true)
       )
       .addStickyDrawerItems(
         new SecondaryDrawerItem()
           .withIdentifier(DRAWER_GLOBAL_SETTINGS)
           .withName(R.string.settings)
-          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_settings)),
+          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_settings))
+          .withIconTintingEnabled(true),
         new SecondaryDrawerItem()
           .withIdentifier(DRAWER_ABOUT)
           .withName(R.string.about)
           .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_copyright))
+          .withIconTintingEnabled(true)
           .withSelectable(false)
       )
       .withOnDrawerItemClickListener(this)
