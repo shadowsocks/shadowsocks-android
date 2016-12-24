@@ -24,11 +24,11 @@ import java.lang.System.currentTimeMillis
 import java.net.{HttpURLConnection, URL}
 import java.util.Locale
 
-import android.app.{Activity, ProgressDialog}
 import android.app.backup.BackupManager
+import android.app.{Activity, ProgressDialog}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
-import android.net.{Uri, VpnService}
+import android.net.VpnService
 import android.nfc.{NdefMessage, NfcAdapter}
 import android.os.{Build, Bundle, Handler, Message}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
@@ -38,7 +38,6 @@ import android.support.v7.widget.RecyclerView.ViewHolder
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
-import android.webkit.{WebView, WebViewClient}
 import android.widget.{TextView, Toast}
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -78,6 +77,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private var currentFragment: ToolbarFragment = _
   private lazy val profilesFragment = new ProfilesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
+  private lazy val aboutFragment = new AboutFragment()
 
   // Services
   private val callback = new IShadowsocksServiceCallback.Stub {
@@ -237,7 +237,6 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withName(R.string.about)
           .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_copyright))
           .withIconTintingEnabled(true)
-          .withSelectable(false)
       )
       .withOnDrawerItemClickListener(this)
       .withActionBarDrawerToggle(true)
@@ -374,22 +373,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_GLOBAL_SETTINGS => displayFragment(globalSettingsFragment)
       case DRAWER_ABOUT =>
         app.track(TAG, "about")
-        val web = new WebView(this)
-        web.loadUrl("file:///android_asset/pages/about.html")
-        web.setWebViewClient(new WebViewClient() {
-          override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
-            try startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))) catch {
-              case _: android.content.ActivityNotFoundException => // Ignore
-            }
-            true
-          }
-        })
-        new AlertDialog.Builder(this)
-          .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
-          .setNegativeButton(getString(android.R.string.ok), null)
-          .setView(web)
-          .create()
-          .show()
+        displayFragment(aboutFragment)
     }
     true  // unexpected cases will throw exception
   }
