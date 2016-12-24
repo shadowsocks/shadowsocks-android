@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:title="@string/add_profile"
-          android:icon="@drawable/ic_content_add"
+          android:icon="@drawable/ic_action_note_add"
           android:alphabeticShortcut="a"
           android:numericShortcut="0"
           app:showAsAction="always">
