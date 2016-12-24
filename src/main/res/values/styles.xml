@@ -14,6 +14,8 @@
         <item name="colorPrimary">@color/material_primary_500</item>
         <item name="colorPrimaryDark">@color/material_primary_700</item>
         <item name="preferenceTheme">@style/Theme.Material.PreferenceThemeOverlay</item>
+
+        <item name="material_drawer_selected_text">@color/material_primary_500</item>
     </style>
 
     <style name="Theme.Material.Dialog" parent="Theme.AppCompat.Light.Dialog">
