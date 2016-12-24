@@ -25,7 +25,7 @@ import java.util.GregorianCalendar
 import android.content._
 import android.os.{Bundle, Handler}
 import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
+import android.support.v7.widget._
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback

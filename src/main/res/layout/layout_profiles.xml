@@ -10,5 +10,6 @@
                                             android:layout_height="0dp"
                                             android:layout_weight="1"
                                             android:paddingBottom="32dp"
+                                            android:clipChildren="false"
                                             android:clipToPadding="false"/>
 </LinearLayout>
