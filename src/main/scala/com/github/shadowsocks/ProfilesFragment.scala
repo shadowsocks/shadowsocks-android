@@ -102,10 +102,11 @@ final class ProfilesFragment extends ToolbarFragment with OnMenuItemClickListene
           val params =
             new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
           params.gravity = Gravity.CENTER_HORIZONTAL
+          params.setMargins(0, Utils.dpToPx(getActivity, 8), 0, 0)
           adView = new NativeExpressAdView(getActivity)
           adView.setLayoutParams(params)
-          adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-          adView.setAdSize(AdSize.BANNER)
+          adView.setAdUnitId("ca-app-pub-9097031975646651/5224027521")
+          adView.setAdSize(new AdSize(320, 132))
           itemView.findViewById(R.id.content).asInstanceOf[LinearLayout].addView(adView)
 
           // Demographics
