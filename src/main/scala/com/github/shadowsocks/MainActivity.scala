@@ -105,7 +105,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
             fab.setEnabled(true)
             changeSwitch(checked = false)
             if (m != null) {
-              val snackbar = Snackbar.make(findViewById(android.R.id.content),
+              val snackbar = Snackbar.make(findViewById(R.id.content),
                 getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
               if (m == getString(R.string.nat_no_root)) addDisableNatToSnackbar(snackbar)
               snackbar.show()
@@ -276,7 +276,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
             synchronized(if (serviceStarted && testCount == id && app.isVpnEnabled) handler.post(() =>
               if (success) statusText.setText(result) else {
                 statusText.setText(R.string.connection_test_fail)
-                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(findViewById(R.id.content), result, Snackbar.LENGTH_LONG).show()
               }))
           }
         }
