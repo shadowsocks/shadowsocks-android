@@ -168,7 +168,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private var rxText: TextView = _
   private var txRateText: TextView = _
   private var rxRateText: TextView = _
-  private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_blue_grey_700)
+  private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_primary_500)
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
 
   val handler = new Handler()
