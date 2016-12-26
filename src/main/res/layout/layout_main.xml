@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="match_parent"
-                                                 android:clipChildren="false">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                tools:ignore="UnknownIdInLayout" android:clipChildren="false">
     <FrameLayout android:id="@+id/content"
                  android:layout_width="match_parent"
                  android:layout_height="match_parent"
-                 app:layout_anchor="@+id/stat"
-                 app:layout_behavior="com.github.shadowsocks.widget.BottomAwareBehavior"/>
+                 android:layout_above="@+id/stat"/>
     <LinearLayout android:id="@+id/stat"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_gravity="bottom"
                   android:elevation="4dp"
                   android:paddingStart="16dip"
                   android:paddingEnd="16dip"
@@ -22,7 +19,7 @@
                   android:background="@drawable/background_stat"
                   android:orientation="vertical"
                   android:nextFocusRight="@+id/fab"
-                  app:layout_behavior="com.github.shadowsocks.widget.BottomBehavior">
+                  android:layout_alignParentBottom="true">
         <TextView android:id="@+id/status"
                   android:textSize="16sp"
                   android:textColor="?android:attr/textColorPrimary"
@@ -74,15 +71,14 @@
                                                    android:layout_width="wrap_content"
                                                    android:layout_height="wrap_content"
                                                    android:elevation="6dp"
-                                                   app:layout_anchorGravity="end"
+                                                   android:layout_alignTop="@+id/stat"
+                                                   android:layout_alignParentEnd="true"
                                                    android:layout_marginEnd="16dp"
-                                                   android:layout_marginBottom="@dimen/fab_margin_bottom"
-                                                   app:layout_behavior="com.github.shadowsocks.widget.BottomBehavior"
-                                                   app:layout_anchor="@+id/stat">
+                                                   android:layout_marginTop="@dimen/fab_margin_top">
         <android.support.design.widget.FloatingActionButton android:id="@+id/fab" android:layout_width="wrap_content"
                                                             android:layout_height="wrap_content"
                                                             app:backgroundTint="@color/material_primary_500"
                                                             app:srcCompat="@drawable/ic_start_idle"
                                                             app:pressedTranslationZ="6dp" app:borderWidth="0dp" />
     </com.github.jorgecastilloprz.FABProgressCircle>
-</android.support.design.widget.CoordinatorLayout>
+</RelativeLayout>

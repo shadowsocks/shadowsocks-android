@@ -46,7 +46,7 @@ class GlobalConfigFragment extends PreferenceFragment {
       val value = v.asInstanceOf[Boolean]
       val result = TcpFastOpen.enabled(value)
       if (result != null && result != "Success.")
-        Snackbar.make(getActivity.findViewById(R.id.content), result, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(getActivity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
       value == TcpFastOpen.sendEnabled
     })
     if (!TcpFastOpen.supported) {
