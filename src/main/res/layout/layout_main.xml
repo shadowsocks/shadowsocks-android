@@ -19,7 +19,7 @@
                   android:background="@drawable/background_stat"
                   android:orientation="vertical"
                   android:nextFocusRight="@+id/fab"
-                  android:layout_alignParentBottom="true">
+                  android:layout_above="@+id/snackbar">
         <TextView android:id="@+id/status"
                   android:textSize="16sp"
                   android:textColor="?android:attr/textColorPrimary"
@@ -81,4 +81,9 @@
                                                             app:srcCompat="@drawable/ic_start_idle"
                                                             app:pressedTranslationZ="6dp" app:borderWidth="0dp" />
     </com.github.jorgecastilloprz.FABProgressCircle>
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/snackbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true" />
 </RelativeLayout>
