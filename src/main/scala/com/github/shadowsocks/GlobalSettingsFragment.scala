@@ -22,6 +22,7 @@ package com.github.shadowsocks
 
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
+import android.app.Fragment
 
 class GlobalSettingsFragment extends ToolbarFragment {
 
@@ -31,5 +32,24 @@ class GlobalSettingsFragment extends ToolbarFragment {
   override def onViewCreated(view: View, savedInstanceState: Bundle) {
     super.onViewCreated(view, savedInstanceState)
     toolbar.setTitle(R.string.settings)
+
+    val fm = getChildFragmentManager()
+    val fragment = new GlobalConfigFragment()
+    val ft = fm.beginTransaction()
+    ft.replace(R.id.content, fragment)
+    ft.commit()
+    fm.executePendingTransactions()
+  }
+
+  override def onDetach() {
+    super.onDetach()
+
+    try {
+      val childFragmentManager = classOf[Fragment].getDeclaredField("mChildFragmentManager")
+      childFragmentManager.setAccessible(true)
+      childFragmentManager.set(this, null)
+    } catch {
+      case ex: Exception => // ignore
+    }
   }
 }

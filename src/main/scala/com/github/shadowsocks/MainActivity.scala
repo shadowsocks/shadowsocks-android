@@ -207,25 +207,25 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_PROFILES)
           .withName(R.string.profiles)
-          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_description))
+          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_action_description))
           .withIconTintingEnabled(true),
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_GLOBAL_SETTINGS)
           .withName(R.string.settings)
-          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_settings))
+          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_action_settings))
           .withIconTintingEnabled(true)
       )
       .addStickyDrawerItems(
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_RECOVERY)
           .withName(R.string.recovery)
-          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_navigation_refresh))
+          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_navigation_refresh))
           .withIconTintingEnabled(true)
           .withSelectable(false),
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_ABOUT)
           .withName(R.string.about)
-          .withIcon(ContextCompat.getDrawable(this, R.drawable.ic_action_copyright))
+          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_action_copyright))
           .withIconTintingEnabled(true)
       )
       .withOnDrawerItemClickListener(this)
@@ -301,6 +301,14 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
     val intent = getIntent
     if (intent != null) handleShareIntent(intent)
+
+    app.profileManager.getFirstProfile match {
+      case Some(_) => // Ignore
+      case _ => {
+        val profile = app.profileManager.createProfile()
+        app.profileId(profile.id)
+      }
+    }
   }
 
   override def onNewIntent(intent: Intent) {
