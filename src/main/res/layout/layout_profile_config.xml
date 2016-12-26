@@ -4,6 +4,10 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
     <include layout="@layout/toolbar_light_dark" />
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/snackbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
     <fragment android:id="@+id/content"
               class="com.github.shadowsocks.ProfileConfigFragment"
               android:layout_width="match_parent"

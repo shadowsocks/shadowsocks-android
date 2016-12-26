@@ -22,6 +22,7 @@ package com.github.shadowsocks.widget
 
 import android.support.design.widget.Snackbar
 import android.view.View
+
 import com.github.shadowsocks.R
 
 import scala.collection.mutable.ArrayBuffer
