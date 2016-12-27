@@ -127,6 +127,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     if (state == State.CONNECTED) fab.setBackgroundTintList(greenTint) else {
       fab.setBackgroundTintList(greyTint)
       updateTraffic(0, 0, 0, 0)
+      testCount += 1  // suppress previous test messages
     }
     fab.setEnabled(false)
     if (state == State.CONNECTED || state == State.STOPPED)
@@ -211,12 +212,10 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    findViewById(R.id.stat).setOnClickListener(_ => {
-      val id = synchronized {
-        testCount += 1
-        handler.post(() => statusText.setText(R.string.connection_test_testing))
-        testCount
-      }
+    findViewById(R.id.stat).setOnClickListener(_ => if (state == State.CONNECTED && app.isVpnEnabled) {
+      testCount += 1
+      statusText.setText(R.string.connection_test_testing)
+      val id = testCount  // it would change by other code
       Utils.ThrowableFuture {
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
         autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
@@ -241,11 +240,10 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
                 success = false
                 result = getString(R.string.connection_test_error, e.getMessage)
             }
-            synchronized(if (state == State.CONNECTED && testCount == id && app.isVpnEnabled) handler.post(() =>
-              if (success) statusText.setText(result) else {
-                statusText.setText(R.string.connection_test_fail)
-                Snackbar.make(findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
-              }))
+            if (testCount == id) handler.post(() => if (success) statusText.setText(result) else {
+              statusText.setText(R.string.connection_test_fail)
+              Snackbar.make(findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+            })
           }
         }
       }
