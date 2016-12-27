@@ -40,6 +40,8 @@
 package com.github.shadowsocks
 
 import java.io.IOException
+import java.net.InetAddress
+import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
 
@@ -54,7 +56,7 @@ import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCall
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import okhttp3.{FormBody, OkHttpClient, Request}
+import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 
 
 import scala.util.Random
@@ -144,7 +146,10 @@ trait BaseService extends Service {
     val sig = Utils.getSignature(this)
 
     val client = new OkHttpClient.Builder()
-      .dns(new CustomDns())
+      .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
+        case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
+        case _ => Dns.SYSTEM.lookup(hostname)
+      })
       .connectTimeout(10, TimeUnit.SECONDS)
       .writeTimeout(10, TimeUnit.SECONDS)
       .readTimeout(30, TimeUnit.SECONDS)
