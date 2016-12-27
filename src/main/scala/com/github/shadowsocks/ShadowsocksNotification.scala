@@ -67,6 +67,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
       case Intent.ACTION_SCREEN_ON =>
         setVisible(visible && Utils.isLollipopOrAbove && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
         service.binder.registerCallback(callback)
+        service.binder.startListeningForBandwidth(callback)
         callbackRegistered = true
       case Intent.ACTION_USER_PRESENT => setVisible(true, forceShow)
     }
