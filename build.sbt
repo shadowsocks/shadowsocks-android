@@ -20,11 +20,9 @@ proguardVersion := "5.3.2"
 proguardCache := Seq()
 proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
-  "-keep class okhttp3.** { *; }" ::
-  "-keep interface okhttp3.** { *; }" ::
-  "-dontwarn okio.**" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
+  "-dontwarn okio.**" ::
   "-dontwarn org.xbill.**" ::
   Nil
 
