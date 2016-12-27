@@ -128,6 +128,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       updateTraffic(0, 0, 0, 0)
       testCount += 1  // suppress previous test messages
     }
+    if (state == State.STOPPED && ProfilesFragment.instance != null)
+      ProfilesFragment.instance.profilesAdapter.refreshId(app.profileId)  // traffic may have changed, refresh required
     fab.setEnabled(false)
     if (state == State.CONNECTED || state == State.STOPPED)
       handler.postDelayed(() => fab.setEnabled(state == State.CONNECTED || state == State.STOPPED), 1000)
