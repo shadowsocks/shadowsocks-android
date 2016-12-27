@@ -29,10 +29,7 @@ import android.animation.{Animator, AnimatorListenerAdapter}
 import android.content.pm.PackageManager
 import android.content.{Context, Intent}
 import android.graphics._
-import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.v4.content.ContextCompat
-import android.support.graphics.drawable.VectorDrawableCompat
 import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
@@ -51,14 +48,6 @@ object Utils {
   private val TAG = "Shadowsocks"
 
   def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-
-  def getAPICompatVectorDrawable(callingContext: Context, resource_id: Int): Drawable =  {
-      if (Build.VERSION.SDK_INT >= 21) {
-          return ContextCompat.getDrawable(callingContext.getApplicationContext(), resource_id);
-      } else {
-          return VectorDrawableCompat.create(callingContext.getResources(), resource_id, callingContext.getTheme());
-      }
-  }
 
   def getSignature(context: Context): String = {
     val info = context

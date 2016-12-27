@@ -33,11 +33,8 @@ class GlobalSettingsFragment extends ToolbarFragment {
     super.onViewCreated(view, savedInstanceState)
     toolbar.setTitle(R.string.settings)
 
-    val fm = getChildFragmentManager()
-    val fragment = new GlobalConfigFragment()
-    val ft = fm.beginTransaction()
-    ft.replace(R.id.content, fragment)
-    ft.commit()
+    val fm = getChildFragmentManager
+    fm.beginTransaction().replace(R.id.content, new GlobalConfigFragment()).commit()
     fm.executePendingTransactions()
   }
 
@@ -49,7 +46,7 @@ class GlobalSettingsFragment extends ToolbarFragment {
       childFragmentManager.setAccessible(true)
       childFragmentManager.set(this, null)
     } catch {
-      case ex: Exception => // ignore
+      case _: Exception =>  // ignore
     }
   }
 }

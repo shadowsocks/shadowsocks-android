@@ -34,6 +34,7 @@ import android.os.{Build, Bundle, Handler, Message}
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
+import android.support.v7.content.res.AppCompatResources
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.text.TextUtils
 import android.util.Log
@@ -45,8 +46,8 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
-import com.mikepenz.materialdrawer.model.{PrimaryDrawerItem, SecondaryDrawerItem}
 import com.mikepenz.materialdrawer.{Drawer, DrawerBuilder}
 
 object MainActivity {
@@ -207,25 +208,25 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_PROFILES)
           .withName(R.string.profiles)
-          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_action_description))
+          .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_description))
           .withIconTintingEnabled(true),
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_GLOBAL_SETTINGS)
           .withName(R.string.settings)
-          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_action_settings))
+          .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_settings))
           .withIconTintingEnabled(true)
       )
       .addStickyDrawerItems(
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_RECOVERY)
           .withName(R.string.recovery)
-          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_navigation_refresh))
+          .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_navigation_refresh))
           .withIconTintingEnabled(true)
           .withSelectable(false),
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_ABOUT)
           .withName(R.string.about)
-          .withIcon(Utils.getAPICompatVectorDrawable(this, R.drawable.ic_action_copyright))
+          .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_copyright))
           .withIconTintingEnabled(true)
       )
       .withOnDrawerItemClickListener(this)
@@ -302,13 +303,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     val intent = getIntent
     if (intent != null) handleShareIntent(intent)
 
-    app.profileManager.getFirstProfile match {
-      case Some(_) => // Ignore
-      case _ => {
-        val profile = app.profileManager.createProfile()
-        app.profileId(profile.id)
-      }
-    }
+    if (app.profileManager.getFirstProfile.isEmpty) app.profileId(app.profileManager.createProfile().id)
   }
 
   override def onNewIntent(intent: Intent) {
