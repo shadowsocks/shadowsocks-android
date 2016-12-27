@@ -29,7 +29,7 @@ import java.util.{Timer, TimerTask}
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.net.ConnectivityManager
-import android.os.{Handler, RemoteCallbackList}
+import android.os.{Handler, IBinder, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -39,6 +39,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 
+import scala.collection.mutable
 import scala.util.Random
 
 trait BaseService extends Service {
@@ -54,7 +55,7 @@ trait BaseService extends Service {
   var trafficMonitorThread: TrafficMonitorThread = _
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
-  var callbacksCount: Int = _
+  private final val bandwidthListeners = new mutable.HashSet[IBinder]() // the binder is the real identifier
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
   lazy val protectPath: String = getApplicationInfo.dataDir + "/protect_path"
@@ -85,31 +86,29 @@ trait BaseService extends Service {
 
     override def getProfileName: String = if (profile == null) null else profile.getName
 
-    override def unregisterCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null && callbacks.unregister(cb)) {
-        callbacksCount -= 1
-        if (callbacksCount == 0 && timer != null) {
-          timer.cancel()
-          timer = null
-        }
-      }
-    }
+    override def registerCallback(cb: IShadowsocksServiceCallback): Unit = callbacks.register(cb)
 
-    override def registerCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null && callbacks.register(cb)) {
-        callbacksCount += 1
-        if (callbacksCount != 0 && timer == null) {
-          val task = new TimerTask {
-            def run() {
-              if (TrafficMonitor.updateRate()) updateTrafficRate()
-            }
-          }
+    override def startListeningForBandwidth(cb: IShadowsocksServiceCallback): Unit =
+      if (bandwidthListeners.add(cb.asBinder)){
+        if (timer == null) {
           timer = new Timer(true)
-          timer.schedule(task, 1000, 1000)
+          timer.schedule(new TimerTask {
+            def run(): Unit = if (TrafficMonitor.updateRate()) updateTrafficRate()
+          }, 1000, 1000)
         }
         TrafficMonitor.updateRate()
         cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
+
+    override def stopListeningForBandwidth(cb: IShadowsocksServiceCallback): Unit =
+      if (bandwidthListeners.remove(cb.asBinder) && bandwidthListeners.isEmpty) {
+        timer.cancel()
+        timer = null
+      }
+
+    override def unregisterCallback(cb: IShadowsocksServiceCallback) {
+      stopListeningForBandwidth(cb) // saves an RPC, and safer
+      callbacks.unregister(cb)
     }
 
     override def use(profileId: Int): Unit = synchronized(if (profileId < 0) stopRunner(stopService = true) else {
@@ -258,7 +257,7 @@ trait BaseService extends Service {
 
   def updateTrafficRate() {
     handler.post(() => {
-      if (callbacksCount > 0) {
+      if (bandwidthListeners.nonEmpty) {
         val txRate = TrafficMonitor.txRate
         val rxRate = TrafficMonitor.rxRate
         val txTotal = TrafficMonitor.txTotal
@@ -266,7 +265,8 @@ trait BaseService extends Service {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
-            callbacks.getBroadcastItem(i).trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+            val item = callbacks.getBroadcastItem(i)
+            if (bandwidthListeners.contains(item.asBinder)) item.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
           } catch {
             case _: Exception => // Ignore
           }
@@ -289,7 +289,7 @@ trait BaseService extends Service {
   protected def changeState(s: Int, msg: String = null) {
     val handler = new Handler(getMainLooper)
     handler.post(() => if (state != s || msg != null) {
-      if (callbacksCount > 0) {
+      if (callbacks.getRegisteredCallbackCount > 0) {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {

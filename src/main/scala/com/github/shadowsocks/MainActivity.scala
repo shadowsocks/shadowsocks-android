@@ -142,7 +142,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onServiceConnected() {
     // Update the UI
     if (fab != null) fab.setEnabled(true)
-    updateState()
+    Log.d(TAG, "bgService " + bgService.getState)
+    callback.stateChanged(bgService.getState, null, null)
+    state = bgService.getState
     if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(R.id.snackbar), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       addDisableNatToSnackbar(snackbar)
@@ -393,25 +395,14 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     }
   }
 
-  private def updateState() {
-    if (bgService != null) {
-      Log.d(TAG, "bgService " + bgService.getState)
-      callback.stateChanged(bgService.getState, null, null)
-      state = bgService.getState
-    }
-  }
-
   protected override def onResume() {
     super.onResume()
-
     app.refreshContainerHolder()
-
-    updateState()
   }
 
   override def onStart() {
     super.onStart()
-    registerCallback()
+    setListeningForBandwidth(true)
   }
 
   override def onBackPressed(): Unit =
@@ -421,8 +412,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     } else super.onBackPressed()
 
   override def onStop() {
+    setListeningForBandwidth(false)
     super.onStop()
-    unregisterCallback()
   }
 
   override def onDestroy() {
