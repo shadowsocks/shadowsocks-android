@@ -138,7 +138,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         app.switchProfile(item.id)
         profilesAdapter.refreshId(old)
         bind(item)
-        if (state == State.CONNECTED) activity.serviceLoad()
+        if (state == State.CONNECTED) activity.bgService.use(item.id) // reconnect to new profile
       }
     }
 

@@ -43,7 +43,6 @@ import android.widget.{TextView, Toast}
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
-import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
@@ -65,69 +64,74 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   with OnSharedPreferenceChangeListener {
   import MainActivity._
 
-  // Variables
-  var serviceStarted: Boolean = _
-  var fab: FloatingActionButton = _
-  var fabProgressCircle: FABProgressCircle = _
-  var state = State.STOPPED
-  var currentProfile = new Profile
+  // UI
+  private val handler = new Handler()
+  private var fab: FloatingActionButton = _
+  private var fabProgressCircle: FABProgressCircle = _
   var drawer: Drawer = _
 
-  private var progressDialog: ProgressDialog = _
+  private var testCount: Int = _
+  private var statusText: TextView = _
+  private var txText: TextView = _
+  private var rxText: TextView = _
+  private var txRateText: TextView = _
+  private var rxRateText: TextView = _
+
   private var currentFragment: ToolbarFragment = _
   private lazy val profilesFragment = new ProfilesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
   private lazy val aboutFragment = new AboutFragment()
 
   // Services
+  var state: Int = _
   private val callback = new IShadowsocksServiceCallback.Stub {
-    def stateChanged(s: Int, profileName: String, m: String) {
-      handler.post(() => {
-        s match {
-          case State.CONNECTING =>
-            fab.setBackgroundTintList(greyTint)
-            fab.setImageResource(R.drawable.ic_start_busy)
-            fab.setEnabled(false)
-            fabProgressCircle.show()
-            statusText.setText("Connecting...")
-          case State.CONNECTED =>
-            fab.setBackgroundTintList(greenTint)
-            if (state == State.CONNECTING) {
-              fabProgressCircle.beginFinalAnimation()
-            } else {
-              fabProgressCircle.postDelayed(hideCircle, 1000)
-            }
-            fab.setEnabled(true)
-            changeSwitch(checked = true)
-            statusText.setText(if (app.isNatEnabled) "Connected" else "Connected, tap to check connection")
-          case State.STOPPED =>
-            fab.setBackgroundTintList(greyTint)
-            fabProgressCircle.postDelayed(hideCircle, 1000)
-            fab.setEnabled(true)
-            changeSwitch(checked = false)
-            if (m != null) {
-              val snackbar = Snackbar.make(findViewById(R.id.snackbar),
-                getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
-              if (m == getString(R.string.nat_no_root)) addDisableNatToSnackbar(snackbar)
-              snackbar.show()
-              Log.e(TAG, "Error to start VPN service: " + m)
-            }
-            statusText.setText("Not connected")
-          case State.STOPPING =>
-            fab.setBackgroundTintList(greyTint)
-            fab.setImageResource(R.drawable.ic_start_busy)
-            fab.setEnabled(false)
-            if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-            statusText.setText("Shutting down...")
-        }
-        state = s
-      })
-    }
-    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+    def stateChanged(s: Int, profileName: String, m: String): Unit = handler.post(() => changeState(s, profileName, m))
+    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
       handler.post(() => updateTraffic(txRate, rxRate, txTotal, rxTotal))
-    }
   }
 
+  private lazy val greyTint = ContextCompat.getColorStateList(MainActivity.this, R.color.material_primary_500)
+  private lazy val greenTint = ContextCompat.getColorStateList(MainActivity.this, R.color.material_green_700)
+  private def hideCircle() = try fabProgressCircle.hide() catch {
+    case _: NullPointerException =>
+  }
+  private def changeState(s: Int, profileName: String = null, m: String = null) {
+    // TODO: localize texts for statusText in this method
+    s match {
+      case State.CONNECTING =>
+        fab.setImageResource(R.drawable.ic_start_busy)
+        fabProgressCircle.show()
+        statusText.setText("Connecting...")
+      case State.CONNECTED =>
+        if (state == State.CONNECTING) fabProgressCircle.beginFinalAnimation()
+        else fabProgressCircle.postDelayed(hideCircle, 1000)
+        fab.setImageResource(R.drawable.ic_start_connected)
+        statusText.setText(if (app.isNatEnabled) "Connected" else "Connected, tap to check connection")
+      case State.STOPPING =>
+        fab.setImageResource(R.drawable.ic_start_busy)
+        if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
+        statusText.setText("Shutting down...")
+      case _ =>
+        fab.setImageResource(R.drawable.ic_start_idle)
+        fabProgressCircle.postDelayed(hideCircle, 1000)
+        if (m != null) {
+          val snackbar = Snackbar.make(findViewById(R.id.snackbar),
+            getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
+          if (m == getString(R.string.nat_no_root)) addDisableNatToSnackbar(snackbar)
+          snackbar.show()
+          Log.e(TAG, "Error to start VPN service: " + m)
+        }
+        statusText.setText("Not connected")
+    }
+    state = s
+    if (state == State.CONNECTED) fab.setBackgroundTintList(greenTint) else {
+      fab.setBackgroundTintList(greyTint)
+      updateTraffic(0, 0, 0, 0)
+    }
+    fab.setEnabled(false)
+    if (state == State.CONNECTED || state == State.STOPPED)
+      handler.postDelayed(() => fab.setEnabled(state == State.CONNECTED || state == State.STOPPED), 1000)
+  }
   def updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
     txText.setText(TrafficMonitor.formatTraffic(txTotal))
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
@@ -137,67 +141,28 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     if (child != null) child.onTrafficUpdated(txRate, rxRate, txTotal, rxTotal)
   }
 
-  def attachServiceCallback(): Unit = attachService(callback)
-
   override def onServiceConnected() {
-    // Update the UI
-    if (fab != null) fab.setEnabled(true)
-    Log.d(TAG, "bgService " + bgService.getState)
-    callback.stateChanged(bgService.getState, null, null)
-    state = bgService.getState
+    changeState(bgService.getState)
     if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
       val snackbar = Snackbar.make(findViewById(R.id.snackbar), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
       addDisableNatToSnackbar(snackbar)
       snackbar.show()
     }
   }
+  override def onServiceDisconnected(): Unit = changeState(State.IDLE)
 
   private def addDisableNatToSnackbar(snackbar: Snackbar) = snackbar.setAction(R.string.switch_to_vpn, (_ =>
     if (state == State.STOPPED) app.editor.putBoolean(Key.isNAT, false)): View.OnClickListener)
 
-  override def onServiceDisconnected() {
-    if (fab != null) fab.setEnabled(false)
-  }
-
   override def binderDied() {
     detachService()
     app.crashRecovery()
-    attachServiceCallback()
+    attachService(callback)
   }
 
-  private var testCount: Int = _
-  private var statusText: TextView = _  // TODO: localize texts for statusText in this file
-  private var txText: TextView = _
-  private var rxText: TextView = _
-  private var txRateText: TextView = _
-  private var rxRateText: TextView = _
-  private lazy val greyTint = ContextCompat.getColorStateList(this, R.color.material_primary_500)
-  private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
-
-  val handler = new Handler()
-  private val connectedListener: BroadcastReceiver = (_, _) =>
-    statusText.setText(if (app.isNatEnabled) "Connected" else "Connected, tap to check connection")
-
-  private def changeSwitch(checked: Boolean) {
-    serviceStarted = checked
-    fab.setImageResource(if (checked) R.drawable.ic_start_connected else R.drawable.ic_start_idle)
-    if (fab.isEnabled) {
-      fab.setEnabled(false)
-      handler.postDelayed(() => fab.setEnabled(true), 1000)
-    }
-  }
-
-  def prepareStartService() {
-    Utils.ThrowableFuture {
-      if (app.isNatEnabled) serviceLoad() else {
-        val intent = VpnService.prepare(this)
-        if (intent != null) {
-          startActivityForResult(intent, REQUEST_CONNECT)
-        } else {
-          handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))
-        }
-      }
-    }
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
+    case Activity.RESULT_OK => bgService.use(app.profileId)
+    case _ => Log.e(TAG, "Failed to start VpnService")
   }
 
   override def onCreate(savedInstanceState: Bundle) {
@@ -276,7 +241,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
                 success = false
                 result = getString(R.string.connection_test_error, e.getMessage)
             }
-            synchronized(if (serviceStarted && testCount == id && app.isVpnEnabled) handler.post(() =>
+            synchronized(if (state == State.CONNECTED && testCount == id && app.isVpnEnabled) handler.post(() =>
               if (success) statusText.setText(result) else {
                 statusText.setText(R.string.connection_test_fail)
                 Snackbar.make(findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
@@ -288,19 +253,22 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
-    else if (bgService != null) prepareStartService()
-    else changeSwitch(checked = false))
-    fab.setOnLongClickListener((v: View) => {
-      Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
+    fab.setOnClickListener(_ => if (state == State.CONNECTED) bgService.use(-1) else Utils.ThrowableFuture {
+      if (app.isNatEnabled) bgService.use(app.profileId) else {
+        val intent = VpnService.prepare(this)
+        if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
+        else handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))
+      }
+    })
+    fab.setOnLongClickListener(_ => {
+      Utils.positionToast(Toast.makeText(this, if (state == State.CONNECTED) R.string.stop else R.string.connect,
         Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show()
       true
     })
-    updateTraffic(0, 0, 0, 0)
 
-    handler.post(attachServiceCallback)
+    changeState(State.IDLE) // reset everything to init state
+    handler.post(() => attachService(callback))
     app.settings.registerOnSharedPreferenceChangeListener(this)
-    registerReceiver(connectedListener, new IntentFilter(Action.CONNECTED))
 
     val intent = getIntent
     if (intent != null) handleShareIntent(intent)
@@ -342,7 +310,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   def onSharedPreferenceChanged(pref: SharedPreferences, key: String): Unit = key match {
     case Key.isNAT => handler.post(() => {
       detachService()
-      attachServiceCallback()
+      attachService(callback)
     })
     case _ =>
   }
@@ -358,8 +326,11 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_PROFILES => displayFragment(profilesFragment)
       case DRAWER_RECOVERY =>
         app.track("GlobalConfigFragment", "reset")
-        serviceStop()
-        val handler = showProgress(R.string.recovering)
+        if (bgService != null) bgService.use(-1)
+        val dialog = ProgressDialog.show(this, "", getString(R.string.recovering), true, false)
+        val handler = new Handler {
+          override def handleMessage(msg: Message): Unit = if (dialog.isShowing && !isDestroyed) dialog.dismiss()
+        }
         Utils.ThrowableFuture {
           app.copyAssets()
           handler.sendEmptyMessage(0)
@@ -370,29 +341,6 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         displayFragment(aboutFragment)
     }
     true  // unexpected cases will throw exception
-  }
-
-  private def showProgress(msg: Int): Handler = {
-    clearDialog()
-    progressDialog = ProgressDialog.show(this, "", getString(msg), true, false)
-    new Handler {
-      override def handleMessage(msg: Message): Unit = clearDialog()
-    }
-  }
-
-  private def clearDialog() {
-    if (progressDialog != null && progressDialog.isShowing) {
-      if (!isDestroyed) progressDialog.dismiss()
-      progressDialog = null
-    }
-  }
-
-  private def hideCircle() {
-    try {
-      fabProgressCircle.hide()
-    } catch {
-      case _: java.lang.NullPointerException => // Ignore
-    }
   }
 
   protected override def onResume() {
@@ -418,31 +366,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   override def onDestroy() {
     super.onDestroy()
-    unregisterReceiver(connectedListener)
     app.settings.unregisterOnSharedPreferenceChangeListener(this)
     detachService()
     new BackupManager(this).dataChanged()
     handler.removeCallbacksAndMessages(null)
-  }
-
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
-    case Activity.RESULT_OK =>
-      serviceLoad()
-    case _ =>
-      changeSwitch(checked = false)
-      Log.e(TAG, "Failed to start VpnService")
-  }
-
-  def serviceStop() {
-    if (bgService != null) bgService.use(-1)
-  }
-
-  /** Called when connect button is clicked. */
-  def serviceLoad() {
-    bgService.use(app.profileId)
-
-    if (app.isVpnEnabled) {
-      changeSwitch(checked = false)
-    }
   }
 }

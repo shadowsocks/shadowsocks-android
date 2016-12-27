@@ -75,11 +75,13 @@
                                                    android:layout_alignParentEnd="true"
                                                    android:layout_marginEnd="16dp"
                                                    android:layout_marginTop="@dimen/fab_margin_top">
-        <android.support.design.widget.FloatingActionButton android:id="@+id/fab" android:layout_width="wrap_content"
+        <android.support.design.widget.FloatingActionButton android:id="@+id/fab"
+                                                            android:layout_width="wrap_content"
                                                             android:layout_height="wrap_content"
                                                             app:backgroundTint="@color/material_primary_500"
                                                             app:srcCompat="@drawable/ic_start_idle"
-                                                            app:pressedTranslationZ="6dp" app:borderWidth="0dp" />
+                                                            app:pressedTranslationZ="6dp"
+                                                            app:borderWidth="0dp"/>
     </com.github.jorgecastilloprz.FABProgressCircle>
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/snackbar"

@@ -30,7 +30,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
   * @author Mygod
   */
 trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
-  class ShadowsocksServiceConnection extends ServiceConnection {
+  private class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       binder = service
       service.linkToDeath(ServiceBoundContext.this, 0)
@@ -52,7 +52,7 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     }
   }
 
-  def setListeningForBandwidth(value: Boolean) {
+  protected def setListeningForBandwidth(value: Boolean) {
     if (listeningForBandwidth != value && bgService != null && callback != null)
       if (value) bgService.startListeningForBandwidth(callback) else bgService.stopListeningForBandwidth(callback)
     listeningForBandwidth = value
@@ -66,8 +66,11 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     callbackRegistered = false
   }
 
-  def onServiceConnected(): Unit = ()
-  def onServiceDisconnected(): Unit = ()
+  protected def onServiceConnected(): Unit = ()
+  /**
+    * Different from Android framework, this method will be called even when you call `detachService`.
+    */
+  protected def onServiceDisconnected(): Unit = ()
   override def binderDied(): Unit = ()
 
   private var callback: IShadowsocksServiceCallback.Stub = _
@@ -76,10 +79,10 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
   private var listeningForBandwidth: Boolean = _
 
   // Variables
-  var binder: IBinder = _
+  private var binder: IBinder = _
   var bgService: IShadowsocksService = _
 
-  def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
+  protected def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
     this.callback = callback
     if (bgService == null) {
       val s = if (app.isNatEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
@@ -92,8 +95,9 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     }
   }
 
-  def detachService() {
+  protected def detachService() {
     unregisterCallback()
+    onServiceDisconnected()
     callback = null
     if (connection != null) {
       try unbindService(connection) catch {
