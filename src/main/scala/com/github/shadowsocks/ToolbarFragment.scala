@@ -32,7 +32,9 @@ class ToolbarFragment extends Fragment {
     super.onViewCreated(view, savedInstanceState)
     toolbar = view.findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     val activity = getActivity.asInstanceOf[MainActivity]
-    activity.drawer.setToolbar(activity, toolbar, true)
+    try activity.drawer.setToolbar(activity, toolbar, true) catch {
+      case _: Exception => // ignore for now
+    }
   }
 
   def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()

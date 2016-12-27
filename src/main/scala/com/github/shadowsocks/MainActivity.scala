@@ -45,6 +45,9 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
+import com.mikepenz.crossfader.Crossfader
+import com.mikepenz.crossfader.view.CrossFadeSlidingPaneLayout
+import com.mikepenz.materialdrawer.interfaces.ICrossfader
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import com.mikepenz.materialdrawer.{Drawer, DrawerBuilder}
@@ -67,6 +70,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private val handler = new Handler()
   private var fab: FloatingActionButton = _
   private var fabProgressCircle: FABProgressCircle = _
+  private var crossfader: Crossfader[CrossFadeSlidingPaneLayout] = _
   var drawer: Drawer = _
 
   private var testCount: Int = _
@@ -173,8 +177,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_main)
-    drawer = new DrawerBuilder()
+    val drawerBuilder = new DrawerBuilder()
       .withActivity(this)
+      .withTranslucentStatusBar(true)
       .withHeader(R.layout.layout_header)
       .addDrawerItems(
         new PrimaryDrawerItem()
@@ -204,7 +209,21 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       .withOnDrawerItemClickListener(this)
       .withActionBarDrawerToggle(true)
       .withSavedInstance(savedInstanceState)
-      .build()
+    val miniDrawerWidth = getResources.getDimension(R.dimen.material_mini_drawer_item)
+    if (getResources.getDisplayMetrics.widthPixels >=
+      getResources.getDimension(R.dimen.profile_item_max_width) + miniDrawerWidth) {
+      drawer = drawerBuilder.withGenerateMiniDrawer(true).buildView()
+      crossfader = new Crossfader[CrossFadeSlidingPaneLayout]()
+      crossfader.withContent(findViewById(android.R.id.content))
+        .withFirst(drawer.getSlider, getResources.getDimensionPixelSize(R.dimen.material_drawer_width))
+        .withSecond(drawer.getMiniDrawer.build(this), miniDrawerWidth.toInt)
+        .withSavedInstance(savedInstanceState)
+        .build()
+      drawer.getMiniDrawer.withCrossFader(new ICrossfader { // a wrapper is needed
+        def isCrossfaded: Boolean = crossfader.isCrossFaded
+        def crossfade(): Unit = crossfader.crossFade()
+      })
+    } else drawer = drawerBuilder.build()
 
     val header = drawer.getHeader
     val title = header.findViewById(R.id.drawer_title).asInstanceOf[TextView]
@@ -368,6 +387,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     drawer.saveInstanceState(outState)
+    if (crossfader != null) crossfader.saveInstanceState(outState)
   }
 
   override def onDestroy() {

@@ -44,6 +44,7 @@ libraryDependencies ++=
   "com.google.android.gms" % "play-services-analytics" % "10.0.1" ::
   "com.google.android.gms" % "play-services-gcm" % "10.0.1" ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
+  "com.mikepenz" % "crossfader" % "1.5.0" ::
   "com.mikepenz" % "fastadapter" % "2.1.5" ::
   "com.mikepenz" % "iconics-core" % "2.8.2" ::
   "com.mikepenz" % "materialdrawer" % "5.8.1" ::
