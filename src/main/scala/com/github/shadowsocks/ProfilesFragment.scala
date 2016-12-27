@@ -23,7 +23,7 @@ package com.github.shadowsocks
 import java.util.GregorianCalendar
 
 import android.content._
-import android.os.{Bundle, Handler}
+import android.os.Bundle
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -93,27 +93,21 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       share.setOnLongClickListener(cardButtonLongClickListener)
     }
 
-    def updateText(txTotal: Long = 0, rxTotal: Long = 0) {
-      val tx = item.tx + txTotal
-      val rx = item.rx + rxTotal
-      val title = item.getName
-      val address = if (item.nameIsEmpty) "" else item.formattedAddress
-      val traffic = getString(R.string.stat_profiles,
-        TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx))
-
-      handler.post(() => {
-        this.title.setText(title)
-        this.address.setText(address)
-        this.traffic.setText(traffic)
-      })
-    }
-
     def bind(item: Profile) {
       this.item = item
       val editable = isProfileEditable(item.id)
       edit.setEnabled(editable)
       edit.setAlpha(if (editable) 1 else 0.5F)
-      updateText()
+      var tx = item.tx
+      var rx = item.rx
+      if (item.id == app.profileId) {
+        tx += txTotal
+        rx += rxTotal
+      }
+      title.setText(item.getName)
+      address.setText(if (item.nameIsEmpty) "" else item.formattedAddress)
+      traffic.setText(getString(R.string.stat_profiles,
+        TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
 
       if (item.id == app.profileId) {
         indicator.setBackgroundResource(R.drawable.background_selected)
@@ -239,10 +233,11 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
   }
 
   private var selectedItem: ProfileViewHolder = _
-  private val handler = new Handler
 
   lazy val profilesAdapter = new ProfilesAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
+  private var txTotal: Long = _
+  private var rxTotal: Long = _
 
   private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
 
@@ -262,7 +257,9 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     val profilesList = view.findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(getActivity)
     profilesList.setLayoutManager(layoutManager)
-    profilesList.setItemAnimator(new DefaultItemAnimator())
+    val animator = new DefaultItemAnimator()
+    animator.setSupportsChangeAnimations(false) // prevent fading-in/out when rebinding
+    profilesList.setItemAnimator(animator)
     profilesList.setAdapter(profilesAdapter)
     instance = this
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
@@ -289,8 +286,11 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     }).attachToRecyclerView(profilesList)
   }
 
-  override def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
-    if (selectedItem != null) selectedItem.updateText(txTotal, rxTotal)
+  override def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = {
+    this.txTotal = txTotal
+    this.rxTotal = rxTotal
+    profilesAdapter.refreshId(app.profileId)
+  }
 
   override def onDetach() {
     undoManager.flush()

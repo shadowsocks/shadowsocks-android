@@ -143,7 +143,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
     val child = getFragmentManager.findFragmentById(R.id.content).asInstanceOf[ToolbarFragment]
-    if (child != null) child.onTrafficUpdated(txRate, rxRate, txTotal, rxTotal)
+    if (state != State.STOPPING && child != null) child.onTrafficUpdated(txRate, rxRate, txTotal, rxTotal)
   }
 
   override def onServiceConnected() {

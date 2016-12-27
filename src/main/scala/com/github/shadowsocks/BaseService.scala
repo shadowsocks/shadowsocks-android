@@ -93,7 +93,7 @@ trait BaseService extends Service {
         if (timer == null) {
           timer = new Timer(true)
           timer.schedule(new TimerTask {
-            def run(): Unit = if (TrafficMonitor.updateRate()) updateTrafficRate()
+            def run(): Unit = if (state == State.CONNECTED && TrafficMonitor.updateRate()) updateTrafficRate()
           }, 1000, 1000)
         }
         TrafficMonitor.updateRate()
@@ -288,8 +288,8 @@ trait BaseService extends Service {
 
   protected def changeState(s: Int, msg: String = null) {
     val handler = new Handler(getMainLooper)
-    handler.post(() => if (state != s || msg != null) {
-      if (callbacks.getRegisteredCallbackCount > 0) {
+    if (state != s || msg != null) {
+      if (callbacks.getRegisteredCallbackCount > 0) handler.post(() => {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
@@ -299,9 +299,9 @@ trait BaseService extends Service {
           }
         }
         callbacks.finishBroadcast()
-      }
+      })
       state = s
-    })
+    }
   }
 
   def getBlackList: String = {
