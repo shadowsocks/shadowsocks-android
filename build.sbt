@@ -20,6 +20,9 @@ proguardVersion := "5.3.2"
 proguardCache := Seq()
 proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
+  "-keep class okhttp3.** { *; }" ::
+  "-keep interface okhttp3.** { *; }" ::
+  "-dontwarn okio.**" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
   "-dontwarn org.xbill.**" ::
@@ -37,7 +40,7 @@ libraryDependencies ++=
   "com.android.support" % "preference-v14" % "25.1.0" ::
   "com.evernote" % "android-job" % "1.1.3" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
-  "com.github.kevinsawicki" % "http-request" % "6.0" ::
+  "com.squareup.okhttp3" % "okhttp" % "3.5.0" ::
   "com.google.android.gms" % "play-services-ads" % "10.0.1" ::
   "com.google.android.gms" % "play-services-analytics" % "10.0.1" ::
   "com.google.android.gms" % "play-services-gcm" % "10.0.1" ::
