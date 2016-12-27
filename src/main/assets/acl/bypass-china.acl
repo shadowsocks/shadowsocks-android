@@ -1,6 +1,6 @@
 [proxy_all]
 
-[black_list]
+[bypass_list]
 1.0.1.0/24
 1.0.2.0/23
 1.0.8.0/21
@@ -4756,8 +4756,8 @@
 ^(.*\.)?gmail\.com$
 ^(.*\.)?gmodules\.com$
 ^(.*\.)?goo\.gl$
-^(.*\.)?google(\..*)?$
-^(.*\.)?googleapis\.com$
+^(.*\.)?google(\.[^.]{2,4}){1,2}$
+^(.*\.)?googleapis(\.[^.]{2,4}){1,2}$
 ^(.*\.)?googleapps\.com$
 ^(.*\.)?googleartproject\.com$
 ^(.*\.)?googleblog\.com$
