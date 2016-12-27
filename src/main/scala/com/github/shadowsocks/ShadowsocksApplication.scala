@@ -88,8 +88,9 @@ class ShadowsocksApplication extends Application {
   def currentProfile: Option[Profile] = profileManager.getProfile(profileId)
 
   def switchProfile(id: Int): Profile = {
-    profileId(id)
-    profileManager.getProfile(id) getOrElse profileManager.createProfile()
+    val result = profileManager.getProfile(id) getOrElse profileManager.createProfile()
+    profileId(result.id)
+    result
   }
 
   private def checkChineseLocale(locale: Locale): Locale = if (locale.getLanguage == "zh") locale.getCountry match {

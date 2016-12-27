@@ -269,8 +269,6 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
     val intent = getIntent
     if (intent != null) handleShareIntent(intent)
-
-    if (app.profileManager.getFirstProfile.isEmpty) app.profileId(app.profileManager.createProfile().id)
   }
 
   override def onNewIntent(intent: Intent) {

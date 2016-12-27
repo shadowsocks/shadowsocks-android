@@ -20,11 +20,10 @@
 
 package com.github.shadowsocks
 
-import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
+import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.os.{Build, Bundle, UserManager}
 import android.support.v14.preference.SwitchPreference
-import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AlertDialog
 import android.support.v7.preference.Preference
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
@@ -87,8 +86,6 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
         .setTitle("Confirm?") // TODO
         .setPositiveButton("Yes", ((_, _) => {
           app.profileManager.delProfile(profile.id)
-          LocalBroadcastManager.getInstance(getActivity)
-            .sendBroadcast(new Intent(Action.PROFILE_REMOVED).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
           getActivity.finish()
         }): DialogInterface.OnClickListener)
         .setNegativeButton("No", null)
@@ -104,8 +101,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   def saveAndExit() {
     profile.deserialize(app.settings)
     app.profileManager.updateProfile(profile)
-    LocalBroadcastManager.getInstance(getActivity)
-      .sendBroadcast(new Intent(Action.PROFILE_CHANGED).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
+    if (ProfilesFragment.instance != null) ProfilesFragment.instance.profilesAdapter.refreshId(profile.id)
     getActivity.finish()
   }
 }

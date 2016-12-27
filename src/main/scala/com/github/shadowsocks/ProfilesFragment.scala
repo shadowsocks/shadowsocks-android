@@ -24,13 +24,12 @@ import java.util.GregorianCalendar
 
 import android.content._
 import android.os.{Bundle, Handler}
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.widget._
 import android.support.v7.widget.RecyclerView.ViewHolder
+import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
-import android.view._
 import android.view.View.OnLongClickListener
+import android.view._
 import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
@@ -41,14 +40,20 @@ import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
+object ProfilesFragment {
+  var instance: ProfilesFragment = _  // used for callback from ProfileManager
+}
+
 final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickListener {
+  import ProfilesFragment._
+
   private val cardButtonLongClickListener: OnLongClickListener = view => {
     Utils.positionToast(Toast.makeText(getActivity, view.getContentDescription, Toast.LENGTH_SHORT), view,
       getActivity.getWindow, 0, Utils.dpToPx(getActivity, 8)).show()
     true
   }
 
-  private final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
+  final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with PopupMenu.OnMenuItemClickListener {
 
     var item: Profile = _
@@ -153,7 +158,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     }
   }
 
-  private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
+  final class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
     profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
 
@@ -210,23 +215,18 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     }
     def removeId(id: Int) {
       val index = profiles.indexWhere(_.id == id)
-      profiles.remove(index)
-      notifyItemRemoved(index)
-      if (id == app.profileId) app.profileId(0)
+      if (index >= 0) {
+        profiles.remove(index)
+        notifyItemRemoved(index)
+        if (id == app.profileId) app.profileId(0) // switch to null profile
+      }
     }
   }
 
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
-  private val profilesListener: BroadcastReceiver = (_, intent) => {
-    val id = intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1)
-    intent.getAction match {
-      case Action.PROFILE_CHANGED => profilesAdapter.refreshId(id)
-      case Action.PROFILE_REMOVED => profilesAdapter.removeId(id)
-    }
-  }
 
-  private lazy val profilesAdapter = new ProfilesAdapter
+  lazy val profilesAdapter = new ProfilesAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
@@ -243,12 +243,13 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    app.profileManager.setProfileAddedListener(profilesAdapter.add)
+    if (app.profileManager.getFirstProfile.isEmpty) app.profileId(app.profileManager.createProfile().id)
     val profilesList = view.findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(getActivity)
     profilesList.setLayoutManager(layoutManager)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
+    instance = this
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(-1))
@@ -265,10 +266,6 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         true
       }
     }).attachToRecyclerView(profilesList)
-    val filter = new IntentFilter(Action.PROFILE_CHANGED)
-    filter.addAction(Action.PROFILE_REMOVED)
-    LocalBroadcastManager.getInstance(getActivity).registerReceiver(profilesListener, filter)
-
   }
 
   override def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
@@ -280,7 +277,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
   }
 
   override def onDestroy() {
-    LocalBroadcastManager.getInstance(getActivity).unregisterReceiver(profilesListener)
+    instance = null
     super.onDestroy()
   }
 
@@ -300,9 +297,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       Toast.makeText(getActivity, R.string.action_import_err, Toast.LENGTH_SHORT).show()
       true
     case R.id.action_manual_settings =>
-      val profile = app.profileManager.createProfile()
-      app.profileManager.updateProfile(profile)
-      startConfig(profile.id)
+      startConfig(app.profileManager.createProfile().id)
       true
     case R.id.action_export =>
       app.profileManager.getAllProfiles match {
