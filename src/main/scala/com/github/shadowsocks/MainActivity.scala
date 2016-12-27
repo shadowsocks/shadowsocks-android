@@ -146,7 +146,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
     txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
-    val child = getFragmentManager.findFragmentById(R.id.content).asInstanceOf[ToolbarFragment]
+    val child = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
     if (child != null) child.onTrafficUpdated(txRate, rxRate, txTotal, rxTotal)
   }
 
@@ -337,7 +337,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   private def displayFragment(fragment: ToolbarFragment) {
     currentFragment = fragment
-    getFragmentManager.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss()
+    getFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
     drawer.closeDrawer()
   }
 
