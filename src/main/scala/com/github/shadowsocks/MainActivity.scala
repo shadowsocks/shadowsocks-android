@@ -203,6 +203,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       )
       .withOnDrawerItemClickListener(this)
       .withActionBarDrawerToggle(true)
+      .withSavedInstance(savedInstanceState)
       .build()
 
     val header = drawer.getHeader
@@ -362,6 +363,11 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onStop() {
     setListeningForBandwidth(false)
     super.onStop()
+  }
+
+  override def onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    drawer.saveInstanceState(outState)
   }
 
   override def onDestroy() {
