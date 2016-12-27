@@ -147,7 +147,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       }
     }
 
-    override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
+    override def onMenuItemClick(menu: MenuItem): Boolean = menu.getItemId match {
       case R.id.action_qr_code_nfc =>
         getFragmentManager.beginTransaction().add(new QRCodeDialog(item.toString), "").commitAllowingStateLoss()
         true
