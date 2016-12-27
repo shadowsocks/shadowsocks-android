@@ -41,7 +41,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 object ProfilesFragment {
-  var instance: ProfilesFragment = _  // used for callback from ProfileManager
+  var instance: ProfilesFragment = _  // used for callback from ProfileManager and stateChanged from MainActivity
 }
 
 final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickListener {
@@ -53,6 +53,19 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     true
   }
 
+  /**
+    * Is ProfilesFragment editable at all.
+    */
+  private def isEnabled = getActivity.asInstanceOf[MainActivity].state match {
+    case State.CONNECTED | State.STOPPED => true
+    case _ => false
+  }
+  private def isProfileEditable(id: => Int) = getActivity.asInstanceOf[MainActivity].state match {
+    case State.CONNECTED => id != app.profileId
+    case State.STOPPED => true
+    case _ => false
+  }
+
   final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with PopupMenu.OnMenuItemClickListener {
 
@@ -62,15 +75,14 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     private val address = itemView.findViewById(R.id.address).asInstanceOf[TextView]
     private val traffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     private val indicator = itemView.findViewById(R.id.indicator).asInstanceOf[ViewGroup]
-
+    private val edit = itemView.findViewById(R.id.edit)
+    edit.setOnClickListener(_ => startConfig(item.id))
+    edit.setOnLongClickListener(cardButtonLongClickListener)
     itemView.setOnClickListener(this)
 
     private var adView: NativeExpressAdView = _
 
     {
-      val edit = itemView.findViewById(R.id.edit)
-      edit.setOnClickListener(_ => startConfig(item.id))
-      edit.setOnLongClickListener(cardButtonLongClickListener)
       val share = itemView.findViewById(R.id.share)
       share.setOnClickListener(_ => {
         val popup = new PopupMenu(getActivity, share)
@@ -98,6 +110,9 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
     def bind(item: Profile) {
       this.item = item
+      val editable = isProfileEditable(item.id)
+      edit.setEnabled(editable)
+      edit.setAlpha(if (editable) 1 else 0.5F)
       updateText()
 
       if (item.id == app.profileId) {
@@ -135,16 +150,13 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       } else if (adView != null) adView.setVisibility(View.GONE)
     }
 
-    def onClick(v: View) {
+    def onClick(v: View): Unit = if (isEnabled) {
       val activity = getActivity.asInstanceOf[MainActivity]
-      val state = activity.state
-      if (state == State.STOPPED || state == State.CONNECTED) {
-        val old = app.profileId
-        app.switchProfile(item.id)
-        profilesAdapter.refreshId(old)
-        bind(item)
-        if (state == State.CONNECTED) activity.bgService.use(item.id) // reconnect to new profile
-      }
+      val old = app.profileId
+      app.switchProfile(item.id)
+      profilesAdapter.refreshId(old)
+      bind(item)
+      if (activity.state == State.CONNECTED) activity.bgService.use(item.id)  // reconnect to new profile
     }
 
     override def onMenuItemClick(menu: MenuItem): Boolean = menu.getItemId match {
@@ -168,6 +180,9 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
+
+    setHasStableIds(true) // Reason: http://stackoverflow.com/a/32488059/2245107
+    override def getItemId(position: Int): Long = profiles(position).id
 
     def add(item: Profile) {
       undoManager.flush()
@@ -247,7 +262,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     val profilesList = view.findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
     val layoutManager = new LinearLayoutManager(getActivity)
     profilesList.setLayoutManager(layoutManager)
-    profilesList.setItemAnimator(new DefaultItemAnimator)
+    profilesList.setItemAnimator(new DefaultItemAnimator())
     profilesList.setAdapter(profilesAdapter)
     instance = this
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
@@ -256,6 +271,12 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     undoManager = new UndoSnackbarManager[Profile](getActivity.findViewById(R.id.snackbar), profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
+      override def getSwipeDirs(recyclerView: RecyclerView, viewHolder: ViewHolder): Int =
+        if (isProfileEditable(viewHolder.asInstanceOf[ProfileViewHolder].item.id))
+          super.getSwipeDirs(recyclerView, viewHolder) else 0
+      override def getDragDirs(recyclerView: RecyclerView, viewHolder: ViewHolder): Int =
+        if (isEnabled) super.getDragDirs(recyclerView, viewHolder) else 0
+
       def onSwiped(viewHolder: ViewHolder, direction: Int) {
         val index = viewHolder.getAdapterPosition
         profilesAdapter.remove(index)

@@ -128,8 +128,11 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       updateTraffic(0, 0, 0, 0)
       testCount += 1  // suppress previous test messages
     }
-    if (state == State.STOPPED && ProfilesFragment.instance != null)
-      ProfilesFragment.instance.profilesAdapter.refreshId(app.profileId)  // traffic may have changed, refresh required
+    if (ProfilesFragment.instance != null) {
+      val adapter = ProfilesFragment.instance.profilesAdapter
+      adapter.notifyDataSetChanged()  // refresh button enabled state
+      if (state == State.STOPPED) adapter.refreshId(app.profileId)  // refresh bandwidth statistics
+    }
     fab.setEnabled(false)
     if (state == State.CONNECTED || state == State.STOPPED)
       handler.postDelayed(() => fab.setEnabled(state == State.CONNECTED || state == State.STOPPED), 1000)
