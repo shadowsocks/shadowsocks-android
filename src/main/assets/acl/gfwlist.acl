@@ -316,7 +316,7 @@
 ^(.*\.)?android\.com$
 ^(.*\.)?androidify\.com$
 ^(.*\.)?appspot\.com$
-^(.*\.)?blogspot\.com$
+^(.*\.)?blogspot(\.[^.]{2,4}){1,2}$
 ^(.*\.)?certificate-transparency\.org$
 ^(.*\.)?chrome\.com$
 ^(.*\.)?chromecast\.com$
