@@ -21,9 +21,8 @@
 package com.github.shadowsocks
 
 import java.io.IOException
-import java.util.concurrent.TimeUnit;
-import java.util.{Arrays, List, Timer, TimerTask}
-import java.net.InetAddress
+import java.util.concurrent.TimeUnit
+import java.util.{Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
@@ -36,21 +35,9 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
+import okhttp3.{FormBody, OkHttpClient, Request}
 
-import okhttp3.Dns
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-
-class CustomDns extends Dns {
-  override def lookup(hostname: String): List[InetAddress] = {
-    Utils.resolve(hostname, false) match {
-      case Some(ip) => Arrays.asList(InetAddress.getByName(ip))
-      case _ => Dns.SYSTEM.lookup(hostname)
-    }
-  }
-}
+import scala.util.Random
 
 trait BaseService extends Service {
 
@@ -166,7 +153,7 @@ trait BaseService extends Service {
     val resposne = client.newCall(request).execute()
     val list = resposne.body.string
 
-    val proxies = util.Random.shuffle(list.split('|').toSeq)
+    val proxies = Random.shuffle(list.split('|').toSeq)
     val proxy = proxies.head.split(':')
     profile.host = proxy(0).trim
     profile.remotePort = proxy(1).trim.toInt
