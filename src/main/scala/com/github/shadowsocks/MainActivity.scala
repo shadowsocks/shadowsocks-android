@@ -54,10 +54,9 @@ object MainActivity {
   private final val REQUEST_CONNECT = 1
 
   private final val DRAWER_PROFILES = 0L
-  // sticky drawer items have negative ids
-  private final val DRAWER_RECOVERY = -1L
-  private final val DRAWER_GLOBAL_SETTINGS = -2L
-  private final val DRAWER_ABOUT = -3L
+  private final val DRAWER_GLOBAL_SETTINGS = 1L
+  private final val DRAWER_RECOVERY = 2L
+  private final val DRAWER_ABOUT = 3L
 }
 
 class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
