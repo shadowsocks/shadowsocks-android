@@ -70,7 +70,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private val handler = new Handler()
   private var fab: FloatingActionButton = _
   private var fabProgressCircle: FABProgressCircle = _
-  private var crossfader: Crossfader[CrossFadeSlidingPaneLayout] = _
+  var crossfader: Crossfader[CrossFadeSlidingPaneLayout] = _
   var drawer: Drawer = _
 
   private var testCount: Int = _
