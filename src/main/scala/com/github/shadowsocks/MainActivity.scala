@@ -99,7 +99,6 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     case _: NullPointerException =>
   }
   private def changeState(s: Int, profileName: String = null, m: String = null) {
-    // TODO: localize texts for statusText in this method
     s match {
       case State.CONNECTING =>
         fab.setImageResource(R.drawable.ic_start_busy)
@@ -314,17 +313,17 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     if (TextUtils.isEmpty(sharedStr)) return
     val profiles = Parser.findAll(sharedStr).toList
     if (profiles.isEmpty) {
-      // TODO: show error msg
+      Snackbar.make(findViewById(R.id.snackbar), R.string.profile_invalid_input, Snackbar.LENGTH_LONG).show()
       return
     }
-    val dialog = new AlertDialog.Builder(this)
+    new AlertDialog.Builder(this)
       .setTitle(R.string.add_profile_dialog)
-      .setPositiveButton("Yes", ((_, _) =>  // TODO
+      .setPositiveButton(R.string.yes, ((_, _) =>
         profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
-      .setNegativeButton("No", null)
+      .setNegativeButton(R.string.no, null)
       .setMessage(profiles.mkString("\n"))
       .create()
-    dialog.show()
+      .show()
   }
 
   def onSharedPreferenceChanged(pref: SharedPreferences, key: String): Unit = key match {

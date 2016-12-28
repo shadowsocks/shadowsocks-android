@@ -42,7 +42,7 @@
                                                               android:layout_gravity="top"
                                                               app:srcCompat="@drawable/ic_social_share"
                                                               android:background="?attr/selectableItemBackgroundBorderless"
-                                                              android:contentDescription="Share"
+                                                              android:contentDescription="@string/share"
                                                               android:focusable="true"
                                                               android:nextFocusLeft="@+id/container"/>
                 <android.support.v7.widget.AppCompatImageView android:id="@+id/edit"
@@ -52,7 +52,7 @@
                     android:layout_gravity="top"
                     app:srcCompat="@drawable/ic_image_edit"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Edit"
+                    android:contentDescription="@string/edit"
                     android:focusable="true"/>
             </LinearLayout>
             <LinearLayout android:layout_width="match_parent"

@@ -43,7 +43,10 @@
   <string name="stopping">關閉中……</string>
   <string name="vpn_error">%s</string>
   <string name="reboot_required">VPN 服務啟動失敗。您或許需要重新啟動您的裝置。</string>
+  <string name="yes">是</string>
+  <string name="no">否</string>
   <string name="close">關閉</string>
+  <string name="profile_empty">請選擇設定檔</string>
   <string name="proxy_empty">Proxy 或密碼不可以空白</string>
   <string name="connect">連線</string>
   <string name="initializing">起始中……</string>
@@ -60,6 +63,7 @@
   <string name="flush_dnscache_summary">僅在 NAT 模式可用，需要 ROOT 權限</string>
   <string name="flush_dnscache_no_root">在無 ROOT 權限時清除 DNS 快取無法進行</string>
   <string name="flushing">清除中……</string>
+  <string name="edit">編輯</string>
   <string name="share">分享</string>
   <string name="share_message">掃描 QR 碼或者使用 Android Beam (NFC)</string>
   <string name="share_message_without_nfc">掃描 QR 碼</string>
@@ -96,6 +100,9 @@
   <string name="profile_manager_dialog_content">&#8226; 輕觸選擇一個設定檔；\n&#8226; 向左/右撥動或按左移除；\n&#8226;
     按住後上下撥動設定檔重新排序。</string>
   <string name="gotcha">我懂了！</string>
+  <string name="profile_config">設定檔配置</string>
+  <string name="unsaved_changes_prompt">要保存更改嗎？</string>
+  <string name="delete_confirm_prompt">您確定要移除這個設定檔嗎？</string>
   <string name="copy_url">複製 URL</string>
   <string name="add_profile_dialog">為 Shadowsocks 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>

@@ -35,7 +35,7 @@ class ProfileConfigActivity extends Activity {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_profile_config)
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
-    toolbar.setTitle("Profile config")  // TODO
+    toolbar.setTitle(R.string.profile_config)
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => onBackPressed())
     toolbar.inflateMenu(R.menu.profile_config_menu)
@@ -43,9 +43,9 @@ class ProfileConfigActivity extends Activity {
   }
 
   override def onBackPressed(): Unit = if (app.settings.getBoolean(Key.dirty, false)) new AlertDialog.Builder(this)
-    .setTitle("Changes not saved. Do you want to save?") // TODO: localizations
-    .setPositiveButton("Yes", ((_, _) => child.saveAndExit()): DialogInterface.OnClickListener)
-    .setNegativeButton("No", ((_, _) => finish()): DialogInterface.OnClickListener)
+    .setTitle(R.string.unsaved_changes_prompt)
+    .setPositiveButton(R.string.yes, ((_, _) => child.saveAndExit()): DialogInterface.OnClickListener)
+    .setNegativeButton(R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
     .setNeutralButton(android.R.string.cancel, null)
     .create()
     .show() else super.onBackPressed()

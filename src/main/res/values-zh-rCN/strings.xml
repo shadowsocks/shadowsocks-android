@@ -42,7 +42,10 @@
   <string name="stopping">正在关闭……</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="reboot_required">VPN 服务启动失败。你可能需要重启设备。</string>
+  <string name="yes">是</string>
+  <string name="no">否</string>
   <string name="close">关闭</string>
+  <string name="profile_empty">请选择配置文件</string>
   <string name="proxy_empty">代理服务器地址及密码不能为空</string>
   <string name="connect">连接</string>
   <string name="initializing">正在初始化……</string>
@@ -59,6 +62,7 @@
   <string name="flush_dnscache_summary">只需在 NAT 模式下使用，需要 ROOT 权限</string>
   <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">刷新中……</string>
+  <string name="edit">编辑</string>
   <string name="share">分享</string>
   <string name="share_message">扫描二维码或使用 Android Beam (NFC)</string>
   <string name="share_message_without_nfc">扫描二维码</string>
@@ -95,6 +99,9 @@
   <string name="profile_manager_dialog_content">&#8226; 点击选择配置文件；\n&#8226; 向左/右滑动或按左删除；\n&#8226;
     长按拖动改变顺序。</string>
   <string name="gotcha">好的</string>
+  <string name="profile_config">配置文件设置</string>
+  <string name="unsaved_changes_prompt">保存修改吗？</string>
+  <string name="delete_confirm_prompt">你是否确定要删除这个配置文件？</string>
   <string name="copy_url">复制 URL</string>
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>

@@ -83,12 +83,12 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_delete =>
       new AlertDialog.Builder(getActivity)
-        .setTitle("Confirm?") // TODO
-        .setPositiveButton("Yes", ((_, _) => {
+        .setTitle(R.string.delete_confirm_prompt)
+        .setPositiveButton(R.string.yes, ((_, _) => {
           app.profileManager.delProfile(profile.id)
           getActivity.finish()
         }): DialogInterface.OnClickListener)
-        .setNegativeButton("No", null)
+        .setNegativeButton(R.string.no, null)
         .create()
         .show()
       true

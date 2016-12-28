@@ -83,9 +83,13 @@
   <string name="vpn_error">%s</string>
   <string name="reboot_required">Failed to start VPN service. You might need to reboot your device.</string>
   <string name="quick_switch">Switch</string>
+  <string name="profile_invalid_input">No valid profile data found.</string>
 
   <!-- alert category -->
+  <string name="yes">Yes</string>
+  <string name="no">No</string>
   <string name="close">Close</string>
+  <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
@@ -100,6 +104,7 @@
   <string name="recovery_summary">Reset all the background services</string>
   <string name="about">About</string>
   <string name="about_title">Shadowsocks %s</string>
+  <string name="edit">Edit</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>
@@ -123,6 +128,9 @@
   <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe left/right or press left
     to remove;\n&#8226; Long press to reorder profiles.</string>
   <string name="gotcha">Gotcha!</string>
+  <string name="profile_config">Profile config</string>
+  <string name="unsaved_changes_prompt">Changes not saved. Do you want to save?</string>
+  <string name="delete_confirm_prompt">Are you sure you want to remove this profile?</string>
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
