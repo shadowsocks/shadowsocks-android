@@ -112,7 +112,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case State.STOPPING =>
         fab.setImageResource(R.drawable.ic_start_busy)
         if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-        statusText.setText(R.string.shutting_down)
+        statusText.setText(R.string.stopping)
       case _ =>
         fab.setImageResource(R.drawable.ic_start_idle)
         fabProgressCircle.postDelayed(hideCircle, 1000)

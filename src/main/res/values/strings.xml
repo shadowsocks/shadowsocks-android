@@ -147,7 +147,6 @@
   <string name="vpn_connected">Connected, tap to check connection</string>
   <string name="nat_connected">Connected</string>
   <string name="not_connected">Not connected</string>
-  <string name="shutting_down">Shutting down…</string>
 
   <!-- kcp -->
   <string name="kcp" translatable="false">KCP</string>
