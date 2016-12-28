@@ -101,7 +101,10 @@
   <string name="gotcha">好的</string>
   <string name="profile_config">配置文件设置</string>
   <string name="unsaved_changes_prompt">保存修改吗？</string>
+  <string name="apply">应用</string>
+  <string name="delete">删除</string>
   <string name="delete_confirm_prompt">你是否确定要删除这个配置文件？</string>
+  <string name="share_qr_nfc">二维码 / NFC</string>
   <string name="copy_url">复制 URL</string>
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>

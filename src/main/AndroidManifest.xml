@@ -67,7 +67,7 @@
         <activity
                 android:name=".ProfileConfigActivity"
                 android:excludeFromRecents="true"
-                android:label="Profile config"
+                android:label="@string/profile_config"
                 android:launchMode="singleTask"/>
 
         <activity
