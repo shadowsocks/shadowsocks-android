@@ -136,6 +136,11 @@
   <!-- status -->
   <string name="sent">傳送:</string>
   <string name="received">接收:</string>
+  <string name="connecting">連線中...</string>
+  <string name="vpn_connected">已連線, 輕觸以檢查連線能力</string>
+  <string name="nat_connected">已連線</string>
+  <string name="not_connected">未連線</string>
+  <string name="shutting_down">關閉連線中...</string>
 
   <!-- kcp -->
   <string name="kcp_summary">啟用 KCP 協定</string>

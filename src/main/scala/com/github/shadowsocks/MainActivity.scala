@@ -104,16 +104,16 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case State.CONNECTING =>
         fab.setImageResource(R.drawable.ic_start_busy)
         fabProgressCircle.show()
-        statusText.setText("Connecting...")
+        statusText.setText(R.string.connecting)
       case State.CONNECTED =>
         if (state == State.CONNECTING) fabProgressCircle.beginFinalAnimation()
         else fabProgressCircle.postDelayed(hideCircle, 1000)
         fab.setImageResource(R.drawable.ic_start_connected)
-        statusText.setText(if (app.isNatEnabled) "Connected" else "Connected, tap to check connection")
+        statusText.setText(if (app.isNatEnabled) R.string.nat_connected else R.string.vpn_connected)
       case State.STOPPING =>
         fab.setImageResource(R.drawable.ic_start_busy)
         if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
-        statusText.setText("Shutting down...")
+        statusText.setText(R.string.shutting_down)
       case _ =>
         fab.setImageResource(R.drawable.ic_start_idle)
         fabProgressCircle.postDelayed(hideCircle, 1000)
@@ -124,7 +124,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           snackbar.show()
           Log.e(TAG, "Error to start VPN service: " + m)
         }
-        statusText.setText("Not connected")
+        statusText.setText(R.string.not_connected)
     }
     state = s
     if (state == State.CONNECTED) fab.setBackgroundTintList(greenTint) else {

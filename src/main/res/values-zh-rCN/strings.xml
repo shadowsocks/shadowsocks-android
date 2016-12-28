@@ -134,6 +134,10 @@
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
+  <string name="vpn_connected">已连接, 轻触以检查连接状态</string>
+  <string name="nat_connected">已连接</string>
+  <string name="not_connected">未连接</string>
+  <string name="shutting_down">关闭连接中...</string>
 
   <!-- kcp -->
   <string name="kcp_summary">启用 KCP 协议</string>
