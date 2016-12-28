@@ -39,7 +39,6 @@
   <string name="nat_no_root">NAT 模式需要 ROOT 權限</string>
   <string name="switch_to_vpn">切換至 VPN 模式</string>
   <string name="stop">停止</string>
-  <string name="quick_switch">切換</string>
   <string name="stopping">關閉中……</string>
   <string name="vpn_error">%s</string>
   <string name="reboot_required">VPN 服務啟動失敗。您或許需要重新啟動您的裝置。</string>
@@ -56,7 +55,6 @@
   <string name="settings">設定</string>
   <string name="remove_profile">移除此設定檔 "%s"?</string>
   <string name="recovery">重設</string>
-  <string name="recovery_summary">重設一切背景服務</string>
   <string name="about">關於</string>
   <string name="about_title">Shadowsocks %s</string>
   <string name="flush_dnscache">清除 DNS 快取</string>
@@ -65,16 +63,11 @@
   <string name="flushing">清除中……</string>
   <string name="edit">編輯</string>
   <string name="share">分享</string>
-  <string name="share_message">掃描 QR 碼或者使用 Android Beam (NFC)</string>
-  <string name="share_message_without_nfc">掃描 QR 碼</string>
-  <string name="share_message_nfc_disabled">掃描 QR 碼\nAndroid Beam 被停用</string>
-  <string name="turn_on_nfc">啟用 NFC &amp; Android Beam</string>
   <string name="add_profile">新增設定檔</string>
 
   <string name="nat">NAT 模式 (已過時)</string>
   <string name="nat_summary">使用 NAT 模式代替 VPN 模式，需要 ROOT 權限</string>
   <string name="remote_dns">遠程 DNS</string>
-  <string name="remote_dns_summary">用於遠程域名解析的 DNS 伺服器 (默認為 8.8.8.8) </string>
 
   <string name="udp_dns">UDP 轉送</string>
   <string name="udp_dns_summary">向遠端轉送 UDP 封包</string>
@@ -85,7 +78,6 @@
   <string name="ipv6">IPv6 路由</string>
   <string name="ipv6_summary">向遠端重新導向 IPv6 流量</string>
 
-  <string name="stat">網路流量</string>
   <string name="stat_summary">傳送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">檢查連線能力</string>
@@ -96,10 +88,6 @@
   <string name="connection_test_error_status_code">錯誤碼: #%d</string>
 
   <!-- profile -->
-  <string name="profile_manager_dialog">設定檔</string>
-  <string name="profile_manager_dialog_content">&#8226; 輕觸選擇一個設定檔；\n&#8226; 向左/右撥動或按左移除；\n&#8226;
-    按住後上下撥動設定檔重新排序。</string>
-  <string name="gotcha">我懂了！</string>
   <string name="profile_config">設定檔配置</string>
   <string name="unsaved_changes_prompt">要保存更改嗎？</string>
   <string name="apply">應用</string>
@@ -110,9 +98,6 @@
   <string name="add_profile_dialog">為 Shadowsocks 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>
   <string name="add_profile_methods_manual_settings">手動設定</string>
-  <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 來新增設定檔</string>
-  <string name="add_profile_nfc_hint">
-    保持兩台設備的屏幕亮起，在另外一台設備上，點擊設定檔的分享按鈕，將它們靠在一起（背靠背）。\n你也可以掃描 NFC 標籤。</string>
   <string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 
   <string-array name="route_entry">

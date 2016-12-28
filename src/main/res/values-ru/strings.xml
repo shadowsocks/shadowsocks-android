@@ -9,7 +9,6 @@
   <string name="profile_summary">Переключить на другой профиль или добавить новые</string>
   <string name="nat">Режим NAT (не рекомендуется)</string>
   <string name="nat_summary">Использовать режим NAT вместо VPN. Требует ROOT прав.</string>
-  <string name="stat">Сетевая Активность</string>
   <string name="stat_summary">Отправлено: \t\t\t\t\t%3$s\t↑\t%1$s/s\nПолучено: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
@@ -74,7 +73,6 @@
   <string name="stopping">Останавливается…</string>
   <string name="vpn_error">%s</string>
   <string name="reboot_required">Сбой запуска VPN сервиса. Требуется перезагрузка Вашего устройства.</string>
-  <string name="quick_switch">Переключить</string>
 
   <!-- alert category -->
   <string name="close">Закрыть</string>
@@ -89,14 +87,9 @@
   <string name="profiles">Профили</string>
   <string name="settings">Настройки</string>
   <string name="recovery">Сброс</string>
-  <string name="recovery_summary">Сброс всех фоновых задач</string>
   <string name="about">О приложении</string>
   <string name="about_title">Shadowsocks %s</string>
   <string name="share">Поделиться</string>
-  <string name="share_message">Сканировать QR код или использовать Android Beam (NFC)</string>
-  <string name="share_message_without_nfc">Сканировать QR код</string>
-  <string name="share_message_nfc_disabled">Сканировать QR код\nAndroid Beam отключен</string>
-  <string name="turn_on_nfc">Включить NFC &amp; Android Beam</string>
   <string name="flush_dnscache">Очистить кэш DNS</string>
   <string name="flush_dnscache_summary">Работает только в режиме NAT. Требует наличия ROOT прав.</string>
   <string name="flush_dnscache_no_root">Очистка кэша DNS не работает без налиичя ROOT прав</string>
@@ -112,15 +105,9 @@
   <string name="action_import_err">Сбой импорта.</string>
 
   <!-- profile -->
-  <string name="profile_manager_dialog">Profiles</string>
-  <string name="profile_manager_dialog_content">&#8226; Нажмите для выбора профиля;\n&#8226; Сдвиньте влево/вправо или нажмите влево
-    чтобы удалить;\n&#8226; Подержите чтобы изменить порядок профилей.</string>
-  <string name="gotcha">Gotcha!</string>
   <string name="add_profile_dialog">Добавить этот Профиль Shadowsocks?</string>
   <string name="add_profile_methods_scan_qr_code">Сканировать QR код</string>
   <string name="add_profile_methods_manual_settings">Настройка вручную</string>
-  <string name="add_profile_nfc_hint_title">Использовать Android Beam (NFC) для добавления профиля</string>
-  <string name="add_profile_nfc_hint">Оставьте экран включённым на обоих устройствах, на втором устойстве нажмите кнопку профиля "поделиться", поднисите устройства друг к другу (тыльными сторонами).\nТак же Вы можете сканировать nfc метку.</string>
   <string name="add_profile_scanner_permission_required">Разрешение камеры требуется для сканирования QR код.</string>
   <string name="copy_url">Копировать URL</string>
   <plurals name="removed">
