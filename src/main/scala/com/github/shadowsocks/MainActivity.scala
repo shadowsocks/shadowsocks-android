@@ -218,6 +218,11 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         .withSecond(drawer.getMiniDrawer.build(this), miniDrawerWidth.toInt)
         .withSavedInstance(savedInstanceState)
         .build()
+      if (getResources.getConfiguration.getLayoutDirection == View.LAYOUT_DIRECTION_RTL)
+        crossfader.getCrossFadeSlidingPaneLayout.setShadowDrawableRight(
+          AppCompatResources.getDrawable(this, R.drawable.material_drawer_shadow_right))
+      else crossfader.getCrossFadeSlidingPaneLayout.setShadowDrawableLeft(
+        AppCompatResources.getDrawable(this, R.drawable.material_drawer_shadow_left))
       drawer.getMiniDrawer.withCrossFader(new ICrossfader { // a wrapper is needed
         def isCrossfaded: Boolean = crossfader.isCrossFaded
         def crossfade(): Unit = crossfader.crossFade()
