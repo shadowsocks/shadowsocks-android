@@ -18,8 +18,8 @@
   <string name="http_proxy_summary">ローカル HTTP プロキシ</string>
   <string name="dns_proxy">DNS プロキシ</string>
   <string name="dns_proxy_summary">DNS解析をリモートサーバーにリダイレクト</string>
-  <string name="auto_set_gfwlist">中国本土のアドレスをプロキシ</string>
-  <string name="auto_set_gfwlist_summary">中国本土のアドレスを迂回</string>
+  <string name="auto_set_gfwlist">CHN Route</string>
+  <string name="auto_set_gfwlist_summary">中国本土のサイトをすべて迂回する</string>
   <string name="route_list">プロキシ方式</string>
   <string name="proxied_apps">アプリ別のプロキシを使用</string>
   <string name="proxied_apps_summary">アプリ別でプロキシを指定、Android 4.x では必ずNATモードを使用して下さい</string>
@@ -40,15 +40,15 @@
   <string name="stop">中止</string>
   <string name="stopping">停止中……</string>
   <string name="vpn_error">バックグランドサービスの起動に失敗しました：%s</string>
-  <string name="reboot_required">VPNサービスの起動に失敗しました、デバイスの再起動が必要かもしれません。</string>
+  <string name="reboot_required">VPNサービスの起動に失敗しました、デバイスの再起動を試みて下さい</string>
   <string name="close">閉じる</string>
-  <string name="proxy_empty">サーバアドレスやパスワードを入力する必要があります</string>
+  <string name="proxy_empty">サーバアドレスやパスワードの入力が必要です</string>
   <string name="connect">接続</string>
   <string name="initializing">初期化中……</string>
   <string name="recovering">リセット中……</string>
   <string name="loading">読み込み中……</string>
   <string name="profiles">プロファイル</string>
-  <string name="settings">オプションの設定</string>
+  <string name="settings">オプション設定</string>
   <string name="remove_profile">このプロファイルを削除「%s」?</string>
   <string name="recovery">リセット</string>
   <string name="about">本アプリについて</string>
@@ -77,7 +77,7 @@
 
   <string name="connection_test_pending">接続状況確認</string>
   <string name="connection_test_testing">テスト中...</string>
-  <string name="connection_test_available">成功: %d msの遅延</string>
+  <string name="connection_test_available">成功: %dmsの遅延</string>
   <string name="connection_test_fail">インターネット利用不可</string>
   <string name="connection_test_error">失敗しました：%s</string>
   <string name="connection_test_error_status_code">ステータスコード無効（#%d）</string>
@@ -91,11 +91,11 @@
 
   <string-array name="route_entry">
     <item>すべて</item>
-    <item>LANアドレスはプロキシを経由しない</item>
-    <item>中国本土アドレスはプロキシを経由しない</item>
-    <item>LAN及び中国本土のアドレスはプロキシを経由しない</item>
-    <item>中国本土からのアクセスができないアドレスのみプロキシを経由する</item>
-    <item>中国本土のアドレスのみプロキシを経由する</item>
+    <item>LANアドレスを迂回する</item>
+    <item>中国本土のアドレスを迂回する</item>
+    <item>LAN及び中国本土のアドレスを迂回する</item>
+    <item>中国本土からアクセス不可なアドレス以外を迂回する</item>
+    <item>中国本土のアドレス以外を迂回する</item>
   </string-array>
 
   <string name="action_apply_all">設定をすべてのプロファイルに適応する</string>
