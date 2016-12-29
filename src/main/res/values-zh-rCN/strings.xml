@@ -53,6 +53,7 @@
   <string name="profiles">配置文件</string>
   <string name="settings">设置选项</string>
   <string name="remove_profile">删除此配置文件「%s」?</string>
+  <string name="faq">常见问题</string>
   <string name="recovery">重置</string>
   <string name="about">关于</string>
   <string name="about_title">影梭（shadowsocks）%s</string>

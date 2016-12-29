@@ -28,9 +28,10 @@ import android.app.backup.BackupManager
 import android.app.{Activity, ProgressDialog}
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
-import android.net.VpnService
+import android.net.{Uri, VpnService}
 import android.nfc.{NdefMessage, NfcAdapter}
 import android.os.{Build, Bundle, Handler, Message}
+import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
@@ -60,6 +61,7 @@ object MainActivity {
   private final val DRAWER_GLOBAL_SETTINGS = 1L
   private final val DRAWER_RECOVERY = 2L
   private final val DRAWER_ABOUT = 3L
+  private final val DRAWER_FAQ = 4L
 }
 
 class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
@@ -84,6 +86,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private lazy val profilesFragment = new ProfilesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
   private lazy val aboutFragment = new AboutFragment()
+  private lazy val customTabsIntent = new CustomTabsIntent.Builder()
+    .setToolbarColor(ContextCompat.getColor(this, R.color.material_primary_500))
+    .build()
 
   // Services
   var state: Int = _
@@ -193,6 +198,12 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withIconTintingEnabled(true)
       )
       .addStickyDrawerItems(
+        new PrimaryDrawerItem()
+          .withIdentifier(DRAWER_FAQ)
+          .withName(R.string.faq)
+          .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_help_outline))
+          .withIconTintingEnabled(true)
+          .withSelectable(false),
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_RECOVERY)
           .withName(R.string.recovery)
@@ -363,6 +374,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_ABOUT =>
         app.track(TAG, "about")
         displayFragment(aboutFragment)
+      case DRAWER_FAQ => customTabsIntent.launchUrl(this, Uri.parse(getString(R.string.faq_url)))
     }
     true  // unexpected cases will throw exception
   }
