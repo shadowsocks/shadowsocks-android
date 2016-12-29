@@ -167,7 +167,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
                 val (enabled, apps) = if (i < 0) (proxiedAppString, "")
                   else (proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
                 bypassSwitch.setChecked(enabled.toBoolean)
-                app.editor.putString(Key.individual, apps).apply()
+                app.editor.putString(Key.individual, apps).putBoolean(Key.dirty, true).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 appListView.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
@@ -205,16 +205,18 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     toolbar.inflateMenu(R.menu.app_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    if (!app.settings.getBoolean(Key.proxyApps, false)) app.editor.putBoolean(Key.proxyApps, true).apply()
+    if (!app.settings.getBoolean(Key.proxyApps, false))
+      app.editor.putBoolean(Key.proxyApps, true).putBoolean(Key.dirty, true).apply()
     findViewById(R.id.onSwitch).asInstanceOf[Switch]
       .setOnCheckedChangeListener((_, checked) => {
-        app.editor.putBoolean(Key.proxyApps, checked).apply()
+        app.editor.putBoolean(Key.proxyApps, checked).putBoolean(Key.dirty, true).apply()
         finish()
       })
 
     bypassSwitch = findViewById(R.id.bypassSwitch).asInstanceOf[Switch]
     bypassSwitch.setChecked(app.settings.getBoolean(Key.bypass, false))
-    bypassSwitch.setOnCheckedChangeListener((_, checked) => app.editor.putBoolean(Key.bypass, checked).apply())
+    bypassSwitch.setOnCheckedChangeListener((_, checked) =>
+      app.editor.putBoolean(Key.bypass, checked).putBoolean(Key.dirty, true).apply())
 
     initProxiedApps()
     loadingView = findViewById(R.id.loading)

@@ -63,7 +63,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   }
 
   override def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String): Unit =
-    if (findPreference(key) != null) app.editor.putBoolean(Key.dirty, true).apply()
+    if (key != Key.proxyApps && findPreference(key) != null) app.editor.putBoolean(Key.dirty, true).apply()
 
   override def onDestroy() {
     app.settings.unregisterOnSharedPreferenceChangeListener(this)
