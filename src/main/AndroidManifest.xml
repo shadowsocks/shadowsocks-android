@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.NFC" />
-    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.touchscreen"
                   android:required="false"/>
@@ -76,12 +75,6 @@
                 android:excludeFromRecents="true"
 		        android:taskAffinity=""
                 android:launchMode="singleTask"/>
-
-        <activity
-                android:name=".ScannerActivity"
-                android:label="@string/add_profile_methods_scan_qr_code"
-                android:parentActivityName=".MainActivity"
-                android:excludeFromRecents="true"/>
 
         <activity
                 android:name=".AppManager"

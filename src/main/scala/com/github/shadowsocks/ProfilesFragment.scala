@@ -28,6 +28,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
+import android.text.TextUtils
 import android.view.View.OnLongClickListener
 import android.view._
 import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
@@ -36,6 +37,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
+import com.google.zxing.integration.android.IntentIntegrator
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -302,9 +304,23 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     super.onDestroy()
   }
 
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    super.onActivityResult(resultCode, resultCode, data)
+    val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+    if (scanResult != null) {
+      val contents = scanResult.getContents
+      if (!TextUtils.isEmpty(contents))
+        Parser.findAll(contents).foreach(app.profileManager.createProfile)
+    }
+  }
+
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_scan_qr_code =>
-      startActivity(new Intent(getActivity, classOf[ScannerActivity]))
+      val integrator = new IntentIntegrator(this)
+      val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
+      list.add("tw.com.quickmark")
+      integrator.setTargetApplications(list)
+      integrator.initiateScan()
       true
     case R.id.action_import =>
       if (clipboard.hasPrimaryClip) {
