@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.app.TaskStackBuilder
+import android.content.Intent
 import android.content.pm.{PackageManager, ShortcutManager}
 import android.os.{Build, Bundle}
 import android.support.v4.app.ActivityCompat
@@ -32,6 +33,7 @@ import android.widget.Toast
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Parser
 import com.google.zxing.Result
+import com.google.zxing.integration.android.IntentIntegrator
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
 object ScannerActivity {
@@ -71,20 +73,42 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
 
   override def onResume() {
     super.onResume()
-    val permissionCheck = ContextCompat.checkSelfPermission(this,
-      android.Manifest.permission.CAMERA)
-    if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-      scannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
-      scannerView.startCamera()          // Start camera on resume
-    } else {
-      ActivityCompat.requestPermissions(this,
-        Array(android.Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+    val integrator = new IntentIntegrator(ScannerActivity.this)
+    val list = new java.util.ArrayList(IntentIntegrator.TARGET_ALL_KNOWN)
+    list.add("tw.com.quickmark")
+    integrator.setTargetApplications(list)
+    val dialog = integrator.initiateScan()
+    if (dialog != null) {
+      val permissionCheck = ContextCompat.checkSelfPermission(this,
+        android.Manifest.permission.CAMERA)
+      if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+        scannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
+        scannerView.startCamera()          // Start camera on resume
+      } else {
+        ActivityCompat.requestPermissions(this,
+          Array(android.Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+      }
     }
   }
 
   override def onPause() {
     super.onPause()
     scannerView.stopCamera()           // Stop camera on pause
+  }
+
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    val scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+    if (scanResult != null) {
+      val contents = scanResult.getContents
+      if (!TextUtils.isEmpty(contents))
+        Parser.findAll(contents).foreach(app.profileManager.createProfile)
+      val intent = getParentActivityIntent
+      if (shouldUpRecreateTask(intent) || isTaskRoot)
+        TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
+      else finish()
+    } else {
+      super.onActivityResult(resultCode, resultCode, data)
+    }
   }
 
   override def handleResult(rawResult: Result) {
