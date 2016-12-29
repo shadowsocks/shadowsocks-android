@@ -14,11 +14,6 @@ Crash: [Submit an issue](https://github.com/shadowsocks/shadowsocks-android/issu
 * Tap the number to enter the port you wish to use; (if the keyboard doesn't pop up automatically for some reason)
 * Use Tasker integration to create a desktop widget.
 
-### How to add QR code from local gallery?
-
-Scan it with a third-party scanner like [QuickMark Barcode Scanner](https://play.google.com/store/apps/details?id=tw.com.quickmark) and click the `ss` url.
-
-
 ### Why is NAT mode deprecated?
 
 1. Requiring ROOT permission;
@@ -51,8 +46,3 @@ So if you notice a significant increase in battery usage after you use Shadowsoc
 ### It works fine under Wi-Fi but can't connect through cellular data?
 
 Allow this app to consume background data in app settings.
-
-### Why Camera permission is required on devices below Android 6.0?
-
-To scan the QR code through the integrated QR scanner.
-
