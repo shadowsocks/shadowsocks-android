@@ -54,6 +54,7 @@
   <string name="profiles">設定檔</string>
   <string name="settings">設定</string>
   <string name="remove_profile">移除此設定檔 "%s"?</string>
+  <string name="faq">常問問題</string>
   <string name="recovery">重設</string>
   <string name="about">關於</string>
   <string name="about_title">Shadowsocks %s</string>
