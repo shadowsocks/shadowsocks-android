@@ -22,7 +22,9 @@ package com.github.shadowsocks
 
 import java.util.GregorianCalendar
 
+import android.app.Activity
 import android.content._
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget._
@@ -306,18 +308,23 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
-    case REQUEST_SCAN_QR_CODE =>
+    case REQUEST_SCAN_QR_CODE => if (resultCode == Activity.RESULT_OK) {
       val contents = data.getStringExtra("SCAN_RESULT")
       if (!TextUtils.isEmpty(contents)) Parser.findAll(contents).foreach(app.profileManager.createProfile)
+    }
     case _ => super.onActivityResult(resultCode, resultCode, data)
   }
 
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_scan_qr_code =>
-      startActivityForResult(new Intent("com.google.zxing.client.android.SCAN")
+      try startActivityForResult(new Intent("com.google.zxing.client.android.SCAN")
         .addCategory(Intent.CATEGORY_DEFAULT)
         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_DOCUMENT),
-        REQUEST_SCAN_QR_CODE)
+        REQUEST_SCAN_QR_CODE) catch {
+        case _: ActivityNotFoundException =>
+          Toast.makeText(getActivity, R.string.add_profile_scanner_not_installed, Toast.LENGTH_LONG).show()
+          startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark")))
+      }
       true
     case R.id.action_import =>
       if (clipboard.hasPrimaryClip) {

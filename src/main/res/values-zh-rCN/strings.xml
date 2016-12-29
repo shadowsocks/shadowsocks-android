@@ -98,7 +98,7 @@
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
-  <string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
+  <string name="add_profile_scanner_not_installed">请安装任意兼容 ZXing 的二维码扫描应用。</string>
 
   <string-array name="route_entry">
     <item>全局</item>

@@ -87,7 +87,6 @@
   <string name="add_profile_dialog">シャドーソックスにプロファイルを追加しますか</string>
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
-  <string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 
   <string-array name="route_entry">
     <item>すべて</item>
