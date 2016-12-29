@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference android:key="isAutoConnect"
+                      android:persistent="false"
+                      android:summary="@string/auto_connect_summary"
+                      android:title="@string/auto_connect"/>
+    <SwitchPreference android:key="tcp_fastopen"
+                      android:summary="@string/tcp_fastopen_summary"
+                      android:title="TCP Fast Open"/>
+    <SwitchPreference android:key="isNAT"
+                      android:title="@string/nat"
+                      android:summary="@string/nat_summary"/>
+</PreferenceScreen>

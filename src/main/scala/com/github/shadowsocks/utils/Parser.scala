@@ -38,8 +38,7 @@ object Parser {
           profile.method = ss.group(2).toLowerCase
           if (ss.group(3) != null) profile.auth = true
           profile.password = ss.group(4)
-          profile.name = ss.group(5)
-          profile.host = profile.name
+          profile.host = ss.group(5)
           profile.remotePort = ss.group(6).toInt
           if (m.group(2) != null) profile.name = URLDecoder.decode(m.group(3), "utf-8")
           profile

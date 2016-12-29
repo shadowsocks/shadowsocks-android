@@ -38,11 +38,13 @@
   <string name="nat_no_root">NAT 模式需要 ROOT 权限</string>
   <string name="switch_to_vpn">切换到 VPN 模式</string>
   <string name="stop">停止</string>
-  <string name="quick_switch">切换</string>
   <string name="stopping">正在关闭……</string>
   <string name="vpn_error">后台服务启动失败：%s</string>
   <string name="reboot_required">VPN 服务启动失败。你可能需要重启设备。</string>
+  <string name="yes">是</string>
+  <string name="no">否</string>
   <string name="close">关闭</string>
+  <string name="profile_empty">请选择配置文件</string>
   <string name="proxy_empty">代理服务器地址及密码不能为空</string>
   <string name="connect">连接</string>
   <string name="initializing">正在初始化……</string>
@@ -52,24 +54,19 @@
   <string name="settings">设置选项</string>
   <string name="remove_profile">删除此配置文件「%s」?</string>
   <string name="recovery">重置</string>
-  <string name="recovery_summary">重置所有后台服务</string>
   <string name="about">关于</string>
   <string name="about_title">影梭（shadowsocks）%s</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>
   <string name="flush_dnscache_summary">只需在 NAT 模式下使用，需要 ROOT 权限</string>
   <string name="flush_dnscache_no_root">在没有 ROOT 权限的情况下无法刷新 DNS 缓存</string>
   <string name="flushing">刷新中……</string>
+  <string name="edit">编辑</string>
   <string name="share">分享</string>
-  <string name="share_message">扫描二维码或使用 Android Beam (NFC)</string>
-  <string name="share_message_without_nfc">扫描二维码</string>
-  <string name="share_message_nfc_disabled">扫描二维码\nAndroid Beam 被禁用</string>
-  <string name="turn_on_nfc">打开 NFC &amp; Android Beam</string>
   <string name="add_profile">添加配置文件</string>
 
   <string name="nat">NAT 模式 (仅限调试)</string>
   <string name="nat_summary">从 VPN 模式切换为 NAT 模式，需要 ROOT 权限</string>
   <string name="remote_dns">远程 DNS</string>
-  <string name="remote_dns_summary">用于远程域名解析的 DNS 服务器 (默认为 8.8.8.8)</string>
 
   <string name="udp_dns">UDP 转发</string>
   <string name="udp_dns_summary">由远程服务器转发 UDP 协议的数据包</string>
@@ -80,7 +77,6 @@
   <string name="ipv6">IPv6 路由</string>
   <string name="ipv6_summary">向远程服务器转发 IPv6 流量</string>
 
-  <string name="stat">网络流量</string>
   <string name="stat_summary">发送: \t%3$s\t↑\t%1$s/s\n接收: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">检查网络连接</string>
@@ -91,16 +87,16 @@
   <string name="connection_test_error_status_code">状态码无效（#%d）</string>
 
   <!-- profile -->
-  <string name="profile_manager_dialog">配置文件</string>
-  <string name="profile_manager_dialog_content">&#8226; 点击选择配置文件；\n&#8226; 向左/右滑动或按左删除；\n&#8226;
-    长按拖动改变顺序。</string>
-  <string name="gotcha">好的</string>
+  <string name="profile_config">配置文件设置</string>
+  <string name="unsaved_changes_prompt">保存修改吗？</string>
+  <string name="apply">应用</string>
+  <string name="delete">删除</string>
+  <string name="delete_confirm_prompt">你是否确定要删除这个配置文件？</string>
+  <string name="share_qr_nfc">二维码 / NFC</string>
   <string name="copy_url">复制 URL</string>
   <string name="add_profile_dialog">为影梭添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
-  <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
-  <string name="add_profile_nfc_hint">保持两台设备的屏幕亮起，在另外一台设备上，点击配置文件的分享按钮，将它们靠在一起（背靠背）。\n你也可以扫描 NFC 标签。</string>
   <string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
 
   <string-array name="route_entry">
@@ -134,6 +130,10 @@
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>
+  <string name="connecting">连接中…</string>
+  <string name="vpn_connected">已连接, 轻触以检查连接状态</string>
+  <string name="nat_connected">已连接</string>
+  <string name="not_connected">未连接</string>
 
   <!-- kcp -->
   <string name="kcp_summary">启用 KCP 协议</string>

@@ -18,50 +18,40 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks.widget
+package com.github.shadowsocks
 
+import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.view.View
+import android.support.v14.preference.SwitchPreference
+import be.mygod.preference.PreferenceFragment
+import com.github.shadowsocks.utils.{Key, TcpFastOpen}
 
-import com.github.shadowsocks.R
+class GlobalConfigFragment extends PreferenceFragment {
+  override def onCreatePreferences(bundle: Bundle, key: String) {
+    addPreferencesFromResource(R.xml.pref_global)
+    val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
+    switch.setOnPreferenceChangeListener((_, value) => {
+      BootReceiver.setEnabled(getActivity, value.asInstanceOf[Boolean])
+      true
+    })
+    if (getPreferenceManager.getSharedPreferences.getBoolean(Key.isAutoConnect, false)) {
+      BootReceiver.setEnabled(getActivity, true)
+      getPreferenceManager.getSharedPreferences.edit.remove(Key.isAutoConnect).apply()
+    }
+    switch.setChecked(BootReceiver.getEnabled(getActivity))
 
-import scala.collection.mutable.ArrayBuffer
-
-/**
-  * @author Mygod
-  * @param view The view to find a parent from.
-  * @param undo Callback for undoing removals.
-  * @param commit Callback for committing removals.
-  * @tparam T Item type.
-  */
-class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
-                             commit: Iterator[(Int, T)] => Unit = null) {
-  private val recycleBin = new ArrayBuffer[(Int, T)]
-  private val removedCallback = new Snackbar.Callback {
-    override def onDismissed(snackbar: Snackbar, event: Int) {
-      event match {
-        case Snackbar.Callback.DISMISS_EVENT_SWIPE | Snackbar.Callback.DISMISS_EVENT_MANUAL |
-             Snackbar.Callback.DISMISS_EVENT_TIMEOUT =>
-          if (commit != null) commit(recycleBin.iterator)
-          recycleBin.clear()
-        case _ =>
-      }
-      last = null
+    val tfo = findPreference(Key.tfo).asInstanceOf[SwitchPreference]
+    tfo.setChecked(TcpFastOpen.sendEnabled)
+    tfo.setOnPreferenceChangeListener((_, v) => {
+      val value = v.asInstanceOf[Boolean]
+      val result = TcpFastOpen.enabled(value)
+      if (result != null && result != "Success.")
+        Snackbar.make(getActivity.findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+      value == TcpFastOpen.sendEnabled
+    })
+    if (!TcpFastOpen.supported) {
+      tfo.setEnabled(false)
+      tfo.setSummary(getString(R.string.tcp_fastopen_summary_unsupported, java.lang.System.getProperty("os.version")))
     }
   }
-  private var last: Snackbar = _
-
-  def remove(index: Int, item: T) {
-    recycleBin.append((index, item))
-    val count = recycleBin.length
-    last = Snackbar
-      .make(view, view.getResources.getQuantityString(R.plurals.removed, count, count: Integer), Snackbar.LENGTH_LONG)
-      .setCallback(removedCallback).setAction(R.string.undo, (_ => {
-      undo(recycleBin.reverseIterator)
-      recycleBin.clear
-    }): View.OnClickListener)
-    last.show()
-  }
-
-  def flush(): Unit = if (last != null) last.dismiss()
 }

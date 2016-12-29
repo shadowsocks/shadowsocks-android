@@ -151,28 +151,33 @@ object Key {
   val localPort = "localPortNum"
   val remoteDns = "remoteDns"
 
-  val profileTip = "profileTip"
-
   val kcp = "kcp"
   val kcpPort = "kcpPort"
   val kcpcli = "kcpcli"
+
+  val dirty = "profileDirty"
 
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"
 }
 
 object State {
+  /**
+    * This state will never be broadcast by the service. This state is only used to indicate that the current context
+    * hasn't bound to any context.
+    */
+  val IDLE = 0
   val CONNECTING = 1
   val CONNECTED = 2
   val STOPPING = 3
   val STOPPED = 4
-  def isAvailable(state: Int): Boolean = state != CONNECTED && state != CONNECTING
 }
 
 object Action {
-  val SERVICE = "com.github.shadowsocks.SERVICE"
-  val CLOSE = "com.github.shadowsocks.CLOSE"
-  val QUICK_SWITCH = "com.github.shadowsocks.QUICK_SWITCH"
+  final val SERVICE = "com.github.shadowsocks.SERVICE"
+  final val CLOSE = "com.github.shadowsocks.CLOSE"
+
+  final val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }
 
 object Route {

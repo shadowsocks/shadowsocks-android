@@ -148,7 +148,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.route != Route.ALL)
       AclSyncJob.schedule(profile.route)
 
-    notification = new ShadowsocksNotification(this, profile.name)
+    notification = new ShadowsocksNotification(this, profile.getName)
   }
 
   /** Called when the activity is first created. */
@@ -318,7 +318,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val builder = new Builder()
     builder
-      .setSession(profile.name)
+      .setSession(profile.getName)
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 

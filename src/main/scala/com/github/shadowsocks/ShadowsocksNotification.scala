@@ -24,13 +24,12 @@ import java.util.Locale
 
 import android.app.{KeyguardManager, NotificationManager, PendingIntent}
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.os.PowerManager
+import android.os.{Build, PowerManager}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback.Stub
-import com.github.shadowsocks.utils.{TrafficMonitor, Action, State, Utils}
-import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.{Action, State, TrafficMonitor, Utils}
 
 /**
   * @author Mygod
@@ -57,17 +56,11 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setColor(ContextCompat.getColor(service, R.color.material_primary_500))
     .setTicker(service.getString(R.string.forward_success))
     .setContentTitle(profileName)
-    .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[Shadowsocks])
+    .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[MainActivity])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-  builder.addAction(R.drawable.ic_navigation_close,
+  if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
     service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
-  app.profileManager.getAllProfiles match {
-    case Some(profiles) => if (profiles.length > 1)
-      builder.addAction(R.drawable.ic_action_settings, service.getString(R.string.quick_switch),
-        PendingIntent.getActivity(service, 0, new Intent(Action.QUICK_SWITCH), 0))
-    case _ =>
-  }
   private lazy val style = new BigTextStyle(builder)
   private var isVisible = true
   update(if (service.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager].isScreenOn)
@@ -87,6 +80,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
       case Intent.ACTION_SCREEN_ON =>
         setVisible(visible && Utils.isLollipopOrAbove && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
         service.binder.registerCallback(callback)
+        service.binder.startListeningForBandwidth(callback)
         callbackRegistered = true
       case Intent.ACTION_USER_PRESENT => setVisible(visible = true, forceShow = forceShow)
     }

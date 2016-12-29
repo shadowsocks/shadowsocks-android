@@ -18,50 +18,35 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks.widget
+package com.github.shadowsocks
 
-import android.support.design.widget.Snackbar
-import android.view.View
+import android.os.Bundle
+import android.view.{LayoutInflater, View, ViewGroup}
+import android.app.Fragment
 
-import com.github.shadowsocks.R
+class GlobalSettingsFragment extends ToolbarFragment {
 
-import scala.collection.mutable.ArrayBuffer
+  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View =
+    inflater.inflate(R.layout.layout_global_settings, container, false)
 
-/**
-  * @author Mygod
-  * @param view The view to find a parent from.
-  * @param undo Callback for undoing removals.
-  * @param commit Callback for committing removals.
-  * @tparam T Item type.
-  */
-class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
-                             commit: Iterator[(Int, T)] => Unit = null) {
-  private val recycleBin = new ArrayBuffer[(Int, T)]
-  private val removedCallback = new Snackbar.Callback {
-    override def onDismissed(snackbar: Snackbar, event: Int) {
-      event match {
-        case Snackbar.Callback.DISMISS_EVENT_SWIPE | Snackbar.Callback.DISMISS_EVENT_MANUAL |
-             Snackbar.Callback.DISMISS_EVENT_TIMEOUT =>
-          if (commit != null) commit(recycleBin.iterator)
-          recycleBin.clear()
-        case _ =>
-      }
-      last = null
+  override def onViewCreated(view: View, savedInstanceState: Bundle) {
+    super.onViewCreated(view, savedInstanceState)
+    toolbar.setTitle(R.string.settings)
+
+    val fm = getChildFragmentManager
+    fm.beginTransaction().replace(R.id.content, new GlobalConfigFragment()).commit()
+    fm.executePendingTransactions()
+  }
+
+  override def onDetach() {
+    super.onDetach()
+
+    try {
+      val childFragmentManager = classOf[Fragment].getDeclaredField("mChildFragmentManager")
+      childFragmentManager.setAccessible(true)
+      childFragmentManager.set(this, null)
+    } catch {
+      case _: Exception =>  // ignore
     }
   }
-  private var last: Snackbar = _
-
-  def remove(index: Int, item: T) {
-    recycleBin.append((index, item))
-    val count = recycleBin.length
-    last = Snackbar
-      .make(view, view.getResources.getQuantityString(R.plurals.removed, count, count: Integer), Snackbar.LENGTH_LONG)
-      .setCallback(removedCallback).setAction(R.string.undo, (_ => {
-      undo(recycleBin.reverseIterator)
-      recycleBin.clear
-    }): View.OnClickListener)
-    last.show()
-  }
-
-  def flush(): Unit = if (last != null) last.dismiss()
 }

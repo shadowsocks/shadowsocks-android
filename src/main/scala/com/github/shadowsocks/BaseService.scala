@@ -21,20 +21,26 @@
 package com.github.shadowsocks
 
 import java.io.IOException
+import java.net.InetAddress
+import java.util
+import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.net.ConnectivityManager
-import android.os.{Handler, RemoteCallbackList}
+import android.os.{Handler, IBinder, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-import com.github.kevinsawicki.http.HttpRequest
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
+import okhttp3.{Dns, FormBody, OkHttpClient, Request}
+
+import scala.collection.mutable
+import scala.util.Random
 
 trait BaseService extends Service {
 
@@ -49,7 +55,7 @@ trait BaseService extends Service {
   var trafficMonitorThread: TrafficMonitorThread = _
 
   final val callbacks = new RemoteCallbackList[IShadowsocksServiceCallback]
-  var callbacksCount: Int = _
+  private final val bandwidthListeners = new mutable.HashSet[IBinder]() // the binder is the real identifier
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
   lazy val protectPath: String = getApplicationInfo.dataDir + "/protect_path"
@@ -78,38 +84,36 @@ trait BaseService extends Service {
       state
     }
 
-    override def getProfileName: String = if (profile == null) null else profile.name
+    override def getProfileName: String = if (profile == null) null else profile.getName
 
-    override def unregisterCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null && callbacks.unregister(cb)) {
-        callbacksCount -= 1
-        if (callbacksCount == 0 && timer != null) {
-          timer.cancel()
-          timer = null
-        }
-      }
-    }
+    override def registerCallback(cb: IShadowsocksServiceCallback): Unit = callbacks.register(cb)
 
-    override def registerCallback(cb: IShadowsocksServiceCallback) {
-      if (cb != null && callbacks.register(cb)) {
-        callbacksCount += 1
-        if (callbacksCount != 0 && timer == null) {
-          val task = new TimerTask {
-            def run() {
-              if (TrafficMonitor.updateRate()) updateTrafficRate()
-            }
-          }
+    override def startListeningForBandwidth(cb: IShadowsocksServiceCallback): Unit =
+      if (bandwidthListeners.add(cb.asBinder)){
+        if (timer == null) {
           timer = new Timer(true)
-          timer.schedule(task, 1000, 1000)
+          timer.schedule(new TimerTask {
+            def run(): Unit = if (state == State.CONNECTED && TrafficMonitor.updateRate()) updateTrafficRate()
+          }, 1000, 1000)
         }
         TrafficMonitor.updateRate()
         cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
+
+    override def stopListeningForBandwidth(cb: IShadowsocksServiceCallback): Unit =
+      if (bandwidthListeners.remove(cb.asBinder) && bandwidthListeners.isEmpty) {
+        timer.cancel()
+        timer = null
+      }
+
+    override def unregisterCallback(cb: IShadowsocksServiceCallback) {
+      stopListeningForBandwidth(cb) // saves an RPC, and safer
+      callbacks.unregister(cb)
     }
 
     override def use(profileId: Int): Unit = synchronized(if (profileId < 0) stopRunner(stopService = true) else {
       val profile = app.profileManager.getProfile(profileId).orNull
-      if (profile == null) stopRunner(stopService = true) else state match {
+      if (profile == null) stopRunner(stopService = true, getString(R.string.profile_empty)) else state match {
         case State.STOPPED => if (checkProfile(profile)) startRunner(profile)
         case State.CONNECTED => if (profileId != BaseService.this.profile.id && checkProfile(profile)) {
           stopRunner(stopService = false)
@@ -132,13 +136,28 @@ trait BaseService extends Service {
     val container = holder.getContainer
     val url = container.getString("proxy_url")
     val sig = Utils.getSignature(this)
-    val list = HttpRequest
-      .post(url)
-      .connectTimeout(2000)
-      .readTimeout(2000)
-      .send("sig="+sig)
-      .body
-    val proxies = util.Random.shuffle(list.split('|').toSeq)
+
+    val client = new OkHttpClient.Builder()
+      .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
+        case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
+        case _ => Dns.SYSTEM.lookup(hostname)
+      })
+      .connectTimeout(10, TimeUnit.SECONDS)
+      .writeTimeout(10, TimeUnit.SECONDS)
+      .readTimeout(30, TimeUnit.SECONDS)
+      .build()
+    val requestBody = new FormBody.Builder()
+      .add("sig", sig)
+      .build()
+    val request = new Request.Builder()
+      .url(url)
+      .post(requestBody)
+      .build()
+
+    val resposne = client.newCall(request).execute()
+    val list = resposne.body.string
+
+    val proxies = Random.shuffle(list.split('|').toSeq)
     val proxy = proxies.head.split(':')
     profile.host = proxy(0).trim
     profile.remotePort = proxy(1).trim.toInt
@@ -238,7 +257,7 @@ trait BaseService extends Service {
 
   def updateTrafficRate() {
     handler.post(() => {
-      if (callbacksCount > 0) {
+      if (bandwidthListeners.nonEmpty) {
         val txRate = TrafficMonitor.txRate
         val rxRate = TrafficMonitor.rxRate
         val txTotal = TrafficMonitor.txTotal
@@ -246,7 +265,8 @@ trait BaseService extends Service {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
-            callbacks.getBroadcastItem(i).trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+            val item = callbacks.getBroadcastItem(i)
+            if (bandwidthListeners.contains(item.asBinder)) item.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
           } catch {
             case _: Exception => // Ignore
           }
@@ -259,7 +279,7 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    app.refreshContainerHolder
+    app.refreshContainerHolder()
     app.updateAssets()
   }
 
@@ -268,8 +288,8 @@ trait BaseService extends Service {
 
   protected def changeState(s: Int, msg: String = null) {
     val handler = new Handler(getMainLooper)
-    handler.post(() => if (state != s || msg != null) {
-      if (callbacksCount > 0) {
+    if (state != s || msg != null) {
+      if (callbacks.getRegisteredCallbackCount > 0) handler.post(() => {
         val n = callbacks.beginBroadcast()
         for (i <- 0 until n) {
           try {
@@ -279,9 +299,9 @@ trait BaseService extends Service {
           }
         }
         callbacks.finishBroadcast()
-      }
+      })
       state = s
-    })
+    }
   }
 
   def getBlackList: String = {

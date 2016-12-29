@@ -18,50 +18,44 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks.widget
+package com.github.shadowsocks
 
-import android.support.design.widget.Snackbar
-import android.view.View
+import java.nio.charset.Charset
 
-import com.github.shadowsocks.R
+import android.app.Activity
+import android.nfc.{NdefMessage, NdefRecord, NfcAdapter}
+import android.os.Bundle
+import android.view.{LayoutInflater, View, ViewGroup}
+import android.widget.{ImageView, LinearLayout}
+import com.github.shadowsocks.utils.Utils
+import net.glxn.qrgen.android.QRCode
 
-import scala.collection.mutable.ArrayBuffer
+final class QRCodeDialog(url: String) extends DialogFragment {
+  private lazy val nfcShareItem = url.getBytes(Charset.forName("UTF-8"))
+  private var adapter: NfcAdapter = _
 
-/**
-  * @author Mygod
-  * @param view The view to find a parent from.
-  * @param undo Callback for undoing removals.
-  * @param commit Callback for committing removals.
-  * @tparam T Item type.
-  */
-class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
-                             commit: Iterator[(Int, T)] => Unit = null) {
-  private val recycleBin = new ArrayBuffer[(Int, T)]
-  private val removedCallback = new Snackbar.Callback {
-    override def onDismissed(snackbar: Snackbar, event: Int) {
-      event match {
-        case Snackbar.Callback.DISMISS_EVENT_SWIPE | Snackbar.Callback.DISMISS_EVENT_MANUAL |
-             Snackbar.Callback.DISMISS_EVENT_TIMEOUT =>
-          if (commit != null) commit(recycleBin.iterator)
-          recycleBin.clear()
-        case _ =>
-      }
-      last = null
+  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
+    val image = new ImageView(getActivity)
+    image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
+    val qrcode = QRCode.from(url)
+      .withSize(Utils.dpToPx(getActivity, 250), Utils.dpToPx(getActivity, 250))
+      .asInstanceOf[QRCode].bitmap()
+    image.setImageBitmap(qrcode)
+    image
+  }
+
+  override def onAttach(activity: Activity) {
+    superOnAttach(activity)
+    adapter = NfcAdapter.getDefaultAdapter(getActivity)
+    if (adapter != null) adapter.setNdefPushMessage(new NdefMessage(Array(
+      new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem))), activity)
+  }
+
+  override def onDetach() {
+    if (adapter != null) {
+      adapter.setNdefPushMessage(null, getActivity)
+      adapter = null
     }
+    super.onDetach()
   }
-  private var last: Snackbar = _
-
-  def remove(index: Int, item: T) {
-    recycleBin.append((index, item))
-    val count = recycleBin.length
-    last = Snackbar
-      .make(view, view.getResources.getQuantityString(R.plurals.removed, count, count: Integer), Snackbar.LENGTH_LONG)
-      .setCallback(removedCallback).setAction(R.string.undo, (_ => {
-      undo(recycleBin.reverseIterator)
-      recycleBin.clear
-    }): View.OnClickListener)
-    last.show()
-  }
-
-  def flush(): Unit = if (last != null) last.dismiss()
 }

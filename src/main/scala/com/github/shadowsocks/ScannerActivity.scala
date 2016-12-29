@@ -58,20 +58,13 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     }
   }
 
-  def navigateUp() {
-    val intent = getParentActivityIntent
-    if (shouldUpRecreateTask(intent) || isTaskRoot)
-      TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
-    else finish()
-  }
-
   override def onCreate(state: Bundle) {
     super.onCreate(state)
     setContentView(R.layout.layout_scanner)
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
     toolbar.setTitle(getTitle)
-    toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
-    toolbar.setNavigationOnClickListener(_ => navigateUp())
+    toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
+    toolbar.setNavigationOnClickListener(_ => finish())
     scannerView = findViewById(R.id.scanner).asInstanceOf[ZXingScannerView]
     if (Build.VERSION.SDK_INT >= 25) getSystemService(classOf[ShortcutManager]).reportShortcutUsed("scan")
   }
@@ -98,7 +91,9 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
     val uri = rawResult.getText
     if (!TextUtils.isEmpty(uri))
       Parser.findAll(uri).foreach(app.profileManager.createProfile)
-    navigateUp()
+    val intent = getParentActivityIntent
+    if (shouldUpRecreateTask(intent) || isTaskRoot)
+      TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
+    else finish()
   }
 }
-

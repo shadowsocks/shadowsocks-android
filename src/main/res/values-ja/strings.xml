@@ -38,7 +38,6 @@
   <string name="nat_no_root">NATモードはROOT権限が必要です</string>
   <string name="switch_to_vpn">VPNモードに切り替える</string>
   <string name="stop">中止</string>
-  <string name="quick_switch">切り替え</string>
   <string name="stopping">停止中……</string>
   <string name="vpn_error">バックグランドサービスの起動に失敗しました：%s</string>
   <string name="reboot_required">VPNサービスの起動に失敗しました、デバイスの再起動を試みて下さい</string>
@@ -52,7 +51,6 @@
   <string name="settings">オプション設定</string>
   <string name="remove_profile">このプロファイルを削除「%s」?</string>
   <string name="recovery">リセット</string>
-  <string name="recovery_summary">すべてのバックグラウンドサービスをリセット</string>
   <string name="about">本アプリについて</string>
   <string name="about_title">シャドーソックス（shadowsocks）%s</string>
   <string name="flush_dnscache">DNS キャッシュをリフレッシュ</string>
@@ -60,16 +58,11 @@
   <string name="flush_dnscache_no_root">ROOT権限がない場合はDNSキャッシュをリフレッシュできません</string>
   <string name="flushing">リフレッシュ中……</string>
   <string name="share">共有</string>
-  <string name="share_message">QRコードを読み取る或いはAndroid Beam (NFC) を使用</string>
-  <string name="share_message_without_nfc">QRコードを読み取る</string>
-  <string name="share_message_nfc_disabled">QRコードを読み取る\nAndroid Beam が無効になっています</string>
-  <string name="turn_on_nfc">NFC 及び Android Beam を有効にする</string>
   <string name="add_profile">プロファイルを追加</string>
 
   <string name="nat">NAT モード (デバックのみ)</string>
   <string name="nat_summary">VPNモードからNATモードに切り替えるにはROOT権限が必要です</string>
   <string name="remote_dns">リモートDNS</string>
-  <string name="remote_dns_summary">リモート解析に使用するDNS(デフォルトネームサーバー 8.8.8.8)</string>
 
   <string name="udp_dns">UDP転送</string>
   <string name="udp_dns_summary">UDPプロトコルでリモードサーバーにパケットを転送</string>
@@ -80,7 +73,6 @@
   <string name="ipv6">IPv6プロキシ</string>
   <string name="ipv6_summary">リモートサーバーにIPv6パケットを転送</string>
 
-  <string name="stat">ネットワークトラフィック</string>
   <string name="stat_summary">送信済み: \t%3$s\t↑\t%1$s/s\n受信済み: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">接続状況確認</string>
@@ -91,16 +83,10 @@
   <string name="connection_test_error_status_code">ステータスコード無効（#%d）</string>
 
   <!-- profile -->
-  <string name="profile_manager_dialog">プロファイル</string>
-  <string name="profile_manager_dialog_content">&#8226; タッチしてプロファイルを選択；\n&#8226; 左或いは右にスワイプして削除；\n&#8226;
-    長押し後にドラッグで順序を変更</string>
-  <string name="gotcha">承知</string>
-  <string name="copy_url">URLをコピー</string>
+  <string name="copy_url">URL をコピー</string>
   <string name="add_profile_dialog">シャドーソックスにプロファイルを追加しますか</string>
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
-  <string name="add_profile_nfc_hint_title">Android Beam (NFC) でプロファイルを追加</string>
-  <string name="add_profile_nfc_hint">2台のデバイス画面を立ち上げ、もう一方のデバイスでプロファイルの共有アイコンをタッチし、2台とも背中合わせにして下さい\nNFC またはNFCラベルを直接スキャン</string>
   <string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 
   <string-array name="route_entry">

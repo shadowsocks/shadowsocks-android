@@ -21,6 +21,7 @@
 package com.github.shadowsocks.database
 
 import android.util.Log
+import com.github.shadowsocks.ProfilesFragment
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 object ProfileManager {
@@ -29,9 +30,6 @@ object ProfileManager {
 
 class ProfileManager(dbHelper: DBHelper) {
   import ProfileManager._
-
-  var profileAddedListener: Profile => Any = _
-  def setProfileAddedListener(listener: Profile => Any): Unit = this.profileAddedListener = listener
 
   def createProfile(p: Profile = null): Profile = {
     val profile = if (p == null) new Profile else p
@@ -52,7 +50,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .prepareStatementString).getFirstResult
       if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
       dbHelper.profileDao.createOrUpdate(profile)
-      if (profileAddedListener != null) profileAddedListener(profile)
+      if (ProfilesFragment.instance != null) ProfilesFragment.instance.profilesAdapter.add(profile)
     } catch {
       case ex: Exception =>
         Log.e(TAG, "addProfile", ex)
@@ -90,6 +88,7 @@ class ProfileManager(dbHelper: DBHelper) {
   def delProfile(id: Int): Boolean = {
     try {
       dbHelper.profileDao.deleteById(id)
+      if (ProfilesFragment.instance != null) ProfilesFragment.instance.profilesAdapter.removeId(id)
       true
     } catch {
       case ex: Exception =>
@@ -121,15 +120,5 @@ class ProfileManager(dbHelper: DBHelper) {
         app.track(ex)
         None
     }
-  }
-
-  def createDefault(): Profile = {
-    val profile = new Profile {
-      name = "Default"
-      host = "198.199.101.152"
-      remotePort = 443
-      password = "u1rRWTssNv0p"
-    }
-    createProfile(profile)
   }
 }

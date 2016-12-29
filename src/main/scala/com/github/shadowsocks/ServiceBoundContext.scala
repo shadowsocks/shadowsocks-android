@@ -30,12 +30,18 @@ import com.github.shadowsocks.ShadowsocksApplication.app
   * @author Mygod
   */
 trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
-  class ShadowsocksServiceConnection extends ServiceConnection {
+  private class ShadowsocksServiceConnection extends ServiceConnection {
     override def onServiceConnected(name: ComponentName, service: IBinder) {
       binder = service
       service.linkToDeath(ServiceBoundContext.this, 0)
       bgService = IShadowsocksService.Stub.asInterface(service)
-      registerCallback()
+      if (callback != null && !callbackRegistered) try {
+        bgService.registerCallback(callback)
+        callbackRegistered = true
+        if (listeningForBandwidth) bgService.startListeningForBandwidth(callback)
+      } catch {
+        case _: RemoteException => // Nothing
+      }
       ServiceBoundContext.this.onServiceConnected()
     }
     override def onServiceDisconnected(name: ComponentName) {
@@ -46,33 +52,37 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     }
   }
 
-  protected def registerCallback(): Unit = if (bgService != null && callback != null && !callbackRegistered) try {
-    bgService.registerCallback(callback)
-    callbackRegistered = true
-  } catch {
-    case _: RemoteException => // Nothing
+  protected def setListeningForBandwidth(value: Boolean) {
+    if (listeningForBandwidth != value && bgService != null && callback != null)
+      if (value) bgService.startListeningForBandwidth(callback) else bgService.stopListeningForBandwidth(callback)
+    listeningForBandwidth = value
   }
 
-  protected def unregisterCallback() {
+  private def unregisterCallback() {
     if (bgService != null && callback != null && callbackRegistered) try bgService.unregisterCallback(callback) catch {
       case _: RemoteException =>
     }
+    listeningForBandwidth = false
     callbackRegistered = false
   }
 
-  def onServiceConnected(): Unit = ()
-  def onServiceDisconnected(): Unit = ()
+  protected def onServiceConnected(): Unit = ()
+  /**
+    * Different from Android framework, this method will be called even when you call `detachService`.
+    */
+  protected def onServiceDisconnected(): Unit = ()
   override def binderDied(): Unit = ()
 
   private var callback: IShadowsocksServiceCallback.Stub = _
   private var connection: ShadowsocksServiceConnection = _
   private var callbackRegistered: Boolean = _
+  private var listeningForBandwidth: Boolean = _
 
   // Variables
-  var binder: IBinder = _
+  private var binder: IBinder = _
   var bgService: IShadowsocksService = _
 
-  def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
+  protected def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
     this.callback = callback
     if (bgService == null) {
       val s = if (app.isNatEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
@@ -85,8 +95,9 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     }
   }
 
-  def detachService() {
+  protected def detachService() {
     unregisterCallback()
+    onServiceDisconnected()
     callback = null
     if (connection != null) {
       try unbindService(connection) catch {
