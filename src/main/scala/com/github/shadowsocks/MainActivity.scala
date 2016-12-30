@@ -89,6 +89,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private lazy val customTabsIntent = new CustomTabsIntent.Builder()
     .setToolbarColor(ContextCompat.getColor(this, R.color.material_primary_500))
     .build()
+  def launchUrl(url: String): Unit = try customTabsIntent.launchUrl(this, Uri.parse(url)) catch {
+    case _: ActivityNotFoundException => // Ignore
+  }
 
   // Services
   var state: Int = _
@@ -374,7 +377,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_ABOUT =>
         app.track(TAG, "about")
         displayFragment(aboutFragment)
-      case DRAWER_FAQ => customTabsIntent.launchUrl(this, Uri.parse(getString(R.string.faq_url)))
+      case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
     }
     true  // unexpected cases will throw exception
   }

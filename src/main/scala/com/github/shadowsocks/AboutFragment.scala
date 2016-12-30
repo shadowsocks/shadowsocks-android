@@ -38,9 +38,7 @@ class AboutFragment extends ToolbarFragment {
     web.loadUrl("file:///android_asset/pages/about.html")
     web.setWebViewClient(new WebViewClient() {
       override def shouldOverrideUrlLoading(view: WebView, url: String): Boolean = {
-        try startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))) catch {
-          case _: android.content.ActivityNotFoundException => // Ignore
-        }
+        getActivity.asInstanceOf[MainActivity].launchUrl(url)
         true
       }
     })
