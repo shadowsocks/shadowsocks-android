@@ -122,6 +122,8 @@ typedef struct {
 static IPR_context global_c = { FALSE, 0, NULL };  /* IP relay context */
 #ifdef _ANDROID
 char *android_workdir = NULL;
+time_t monitor_update_bounce = 0;
+uint64_t monitor_tx = 0, monitor_rx = 0;
 #endif
 
 /*---------------------------------------------------
@@ -131,7 +133,7 @@ char *android_workdir = NULL;
 #ifdef _ANDROID
 /*
    copy from shadowsocks-libev/src/android.c
-   use system connect-send-recv-close instead of lwip's'
+   TODO: put protect_socket and send_traffic_stat into a common header file for share
  */
 int protect_socket(int fd)
 {
@@ -162,6 +164,58 @@ int protect_socket(int fd)
     }
 
     if (ancil_send_fd(sock, fd)) {
+        close(sock);
+        return -1;
+    }
+
+    char ret = 0;
+
+    if (recv(sock, &ret, 1, 0) == -1) {
+        close(sock);
+        return -1;
+    }
+
+    close(sock);
+    return ret;
+}
+
+int send_traffic_stat(uint64_t tx, uint64_t rx)
+{
+    int sock;
+    struct sockaddr_un addr;
+
+    time_t now = time(NULL);
+    if (now - monitor_update_bounce < 1) {
+        return 0;
+    }
+    monitor_update_bounce = now;
+
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        return -1;
+    }
+
+    // Set timeout to 1s
+    struct timeval tv;
+    tv.tv_sec  = 1;
+    tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval));
+    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
+
+    char path[257];
+    sprintf(path, "%s/stat_path", android_workdir);
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, path, sizeof(addr.sun_path) - 1);
+
+    if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        close(sock);
+        return -1;
+    }
+
+    uint64_t stat[2] = { monitor_tx, monitor_rx };
+
+    if (send(sock, stat, sizeof(stat), 0) == -1) {
         close(sock);
         return -1;
     }
@@ -758,6 +812,8 @@ static int forward_tcp_packets( IPR_relay *relay, fd_set *read_mask )
                 continue;
             }
             tcp_client->last_used_time = time( NULL );
+            monitor_tx += read_size;
+            send_traffic_stat(monitor_tx, monitor_rx);
         }
 
         /* sends packet from target to client */
@@ -789,6 +845,8 @@ static int forward_tcp_packets( IPR_relay *relay, fd_set *read_mask )
                 continue;
             }
             tcp_client->last_used_time = time( NULL );
+            monitor_rx += read_size;
+            send_traffic_stat(monitor_tx, monitor_rx);
         }
 
         /* moves to next client */
@@ -840,6 +898,9 @@ static int forward_udp_packets( IPR_relay *relay, fd_set *read_mask )
                     if ( send( target_socket, read_buffer, read_size, 0 ) < 0 ) {
                         log_msg( relay, IPR_LL_WARNING, "udp_send target failed (%d)! ignoring...",
                                  ERROR_STRING() ) ;
+                    } else {
+                        monitor_tx += read_size;
+                        send_traffic_stat(monitor_tx, monitor_rx);
                     }
                 }
             }
@@ -848,6 +909,9 @@ static int forward_udp_packets( IPR_relay *relay, fd_set *read_mask )
                     log_msg( relay, IPR_LL_WARNING, "udp_send target failed (%d)! ignoring...",
                              ERROR_STRING() );
                     udp_client->last_used_time = time( NULL );
+                } else {
+                    monitor_tx += read_size;
+                    send_traffic_stat(monitor_tx, monitor_rx);
                 }
             }
         }
@@ -878,6 +942,8 @@ static int forward_udp_packets( IPR_relay *relay, fd_set *read_mask )
                 continue;
             }
             udp_client->last_used_time = time( NULL );
+            monitor_rx += read_size;
+            send_traffic_stat(monitor_tx, monitor_rx);
         }
     }
 
