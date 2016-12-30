@@ -178,7 +178,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     def onBindViewHolder(vh: ProfileViewHolder, i: Int): Unit = vh.bind(profiles(i))
 
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
-      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profiles_item, vg, false))
+      new ProfileViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_profile, vg, false))
 
     setHasStableIds(true) // Reason: http://stackoverflow.com/a/32488059/2245107
     override def getItemId(position: Int): Long = profiles(position).id
