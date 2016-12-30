@@ -31,7 +31,7 @@ import com.j256.ormlite.field.{DataType, DatabaseField}
 
 class Profile {
   @DatabaseField(generatedId = true)
-  var id: Int = 0
+  var id: Int = _
 
   @DatabaseField
   var name: String = ""
@@ -59,28 +59,28 @@ class Profile {
   var remoteDns: String = "8.8.8.8"
 
   @DatabaseField
-  var proxyApps: Boolean = false
+  var proxyApps: Boolean = _
 
   @DatabaseField
-  var bypass: Boolean = false
+  var bypass: Boolean = _
 
   @DatabaseField
-  var udpdns: Boolean = false
+  var udpdns: Boolean = _
 
   @DatabaseField
-  var auth: Boolean = false
+  var auth: Boolean = _
 
   @DatabaseField
-  var ipv6: Boolean = false
+  var ipv6: Boolean = _
 
   @DatabaseField(dataType = DataType.LONG_STRING)
   var individual: String = ""
 
   @DatabaseField
-  var tx: Long = 0
+  var tx: Long = _
 
   @DatabaseField
-  var rx: Long = 0
+  var rx: Long = _
 
   @DatabaseField
   val date: java.util.Date = new java.util.Date()
@@ -89,7 +89,7 @@ class Profile {
   var userOrder: Long = _
 
   @DatabaseField
-  var kcp: Boolean = false
+  var kcp: Boolean = _
 
   @DatabaseField
   var kcpPort: Int = 8399

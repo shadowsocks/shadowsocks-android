@@ -23,11 +23,11 @@ package com.github.shadowsocks.database
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.database.sqlite.SQLiteDatabase
+import com.github.shadowsocks.ShadowsocksApplication.app
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
-import com.github.shadowsocks.ShadowsocksApplication.app
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -55,12 +55,16 @@ class DBHelper(val context: Context)
     TableUtils.createTable(connectionSource, classOf[Profile])
   }
 
+  def recreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
+    TableUtils.dropTable(connectionSource, classOf[Profile], true)
+    onCreate(database, connectionSource)
+  }
+
   def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int,
     newVersion: Int) {
     if (oldVersion != newVersion) {
       if (oldVersion < 7) {
-        profileDao.executeRawNoArgs("DROP TABLE IF EXISTS 'profile';")
-        onCreate(database, connectionSource)
+        recreate(database, connectionSource)
         return
       }
 
@@ -132,8 +136,7 @@ class DBHelper(val context: Context)
       } catch {
         case ex: Exception =>
           app.track(ex)
-          profileDao.executeRawNoArgs("DROP TABLE IF EXISTS 'profile';")
-          onCreate(database, connectionSource)
+          recreate(database, connectionSource)
           return
       }
     }
