@@ -15,13 +15,7 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
       binder = service
       service.linkToDeath(ServiceBoundContext.this, 0)
       bgService = IShadowsocksService.Stub.asInterface(service)
-      if (callback != null && !callbackRegistered) try {
-        bgService.registerCallback(callback)
-        callbackRegistered = true
-        if (listeningForBandwidth) bgService.startListeningForBandwidth(callback)
-      } catch {
-        case _: RemoteException => // Nothing
-      }
+      registerCallback
       ServiceBoundContext.this.onServiceConnected()
     }
     override def onServiceDisconnected(name: ComponentName) {
@@ -32,17 +26,17 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     }
   }
 
-  def setListeningForBandwidth(value: Boolean) {
-    if (listeningForBandwidth != value && bgService != null && callback != null)
-      if (value) bgService.startListeningForBandwidth(callback) else bgService.stopListeningForBandwidth(callback)
-    listeningForBandwidth = value
+  protected def registerCallback = if (bgService != null && callback != null && !callbackRegistered) try {
+    bgService.registerCallback(callback)
+    callbackRegistered = true
+  } catch {
+    case ignored: RemoteException => // Nothing
   }
 
-  private def unregisterCallback() {
+  protected def unregisterCallback = {
     if (bgService != null && callback != null && callbackRegistered) try bgService.unregisterCallback(callback) catch {
       case ignored: RemoteException =>
     }
-    listeningForBandwidth = false
     callbackRegistered = false
   }
 
@@ -53,7 +47,6 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
   private var callback: IShadowsocksServiceCallback.Stub = _
   private var connection: ShadowsocksServiceConnection = _
   private var callbackRegistered: Boolean = _
-  private var listeningForBandwidth: Boolean = _
 
   // Variables
   var binder: IBinder = _
