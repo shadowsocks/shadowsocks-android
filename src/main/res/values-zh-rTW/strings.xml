@@ -59,6 +59,9 @@
   <string name="initializing">起始中……</string>
   <string name="recovering">重設中……</string>
   <string name="loading">載入中……</string>
+
+  <string name="dr">去重添加</string>
+
   <string name="profiles">設定檔</string>
   <string name="settings">設定</string>
   <string name="remove_profile">移除此設定檔 "%s"?</string>

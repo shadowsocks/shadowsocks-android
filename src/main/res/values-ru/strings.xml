@@ -98,6 +98,8 @@
   <string name="loading">Загрузка…</string>
   <string name="remove_profile">Удалить этот профиль "%s"?</string>
 
+  <string name="dr">Дубликат Удаление Добавление</string>
+
   <!-- menu category -->
   <string name="profiles">Профили</string>
   <string name="settings">Настройки</string>

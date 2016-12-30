@@ -80,6 +80,49 @@ class ProfileManager(dbHelper: DBHelper) {
     profile
   }
 
+  def createProfile_dr(p: Profile = null): Profile = {
+    val profile = if (p == null) new Profile else p
+    profile.id = 0
+    try {
+      app.currentProfile match {
+        case Some(oldProfile) =>
+          // Copy Feature Settings from old profile
+          profile.route = oldProfile.route
+          profile.ipv6 = oldProfile.ipv6
+          profile.proxyApps = oldProfile.proxyApps
+          profile.bypass = oldProfile.bypass
+          profile.individual = oldProfile.individual
+          profile.udpdns = oldProfile.udpdns
+          profile.dns = oldProfile.dns
+          profile.china_dns = oldProfile.china_dns
+        case _ =>
+      }
+      val last = dbHelper.profileDao.queryRaw(dbHelper.profileDao.queryBuilder.selectRaw("MAX(userOrder)")
+        .prepareStatementString).getFirstResult
+      if (last != null && last.length == 1 && last(0) != null) profile.userOrder = last(0).toInt + 1
+
+      val last_exist = dbHelper.profileDao.queryBuilder()
+        .where().eq("name", profile.name)
+        .and().eq("host", profile.host)
+        .and().eq("remotePort", profile.remotePort)
+        .and().eq("password", profile.password)
+        .and().eq("protocol", profile.protocol)
+        .and().eq("obfs", profile.obfs)
+        .and().eq("obfs_param", profile.obfs_param)
+        .and().eq("method", profile.method).queryForFirst()
+      if (last_exist == null)
+      {
+        dbHelper.profileDao.createOrUpdate(profile)
+        if (profileAddedListener != null) profileAddedListener(profile)
+      }
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "addProfile", ex)
+        app.track(ex)
+    }
+    profile
+  }
+
   def updateProfile(profile: Profile): Boolean = {
     try {
       dbHelper.profileDao.update(profile)

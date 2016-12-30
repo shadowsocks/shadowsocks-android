@@ -58,6 +58,9 @@
   <string name="initializing">正在初始化……</string>
   <string name="recovering">重置中……</string>
   <string name="loading">正在加载……</string>
+
+  <string name="dr">去重添加</string>
+
   <string name="profiles">配置文件</string>
   <string name="settings">设置选项</string>
   <string name="remove_profile">删除此配置文件「%s」?</string>

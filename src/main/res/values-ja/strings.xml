@@ -54,6 +54,9 @@
   <string name="initializing">初期化中……</string>
   <string name="recovering">リセット中……</string>
   <string name="loading">読み込み中……</string>
+
+  <string name="dr">重複削除追加</string>
+
   <string name="profiles">プロファイル</string>
   <string name="settings">オプション設定</string>
   <string name="remove_profile">このプロファイルを削除「%s」?</string>
@@ -76,7 +79,7 @@
   <string name="nat_summary">VPNモードからNATモードに切り替えるにはROOT権限が必要です</string>
   <string name="remote_dns">リモートDNS</string>
   <string name="remote_dns_summary">リモート解析に使用するDNS(デフォルトネームサーバー 8.8.8.8)</string>
-  
+
   <string name="dns">DNS</string>
   <string name="dns_summary">特定のドメイン名の解決のためにDNSサーバ，として 8.8.8.8:53</string>
 

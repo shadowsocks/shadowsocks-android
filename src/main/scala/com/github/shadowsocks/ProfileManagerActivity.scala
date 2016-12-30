@@ -318,8 +318,16 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           val profiles_ssr = Parser.findAll_ssr(clipboard.getPrimaryClip.getItemAt(0).getText).toList
           val profiles = profiles_normal ::: profiles_ssr
           if (profiles.nonEmpty) {
-            profiles.foreach(app.profileManager.createProfile)
-            Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show
+            val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+              .setTitle(R.string.add_profile_dialog)
+              .setPositiveButton(android.R.string.yes, ((_, _) =>
+                profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+              .setNeutralButton(R.string.dr, ((_, _) =>
+                profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
+              .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+              .setMessage(profiles.mkString("\n"))
+              .create()
+            dialog.show()
             return
           }
         }
@@ -366,6 +374,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       .setTitle(R.string.add_profile_dialog)
       .setPositiveButton(android.R.string.yes, ((_, _) =>
         profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+      .setNeutralButton(R.string.dr, ((_, _) =>
+        profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
       .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
       .setMessage(profiles.mkString("\n"))
       .create()
@@ -387,7 +397,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     app.profileManager.setProfileAddedListener(null)
     super.onDestroy
   }
-  
+
   override def onBackPressed() {
     if (menu.isOpened) menu.close(true) else super.onBackPressed()
   }

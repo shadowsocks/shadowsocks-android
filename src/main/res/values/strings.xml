@@ -105,6 +105,8 @@
   <string name="loading">Loading…</string>
   <string name="remove_profile">Remove this profile "%s"?</string>
 
+  <string name="dr">Duplicate Removal Add</string>
+
   <!-- menu category -->
   <string name="profiles">Profiles</string>
   <string name="settings">Settings</string>
