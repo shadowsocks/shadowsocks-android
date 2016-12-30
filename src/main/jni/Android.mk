@@ -606,6 +606,26 @@ LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files))
 
 include $(BUILD_STATIC_LIBRARY)
 
+########################################################
+## ip-relay
+########################################################
+
+include $(CLEAR_VARS)
+
+SRELAY_SOURCES := lib_ip_relay.c ip_relay.c
+
+LOCAL_MODULE    := ip-relay
+LOCAL_SRC_FILES := $(addprefix iprelay/, $(SRELAY_SOURCES))
+LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -D_ANDROID \
+                   -I$(LOCAL_PATH)/libancillary \
+                   -I$(LOCAL_PATH)/iprelay
+
+LOCAL_STATIC_LIBRARIES := libancillary
+
+LOCAL_LDLIBS := -llog
+
+include $(BUILD_EXECUTABLE)
+
 # Import cpufeatures
 $(call import-module,android/cpufeatures)
 

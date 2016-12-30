@@ -106,10 +106,17 @@ static int parse_command_line( int argc, char **argv )
     if ( argc < 4 ) {
         fprintf( stderr, "usage:\n" );
         fprintf( stderr,
-            "\tip_relay listen_port target_ip target_port [timeout]\n\n" );
+            "\tip_relay listen_port target_ip target_port"
+#ifdef _ANDROID
+            " android_workdir"
+#endif
+            " [timeout]\n\n" );
         fprintf( stderr, "\tlisten_port: \n\t\tlocal port to listen on for udp/tcp connections.\n" );
         fprintf( stderr, "\ttarget_ip: \n\t\tip address to redirect connections to\n" );
         fprintf( stderr, "\ttarget_port: \n\t\tport number to redirect connections to\n" );
+#ifdef _ANDROID
+        fprintf( stderr, "\tandroid_workdir: \n\t\tlocation to the unix socket of protect_path\n" );
+#endif
         fprintf( stderr, "\ttimeout: \n\t\toptional udp/tcp connection timeout in seconds, default = %d\n",
                  IPR_DEFAULT_TIMEOUT );
         exit( IR_ERROR_BAD_PARAMETERS );
@@ -117,9 +124,16 @@ static int parse_command_line( int argc, char **argv )
     global_c.listen_port = (unsigned short)atoi( argv[1] );
     global_c.target_host = argv[2];
     global_c.target_port = (unsigned short)atoi( argv[3] );
+#ifdef _ANDROID
+    android_workdir = argv[4];
+    if ( argc > 5 ) {
+        global_c.timeout = (unsigned long)atoi( argv[5] );
+    }
+#else
     if ( argc > 4 ) {
         global_c.timeout = (unsigned long)atoi( argv[4] );
     }
+#endif
 
     /* returns */
     return 0;

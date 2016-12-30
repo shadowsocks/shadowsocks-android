@@ -196,7 +196,26 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     kcptunProcess = new GuardedProcess(cmd).start()
   }
 
+  def startShadowsocksProxy(
+    localPort: Int = -1,
+    remoteHost: String = null,
+    remotePort: Int = -1
+  ): GuardedProcess = {
+
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ip-relay"
+      , (if (localPort < 0) profile.localPort else localPort).toString
+      , (if (remoteHost == null) profile.host else remoteHost)
+      , (if (remotePort < 0) profile.remotePort else remotePort).toString
+      , getApplicationInfo.dataDir)
+
+    return new GuardedProcess(cmd).start()
+  }
+
   def startShadowsocksUDPDaemon() {
+    if (profile.password.length() == 0) {
+      sstunnelProcess = startShadowsocksProxy()
+      return
+    }
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
         profile.password, profile.method, 600)
@@ -218,6 +237,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startShadowsocksDaemon() {
+    if (profile.password.length() == 0) {
+      sslocalProcess = startShadowsocksProxy()
+      return
+    }
     val conf = if (profile.kcp) {
       ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort,
@@ -254,6 +277,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   }
 
   def startDnsTunnel() {
+    if (profile.password.length() == 0) {
+      return
+    }
     val conf = if (profile.kcp) {
       ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort + 63,
@@ -290,18 +316,19 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsDaemon() {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
     val protect = "protect = \"" + protectPath +"\";"
+    val localPort = profile.localPort + (if (profile.password.length() == 0) 0 else 63)
     val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, "114.114.114.114, 223.5.5.5, 1.2.4.8",
-          getBlackList, reject, profile.localPort + 63, reject)
+          getBlackList, reject, localPort, reject)
       case Route.CHINALIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, "8.8.8.8, 8.8.4.4, 208.67.222.222",
-          "", reject, profile.localPort + 63, reject)
+          "", reject, localPort, reject)
       case _ =>
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
-          "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject)
+          "0.0.0.0", profile.localPort + 53, localPort, reject)
     }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-vpn.conf"))(p => {
       p.println(conf)

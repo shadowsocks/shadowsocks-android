@@ -21,6 +21,10 @@
 #ifdef _WIN32
 #include <Winsock2.h>
 #else
+#ifdef _ANDROID
+#include <unistd.h>
+#include <sys/un.h>
+#endif
 #include <sys/time.h>
 #include <sys/types.h>
 #endif /* _WIN32 */

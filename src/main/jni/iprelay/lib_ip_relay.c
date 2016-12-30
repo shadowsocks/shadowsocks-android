@@ -15,6 +15,10 @@
  +---------------------------------------------------*/
 #include "lib_ip_relay.h"
 
+#ifdef _ANDROID
+#include "ancillary.h"
+#endif
+
 #ifndef _WIN32
 
 #include <sys/socket.h>
@@ -116,10 +120,63 @@ typedef struct {
  |     Global vars Definition below this line
  +---------------------------------------------------*/
 static IPR_context global_c = { FALSE, 0, NULL };  /* IP relay context */
+#ifdef _ANDROID
+char *android_workdir = NULL;
+#endif
 
 /*---------------------------------------------------
  |     External functions Definition below this line
  +---------------------------------------------------*/
+
+#ifdef _ANDROID
+/*
+   copy from shadowsocks-libev/src/android.c
+   use system connect-send-recv-close instead of lwip's'
+ */
+int protect_socket(int fd)
+{
+    int sock;
+    struct sockaddr_un addr;
+
+    if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+        return -1;
+    }
+
+    // Set timeout to 1s
+    struct timeval tv;
+    tv.tv_sec  = 1;
+    tv.tv_usec = 0;
+    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(struct timeval));
+    setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char *)&tv, sizeof(struct timeval));
+
+    char path[257];
+    sprintf(path, "%s/protect_path", android_workdir);
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, path, sizeof(addr.sun_path) - 1);
+
+    if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        close(sock);
+        return -1;
+    }
+
+    if (ancil_send_fd(sock, fd)) {
+        close(sock);
+        return -1;
+    }
+
+    char ret = 0;
+
+    if (recv(sock, &ret, 1, 0) == -1) {
+        close(sock);
+        return -1;
+    }
+
+    close(sock);
+    return ret;
+}
+#endif
 
 
 /* inits socket library */
@@ -284,6 +341,10 @@ static int create_listen_sockets( IPR_relay *relay )
         log_msg( relay, IPR_LL_ERROR, "could not create listen sockets!" );
         return IPR_ERROR_CODE;
     }
+    #ifdef _ANDROID
+    protect_socket(relay->tcp_client_listen_socket);
+    protect_socket(relay->udp_client_listen_socket);
+    #endif
 
     /* binds server sockets (and starts listening on tcp socket ) */
     memset( &sock_addr, 0, sizeof(sock_addr) );
@@ -543,6 +604,9 @@ static SOCKET create_tcp_target_socket( IPR_relay *relay )
         log_msg( relay, IPR_LL_WARNING, "could not create tcp target socket!") ;
         return INVALID_SOCKET;
     }
+    #ifdef _ANDROID
+    protect_socket(target_socket);
+    #endif
 
     /* connects target sockets */
     memset(&sock_addr, 0, sizeof(sock_addr));
@@ -575,6 +639,9 @@ static SOCKET create_udp_target_socket( IPR_relay *relay )
         log_msg( relay, IPR_LL_WARNING, "could not create target udp socket!") ;
         return INVALID_SOCKET;
     }
+    #ifdef _ANDROID
+    protect_socket(target_socket);
+    #endif
 
     /* connects target sockets */
     memset(&sock_addr, 0, sizeof(sock_addr));

@@ -27,6 +27,7 @@ object Executable {
   val SS_TUNNEL = "ss-tunnel"
   val TUN2SOCKS = "tun2socks"
   val KCPTUN = "kcptun"
+  val IPRELAY = "ip-relay"
 }
 
 object ConfigUtils {

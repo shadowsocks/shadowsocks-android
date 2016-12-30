@@ -126,7 +126,7 @@ trait BaseService extends Service {
     override def useSync(profileId: Int): Unit = use(profileId)
   }
 
-  def checkProfile(profile: Profile): Boolean = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
+  def checkProfile(profile: Profile): Boolean = if (TextUtils.isEmpty(profile.host)) {
     stopRunner(stopService = true, getString(R.string.proxy_empty))
     false
   } else true

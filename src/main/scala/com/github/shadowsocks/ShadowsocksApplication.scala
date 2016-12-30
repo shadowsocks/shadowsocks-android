@@ -51,7 +51,7 @@ object ShadowsocksApplication {
 
   private final val TAG = "ShadowsocksApplication"
   private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
-    Executable.TUN2SOCKS, Executable.KCPTUN)
+    Executable.TUN2SOCKS, Executable.KCPTUN, Executable.IPRELAY)
 
   // The ones in Locale doesn't have script included
   private final lazy val SIMPLIFIED_CHINESE =
@@ -197,7 +197,7 @@ class ShadowsocksApplication extends Application {
   def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun")) {
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun", "ip-relay")) {
       cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
       cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
         .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))

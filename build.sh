@@ -14,7 +14,7 @@ mkdir -p assets/armeabi-v7a
 mkdir -p assets/x86
 
 #copy executables
-for app in pdnsd redsocks ss-local ss-tunnel tun2socks
+for app in pdnsd redsocks ss-local ss-tunnel tun2socks ip-relay
 do
     echo $app
     try mv libs/armeabi-v7a/$app assets/armeabi-v7a/
