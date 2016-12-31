@@ -36,14 +36,19 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 ## OPEN SOURCE LICENSES
 
-* shadowsocks-libev: [GPLv3](https://github.com/shadowsocks/shadowsocks-libev/blob/master/LICENSE)
-* tun2socks: [BSD](https://github.com/shadowsocks/badvpn/blob/shadowsocks-android/COPYING)
-* redsocks: [APL 2.0](https://github.com/shadowsocks/redsocks/blob/master/README)
-* OpenSSL: [OpenSSL](https://github.com/shadowsocks/openssl-android/blob/master/NOTICE)
-* pdnsd: [GPLv3](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING)
-* libev: [GPLv2](https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libev/LICENSE)
-* libevent: [BSD](https://github.com/shadowsocks/libevent/blob/master/LICENSE)
-* kcptun: [MIT](https://github.com/xtaci/kcptun)
+<ul>
+    <li>redsocks: <a href="https://github.com/shadowsocks/redsocks/blob/shadowsocks-android/README">APL 2.0</a></li>
+    <li>mbed TLS: <a href="https://github.com/ARMmbed/mbedtls/blob/development/LICENSE">APL 2.0</a></li>
+    <li>libevent: <a href="https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/libevent/LICENSE">BSD</a></li>
+    <li>tun2socks: <a href="https://github.com/shadowsocks/badvpn/blob/shadowsocks-android/COPYING">BSD</a></li>
+    <li>pcre: <a href="https://android.googlesource.com/platform/external/pcre/+/master/dist2/LICENCE">BSD</a></li>
+    <li>libancillary: <a href="https://github.com/shadowsocks/libancillary/blob/shadowsocks-android/COPYING">BSD</a></li>
+    <li>shadowsocks-libev: <a href="https://github.com/shadowsocks/shadowsocks-libev/blob/master/LICENSE">GPLv3</a></li>
+    <li>pdnsd: <a href="https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING">GPLv3</a></li>
+    <li>libev: <a href="https://github.com/shadowsocks/shadowsocks-libev/blob/master/libev/LICENSE">GPLv2</a></li>
+    <li>kcptun: <a href="https://github.com/xtaci/kcptun/commits/master/LICENSE.md">MIT</a></li>
+    <li>libsodium: <a href="https://github.com/jedisct1/libsodium/blob/master/LICENSE">ISC</a></li>
+</ul>
 
 ### LICENSE
 
