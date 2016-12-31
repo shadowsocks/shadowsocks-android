@@ -29,10 +29,13 @@ class AclSyncJob(route: String) extends Job {
   override def onRunJob(params: Params): Result = {
     val filename = route + ".acl"
     try {
-      //noinspection JavaAccessorMethodCalledAsEmptyParen
-      IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
-        new URL("https://shadowsocks.org/acl/android/v1/" +
-          filename).openConnection().getInputStream())(IOUtils.readString))
+      if(route != "self")
+      {
+        //noinspection JavaAccessorMethodCalledAsEmptyParen
+        IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename, autoClose(
+          new URL("https://shadowsocks.org/acl/android/v1/" +
+            filename).openConnection().getInputStream())(IOUtils.readString))
+      }
       Result.SUCCESS
     } catch {
       case e: IOException =>

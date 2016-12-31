@@ -130,7 +130,17 @@
     <item>略過區域網路及中國大陸位址</item>
     <item>僅代理大陸屏蔽位址</item>
     <item>僅代理大陸位址</item>
+    <item>客制化 ACL 文件</item>
   </string-array>
+
+  <string name="acl_file">ACL File URL</string>
+  <string name="aclupdate">ACL 文件更新</string>
+  <string name="aclupdate_summary">更新您本地的 ACL 文件</string>
+  <string name="aclupdate_url_notset">很抱歉，因為您沒有設置 ACL 地址，所以無法進行更新。請在路由中選擇 \'客制化 ACL 文件\' 之後再進行升級嘗試。</string>
+
+  <string name="aclupdate_downloading">文件更新中...</string>
+  <string name="aclupdate_successfully">文件更新成功!</string>
+  <string name="aclupdate_failed">文件更新失敗！</string>
 
   <string name="action_apply_all">應用設置到所有配置文件</string>
   <string name="action_export">匯出至剪貼簿</string>

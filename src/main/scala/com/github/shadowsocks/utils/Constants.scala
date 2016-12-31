@@ -160,6 +160,7 @@ object Key {
 
   val isNAT = "isNAT"
   val route = "route"
+  val aclurl = "aclurl"
 
   val isAutoConnect = "isAutoConnect"
 
@@ -196,8 +197,8 @@ object State {
 }
 
 object Action {
-  val SERVICE = "com.github.shadowsocks.SERVICE"
-  val CLOSE = "com.github.shadowsocks.CLOSE"
+  val SERVICE = "in.zhaoj.shadowsocksr.SERVICE"
+  val CLOSE = "in.zhaoj.shadowsocksr.CLOSE"
   val QUICK_SWITCH = "in.zhaoj.shadowsocksr.QUICK_SWITCH"
 }
 
@@ -208,4 +209,5 @@ object Route {
   val BYPASS_LAN_CHN = "bypass-lan-china"
   val GFWLIST = "gfwlist"
   val CHINALIST = "china-list"
+  val ACL = "acl"
 }

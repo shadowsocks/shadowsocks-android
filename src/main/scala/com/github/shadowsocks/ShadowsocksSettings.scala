@@ -6,14 +6,22 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.{Intent, SharedPreferences}
 import android.net.Uri
 import android.os.{Build, Bundle}
+import java.io.{IOException, File}
+import java.net.URL
 import android.preference.{Preference, PreferenceFragment, SwitchPreference}
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
+import android.app.ProgressDialog
+import android.content._
 import android.webkit.{WebView, WebViewClient}
+import android.widget.EditText
+import android.os.Looper
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
+import com.github.shadowsocks.utils.CloseUtils._
+import com.github.shadowsocks.utils.IOUtils
 
 object ShadowsocksSettings {
   // Constants
@@ -116,6 +124,23 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       app.profileManager.updateProfile(profile)
     })
     findPreference(Key.route).setOnPreferenceChangeListener((_, value) => {
+      if(value == "self")
+      {
+        val AclUrlEditText = new EditText(activity);
+        AclUrlEditText.setText(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""));
+        new AlertDialog.Builder(activity)
+          .setTitle(getString(R.string.acl_file))
+          .setPositiveButton(android.R.string.ok, ((_, _) => {
+            getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, AclUrlEditText.getText().toString()).commit()
+            downloadAcl(AclUrlEditText.getText().toString())
+          }): DialogInterface.OnClickListener)
+          .setNegativeButton(android.R.string.no, null)
+          .setView(AclUrlEditText)
+          .create()
+          .show()
+          true
+      }
+
       profile.route = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
@@ -179,6 +204,30 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
+    findPreference("aclupdate").setOnPreferenceClickListener((preference: Preference) => {
+      app.track(TAG, "aclupdate")
+      val url = getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "");
+      if(url == "")
+      {
+        new AlertDialog.Builder(activity)
+          .setTitle(getString(R.string.aclupdate).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
+          .setNegativeButton(getString(android.R.string.ok), null)
+          .setMessage(R.string.aclupdate_url_notset)
+          .create()
+          .show()
+      }
+      else
+      {
+        downloadAcl(url)
+      }
+      true
+    })
+
+    if(new File(app.getApplicationInfo.dataDir + '/' + "self.acl").exists == false && getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "") != "")
+    {
+      downloadAcl(getPreferenceManager.getSharedPreferences.getString(Key.aclurl, ""))
+    }
+
     findPreference("about").setOnPreferenceClickListener((preference: Preference) => {
       app.track(TAG, "about")
       val web = new WebView(activity)
@@ -202,6 +251,48 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         .show()
       true
     })
+  }
+
+  def downloadAcl(url: String) {
+    val progressDialog = ProgressDialog.show(activity, getString(R.string.aclupdate), getString(R.string.aclupdate_downloading), false, false)
+    progressDialog.create()
+    progressDialog.show()
+    new Thread {
+      override def run() {
+        Looper.prepare();
+        try {
+          IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + "self.acl", autoClose(
+            new URL(url).openConnection().getInputStream())(IOUtils.readString))
+          progressDialog.dismiss()
+          new AlertDialog.Builder(activity, R.style.Theme_Material_Dialog_Alert)
+            .setTitle(getString(R.string.aclupdate))
+            .setNegativeButton(android.R.string.yes, null)
+            .setMessage(getString(R.string.aclupdate_successfully))
+            .create()
+            .show()
+        } catch {
+          case e: IOException =>
+            e.printStackTrace()
+            progressDialog.dismiss()
+            new AlertDialog.Builder(activity, R.style.Theme_Material_Dialog_Alert)
+              .setTitle(getString(R.string.aclupdate))
+              .setNegativeButton(android.R.string.yes, null)
+              .setMessage(getString(R.string.aclupdate_failed))
+              .create()
+              .show()
+          case e: Exception =>  // unknown failures, probably shouldn't retry
+            e.printStackTrace()
+            progressDialog.dismiss()
+            new AlertDialog.Builder(activity, R.style.Theme_Material_Dialog_Alert)
+              .setTitle(getString(R.string.aclupdate))
+              .setNegativeButton(android.R.string.yes, null)
+              .setMessage(getString(R.string.aclupdate_failed))
+              .create()
+              .show()
+        }
+        Looper.loop();
+      }
+    }.start()
   }
 
   def refreshProfile() {

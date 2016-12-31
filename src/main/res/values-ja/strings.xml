@@ -125,7 +125,17 @@
     <item>LAN及び中国本土のアドレスを迂回する</item>
     <item>中国本土からアクセス不可なアドレス以外を迂回する</item>
     <item>中国本土のアドレス以外を迂回する</item>
+    <item>カスタム ACL ファイル</item>
   </string-array>
+
+  <string name="acl_file">ACL ファイル URL</string>
+  <string name="aclupdate">ACL 更新</string>
+  <string name="aclupdate_summary">ACL ファイル 更新</string>
+  <string name="aclupdate_url_notset">申し訳ありませんが、ACL ファイル URL を設定していないため、この操作は実行できません。 ルート設定で「カスタム ACL ファイル」を選択して、もう一度お試しください。</string>
+
+  <string name="aclupdate_downloading">ファイルの更新中...</string>
+  <string name="aclupdate_successfully">アップデートは成功しました！</string>
+  <string name="aclupdate_failed">アップデートに失敗しました！</string>
 
   <string name="action_apply_all">設定をすべてのプロファイルに適応する</string>
   <string name="action_export">クリップボードに出力</string>

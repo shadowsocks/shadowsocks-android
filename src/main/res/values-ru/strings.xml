@@ -58,7 +58,15 @@
     <item>Обходной Китай</item>
     <item>Обход LAN и Китай</item>
     <item>Список GFW</item>
+    <item>Пользовательские ACL файла</item>
   </string-array>
+  <string name="acl_file">ACL File URL</string>
+  <string name="aclupdate">ACL Обновить</string>
+  <string name="aclupdate_summary">Обновите ACL Обновить</string>
+  <string name="aclupdate_url_notset">К сожалению, из-за вас не установил аКЛ URL, это действие не может иметь место. Пожалуйста, выберите \'Обновите ACL Обновить\' в настройках маршрута и повторите попытку.</string>
+  <string name="aclupdate_downloading">Обновление файла ...</string>
+  <string name="aclupdate_successfully">Обновление успешно!</string>
+  <string name="aclupdate_failed">Не удалось обновить!</string>
   <string name="proxied_apps">Прокси для выбранных приложений</string>
   <string name="proxied_apps_summary">Установить прокси для выбранных приложений, требует режим NAT под Android 4.x</string>
   <string name="on">Вкл</string>
