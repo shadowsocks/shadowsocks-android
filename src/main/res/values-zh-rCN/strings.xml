@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">ShadowsocksR</string>
+  <string name="app_name">Shadowsocks   R</string>
   <string name="quick_toggle">开关</string>
 
   <string name="misc_cat">其他</string>
@@ -114,7 +114,7 @@
     长按拖动改变顺序。</string>
   <string name="gotcha">好的</string>
   <string name="copy_url">复制 URL</string>
-  <string name="add_profile_dialog">为 ShadowsocksR 添加此配置文件？</string>
+  <string name="add_profile_dialog">为 Shadowsocks R 添加此配置文件？</string>
   <string name="add_profile_methods_scan_qr_code">扫描二维码</string>
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 来添加配置</string>
