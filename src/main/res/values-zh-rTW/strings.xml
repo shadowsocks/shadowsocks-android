@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
   <string name="app_name">ShadowsocksR</string>
@@ -18,11 +18,11 @@
   <string name="sitekey">密碼</string>
   <string name="sitekey_summary">遠端伺服器的密碼</string>
   <string name="protocol">協定</string>
-  <string name="protocol_summary">您在伺服器裡設定的協定（SSR 特性）</string>
+  <string name="protocol_summary">您在伺服器裡設定的協定（ShadowsocksR 特性）</string>
   <string name="obfs">obfs</string>
-  <string name="obfs_summary">您在伺服器裡選擇的 obfs（SSR 特性）</string>
+  <string name="obfs_summary">您在伺服器裡選擇的 obfs（ShadowsocksR 特性）</string>
   <string name="obfs_param">obfs 參數</string>
-  <string name="obfs_param_summary">您在伺服器裡輸入的 obfs 參數（SSR 特性）</string>
+  <string name="obfs_param_summary">您在伺服器裡輸入的 obfs 參數（ShadowsocksR 特性）</string>
   <string name="enc_method">加密方法</string>
   <string name="feature_cat">功能設定</string>
   <string name="http_proxy">HTTP Proxy</string>
