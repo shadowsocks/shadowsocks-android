@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">ShadowsocksR</string>
+  <string name="app_name">SSR</string>
   <string name="quick_toggle">Toggle</string>
 
   <!-- global/misc category -->
