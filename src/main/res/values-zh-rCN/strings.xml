@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">影梭增强版</string>
+  <string name="app_name">SSR</string>
   <string name="quick_toggle">开关</string>
 
   <string name="misc_cat">其他</string>
