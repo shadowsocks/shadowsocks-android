@@ -97,8 +97,10 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   var state: Int = _
   private val callback = new IShadowsocksServiceCallback.Stub {
     def stateChanged(s: Int, profileName: String, m: String): Unit = handler.post(() => changeState(s, profileName, m))
-    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
-      handler.post(() => updateTraffic(txRate, rxRate, txTotal, rxTotal))
+    def trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit =
+      handler.post(() => updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal))
+    override def trafficPersisted(profileId: Int): Unit = handler.post(() => if (ProfilesFragment.instance != null)
+      ProfilesFragment.instance.onTrafficPersisted(profileId))
   }
 
   private lazy val greyTint = ContextCompat.getColorStateList(MainActivity.this, R.color.material_primary_500)
@@ -136,25 +138,22 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     state = s
     if (state == State.CONNECTED) fab.setBackgroundTintList(greenTint) else {
       fab.setBackgroundTintList(greyTint)
-      updateTraffic(0, 0, 0, 0)
+      updateTraffic(-1, 0, 0, 0, 0)
       testCount += 1  // suppress previous test messages
     }
-    if (ProfilesFragment.instance != null) {
-      val adapter = ProfilesFragment.instance.profilesAdapter
-      adapter.notifyDataSetChanged()  // refresh button enabled state
-      if (state == State.STOPPED) adapter.refreshId(app.profileId)  // refresh bandwidth statistics
-    }
+    if (ProfilesFragment.instance != null)
+      ProfilesFragment.instance.profilesAdapter.notifyDataSetChanged()  // refresh button enabled state
     fab.setEnabled(false)
     if (state == State.CONNECTED || state == State.STOPPED)
       handler.postDelayed(() => fab.setEnabled(state == State.CONNECTED || state == State.STOPPED), 1000)
   }
-  def updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+  def updateTraffic(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
     txText.setText(TrafficMonitor.formatTraffic(txTotal))
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
     txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
     val child = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
-    if (state != State.STOPPING && child != null) child.onTrafficUpdated(txRate, rxRate, txTotal, rxTotal)
+    if (state != State.STOPPING && child != null) child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
   }
 
   override def onServiceConnected() {

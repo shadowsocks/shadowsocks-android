@@ -39,7 +39,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
     override def stateChanged(state: Int, profileName: String, msg: String): Unit = ()  // ignore
-    override def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+    override def trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
       val txr = TrafficMonitor.formatTraffic(txRate)
       val rxr = TrafficMonitor.formatTraffic(rxRate)
       builder.setContentText(service.getString(R.string.traffic_summary).formatLocal(Locale.ENGLISH, txr, rxr))
@@ -47,6 +47,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
         TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal)))
       show()
     }
+    override def trafficPersisted(profileId: Int): Unit = ()
   }
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _

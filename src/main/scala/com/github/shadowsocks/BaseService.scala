@@ -97,7 +97,8 @@ trait BaseService extends Service {
           }, 1000, 1000)
         }
         TrafficMonitor.updateRate()
-        cb.trafficUpdated(TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
+        cb.trafficUpdated(profile.id,
+          TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
 
     override def stopListeningForBandwidth(cb: IShadowsocksServiceCallback): Unit =
@@ -246,6 +247,20 @@ trait BaseService extends Service {
           p.tx += tx
           p.rx += rx
           app.profileManager.updateProfile(p)
+          handler.post(() => {
+            if (bandwidthListeners.nonEmpty) {
+              val n = callbacks.beginBroadcast()
+              for (i <- 0 until n) {
+                try {
+                  val item = callbacks.getBroadcastItem(i)
+                  if (bandwidthListeners.contains(item.asBinder)) item.trafficPersisted(p.id)
+                } catch {
+                  case _: Exception => // Ignore
+                }
+              }
+              callbacks.finishBroadcast()
+            }
+          })
         case None =>
       }
     }
@@ -266,7 +281,8 @@ trait BaseService extends Service {
         for (i <- 0 until n) {
           try {
             val item = callbacks.getBroadcastItem(i)
-            if (bandwidthListeners.contains(item.asBinder)) item.trafficUpdated(txRate, rxRate, txTotal, rxTotal)
+            if (bandwidthListeners.contains(item.asBinder))
+              item.trafficUpdated(profile.id, txRate, rxRate, txTotal, rxTotal)
           } catch {
             case _: Exception => // Ignore
           }

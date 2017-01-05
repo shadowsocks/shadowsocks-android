@@ -101,7 +101,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   def saveAndExit() {
     profile.deserialize(app.settings)
     app.profileManager.updateProfile(profile)
-    if (ProfilesFragment.instance != null) ProfilesFragment.instance.profilesAdapter.refreshId(profile.id)
+    if (ProfilesFragment.instance != null) ProfilesFragment.instance.profilesAdapter.deepRefreshId(profile.id)
     getActivity.finish()
   }
 }

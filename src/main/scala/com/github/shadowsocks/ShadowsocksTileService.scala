@@ -36,7 +36,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
   private lazy val iconBusy = Icon.createWithResource(this, R.drawable.ic_start_busy)
   private lazy val iconConnected = Icon.createWithResource(this, R.drawable.ic_start_connected)
   private lazy val callback = new IShadowsocksServiceCallback.Stub {
-    def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()
+    def trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()
     def stateChanged(state: Int, profileName: String, msg: String) {
       val tile = getQsTile
       if (tile != null) {
@@ -57,6 +57,7 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
         tile.updateTile()
       }
     }
+    override def trafficPersisted(profileId: Int): Unit = ()
   }
 
   override def onServiceConnected(): Unit = callback.stateChanged(bgService.getState, bgService.getProfileName, null)

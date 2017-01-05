@@ -35,5 +35,5 @@ class ToolbarFragment extends Fragment {
     if (activity.crossfader == null) activity.drawer.setToolbar(activity, toolbar, true)
   }
 
-  def onTrafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()
+  def onTrafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()
 }
