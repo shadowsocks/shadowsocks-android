@@ -79,11 +79,12 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     private val title = itemView.findViewById(R.id.title).asInstanceOf[TextView]
     private val address = itemView.findViewById(R.id.address).asInstanceOf[TextView]
     private val traffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
-    private val indicator = itemView.findViewById(R.id.indicator).asInstanceOf[ViewGroup]
     private val edit = itemView.findViewById(R.id.edit)
     edit.setOnClickListener(_ => startConfig(item.id))
     edit.setOnLongClickListener(cardButtonLongClickListener)
     itemView.setOnClickListener(this)
+    // it will not take effect unless set in code
+    itemView.findViewById(R.id.indicator).setBackgroundResource(R.drawable.background_profile)
 
     private var adView: NativeExpressAdView = _
 
@@ -115,10 +116,10 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
 
       if (item.id == app.profileId) {
-        indicator.setBackgroundResource(R.drawable.background_selected)
+        itemView.setSelected(true)
         selectedItem = this
       } else {
-        indicator.setBackgroundResource(R.drawable.background_selectable)
+        itemView.setSelected(false)
         if (selectedItem eq this) selectedItem = null
       }
 

@@ -6,7 +6,6 @@
              android:layout_height="wrap_content">
     <com.github.shadowsocks.widget.BoundedCardView android:layout_width="match_parent"
                                                    android:layout_height="wrap_content"
-                                                   android:background="@drawable/background_selectable"
                                                    android:layout_marginTop="8dp"
                                                    android:layout_marginStart="8dp"
                                                    android:layout_marginEnd="8dp"
