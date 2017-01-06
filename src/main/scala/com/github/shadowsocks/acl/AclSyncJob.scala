@@ -18,27 +18,48 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks.job
+package com.github.shadowsocks.acl
 
-import android.util.Log
-import com.evernote.android.job.JobCreator
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+
+import com.evernote.android.job.Job.{Params, Result}
+import com.evernote.android.job.{Job, JobRequest}
+import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.IOUtils
+
+import scala.io.Source
 
 /**
-  * “I create jobs all day long.
-  * - Donald Trump, 2015
-  *
-  * Source: http://www.cnn.com/2015/09/24/politics/donald-trump-marco-rubio-foreign-policy/
-  *
-  * @author !Mygod
+  * @author Mygod
   */
-object DonaldTrump extends JobCreator {
-  def create(tag: String): AclSyncJob = {
-    val parts = tag.split(":")
-    parts(0) match {
-      case AclSyncJob.TAG => new AclSyncJob(parts(1))
-      case _ =>
-        Log.w("DonaldTrump", "Unknown job tag: " + tag)
-        null
+object AclSyncJob {
+  final val TAG = "AclSyncJob"
+
+  def schedule(route: String): Int = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
+    .setExecutionWindow(1, TimeUnit.DAYS.toMillis(28))
+    .setRequirementsEnforced(true)
+    .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
+    .setRequiresCharging(true)
+    .setUpdateCurrent(true)
+    .build().schedule()
+}
+
+class AclSyncJob(route: String) extends Job {
+  override def onRunJob(params: Params): Result = {
+    val filename = route + ".acl"
+    try {
+      //noinspection JavaAccessorMethodCalledAsEmptyParen
+      IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename,
+        Source.fromURL("https://shadowsocks.org/acl/android/v1/" + filename).mkString)
+      Result.SUCCESS
+    } catch {
+      case e: IOException =>
+        e.printStackTrace()
+        Result.RESCHEDULE
+      case e: Exception =>  // unknown failures, probably shouldn't retry
+        e.printStackTrace()
+        Result.FAILURE
     }
   }
 }

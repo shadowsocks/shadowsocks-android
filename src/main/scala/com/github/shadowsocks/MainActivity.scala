@@ -43,6 +43,7 @@ import android.view.View
 import android.widget.{TextView, Toast}
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
@@ -62,6 +63,7 @@ object MainActivity {
   private final val DRAWER_RECOVERY = 2L
   private final val DRAWER_ABOUT = 3L
   private final val DRAWER_FAQ = 4L
+  private final val DRAWER_CUSTOM_RULES = 5L
 }
 
 class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
@@ -84,6 +86,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   private var currentFragment: ToolbarFragment = _
   private lazy val profilesFragment = new ProfilesFragment()
+  private lazy val customRulesFragment = new CustomRulesFragment()
   private lazy val globalSettingsFragment = new GlobalSettingsFragment()
   private lazy val aboutFragment = new AboutFragment()
   private lazy val customTabsIntent = new CustomTabsIntent.Builder()
@@ -192,6 +195,11 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withIdentifier(DRAWER_PROFILES)
           .withName(R.string.profiles)
           .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_description))
+          .withIconTintingEnabled(true),
+        new PrimaryDrawerItem()
+          .withIdentifier(DRAWER_CUSTOM_RULES)
+          .withName(R.string.custom_rules)
+          .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_assignment))
           .withIconTintingEnabled(true),
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_GLOBAL_SETTINGS)
@@ -377,6 +385,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         app.track(TAG, "about")
         displayFragment(aboutFragment)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
+      case DRAWER_CUSTOM_RULES => displayFragment(customRulesFragment)
     }
     true  // unexpected cases will throw exception
   }

@@ -179,12 +179,3 @@ object Action {
 
   final val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }
-
-object Route {
-  val ALL = "all"
-  val BYPASS_LAN = "bypass-lan"
-  val BYPASS_CHN = "bypass-china"
-  val BYPASS_LAN_CHN = "bypass-lan-china"
-  val GFWLIST = "gfwlist"
-  val CHINALIST = "china-list"
-}

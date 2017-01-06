@@ -30,7 +30,18 @@ import android.widget.{ImageView, LinearLayout}
 import com.github.shadowsocks.utils.Utils
 import net.glxn.qrgen.android.QRCode
 
-final class QRCodeDialog(url: String) extends DialogFragment {
+object QRCodeDialog {
+  private final val KEY_URL = "com.github.shadowsocks.QRCodeDialog.KEY_URL"
+}
+
+final class QRCodeDialog extends DialogFragment {
+  import QRCodeDialog._
+  def this(url: String) {
+    this()
+    getArguments.putString(KEY_URL, url)
+  }
+  private def url = getArguments.getString(KEY_URL)
+
   private lazy val nfcShareItem = url.getBytes(Charset.forName("UTF-8"))
   private var adapter: NfcAdapter = _
 

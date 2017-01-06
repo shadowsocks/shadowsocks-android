@@ -51,8 +51,8 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
   }
   private var last: Snackbar = _
 
-  def remove(index: Int, item: T) {
-    recycleBin.append((index, item))
+  def remove(items: (Int, T)*) {
+    recycleBin.appendAll(items)
     val count = recycleBin.length
     last = Snackbar
       .make(view, view.getResources.getQuantityString(R.plurals.removed, count, count: Integer), Snackbar.LENGTH_LONG)

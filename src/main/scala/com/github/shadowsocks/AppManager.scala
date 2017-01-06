@@ -221,7 +221,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     initProxiedApps()
     loadingView = findViewById(R.id.loading)
     appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]
-    appListView.setLayoutManager(new LinearLayoutManager(this))
+    appListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false))
     appListView.setItemAnimator(new DefaultItemAnimator)
 
     instance = this

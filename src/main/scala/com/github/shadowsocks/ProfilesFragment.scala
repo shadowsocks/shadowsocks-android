@@ -71,7 +71,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     case _ => false
   }
 
-  final class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
+  final class ProfileViewHolder(view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with PopupMenu.OnMenuItemClickListener {
 
     var item: Profile = _
@@ -256,7 +256,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     .putExtra(Action.EXTRA_PROFILE_ID, id))
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View =
-    inflater.inflate(R.layout.layout_profiles, container, false)
+    inflater.inflate(R.layout.layout_list, container, false)
 
   override def onViewCreated(view: View, savedInstanceState: Bundle) {
     super.onViewCreated(view, savedInstanceState)
@@ -265,18 +265,19 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     toolbar.setOnMenuItemClickListener(this)
 
     if (app.profileManager.getFirstProfile.isEmpty) app.profileId(app.profileManager.createProfile().id)
-    val profilesList = view.findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    val layoutManager = new LinearLayoutManager(getActivity)
+    val profilesList = view.findViewById(R.id.list).asInstanceOf[RecyclerView]
+    val layoutManager = new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
+    layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
+      case (profile, i) if profile.id == app.profileId => i
+    }.getOrElse(-1))
     val animator = new DefaultItemAnimator()
     animator.setSupportsChangeAnimations(false) // prevent fading-in/out when rebinding
     profilesList.setItemAnimator(animator)
     profilesList.setAdapter(profilesAdapter)
     instance = this
-    layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
-      case (profile, i) if profile.id == app.profileId => i
-    }.getOrElse(-1))
-    undoManager = new UndoSnackbarManager[Profile](getActivity.findViewById(R.id.snackbar), profilesAdapter.undo, profilesAdapter.commit)
+    undoManager = new UndoSnackbarManager[Profile](getActivity.findViewById(R.id.snackbar),
+      profilesAdapter.undo, profilesAdapter.commit)
     new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
       ItemTouchHelper.START | ItemTouchHelper.END) {
       override def getSwipeDirs(recyclerView: RecyclerView, viewHolder: ViewHolder): Int =
@@ -288,7 +289,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       def onSwiped(viewHolder: ViewHolder, direction: Int) {
         val index = viewHolder.getAdapterPosition
         profilesAdapter.remove(index)
-        undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
+        undoManager.remove((index, viewHolder.asInstanceOf[ProfileViewHolder].item))
       }
       def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean = {
         profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)

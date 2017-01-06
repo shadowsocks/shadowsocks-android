@@ -100,13 +100,15 @@
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_scanner_not_installed">请安装任意兼容 ZXing 的二维码扫描应用。</string>
 
+  <string name="route_entry_gfwlist">仅代理中国大陆无法访问的地址</string>
   <string-array name="route_entry">
     <item>全局</item>
     <item>绕过局域网地址</item>
     <item>绕过中国大陆地址</item>
     <item>绕过局域网及中国大陆地址</item>
-    <item>仅代理中国大陆无法访问的地址</item>
+    <item>@string/route_entry_gfwlist</item>
     <item>仅代理中国大陆地址</item>
+    <item>@string/custom_rules</item>
   </string-array>
 
   <string name="action_apply_all">应用设置到所有配置文件</string>
@@ -141,5 +143,15 @@
   <string name="kcp_port">KCP 端口</string>
   <string name="kcp_port_summary">%d（远端 KCPTUN 服务器的端口号）</string>
   <string name="kcpcli">KCP 参数</string>
+
+  <!-- acl -->
+  <string name="custom_rules">自定义规则</string>
+  <string name="action_selection">选择…</string>
+  <string name="action_add_rule">添加规则…</string>
+  <string-array name="acl_rule_templates">
+    <item>子网/域名 PCRE 正则表达式</item>
+    <item>域名及其子域名</item>
+  </string-array>
+  <string name="edit_rule">编辑规则</string>
 
 </resources>

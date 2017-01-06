@@ -35,7 +35,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
   * @author CzBiX
   */
 class TaskerActivity extends AppCompatActivity {
-  private class ProfileViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
+  private class ProfileViewHolder(view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
     {
       val typedArray = obtainStyledAttributes(Array(android.R.attr.selectableItemBackground))
       view.setBackgroundResource(typedArray.getResourceId(0, 0))
@@ -92,8 +92,8 @@ class TaskerActivity extends AppCompatActivity {
     taskerOption = TaskerSettings.fromIntent(getIntent)
     switch = findViewById(R.id.serviceSwitch).asInstanceOf[Switch]
     switch.setChecked(taskerOption.switchOn)
-    val profilesList = findViewById(R.id.profilesList).asInstanceOf[RecyclerView]
-    val lm = new LinearLayoutManager(this)
+    val profilesList = findViewById(R.id.list).asInstanceOf[RecyclerView]
+    val lm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
     profilesList.setLayoutManager(lm)
     profilesList.setItemAnimator(new DefaultItemAnimator)
     profilesList.setAdapter(profilesAdapter)
