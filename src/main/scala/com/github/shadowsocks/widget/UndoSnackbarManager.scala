@@ -22,7 +22,6 @@ package com.github.shadowsocks.widget
 
 import android.support.design.widget.Snackbar
 import android.view.View
-
 import com.github.shadowsocks.R
 
 import scala.collection.mutable.ArrayBuffer
@@ -56,10 +55,11 @@ class UndoSnackbarManager[T](view: View, undo: Iterator[(Int, T)] => Unit,
     val count = recycleBin.length
     last = Snackbar
       .make(view, view.getResources.getQuantityString(R.plurals.removed, count, count: Integer), Snackbar.LENGTH_LONG)
-      .setCallback(removedCallback).setAction(R.string.undo, (_ => {
-      undo(recycleBin.reverseIterator)
-      recycleBin.clear
-    }): View.OnClickListener)
+      .addCallback(removedCallback)
+      .setAction(R.string.undo, (_ => {
+        undo(recycleBin.reverseIterator)
+        recycleBin.clear
+      }): View.OnClickListener)
     last.show()
   }
 
