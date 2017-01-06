@@ -37,16 +37,6 @@ object IOUtils {
     }
   }
 
-  def readString(in: InputStream): String = {
-    val builder = new StringBuilder()
-    val buffer = new Array[Byte](BUFFER_SIZE)
-    while (true) {
-      val count = in.read(buffer)
-      if (count >= 0) builder.append(new String(buffer, 0, count)) else return builder.toString()
-    }
-    null
-  }
-
   def writeString(file: String, content: String): Unit =
     autoClose(new FileWriter(file))(writer => writer.write(content))
 }

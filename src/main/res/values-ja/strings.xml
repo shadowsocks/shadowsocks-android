@@ -83,18 +83,19 @@
   <string name="connection_test_error_status_code">ステータスコード無効（#%d）</string>
 
   <!-- profile -->
-  <string name="copy_url">URL をコピー</string>
   <string name="add_profile_dialog">シャドーソックスにプロファイルを追加しますか</string>
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
 
+  <string name="route_entry_gfwlist">中国本土からアクセス不可なアドレス以外を迂回する</string>
   <string-array name="route_entry">
     <item>すべて</item>
     <item>LANアドレスを迂回する</item>
     <item>中国本土のアドレスを迂回する</item>
     <item>LAN及び中国本土のアドレスを迂回する</item>
-    <item>中国本土からアクセス不可なアドレス以外を迂回する</item>
+    <item>@string/route_entry_gfwlist</item>
     <item>中国本土のアドレス以外を迂回する</item>
+    <item>@string/custom_rules</item>
   </string-array>
 
   <string name="action_apply_all">設定をすべてのプロファイルに適応する</string>

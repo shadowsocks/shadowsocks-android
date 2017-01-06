@@ -47,6 +47,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/applistview"
+            android:scrollbars="vertical"
             android:visibility="gone"/>
   </FrameLayout>
 </LinearLayout>

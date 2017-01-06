@@ -95,19 +95,20 @@
   <string name="delete">刪除</string>
   <string name="delete_confirm_prompt">您確定要移除這個設定檔嗎？</string>
   <string name="share_qr_nfc">QR 碼 / NFC</string>
-  <string name="copy_url">複製 URL</string>
   <string name="add_profile_dialog">為 Shadowsocks 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>
   <string name="add_profile_methods_manual_settings">手動設定</string>
   <string name="add_profile_scanner_not_installed">請安裝任何兼容 ZXing 的 QR 碼掃描應用程式。</string>
 
+  <string name="route_entry_gfwlist">GFW List</string>
   <string-array name="route_entry">
     <item>全域</item>
     <item>略過區域網路位址</item>
     <item>略過中國大陸位址</item>
     <item>略過區域網路及中國大陸位址</item>
-    <item>僅代理大陸屏蔽位址</item>
+    <item>@string/route_entry_gfwlist</item>
     <item>僅代理大陸位址</item>
+    <item>@string/custom_rules</item>
   </string-array>
 
   <string name="action_apply_all">應用設置到所有配置文件</string>
@@ -142,5 +143,15 @@
   <string name="kcp_port">KCP 連接埠</string>
   <string name="kcp_port_summary">%d（遠端 KCPTUN 伺服器的連接埠號碼）</string>
   <string name="kcpcli">KCP 參數</string>
+
+  <!-- acl -->
+  <string name="custom_rules">自定義規則</string>
+  <string name="action_selection">選擇…</string>
+  <string name="action_add_rule">添加規則…</string>
+  <string-array name="acl_rule_templates">
+    <item>子網/主機名 PCRE 正則表達式</item>
+    <item>域名及其所有子域名</item>
+  </string-array>
+  <string name="edit_rule">編輯規則</string>
 
 </resources>

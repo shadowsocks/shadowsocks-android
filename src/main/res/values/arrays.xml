@@ -45,6 +45,7 @@
         <item>bypass-lan-china</item>
         <item>gfwlist</item>
         <item>china-list</item>
+        <item>custom-rules</item>
     </string-array>
 
     <string-array name="bypass_private_route">

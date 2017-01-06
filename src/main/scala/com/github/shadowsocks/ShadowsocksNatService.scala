@@ -28,8 +28,8 @@ import android.content._
 import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.acl.{AclSyncJob, Acl}
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.job.AclSyncJob
 import com.github.shadowsocks.utils._
 import eu.chainfire.libsuperuser.Shell
 
@@ -76,9 +76,9 @@ class ShadowsocksNatService extends BaseService {
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
-    if (profile.route != Route.ALL) {
+    if (profile.route != Acl.ALL) {
       cmd += "--acl"
-      cmd += getApplicationInfo.dataDir + '/' + profile.route + ".acl"
+      cmd += Acl.getPath(profile.route)
     }
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
@@ -169,11 +169,11 @@ class ShadowsocksNatService extends BaseService {
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
 
     val conf = profile.route match {
-      case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST =>
+      case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, "114.114.114.114, 223.5.5.5, 1.2.4.8",
           getBlackList, reject, profile.localPort + 63, reject)
-      case Route.CHINALIST =>
+      case Acl.CHINALIST =>
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, "8.8.8.8, 8.8.4.4, 208.67.222.222",
           "", reject, profile.localPort + 63, reject)
@@ -311,7 +311,7 @@ class ShadowsocksNatService extends BaseService {
 
     handleConnection()
 
-    if (profile.route != Route.ALL)
+    if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
       AclSyncJob.schedule(profile.route)
 
     changeState(State.CONNECTED)
