@@ -37,6 +37,7 @@ libraryDependencies ++=
   "com.android.support" % "design" % "25.1.0" ::
   "com.android.support" % "gridlayout-v7" % "25.1.0" ::
   "com.android.support" % "preference-v14" % "25.1.0" ::
+  "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
   "com.evernote" % "android-job" % "1.1.3" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.google.android.gms" % "play-services-ads" % "10.0.1" ::

@@ -12,6 +12,7 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view._
 import android.widget.{EditText, Spinner, TextView, Toast}
+import com.futuremind.recyclerviewfastscroll.{FastScroller, SectionTitleProvider}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.State
 import com.github.shadowsocks.widget.UndoSnackbarManager
@@ -103,7 +104,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     }
   }
 
-  private final class AclRulesAdapter extends RecyclerView.Adapter[AclRuleViewHolder] {
+  private final class AclRulesAdapter extends RecyclerView.Adapter[AclRuleViewHolder] with SectionTitleProvider {
     private val acl = Acl.customRules
     private var savePending: Boolean = _
     private def apply() = if (!savePending) {
@@ -192,6 +193,17 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       onSelectedItemsUpdated()
       notifyDataSetChanged()
     }
+
+    def getSectionTitle(i: Int): String = {
+      val j = i - acl.subnets.size
+      (if (j < 0) acl.subnets(i).address.toString.charAt(0).toString else {
+        val hostname = acl.proxyHostnames(i)
+        PATTERN_DOMAIN.findFirstMatchIn(hostname) match {
+          case Some(m) => m.matched.replaceAll("\\\\.", ".")  // don't convert IDN yet
+          case None => hostname
+        }
+      }).substring(0, 1)
+    }
   }
 
   private lazy val adapter = new AclRulesAdapter()
@@ -201,7 +213,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
   private lazy val clipboard = getActivity.getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View =
-    inflater.inflate(R.layout.layout_list, container, false)
+    inflater.inflate(R.layout.layout_custom_rules, container, false)
   override def onViewCreated(view: View, savedInstanceState: Bundle) {
     super.onViewCreated(view, savedInstanceState)
     if (savedInstanceState != null) {
@@ -224,6 +236,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     list.setLayoutManager(new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false))
     list.setItemAnimator(new DefaultItemAnimator)
     list.setAdapter(adapter)
+    val fastScroller = view.findViewById(R.id.fastscroller).asInstanceOf[FastScroller]
+    fastScroller.setRecyclerView(list)
     undoManager = new UndoSnackbarManager[AnyRef](getActivity.findViewById(R.id.snackbar), adapter.undo)
     new ItemTouchHelper(new SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
       override def getSwipeDirs(recyclerView: RecyclerView, viewHolder: ViewHolder): Int =

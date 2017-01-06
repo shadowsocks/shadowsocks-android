@@ -82,16 +82,6 @@ object Utils {
     toast
   }
 
-  def crossFade(context: Context, from: View, to: View) {
-    def shortAnimTime = context.getResources.getInteger(android.R.integer.config_shortAnimTime)
-    to.setAlpha(0)
-    to.setVisibility(View.VISIBLE)
-    to.animate().alpha(1).setDuration(shortAnimTime)
-    from.animate().alpha(0).setDuration(shortAnimTime).setListener(new AnimatorListenerAdapter {
-      override def onAnimationEnd(animation: Animator): Unit = from.setVisibility(View.GONE)
-    })
-  }
-
   def readAllLines(f: File): String = {
     val scanner = new Scanner(f)
     try {

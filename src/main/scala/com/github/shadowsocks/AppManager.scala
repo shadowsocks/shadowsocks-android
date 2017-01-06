@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import java.util.concurrent.atomic.AtomicBoolean
 
 import android.Manifest.permission
+import android.animation.{Animator, AnimatorListenerAdapter}
 import android.app.TaskStackBuilder
 import android.content._
 import android.content.pm.PackageManager
@@ -33,6 +34,7 @@ import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.support.v7.widget.{DefaultItemAnimator, LinearLayoutManager, RecyclerView, Toolbar}
 import android.view._
 import android.widget._
+import com.futuremind.recyclerviewfastscroll.{FastScroller, SectionTitleProvider}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.{Key, Utils}
 
@@ -102,7 +104,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     }
   }
 
-  private final class AppsAdapter extends RecyclerView.Adapter[AppViewHolder] {
+  private final class AppsAdapter extends RecyclerView.Adapter[AppViewHolder] with SectionTitleProvider {
     private val apps = getApps(getPackageManager).sortWith((a, b) => {
       val aProxied = proxiedApps.contains(a.packageName)
       if (aProxied ^ proxiedApps.contains(b.packageName)) aProxied else a.name.compareToIgnoreCase(b.name) < 0
@@ -112,12 +114,14 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     def onBindViewHolder(vh: AppViewHolder, i: Int): Unit = vh.bind(apps(i))
     def onCreateViewHolder(vg: ViewGroup, i: Int) =
       new AppViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_apps_item, vg, false))
+    def getSectionTitle(i: Int): String = apps(i).name.substring(0, 1)
   }
 
   private var proxiedApps: mutable.HashSet[String] = _
   private var toolbar: Toolbar = _
   private var bypassSwitch: Switch = _
   private var appListView: RecyclerView = _
+  private var fastScroller: FastScroller = _
   private var loadingView: View = _
   private val appsLoading = new AtomicBoolean
   private var handler: Handler = _
@@ -170,6 +174,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
                 app.editor.putString(Key.individual, apps).putBoolean(Key.dirty, true).apply()
                 Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
                 appListView.setVisibility(View.GONE)
+                fastScroller.setVisibility(View.GONE)
                 loadingView.setVisibility(View.VISIBLE)
                 initProxiedApps(apps)
                 reloadApps()
@@ -220,9 +225,11 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
 
     initProxiedApps()
     loadingView = findViewById(R.id.loading)
-    appListView = findViewById(R.id.applistview).asInstanceOf[RecyclerView]
+    appListView = findViewById(R.id.list).asInstanceOf[RecyclerView]
     appListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false))
     appListView.setItemAnimator(new DefaultItemAnimator)
+    fastScroller = findViewById(R.id.fastscroller).asInstanceOf[FastScroller]
+    fastScroller.setRecyclerView(appListView)
 
     instance = this
     loadAppsAsync()
@@ -239,7 +246,16 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       } while (!appsLoading.compareAndSet(true, false))
       handler.post(() => {
         appListView.setAdapter(adapter)
-        Utils.crossFade(AppManager.this, loadingView, appListView)
+        val shortAnimTime = getResources.getInteger(android.R.integer.config_shortAnimTime)
+        appListView.setAlpha(0)
+        appListView.setVisibility(View.VISIBLE)
+        appListView.animate().alpha(1).setDuration(shortAnimTime)
+        fastScroller.setAlpha(0)
+        fastScroller.setVisibility(View.VISIBLE)
+        fastScroller.animate().alpha(1).setDuration(shortAnimTime)
+        loadingView.animate().alpha(0).setDuration(shortAnimTime).setListener(new AnimatorListenerAdapter {
+          override def onAnimationEnd(animation: Animator): Unit = loadingView.setVisibility(View.GONE)
+        })
       })
     }
   }

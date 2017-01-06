@@ -28,6 +28,6 @@
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:clickable="false"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="16dp"/>
 
 </LinearLayout>

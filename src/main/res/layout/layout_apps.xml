@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -19,7 +20,7 @@
             android:textSize="18sp"
             android:textColor="?android:attr/textColorSecondary"
             android:paddingStart="60dp"
-            android:paddingEnd="8dp"
+            android:paddingEnd="16dp"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:layout_width="match_parent"
@@ -30,7 +31,7 @@
             android:textSize="18sp"
             android:textColor="?android:attr/textColorSecondary"
             android:paddingStart="60dp"
-            android:paddingEnd="8dp"
+            android:paddingEnd="16dp"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:layout_width="match_parent"
@@ -46,8 +47,19 @@
     <android.support.v7.widget.RecyclerView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:id="@+id/applistview"
-            android:scrollbars="vertical"
+            android:id="@+id/list"
             android:visibility="gone"/>
+    <com.futuremind.recyclerviewfastscroll.FastScroller
+            android:id="@+id/fastscroller"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone"
+            app:fastscroll__handleColor="@color/material_primary_500"
+            app:fastscroll__bubbleColor="@color/material_primary_500"
+            app:fastscroll__bubbleTextAppearance="@style/StyledScrollerTextAppearance"/>
   </FrameLayout>
 </LinearLayout>
