@@ -38,7 +38,9 @@ final class QRCodeDialog extends DialogFragment {
   import QRCodeDialog._
   def this(url: String) {
     this()
-    getArguments.putString(KEY_URL, url)
+    val bundle = new Bundle()
+    bundle.putString(KEY_URL, url)
+    setArguments(bundle)
   }
   private def url = getArguments.getString(KEY_URL)
 
