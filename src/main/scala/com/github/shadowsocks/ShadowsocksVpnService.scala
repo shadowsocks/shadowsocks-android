@@ -270,15 +270,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-V"
       , "-t", "10"
       , "-b", "127.0.0.1"
+      , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")
-
-    cmd += "-L"
-
-    if (profile.remoteDns == null)
-      cmd += "8.8.8.8:53"
-    else
-      cmd += profile.remoteDns + ":53"
 
     if (profile.auth) cmd += "-A"
 
