@@ -385,6 +385,7 @@ include $(CLEAR_VARS)
 
 SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
 	utils.c netutils.c json.c jconf.c acl.c http.c tls.c rule.c \
+	obfs_http.c obfs_tls.c base64.c \
 	android.c
 
 LOCAL_MODULE    := ss-local
@@ -417,7 +418,7 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c
+SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c obfs_http.c obfs_tls.c base64.c
 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
