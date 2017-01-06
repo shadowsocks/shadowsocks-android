@@ -148,7 +148,13 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
 
     def remove(i: Int) {
       val j = i - acl.subnets.size
-      if (j < 0) acl.subnets.remove(i) else acl.proxyHostnames.remove(j)
+      if (j < 0) {
+        undoManager.remove((i, acl.subnets(i)))
+        acl.subnets.remove(i)
+      } else {
+        undoManager.remove((j, acl.proxyHostnames(j)))
+        acl.proxyHostnames.remove(j)
+      }
       notifyItemRemoved(i)
       apply()
     }
