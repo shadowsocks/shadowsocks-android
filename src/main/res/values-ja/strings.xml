@@ -83,7 +83,6 @@
   <string name="connection_test_error_status_code">ステータスコード無効（#%d）</string>
 
   <!-- profile -->
-  <string name="copy_url">URL をコピー</string>
   <string name="add_profile_dialog">シャドーソックスにプロファイルを追加しますか</string>
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>

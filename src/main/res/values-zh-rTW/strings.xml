@@ -95,7 +95,6 @@
   <string name="delete">刪除</string>
   <string name="delete_confirm_prompt">您確定要移除這個設定檔嗎？</string>
   <string name="share_qr_nfc">QR 碼 / NFC</string>
-  <string name="copy_url">複製 URL</string>
   <string name="add_profile_dialog">為 Shadowsocks 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>
   <string name="add_profile_methods_manual_settings">手動設定</string>

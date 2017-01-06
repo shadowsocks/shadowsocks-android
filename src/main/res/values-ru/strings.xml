@@ -110,7 +110,6 @@
   <string name="add_profile_dialog">Добавить этот Профиль Shadowsocks?</string>
   <string name="add_profile_methods_scan_qr_code">Сканировать QR код</string>
   <string name="add_profile_methods_manual_settings">Настройка вручную</string>
-  <string name="copy_url">Копировать URL</string>
   <plurals name="removed">
     <item quantity="one">Удалён</item>
     <item quantity="other">%d элементы удалены</item>
