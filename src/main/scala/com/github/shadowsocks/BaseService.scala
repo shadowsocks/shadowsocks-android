@@ -98,7 +98,7 @@ trait BaseService extends Service {
           }, 1000, 1000)
         }
         TrafficMonitor.updateRate()
-        cb.trafficUpdated(profile.id,
+        if (state == State.CONNECTED) cb.trafficUpdated(profile.id,
           TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
 
