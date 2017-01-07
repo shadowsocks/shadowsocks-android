@@ -14,7 +14,7 @@
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">%1$s↑\t%2$s↓</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
-  <plurals name="bytes" translatable="false">
+  <plurals name="bytes">
     <item quantity="one">Byte</item>
     <item quantity="other">Bytes</item>
   </plurals>
