@@ -113,7 +113,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       }
       title.setText(item.getName)
       address.setText(if (item.nameIsEmpty) "" else item.formattedAddress)
-      traffic.setText(getString(R.string.stat_profiles,
+      traffic.setText(if (tx <= 0 && rx <= 0) null else getString(R.string.stat_profiles,
         TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
 
       if (item.id == app.profileId) {
