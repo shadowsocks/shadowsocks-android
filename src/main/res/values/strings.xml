@@ -40,13 +40,6 @@
   <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
   <string name="onetime_auth">One-time Authentication</string>
   <string name="onetime_auth_summary">Enable one-time authentication</string>
-  <string name="http_proxy">HTTP Proxy</string>
-  <string name="http_proxy_summary">Local HTTP Proxy</string>
-  <string name="dns_proxy">DNS Proxy</string>
-  <string name="dns_proxy_summary">Redirect DNS queries to remote</string>
-  <string name="auto_set_gfwlist">CHN Route</string>
-  <string name="auto_set_gfwlist_summary">Bypass all sites located in China
-  </string>
   <string name="route_list">Route</string>
   <string name="route_entry_all">All</string>
   <string name="route_entry_bypass_lan">Bypass LAN</string>
