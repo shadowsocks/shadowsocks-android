@@ -30,19 +30,21 @@ shrinkResources := true
 typedResources := false
 resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
 
+val supportLibsVersion = "25.1.0"
+val playServicesVersion = "10.0.1"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
-  "com.android.support" % "cardview-v7" % "25.1.0" ::
-  "com.android.support" % "customtabs" % "25.1.0" ::
-  "com.android.support" % "design" % "25.1.0" ::
-  "com.android.support" % "gridlayout-v7" % "25.1.0" ::
-  "com.android.support" % "preference-v14" % "25.1.0" ::
+  "com.android.support" % "cardview-v7" % supportLibsVersion ::
+  "com.android.support" % "customtabs" % supportLibsVersion ::
+  "com.android.support" % "design" % supportLibsVersion ::
+  "com.android.support" % "gridlayout-v7" % supportLibsVersion ::
+  "com.android.support" % "preference-v14" % supportLibsVersion ::
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
   "com.evernote" % "android-job" % "1.1.4" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
-  "com.google.android.gms" % "play-services-ads" % "10.0.1" ::
-  "com.google.android.gms" % "play-services-analytics" % "10.0.1" ::
-  "com.google.android.gms" % "play-services-gcm" % "10.0.1" ::
+  "com.google.android.gms" % "play-services-ads" % playServicesVersion ::
+  "com.google.android.gms" % "play-services-analytics" % playServicesVersion ::
+  "com.google.android.gms" % "play-services-gcm" % playServicesVersion ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
   "com.mikepenz" % "crossfader" % "1.5.0" ::
   "com.mikepenz" % "fastadapter" % "2.1.5" ::
