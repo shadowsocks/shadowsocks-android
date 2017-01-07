@@ -16,6 +16,8 @@
 LOCAL_PATH := $(call my-dir)
 ROOT_PATH := $(LOCAL_PATH)
 
+BUILD_SHARED_EXECUTABLE := $(LOCAL_PATH)/build-shared-executable.mk
+
 ########################################################
 ## libsodium
 ########################################################
@@ -358,7 +360,7 @@ LOCAL_CFLAGS := -O2 -std=gnu99 -DUSE_IPTABLES \
 	-I$(LOCAL_PATH)/libevent/include \
 	-I$(LOCAL_PATH)/libevent
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
 ## pdnsd
@@ -375,7 +377,7 @@ LOCAL_CFLAGS    := -DANDROID -Wall -O2 -I$(LOCAL_PATH)/pdnsd \
 LOCAL_STATIC_LIBRARIES := libancillary
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
 ## shadowsocks-libev local
@@ -410,7 +412,7 @@ LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns \
 
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
 ## shadowsocks-libev tunnel
@@ -439,7 +441,7 @@ LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libudns libancillar
 
 LOCAL_LDLIBS := -llog
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
 ## system
@@ -550,7 +552,7 @@ LOCAL_LDLIBS := -ldl -llog
 
 LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES))
 
-include $(BUILD_EXECUTABLE)
+include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
 ## mbed TLS 
@@ -574,7 +576,7 @@ include $(BUILD_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := pcre 
+LOCAL_MODULE := pcre
 
 LOCAL_CFLAGS += -DHAVE_CONFIG_H
 

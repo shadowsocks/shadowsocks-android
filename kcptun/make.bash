@@ -58,12 +58,12 @@ go get
 echo "Cross compile kcptun for arm"
 try env CGO_ENABLED=1 CC=$ANDROID_ARM_CC GOOS=android GOARCH=arm GOARM=7 go build -ldflags="-s -w"
 try $ANDROID_ARM_STRIP client
-try mv client $DIR/../src/main/assets/armeabi-v7a/kcptun
+try mv client $DIR/../src/main/libs/armeabi-v7a/libkcptun.so
 
 echo "Cross compile kcptun for x86"
 try env CGO_ENABLED=1 CC=$ANDROID_X86_CC GOOS=android GOARCH=386 go build -ldflags="-s -w"
 try $ANDROID_X86_STRIP client
-try mv client $DIR/../src/main/assets/x86/kcptun
+try mv client $DIR/../src/main/libs/x86/libkcptun.so
 popd
 
 echo "Successfully build kcptun"

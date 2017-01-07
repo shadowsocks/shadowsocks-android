@@ -377,6 +377,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           override def handleMessage(msg: Message): Unit = if (dialog.isShowing && !isDestroyed) dialog.dismiss()
         }
         Utils.ThrowableFuture {
+          app.crashRecovery()
           app.copyAssets()
           handler.sendEmptyMessage(0)
         }
