@@ -232,7 +232,6 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     toolbar.inflateMenu(R.menu.custom_rules_menu)
     toolbar.setOnMenuItemClickListener(this)
     selectionItem = toolbar.getMenu.findItem(R.id.selection)
-    app.updateAssets()
     list = view.findViewById(R.id.list).asInstanceOf[RecyclerView]
     list.setLayoutManager(new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false))
     list.setItemAnimator(new DefaultItemAnimator)
