@@ -80,7 +80,7 @@
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
-  <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
+  <string name="auto_connect_summary">Enable ShadowsocksR on startup</string>
   <string name="tcp_fastopen_summary">Toggling requires ROOT permission</string>
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="udp_dns">UDP Forwarding</string>
@@ -91,7 +91,7 @@
   <string name="china_dns_summary">The dns server you want to use to resolve normal domain,e.g. 223.5.5.5:53</string>
 
   <!-- notification category -->
-  <string name="forward_success">Shadowsocks started.</string>
+  <string name="forward_success">ShadowsocksR started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="method_unsafe">WARNING: The current encryption method is unsafe</string>
@@ -121,7 +121,7 @@
   <string name="recovery">Reset</string>
   <string name="recovery_summary">Reset all the background services</string>
   <string name="about">About</string>
-  <string name="about_title">Shadowsocks R %s</string>
+  <string name="about_title">ShadowsocksR %s</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>
