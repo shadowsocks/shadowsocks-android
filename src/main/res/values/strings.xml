@@ -48,18 +48,15 @@
   <string name="auto_set_gfwlist_summary">Bypass all sites located in China
   </string>
   <string name="route_list">Route</string>
+  <string name="route_entry_all">All</string>
+  <string name="route_entry_bypass_lan">Bypass LAN</string>
+  <string name="route_entry_bypass_chn">Bypass mainland China</string>
+  <string name="route_entry_bypass_lan_chn">Bypass LAN &amp; mainland China</string>
   <string name="route_entry_gfwlist">GFW List</string>
-  <string-array name="route_entry">
-    <item>All</item>
-    <item>Bypass LAN</item>
-    <item>Bypass mainland China</item>
-    <item>Bypass LAN &amp; mainland China</item>
-    <item>@string/route_entry_gfwlist</item>
-    <item>China List</item>
-    <item>@string/custom_rules</item>
-  </string-array>
+  <string name="route_entry_chinalist">China List</string>
   <string name="proxied_apps">Per-App Proxy</string>
   <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
+  <string name="proxied_apps_summary_v21">Set proxy for selected apps</string>
   <string name="on">On</string>
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
@@ -162,9 +159,7 @@
   <string name="custom_rules">Custom rules</string>
   <string name="action_selection">Selection…</string>
   <string name="action_add_rule">Add rule(s)…</string>
-  <string-array name="acl_rule_templates">
-    <item>Subnet/Hostname PCRE pattern</item>
-    <item>Domain name and all its subdomain names</item>
-  </string-array>
+  <string name="acl_rule_templates_generic">Subnet/Hostname PCRE pattern</string>
+  <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
   <string name="edit_rule">Edit rule</string>
 </resources>

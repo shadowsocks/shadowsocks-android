@@ -38,6 +38,15 @@
         <item>chacha20-ietf</item>
     </string-array>
 
+    <string-array name="route_entry">
+        <item>@string/route_entry_all</item>
+        <item>@string/route_entry_bypass_lan</item>
+        <item>@string/route_entry_bypass_chn</item>
+        <item>@string/route_entry_bypass_lan_chn</item>
+        <item>@string/route_entry_gfwlist</item>
+        <item>@string/route_entry_chinalist</item>
+        <item>@string/custom_rules</item>
+    </string-array>
     <string-array name="route_value">
         <item>all</item>
         <item>bypass-lan</item>
@@ -204,5 +213,10 @@
         <item>203.128.0.0/9</item>
         <item>204.0.0.0/6</item>
         <item>208.0.0.0/4</item>
+    </string-array>
+
+    <string-array name="acl_rule_templates">
+        <item>@string/acl_rule_templates_generic</item>
+        <item>@string/acl_rule_templates_domain</item>
     </string-array>
 </resources>

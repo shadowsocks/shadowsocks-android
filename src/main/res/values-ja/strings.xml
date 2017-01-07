@@ -23,6 +23,7 @@
   <string name="route_list">プロキシ方式</string>
   <string name="proxied_apps">アプリ別のプロキシを使用</string>
   <string name="proxied_apps_summary">アプリ別でプロキシを指定、Android 4.x では必ずNATモードを使用して下さい</string>
+  <string name="proxied_apps_summary_v21">選択したアプリにプロキシを設定する</string>
   <string name="on">ON</string>
   <string name="bypass_apps">バイパスモード（迂回モード）</string>
   <string name="bypass_apps_summary">このモードを選択した場合、指定したアプリのパケットはプロキシを経由しない</string>
@@ -76,7 +77,7 @@
   <string name="stat_summary">送信済み: \t%3$s\t↑\t%1$s/s\n受信済み: \t%4$s\t↓\t%2$s/s</string>
 
   <string name="connection_test_pending">接続状況確認</string>
-  <string name="connection_test_testing">テスト中...</string>
+  <string name="connection_test_testing">テスト中…</string>
   <string name="connection_test_available">成功: %dmsの遅延</string>
   <string name="connection_test_fail">インターネット利用不可</string>
   <string name="connection_test_error">失敗しました：%s</string>
@@ -87,16 +88,12 @@
   <string name="add_profile_methods_scan_qr_code">QRコードを読み取る</string>
   <string name="add_profile_methods_manual_settings">手動でセットアップ</string>
 
+  <string name="route_entry_all">すべて</string>
+  <string name="route_entry_bypass_lan">LANアドレスを迂回する</string>
+  <string name="route_entry_bypass_chn">中国本土のアドレスを迂回する</string>
+  <string name="route_entry_bypass_lan_chn">LAN及び中国本土のアドレスを迂回する</string>
   <string name="route_entry_gfwlist">中国本土からアクセス不可なアドレス以外を迂回する</string>
-  <string-array name="route_entry">
-    <item>すべて</item>
-    <item>LANアドレスを迂回する</item>
-    <item>中国本土のアドレスを迂回する</item>
-    <item>LAN及び中国本土のアドレスを迂回する</item>
-    <item>@string/route_entry_gfwlist</item>
-    <item>中国本土のアドレス以外を迂回する</item>
-    <item>@string/custom_rules</item>
-  </string-array>
+  <string name="route_entry_chinalist">中国本土のアドレス以外を迂回する</string>
 
   <string name="action_apply_all">設定をすべてのプロファイルに適応する</string>
   <string name="action_export">クリップボードに出力</string>

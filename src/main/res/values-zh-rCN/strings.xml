@@ -23,6 +23,7 @@
   <string name="route_list">路由</string>
   <string name="proxied_apps">分应用代理</string>
   <string name="proxied_apps_summary">为应用程序分别设置代理，在 4.x 下需要启用 NAT 模式</string>
+  <string name="proxied_apps_summary_v21">为应用程序分别设置代理</string>
   <string name="on">开</string>
   <string name="bypass_apps">绕行模式</string>
   <string name="bypass_apps_summary">启用该选项，以使所选应用程序的流量不经过代理</string>
@@ -99,16 +100,12 @@
   <string name="add_profile_methods_manual_settings">手动设置</string>
   <string name="add_profile_scanner_not_installed">请安装任意兼容 ZXing 的二维码扫描应用。</string>
 
+  <string name="route_entry_all">全局</string>
+  <string name="route_entry_bypass_lan">绕过局域网地址</string>
+  <string name="route_entry_bypass_chn">绕过中国大陆地址</string>
+  <string name="route_entry_bypass_lan_chn">绕过局域网及中国大陆地址</string>
   <string name="route_entry_gfwlist">仅代理中国大陆无法访问的地址</string>
-  <string-array name="route_entry">
-    <item>全局</item>
-    <item>绕过局域网地址</item>
-    <item>绕过中国大陆地址</item>
-    <item>绕过局域网及中国大陆地址</item>
-    <item>@string/route_entry_gfwlist</item>
-    <item>仅代理中国大陆地址</item>
-    <item>@string/custom_rules</item>
-  </string-array>
+  <string name="route_entry_chinalist">仅代理中国大陆地址</string>
 
   <string name="action_apply_all">应用设置到所有配置文件</string>
   <string name="action_export">导出至剪贴板</string>
@@ -147,10 +144,8 @@
   <string name="custom_rules">自定义规则</string>
   <string name="action_selection">选择…</string>
   <string name="action_add_rule">添加规则…</string>
-  <string-array name="acl_rule_templates">
-    <item>子网/域名 PCRE 正则表达式</item>
-    <item>域名及其子域名</item>
-  </string-array>
+  <string name="acl_rule_templates_generic">子网/域名 PCRE 正则表达式</string>
+  <string name="acl_rule_templates_domain">域名及其子域名</string>
   <string name="edit_rule">编辑规则</string>
 
 </resources>

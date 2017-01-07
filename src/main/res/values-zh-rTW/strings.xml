@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
   <string name="app_name">Shadowsocks</string>
@@ -24,6 +24,7 @@
   <string name="route_list">路由</string>
   <string name="proxied_apps">個別應用程式的 Proxy</string>
   <string name="proxied_apps_summary">為已選擇的應用程式設定 Proxy，在 Android 4.X 以下需要開啟 NAT 模式</string>
+  <string name="proxied_apps_summary_v21">為已選擇的應用程式設定 Proxy</string>
   <string name="on">開</string>
   <string name="bypass_apps">略過模式</string>
   <string name="bypass_apps_summary">啟用此選項，會略過已選擇的應用程式</string>
@@ -100,16 +101,12 @@
   <string name="add_profile_methods_manual_settings">手動設定</string>
   <string name="add_profile_scanner_not_installed">請安裝任何相容 ZXing 的 QR 碼掃描應用程式。</string>
 
+  <string name="route_entry_all">全部</string>
+  <string name="route_entry_bypass_lan">略過區域網路</string>
+  <string name="route_entry_bypass_chn">略過中國大陸</string>
+  <string name="route_entry_bypass_lan_chn">略過區域網路及中國大陸</string>
   <string name="route_entry_gfwlist">GFW List</string>
-  <string-array name="route_entry">
-    <item>全部</item>
-    <item>略過區域網路</item>
-    <item>略過中國大陸</item>
-    <item>略過區域網路及中國大陸</item>
-    <item>@string/route_entry_gfwlist</item>
-    <item>China List</item>
-    <item>@string/custom_rules</item>
-  </string-array>
+  <string name="route_entry_chinalist">China List</string>
 
   <string name="action_apply_all">套用設定至所有設定檔</string>
   <string name="action_export">匯出至剪貼簿</string>
@@ -148,10 +145,8 @@
   <string name="custom_rules">自訂規則</string>
   <string name="action_selection">選擇…</string>
   <string name="action_add_rule">新增規則…</string>
-  <string-array name="acl_rule_templates">
-    <item>子網路/主機名稱 PCRE 模式</item>
-    <item>網域及其所有子網域</item>
-  </string-array>
+  <string name="acl_rule_templates_generic">子網路/主機名稱 PCRE 模式</string>
+  <string name="acl_rule_templates_domain">網域及其所有子網域</string>
   <string name="edit_rule">編輯規則</string>
 
 </resources>
