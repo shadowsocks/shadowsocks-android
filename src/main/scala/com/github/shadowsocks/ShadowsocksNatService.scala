@@ -80,7 +80,7 @@ class ShadowsocksNatService extends BaseService {
       p.println(conf)
     })
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
           , "-P", getApplicationInfo.dataDir
@@ -97,6 +97,7 @@ class ShadowsocksNatService extends BaseService {
     sslocalProcess = new GuardedProcess(cmd).start()
   }
 
+  
   def startTunnel() {
     if (profile.udpdns) {
       val conf = ConfigUtils
@@ -105,7 +106,7 @@ class ShadowsocksNatService extends BaseService {
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
-      val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
+      val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
         , "-u"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
@@ -131,7 +132,7 @@ class ShadowsocksNatService extends BaseService {
         p.println(conf)
       })
 
-      val cmdBuf = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-tunnel"
+      val cmdBuf = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
         , "-t" , "10"
         , "-b" , "127.0.0.1"
         , "-l" , (profile.localPort + 63).toString
@@ -188,7 +189,7 @@ class ShadowsocksNatService extends BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
        p.println(conf)
     })
-    val cmd = Array(getApplicationInfo.dataDir + "/pdnsd", "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
+    val cmd = Array(getApplicationInfo.nativeLibraryDir + "/libpdnsd.so", "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
@@ -197,7 +198,7 @@ class ShadowsocksNatService extends BaseService {
 
   def startRedsocksDaemon() {
     val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort)
-    val cmd = Array(getApplicationInfo.dataDir + "/redsocks", "-c", getApplicationInfo.dataDir + "/redsocks-nat.conf")
+    val cmd = Array(getApplicationInfo.nativeLibraryDir + "/libredsocks.so", "-c", getApplicationInfo.dataDir + "/redsocks-nat.conf")
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
       p.println(conf)
     })
