@@ -27,6 +27,8 @@ object Executable {
   val SS_TUNNEL = "ss-tunnel"
   val TUN2SOCKS = "tun2socks"
   val KCPTUN = "kcptun"
+
+  val EXECUTABLES = Array(SS_LOCAL, SS_TUNNEL, PDNSD, REDSOCKS, TUN2SOCKS, KCPTUN)
 }
 
 object ConfigUtils {

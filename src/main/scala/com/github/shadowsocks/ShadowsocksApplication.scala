@@ -50,8 +50,6 @@ object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
   private final val TAG = "ShadowsocksApplication"
-  private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
-    Executable.TUN2SOCKS, Executable.KCPTUN)
 
   // The ones in Locale doesn't have script included
   private final lazy val SIMPLIFIED_CHINESE =
@@ -180,25 +178,11 @@ class ShadowsocksApplication extends Application {
     if (holder != null) holder.refresh()
   }
 
-  private def copyAssets(path: String) {
-    val assetManager = getAssets
-    var files: Array[String] = null
-    try files = assetManager.list(path) catch {
-      case e: IOException =>
-        Log.e(TAG, e.getMessage)
-        app.track(e)
-    }
-    if (files != null) for (file <- files)
-      autoClose(assetManager.open(if (path.nonEmpty) path + '/' + file else file))(in =>
-        autoClose(new FileOutputStream(getApplicationInfo.dataDir + '/' + file))(out =>
-          IOUtils.copy(in, out)))
-  }
-
   def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun")) {
-      cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
+    for (task <- Executable.EXECUTABLES) {
+      cmd.append("killall lib%s.so".formatLocal(Locale.ENGLISH, task))
       cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
         .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
     }
@@ -212,10 +196,16 @@ class ShadowsocksApplication extends Application {
   }
 
   def copyAssets() {
-    crashRecovery() // ensure executables are killed before writing to them
-    copyAssets(System.getABI)
-    copyAssets("acl")
-    Shell.SH.run(EXECUTABLES.map("chmod 755 " + getApplicationInfo.dataDir + '/' + _))
+    val assetManager = getAssets
+    var files: Array[String] = null
+    try files = assetManager.list("acl") catch {
+      case e: IOException =>
+        Log.e(TAG, e.getMessage)
+        app.track(e)
+    }
+    if (files != null) for (file <- files) autoClose(assetManager.open("acl/" + file))(in =>
+      autoClose(new FileOutputStream(getApplicationInfo.dataDir + '/' + file))(out =>
+        IOUtils.copy(in, out)))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }
 

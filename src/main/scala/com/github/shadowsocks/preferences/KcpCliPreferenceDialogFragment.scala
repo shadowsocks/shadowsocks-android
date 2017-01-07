@@ -35,7 +35,7 @@ class KcpCliPreferenceDialogFragment extends EditTextPreferenceDialogFragment {
     super.onPrepareDialogBuilder(builder)
     builder.setNeutralButton("?", ((_, _) => new AlertDialog.Builder(builder.getContext)
       .setTitle("?")
-      .setMessage(Shell.SH.run(builder.getContext.getApplicationInfo.dataDir + "/kcptun --help")
+      .setMessage(Shell.SH.run(builder.getContext.getApplicationInfo.nativeLibraryDir + "/libkcptun.so --help")
         .asScala
         .dropWhile(line => line != "GLOBAL OPTIONS:")
         .drop(1)

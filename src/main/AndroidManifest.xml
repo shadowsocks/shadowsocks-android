@@ -19,7 +19,6 @@
 
     <application
             android:allowBackup="true"
-            android:extractNativeLibs="false"
             android:name=".ShadowsocksApplication"
             android:hardwareAccelerated="true"
             android:icon="@mipmap/ic_launcher"
