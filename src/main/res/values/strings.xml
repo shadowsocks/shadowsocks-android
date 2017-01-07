@@ -38,6 +38,8 @@
   <string name="sitekey_summary">Password of the remote server</string>
   <string name="protocol">Protocol</string>
   <string name="protocol_summary">Protocol you set in your server</string>
+  <string name="protocol_param">Protocol Param</string>
+  <string name="protocol_param_summary">Protocol param you input in your server</string>
   <string name="obfs">Obfs</string>
   <string name="obfs_summary">Obfs you selected in your server</string>
   <string name="obfs_param">Obfs Param</string>

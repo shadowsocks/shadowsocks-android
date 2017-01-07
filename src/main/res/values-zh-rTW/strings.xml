@@ -19,6 +19,8 @@
   <string name="sitekey_summary">遠端伺服器的密碼</string>
   <string name="protocol">協定</string>
   <string name="protocol_summary">您在伺服器裡設定的協定（ShadowsocksR 特性）</string>
+  <string name="protocol_param">協定參數</string>
+  <string name="protocol_param_summary">您在伺服器裡輸入的協定參數（ShadowsocksR 特性）</string>
   <string name="obfs">obfs</string>
   <string name="obfs_summary">您在伺服器裡選擇的 obfs（ShadowsocksR 特性）</string>
   <string name="obfs_param">obfs 參數</string>

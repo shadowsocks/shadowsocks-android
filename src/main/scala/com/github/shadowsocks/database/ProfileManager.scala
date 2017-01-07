@@ -107,6 +107,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .and().eq("remotePort", profile.remotePort)
         .and().eq("password", profile.password)
         .and().eq("protocol", profile.protocol)
+        .and().eq("protocol_param", profile.protocol_param)
         .and().eq("obfs", profile.obfs)
         .and().eq("obfs_param", profile.obfs_param)
         .and().eq("method", profile.method).queryForFirst()

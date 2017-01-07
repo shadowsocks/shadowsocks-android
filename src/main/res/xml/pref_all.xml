@@ -48,6 +48,10 @@
                 android:entryValues="@array/protocol_value"
                 android:summary="%s"
                 android:title="@string/protocol"/>
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                android:key="protocol_param"
+                android:summary="@string/protocol_param_summary"
+                android:title="@string/protocol_param"/>
         <com.github.shadowsocks.preferences.DropDownPreference
                 android:key="obfs"
                 android:persistent="false"
@@ -57,7 +61,6 @@
                 android:title="@string/obfs"/>
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="obfs_param"
-                android:persistent="false"
                 android:summary="@string/obfs_param_summary"
                 android:title="@string/obfs_param"/>
 

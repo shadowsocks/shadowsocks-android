@@ -49,7 +49,7 @@ object Executable {
 }
 
 object ConfigUtils {
-  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\"}"
+  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\", \"protocol_param\": \"%s\"}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +
     " log_info = off;\n" +
@@ -181,6 +181,7 @@ object Key {
   val obfs = "obfs"
   val obfs_param = "obfs_param"
   val protocol = "protocol"
+  val protocol_param = "protocol_param"
   val dns = "dns"
   val china_dns = "china_dns"
 

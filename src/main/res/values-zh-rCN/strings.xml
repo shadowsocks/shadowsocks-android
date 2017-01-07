@@ -18,6 +18,8 @@
   <string name="sitekey_summary">远程服务器的密码</string>
   <string name="protocol">协议</string>
   <string name="protocol_summary">您的自定义协议（ShadowsocksR 特性）</string>
+  <string name="protocol_param">协议参数</string>
+  <string name="protocol_param_summary">您的自定义协议参数（ShadowsocksR 特性）</string>
   <string name="obfs">混淆方式</string>
   <string name="obfs_summary">您的自定义混淆方式（ShadowsocksR 特性）</string>
   <string name="obfs_param">混淆参数</string>

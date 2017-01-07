@@ -15,6 +15,8 @@
   <string name="enc_method">暗号化方式</string>
   <string name="protocol">ファンクション設定</string>
   <string name="protocol_summary">きみのプロトコル（SSR プロパティ）</string>
+  <string name="protocol_param">ファンクション パラメータ</string>
+  <string name="protocol_param_summary">きみの ファンクション パラメータ（SSR プロパティ）</string>
   <string name="obfs">Obfs ウェイ</string>
   <string name="obfs_summary">きみの Obfs ウェイ（SSR プロパティ）</string>
   <string name="obfs_param">Obfs パラメータ</string>
