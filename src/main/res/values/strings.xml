@@ -52,8 +52,8 @@
   <string-array name="route_entry">
     <item>All</item>
     <item>Bypass LAN</item>
-    <item>Bypass China</item>
-    <item>Bypass LAN &amp; China</item>
+    <item>Bypass mainland China</item>
+    <item>Bypass LAN &amp; mainland China</item>
     <item>@string/route_entry_gfwlist</item>
     <item>China List</item>
     <item>@string/custom_rules</item>
