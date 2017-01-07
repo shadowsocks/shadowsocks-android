@@ -145,7 +145,7 @@
   <string name="kcpcli">KCP 參數 (CLI)</string>
 
   <!-- acl -->
-  <string name="custom_rules">新增規則</string>
+  <string name="custom_rules">自訂規則</string>
   <string name="action_selection">選擇…</string>
   <string name="action_add_rule">新增規則…</string>
   <string-array name="acl_rule_templates">
