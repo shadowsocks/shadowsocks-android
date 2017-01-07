@@ -5,6 +5,7 @@ import java.util.Locale
 
 import android.content.{ClipData, ClipboardManager, Context, DialogInterface}
 import android.os.{Bundle, Handler}
+import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.helper.ItemTouchHelper
@@ -276,7 +277,16 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         .create().show()
       true
     case R.id.action_import =>
-      clipboard.getPrimaryClip.getItemAt(0).getText.toString.split("\n").foreach(adapter.addToProxy)
+      try {
+        val items = clipboard.getPrimaryClip.getItemAt(0).getText.toString.split("\n")
+        if (items.nonEmpty) {
+          items.foreach(adapter.addToProxy)
+          return true
+        }
+      } catch {
+        case _: Exception =>
+      }
+      Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
       true
     case R.id.action_import_gfwlist =>
       val acl = new Acl().fromId(Acl.GFWLIST)
