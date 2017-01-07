@@ -75,7 +75,7 @@ trait BaseService extends Service {
 
    if (isConnected && profile.kcp && kcptunProcess != null) {
      restartHanlder.removeCallbacks(null)
-     restartHanlder.postDelayed(() => kcptunProcess.restart(), 2000)
+     restartHanlder.postDelayed(() => if (kcptunProcess != null) kcptunProcess.restart(), 2000)
    }
   }
   var networkReceiverRegistered: Boolean = _
