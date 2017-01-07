@@ -1,8 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
   <string name="app_name">SSR</string>
-  <string name="quick_toggle">開關</string>
+  <string name="quick_toggle">切換</string>
 
   <string name="misc_cat">其他</string>
   <string name="proxy_cat">伺服器設定</string>
@@ -17,12 +17,12 @@
   <string name="port_summary">%d（本機伺服器的連接埠號碼）</string>
   <string name="sitekey">密碼</string>
   <string name="sitekey_summary">遠端伺服器的密碼</string>
-  <string name="protocol">協議</string>
-  <string name="protocol_summary">您在魔改版面板裡設置的自定義協議（SSR 特性）</string>
-  <string name="obfs">混淆方式</string>
-  <string name="obfs_summary">您在魔改版面板裡設置的自定義混淆方式（SSR 特性）</string>
-  <string name="obfs_param">混淆參數</string>
-  <string name="obfs_param_summary">您在魔改版面板裡輸入的自定義混淆參數（SSR 特性）</string>
+  <string name="protocol">協定</string>
+  <string name="protocol_summary">您在伺服器裡設定的協定（ShadowsocksR 特性）</string>
+  <string name="obfs">obfs</string>
+  <string name="obfs_summary">您在伺服器裡選擇的 obfs（ShadowsocksR 特性）</string>
+  <string name="obfs_param">obfs 參數</string>
+  <string name="obfs_param_summary">您在伺服器裡輸入的 obfs 參數（ShadowsocksR 特性）</string>
   <string name="enc_method">加密方法</string>
   <string name="feature_cat">功能設定</string>
   <string name="http_proxy">HTTP Proxy</string>
@@ -30,7 +30,7 @@
   <string name="dns_proxy">DNS Proxy</string>
   <string name="dns_proxy_summary">重新導向 DNS 查詢至遠端</string>
   <string name="auto_set_gfwlist">中國大陸路由</string>
-  <string name="auto_set_gfwlist_summary">略過一切中國大陸的網站</string>
+  <string name="auto_set_gfwlist_summary">略過所有中國大陸的網站</string>
   <string name="route_list">路由</string>
   <string name="proxied_apps">個別應用程式的 Proxy</string>
   <string name="proxied_apps_summary">為已選擇的應用程式設定 Proxy，在 Android 4.X 以下需要開啟 NAT 模式</string>
@@ -38,13 +38,13 @@
   <string name="bypass_apps">略過模式</string>
   <string name="bypass_apps_summary">啟用此選項，會略過已選擇的應用程式</string>
   <string name="auto_connect">自動連線</string>
-  <string name="auto_connect_summary">在裝置啟動時啟用 Shadowsocks</string>
+  <string name="auto_connect_summary">在裝置啟動時啟用 ShadowsocksR</string>
   <string name="tcp_fastopen_summary">切換需要 ROOT 權限</string>
-  <string name="tcp_fastopen_summary_unsupported">不支持的內核版本：%s &lt; 3.7.1</string>
-  <string name="forward_success">Shadowsocks 已啟動。</string>
+  <string name="tcp_fastopen_summary_unsupported">不支援的核心版本：%s &lt; 3.7.1</string>
+  <string name="forward_success">ShadowsocksR 已啟動。</string>
   <string name="service_failed">連線至遠端伺服器失敗</string>
   <string name="invalid_server">伺服器名稱無效</string>
-  <string name="method_unsafe">警告：當前使用的加密算法不安全</string>
+  <string name="method_unsafe">警告：目前使用的加密演算法不安全</string>
   <string name="nat_deprecated">警告：自 Android 5.0 開始， NAT 模式已過時</string>
   <string name="nat_no_root">NAT 模式需要 ROOT 權限</string>
   <string name="switch_to_vpn">切換至 VPN 模式</string>
@@ -56,11 +56,11 @@
   <string name="close">關閉</string>
   <string name="proxy_empty">Proxy 或密碼不可以空白</string>
   <string name="connect">連線</string>
-  <string name="initializing">起始中……</string>
+  <string name="initializing">初始化中……</string>
   <string name="recovering">重設中……</string>
   <string name="loading">載入中……</string>
 
-  <string name="dr">去重添加</string>
+  <string name="dr">移除重複新增</string>
 
   <string name="profiles">設定檔</string>
   <string name="settings">設定</string>
@@ -68,7 +68,7 @@
   <string name="recovery">重設</string>
   <string name="recovery_summary">重設一切背景服務</string>
   <string name="about">關於</string>
-  <string name="about_title">Shadowsocks R %s</string>
+  <string name="about_title">ShadowsocksR %s</string>
   <string name="flush_dnscache">清除 DNS 快取</string>
   <string name="flush_dnscache_summary">僅在 NAT 模式可用</string>
   <string name="flush_dnscache_summary_root">僅在 NAT 模式可用，需要 ROOT 權限</string>
@@ -88,10 +88,10 @@
   <string name="udp_dns_summary">向遠端轉送 UDP 封包</string>
 
   <string name="dns">DNS</string>
-  <string name="dns_summary">用于解析特殊域名的DNS，如 8.8.8.8:53</string>
+  <string name="dns_summary">此 DNS 伺服器用於解析特殊網域名稱，如 8.8.8.8:53</string>
 
   <string name="china_dns">China DNS</string>
-  <string name="china_dns_summary">用于解析一般域名的DNS，如 223.5.5.5:53</string>
+  <string name="china_dns_summary">此 DNS 伺服器用於解析標準網域名稱，如 223.5.5.5:53</string>
 
   <string name="onetime_auth">單次驗證</string>
   <string name="onetime_auth_summary">啟用單次驗證</string>
@@ -115,34 +115,34 @@
     按住後上下撥動設定檔重新排序。</string>
   <string name="gotcha">我懂了！</string>
   <string name="copy_url">複製 URL</string>
-  <string name="add_profile_dialog">為 SSR 新增此設定檔？</string>
+  <string name="add_profile_dialog">為 ShadowsocksR 新增此設定檔？</string>
   <string name="add_profile_methods_scan_qr_code">掃描 QR 碼</string>
   <string name="add_profile_methods_manual_settings">手動設定</string>
   <string name="add_profile_nfc_hint_title">使用 Android Beam (NFC) 來新增設定檔</string>
   <string name="add_profile_nfc_hint">
-    保持兩台設備的屏幕亮起，在另外一台設備上，點擊設定檔的分享按鈕，將它們靠在一起（背靠背）。\n你也可以掃描 NFC 標籤。</string>
+    保持開啟兩個裝置的螢幕，在另一個裝置上，按一下設定檔的分享按鈕，將它們放在一起（背靠背）。\n您也可以掃描 NFC 標籤。</string>
   <string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 
   <string-array name="route_entry">
-    <item>全域</item>
-    <item>略過區域網路位址</item>
-    <item>略過中國大陸位址</item>
-    <item>略過區域網路及中國大陸位址</item>
-    <item>僅代理大陸屏蔽位址</item>
-    <item>僅代理大陸位址</item>
-    <item>客制化 ACL 文件</item>
+    <item>全部</item>
+    <item>略過區域網路</item>
+    <item>略過中國大陸</item>
+    <item>略過區域網路及中國大陸</item>
+    <item>GFW List</item>
+    <item>China List</item>
+    <item>自訂 ACL 檔案</item>
   </string-array>
 
-  <string name="acl_file">ACL File URL</string>
-  <string name="aclupdate">ACL 文件更新</string>
-  <string name="aclupdate_summary">更新您本地的 ACL 文件</string>
-  <string name="aclupdate_url_notset">很抱歉，因為您沒有設置 ACL 地址，所以無法進行更新。請在路由中選擇 \'客制化 ACL 文件\' 之後再進行升級嘗試。</string>
+  <string name="acl_file">ACL 檔案網址</string>
+  <string name="aclupdate">ACL 檔案升級</string>
+  <string name="aclupdate_summary">升級您的 ACL 檔案</string>
+  <string name="aclupdate_url_notset">很抱歉，因為您未設定 ACL 網址，所以無法進行升級。請在路由設定中選擇 \'自訂 ACL 檔案\' 並再試一次。</string>
 
-  <string name="aclupdate_downloading">文件更新中...</string>
-  <string name="aclupdate_successfully">文件更新成功!</string>
-  <string name="aclupdate_failed">文件更新失敗！</string>
+  <string name="aclupdate_downloading">檔案升級中...</string>
+  <string name="aclupdate_successfully">檔案升級成功！</string>
+  <string name="aclupdate_failed">檔案升級失敗！</string>
 
-  <string name="action_apply_all">應用設置到所有配置文件</string>
+  <string name="action_apply_all">套用設定至所有設定檔</string>
   <string name="action_export">匯出至剪貼簿</string>
   <string name="action_import">從剪貼簿匯入</string>
   <string name="action_export_msg">匯出至剪貼簿成功</string>
