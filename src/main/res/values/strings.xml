@@ -149,7 +149,6 @@
   <string name="not_connected">Not connected</string>
 
   <!-- kcp -->
-  <string name="kcp" translatable="false">KCP</string>
   <string name="kcp_summary">Enable Shadowsocks over KCP</string>
   <string name="kcp_port">KCP Port</string>
   <string name="kcp_port_summary">%d (port number of the remote KCPTUN server)</string>

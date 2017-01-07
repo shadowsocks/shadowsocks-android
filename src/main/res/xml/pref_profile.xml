@@ -72,12 +72,12 @@
     </be.mygod.preference.PreferenceCategory>
 
     <be.mygod.preference.PreferenceCategory
-            android:title="@string/kcp">
+            android:title="KCP">
 
         <SwitchPreference
                 android:key="kcp"
                 android:summary="@string/kcp_summary"
-                android:title="@string/kcp"/>
+                android:title="KCP"/>
 
         <be.mygod.preference.NumberPickerPreference
                 app:min="1"
