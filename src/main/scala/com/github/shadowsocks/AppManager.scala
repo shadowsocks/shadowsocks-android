@@ -229,7 +229,6 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
     appListView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false))
     appListView.setItemAnimator(new DefaultItemAnimator)
     fastScroller = findViewById(R.id.fastscroller).asInstanceOf[FastScroller]
-    fastScroller.setRecyclerView(appListView)
 
     instance = this
     loadAppsAsync()
@@ -246,6 +245,7 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
       } while (!appsLoading.compareAndSet(true, false))
       handler.post(() => {
         appListView.setAdapter(adapter)
+        fastScroller.setRecyclerView(appListView)
         val shortAnimTime = getResources.getInteger(android.R.integer.config_shortAnimTime)
         appListView.setAlpha(0)
         appListView.setVisibility(View.VISIBLE)
