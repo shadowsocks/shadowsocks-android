@@ -4,7 +4,7 @@ import java.net.IDN
 import java.util.Locale
 
 import android.content.{ClipData, ClipboardManager, Context, DialogInterface}
-import android.os.{Bundle, Handler}
+import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -62,7 +62,6 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       .setView(view))
   }
 
-  private val handler = new Handler()
   private val selectedItems = new mutable.HashSet[AnyRef]
   private def onSelectedItemsUpdated(): Unit = if (selectionItem != null) {
     selectionItem.setVisible(selectedItems.nonEmpty)
@@ -95,7 +94,10 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
           undoManager.remove((-1, item))
         }): DialogInterface.OnClickListener)
         .setPositiveButton(android.R.string.ok, ((_, _) =>
-          if (adapter.addFromTemplate(templateSelector.getSelectedItemPosition, editText.getText)) adapter.remove(item))
+          adapter.addFromTemplate(templateSelector.getSelectedItemPosition, editText.getText) match {
+            case -1 => adapter.remove(item)
+            case index => list.post(() => list.scrollToPosition(index))
+          })
           : DialogInterface.OnClickListener)
         .create().show()
     }
@@ -112,7 +114,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     private var savePending: Boolean = _
     private def apply() = if (!savePending) {
       savePending = true
-      handler.post(() => {
+      list.post(() => {
         Acl.save(Acl.CUSTOM_RULES, acl)
         savePending = false
       })
@@ -126,28 +128,30 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     def onCreateViewHolder(vg: ViewGroup, i: Int) = new AclRuleViewHolder(LayoutInflater.from(vg.getContext)
       .inflate(android.R.layout.simple_list_item_1, vg, false))
 
-    def addSubnet(subnet: Subnet): Boolean = if (acl.subnets.add(subnet)) {
-      notifyItemInserted(acl.subnets.indexOf(subnet))
+    def addSubnet(subnet: Subnet): Int = if (acl.subnets.add(subnet)) {
+      val index = acl.subnets.indexOf(subnet)
+      notifyItemInserted(index)
       apply()
-      true
-    } else false
-    def addHostname(hostname: String): Boolean = if (acl.proxyHostnames.add(hostname)) {
-      notifyItemInserted(acl.proxyHostnames.indexOf(hostname) + acl.subnets.size)
+      index
+    } else -1
+    def addHostname(hostname: String): Int = if (acl.proxyHostnames.add(hostname)) {
+      val index = acl.proxyHostnames.indexOf(hostname) + acl.subnets.size
+      notifyItemInserted(index)
       apply()
-      true
-    } else false
-    def addToProxy(input: String): Boolean = try addSubnet(Subnet.fromString(input)) catch {
+      index
+    } else -1
+    def addToProxy(input: String): Int = try addSubnet(Subnet.fromString(input)) catch {
       case _: IllegalArgumentException => addHostname(input)
     }
-    def addFromTemplate(template: Int, text: CharSequence): Boolean = template match {
+    def addFromTemplate(template: Int, text: CharSequence): Int = template match {
       case GENERIC => addToProxy(text.toString)
       case DOMAIN => try addHostname(TEMPLATE_DOMAIN.formatLocal(Locale.ENGLISH,
         IDN.toASCII(text.toString, IDN.ALLOW_UNASSIGNED | IDN.USE_STD3_ASCII_RULES).replaceAll("\\.", "\\\\."))) catch {
         case exc: IllegalArgumentException =>
           Toast.makeText(getActivity, exc.getMessage, Toast.LENGTH_SHORT).show()
-          false
+          -1
       }
-      case _ => false
+      case _ => -1
     }
 
     def remove(i: Int) {
