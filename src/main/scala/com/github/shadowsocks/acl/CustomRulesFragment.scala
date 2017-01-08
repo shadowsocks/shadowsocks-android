@@ -64,7 +64,9 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
 
   private val handler = new Handler()
   private val selectedItems = new mutable.HashSet[AnyRef]
-  private def onSelectedItemsUpdated(): Unit = selectionItem.setVisible(selectedItems.nonEmpty)
+  private def onSelectedItemsUpdated(): Unit = if (selectionItem != null) {
+    selectionItem.setVisible(selectedItems.nonEmpty)
+  }
 
   private final class AclRuleViewHolder(view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with View.OnLongClickListener {
@@ -232,6 +234,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     toolbar.inflateMenu(R.menu.custom_rules_menu)
     toolbar.setOnMenuItemClickListener(this)
     selectionItem = toolbar.getMenu.findItem(R.id.selection)
+    selectionItem.setVisible(selectedItems.nonEmpty)
     list = view.findViewById(R.id.list).asInstanceOf[RecyclerView]
     list.setLayoutManager(new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false))
     list.setItemAnimator(new DefaultItemAnimator)
