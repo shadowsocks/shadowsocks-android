@@ -25,6 +25,7 @@ _Put an `x` inside the [ ] that applies._
   * [ ] Bypass LAN & China
   * [ ] GFW List
   * [ ] China List
+  * [ ] Custom rules
 * [ ] IPv6 route
 * [ ] Per-App Proxy
   * [ ] Bypass mode
