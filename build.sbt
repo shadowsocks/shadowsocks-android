@@ -13,8 +13,6 @@ platformTarget := "android-25"
 compileOrder := CompileOrder.JavaThenScala
 javacOptions ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil
 scalacOptions ++= "-target:jvm-1.7" :: "-Xexperimental" :: Nil
-ndkJavah := Seq()
-ndkBuild := Seq()
 
 proguardVersion := "5.3.2"
 proguardCache := Seq()
