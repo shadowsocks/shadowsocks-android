@@ -34,12 +34,6 @@
 <string name="ipv6_summary">"向遠端重新導向 IPv6 流量"</string>
 <string name="onetime_auth">"單次驗證"</string>
 <string name="onetime_auth_summary">"啟用單次驗證"</string>
-<string name="http_proxy">"HTTP Proxy"</string>
-<string name="http_proxy_summary">"本機 HTTP Proxy"</string>
-<string name="dns_proxy">"DNS Proxy"</string>
-<string name="dns_proxy_summary">"重新導向 DNS 查詢至遠端"</string>
-<string name="auto_set_gfwlist">"中國大陸路由"</string>
-<string name="auto_set_gfwlist_summary">"略過一切中國大陸的網站"</string>
 <string name="route_list">"路由"</string>
 <string name="route_entry_gfwlist">"GFW List"</string>
 <string name="proxied_apps">"個別應用程式的 Proxy"</string>

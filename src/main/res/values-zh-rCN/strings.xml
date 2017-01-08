@@ -34,12 +34,6 @@
 <string name="ipv6_summary">"向远程服务器转发 IPv6 流量"</string>
 <string name="onetime_auth">"一次性认证"</string>
 <string name="onetime_auth_summary">"启用一次性认证"</string>
-<string name="http_proxy">"HTTP 代理服务器"</string>
-<string name="http_proxy_summary">"本地 HTTP 代理"</string>
-<string name="dns_proxy">"DNS 代理"</string>
-<string name="dns_proxy_summary">"重定向 DNS 查询到远程服务器"</string>
-<string name="auto_set_gfwlist">"国内路由"</string>
-<string name="auto_set_gfwlist_summary">"绕过所有位于中国的网站"</string>
 <string name="route_list">"路由"</string>
 <string name="route_entry_gfwlist">"仅代理中国大陆无法访问的地址"</string>
 <string name="proxied_apps">"分应用代理"</string>

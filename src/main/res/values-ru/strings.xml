@@ -35,12 +35,6 @@
 <string name="ipv6_summary">"Перенаправлять IPv6 траффик на удалённый сервер"</string>
 <string name="onetime_auth">"Единоразовая Аутентификация"</string>
 <string name="onetime_auth_summary">"Включить единоразовую аутентификацию"</string>
-<string name="http_proxy">"HTTP Прокси"</string>
-<string name="http_proxy_summary">"Локальный HTTP прокси"</string>
-<string name="dns_proxy">"DNS Прокси"</string>
-<string name="dns_proxy_summary">"Перенаправлять DNS запросы на удалённый сервер"</string>
-<string name="auto_set_gfwlist">"CHN Маршрут"</string>
-<string name="auto_set_gfwlist_summary">"Игнорировать все сайты находящиеся в Китае"</string>
 <string name="route_list">"Маршрут"</string>
 <string name="route_entry_gfwlist">"Список GFW"</string>
 <string name="proxied_apps">"Прокси для выбранных приложений"</string>

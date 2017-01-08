@@ -34,12 +34,6 @@
 <string name="ipv6_summary">"リモートサーバーにIPv6パケットを転送"</string>
 <string name="onetime_auth">"ワンタイム認証"</string>
 <string name="onetime_auth_summary">"ワンタイム認証を使用する"</string>
-<string name="http_proxy">"HTTP プロキシサーバー"</string>
-<string name="http_proxy_summary">"ローカル HTTP プロキシ"</string>
-<string name="dns_proxy">"DNS プロキシ"</string>
-<string name="dns_proxy_summary">"DNS解析をリモートサーバーにリダイレクト"</string>
-<string name="auto_set_gfwlist">"CHN Route"</string>
-<string name="auto_set_gfwlist_summary">"中国本土のサイトをすべて迂回する"</string>
 <string name="route_list">"プロキシ方式"</string>
 <string name="route_entry_gfwlist">"中国本土からアクセス不可なアドレス以外を迂回する"</string>
 <string name="proxied_apps">"アプリ別のプロキシを使用"</string>
