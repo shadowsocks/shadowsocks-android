@@ -88,10 +88,9 @@ class Acl {
   override def toString: String = {
     val result = new StringBuilder()
     result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
-    var bypassList = bypassHostnames.toStream
-    var proxyList = proxyHostnames.toStream
-    if (bypass) proxyList = subnets.toStream.map(_.toString) #::: bypassList
-    else bypassList = subnets.toStream.map(_.toString) #::: proxyList
+    val (bypassList, proxyList) =
+      if (bypass) (bypassHostnames.toStream, subnets.toStream.map(_.toString) #::: proxyHostnames.toStream)
+      else (subnets.toStream.map(_.toString) #::: bypassHostnames.toStream, proxyHostnames.toStream)
     if (bypassList.nonEmpty) {
       result.append("[bypass_list]\n")
       result.append(bypassList.mkString("\n"))

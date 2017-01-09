@@ -208,13 +208,15 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
 
     def getSectionTitle(i: Int): String = {
       val j = i - acl.subnets.size
-      try (if (j < 0) acl.subnets(i).address.getHostAddress.substring(0, 1) else {
-        val hostname = acl.proxyHostnames(i)
-        PATTERN_DOMAIN.findFirstMatchIn(hostname) match {
-          case Some(m) => m.matched.replaceAll("\\\\.", ".")  // don't convert IDN yet
-          case None => hostname
-        }
-      }).substring(0, 1) catch {
+      try {
+        (if (j < 0) acl.subnets(i).address.getHostAddress.substring(0, 1) else {
+          val hostname = acl.proxyHostnames(i)
+          PATTERN_DOMAIN.findFirstMatchIn(hostname) match {
+            case Some(m) => m.matched.replaceAll("\\\\.", ".")  // don't convert IDN yet
+            case None => hostname
+          }
+        }).substring(0, 1)
+      } catch {
         case _: IndexOutOfBoundsException => " "
       }
     }
