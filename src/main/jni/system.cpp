@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <cpu-features.h>
 
 #include <sys/un.h>
 #include <sys/stat.h>
