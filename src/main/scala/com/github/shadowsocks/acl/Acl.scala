@@ -58,8 +58,8 @@ class Acl {
     bypass = false
     lazy val bypassSubnets = new mutable.SortedList[Subnet]()
     lazy val proxySubnets = new mutable.SortedList[Subnet]()
-    var hostnames: mutable.SortedList[String] = proxyHostnames
-    var subnets: mutable.SortedList[Subnet] = proxySubnets
+    var hostnames: mutable.SortedList[String] = bypassHostnames
+    var subnets: mutable.SortedList[Subnet] = bypassSubnets
     for (line <- value.getLines()) (line.indexOf('#') match {
       case -1 => line
       case index => line.substring(0, index)  // trim comments
