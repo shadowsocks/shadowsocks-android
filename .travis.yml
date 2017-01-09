@@ -50,4 +50,4 @@ install:
       fi
 
 script:
-    - $SBTPATH/sbt native-build android:package-debug
+    - $SBTPATH/sbt -DNPROC=$(nproc) native-build android:package-debug

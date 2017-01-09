@@ -8,6 +8,11 @@ name := "shadowsocks"
 version := "3.4.1"
 versionCode := Some(173)
 
+// Speed up ndk-build by reading nproc from environment
+// and default to 8
+val nproc = sys.props.getOrElse("NPROC", default = "8")
+ndkArgs := Seq(s"-j$nproc")
+
 platformTarget := "android-25"
 
 compileOrder := CompileOrder.JavaThenScala
