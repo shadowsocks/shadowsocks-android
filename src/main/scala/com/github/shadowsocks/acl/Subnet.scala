@@ -26,7 +26,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) extends Comparable[S
     var result = addrThis lengthCompare addrThat.length // IPv4 address goes first
     if (result != 0) return result
     for ((x, y) <- addrThis zip addrThat) {
-      result = x compare y
+      result = (x & 0xFF) compare (y & 0xFF)  // undo sign extension of signed byte
       if (result != 0) return result
     }
     prefixSize compare that.prefixSize
