@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.app.backup.{BackupAgentHelper, FileBackupHelper, SharedPreferencesBackupHelper}
+import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.database.DBHelper
 
 class ShadowsocksBackupAgent extends BackupAgentHelper {
@@ -38,6 +39,7 @@ class ShadowsocksBackupAgent extends BackupAgentHelper {
   override def onCreate() {
     val helper = new SharedPreferencesBackupHelper(this, PREFS_DISPLAY)
     addHelper(MY_PREFS_BACKUP_KEY, helper)
-    addHelper(DATABASE, new FileBackupHelper(this, "../databases/" + DBHelper.PROFILE))
+    addHelper(DATABASE, new FileBackupHelper(this, "../databases/" + DBHelper.PROFILE,
+      "../" + Acl.CUSTOM_RULES + ".acl"))
   }
 }

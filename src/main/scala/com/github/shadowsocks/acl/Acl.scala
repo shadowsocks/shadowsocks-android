@@ -51,15 +51,15 @@ class Acl {
     bypass = other.bypass
     this
   }
-  def fromSource(value: Source): Acl = {
+  def fromSource(value: Source, defaultBypass: Boolean = false): Acl = {
     bypassHostnames.clear()
     proxyHostnames.clear()
     this.subnets.clear()
-    bypass = false
+    bypass = defaultBypass
     lazy val bypassSubnets = new mutable.SortedList[Subnet]()
     lazy val proxySubnets = new mutable.SortedList[Subnet]()
-    var hostnames: mutable.SortedList[String] = bypassHostnames
-    var subnets: mutable.SortedList[Subnet] = bypassSubnets
+    var hostnames: mutable.SortedList[String] = if (defaultBypass) proxyHostnames else bypassHostnames
+    var subnets: mutable.SortedList[Subnet] = if (defaultBypass) proxySubnets else bypassSubnets
     for (line <- value.getLines()) (line.indexOf('#') match {
       case -1 => line
       case index => line.substring(0, index)  // trim comments
