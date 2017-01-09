@@ -81,9 +81,7 @@
   <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
   <string name="connect">Connect</string>
-  <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
-  <string name="loading">Loading…</string>
   <string name="remove_profile">Remove this profile "%s"?</string>
 
   <!-- menu category -->
@@ -96,10 +94,6 @@
   <string name="about_title">Shadowsocks %s</string>
   <string name="edit">Edit</string>
   <string name="share">Share</string>
-  <string name="flush_dnscache">Flush DNS cache</string>
-  <string name="flush_dnscache_summary">Only useful in NAT mode. Requires ROOT permission.</string>
-  <string name="flush_dnscache_no_root">Flush DNS cache cannot proceed without ROOT permission</string>
-  <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
   <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export">Export to Clipboard</string>
