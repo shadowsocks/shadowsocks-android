@@ -39,7 +39,10 @@ class SortedList[A] private(treeRef: ObjectRef[RB.Tree[A, Null]], from: Option[A
   }
 
   // AbstractSeq
-  def apply(i: Int): A = RB.nth(treeRef.elem, i).key // Should i out of range result in NullReferenceException?
+  def apply(i: Int): A = try RB.nth(treeRef.elem, i).key catch {
+    // out of bounds will result in accessing null nodes
+    case e: NullPointerException => throw new IndexOutOfBoundsException().initCause(e)
+  }
   def length: Int = size
 
   // Buffer

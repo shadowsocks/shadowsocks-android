@@ -95,8 +95,13 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         }): DialogInterface.OnClickListener)
         .setPositiveButton(android.R.string.ok, ((_, _) =>
           adapter.addFromTemplate(templateSelector.getSelectedItemPosition, editText.getText) match {
-            case -1 => adapter.remove(item)
-            case index => list.post(() => list.scrollToPosition(index))
+            case -1 =>
+            case index =>
+              val item = this.item
+              list.post(() => {
+                list.scrollToPosition(index)
+                adapter.remove(item)
+              })
           })
           : DialogInterface.OnClickListener)
         .create().show()
@@ -203,13 +208,15 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
 
     def getSectionTitle(i: Int): String = {
       val j = i - acl.subnets.size
-      (if (j < 0) acl.subnets(i).address.toString.charAt(0).toString else {
+      try (if (j < 0) acl.subnets(i).address.getHostAddress.substring(0, 1) else {
         val hostname = acl.proxyHostnames(i)
         PATTERN_DOMAIN.findFirstMatchIn(hostname) match {
           case Some(m) => m.matched.replaceAll("\\\\.", ".")  // don't convert IDN yet
           case None => hostname
         }
-      }).substring(0, 1)
+      }).substring(0, 1) catch {
+        case _: IndexOutOfBoundsException => " "
+      }
     }
   }
 

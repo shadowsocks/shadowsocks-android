@@ -18,7 +18,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) extends Comparable[S
   override def toString: String = if (address match {
     case _: Inet4Address => prefixSize == 32
     case _: Inet6Address => prefixSize == 128
-  }) address.toString else address.toString + '/' + prefixSize
+  }) address.getHostAddress else address.getHostAddress + '/' + prefixSize
 
   override def compareTo(that: Subnet): Int = {
     val addrThis = address.getAddress

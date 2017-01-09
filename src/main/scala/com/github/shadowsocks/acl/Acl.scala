@@ -80,7 +80,7 @@ class Acl {
       }
       case _ =>
     }
-    this.subnets ++= (if (bypass) bypassSubnets else proxySubnets)
+    this.subnets ++= (if (bypass) proxySubnets else bypassSubnets)
     this
   }
   final def fromId(id: String): Acl = fromSource(Source.fromFile(Acl.getPath(id)))
@@ -90,8 +90,8 @@ class Acl {
     result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
     var bypassList = bypassHostnames.toStream
     var proxyList = proxyHostnames.toStream
-    if (bypass) bypassList = subnets.toStream.map(_.toString) #::: bypassList
-    else proxyList = subnets.toStream.map(_.toString) #::: proxyList
+    if (bypass) proxyList = subnets.toStream.map(_.toString) #::: bypassList
+    else bypassList = subnets.toStream.map(_.toString) #::: proxyList
     if (bypassList.nonEmpty) {
       result.append("[bypass_list]\n")
       result.append(bypassList.mkString("\n"))
