@@ -113,12 +113,12 @@
 
         <SwitchPreference
                 android:key="tcp_fastopen"
-                android:persistent="false"
+                android:defaultValue="false"
                 android:summary="@string/tcp_fastopen_summary"
                 android:title="TCP Fast Open"/>
 
         <SwitchPreference android:key="isNAT"
-                          android:persistent="false"
+                          android:defaultValue="false"
                           android:title="@string/nat"
                           android:summary="@string/nat_summary"/>
         <Preference android:key="recovery" android:title="@string/recovery"
