@@ -25,6 +25,7 @@ import java.util.Locale
 
 import android.content.SharedPreferences
 import android.os.Binder
+import android.text.TextUtils
 import android.util.Base64
 import com.github.shadowsocks.utils.Key
 import com.j256.ormlite.field.{DataType, DatabaseField}
@@ -103,7 +104,7 @@ class Profile {
 
   override def toString: String = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
     method, if (auth) "-auth" else "", password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP) +
-    '#' + URLEncoder.encode(name, "utf-8")
+    (if (TextUtils.isEmpty(name)) "" else '#' + URLEncoder.encode(name, "utf-8"))
 
   def isMethodUnsafe: Boolean = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 
