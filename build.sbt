@@ -5,8 +5,8 @@ enablePlugins(AndroidApp)
 android.useSupportVectors
 
 name := "shadowsocks"
-version := "3.4.1"
-versionCode := Some(173)
+version := "3.4.2"
+versionCode := Some(174)
 
 platformTarget := "android-25"
 
