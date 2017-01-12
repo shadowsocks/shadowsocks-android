@@ -28,7 +28,6 @@ import java.util.{Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.net.ConnectivityManager
 import android.os.{Handler, IBinder, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
@@ -49,7 +48,6 @@ trait BaseService extends Service {
   @volatile protected var profile: Profile = _
 
   case class NameNotResolvedException() extends IOException
-  case class KcpcliParseException(cause: Throwable) extends Exception(cause)
   case class NullConnectionException() extends NullPointerException
 
   var timer: Timer = _
@@ -66,19 +64,6 @@ trait BaseService extends Service {
     stopRunner(stopService = true)
   }
   var closeReceiverRegistered: Boolean = _
-
-  var kcptunProcess: GuardedProcess = _
-  private val networkReceiver: BroadcastReceiver = (context: Context, _: Intent) => {
-   val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE).asInstanceOf[ConnectivityManager]
-   val activeNetwork = cm.getActiveNetworkInfo
-   val isConnected = activeNetwork != null && activeNetwork.isConnected
-
-   if (isConnected && profile.kcp && kcptunProcess != null) {
-     restartHanlder.removeCallbacks(null)
-     restartHanlder.postDelayed(() => if (kcptunProcess != null) kcptunProcess.restart(), 2000)
-   }
-  }
-  var networkReceiverRegistered: Boolean = _
 
   val binder = new IShadowsocksService.Stub {
     override def getState: Int = {
@@ -185,14 +170,6 @@ trait BaseService extends Service {
       closeReceiverRegistered = true
     }
 
-    if (profile.kcp && !networkReceiverRegistered) {
-      // register network change receiver
-      val filter = new IntentFilter()
-      filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
-      registerReceiver(networkReceiver, filter)
-      networkReceiverRegistered = true
-    }
-
     app.track(getClass.getSimpleName, "start")
 
     changeState(State.CONNECTING)
@@ -202,8 +179,6 @@ trait BaseService extends Service {
 
     Utils.ThrowableFuture(try connect() catch {
       case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
-      case exc: KcpcliParseException =>
-        stopRunner(stopService = true, getString(R.string.service_failed) + ": " + exc.cause.getMessage)
       case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
       case exc: Throwable =>
         stopRunner(stopService = true, getString(R.string.service_failed) + ": " + exc.getMessage)
@@ -217,10 +192,6 @@ trait BaseService extends Service {
     if (closeReceiverRegistered) {
       unregisterReceiver(closeReceiver)
       closeReceiverRegistered = false
-    }
-    if (networkReceiverRegistered) {
-      unregisterReceiver(networkReceiver)
-      networkReceiverRegistered = false
     }
 
     // Make sure update total traffic when stopping the runner

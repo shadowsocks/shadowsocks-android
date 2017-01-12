@@ -90,13 +90,7 @@ class Profile {
   var userOrder: Long = _
 
   @DatabaseField
-  var kcp: Boolean = _
-
-  @DatabaseField
-  var kcpPort: Int = 8399
-
-  @DatabaseField
-  var kcpcli: String = "--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0"
+  var plugin: String = _
 
   def formattedAddress: String = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
   def nameIsEmpty: Boolean = name == null || name.isEmpty
@@ -123,9 +117,7 @@ class Profile {
     .putBoolean(Key.auth, auth)
     .putBoolean(Key.ipv6, ipv6)
     .putString(Key.individual, individual)
-    .putBoolean(Key.kcp, kcp)
-    .putInt(Key.kcpPort, kcpPort)
-    .putString(Key.kcpcli, kcpcli)
+    .putString(Key.plugin, plugin)
     .remove(Key.dirty)
   def deserialize(pref: SharedPreferences) {
     // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
@@ -143,8 +135,6 @@ class Profile {
     auth = pref.getBoolean(Key.auth, false)
     ipv6 = pref.getBoolean(Key.ipv6, false)
     individual = pref.getString(Key.individual, null)
-    kcp = pref.getBoolean(Key.kcp, false)
-    kcpPort = pref.getInt(Key.kcpPort, 0)
-    kcpcli = pref.getString(Key.kcpcli, null)
+    plugin = pref.getString(Key.plugin, null)
   }
 }

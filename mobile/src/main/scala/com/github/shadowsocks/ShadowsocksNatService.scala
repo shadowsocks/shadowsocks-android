@@ -53,15 +53,10 @@ class ShadowsocksNatService extends BaseService {
   var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
-    val conf = if (profile.kcp) {
-      ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort,
-        profile.password, profile.method, 600)
-    } else {
+    val conf =
       ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
         profile.password, profile.method, 600)
-    }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
@@ -83,27 +78,6 @@ class ShadowsocksNatService extends BaseService {
 
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
     sslocalProcess = new GuardedProcess(cmd).start()
-  }
-
-  def startKcptunDaemon() {
-    if (profile.kcpcli == null) profile.kcpcli = ""
-
-    val host = if (profile.host.contains(":")) {
-      "[" + profile.host + "]"
-    } else {
-      profile.host
-    }
-
-    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libkcptun.so"
-      , "-r", host + ":" + profile.kcpPort
-      , "-l", "127.0.0.1:" + (profile.localPort + 90))
-    try cmd ++= Utils.translateCommandline(profile.kcpcli) catch {
-      case exc: Exception => throw KcpcliParseException(exc)
-    }
-
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-
-    kcptunProcess = new GuardedProcess(cmd).start()
   }
 
   def startDNSTunnel() {
@@ -130,15 +104,10 @@ class ShadowsocksNatService extends BaseService {
       sstunnelProcess = new GuardedProcess(cmd).start()
 
     } else {
-      val conf = if (profile.kcp) {
-        ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90,
-          profile.localPort + 63, profile.password, profile.method, 10)
-      } else {
+      val conf =
         ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
           profile.password, profile.method, 10)
-      }
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
@@ -205,7 +174,6 @@ class ShadowsocksNatService extends BaseService {
     startShadowsocksDaemon()
 
     if (!profile.udpdns) startDnsDaemon()
-    if (profile.kcp) startKcptunDaemon()
 
     setupIptables()
 
@@ -221,10 +189,6 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def killProcesses() {
-    if (kcptunProcess != null) {
-      kcptunProcess.destroy()
-      kcptunProcess = null
-    }
     if (sslocalProcess != null) {
       sslocalProcess.destroy()
       sslocalProcess = null

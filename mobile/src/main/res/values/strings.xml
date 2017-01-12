@@ -135,12 +135,6 @@
   <string name="nat_connected">Connected</string>
   <string name="not_connected">Not connected</string>
 
-  <!-- kcp -->
-  <string name="kcp_summary">Enable Shadowsocks over KCP</string>
-  <string name="kcp_port">KCP Port</string>
-  <string name="kcp_port_summary">%d (port number of the remote KCPTUN server)</string>
-  <string name="kcpcli">KCP Parameters (CLI)</string>
-
   <!-- acl -->
   <string name="custom_rules">Custom rules</string>
   <string name="action_selection">Selection…</string>

@@ -46,7 +46,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 21) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 22) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -115,23 +115,25 @@ class DBHelper(val context: Context)
           profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'bypass-lan-china' WHERE route = 'bypass-china'")
         }
 
-        if (oldVersion < 17) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcp SMALLINT;")
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpcli VARCHAR DEFAULT " +
-            "'--crypt none --mode normal --mtu 1200 --nocomp --dscp 46 --parityshard 0';")
-        } else if (oldVersion < 20) {
-          profileDao.executeRawNoArgs("UPDATE `profile` SET kcpcli = '--crypt none --mode normal --mtu 1200 --nocomp " +
-            "--dscp 46 --parityshard 0' WHERE kcpcli IS NULL;")
-        }
-
-        if (oldVersion < 18) {
-          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN kcpPort INTEGER DEFAULT 8399;")
-        } else if (oldVersion < 19) {
-          profileDao.executeRawNoArgs("UPDATE `profile` SET kcpPort = 8399 WHERE kcpPort = 0;")
-        }
-
         if (oldVersion < 21) {
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN remoteDns VARCHAR DEFAULT '8.8.8.8';")
+        }
+
+        if (oldVersion < 17) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN plugin VARCHAR;")
+        } else if (oldVersion < 22) {
+          // upgrade kcptun to SIP003 plugin
+          profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
+          TableUtils.createTable(connectionSource, classOf[Profile])
+          profileDao.executeRawNoArgs(
+            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
+            " udpdns, auth, ipv6, individual, tx, rx, date, userOrder, plugin) " +
+            "SELECT id, name, host, localPort, CASE WHEN kcp = 1 THEN kcpPort ELSE remotePort END, password, method, " +
+            "route, proxyApps, bypass, udpdns, auth, ipv6, individual, tx, rx, date, userOrder, " +
+            "CASE WHEN kcp = 1 THEN 'kcptun ' || kcpcli ELSE NULL END FROM `tmp`;")
+          profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
+          profileDao.executeRawNoArgs("COMMIT;")
         }
       } catch {
         case ex: Exception =>

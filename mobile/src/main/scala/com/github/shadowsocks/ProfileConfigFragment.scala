@@ -25,13 +25,11 @@ import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.os.{Build, Bundle, UserManager}
 import android.support.v14.preference.SwitchPreference
 import android.support.v7.app.AlertDialog
-import android.support.v7.preference.Preference
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.view.MenuItem
 import be.mygod.preference.PreferenceFragment
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.preferences.KcpCliPreferenceDialogFragment
 import com.github.shadowsocks.utils.{Action, Key, Utils}
 
 class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener
@@ -73,11 +71,6 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   override def onResume() {
     super.onResume()
     isProxyApps.setChecked(app.settings.getBoolean(Key.proxyApps, false)) // fetch proxyApps updated by AppManager
-  }
-
-  override def onDisplayPreferenceDialog(preference: Preference): Unit = preference.getKey match {
-    case Key.kcpcli => displayPreferenceDialog(Key.kcpcli, new KcpCliPreferenceDialogFragment())
-    case _ => super.onDisplayPreferenceDialog(preference)
   }
 
   override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {

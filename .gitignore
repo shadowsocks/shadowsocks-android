@@ -1,31 +1,8 @@
-classes
-bin
-gen
 target
 local.properties
-.classpath
-.project
-.settings
-tests/bin
-tests/gen
-tests/local.properties
-NUL
-gen_*
-*.class
-*.o
 local.sbt
-.deps
 /proguard-sbt.txt
 
 #Intellij IDEA
-*.iml
-*.ipr
-*.iws
 .idea/
-out/
 .d
-
-#NDK
-src/main/obj
-src/main/libs
-jni/Application.mk

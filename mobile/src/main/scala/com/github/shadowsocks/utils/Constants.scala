@@ -26,9 +26,8 @@ object Executable {
   val SS_LOCAL = "ss-local"
   val SS_TUNNEL = "ss-tunnel"
   val TUN2SOCKS = "tun2socks"
-  val KCPTUN = "kcptun"
 
-  val EXECUTABLES = Array(SS_LOCAL, SS_TUNNEL, PDNSD, REDSOCKS, TUN2SOCKS, KCPTUN)
+  val EXECUTABLES = Array(SS_LOCAL, SS_TUNNEL, PDNSD, REDSOCKS, TUN2SOCKS)
 }
 
 object ConfigUtils {
@@ -153,9 +152,7 @@ object Key {
   val localPort = "localPortNum"
   val remoteDns = "remoteDns"
 
-  val kcp = "kcp"
-  val kcpPort = "kcpPort"
-  val kcpcli = "kcpcli"
+  val plugin = "plugin"
 
   val dirty = "profileDirty"
 
