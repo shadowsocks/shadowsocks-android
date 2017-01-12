@@ -1,5 +1,3 @@
-import android.Keys.proguardCache
-
 lazy val commonSettings = Seq(
   scalaVersion := "2.11.8",
   dexMaxHeap := "4g",
@@ -19,4 +17,9 @@ lazy val commonSettings = Seq(
   typedResources := false
 )
 
-lazy val mobile = project.settings(commonSettings)
+lazy val shadowsocks = project.in(file("."))
+  .settings(commonSettings)
+  .aggregate(mobile)
+
+lazy val mobile = project
+  .settings(commonSettings)
