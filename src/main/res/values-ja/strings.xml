@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">"シャドーソックス"</string>
-<string name="quick_toggle">"スイッチ"</string>
+<string name="quick_toggle">"ON/OFF"</string>
 
 <!-- global/misc category -->
 <string name="misc_cat">"その他"</string>
@@ -34,12 +33,6 @@
 <string name="ipv6_summary">"リモートサーバーにIPv6パケットを転送"</string>
 <string name="onetime_auth">"ワンタイム認証"</string>
 <string name="onetime_auth_summary">"ワンタイム認証を使用する"</string>
-<string name="http_proxy">"HTTP プロキシサーバー"</string>
-<string name="http_proxy_summary">"ローカル HTTP プロキシ"</string>
-<string name="dns_proxy">"DNS プロキシ"</string>
-<string name="dns_proxy_summary">"DNS解析をリモートサーバーにリダイレクト"</string>
-<string name="auto_set_gfwlist">"CHN Route"</string>
-<string name="auto_set_gfwlist_summary">"中国本土のサイトをすべて迂回する"</string>
 <string name="route_list">"プロキシ方式"</string>
 <string name="route_entry_gfwlist">"中国本土からアクセス不可なアドレス以外を迂回する"</string>
 <string name="proxied_apps">"アプリ別のプロキシを使用"</string>
@@ -66,25 +59,26 @@
 <string name="stopping">"停止中……"</string>
 <string name="vpn_error">"バックグランドサービスの起動に失敗しました：%s"</string>
 <string name="reboot_required">"VPNサービスの起動に失敗しました、デバイスの再起動を試みて下さい"</string>
+<string name="profile_invalid_input">"有効なデータが見つかりません"</string>
+
+<!-- alert category -->
+<string name="yes">"はい"</string>
+<string name="no">"いいえ"</string>
 <string name="close">"閉じる"</string>
+<string name="profile_empty">"プロファイルを選択して下さい"</string>
 <string name="proxy_empty">"サーバアドレスやパスワードの入力が必要です"</string>
 <string name="connect">"接続"</string>
-<string name="initializing">"初期化中……"</string>
 <string name="recovering">"リセット中……"</string>
-<string name="loading">"読み込み中……"</string>
 <string name="remove_profile">"このプロファイルを削除「%s」?"</string>
 
 <!-- menu category -->
 <string name="profiles">"プロファイル"</string>
 <string name="settings">"オプション設定"</string>
+<string name="faq">"質問"</string>
 <string name="recovery">"リセット"</string>
 <string name="about">"本アプリについて"</string>
-<string name="about_title">"シャドーソックス（shadowsocks）%s"</string>
+<string name="edit">"編集"</string>
 <string name="share">"共有"</string>
-<string name="flush_dnscache">"DNS キャッシュをリフレッシュ"</string>
-<string name="flush_dnscache_summary">"NATモードの場合のみ使用、ROOT権限が必要です"</string>
-<string name="flush_dnscache_no_root">"ROOT権限がない場合はDNSキャッシュをリフレッシュできません"</string>
-<string name="flushing">"リフレッシュ中……"</string>
 <string name="add_profile">"プロファイルを追加"</string>
 <string name="action_apply_all">"設定をすべてのプロファイルに適応する"</string>
 <string name="action_export">"クリップボードに出力"</string>
@@ -93,13 +87,22 @@
 <string name="action_export_err">"クリップボードの出力に失敗しました"</string>
 <string name="action_import_msg">"インポートは成功しました"</string>
 <string name="action_import_err">"インポートは失敗しました"</string>
+
+<!-- profile -->
+<string name="profile_config">"プロファイル編集"</string>
+<string name="unsaved_changes_prompt">"編集は保存されておりません、保存しますか？"</string>
+<string name="apply">"適応する"</string>
+<string name="delete">"削除する"</string>
+<string name="delete_confirm_prompt">"このプロファイルを削除しますか？"</string>
+<string name="share_qr_nfc">"QRコード/NFC"</string>
 <string name="add_profile_dialog">"シャドーソックスにプロファイルを追加しますか"</string>
 <string name="add_profile_methods_scan_qr_code">"QRコードを読み取る"</string>
 <string name="add_profile_methods_manual_settings">"手動でセットアップ"</string>
+<string name="add_profile_scanner_not_installed">"Zxingに準拠したQRコードスキャンアプリをインストールして下さい"</string>
 <plurals name="removed">
 <item quantity="other">"削除済み"</item>
 </plurals>
-<string name="undo">"戻る"</string>
+<string name="undo">"撤回"</string>
 
 <!-- tasker -->
 <string name="toggle_service_state">"サービスを開始"</string>
@@ -111,16 +114,28 @@
 <!-- status -->
 <string name="sent">"送信済み:"</string>
 <string name="received">"受信済み:"</string>
+<string name="connecting">"接続中..."</string>
+<string name="vpn_connected">"接続済み、タップして接続状況をチェック"</string>
+<string name="nat_connected">"接続済み"</string>
+<string name="not_connected">"接続されませんでした"</string>
 
 <!-- kcp -->
 <string name="kcp_summary">"KCP プロトコル を有効にする"</string>
 <string name="kcp_port">"KCP ポート"</string>
 <string name="kcp_port_summary">"%d（リモート KCPTUN サーバーのポート番号）"</string>
 <string name="kcpcli">"KCP パラメータ"</string>
+
+<!-- acl -->
+<string name="custom_rules">"カスタムルール"</string>
+<string name="action_selection">"選択"</string>
+<string name="action_add_rule">"ルールを追加"</string>
+<string name="edit_rule">"ルールを編集"</string>
 <string name="route_entry_all">"すべて"</string>
 <string name="route_entry_bypass_lan">"LANアドレスを迂回する"</string>
 <string name="route_entry_bypass_chn">"中国本土のアドレスを迂回する"</string>
 <string name="route_entry_bypass_lan_chn">"LAN及び中国本土のアドレスを迂回する"</string>
 <string name="route_entry_chinalist">"中国本土のアドレス以外を迂回する"</string>
 <string name="proxied_apps_summary_v21">"選択したアプリにプロキシを設定する"</string>
+<string name="acl_rule_templates_generic">"サブネット/ホストネームPCREパターン"</string>
+<string name="acl_rule_templates_domain">"ドメイン及びサブドメイン"</string>
 </resources>
