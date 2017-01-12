@@ -6,6 +6,12 @@ version := "4.0.0"
 versionCode := Some(174)
 
 proguardOptions ++=
+  "-keep class android.support.v14.preference.SwitchPreference { <init>(...); }" ::
+  "-keep class android.support.v7.preference.DropDownPreference { <init>(...); }" ::
+  "-keep class android.support.v7.preference.PreferenceScreen { <init>(...); }" ::
+  "-keep class be.mygod.preference.EditTextPreference { <init>(...); }" ::
+  "-keep class be.mygod.preference.NumberPickerPreference { <init>(...); }" ::
+  "-keep class be.mygod.preference.PreferenceCategory { <init>(...); }" ::
   "-keep class com.github.shadowsocks.System { *; }" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
@@ -15,15 +21,9 @@ proguardOptions ++=
 
 resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
 
-val supportLibsVersion = "25.1.0"
 val playServicesVersion = "10.0.1"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
-  "com.android.support" % "cardview-v7" % supportLibsVersion ::
-  "com.android.support" % "customtabs" % supportLibsVersion ::
-  "com.android.support" % "design" % supportLibsVersion ::
-  "com.android.support" % "gridlayout-v7" % supportLibsVersion ::
-  "com.android.support" % "preference-v14" % supportLibsVersion ::
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
   "com.evernote" % "android-job" % "1.1.4" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::

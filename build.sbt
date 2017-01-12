@@ -17,9 +17,30 @@ lazy val commonSettings = Seq(
   typedResources := false
 )
 
-lazy val shadowsocks = project.in(file("."))
+val supportLibsVersion = "25.1.0"
+lazy val root = Project(id = "shadowsocks-android", base = file("."))
   .settings(commonSettings)
-  .aggregate(mobile)
+  .aggregate(pluginLib, mobile)
+
+install in Android := (install in (mobile, Android)).value
+run in Android := (run in (mobile, Android)).evaluated
+
+lazy val pluginLib = Project(id = "plugin-lib", base = file("plugin-lib"))
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++=
+      "com.android.support" % "preference-v14" % supportLibsVersion ::
+      Nil
+  )
 
 lazy val mobile = project
   .settings(commonSettings)
+  .settings(
+    libraryDependencies ++=
+      "com.android.support" % "cardview-v7" % supportLibsVersion ::
+      "com.android.support" % "customtabs" % supportLibsVersion ::
+      "com.android.support" % "design" % supportLibsVersion ::
+      "com.android.support" % "gridlayout-v7" % supportLibsVersion ::
+      Nil
+  )
+  .dependsOn(pluginLib)

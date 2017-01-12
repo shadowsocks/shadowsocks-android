@@ -26,7 +26,7 @@ import android.support.v7.preference.DialogPreference
 import android.util.AttributeSet
 import android.view.ContextThemeWrapper
 import android.widget.NumberPicker
-import com.github.shadowsocks.R
+import com.github.shadowsocks.plugin.R
 
 class NumberPickerPreference(private val context: Context, attrs: AttributeSet = null)
   extends DialogPreference(context, attrs) with DialogPreferencePlus with SummaryPreference {

@@ -4,8 +4,4 @@
         <attr name="bounded_width" format="dimension" />
         <attr name="bounded_height" format="dimension" />
     </declare-styleable>
-    <declare-styleable name="NumberPickerPreference">
-        <attr name="max" format="integer" />
-        <attr name="min" format="integer" />
-    </declare-styleable>
 </resources>

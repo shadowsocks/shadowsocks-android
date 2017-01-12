@@ -28,7 +28,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewCompat
 import android.support.v7.preference.{PreferenceGroup, PreferenceViewHolder, PreferenceGroupAdapter => Old}
 import android.view.{LayoutInflater, View, ViewGroup}
-import com.github.shadowsocks.R
+import com.github.shadowsocks.plugin.R
 
 /**
   * Fix by: https://github.com/Gericop/Android-Support-Preference-V7-Fix/commit/7de016b007e28a264001a8bb353f110a7f64bb69

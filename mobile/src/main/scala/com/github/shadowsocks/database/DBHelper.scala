@@ -127,10 +127,10 @@ class DBHelper(val context: Context)
           profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
           TableUtils.createTable(connectionSource, classOf[Profile])
           profileDao.executeRawNoArgs(
-            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
-            " udpdns, auth, ipv6, individual, tx, rx, date, userOrder, plugin) " +
+            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, remoteDns, proxyApps," +
+            " bypass, udpdns, auth, ipv6, individual, tx, rx, date, userOrder, plugin) " +
             "SELECT id, name, host, localPort, CASE WHEN kcp = 1 THEN kcpPort ELSE remotePort END, password, method, " +
-            "route, proxyApps, bypass, udpdns, auth, ipv6, individual, tx, rx, date, userOrder, " +
+            "route, remoteDns, proxyApps, bypass, udpdns, auth, ipv6, individual, tx, rx, date, userOrder, " +
             "CASE WHEN kcp = 1 THEN 'kcptun ' || kcpcli ELSE NULL END FROM `tmp`;")
           profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
           profileDao.executeRawNoArgs("COMMIT;")
