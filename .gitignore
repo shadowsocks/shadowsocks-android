@@ -28,6 +28,4 @@ out/
 #NDK
 src/main/obj
 src/main/libs
-src/main/assets/armeabi-v7a/*
-src/main/assets/x86/*
 jni/Application.mk
