@@ -7,7 +7,6 @@ env:
     global:
         - NDK_VERSION=r12b
         - NDK_CCACHE=ccache
-        - GOROOT_BOOTSTRAP=$GOROOT
         - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
         - SBTPATH=$HOME/.sbt
         - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
