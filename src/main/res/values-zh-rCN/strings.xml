@@ -7,14 +7,14 @@
 <string name="misc_cat">"其他"</string>
 <string name="profile">"配置文件"</string>
 <string name="profile_summary">"新建或切换到其他配置文件"</string>
-<string name="nat">"NAT 模式 (仅限调试)"</string>
+<string name="nat">"NAT 模式（仅限调试）"</string>
 <string name="nat_summary">"从 VPN 模式切换为 NAT 模式，需要 ROOT 权限"</string>
 <string name="remote_dns">"远程 DNS"</string>
 <string name="stat_summary">"发送: \t%3$s\t↑\t%1$s/s
 接收: \t%4$s\t↓\t%2$s/s"</string>
 <string name="connection_test_pending">"检查网络连接"</string>
-<string name="connection_test_testing">"测试中……"</string>
-<string name="connection_test_available">"连接有效: 延时 %d 毫秒"</string>
+<string name="connection_test_testing">"测试中…"</string>
+<string name="connection_test_available">"连接有效：延时 %d 毫秒"</string>
 <string name="connection_test_error">"失败：%s"</string>
 <string name="connection_test_fail">"无互联网连接"</string>
 <string name="connection_test_error_status_code">"状态码无效（#%d）"</string>
@@ -34,12 +34,6 @@
 <string name="ipv6_summary">"向远程服务器转发 IPv6 流量"</string>
 <string name="onetime_auth">"一次性认证"</string>
 <string name="onetime_auth_summary">"启用一次性认证"</string>
-<string name="http_proxy">"HTTP 代理服务器"</string>
-<string name="http_proxy_summary">"本地 HTTP 代理"</string>
-<string name="dns_proxy">"DNS 代理"</string>
-<string name="dns_proxy_summary">"重定向 DNS 查询到远程服务器"</string>
-<string name="auto_set_gfwlist">"国内路由"</string>
-<string name="auto_set_gfwlist_summary">"绕过所有位于中国的网站"</string>
 <string name="route_list">"路由"</string>
 <string name="route_entry_gfwlist">"仅代理中国大陆无法访问的地址"</string>
 <string name="proxied_apps">"分应用代理"</string>
@@ -63,10 +57,10 @@
 <string name="nat_no_root">"NAT 模式需要 ROOT 权限"</string>
 <string name="switch_to_vpn">"切换到 VPN 模式"</string>
 <string name="stop">"停止"</string>
-<string name="stopping">"正在关闭……"</string>
+<string name="stopping">"正在关闭…"</string>
 <string name="vpn_error">"后台服务启动失败：%s"</string>
 <string name="reboot_required">"VPN 服务启动失败。你可能需要重启设备。"</string>
-<string name="profile_invalid_input">"未找到有效配置文件。"</string>
+<string name="profile_invalid_input">"未找到有效的配置文件。"</string>
 
 <!-- alert category -->
 <string name="yes">"是"</string>
@@ -75,9 +69,7 @@
 <string name="profile_empty">"请选择配置文件"</string>
 <string name="proxy_empty">"代理服务器地址及密码不能为空"</string>
 <string name="connect">"连接"</string>
-<string name="initializing">"正在初始化……"</string>
-<string name="recovering">"重置中……"</string>
-<string name="loading">"正在加载……"</string>
+<string name="recovering">"重置中…"</string>
 <string name="remove_profile">"删除此配置文件「%s」?"</string>
 
 <!-- menu category -->
@@ -86,13 +78,9 @@
 <string name="faq">"常见问题"</string>
 <string name="recovery">"重置"</string>
 <string name="about">"关于"</string>
-<string name="about_title">"影梭（shadowsocks）%s"</string>
+<string name="about_title">"影梭 (shadowsocks) %s"</string>
 <string name="edit">"编辑"</string>
 <string name="share">"分享"</string>
-<string name="flush_dnscache">"刷新 DNS 缓存"</string>
-<string name="flush_dnscache_summary">"只需在 NAT 模式下使用，需要 ROOT 权限"</string>
-<string name="flush_dnscache_no_root">"在没有 ROOT 权限的情况下无法刷新 DNS 缓存"</string>
-<string name="flushing">"刷新中……"</string>
 <string name="add_profile">"添加配置文件"</string>
 <string name="action_apply_all">"应用设置到所有配置文件"</string>
 <string name="action_export">"导出至剪贴板"</string>
@@ -107,14 +95,14 @@
 <string name="unsaved_changes_prompt">"保存修改吗？"</string>
 <string name="apply">"应用"</string>
 <string name="delete">"删除"</string>
-<string name="delete_confirm_prompt">"你是否确定要删除这个配置文件？"</string>
+<string name="delete_confirm_prompt">"您确定要删除此配置文件？"</string>
 <string name="share_qr_nfc">"二维码 / NFC"</string>
 <string name="add_profile_dialog">"为影梭添加此配置文件？"</string>
 <string name="add_profile_methods_scan_qr_code">"扫描二维码"</string>
 <string name="add_profile_methods_manual_settings">"手动设置"</string>
 <string name="add_profile_scanner_not_installed">"请安装任意兼容 ZXing 的二维码扫描应用。"</string>
 <plurals name="removed">
-<item quantity="other">"已删除"</item>
+<item quantity="other">"已删除 %d 项"</item>
 </plurals>
 <string name="undo">"撤销"</string>
 
@@ -126,10 +114,10 @@
 <string name="profile_default">"使用当前配置"</string>
 
 <!-- status -->
-<string name="sent">"发送:"</string>
-<string name="received">"接收:"</string>
+<string name="sent">"发送："</string>
+<string name="received">"接收："</string>
 <string name="connecting">"连接中…"</string>
-<string name="vpn_connected">"已连接, 轻触以检查连接状态"</string>
+<string name="vpn_connected">"已连接，点击测试连接"</string>
 <string name="nat_connected">"已连接"</string>
 <string name="not_connected">"未连接"</string>
 
