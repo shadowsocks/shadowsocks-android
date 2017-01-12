@@ -20,12 +20,12 @@ lazy val commonSettings = Seq(
 val supportLibsVersion = "25.1.0"
 lazy val root = Project(id = "shadowsocks-android", base = file("."))
   .settings(commonSettings)
-  .aggregate(pluginLib, mobile)
+  .aggregate(plugin, mobile)
 
 install in Android := (install in (mobile, Android)).value
 run in Android := (run in (mobile, Android)).evaluated
 
-lazy val pluginLib = Project(id = "plugin-lib", base = file("plugin-lib"))
+lazy val plugin = project
   .settings(commonSettings)
   .settings(
     libraryDependencies ++=
@@ -43,4 +43,4 @@ lazy val mobile = project
       "com.android.support" % "gridlayout-v7" % supportLibsVersion ::
       Nil
   )
-  .dependsOn(pluginLib)
+  .dependsOn(plugin)
