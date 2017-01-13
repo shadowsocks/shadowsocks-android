@@ -34,7 +34,7 @@ final class BottomSheetPreferenceDialogFragment extends PreferenceDialogFragment
     dialog
   }
 
-  def onDialogClosed(positiveResult: Boolean): Unit = if (clickedIndex >= 0) {
+  def onDialogClosed(positiveResult: Boolean): Unit = if (clickedIndex >= 0 && clickedIndex != index) {
     val value = preference.getEntryValues()(clickedIndex).toString
     if (preference.callChangeListener(value)) preference.setValue(value)
   }

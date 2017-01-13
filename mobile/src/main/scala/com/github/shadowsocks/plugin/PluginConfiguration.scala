@@ -10,7 +10,7 @@ import scala.collection.mutable
   */
 class PluginConfiguration(val pluginsOptions: Map[String, PluginOptions], val selected: String) {
   private def this(plugins: Array[PluginOptions]) =
-    this(plugins.map(opt => opt.id -> opt).toMap, if (plugins.isEmpty) "" else plugins(0).id)
+    this(plugins.filter(_.id.nonEmpty).map(opt => opt.id -> opt).toMap, if (plugins.isEmpty) "" else plugins(0).id)
   def this(plugin: String) = this(if (plugin == null) Array[PluginOptions]() else plugin.split("\n").map {
     case line if line.startsWith("kcptun ") =>
       val opt = new PluginOptions()
@@ -30,7 +30,8 @@ class PluginConfiguration(val pluginsOptions: Map[String, PluginOptions], val se
     case line => new PluginOptions(line)
   })
 
-  def selectedOptions: PluginOptions = pluginsOptions(selected)
+  def getOptions(id: String): PluginOptions = if (id.isEmpty) new PluginOptions() else pluginsOptions(id)
+  def selectedOptions: PluginOptions = getOptions(selected)
 
   override def toString: String = {
     val result = new mutable.ListBuffer[PluginOptions]()
