@@ -142,4 +142,10 @@
   <string name="acl_rule_templates_generic">Subnet/Hostname PCRE pattern</string>
   <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
   <string name="edit_rule">Edit rule</string>
+
+  <!-- plugin -->
+  <string name="plugin">Plugin</string>
+  <string name="plugin_configure">Configure…</string>
+  <string name="plugin_disabled">Disabled</string>
+  <string name="plugin_unknown">Unknown plugin %s</string>
 </resources>

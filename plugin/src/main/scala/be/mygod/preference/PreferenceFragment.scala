@@ -30,9 +30,10 @@ abstract class PreferenceFragment extends Base {
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View =
     super.onCreateView(inflater, container, savedInstanceState)
 
-  protected final def displayPreferenceDialog(key: String, fragment: DialogFragment) {
+  protected final def displayPreferenceDialog(key: String, fragment: DialogFragment, other: Bundle = null) {
     val bundle = new Bundle(1)
     bundle.putString("key", key)
+    if (other != null) bundle.putAll(other)
     fragment.setArguments(bundle)
     fragment.setTargetFragment(this, 0)
     getFragmentManager.beginTransaction()

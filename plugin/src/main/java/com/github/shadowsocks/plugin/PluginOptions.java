@@ -37,8 +37,10 @@ public final class PluginOptions extends HashMap<String, String> {
                 key = current.toString();
                 current.setLength(0);
             } else if (";".equals(nextToken)) {
-                if (current.length() > 0) put(key, current.toString());
-                else if (firstEntry) id = key;
+                if (key != null) {
+                    put(key, current.toString());
+                    key = null;
+                } else if (firstEntry) id = current.toString();
                 else throw new IllegalArgumentException("Value missing in " + options);
                 firstEntry = false;
             }
@@ -49,7 +51,7 @@ public final class PluginOptions extends HashMap<String, String> {
         this.id = id;
     }
 
-    public String id;
+    public String id = "";
 
     private static void append(StringBuilder result, String str) {
         for (int i = 0; i < str.length(); ++i) {
@@ -62,7 +64,7 @@ public final class PluginOptions extends HashMap<String, String> {
     }
     public String toString(boolean trimId) {
         final StringBuilder result = new StringBuilder();
-        if (!trimId && !TextUtils.isEmpty(id)) append(result, id);
+        if (!trimId) if (TextUtils.isEmpty(id)) return ""; else append(result, id);
         for (Entry<String, String> entry : entrySet()) if (entry.getValue() != null) {
             if (result.length() > 0) result.append(';');
             append(result, entry.getKey());
@@ -73,6 +75,6 @@ public final class PluginOptions extends HashMap<String, String> {
     }
     @Override
     public String toString() {
-        return toString(false);
+        return toString(true);
     }
 }

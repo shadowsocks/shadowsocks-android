@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.SharedPreferences
+import android.content._
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
@@ -210,4 +210,15 @@ class ShadowsocksApplication extends Application {
   }
 
   def updateAssets(): Unit = if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
+
+  def listenForPackageChanges(callback: => Unit): BroadcastReceiver = {
+    val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
+    filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
+    filter.addDataScheme("package")
+    val result: BroadcastReceiver = (_: Context, intent: Intent) =>
+      if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED || !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))
+        callback
+    app.registerReceiver(result, filter)
+    result
+  }
 }

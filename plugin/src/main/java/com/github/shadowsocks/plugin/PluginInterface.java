@@ -51,6 +51,8 @@ public final class PluginInterface {
      */
     public static final String COLUMN_PATH = "path";
 
+    static final String AUTHORITY_BASE = "com.github.shadowsocks.plugin.";
+
     /**
      * Authority to use for native plugin ContentProvider.
      *
@@ -58,7 +60,7 @@ public final class PluginInterface {
      * @return com.github.shadowsocks.plugin.$PLUGIN_ID
      */
     public static String getAuthority(String pluginId) {
-        return "com.github.shadowsocks.plugin." + pluginId;
+        return AUTHORITY_BASE + pluginId;
     }
 
     /**

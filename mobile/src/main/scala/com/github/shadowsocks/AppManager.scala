@@ -48,21 +48,13 @@ object AppManager {
 
   private var instance: AppManager = _
 
-  private var receiverRegistered: Boolean = _
+  private var receiver: BroadcastReceiver = _
   private var cachedApps: Array[ProxiedApp] = _
   private def getApps(pm: PackageManager) = {
-    if (!receiverRegistered) {
-      val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-      filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
-      filter.addDataScheme("package")
-      app.registerReceiver((_: Context, intent: Intent) =>
-        if (intent.getAction != Intent.ACTION_PACKAGE_REMOVED ||
-          !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-          synchronized(cachedApps = null)
-          val instance = AppManager.instance
-          if (instance != null) instance.reloadApps()
-        }, filter)
-      receiverRegistered = true
+    if (receiver == null) receiver = app.listenForPackageChanges {
+      synchronized(cachedApps = null)
+      val instance = AppManager.instance
+      if (instance != null) instance.reloadApps()
     }
     synchronized {
       if (cachedApps == null) cachedApps = pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)

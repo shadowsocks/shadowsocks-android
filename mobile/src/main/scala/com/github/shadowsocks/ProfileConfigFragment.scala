@@ -23,19 +23,33 @@ package com.github.shadowsocks
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content.{DialogInterface, Intent, SharedPreferences}
 import android.os.{Build, Bundle, UserManager}
+import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
 import android.support.v7.app.AlertDialog
+import android.support.v7.preference.Preference
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
+import android.text.TextUtils
 import android.view.MenuItem
-import be.mygod.preference.PreferenceFragment
+import be.mygod.preference.{EditTextPreference, PreferenceFragment}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.plugin.{PluginConfiguration, PluginInterface, PluginManager, PluginOptions}
+import com.github.shadowsocks.preference.{IconListPreference, PluginConfigurationDialogFragment}
 import com.github.shadowsocks.utils.{Action, Key, Utils}
+
+object ProfileConfigFragment {
+  private final val REQUEST_CODE_CONFIGURE = 1
+}
 
 class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener
   with OnSharedPreferenceChangeListener {
+  import ProfileConfigFragment._
+
   private var profile: Profile = _
   private var isProxyApps: SwitchPreference = _
+  private var plugin: IconListPreference = _
+  private var pluginConfigure: EditTextPreference = _
+  private var pluginConfiguration: PluginConfiguration = _
 
   override def onCreatePreferences(bundle: Bundle, key: String) {
     app.profileManager.getProfile(getActivity.getIntent.getIntExtra(Action.EXTRA_PROFILE_ID, -1)) match {
@@ -57,7 +71,41 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       isProxyApps.setChecked(true)
       false
     })
+    plugin = findPreference(Key.plugin).asInstanceOf[IconListPreference]
+    pluginConfigure = findPreference("plugin.configure").asInstanceOf[EditTextPreference]
+    plugin.unknownValueSummary = getString(R.string.plugin_unknown)
+    plugin.setOnPreferenceChangeListener((_, value) => {
+      val selected = value.asInstanceOf[String]
+      pluginConfiguration = new PluginConfiguration(pluginConfiguration.pluginsOptions, selected)
+      app.editor.putString(Key.plugin, pluginConfiguration.toString).putBoolean(Key.dirty, true).apply()
+      pluginConfigure.setEnabled(!TextUtils.isEmpty(selected))
+      true
+    })
+    pluginConfigure.setOnPreferenceChangeListener((_, value) => try {
+      val selected = pluginConfiguration.selected
+      pluginConfiguration = new PluginConfiguration(pluginConfiguration.pluginsOptions +
+        (pluginConfiguration.selected -> new PluginOptions(selected, value.asInstanceOf[String])), selected)
+      app.editor.putString(Key.plugin, pluginConfiguration.toString).putBoolean(Key.dirty, true).apply()
+      true
+    } catch {
+      case exc: IllegalArgumentException =>
+        Snackbar.make(getActivity.findViewById(R.id.snackbar), exc.getLocalizedMessage, Snackbar.LENGTH_LONG).show()
+        false
+    })
+    initPlugins()
+    app.listenForPackageChanges(getView.post(initPlugins))
     app.settings.registerOnSharedPreferenceChangeListener(this)
+  }
+
+  def initPlugins() {
+    val plugins = PluginManager.fetchPlugins()
+    plugin.setEntries(plugins.map(_.label))
+    plugin.setEntryValues(plugins.map(_.id.asInstanceOf[CharSequence]))
+    plugin.setEntryIcons(plugins.map(_.icon))
+    pluginConfiguration = new PluginConfiguration(app.settings.getString(Key.plugin, null))
+    plugin.setValue(pluginConfiguration.selected)
+    plugin.checkSummary()
+    pluginConfigure.setText(pluginConfiguration.selectedOptions.toString)
   }
 
   override def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String): Unit =
@@ -72,6 +120,18 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
     super.onResume()
     isProxyApps.setChecked(app.settings.getBoolean(Key.proxyApps, false)) // fetch proxyApps updated by AppManager
   }
+
+  override def onDisplayPreferenceDialog(preference: Preference): Unit = if (preference eq pluginConfigure) {
+    val selected = pluginConfiguration.selected
+    val intent = new Intent(PluginInterface.ACTION_CONFIGURE(selected))
+    if (intent.resolveActivity(getActivity.getPackageManager) != null)
+      startActivityForResult(intent.putExtra(PluginInterface.EXTRA_OPTIONS,
+        pluginConfiguration.selectedOptions.toString), REQUEST_CODE_CONFIGURE) else {
+      val bundle = new Bundle()
+      bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, selected)
+      displayPreferenceDialog(preference.getKey, new PluginConfigurationDialogFragment, bundle)
+    }
+  } else super.onDisplayPreferenceDialog(preference)
 
   override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_delete =>

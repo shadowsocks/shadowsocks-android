@@ -18,34 +18,40 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package be.mygod.preference
+package com.github.shadowsocks.preference
 
-import android.content.Context
-import android.support.v14.preference.PreferenceDialogFragment
-import android.support.v7.widget.AppCompatEditText
-import android.view.{View, ViewGroup}
+import android.app.{Activity, AlertDialog}
+import android.content.{DialogInterface, Intent}
+import be.mygod.preference.EditTextPreferenceDialogFragment
+import com.github.shadowsocks.plugin.PluginInterface
 
-class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
-  private lazy val preference = getPreference.asInstanceOf[EditTextPreference]
-  protected lazy val editText: AppCompatEditText = preference.editText
+/**
+  * @author Mygod
+  */
+object PluginConfigurationDialogFragment {
+  final val PLUGIN_ID_FRAGMENT_TAG = "com.github.shadowsocks.preference.PluginConfigurationDialogFragment.PLUGIN_ID"
+  private final val REQUEST_CODE_HELP = 1
+}
 
-  override protected def onCreateDialogView(context: Context): AppCompatEditText = {
-    val parent = editText.getParent.asInstanceOf[ViewGroup]
-    if (parent != null) parent.removeView(editText)
-    editText
+class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment {
+  import PluginConfigurationDialogFragment._
+
+  override def onPrepareDialogBuilder(builder: AlertDialog.Builder) {
+    super.onPrepareDialogBuilder(builder)
+    val intent = new Intent(PluginInterface.ACTION_HELP(getArguments.getString(PLUGIN_ID_FRAGMENT_TAG)))
+    if (intent.resolveActivity(getContext.getPackageManager) != null) builder.setNeutralButton("?", ((_, _) =>
+      startActivityForResult(intent.putExtra(PluginInterface.EXTRA_OPTIONS, editText.getText.toString),
+        REQUEST_CODE_HELP)): DialogInterface.OnClickListener)
   }
 
-  override protected def onBindDialogView(view: View) {
-    super.onBindDialogView(view)
-    editText.setText(preference.getText)
-    val text = editText.getText
-    if (text != null) editText.setSelection(0, text.length)
-  }
-
-  override protected def needInputMethod = true
-
-  def onDialogClosed(positiveResult: Boolean): Unit = if (positiveResult) {
-    val value = editText.getText.toString
-    if (preference.callChangeListener(value)) preference.setText(value)
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
+    case REQUEST_CODE_HELP => requestCode match {
+      case Activity.RESULT_OK => new AlertDialog.Builder(getContext)
+        .setTitle("?")
+        .setMessage(data.getCharSequenceExtra(PluginInterface.EXTRA_HELP_MESSAGE))
+        .show()
+      case _ =>
+    }
+    case _ => super.onActivityResult(requestCode, resultCode, data)
   }
 }

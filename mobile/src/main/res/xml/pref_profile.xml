@@ -71,4 +71,20 @@
 
     </be.mygod.preference.PreferenceCategory>
 
+    <be.mygod.preference.PreferenceCategory
+            android:title="@string/plugin">
+
+        <com.github.shadowsocks.preference.IconListPreference
+                android:key="plugin"
+                android:persistent="false"
+                android:summary="%s"
+                android:title="@string/plugin"/>
+        <be.mygod.preference.EditTextPreference
+                android:key="plugin.configure"
+                android:persistent="false"
+                android:summary="%s"
+                android:title="@string/plugin_configure"/>
+
+    </be.mygod.preference.PreferenceCategory>
+
 </PreferenceScreen>
