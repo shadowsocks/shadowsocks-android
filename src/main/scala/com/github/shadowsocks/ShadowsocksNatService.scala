@@ -74,8 +74,8 @@ class ShadowsocksNatService extends BaseService {
   def startShadowsocksDaemon() {
 
     val conf = ConfigUtils
-    .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
-        profile.password, profile.method, 600, profile.protocol, profile.obfs, profile.obfs_param, profile.protocol_param)
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+        ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
       p.println(conf)
     })
@@ -100,8 +100,8 @@ class ShadowsocksNatService extends BaseService {
   def startTunnel() {
     if (profile.udpdns) {
       val conf = ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
-        profile.password, profile.method, 10, profile.protocol, profile.obfs, profile.obfs_param, profile.protocol_param)
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
+          ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })
@@ -126,7 +126,7 @@ class ShadowsocksNatService extends BaseService {
     } else {
       val conf = ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
-          profile.password, profile.method, 10, profile.protocol, profile.obfs, profile.obfs_param, profile.protocol_param)
+          ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
       })

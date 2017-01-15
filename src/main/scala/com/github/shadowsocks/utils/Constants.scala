@@ -49,6 +49,13 @@ object Executable {
 }
 
 object ConfigUtils {
+
+  def EscapedJson(OriginString:String):String = {
+    val ProcessString = OriginString.replaceAll("\\\\","\\\\\\\\").replaceAll("\"","\\\\\"")
+
+    ProcessString
+  }
+
   val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d, \"protocol\": \"%s\", \"obfs\": \"%s\", \"obfs_param\": \"%s\", \"protocol_param\": \"%s\"}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +

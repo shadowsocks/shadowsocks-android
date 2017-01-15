@@ -188,7 +188,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startShadowsocksUDPDaemon() {
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
-        profile.password, profile.method, 600, profile.protocol, profile.obfs, profile.obfs_param, profile.protocol_param)
+        ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf"))(p => {
       p.println(conf)
     })
@@ -208,7 +208,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
-        profile.password, profile.method, 600, profile.protocol, profile.obfs, profile.obfs_param, profile.protocol_param)
+        ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
       p.println(conf)
     })
@@ -236,7 +236,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startDnsTunnel() = {
     val conf = ConfigUtils
       .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
-        profile.password, profile.method, 10, profile.protocol, profile.obfs, profile.obfs_param, profile.protocol_param)
+        ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
