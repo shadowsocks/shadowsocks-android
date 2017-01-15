@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <cpu-features.h>
 
 #include <sys/un.h>
 #include <sys/stat.h>
@@ -16,6 +17,25 @@
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
+
+jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
+  AndroidCpuFamily family = android_getCpuFamily();
+  uint64_t features = android_getCpuFeatures();
+  const char *abi;
+
+  if (family == ANDROID_CPU_FAMILY_X86) {
+    abi = "x86";
+  } else if (family == ANDROID_CPU_FAMILY_MIPS) {
+    abi = "mips";
+  } else if (family == ANDROID_CPU_FAMILY_ARM) {
+    // if (features & ANDROID_CPU_ARM_FEATURE_ARMv7) {
+    abi = "armeabi-v7a";
+    // } else {
+    //   abi = "armeabi";
+    // }
+  }
+  return env->NewStringUTF(abi);
+}
 
 jint Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring cmd) {
     const char *cmd_str  = env->GetStringUTFChars(cmd, 0);
@@ -83,7 +103,9 @@ static JNINativeMethod method_table[] = {
     { "sendfd", "(ILjava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_system_sendfd },
     { "exec", "(Ljava/lang/String;)I",
-        (void*) Java_com_github_shadowsocks_system_exec }
+        (void*) Java_com_github_shadowsocks_system_exec },
+    { "getABI", "()Ljava/lang/String;",
+        (void*) Java_com_github_shadowsocks_system_getabi }
 };
 
 
