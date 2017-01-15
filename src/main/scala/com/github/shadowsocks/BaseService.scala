@@ -139,38 +139,40 @@ trait BaseService extends Service {
     false
   } else true
 
-  def connect() = if (profile.host == "198.199.101.152") {
-    val holder = app.containerHolder
-    val container = holder.getContainer
-    val url = container.getString("proxy_url")
-    val sig = Utils.getSignature(this)
+  def connect() {
+    if (profile.host == "198.199.101.152") {
+      val holder = app.containerHolder
+      val container = holder.getContainer
+      val url = container.getString("proxy_url")
+      val sig = Utils.getSignature(this)
 
-    val client = new OkHttpClient.Builder()
-      .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
-        case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
-        case _ => Dns.SYSTEM.lookup(hostname)
-      })
-      .connectTimeout(10, TimeUnit.SECONDS)
-      .writeTimeout(10, TimeUnit.SECONDS)
-      .readTimeout(30, TimeUnit.SECONDS)
-      .build()
-    val requestBody = new FormBody.Builder()
-      .add("sig", sig)
-      .build()
-    val request = new Request.Builder()
-      .url(url)
-      .post(requestBody)
-      .build()
+      val client = new OkHttpClient.Builder()
+        .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
+          case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
+          case _ => Dns.SYSTEM.lookup(hostname)
+        })
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+      val requestBody = new FormBody.Builder()
+        .add("sig", sig)
+        .build()
+      val request = new Request.Builder()
+        .url(url)
+        .post(requestBody)
+        .build()
 
-    val resposne = client.newCall(request).execute()
-    val list = resposne.body.string
+      val resposne = client.newCall(request).execute()
+      val list = resposne.body.string
 
-    val proxies = Random.shuffle(list.split('|').toSeq)
-    val proxy = proxies.head.split(':')
-    profile.host = proxy(0).trim
-    profile.remotePort = proxy(1).trim.toInt
-    profile.password = proxy(2).trim
-    profile.method = proxy(3).trim
+      val proxies = Random.shuffle(list.split('|').toSeq)
+      val proxy = proxies.head.split(':')
+      profile.host = proxy(0).trim
+      profile.remotePort = proxy(1).trim.toInt
+      profile.password = proxy(2).trim
+      profile.method = proxy(3).trim
+    }
   }
 
   def startRunner(profile: Profile) {
