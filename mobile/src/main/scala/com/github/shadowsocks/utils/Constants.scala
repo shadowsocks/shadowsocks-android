@@ -31,7 +31,6 @@ object Executable {
 }
 
 object ConfigUtils {
-  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +
     " log_info = off;\n" +

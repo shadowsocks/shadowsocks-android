@@ -21,7 +21,7 @@
 package com.github.shadowsocks.utils
 
 import com.github.shadowsocks.utils.CloseUtils._
-import java.io.{FileWriter, InputStream, OutputStream}
+import java.io._
 
 /**
   * @author Mygod
@@ -39,4 +39,10 @@ object IOUtils {
 
   def writeString(file: String, content: String): Unit =
     autoClose(new FileWriter(file))(writer => writer.write(content))
+
+  @throws[FileNotFoundException]
+  def deleteRecursively(file: File) {
+    if (file.isDirectory) file.listFiles().foreach(deleteRecursively)
+    if (!file.delete()) throw new FileNotFoundException("Failed to delete: " + file.getAbsolutePath)
+  }
 }

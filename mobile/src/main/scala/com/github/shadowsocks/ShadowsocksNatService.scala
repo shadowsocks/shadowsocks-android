@@ -53,21 +53,11 @@ class ShadowsocksNatService extends BaseService {
   var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
-    val conf =
-      ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
-        profile.password, profile.method, 600)
-    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
-      p.println(conf)
-    })
-
     val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
           , "-P", getApplicationInfo.dataDir
-          , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
-
-    if (profile.auth) cmd += "-A"
+          , "-c" , buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-local-nat.conf"))
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
@@ -76,55 +66,24 @@ class ShadowsocksNatService extends BaseService {
       cmd += Acl.getPath(profile.route)
     }
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
     sslocalProcess = new GuardedProcess(cmd).start()
   }
 
   def startDNSTunnel() {
-    if (profile.udpdns) {
-      val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
-          profile.password, profile.method, 10)
-      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
-        p.println(conf)
-      })
-      val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
-        , "-u"
-        , "-t" , "10"
-        , "-b" , "127.0.0.1"
-        , "-l" , (profile.localPort + 53).toString
-        , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
-        , "-P" , getApplicationInfo.dataDir
-        , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
+    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
+      , "-t" , "10"
+      , "-b" , "127.0.0.1"
+      , "-l" , (profile.localPort + 53).toString
+      , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
+      , "-P", getApplicationInfo.dataDir
+      , "-c" , buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf", 53))
 
-      if (profile.auth) cmd += "-A"
+    if (profile.udpdns) cmd.append("-u")
 
-      if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
 
-      sstunnelProcess = new GuardedProcess(cmd).start()
-
-    } else {
-      val conf =
-        ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
-          profile.password, profile.method, 10)
-      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
-        p.println(conf)
-      })
-      val cmdBuf = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
-        , "-t" , "10"
-        , "-b" , "127.0.0.1"
-        , "-l" , (profile.localPort + 63).toString
-        , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
-        , "-P", getApplicationInfo.dataDir
-        , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
-
-      if (profile.auth) cmdBuf += "-A"
-
-      if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
-
-      sstunnelProcess = new GuardedProcess(cmdBuf).start()
-    }
+    sstunnelProcess = new GuardedProcess(cmd).start()
   }
 
   def startDnsDaemon() {
@@ -150,7 +109,7 @@ class ShadowsocksNatService extends BaseService {
     })
     val cmd = Array(getApplicationInfo.nativeLibraryDir + "/libpdnsd.so", "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
 
     pdnsdProcess = new GuardedProcess(cmd).start()
   }
@@ -162,7 +121,7 @@ class ShadowsocksNatService extends BaseService {
       p.println(conf)
     })
 
-    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
     redsocksProcess = new GuardedProcess(cmd).start()
   }
 

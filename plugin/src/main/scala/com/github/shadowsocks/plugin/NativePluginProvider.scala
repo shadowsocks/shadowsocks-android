@@ -46,7 +46,7 @@ abstract class NativePluginProvider extends ContentProvider {
 
   override def query(uri: Uri, projection: Array[String], selection: String, selectionArgs: Array[String],
                      sortOrder: String): Cursor = {
-    if (selection != null || selectionArgs != null || sortOrder != null) ???
+    assert(selection == null && selectionArgs == null && sortOrder == null)
     val result = new MatrixCursor(projection.filter(_ == PluginInterface.COLUMN_PATH))
     populateFiles(new PathProvider(uri, result))
     result
@@ -54,7 +54,7 @@ abstract class NativePluginProvider extends ContentProvider {
 
   def openFile(uri: Uri): ParcelFileDescriptor
   override def openFile(uri: Uri, mode: String): ParcelFileDescriptor = {
-    if (mode != "r") ???
+    assert(mode == "r")
     openFile(uri)
   }
 

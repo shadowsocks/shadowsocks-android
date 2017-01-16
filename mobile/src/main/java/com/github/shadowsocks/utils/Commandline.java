@@ -1,6 +1,7 @@
 package com.github.shadowsocks.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
@@ -32,23 +33,21 @@ public final class Commandline {
     /**
      * Quote the parts of the given array in way that makes them
      * usable as command line arguments.
-     * @param line the list of arguments to quote.
+     * @param args the list of arguments to quote.
      * @return empty string for null or no command, else every argument split
      * by spaces and quoted by quoting rules.
      */
-    public static String toString(String[] line) {
+    public static String toString(Iterable<String> args) {
         // empty path return empty string
-        if (line == null || line.length == 0) {
+        if (args == null) {
             return "";
         }
         // path containing one or more elements
         final StringBuilder result = new StringBuilder();
-        for (int i = 0; i < line.length; i++) {
-            if (i > 0) {
-                result.append(' ');
-            }
-            for (int j = 0; j < line[i].length(); ++j) {
-                char ch = line[i].charAt(j);
+        for (String arg : args) {
+            if (result.length() > 0) result.append(' ');
+            for (int j = 0; j < arg.length(); ++j) {
+                char ch = arg.charAt(j);
                 switch (ch) {
                     case ' ': case '\\': case '"': case '\'': result.append('\\');  // intentionally no break
                     default: result.append(ch);
@@ -56,6 +55,16 @@ public final class Commandline {
             }
         }
         return result.toString();
+    }
+    /**
+     * Quote the parts of the given array in way that makes them
+     * usable as command line arguments.
+     * @param args the list of arguments to quote.
+     * @return empty string for null or no command, else every argument split
+     * by spaces and quoted by quoting rules.
+     */
+    public static String toString(String[] args) {
+        return toString(Arrays.asList(args));   // thanks to Java, arrays aren't iterable
     }
 
     /**

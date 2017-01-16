@@ -24,7 +24,7 @@ import java.io.IOException
 import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
-import java.util.{Timer, TimerTask}
+import java.util.{Locale, Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
@@ -36,6 +36,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.plugin.{PluginConfiguration, PluginManager, PluginOptions}
 import com.github.shadowsocks.utils._
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 
@@ -46,6 +47,8 @@ trait BaseService extends Service {
 
   @volatile private var state = State.STOPPED
   @volatile protected var profile: Profile = _
+  @volatile private var plugin: PluginOptions = _
+  @volatile private var pluginPath: String = _
 
   case class NameNotResolvedException() extends IOException
   case class NullConnectionException() extends NullPointerException
@@ -149,8 +152,12 @@ trait BaseService extends Service {
       profile.password = proxy(2).trim
       profile.method = proxy(3).trim
     }
+
     if (profile.route == Acl.CUSTOM_RULES)  // rationalize custom rules
       Acl.save(Acl.CUSTOM_RULES, new Acl().fromId(Acl.CUSTOM_RULES))
+
+    plugin = new PluginConfiguration(profile.plugin).selectedOptions
+    pluginPath = PluginManager.initPlugin(plugin.id)
   }
 
   def startRunner(profile: Profile) {
@@ -303,5 +310,23 @@ trait BaseService extends Service {
     } catch {
       case _: Exception => "exclude = " + default + ";"
     }
+  }
+
+  protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0): String = {
+    val builder = new StringBuilder(
+      """{"server": "%s", "server_port": %d, "local_port": %d, "password": "%s", "method": "%s""""
+        .formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + localPortOffset,
+          profile.password, profile.method))
+    if (profile.auth) builder.append(""", "auth": true""")
+    if (pluginPath != null) {
+      builder.append(""", "plugin": """")
+      builder.append(pluginPath)
+      builder.append("""", "plugin_opts": """")
+      builder.append(plugin.toString)
+      builder.append('"')
+    }
+    builder.append('}')
+    IOUtils.writeString(file, builder.toString)
+    file
   }
 }

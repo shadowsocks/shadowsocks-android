@@ -26,6 +26,7 @@ import java.util.concurrent.Semaphore
 
 import android.util.Log
 import com.github.shadowsocks.utils.CloseUtils._
+import com.github.shadowsocks.utils.Commandline
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.Stream
@@ -57,7 +58,7 @@ class GuardedProcess(cmd: Seq[String]) {
       try {
         var callback: () => Unit = null
         while (!isDestroyed) {
-          Log.i(TAG, "start process: " + cmd)
+          Log.i(TAG, "start process: " + Commandline.toString(cmd))
           val startTime = currentTimeMillis
 
           process = new ProcessBuilder(cmd).redirectErrorStream(true).start
@@ -75,7 +76,7 @@ class GuardedProcess(cmd: Seq[String]) {
               isRestart = false
             } else {
               if (currentTimeMillis - startTime < 1000) {
-                Log.w(TAG, "process exit too fast, stop guard: " + cmd)
+                Log.w(TAG, "process exit too fast, stop guard: " + Commandline.toString(cmd))
                 isDestroyed = true
               }
             }
@@ -83,11 +84,11 @@ class GuardedProcess(cmd: Seq[String]) {
         }
       } catch {
         case _: InterruptedException =>
-          Log.i(TAG, "thread interrupt, destroy process: " + cmd)
+          Log.i(TAG, "thread interrupt, destroy process: " + Commandline.toString(cmd))
           process.destroy()
         case e: IOException => ioException = e
       } finally semaphore.release()
-    }, "GuardThread-" + cmd)
+    }, "GuardThread-" + cmd.head)
 
     guardThread.start()
     semaphore.acquire()
