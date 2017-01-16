@@ -23,12 +23,11 @@ public final class PluginOptions extends HashMap<String, String> {
         super(initialCapacity, loadFactor);
     }
 
-    public PluginOptions(String options) throws IllegalArgumentException {
+    private PluginOptions(String options, boolean parseId) throws IllegalArgumentException {
         if (TextUtils.isEmpty(options)) return;
         final StringTokenizer tokenizer = new StringTokenizer(options, "\\=;", true);
         final StringBuilder current = new StringBuilder();
         String key = null;
-        boolean firstEntry = true;
         while (tokenizer.hasMoreTokens()) {
             String nextToken = tokenizer.nextToken();
             if ("\\".equals(nextToken)) current.append(tokenizer.nextToken());
@@ -36,22 +35,28 @@ public final class PluginOptions extends HashMap<String, String> {
                 if (key != null) throw new IllegalArgumentException("Duplicate keys in " + options);
                 key = current.toString();
                 current.setLength(0);
-            } else if (";".equals(nextToken)) {
+            } else if (";".equals(nextToken))
                 if (key != null) {
                     put(key, current.toString());
                     key = null;
-                } else if (firstEntry) id = current.toString();
-                else throw new IllegalArgumentException("Value missing in " + options);
-                firstEntry = false;
-            }
+                } else if (parseId) {
+                    id = current.toString();
+                    parseId = false;
+                } else {
+                    put(current.toString(), null);
+                    current.setLength(0);
+                }
         }
     }
+    public PluginOptions(String options) throws IllegalArgumentException {
+        this(options, true);
+    }
     public PluginOptions(String id, String options) throws IllegalArgumentException {
-        this(options);
+        this(options, false);
         this.id = id;
     }
 
-    public String id = "";
+    public String id;
 
     private static void append(StringBuilder result, String str) {
         for (int i = 0; i < str.length(); ++i) {
@@ -65,11 +70,14 @@ public final class PluginOptions extends HashMap<String, String> {
     public String toString(boolean trimId) {
         final StringBuilder result = new StringBuilder();
         if (!trimId) if (TextUtils.isEmpty(id)) return ""; else append(result, id);
-        for (Entry<String, String> entry : entrySet()) if (entry.getValue() != null) {
+        for (Entry<String, String> entry : entrySet()) {
             if (result.length() > 0) result.append(';');
             append(result, entry.getKey());
-            result.append('=');
-            append(result, entry.getValue());
+            String value = entry.getValue();
+            if (value != null) {
+                result.append('=');
+                append(result, value);
+            }
         }
         return result.toString();
     }
