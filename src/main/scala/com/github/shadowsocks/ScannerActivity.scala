@@ -63,6 +63,7 @@ class ScannerActivity extends AppCompatActivity with ZXingScannerView.ResultHand
       android.Manifest.permission.CAMERA)
     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
       scannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
+      scannerView.setAutoFocus(true)
       scannerView.startCamera()          // Start camera on resume
     } else {
       ActivityCompat.requestPermissions(this,
