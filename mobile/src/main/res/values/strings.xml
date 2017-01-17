@@ -26,7 +26,6 @@
   <string name="connection_test_error_status_code">Error code: #%d</string>
 
   <!-- proxy category -->
-  <string name="proxy_cat">Server Settings</string>
   <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
   <string name="remote_port">Remote Port</string>
@@ -35,7 +34,6 @@
   <string name="enc_method">Encrypt Method</string>
 
   <!-- feature category -->
-  <string name="feature_cat">Feature Settings</string>
   <string name="ipv6">IPv6 Route</string>
   <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
   <string name="onetime_auth">One-time Authentication</string>
@@ -75,8 +73,6 @@
   <string name="profile_invalid_input">No valid profile data found.</string>
 
   <!-- alert category -->
-  <string name="yes">Yes</string>
-  <string name="no">No</string>
   <string name="close">Close</string>
   <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
@@ -105,8 +101,6 @@
 
   <!-- profile -->
   <string name="profile_config">Profile config</string>
-  <string name="unsaved_changes_prompt">Changes not saved. Do you want to save?</string>
-  <string name="apply">Apply</string>
   <string name="delete">Remove</string>
   <string name="delete_confirm_prompt">Are you sure you want to remove this profile?</string>
   <string name="share_qr_nfc">QR code/NFC</string>

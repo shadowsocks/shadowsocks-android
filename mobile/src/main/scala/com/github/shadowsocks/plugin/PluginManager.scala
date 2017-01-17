@@ -38,7 +38,9 @@ object PluginManager {
       case null =>
       case path => return path
     } catch {
-      case t: Throwable => if (throwable == null) throwable = t
+      case t: Throwable =>
+        t.printStackTrace()
+        if (throwable == null) throwable = t
     }
 
     // add other plugin types here

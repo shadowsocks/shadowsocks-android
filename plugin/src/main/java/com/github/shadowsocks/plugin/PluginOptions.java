@@ -3,6 +3,7 @@ package com.github.shadowsocks.plugin;
 import android.text.TextUtils;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.StringTokenizer;
 
 /**
@@ -23,7 +24,7 @@ public final class PluginOptions extends HashMap<String, String> {
         super(initialCapacity, loadFactor);
     }
 
-    private PluginOptions(String options, boolean parseId) throws IllegalArgumentException {
+    private PluginOptions(String options, boolean parseId) {
         if (TextUtils.isEmpty(options)) return;
         final StringTokenizer tokenizer = new StringTokenizer(options, "\\=;", true);
         final StringBuilder current = new StringBuilder();
@@ -31,8 +32,7 @@ public final class PluginOptions extends HashMap<String, String> {
         while (tokenizer.hasMoreTokens()) {
             String nextToken = tokenizer.nextToken();
             if ("\\".equals(nextToken)) current.append(tokenizer.nextToken());
-            else if ("=".equals(nextToken)) {
-                if (key != null) throw new IllegalArgumentException("Duplicate keys in " + options);
+            else if ("=".equals(nextToken) && key == null) {
                 key = current.toString();
                 current.setLength(0);
             } else if (";".equals(nextToken))
@@ -46,12 +46,13 @@ public final class PluginOptions extends HashMap<String, String> {
                     put(current.toString(), null);
                     current.setLength(0);
                 }
+            else current.append(nextToken);
         }
     }
-    public PluginOptions(String options) throws IllegalArgumentException {
+    public PluginOptions(String options) {
         this(options, true);
     }
-    public PluginOptions(String id, String options) throws IllegalArgumentException {
+    public PluginOptions(String id, String options) {
         this(options, false);
         this.id = id;
     }
@@ -84,5 +85,19 @@ public final class PluginOptions extends HashMap<String, String> {
     @Override
     public String toString() {
         return toString(true);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PluginOptions that = (PluginOptions) o;
+        return Objects.equals(id, that.id) && super.equals(that);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), id);
     }
 }

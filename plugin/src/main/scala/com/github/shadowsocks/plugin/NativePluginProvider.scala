@@ -14,8 +14,8 @@ import android.os.ParcelFileDescriptor
   *    ...
   *    &lt;application&gt;
   *        ...
-  *        &lt;provider android:name="com.github.shadowsocks.$PLUGIN_ID.PluginProvider"
-  *                     android:authorities="com.github.shadowsocks.$PLUGIN_ID"&gt;
+  *        &lt;provider android:name="com.github.shadowsocks.$PLUGIN_ID.BinaryProvider"
+  *                     android:authorities="com.github.shadowsocks.plugin.$PLUGIN_ID"&gt;
   *            &lt;intent-filter&gt;
   *                &lt;category android:name="com.github.shadowsocks.plugin.CATEGORY_NATIVE_PLUGIN" /&gt;
   *            &lt;/intent-filter&gt;
