@@ -349,7 +349,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libev
+					-I$(LOCAL_PATH)/libev
 
 LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns \
 	libsodium libancillary libpcre
@@ -378,7 +378,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-I$(LOCAL_PATH)/libsodium/include \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/mbedtls/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
+					-I$(LOCAL_PATH)/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
 LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libudns libancillary
