@@ -84,7 +84,6 @@ SODIUM_SOURCE := \
 	crypto_secretbox/crypto_secretbox.c \
 	crypto_secretbox/crypto_secretbox_easy.c \
 	crypto_secretbox/xsalsa20poly1305/secretbox_xsalsa20poly1305_api.c \
-	crypto_secretbox/xsalsa20poly1305/ref/box_xsalsa20poly1305.c \
 	crypto_shorthash/crypto_shorthash.c \
 	crypto_shorthash/siphash24/shorthash_siphash24_api.c \
 	crypto_shorthash/siphash24/ref/shorthash_siphash24.c \
@@ -92,58 +91,10 @@ SODIUM_SOURCE := \
 	crypto_sign/ed25519/ref10/base.h \
 	crypto_sign/ed25519/ref10/base2.h \
 	crypto_sign/ed25519/sign_ed25519_api.c \
-	crypto_sign/ed25519/ref10/d.h \
-	crypto_sign/ed25519/ref10/d2.h \
-	crypto_sign/ed25519/ref10/fe.h \
-	crypto_sign/ed25519/ref10/fe_0.c \
-	crypto_sign/ed25519/ref10/fe_1.c \
-	crypto_sign/ed25519/ref10/fe_add.c \
-	crypto_sign/ed25519/ref10/fe_cmov.c \
-	crypto_sign/ed25519/ref10/fe_copy.c \
-	crypto_sign/ed25519/ref10/fe_frombytes.c \
-	crypto_sign/ed25519/ref10/fe_invert.c \
-	crypto_sign/ed25519/ref10/fe_isnegative.c \
-	crypto_sign/ed25519/ref10/fe_isnonzero.c \
-	crypto_sign/ed25519/ref10/fe_mul.c \
-	crypto_sign/ed25519/ref10/fe_neg.c \
-	crypto_sign/ed25519/ref10/fe_pow22523.c \
-	crypto_sign/ed25519/ref10/fe_sq.c \
-	crypto_sign/ed25519/ref10/fe_sq2.c \
-	crypto_sign/ed25519/ref10/fe_sub.c \
-	crypto_sign/ed25519/ref10/fe_tobytes.c \
-	crypto_sign/ed25519/ref10/ge.h \
-	crypto_sign/ed25519/ref10/ge_add.c \
-	crypto_sign/ed25519/ref10/ge_add.h \
-	crypto_sign/ed25519/ref10/ge_double_scalarmult.c \
-	crypto_sign/ed25519/ref10/ge_frombytes.c \
-	crypto_sign/ed25519/ref10/ge_madd.c \
-	crypto_sign/ed25519/ref10/ge_madd.h \
-	crypto_sign/ed25519/ref10/ge_msub.c \
-	crypto_sign/ed25519/ref10/ge_msub.h \
-	crypto_sign/ed25519/ref10/ge_p1p1_to_p2.c \
-	crypto_sign/ed25519/ref10/ge_p1p1_to_p3.c \
-	crypto_sign/ed25519/ref10/ge_p2_0.c \
-	crypto_sign/ed25519/ref10/ge_p2_dbl.c \
-	crypto_sign/ed25519/ref10/ge_p2_dbl.h \
-	crypto_sign/ed25519/ref10/ge_p3_0.c \
-	crypto_sign/ed25519/ref10/ge_p3_dbl.c \
-	crypto_sign/ed25519/ref10/ge_p3_to_cached.c \
-	crypto_sign/ed25519/ref10/ge_p3_to_p2.c \
-	crypto_sign/ed25519/ref10/ge_p3_tobytes.c \
-	crypto_sign/ed25519/ref10/ge_precomp_0.c \
-	crypto_sign/ed25519/ref10/ge_scalarmult_base.c \
-	crypto_sign/ed25519/ref10/ge_sub.c \
-	crypto_sign/ed25519/ref10/ge_sub.h \
-	crypto_sign/ed25519/ref10/ge_tobytes.c \
 	crypto_sign/ed25519/ref10/keypair.c \
 	crypto_sign/ed25519/ref10/open.c \
-	crypto_sign/ed25519/ref10/pow22523.h \
-	crypto_sign/ed25519/ref10/pow225521.h \
-	crypto_sign/ed25519/ref10/sc.h \
-	crypto_sign/ed25519/ref10/sc_muladd.c \
-	crypto_sign/ed25519/ref10/sc_reduce.c \
+	crypto_sign/ed25519/ref10/obsolete.c \
 	crypto_sign/ed25519/ref10/sign.c \
-	crypto_sign/ed25519/ref10/sqrtm1.h \
 	crypto_stream/crypto_stream.c \
 	crypto_stream/chacha20/stream_chacha20.c \
 	crypto_stream/chacha20/stream_chacha20.h \
@@ -166,23 +117,16 @@ SODIUM_SOURCE := \
 	sodium/version.c
 
 SODIUM_SOURCE += \
-	crypto_scalarmult/curve25519/ref10/curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/curve25519_ref10.h \
-	crypto_scalarmult/curve25519/ref10/fe.h \
-	crypto_scalarmult/curve25519/ref10/fe_0_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_1_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_add_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_copy_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_cswap_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_frombytes_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_invert_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_mul_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_mul121666_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_sq_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_sub_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/fe_tobytes_curve25519_ref10.c \
-	crypto_scalarmult/curve25519/ref10/montgomery.h \
-	crypto_scalarmult/curve25519/ref10/pow225521.h
+	crypto_scalarmult/curve25519/ref10/x25519_ref10.c
+
+SODIUM_SOURCE += \
+	crypto_pwhash/argon2/argon2-core.c \
+	crypto_pwhash/argon2/argon2.c \
+	crypto_pwhash/argon2/argon2-encoding.c \
+	crypto_pwhash/argon2/blake2b-long.c \
+	crypto_pwhash/argon2/argon2-fill-block-ref.c \
+	crypto_pwhash/argon2/pwhash_argon2i.c \
+	crypto_pwhash/argon2/argon2-fill-block-ssse3.c
 
 SODIUM_SOURCE += \
 	crypto_stream/salsa20/ref/stream_salsa20_ref.c \
@@ -192,10 +136,10 @@ SODIUM_SOURCE += \
 	randombytes/sysrandom/randombytes_sysrandom.c
 
 LOCAL_MODULE := sodium
-LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/libsodium/src/libsodium/include \
 				-I$(LOCAL_PATH)/include \
 				-I$(LOCAL_PATH)/include/sodium \
-				-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
+				-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 				-DPACKAGE_NAME=\"libsodium\" -DPACKAGE_TARNAME=\"libsodium\" \
 				-DPACKAGE_VERSION=\"1.0.7\" -DPACKAGE_STRING=\"libsodium\ 1.0.7\" \
 				-DPACKAGE_BUGREPORT=\"https://github.com/jedisct1/libsodium/issues\" \
@@ -211,7 +155,7 @@ LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/in
 				-DHAVE_WEAK_SYMBOLS=1 -DHAVE_ARC4RANDOM=1 -DHAVE_ARC4RANDOM_BUF=1 \
 				-DHAVE_MLOCK=1 -DHAVE_MPROTECT=1 -DHAVE_POSIX_MEMALIGN=1
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libsodium/src/libsodium/,$(SODIUM_SOURCE))
+LOCAL_SRC_FILES := $(addprefix libsodium/src/libsodium/,$(SODIUM_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -275,7 +219,7 @@ LOCAL_MODULE := libipset
 LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
 				-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libipset/,$(IPSET_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libipset/src/libipset/,$(IPSET_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -302,7 +246,7 @@ LOCAL_MODULE := libcork
 LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 				-DCORK_API=CORK_LOCAL
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/,$(CORK_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/src/libcork/,$(CORK_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -318,10 +262,10 @@ UDNS_SOURCES := udns_dn.c udns_dntosp.c udns_parse.c udns_resolver.c udns_init.c
 	udns_rr_srv.c udns_rr_naptr.c udns_codes.c udns_jran.c
 
 LOCAL_MODULE := libudns
-LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/shadowsocks-libev/libudns \
+LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/libudns \
 				-DHAVE_DECL_INET_NTOP
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libudns/,$(UDNS_SOURCES))
+LOCAL_SRC_FILES := $(addprefix libudns/,$(UDNS_SOURCES))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -335,8 +279,8 @@ LOCAL_MODULE := libev
 LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H \
 				-I$(LOCAL_PATH)/include/libev
 LOCAL_SRC_FILES := \
-	shadowsocks-libev/libev/ev.c \
-	shadowsocks-libev/libev/event.c 
+	libev/ev.c \
+	libev/event.c 
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -400,10 +344,10 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/mbedtls/include  \
 					-I$(LOCAL_PATH)/pcre \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
+					-I$(LOCAL_PATH)/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
+					-I$(LOCAL_PATH)/libsodium/src/libsodium/include \
+					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libev
 
@@ -429,10 +373,10 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
+					-I$(LOCAL_PATH)/libudns \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
+					-I$(LOCAL_PATH)/libsodium/include \
+					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/mbedtls/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
