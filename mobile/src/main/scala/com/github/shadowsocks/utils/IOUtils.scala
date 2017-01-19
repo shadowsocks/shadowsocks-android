@@ -41,7 +41,7 @@ object IOUtils {
     autoClose(new FileWriter(file))(writer => writer.write(content))
 
   @throws[FileNotFoundException]
-  def deleteRecursively(file: File) {
+  def deleteRecursively(file: File): Unit = if (file.exists()) {
     if (file.isDirectory) file.listFiles().foreach(deleteRecursively)
     if (!file.delete()) throw new FileNotFoundException("Failed to delete: " + file.getAbsolutePath)
   }

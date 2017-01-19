@@ -35,5 +35,5 @@ trait ConfigurationActivity extends OptionsCapableActivity {
     * @param options PluginOptions to save.
     */
   final def saveChanges(options: PluginOptions): Unit =
-    setResult(Activity.RESULT_OK, new Intent().putExtra(PluginInterface.EXTRA_OPTIONS, options.toString))
+    setResult(Activity.RESULT_OK, new Intent().putExtra(PluginContract.EXTRA_OPTIONS, options.toString))
 }

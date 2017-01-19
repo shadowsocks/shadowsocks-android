@@ -25,8 +25,9 @@ public final class PluginOptions extends HashMap<String, String> {
     }
 
     private PluginOptions(String options, boolean parseId) {
+        this();
         if (TextUtils.isEmpty(options)) return;
-        final StringTokenizer tokenizer = new StringTokenizer(options, "\\=;", true);
+        final StringTokenizer tokenizer = new StringTokenizer(options + ';', "\\=;", true);
         final StringBuilder current = new StringBuilder();
         String key = null;
         while (tokenizer.hasMoreTokens()) {
@@ -35,18 +36,15 @@ public final class PluginOptions extends HashMap<String, String> {
             else if ("=".equals(nextToken) && key == null) {
                 key = current.toString();
                 current.setLength(0);
-            } else if (";".equals(nextToken))
+            } else if (";".equals(nextToken)) {
                 if (key != null) {
                     put(key, current.toString());
                     key = null;
-                } else if (parseId) {
-                    id = current.toString();
-                    parseId = false;
-                } else {
-                    put(current.toString(), null);
-                    current.setLength(0);
-                }
-            else current.append(nextToken);
+                } else if (current.length() > 0)
+                    if (parseId) id = current.toString(); else put(current.toString(), null);
+                current.setLength(0);
+                parseId = false;
+            } else current.append(nextToken);
         }
     }
     public PluginOptions(String options) {
@@ -57,7 +55,7 @@ public final class PluginOptions extends HashMap<String, String> {
         this.id = id;
     }
 
-    public String id;
+    public String id = "";
 
     private static void append(StringBuilder result, String str) {
         for (int i = 0; i < str.length(); ++i) {

@@ -20,8 +20,9 @@
 
 package com.github.shadowsocks
 
+import android.app.Activity
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.content.{DialogInterface, Intent, SharedPreferences}
+import android.content._
 import android.os.{Build, Bundle, UserManager}
 import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
@@ -33,7 +34,7 @@ import android.view.MenuItem
 import be.mygod.preference.{EditTextPreference, PreferenceFragment}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.plugin.{PluginConfiguration, PluginInterface, PluginManager, PluginOptions}
+import com.github.shadowsocks.plugin._
 import com.github.shadowsocks.preference.{IconListPreference, PluginConfigurationDialogFragment}
 import com.github.shadowsocks.utils.{Action, Key, Utils}
 
@@ -79,34 +80,38 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       pluginConfiguration = new PluginConfiguration(pluginConfiguration.pluginsOptions, selected)
       app.editor.putString(Key.plugin, pluginConfiguration.toString).putBoolean(Key.dirty, true).apply()
       pluginConfigure.setEnabled(!TextUtils.isEmpty(selected))
+      pluginConfigure.setText(pluginConfiguration.selectedOptions.toString)
       true
     })
-    pluginConfigure.setOnPreferenceChangeListener((_, value) => try {
-      val selected = pluginConfiguration.selected
-      pluginConfiguration = new PluginConfiguration(pluginConfiguration.pluginsOptions +
-        (pluginConfiguration.selected -> new PluginOptions(selected, value.asInstanceOf[String])), selected)
-      app.editor.putString(Key.plugin, pluginConfiguration.toString).putBoolean(Key.dirty, true).apply()
-      true
-    } catch {
-      case exc: IllegalArgumentException =>
-        Snackbar.make(getActivity.findViewById(R.id.snackbar), exc.getLocalizedMessage, Snackbar.LENGTH_LONG).show()
-        false
-    })
+    pluginConfigure.setOnPreferenceChangeListener(onPluginConfigureChanged)
     initPlugins()
-    app.listenForPackageChanges(if (getView != null) getView.post(initPlugins))
+    app.listenForPackageChanges(initPlugins())
     app.settings.registerOnSharedPreferenceChangeListener(this)
   }
 
   def initPlugins() {
     val plugins = PluginManager.fetchPlugins()
-    plugin.setEntries(plugins.map(_.label))
-    plugin.setEntryValues(plugins.map(_.id.asInstanceOf[CharSequence]))
-    plugin.setEntryIcons(plugins.map(_.icon))
+    plugin.setEntries(plugins.map(_._2.label).toArray)
+    plugin.setEntryValues(plugins.map(_._2.id.asInstanceOf[CharSequence]).toArray)
+    plugin.setEntryIcons(plugins.map(_._2.icon).toArray)
+    plugin.entryPackageNames = plugins.map(_._2.packageName).toArray
     pluginConfiguration = new PluginConfiguration(app.settings.getString(Key.plugin, null))
     plugin.setValue(pluginConfiguration.selected)
     plugin.checkSummary()
     pluginConfigure.setEnabled(!TextUtils.isEmpty(pluginConfiguration.selected))
     pluginConfigure.setText(pluginConfiguration.selectedOptions.toString)
+  }
+
+  private def onPluginConfigureChanged(p: Preference, value: Any) = try {
+    val selected = pluginConfiguration.selected
+    pluginConfiguration = new PluginConfiguration(pluginConfiguration.pluginsOptions +
+      (pluginConfiguration.selected -> new PluginOptions(selected, value.asInstanceOf[String])), selected)
+    app.editor.putString(Key.plugin, pluginConfiguration.toString).putBoolean(Key.dirty, true).apply()
+    true
+  } catch {
+    case exc: IllegalArgumentException =>
+      Snackbar.make(getActivity.findViewById(R.id.snackbar), exc.getLocalizedMessage, Snackbar.LENGTH_LONG).show()
+      false
   }
 
   override def onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String): Unit =
@@ -124,15 +129,24 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
 
   override def onDisplayPreferenceDialog(preference: Preference): Unit = if (preference eq pluginConfigure) {
     val selected = pluginConfiguration.selected
-    val intent = new Intent(PluginInterface.ACTION_CONFIGURE(selected))
+    val intent = PluginManager.buildIntent(selected, PluginContract.ACTION_CONFIGURE)
     if (intent.resolveActivity(getActivity.getPackageManager) != null)
-      startActivityForResult(intent.putExtra(PluginInterface.EXTRA_OPTIONS,
+      startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS,
         pluginConfiguration.selectedOptions.toString), REQUEST_CODE_CONFIGURE) else {
       val bundle = new Bundle()
       bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, selected)
       displayPreferenceDialog(preference.getKey, new PluginConfigurationDialogFragment, bundle)
     }
   } else super.onDisplayPreferenceDialog(preference)
+
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
+    case REQUEST_CODE_CONFIGURE => if (resultCode == Activity.RESULT_OK) {
+      val options = data.getStringExtra(PluginContract.EXTRA_OPTIONS)
+      pluginConfigure.setText(options)
+      onPluginConfigureChanged(null, options)
+    }
+    case _ => super.onActivityResult(requestCode, resultCode, data)
+  }
 
   override def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_delete =>

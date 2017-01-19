@@ -19,6 +19,7 @@ class IconListPreference(context: Context, attrs: AttributeSet = null) extends L
   def selectedEntry: Int = getEntryValues.indexOf(getValue)
 
   var unknownValueSummary: String = _
+  var entryPackageNames: Array[String] = _
 
   private var listener: OnPreferenceChangeListener = _
   override def getOnPreferenceChangeListener: OnPreferenceChangeListener = listener

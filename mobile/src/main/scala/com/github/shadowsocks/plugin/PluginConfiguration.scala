@@ -19,7 +19,7 @@ class PluginConfiguration(val pluginsOptions: Map[String, PluginOptions], val se
         val args = mutable.Queue(Commandline.translateCommandline(line): _*)
         args.dequeue()
         while (args.nonEmpty) args.dequeue() match {
-          case "--nocomp" => opt.put("nocomp", "1")
+          case "--nocomp" => opt.put("nocomp", null)
           case option if option.startsWith("--") => opt.put(option.substring(2), args.dequeue())
           case option => throw new IllegalArgumentException("Unknown kcptun parameter: " + option)
         }
@@ -30,7 +30,10 @@ class PluginConfiguration(val pluginsOptions: Map[String, PluginOptions], val se
     case line => new PluginOptions(line)
   })
 
-  def getOptions(id: String): PluginOptions = if (id.isEmpty) new PluginOptions() else pluginsOptions(id)
+  def getOptions(id: String): PluginOptions = if (id.isEmpty) new PluginOptions() else pluginsOptions.get(id) match {
+    case Some(options) => options
+    case None => new PluginOptions(id, PluginManager.fetchPlugins()(id).defaultConfig)
+  }
   def selectedOptions: PluginOptions = getOptions(selected)
 
   override def toString: String = {
@@ -39,6 +42,7 @@ class PluginConfiguration(val pluginsOptions: Map[String, PluginOptions], val se
       case this.selected => result.prepend(opt)
       case _ => result.append(opt)
     }
+    if (!pluginsOptions.contains(selected)) result.prepend(selectedOptions)
     result.map(_.toString(false)).mkString("\n")
   }
 }

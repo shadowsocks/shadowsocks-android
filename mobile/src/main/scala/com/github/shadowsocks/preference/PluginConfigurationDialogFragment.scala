@@ -23,7 +23,7 @@ package com.github.shadowsocks.preference
 import android.app.{Activity, AlertDialog}
 import android.content.{DialogInterface, Intent}
 import be.mygod.preference.EditTextPreferenceDialogFragment
-import com.github.shadowsocks.plugin.PluginInterface
+import com.github.shadowsocks.plugin.{PluginContract, PluginManager}
 
 /**
   * @author Mygod
@@ -38,9 +38,9 @@ class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment
 
   override def onPrepareDialogBuilder(builder: AlertDialog.Builder) {
     super.onPrepareDialogBuilder(builder)
-    val intent = new Intent(PluginInterface.ACTION_HELP(getArguments.getString(PLUGIN_ID_FRAGMENT_TAG)))
+    val intent = PluginManager.buildIntent(getArguments.getString(PLUGIN_ID_FRAGMENT_TAG), PluginContract.ACTION_HELP)
     if (intent.resolveActivity(getActivity.getPackageManager) != null) builder.setNeutralButton("?", ((_, _) =>
-      startActivityForResult(intent.putExtra(PluginInterface.EXTRA_OPTIONS, editText.getText.toString),
+      startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.getText.toString),
         REQUEST_CODE_HELP)): DialogInterface.OnClickListener)
   }
 
@@ -48,7 +48,7 @@ class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment
     case REQUEST_CODE_HELP => requestCode match {
       case Activity.RESULT_OK => new AlertDialog.Builder(getContext)
         .setTitle("?")
-        .setMessage(data.getCharSequenceExtra(PluginInterface.EXTRA_HELP_MESSAGE))
+        .setMessage(data.getCharSequenceExtra(PluginContract.EXTRA_HELP_MESSAGE))
         .show()
       case _ =>
     }

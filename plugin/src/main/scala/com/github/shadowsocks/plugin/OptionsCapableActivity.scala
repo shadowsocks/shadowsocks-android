@@ -12,7 +12,7 @@ import android.widget.Toast
   */
 trait OptionsCapableActivity extends Activity {
   protected def pluginOptions(intent: Intent = getIntent): PluginOptions =
-    try new PluginOptions(intent.getStringExtra(PluginInterface.EXTRA_OPTIONS)) catch {
+    try new PluginOptions(intent.getStringExtra(PluginContract.EXTRA_OPTIONS)) catch {
       case exc: IllegalArgumentException =>
         Toast.makeText(this, exc.getMessage, Toast.LENGTH_SHORT).show()
         null

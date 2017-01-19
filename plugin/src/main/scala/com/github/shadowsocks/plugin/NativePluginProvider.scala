@@ -17,7 +17,7 @@ import android.os.ParcelFileDescriptor
   *        &lt;provider android:name="com.github.shadowsocks.$PLUGIN_ID.BinaryProvider"
   *                     android:authorities="com.github.shadowsocks.plugin.$PLUGIN_ID"&gt;
   *            &lt;intent-filter&gt;
-  *                &lt;category android:name="com.github.shadowsocks.plugin.CATEGORY_NATIVE_PLUGIN" /&gt;
+  *                &lt;category android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" /&gt;
   *            &lt;/intent-filter&gt;
   *        &lt;/provider&gt;
   *        ...
@@ -47,7 +47,7 @@ abstract class NativePluginProvider extends ContentProvider {
   override def query(uri: Uri, projection: Array[String], selection: String, selectionArgs: Array[String],
                      sortOrder: String): Cursor = {
     assert(selection == null && selectionArgs == null && sortOrder == null)
-    val result = new MatrixCursor(projection.filter(_ == PluginInterface.COLUMN_PATH))
+    val result = new MatrixCursor(projection)
     populateFiles(new PathProvider(uri, result))
     result
   }
