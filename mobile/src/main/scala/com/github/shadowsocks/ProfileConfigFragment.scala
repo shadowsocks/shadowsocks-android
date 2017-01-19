@@ -93,7 +93,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
         false
     })
     initPlugins()
-    app.listenForPackageChanges(getView.post(initPlugins))
+    app.listenForPackageChanges(if (getView != null) getView.post(initPlugins))
     app.settings.registerOnSharedPreferenceChangeListener(this)
   }
 

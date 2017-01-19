@@ -39,7 +39,7 @@ class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment
   override def onPrepareDialogBuilder(builder: AlertDialog.Builder) {
     super.onPrepareDialogBuilder(builder)
     val intent = new Intent(PluginInterface.ACTION_HELP(getArguments.getString(PLUGIN_ID_FRAGMENT_TAG)))
-    if (intent.resolveActivity(getContext.getPackageManager) != null) builder.setNeutralButton("?", ((_, _) =>
+    if (intent.resolveActivity(getActivity.getPackageManager) != null) builder.setNeutralButton("?", ((_, _) =>
       startActivityForResult(intent.putExtra(PluginInterface.EXTRA_OPTIONS, editText.getText.toString),
         REQUEST_CODE_HELP)): DialogInterface.OnClickListener)
   }

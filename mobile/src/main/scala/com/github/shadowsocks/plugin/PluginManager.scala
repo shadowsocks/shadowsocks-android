@@ -5,6 +5,7 @@ import java.io.{File, FileNotFoundException, FileOutputStream, IOException}
 import android.content.pm.PackageManager
 import android.content.{BroadcastReceiver, ContentResolver, Intent}
 import android.net.Uri
+import android.text.TextUtils
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.IOUtils
@@ -22,8 +23,10 @@ object PluginManager {
     synchronized(if (cachedPlugins == null) {
       val pm = app.getPackageManager
       cachedPlugins = (NoPlugin +:
-        pm.queryIntentContentProviders(new Intent().addCategory(PluginInterface.CATEGORY_NATIVE_PLUGIN),
-          PackageManager.GET_META_DATA).asScala.map(new NativePlugin(_, pm))).toArray
+        pm.queryContentProviders(null, 0, PackageManager.GET_META_DATA).asScala
+          .filter(_ != null)
+          .filter(_.authority.startsWith(PluginInterface.AUTHORITY_BASE))
+          .map(new NativePlugin(_, pm))).toArray
     })
     cachedPlugins
   }
@@ -31,7 +34,7 @@ object PluginManager {
   // the following parts are meant to be used by :bg
   @throws[Throwable]
   def initPlugin(id: String): String = {
-    if (id.isEmpty) return null
+    if (TextUtils.isEmpty(id)) return null
     var throwable: Throwable = null
 
     try initNativePlugin(id) match {
@@ -62,7 +65,11 @@ object PluginManager {
       var initialized = false
       val pluginDir = new File(app.getFilesDir, "plugin")
       if (cursor.moveToFirst()) {
-        IOUtils.deleteRecursively(pluginDir)
+        try {
+          IOUtils.deleteRecursively(pluginDir)
+        } catch {
+          case ex: IOException => // Ignore
+        }
         if (!pluginDir.mkdirs()) throw new FileNotFoundException("Unable to create plugin directory")
         val pluginDirPath = pluginDir.getAbsolutePath + '/'
         do {
