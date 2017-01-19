@@ -142,4 +142,5 @@
   <string name="plugin_configure">Configure…</string>
   <string name="plugin_disabled">Disabled</string>
   <string name="plugin_unknown">Unknown plugin %s</string>
+  <string name="profile_plugin">Plugin: %s</string>
 </resources>

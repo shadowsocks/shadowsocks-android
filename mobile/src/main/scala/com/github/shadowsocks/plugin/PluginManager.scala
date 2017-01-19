@@ -11,6 +11,7 @@ import com.github.shadowsocks.utils.{Commandline, IOUtils}
 import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 /**
   * @author Mygod
@@ -80,14 +81,14 @@ object PluginManager {
       IOUtils.deleteRecursively(pluginDir)
       if (!pluginDir.mkdirs()) throw new FileNotFoundException("Unable to create plugin directory")
       val pluginDirPath = pluginDir.getAbsolutePath + '/'
-      var list: List[String] = Nil
+      val list = new ListBuffer[String]
       do {
         val path = cursor.getString(0)
         val file = new File(pluginDir, path)
         assert(file.getAbsolutePath.startsWith(pluginDirPath))
         autoClose(cr.openInputStream(builder.path(path).build()))(in =>
           autoClose(new FileOutputStream(file))(out => IOUtils.copy(in, out)))
-        list +:= Commandline.toString(Array("chmod", cursor.getString(1), file.getAbsolutePath))
+        list += Commandline.toString(Array("chmod", cursor.getString(1), file.getAbsolutePath))
         if (path == id) initialized = true
       } while (cursor.moveToNext())
       if (!initialized) entryNotFound()

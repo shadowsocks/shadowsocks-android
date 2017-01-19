@@ -37,11 +37,12 @@ import android.view._
 import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
 
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Random
 
 object ProfilesFragment {
@@ -77,8 +78,8 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
     var item: Profile = _
 
-    private val title = itemView.findViewById(R.id.title).asInstanceOf[TextView]
-    private val address = itemView.findViewById(R.id.address).asInstanceOf[TextView]
+    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
     private val traffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
     private val edit = itemView.findViewById(R.id.edit)
     edit.setOnClickListener(_ => startConfig(item.id))
@@ -111,10 +112,22 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         tx += txTotal
         rx += rxTotal
       }
-      title.setText(item.getName)
-      address.setText(if (item.nameIsEmpty) "" else item.formattedAddress)
-      traffic.setText(if (tx <= 0 && rx <= 0) null else getString(R.string.stat_profiles,
-        TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
+      text1.setText(item.getName)
+      val t2 = new ListBuffer[String]
+      if (!item.nameIsEmpty) t2 += item.formattedAddress
+      new PluginConfiguration(item.plugin).selected match {
+        case "" =>
+        case id => t2 += app.getString(R.string.profile_plugin, id)
+      }
+      if (t2.isEmpty) text2.setVisibility(View.GONE) else {
+        text2.setVisibility(View.VISIBLE)
+        text2.setText(t2.mkString("\n"))
+      }
+      if (tx <= 0 && rx <= 0) traffic.setVisibility(View.GONE) else {
+        traffic.setVisibility(View.VISIBLE)
+        traffic.setText(getString(R.string.stat_profiles,
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
+      }
 
       if (item.id == app.profileId) {
         itemView.setSelected(true)

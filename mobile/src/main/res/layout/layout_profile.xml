@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:id="@+id/container">
-                <TextView android:id="@+id/title"
+                <TextView android:id="@android:id/text1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -54,27 +54,29 @@
                     android:contentDescription="@string/edit"
                     android:focusable="true"/>
             </LinearLayout>
-            <LinearLayout android:layout_width="match_parent"
+            <RelativeLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="4dp"
-                android:id="@+id/details">
-                <TextView android:id="@+id/address"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorSecondary"/>
+                android:layout_marginTop="4dp">
+                <TextView android:id="@android:id/text2"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_alignParentStart="true"
+                          android:layout_toStartOf="@+id/traffic"
+                          android:layout_marginEnd="8dp"
+                          android:maxLines="2"
+                          android:ellipsize="end"
+                          android:textAppearance="?android:attr/textAppearanceSmall"
+                          android:textColor="?android:attr/textColorSecondary"/>
                 <TextView android:id="@+id/traffic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
+                    android:layout_alignParentEnd="true"
                     android:ellipsize="end"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?android:attr/textColorSecondary"/>
-            </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
     </com.github.shadowsocks.widget.BoundedCardView>
 </FrameLayout>
