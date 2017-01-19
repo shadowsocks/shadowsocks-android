@@ -43,7 +43,7 @@ import android.view.View
 import android.widget.{TextView, Toast}
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.acl.CustomRulesFragment
+import com.github.shadowsocks.acl.{Acl, CustomRulesFragment}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
@@ -267,7 +267,10 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       val id = testCount  // it would change by other code
       Utils.ThrowableFuture {
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection()
+        autoDisconnect(new URL("https", app.currentProfile.get.route match {
+          case Acl.CHINALIST => "www.qualcomm.cn"
+          case _ => "www.google.com"
+        }, "/generate_204").openConnection()
           .asInstanceOf[HttpURLConnection]) { conn =>
           conn.setConnectTimeout(5 * 1000)
           conn.setReadTimeout(5 * 1000)
