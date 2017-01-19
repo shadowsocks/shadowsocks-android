@@ -24,7 +24,7 @@ import java.io.IOException
 import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
-import java.util.{Locale, Timer, TimerTask}
+import java.util.{Timer, TimerTask}
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
@@ -39,6 +39,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.plugin.{PluginConfiguration, PluginManager, PluginOptions}
 import com.github.shadowsocks.utils._
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
+import org.json.JSONObject
 
 import scala.collection.mutable
 import scala.util.Random
@@ -313,20 +314,18 @@ trait BaseService extends Service {
   }
 
   protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0): String = {
-    val builder = new StringBuilder(
-      """{"server": "%s", "server_port": %d, "local_port": %d, "password": "%s", "method": "%s""""
-        .formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + localPortOffset,
-          profile.password, profile.method))
-    if (profile.auth) builder.append(""", "auth": true""")
+    val config = new JSONObject()
+    config.put("server", profile.host)
+    config.put("server_port", profile.remotePort)
+    config.put("local_port", profile.localPort + localPortOffset)
+    config.put("password", profile.password)
+    config.put("method", profile.method)
+    if (profile.auth) config.put("auth", true)
     if (pluginPath != null) {
-      builder.append(""", "plugin": """")
-      builder.append(pluginPath)
-      builder.append("""", "plugin_opts": """")
-      builder.append(plugin.toString)
-      builder.append('"')
+      config.put("plugin", pluginPath)
+      config.put("plugin_opts", plugin.toString)
     }
-    builder.append('}')
-    IOUtils.writeString(file, builder.toString)
+    IOUtils.writeString(file, config.toString)
     file
   }
 }
