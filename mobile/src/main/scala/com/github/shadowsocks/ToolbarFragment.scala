@@ -36,4 +36,6 @@ class ToolbarFragment extends Fragment {
   }
 
   def onTrafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long): Unit = ()
+
+  def onBackPressed(): Boolean = false
 }

@@ -63,9 +63,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
   }
 
   private val selectedItems = new mutable.HashSet[AnyRef]
-  private def onSelectedItemsUpdated(): Unit = if (selectionItem != null) {
-    selectionItem.setVisible(selectedItems.nonEmpty)
-  }
+  private def onSelectedItemsUpdated(): Unit =
+    if (selectionItem != null) selectionItem.setVisible(selectedItems.nonEmpty)
 
   private final class AclRuleViewHolder(view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with View.OnLongClickListener {
@@ -262,6 +261,13 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder): Boolean = false
     }).attachToRecyclerView(list)
   }
+
+  override def onBackPressed(): Boolean = if (selectedItems.nonEmpty) {
+    selectedItems.clear()
+    onSelectedItemsUpdated()
+    adapter.notifyDataSetChanged()
+    true
+  } else super.onBackPressed()
 
   override def onSaveInstanceState(outState: Bundle): Unit = {
     super.onSaveInstanceState(outState)
