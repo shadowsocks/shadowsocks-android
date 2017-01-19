@@ -55,7 +55,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
   private val cardButtonLongClickListener: OnLongClickListener = view => {
     Utils.positionToast(Toast.makeText(getActivity, view.getContentDescription, Toast.LENGTH_SHORT), view,
-      getActivity.getWindow, 0, Utils.dpToPx(getActivity, 8)).show()
+      getActivity.getWindow, 0, getResources.getDimensionPixelOffset(R.dimen.margin_small)).show()
     true
   }
 
@@ -129,7 +129,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           val params =
             new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
           params.gravity = Gravity.CENTER_HORIZONTAL
-          params.setMargins(0, Utils.dpToPx(getActivity, 8), 0, 0)
+          params.setMargins(0, getResources.getDimensionPixelOffset(R.dimen.margin_small), 0, 0)
           adView = new NativeExpressAdView(getActivity)
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/5224027521")

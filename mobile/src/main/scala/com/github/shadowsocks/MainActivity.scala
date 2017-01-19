@@ -309,7 +309,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     })
     fab.setOnLongClickListener(_ => {
       Utils.positionToast(Toast.makeText(this, if (state == State.CONNECTED) R.string.stop else R.string.connect,
-        Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show()
+        Toast.LENGTH_SHORT), fab, getWindow, 0, getResources.getDimensionPixelOffset(R.dimen.margin_small)).show()
       true
     })
 

@@ -27,7 +27,6 @@ import android.nfc.{NdefMessage, NdefRecord, NfcAdapter}
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{ImageView, LinearLayout}
-import com.github.shadowsocks.utils.Utils
 import net.glxn.qrgen.android.QRCode
 
 object QRCodeDialog {
@@ -50,8 +49,9 @@ final class QRCodeDialog extends DialogFragment {
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
     val image = new ImageView(getActivity)
     image.setLayoutParams(new LinearLayout.LayoutParams(-1, -1))
+    val size = getResources.getDimensionPixelSize(R.dimen.qr_code_size)
     val qrcode = QRCode.from(url)
-      .withSize(Utils.dpToPx(getActivity, 250), Utils.dpToPx(getActivity, 250))
+      .withSize(size, size)
       .asInstanceOf[QRCode].bitmap()
     image.setImageBitmap(qrcode)
     image
