@@ -1,6 +1,6 @@
 package com.github.shadowsocks.acl
 
-import java.io.FileNotFoundException
+import java.io.{File, FileNotFoundException}
 
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.IOUtils
@@ -83,7 +83,7 @@ class Acl {
     this.subnets ++= (if (bypass) proxySubnets else bypassSubnets)
     this
   }
-  final def fromId(id: String): Acl = fromSource(Source.fromFile(Acl.getPath(id)))
+  final def fromId(id: String): Acl = fromSource(Source.fromFile(Acl.getFile(id)))
 
   override def toString: String = {
     val result = new StringBuilder()
@@ -128,7 +128,7 @@ object Acl {
   final val CHINALIST = "china-list"
   final val CUSTOM_RULES = "custom-rules"
 
-  def getPath(id: String): String = app.getApplicationInfo.dataDir + '/' + id + ".acl"
+  def getFile(id: String) = new File(app.getFilesDir, id + ".acl")
   def customRules: Acl = {
     val acl = new Acl()
     try acl.fromId(CUSTOM_RULES) catch {
@@ -138,5 +138,5 @@ object Acl {
     acl.bypassHostnames.clear() // everything is bypassed
     acl
   }
-  def save(id: String, acl: Acl): Unit = IOUtils.writeString(getPath(id), acl.toString)
+  def save(id: String, acl: Acl): Unit = IOUtils.writeString(getFile(id), acl.toString)
 }

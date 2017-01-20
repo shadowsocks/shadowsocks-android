@@ -27,6 +27,7 @@ import java.util.concurrent.Semaphore
 import android.util.Log
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.Commandline
+import com.github.shadowsocks.ShadowsocksApplication.app
 
 import scala.collection.JavaConversions._
 import scala.collection.immutable.Stream
@@ -41,7 +42,7 @@ class StreamLogger(is: InputStream, tag: String) extends Thread {
 /**
   * @author ayanamist@gmail.com
   */
-class GuardedProcess(cmd: Seq[String]) {
+class GuardedProcess(cmd: String*) {
   private val TAG = classOf[GuardedProcess].getSimpleName
 
   @volatile private var guardThread: Thread = _
@@ -58,10 +59,13 @@ class GuardedProcess(cmd: Seq[String]) {
       try {
         var callback: () => Unit = null
         while (!isDestroyed) {
-          Log.i(TAG, "start process: " + Commandline.toString(cmd))
+          if (BuildConfig.DEBUG) Log.d(TAG, "start process: " + Commandline.toString(cmd))
           val startTime = currentTimeMillis
 
-          process = new ProcessBuilder(cmd).redirectErrorStream(true).start
+          process = new ProcessBuilder(cmd)
+            .redirectErrorStream(true)
+            .directory(app.getFilesDir)
+            .start()
 
           val is = process.getInputStream
           new StreamLogger(is, TAG).start()
@@ -84,7 +88,7 @@ class GuardedProcess(cmd: Seq[String]) {
         }
       } catch {
         case _: InterruptedException =>
-          Log.i(TAG, "thread interrupt, destroy process: " + Commandline.toString(cmd))
+          if (BuildConfig.DEBUG) Log.d(TAG, "thread interrupt, destroy process: " + Commandline.toString(cmd))
           process.destroy()
         case e: IOException => ioException = e
       } finally semaphore.release()

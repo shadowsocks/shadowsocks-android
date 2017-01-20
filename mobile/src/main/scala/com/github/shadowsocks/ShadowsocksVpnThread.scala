@@ -32,11 +32,11 @@ object ShadowsocksVpnThread {
   val getInt: Method = classOf[FileDescriptor].getDeclaredMethod("getInt$")
 }
 
-class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
+class ShadowsocksVpnThread(service: ShadowsocksVpnService) extends Thread {
   import ShadowsocksVpnThread._
 
   val TAG = "ShadowsocksVpnService"
-  lazy val PATH: String = vpnService.getApplicationInfo.dataDir + "/protect_path"
+  val protect = new File(service.getFilesDir, "protect_path")
 
   @volatile var isRunning: Boolean = true
   @volatile var serverSocket: LocalServerSocket = _
@@ -59,11 +59,11 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
   override def run() {
 
-    new File(PATH).delete()
+    protect.delete()
 
     try {
       val localSocket = new LocalSocket
-      localSocket.bind(new LocalSocketAddress(PATH, LocalSocketAddress.Namespace.FILESYSTEM))
+      localSocket.bind(new LocalSocketAddress(protect.getAbsolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
       serverSocket = new LocalServerSocket(localSocket.getFileDescriptor)
     } catch {
       case e: IOException =>
@@ -89,7 +89,7 @@ class ShadowsocksVpnThread(vpnService: ShadowsocksVpnService) extends Thread {
 
             if (fds.nonEmpty) {
               val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
-              val ret = vpnService.protect(fd)
+              val ret = service.protect(fd)
 
               // Trick to close file decriptor
               System.jniclose(fd)

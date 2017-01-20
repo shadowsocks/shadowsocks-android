@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks
 
-import java.io.IOException
+import java.io.{File, IOException}
 import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
@@ -63,7 +63,6 @@ trait BaseService extends Service {
   private final val bandwidthListeners = new mutable.HashSet[IBinder]() // the binder is the real identifier
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
-  lazy val protectPath: String = getApplicationInfo.dataDir + "/protect_path"
 
   private val closeReceiver: BroadcastReceiver = (context: Context, _: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
@@ -320,18 +319,17 @@ trait BaseService extends Service {
     if (TcpFastOpen.sendEnabled) result += "--fast-open"
     result
   }
-  protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0): String = {
+  protected final def buildShadowsocksConfig(file: String): String = {
     val config = new JSONObject()
       .put("server", profile.host)
       .put("server_port", profile.remotePort)
-      .put("local_port", profile.localPort + localPortOffset)
       .put("password", profile.password)
       .put("method", profile.method)
     if (profile.auth) config.put("auth", true)
     if (pluginPath != null) config
       .put("plugin", Commandline.toString(buildPluginCommandLine()))
       .put("plugin_opts", plugin.toString)
-    IOUtils.writeString(file, config.toString)
+    IOUtils.writeString(new File(getFilesDir, file), config.toString)
     file
   }
 }

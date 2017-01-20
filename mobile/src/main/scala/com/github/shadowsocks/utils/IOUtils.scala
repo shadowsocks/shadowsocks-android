@@ -37,6 +37,8 @@ object IOUtils {
     }
   }
 
+  def writeString(file: File, content: String): Unit =
+    autoClose(new FileWriter(file))(writer => writer.write(content))
   def writeString(file: String, content: String): Unit =
     autoClose(new FileWriter(file))(writer => writer.write(content))
 
