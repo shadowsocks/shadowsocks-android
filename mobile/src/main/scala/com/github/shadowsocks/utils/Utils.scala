@@ -20,10 +20,8 @@
 
 package com.github.shadowsocks.utils
 
-import java.io.File
 import java.net._
 import java.security.MessageDigest
-import java.util.Scanner
 
 import android.content.pm.PackageManager
 import android.content.{Context, Intent}
@@ -78,22 +76,6 @@ object Utils {
     toast
   }
 
-  def readAllLines(f: File): String = {
-    val scanner = new Scanner(f)
-    try {
-      scanner.useDelimiter("\\Z")
-      scanner.next()
-    } finally scanner.close()
-  }
-  def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
-    val p = new java.io.PrintWriter(f)
-    try {
-      op(p)
-    } finally {
-      p.close()
-    }
-  }
-
   def resolve(host: String, addrType: Int): Option[String] = {
     try {
       val lookup = new Lookup(host, addrType)
@@ -131,20 +113,16 @@ object Utils {
   /**
    * If there exists a valid IPv6 interface
    */
-  def isIPv6Support: Boolean = {
-    try {
-      for (intf <- enumerationAsScalaIterator(NetworkInterface.getNetworkInterfaces))
-        for (addr <- enumerationAsScalaIterator(intf.getInetAddresses))
-          if (addr.isInstanceOf[Inet6Address] && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
-            return true
-          }
-    } catch {
-      case ex: Exception =>
-        Log.e(TAG, "Failed to get interfaces' addresses.", ex)
-        app.track(ex)
-    }
-    false
+  def isIPv6Support: Boolean = try {
+    val result = NetworkInterface.getNetworkInterfaces.flatMap(_.getInetAddresses)
+      .count(addr => addr.isInstanceOf[Inet6Address] && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) > 0
+    if (result && BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
+    result
+  } catch {
+    case ex: Exception =>
+      Log.e(TAG, "Failed to get interfaces' addresses.", ex)
+      app.track(ex)
+      false
   }
 
   def startSsService(context: Context) {

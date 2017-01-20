@@ -32,7 +32,7 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 class TrafficMonitorThread(context: Context) extends Thread {
 
   val TAG = "TrafficMonitorThread"
-  lazy val PATH: String = context.getApplicationInfo.dataDir + "/stat_path"
+  val stat = new File(context.getFilesDir, "/stat_path")
 
   @volatile var serverSocket: LocalServerSocket = _
   @volatile var isRunning: Boolean = true
@@ -55,11 +55,11 @@ class TrafficMonitorThread(context: Context) extends Thread {
 
   override def run() {
 
-    new File(PATH).delete()
+    stat.delete()
 
     try {
       val localSocket = new LocalSocket
-      localSocket.bind(new LocalSocketAddress(PATH, LocalSocketAddress.Namespace.FILESYSTEM))
+      localSocket.bind(new LocalSocketAddress(stat.getAbsolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
       serverSocket = new LocalServerSocket(localSocket.getFileDescriptor)
     } catch {
       case e: IOException =>

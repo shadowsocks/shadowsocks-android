@@ -53,76 +53,59 @@ class ShadowsocksNatService extends BaseService {
   var su: Shell.Interactive = _
 
   def startShadowsocksDaemon() {
-    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so"
-          , "-b" , "127.0.0.1"
-          , "-t" , "600"
-          , "-P", getApplicationInfo.dataDir
-          , "-c" , buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-local-nat.conf"))
+    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so",
+      "-b", "127.0.0.1",
+      "-l", profile.localPort.toString,
+      "-t", "600",
+      "-c", buildShadowsocksConfig("ss-local-nat.conf"))
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
     if (profile.route != Acl.ALL) {
       cmd += "--acl"
-      cmd += Acl.getPath(profile.route)
+      cmd += Acl.getFile(profile.route).getAbsolutePath
     }
 
-    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
-    sslocalProcess = new GuardedProcess(cmd).start()
+    sslocalProcess = new GuardedProcess(cmd: _*).start()
   }
 
   def startDNSTunnel() {
-    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
-      , "-t" , "10"
-      , "-b" , "127.0.0.1"
-      , "-l" , (profile.localPort + 53).toString
-      , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
-      , "-P", getApplicationInfo.dataDir
-      , "-c" , buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf", 63))
+    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so",
+      "-t", "10",
+      "-b", "127.0.0.1",
+      "-l", (profile.localPort + 63).toString,
+      "-L", if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53",
+      "-c", buildShadowsocksConfig("ss-tunnel-nat.conf"))
 
     if (profile.udpdns) cmd.append("-u")
 
-    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
-
-    sstunnelProcess = new GuardedProcess(cmd).start()
+    sstunnelProcess = new GuardedProcess(cmd: _*).start()
   }
 
   def startDnsDaemon() {
-
     val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
-
-    val conf = profile.route match {
+    IOUtils.writeString(new File(getFilesDir, "pdnsd-nat.conf"), profile.route match {
       case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES =>
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getCacheDir.getAbsolutePath,
           "127.0.0.1", profile.localPort + 53, "114.114.114.114, 223.5.5.5, 1.2.4.8",
           getBlackList, reject, profile.localPort + 63, reject)
       case Acl.CHINALIST =>
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getCacheDir.getAbsolutePath,
           "127.0.0.1", profile.localPort + 53, "8.8.8.8, 8.8.4.4, 208.67.222.222",
           "", reject, profile.localPort + 63, reject)
       case _ =>
-        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
+        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "", getCacheDir.getAbsolutePath,
           "127.0.0.1", profile.localPort + 53, profile.localPort + 63, reject)
-    }
-
-    Utils.printToFile(new File(getApplicationInfo.dataDir + "/pdnsd-nat.conf"))(p => {
-       p.println(conf)
     })
-    val cmd = Array(getApplicationInfo.nativeLibraryDir + "/libpdnsd.so", "-c", getApplicationInfo.dataDir + "/pdnsd-nat.conf")
-
-    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
-
-    pdnsdProcess = new GuardedProcess(cmd).start()
+    pdnsdProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/libpdnsd.so", "-c", "pdnsd-nat.conf")
+      .start()
   }
 
   def startRedsocksDaemon() {
-    val conf = ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort)
-    val cmd = Array(getApplicationInfo.nativeLibraryDir + "/libredsocks.so", "-c", getApplicationInfo.dataDir + "/redsocks-nat.conf")
-    Utils.printToFile(new File(getApplicationInfo.dataDir + "/redsocks-nat.conf"))(p => {
-      p.println(conf)
-    })
-
-    if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
-    redsocksProcess = new GuardedProcess(cmd).start()
+    IOUtils.writeString(new File(getFilesDir, "redsocks-nat.conf"),
+      ConfigUtils.REDSOCKS.formatLocal(Locale.ENGLISH, profile.localPort))
+    redsocksProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/libredsocks.so",
+      "-c", "redsocks-nat.conf").start()
   }
 
   /** Called when the activity is first created. */

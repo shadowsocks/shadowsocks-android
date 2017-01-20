@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks
 
-import java.io.{FileOutputStream, IOException}
+import java.io.{File, FileOutputStream, IOException}
 import java.util
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -184,7 +184,7 @@ class ShadowsocksApplication extends Application {
     for (task <- Executable.EXECUTABLES) {
       cmd.append("killall lib%s.so".formatLocal(Locale.ENGLISH, task))
       cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
-        .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))
+        .formatLocal(Locale.ENGLISH, getFilesDir.getAbsolutePath, task))
     }
     if (app.isNatEnabled) {
       cmd.append("iptables -t nat -F OUTPUT")
@@ -204,7 +204,7 @@ class ShadowsocksApplication extends Application {
         app.track(e)
     }
     if (files != null) for (file <- files) autoClose(assetManager.open("acl/" + file))(in =>
-      autoClose(new FileOutputStream(getApplicationInfo.dataDir + '/' + file))(out =>
+      autoClose(new FileOutputStream(new File(getFilesDir, file)))(out =>
         IOUtils.copy(in, out)))
     editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
   }

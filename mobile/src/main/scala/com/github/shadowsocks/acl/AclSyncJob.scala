@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit
 
 import com.evernote.android.job.Job.{Params, Result}
 import com.evernote.android.job.{Job, JobRequest}
-import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.IOUtils
 
 import scala.io.Source
@@ -47,11 +46,10 @@ object AclSyncJob {
 
 class AclSyncJob(route: String) extends Job {
   override def onRunJob(params: Params): Result = {
-    val filename = route + ".acl"
     try {
       //noinspection JavaAccessorMethodCalledAsEmptyParen
-      IOUtils.writeString(app.getApplicationInfo.dataDir + '/' + filename,
-        Source.fromURL("https://shadowsocks.org/acl/android/v1/" + filename).mkString)
+      IOUtils.writeString(Acl.getFile(route),
+        Source.fromURL("https://shadowsocks.org/acl/android/v1/" + route + ".acl").mkString)
       Result.SUCCESS
     } catch {
       case e: IOException =>
