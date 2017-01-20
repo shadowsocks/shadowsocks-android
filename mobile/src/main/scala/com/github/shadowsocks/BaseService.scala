@@ -42,6 +42,8 @@ import okhttp3.{Dns, FormBody, OkHttpClient, Request}
 import org.json.JSONObject
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConversions._
 import scala.util.Random
 
 trait BaseService extends Service {
@@ -49,7 +51,7 @@ trait BaseService extends Service {
   @volatile private var state = State.STOPPED
   @volatile protected var profile: Profile = _
   @volatile private var plugin: PluginOptions = _
-  @volatile private var pluginPath: String = _
+  @volatile protected var pluginPath: String = _
 
   case class NameNotResolvedException() extends IOException
   case class NullConnectionException() extends NullPointerException
@@ -313,24 +315,22 @@ trait BaseService extends Service {
     }
   }
 
-  protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0, vpn: Boolean = false): String = {
+  protected def buildPluginCommandLine(): ArrayBuffer[String] = {
+    val result = ArrayBuffer(pluginPath)
+    if (TcpFastOpen.sendEnabled) result += "--fast-open"
+    result
+  }
+  protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0): String = {
     val config = new JSONObject()
-    config.put("server", profile.host)
-    config.put("server_port", profile.remotePort)
-    config.put("local_port", profile.localPort + localPortOffset)
-    config.put("password", profile.password)
-    config.put("method", profile.method)
+      .put("server", profile.host)
+      .put("server_port", profile.remotePort)
+      .put("local_port", profile.localPort + localPortOffset)
+      .put("password", profile.password)
+      .put("method", profile.method)
     if (profile.auth) config.put("auth", true)
-    if (pluginPath != null) {
-      config.put("plugin", pluginPath)
-      val plugin_opts = if (vpn) {
-        "V;P=" + getApplicationInfo.dataDir + ";" + plugin.toString
-      } else {
-        plugin.toString
-      }
-      Log.d("shadowsocks", plugin_opts)
-      config.put("plugin_opts", plugin_opts)
-    }
+    if (pluginPath != null) config
+      .put("plugin", Commandline.toString(buildPluginCommandLine()))
+      .put("plugin_opts", plugin.toString)
     IOUtils.writeString(file, config.toString)
     file
   }
