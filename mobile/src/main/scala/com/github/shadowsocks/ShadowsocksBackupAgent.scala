@@ -40,6 +40,6 @@ class ShadowsocksBackupAgent extends BackupAgentHelper {
     val helper = new SharedPreferencesBackupHelper(this, PREFS_DISPLAY)
     addHelper(MY_PREFS_BACKUP_KEY, helper)
     addHelper(DATABASE, new FileBackupHelper(this, "../databases/" + DBHelper.PROFILE,
-      "../" + Acl.CUSTOM_RULES + ".acl"))
+      Acl.CUSTOM_RULES + ".acl"))
   }
 }
