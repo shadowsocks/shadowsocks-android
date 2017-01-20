@@ -167,7 +167,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
-      , "-c", buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))
+      , "-c", buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-local-vpn.conf", 0, true))
 
     if (profile.udpdns) cmd += "-u"
 
@@ -190,7 +190,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-b", "127.0.0.1"
       , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
       , "-P", getApplicationInfo.dataDir
-      , "-c", buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf", 53))
+      , "-c", buildShadowsocksConfig(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf", 53, true))
     if (BuildConfig.DEBUG) Log.d(TAG, Commandline.toString(cmd))
     sstunnelProcess = new GuardedProcess(cmd).start()
   }

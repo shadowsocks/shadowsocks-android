@@ -313,7 +313,7 @@ trait BaseService extends Service {
     }
   }
 
-  protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0): String = {
+  protected def buildShadowsocksConfig(file: String, localPortOffset: Int = 0, vpn: Boolean = false): String = {
     val config = new JSONObject()
     config.put("server", profile.host)
     config.put("server_port", profile.remotePort)
@@ -323,7 +323,13 @@ trait BaseService extends Service {
     if (profile.auth) config.put("auth", true)
     if (pluginPath != null) {
       config.put("plugin", pluginPath)
-      config.put("plugin_opts", plugin.toString)
+      val plugin_opts = if (vpn) {
+        "V;P=" + getApplicationInfo.dataDir + ";" + plugin.toString
+      } else {
+        plugin.toString
+      }
+      Log.d("shadowsocks", plugin_opts)
+      config.put("plugin_opts", plugin_opts)
     }
     IOUtils.writeString(file, config.toString)
     file
