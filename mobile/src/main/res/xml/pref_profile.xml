@@ -2,13 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
 
+    <be.mygod.preference.EditTextPreference
+            android:key="profileName"
+            android:summary="%s"
+            android:title="@string/profile_name"/>
+
     <be.mygod.preference.PreferenceCategory
             android:title="@string/proxy_cat">
 
-        <be.mygod.preference.EditTextPreference
-                android:key="profileName"
-                android:summary="%s"
-                android:title="@string/profile_name"/>
         <be.mygod.preference.EditTextPreference
                 android:key="proxy"
                 android:summary="%s"
