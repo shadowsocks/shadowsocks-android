@@ -74,7 +74,7 @@ class ShadowsocksNatService extends BaseService {
       "-t", "10",
       "-b", "127.0.0.1",
       "-l", (profile.localPort + 63).toString,
-      "-L", if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53",
+      "-L", profile.remoteDns + ":53",
       "-c", buildShadowsocksConfig("ss-tunnel-nat.conf"))
 
     if (profile.udpdns) cmd.append("-u")
