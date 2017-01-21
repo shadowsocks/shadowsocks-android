@@ -46,7 +46,7 @@ object TcpFastOpen {
 
   def sendEnabled: Boolean = {
     val file = new File("/proc/sys/net/ipv4/tcp_fastopen")
-    file.canRead && (Source.fromFile(file).mkString.toInt & 1) > 0
+    file.canRead && (Source.fromFile(file).mkString.trim.toInt & 1) > 0
   }
 
   def enabled(value: Boolean): String = if (sendEnabled != value) {
