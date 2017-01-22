@@ -26,7 +26,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 * Invoke the building like this
 
 ```bash
-    git submodule update --init
+    git submodule update --init --recursive
 
     # Build the App
     sbt clean android:package-release
@@ -53,6 +53,7 @@ Translators can go to [POEditor](https://poeditor.com/join/project/u5VHO9vhSf) t
     <li>pdnsd: <a href="https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING">GPLv3</a></li>
     <li>libev: <a href="https://github.com/shadowsocks/shadowsocks-libev/blob/master/libev/LICENSE">GPLv2</a></li>
     <li>libsodium: <a href="https://github.com/jedisct1/libsodium/blob/master/LICENSE">ISC</a></li>
+    <li>libudns: <a href="https://github.com/shadowsocks/libudns/blob/master/COPYING.LGPL">LGPL</a></li>
 </ul>
 
 ### LICENSE
