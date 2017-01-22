@@ -9,6 +9,7 @@ lazy val commonSettings = Seq(
   compileOrder := CompileOrder.JavaThenScala,
   javacOptions ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil,
   scalacOptions ++= "-target:jvm-1.7" :: "-Xexperimental" :: Nil,
+  ndkArgs := "-j" :: java.lang.Runtime.getRuntime.availableProcessors.toString :: Nil,
 
   proguardVersion := "5.3.2",
   proguardCache := Seq(),
