@@ -99,6 +99,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
     plugin.entryPackageNames = plugins.map(_._2.packageName).toArray
     pluginConfiguration = new PluginConfiguration(app.settings.getString(Key.plugin, null))
     plugin.setValue(pluginConfiguration.selected)
+    plugin.init()
     plugin.checkSummary()
     pluginConfigure.setEnabled(!TextUtils.isEmpty(pluginConfiguration.selected))
     pluginConfigure.setText(pluginConfiguration.selectedOptions.toString)
