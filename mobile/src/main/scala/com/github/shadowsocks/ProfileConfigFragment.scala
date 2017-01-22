@@ -110,7 +110,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
     true
   } catch {
     case exc: IllegalArgumentException =>
-      Snackbar.make(getActivity.findViewById(R.id.snackbar), exc.getLocalizedMessage, Snackbar.LENGTH_LONG).show()
+      Snackbar.make(getView, exc.getLocalizedMessage, Snackbar.LENGTH_LONG).show()
       false
   }
 
