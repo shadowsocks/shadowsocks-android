@@ -5,6 +5,8 @@ import java.io.{File, FileNotFoundException, FileOutputStream, IOException}
 import android.content.pm.PackageManager
 import android.content.{BroadcastReceiver, ContentResolver, Intent}
 import android.net.Uri
+import android.os.Bundle
+import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.{Commandline, IOUtils}
@@ -41,11 +43,11 @@ object PluginManager {
 
   // the following parts are meant to be used by :bg
   @throws[Throwable]
-  def initPlugin(id: String): String = {
-    if (id.isEmpty) return null
+  def init(options: PluginOptions): String = {
+    if (options.id.isEmpty) return null
     var throwable: Throwable = null
 
-    try initNativePlugin(id) match {
+    try initNative(options) match {
       case null =>
       case path => return path
     } catch {
@@ -56,44 +58,61 @@ object PluginManager {
 
     // add other plugin types here
 
-    throw if (throwable == null)
-      new FileNotFoundException(app.getString(com.github.shadowsocks.R.string.plugin_unknown, id)) else throwable
+    throw if (throwable == null) new FileNotFoundException(
+      app.getString(com.github.shadowsocks.R.string.plugin_unknown, options.id)) else throwable
   }
 
   @throws[IOException]
   @throws[IndexOutOfBoundsException]
   @throws[AssertionError]
-  private def initNativePlugin(id: String): String = {
+  private def initNative(options: PluginOptions): String = {
     val providers = app.getPackageManager.queryIntentContentProviders(
-      new Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(id)), 0)
+      new Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(options.id)), 0)
     assert(providers.length == 1)
-    val builder = new Uri.Builder()
+    val uri = new Uri.Builder()
       .scheme(ContentResolver.SCHEME_CONTENT)
       .authority(providers(0).providerInfo.authority)
+      .build()
     val cr = app.getContentResolver
-    val cursor = cr.query(builder.build(), Array(PluginContract.COLUMN_PATH, PluginContract.COLUMN_MODE),
-      null, null, null)
-    if (cursor != null) {
-      var initialized = false
-      val pluginDir = new File(app.getFilesDir, "plugin")
-      def entryNotFound() = throw new IndexOutOfBoundsException("Plugin entry binary not found")
-      if (!cursor.moveToFirst()) entryNotFound()
-      IOUtils.deleteRecursively(pluginDir)
-      if (!pluginDir.mkdirs()) throw new FileNotFoundException("Unable to create plugin directory")
-      val pluginDirPath = pluginDir.getAbsolutePath + '/'
-      val list = new ListBuffer[String]
-      do {
-        val path = cursor.getString(0)
-        val file = new File(pluginDir, path)
-        assert(file.getAbsolutePath.startsWith(pluginDirPath))
-        autoClose(cr.openInputStream(builder.path(path).build()))(in =>
-          autoClose(new FileOutputStream(file))(out => IOUtils.copy(in, out)))
-        list += Commandline.toString(Array("chmod", cursor.getString(1), file.getAbsolutePath))
-        if (path == id) initialized = true
-      } while (cursor.moveToNext())
-      if (!initialized) entryNotFound()
-      Shell.SH.run(list)
-      new File(pluginDir, id).getAbsolutePath
-    } else null
+    try initNativeFast(cr, options, uri) catch {
+      case t: Throwable =>
+        t.printStackTrace()
+        Log.w("PluginManager", "Initializing native plugin fast mode failed. Falling back to slow mode.")
+        initNativeSlow(cr, options, uri)
+    }
   }
+
+  private def initNativeFast(cr: ContentResolver, options: PluginOptions, uri: Uri): String = {
+    val out = new Bundle()
+    out.putString(PluginContract.EXTRA_OPTIONS, options.id)
+    val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null, out).getString(PluginContract.EXTRA_ENTRY)
+    assert(new File(result).canExecute)
+    result
+  }
+
+  private def initNativeSlow(cr: ContentResolver, options: PluginOptions, uri: Uri): String =
+    cr.query(uri, Array(PluginContract.COLUMN_PATH, PluginContract.COLUMN_MODE), null, null, null) match {
+      case null => null
+      case cursor =>
+        var initialized = false
+        val pluginDir = new File(app.getFilesDir, "plugin")
+        def entryNotFound() = throw new IndexOutOfBoundsException("Plugin entry binary not found")
+        if (!cursor.moveToFirst()) entryNotFound()
+        IOUtils.deleteRecursively(pluginDir)
+        if (!pluginDir.mkdirs()) throw new FileNotFoundException("Unable to create plugin directory")
+        val pluginDirPath = pluginDir.getAbsolutePath + '/'
+        val list = new ListBuffer[String]
+        do {
+          val path = cursor.getString(0)
+          val file = new File(pluginDir, path)
+          assert(file.getAbsolutePath.startsWith(pluginDirPath))
+          autoClose(cr.openInputStream(uri.buildUpon().path(path).build()))(in =>
+            autoClose(new FileOutputStream(file))(out => IOUtils.copy(in, out)))
+          list += Commandline.toString(Array("chmod", cursor.getString(1), file.getAbsolutePath))
+          if (path == options.id) initialized = true
+        } while (cursor.moveToNext())
+        if (!initialized) entryNotFound()
+        Shell.SH.run(list)
+        new File(pluginDir, options.id).getAbsolutePath
+    }
 }

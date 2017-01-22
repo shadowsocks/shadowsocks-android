@@ -159,7 +159,7 @@ trait BaseService extends Service {
       Acl.save(Acl.CUSTOM_RULES, new Acl().fromId(Acl.CUSTOM_RULES))
 
     plugin = new PluginConfiguration(profile.plugin).selectedOptions
-    pluginPath = PluginManager.initPlugin(plugin.id)
+    pluginPath = PluginManager.init(plugin)
   }
 
   def startRunner(profile: Profile) {

@@ -31,6 +31,14 @@ public final class PluginContract {
     public static final String ACTION_HELP = "com.github.shadowsocks.plugin.ACTION_HELP";
 
     /**
+     * The lookup key for a string that provides the plugin entry binary.
+     *
+     * Example: "/data/data/com.github.shadowsocks.plugin.obfs_local/lib/libobfs-local.so"
+     *
+     * Constant Value: "com.github.shadowsocks.plugin.EXTRA_ENTRY"
+     */
+    public static final String EXTRA_ENTRY = "com.github.shadowsocks.plugin.EXTRA_ENTRY";
+    /**
      * The lookup key for a string that provides the whole command as a string.
      *
      * Example: "obfs=http;obfs-host=www.baidu.com"
@@ -60,6 +68,8 @@ public final class PluginContract {
      * Constant Value: "com.github.shadowsocks.plugin.default_config"
      */
     public static final String METADATA_KEY_DEFAULT_CONFIG = "com.github.shadowsocks.plugin.default_config";
+
+    static final String METHOD_GET_EXECUTABLE = "shadowsocks:getExecutable";
 
     /**
      * Relative to the file to be copied. This column is required.

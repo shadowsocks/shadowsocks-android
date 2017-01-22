@@ -3,7 +3,7 @@ package com.github.shadowsocks.plugin
 import android.content.{ContentProvider, ContentValues}
 import android.database.{Cursor, MatrixCursor}
 import android.net.Uri
-import android.os.ParcelFileDescriptor
+import android.os.{Bundle, ParcelFileDescriptor}
 
 /**
   * Base class for a native plugin provider. A native plugin provider offers read-only access to files that are required
@@ -52,10 +52,28 @@ abstract class NativePluginProvider extends ContentProvider {
     result
   }
 
+  /**
+    * Returns executable entry absolute path. This is used if plugin is sharing UID with the host.
+    *
+    * Default behavior is throwing UnsupportedOperationException. If you don't wish to use this feature, use the default
+    * behavior.
+    *
+    * @return Absolute path for executable entry.
+    */
+  def getExecutable: String = throw new UnsupportedOperationException
+
   def openFile(uri: Uri): ParcelFileDescriptor
   override def openFile(uri: Uri, mode: String): ParcelFileDescriptor = {
     assert(mode == "r")
     openFile(uri)
+  }
+
+  override def call(method: String, arg: String, extras: Bundle): Bundle = method match {
+    case PluginContract.METHOD_GET_EXECUTABLE =>
+      val out = new Bundle()
+      out.putString(PluginContract.EXTRA_ENTRY, getExecutable)
+      out
+    case _ => super.call(method, arg, extras)
   }
 
   // Methods that should not be used
