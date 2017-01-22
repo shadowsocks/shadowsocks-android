@@ -170,7 +170,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onServiceDisconnected(): Unit = changeState(State.IDLE)
 
   private def addDisableNatToSnackbar(snackbar: Snackbar) = snackbar.setAction(R.string.switch_to_vpn, (_ =>
-    if (state == State.STOPPED) app.editor.putBoolean(Key.isNAT, false)): View.OnClickListener)
+    if (state == State.STOPPED) app.editor.putBoolean(Key.isNAT, false).apply()): View.OnClickListener)
 
   override def binderDied() {
     detachService()
