@@ -21,14 +21,21 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.content.DialogInterface
+import android.content.{DialogInterface, Intent}
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.Toolbar
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.utils.Key
 
+object ProfileConfigActivity {
+  final val REQUEST_CODE_PLUGIN_HELP = 1
+}
+
 class ProfileConfigActivity extends Activity {
+  import ProfileConfigActivity._
+
   private lazy val child = getFragmentManager.findFragmentById(R.id.content).asInstanceOf[ProfileConfigFragment]
 
   override def onCreate(savedInstanceState: Bundle) {
@@ -49,4 +56,12 @@ class ProfileConfigActivity extends Activity {
     .setNeutralButton(android.R.string.cancel, null)
     .create()
     .show() else super.onBackPressed()
+
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
+    case REQUEST_CODE_PLUGIN_HELP => if (resultCode == Activity.RESULT_OK) new AlertDialog.Builder(this)
+      .setTitle("?")
+      .setMessage(data.getCharSequenceExtra(PluginContract.EXTRA_HELP_MESSAGE))
+      .show()
+    case _ => super.onActivityResult(requestCode, resultCode, data)
+  }
 }

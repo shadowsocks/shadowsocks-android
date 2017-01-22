@@ -20,9 +20,10 @@
 
 package com.github.shadowsocks.preference
 
-import android.app.{Activity, AlertDialog}
-import android.content.{DialogInterface, Intent}
+import android.app.AlertDialog
+import android.content.DialogInterface
 import be.mygod.preference.EditTextPreferenceDialogFragment
+import com.github.shadowsocks.ProfileConfigActivity
 import com.github.shadowsocks.plugin.{PluginContract, PluginManager}
 
 /**
@@ -30,7 +31,6 @@ import com.github.shadowsocks.plugin.{PluginContract, PluginManager}
   */
 object PluginConfigurationDialogFragment {
   final val PLUGIN_ID_FRAGMENT_TAG = "com.github.shadowsocks.preference.PluginConfigurationDialogFragment.PLUGIN_ID"
-  private final val REQUEST_CODE_HELP = 1
 }
 
 class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment {
@@ -40,18 +40,7 @@ class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment
     super.onPrepareDialogBuilder(builder)
     val intent = PluginManager.buildIntent(getArguments.getString(PLUGIN_ID_FRAGMENT_TAG), PluginContract.ACTION_HELP)
     if (intent.resolveActivity(getActivity.getPackageManager) != null) builder.setNeutralButton("?", ((_, _) =>
-      startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.getText.toString),
-        REQUEST_CODE_HELP)): DialogInterface.OnClickListener)
-  }
-
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
-    case REQUEST_CODE_HELP => requestCode match {
-      case Activity.RESULT_OK => new AlertDialog.Builder(getContext)
-        .setTitle("?")
-        .setMessage(data.getCharSequenceExtra(PluginContract.EXTRA_HELP_MESSAGE))
-        .show()
-      case _ =>
-    }
-    case _ => super.onActivityResult(requestCode, resultCode, data)
+      getActivity.startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.getText.toString),
+        ProfileConfigActivity.REQUEST_CODE_PLUGIN_HELP)): DialogInterface.OnClickListener)
   }
 }

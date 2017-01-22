@@ -39,7 +39,7 @@ import com.github.shadowsocks.preference.{IconListPreference, PluginConfiguratio
 import com.github.shadowsocks.utils.{Action, Key, Utils}
 
 object ProfileConfigFragment {
-  private final val REQUEST_CODE_CONFIGURE = 1
+  private final val REQUEST_CODE_PLUGIN_CONFIGURE = 1
 }
 
 class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener
@@ -135,7 +135,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
     val intent = PluginManager.buildIntent(selected, PluginContract.ACTION_CONFIGURE)
     if (intent.resolveActivity(getActivity.getPackageManager) != null)
       startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS,
-        pluginConfiguration.selectedOptions.toString), REQUEST_CODE_CONFIGURE) else {
+        pluginConfiguration.selectedOptions.toString), REQUEST_CODE_PLUGIN_CONFIGURE) else {
       val bundle = new Bundle()
       bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, selected)
       displayPreferenceDialog(preference.getKey, new PluginConfigurationDialogFragment, bundle)
@@ -143,7 +143,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   } else super.onDisplayPreferenceDialog(preference)
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
-    case REQUEST_CODE_CONFIGURE => if (resultCode == Activity.RESULT_OK) {
+    case REQUEST_CODE_PLUGIN_CONFIGURE => if (resultCode == Activity.RESULT_OK) {
       val options = data.getStringExtra(PluginContract.EXTRA_OPTIONS)
       pluginConfigure.setText(options)
       onPluginConfigureChanged(null, options)

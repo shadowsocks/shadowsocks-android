@@ -13,6 +13,8 @@ import android.content.Intent
 trait HelpCallback extends HelpActivity {
   def produceHelpMessage(options: PluginOptions): CharSequence
 
-  override protected def onInitializePluginOptions(options: PluginOptions): Unit = setResult(Activity.RESULT_OK,
-    new Intent().putExtra(PluginContract.EXTRA_HELP_MESSAGE, produceHelpMessage(options)))
+  override protected def onInitializePluginOptions(options: PluginOptions) {
+    setResult(Activity.RESULT_OK, new Intent().putExtra(PluginContract.EXTRA_HELP_MESSAGE, produceHelpMessage(options)))
+    finish()
+  }
 }
