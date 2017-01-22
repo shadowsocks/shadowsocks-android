@@ -70,7 +70,7 @@ final class BottomSheetPreferenceDialogFragment extends PreferenceDialogFragment
       case null => false
       case pn => try {
         startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, new Uri.Builder()
-          .authority(Settings.AUTHORITY)
+          .scheme("package")
           .opaquePart(pn)
           .build()))
         true
