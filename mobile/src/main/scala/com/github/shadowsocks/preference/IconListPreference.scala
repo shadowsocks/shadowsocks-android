@@ -41,7 +41,9 @@ class IconListPreference(context: Context, attrs: AttributeSet = null) extends L
 //    a.recycle()
 //  }
 
-  def getEntryIcon: Drawable = mEntryIcons(selectedEntry)
+  def getEntryIcon: Drawable = try mEntryIcons(selectedEntry) catch {
+    case _: ArrayIndexOutOfBoundsException => null
+  }
   def getEntryIcons: Array[Drawable] = mEntryIcons
   def setEntryIcons(entryIcons: Array[Drawable]): Unit = mEntryIcons = entryIcons
 
