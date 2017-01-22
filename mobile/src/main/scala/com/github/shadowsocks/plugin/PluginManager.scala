@@ -2,11 +2,11 @@ package com.github.shadowsocks.plugin
 
 import java.io.{File, FileNotFoundException, FileOutputStream, IOException}
 
-import android.content.pm.PackageManager
+import android.content.pm.{PackageManager, Signature}
 import android.content.{BroadcastReceiver, ContentResolver, Intent}
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.util.{Base64, Log}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.CloseUtils.autoClose
 import com.github.shadowsocks.utils.{Commandline, IOUtils}
@@ -19,6 +19,39 @@ import scala.collection.mutable.ListBuffer
   * @author Mygod
   */
 object PluginManager {
+  /**
+    * Trusted signatures by the app. Third-party fork should add their public key to their fork if the developer wishes
+    * to publish or has published plugins for this app. You can obtain your public key by executing:
+    *
+    * $ keytool -export -alias key-alias -keystore /path/to/keystore.jks -rfc
+    *
+    * If you don't plan to publish any plugin but is developing/has developed some, it's not necessary to add your
+    * public key yet since it will also automatically trust packages signed by the same signatures, e.g. debug keys.
+    */
+  lazy val trustedSignatures: Set[Signature] =
+    app.getPackageManager.getPackageInfo(app.getPackageName, PackageManager.GET_SIGNATURES).signatures.toSet +
+    new Signature(Base64.decode(  // @Mygod
+      """
+        |MIIDWzCCAkOgAwIBAgIEUzfv8DANBgkqhkiG9w0BAQsFADBdMQswCQYDVQQGEwJD
+        |TjEOMAwGA1UECBMFTXlnb2QxDjAMBgNVBAcTBU15Z29kMQ4wDAYDVQQKEwVNeWdv
+        |ZDEOMAwGA1UECxMFTXlnb2QxDjAMBgNVBAMTBU15Z29kMCAXDTE0MDUwMjA5MjQx
+        |OVoYDzMwMTMwOTAyMDkyNDE5WjBdMQswCQYDVQQGEwJDTjEOMAwGA1UECBMFTXln
+        |b2QxDjAMBgNVBAcTBU15Z29kMQ4wDAYDVQQKEwVNeWdvZDEOMAwGA1UECxMFTXln
+        |b2QxDjAMBgNVBAMTBU15Z29kMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+        |AQEAjm5ikHoP3w6zavvZU5bRo6Birz41JL/nZidpdww21q/G9APA+IiJMUeeocy0
+        |L7/QY8MQZABVwNq79LXYWJBcmmFXM9xBPgDqQP4uh9JsvazCI9bvDiMn92mz9HiS
+        |Sg9V4KGg0AcY0r230KIFo7hz+2QBp1gwAAE97myBfA3pi3IzJM2kWsh4LWkKQMfL
+        |M6KDhpb4mdDQnHlgi4JWe3SYbLtpB6whnTqjHaOzvyiLspx1tmrb0KVxssry9KoX
+        |YQzl56scfE/QJX0jJ5qYmNAYRCb4PibMuNSGB2NObDabSOMAdT4JLueOcHZ/x9tw
+        |agGQ9UdymVZYzf8uqc+29ppKdQIDAQABoyEwHzAdBgNVHQ4EFgQUBK4uJ0cqmnho
+        |6I72VmOVQMvVCXowDQYJKoZIhvcNAQELBQADggEBABZQ3yNESQdgNJg+NRIcpF9l
+        |YSKZvrBZ51gyrC7/2ZKMpRIyXruUOIrjuTR5eaONs1E4HI/uA3xG1eeW2pjPxDnO
+        |zgM4t7EPH6QbzibihoHw1MAB/mzECzY8r11PBhDQlst0a2hp+zUNR8CLbpmPPqTY
+        |RSo6EooQ7+NBejOXysqIF1q0BJs8Y5s/CaTOmgbL7uPCkzArB6SS/hzXgDk5gw6v
+        |wkGeOtzcj1DlbUTvt1s5GlnwBTGUmkbLx+YUje+n+IBgMbohLUDYBtUHylRVgMsc
+        |1WS67kDqeJiiQZvrxvyW6CZZ/MIGI+uAkkj3DqJpaZirkwPgvpcOIrjZy0uFvQM=
+      """, Base64.DEFAULT))
+
   private var receiver: BroadcastReceiver = _
   private var cachedPlugins: Map[String, Plugin] = _
   def fetchPlugins(): Map[String, Plugin] = {

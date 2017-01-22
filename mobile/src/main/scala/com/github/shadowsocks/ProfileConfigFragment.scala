@@ -81,6 +81,8 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       app.editor.putString(Key.plugin, pluginConfiguration.toString).putBoolean(Key.dirty, true).apply()
       pluginConfigure.setEnabled(!TextUtils.isEmpty(selected))
       pluginConfigure.setText(pluginConfiguration.selectedOptions.toString)
+      if (!PluginManager.fetchPlugins()(selected).trusted)
+        Snackbar.make(getView, R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
       true
     })
     pluginConfigure.setOnPreferenceChangeListener(onPluginConfigureChanged)

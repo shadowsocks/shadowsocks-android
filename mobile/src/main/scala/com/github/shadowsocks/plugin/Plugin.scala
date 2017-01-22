@@ -11,4 +11,5 @@ abstract class Plugin {
   def icon: Drawable = null
   def defaultConfig: String = null
   def packageName: String = null
+  def trusted: Boolean = true
 }

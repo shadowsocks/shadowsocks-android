@@ -142,5 +142,6 @@
   <string name="plugin_configure">Configure…</string>
   <string name="plugin_disabled">Disabled</string>
   <string name="plugin_unknown">Unknown plugin %s</string>
+  <string name="plugin_untrusted">Warning: This plugin does not seem to come from a known trusted source.</string>
   <string name="profile_plugin">Plugin: %s</string>
 </resources>
