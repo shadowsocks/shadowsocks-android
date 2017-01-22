@@ -28,9 +28,7 @@ run in Android := (run in (mobile, Android)).evaluated
 lazy val plugin = project
   .settings(commonSettings)
   .settings(
-    libraryDependencies ++=
-      "com.android.support" % "preference-v14" % supportLibsVersion ::
-      Nil
+    libraryDependencies += "com.android.support" % "preference-v14" % supportLibsVersion
   )
 
 lazy val mobile = project

@@ -161,8 +161,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
-  override protected def buildPluginCommandLine(): ArrayBuffer[String] =
-    super.buildPluginCommandLine() ++= Seq("-V")
+  override protected def buildPluginCommandLine(): ArrayBuffer[String] = super.buildPluginCommandLine() += "-V"
 
   def startShadowsocksDaemon() {
     val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so",
