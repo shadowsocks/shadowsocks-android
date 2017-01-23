@@ -26,7 +26,7 @@ public final class PluginContract {
     /**
      * Activity Action: Used for HelpActivity or HelpCallback.
      *
-     * Constant Value: "com.github.shadowsocks.plugin.ACTION_CONFIGURE"
+     * Constant Value: "com.github.shadowsocks.plugin.ACTION_HELP"
      */
     public static final String ACTION_HELP = "com.github.shadowsocks.plugin.ACTION_HELP";
 
@@ -39,7 +39,7 @@ public final class PluginContract {
      */
     public static final String EXTRA_ENTRY = "com.github.shadowsocks.plugin.EXTRA_ENTRY";
     /**
-     * The lookup key for a string that provides the whole command as a string.
+     * The lookup key for a string that provides the options as a string.
      *
      * Example: "obfs=http;obfs-host=www.baidu.com"
      *
@@ -69,7 +69,7 @@ public final class PluginContract {
      */
     public static final String METADATA_KEY_DEFAULT_CONFIG = "com.github.shadowsocks.plugin.default_config";
 
-    static final String METHOD_GET_EXECUTABLE = "shadowsocks:getExecutable";
+    public static final String METHOD_GET_EXECUTABLE = "shadowsocks:getExecutable";
 
     /** ConfigurationActivity result: fallback to manual edit mode. */
     public static final int RESULT_FALLBACK = 1;

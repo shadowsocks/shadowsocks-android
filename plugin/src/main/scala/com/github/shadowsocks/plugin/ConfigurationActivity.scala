@@ -12,9 +12,13 @@ import android.content.Intent
   *    ...
   *    &lt;application&gt;
   *        ...
-  *        &lt;activity android:name="com.github.shadowsocks.$PLUGIN_ID.ConfigureActivity"&gt;
+  *        &lt;activity android:name=".ConfigureActivity"&gt;
   *            &lt;intent-filter&gt;
-  *                &lt;action android:name="com.github.shadowsocks.plugin.$PLUGIN_ID.ACTION_CONFIGURE" /&gt;
+  *                &lt;action android:name="com.github.shadowsocks.plugin.ACTION_CONFIGURE"/&gt;
+  *                &lt;category android:name="android.intent.category.DEFAULT"/&gt;
+  *                &lt;data android:scheme="plugin"
+  *                         android:host="com.github.shadowsocks"
+  *                         android:path="/$PLUGIN_ID"/&gt;
   *            &lt;/intent-filter&gt;
   *        &lt;/activity&gt;
   *        ...
