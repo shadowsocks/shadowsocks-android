@@ -36,4 +36,12 @@ trait ConfigurationActivity extends OptionsCapableActivity {
     */
   final def saveChanges(options: PluginOptions): Unit =
     setResult(Activity.RESULT_OK, new Intent().putExtra(PluginContract.EXTRA_OPTIONS, options.toString))
+
+  /**
+    * Finish this activity and request manual editor to pop up instead.
+    */
+  final def fallbackToManualEditor() {
+    setResult(PluginContract.RESULT_FALLBACK)
+    finish()
+  }
 }

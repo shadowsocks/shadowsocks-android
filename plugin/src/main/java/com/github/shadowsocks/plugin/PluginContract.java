@@ -71,6 +71,9 @@ public final class PluginContract {
 
     static final String METHOD_GET_EXECUTABLE = "shadowsocks:getExecutable";
 
+    /** ConfigurationActivity result: fallback to manual edit mode. */
+    public static final int RESULT_FALLBACK = 1;
+
     /**
      * Relative to the file to be copied. This column is required.
      *

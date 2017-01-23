@@ -152,6 +152,7 @@ object Key {
   val remoteDns = "remoteDns"
 
   val plugin = "plugin"
+  val pluginConfigure = "plugin.configure"
 
   val dirty = "profileDirty"
 

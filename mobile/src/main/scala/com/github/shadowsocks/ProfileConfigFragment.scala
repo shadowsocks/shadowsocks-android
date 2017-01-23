@@ -73,7 +73,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       false
     })
     plugin = findPreference(Key.plugin).asInstanceOf[IconListPreference]
-    pluginConfigure = findPreference("plugin.configure").asInstanceOf[EditTextPreference]
+    pluginConfigure = findPreference(Key.pluginConfigure).asInstanceOf[EditTextPreference]
     plugin.unknownValueSummary = getString(R.string.plugin_unknown)
     plugin.setOnPreferenceChangeListener((_, value) => {
       val selected = value.asInstanceOf[String]
@@ -130,23 +130,29 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
     isProxyApps.setChecked(app.settings.getBoolean(Key.proxyApps, false)) // fetch proxyApps updated by AppManager
   }
 
-  override def onDisplayPreferenceDialog(preference: Preference): Unit = if (preference eq pluginConfigure) {
-    val selected = pluginConfiguration.selected
-    val intent = PluginManager.buildIntent(selected, PluginContract.ACTION_CONFIGURE)
+  private def showPluginEditor() {
+    val bundle = new Bundle()
+    bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)
+    displayPreferenceDialog(Key.pluginConfigure, new PluginConfigurationDialogFragment, bundle)
+  }
+
+  override def onDisplayPreferenceDialog(preference: Preference): Unit = if (preference.getKey == Key.pluginConfigure) {
+    val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
     if (intent.resolveActivity(getActivity.getPackageManager) != null)
       startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS,
         pluginConfiguration.selectedOptions.toString), REQUEST_CODE_PLUGIN_CONFIGURE) else {
-      val bundle = new Bundle()
-      bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, selected)
-      displayPreferenceDialog(preference.getKey, new PluginConfigurationDialogFragment, bundle)
+      showPluginEditor()
     }
   } else super.onDisplayPreferenceDialog(preference)
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
-    case REQUEST_CODE_PLUGIN_CONFIGURE => if (resultCode == Activity.RESULT_OK) {
-      val options = data.getStringExtra(PluginContract.EXTRA_OPTIONS)
-      pluginConfigure.setText(options)
-      onPluginConfigureChanged(null, options)
+    case REQUEST_CODE_PLUGIN_CONFIGURE => resultCode match {
+      case Activity.RESULT_OK =>
+        val options = data.getStringExtra(PluginContract.EXTRA_OPTIONS)
+        pluginConfigure.setText(options)
+        onPluginConfigureChanged(null, options)
+      case PluginContract.RESULT_FALLBACK => showPluginEditor()
+      case _ =>
     }
     case _ => super.onActivityResult(requestCode, resultCode, data)
   }
