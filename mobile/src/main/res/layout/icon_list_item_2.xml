@@ -3,8 +3,8 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:background="?android:attr/selectableItemBackground"
-              android:paddingStart="16dp"
-              android:paddingEnd="16dp">
+              android:paddingStart="12dp"
+              android:paddingEnd="12dp">
     <ImageView android:id="@android:id/icon"
                android:layout_width="52dp"
                android:layout_height="52dp"/>
