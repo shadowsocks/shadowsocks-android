@@ -3,7 +3,7 @@ android.useSupportVectors
 
 name := "shadowsocks"
 version := "4.0.0"
-versionCode := Some(174)
+versionCode := Some(175)
 
 proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
