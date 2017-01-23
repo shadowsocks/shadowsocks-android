@@ -58,7 +58,7 @@ final class BottomSheetPreferenceDialogFragment extends PreferenceDialogFragment
       val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
       text1.setTypeface(null, typeface)
       text2.setTypeface(null, typeface)
-      text2.setVisibility(if (entryValues(i).length > 0) View.VISIBLE else View.GONE)
+      text2.setVisibility(if (entryValues(i).length > 0 && entries(i) != entryValues(i)) View.VISIBLE else View.GONE)
       icon.setImageDrawable(entryIcons(i))
       index = i
     }
