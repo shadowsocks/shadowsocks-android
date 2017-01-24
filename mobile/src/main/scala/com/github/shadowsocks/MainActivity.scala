@@ -172,11 +172,11 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private def addDisableNatToSnackbar(snackbar: Snackbar) = snackbar.setAction(R.string.switch_to_vpn, (_ =>
     if (state == State.STOPPED) app.editor.putBoolean(Key.isNAT, false).apply()): View.OnClickListener)
 
-  override def binderDied() {
+  override def binderDied(): Unit = handler.post(() => {
     detachService()
     app.crashRecovery()
     attachService(callback)
-  }
+  })
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
     case Activity.RESULT_OK => bgService.use(app.profileId)
