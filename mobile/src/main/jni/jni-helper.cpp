@@ -17,7 +17,7 @@
 #define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
 
-jint Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring cmd) {
+jint Java_com_github_shadowsocks_jnihelper_exec(JNIEnv *env, jobject thiz, jstring cmd) {
     const char *cmd_str  = env->GetStringUTFChars(cmd, 0);
 
     pid_t pid;
@@ -40,11 +40,11 @@ jint Java_com_github_shadowsocks_system_exec(JNIEnv *env, jobject thiz, jstring 
     return 1;
 }
 
-void Java_com_github_shadowsocks_system_jniclose(JNIEnv *env, jobject thiz, jint fd) {
+void Java_com_github_shadowsocks_jnihelper_close(JNIEnv *env, jobject thiz, jint fd) {
     close(fd);
 }
 
-jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
+jint Java_com_github_shadowsocks_jnihelper_sendfd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;
     struct sockaddr_un addr;
     const char *sock_str  = env->GetStringUTFChars(path, 0);
@@ -75,15 +75,15 @@ jint Java_com_github_shadowsocks_system_sendfd(JNIEnv *env, jobject thiz, jint t
     return 0;
 }
 
-static const char *classPathName = "com/github/shadowsocks/System";
+static const char *classPathName = "com/github/shadowsocks/JniHelper";
 
 static JNINativeMethod method_table[] = {
-    { "jniclose", "(I)V",
-        (void*) Java_com_github_shadowsocks_system_jniclose },
-    { "sendfd", "(ILjava/lang/String;)I",
-        (void*) Java_com_github_shadowsocks_system_sendfd },
+    { "close", "(I)V",
+        (void*) Java_com_github_shadowsocks_jnihelper_close },
+    { "sendFd", "(ILjava/lang/String;)I",
+        (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
     { "exec", "(Ljava/lang/String;)I",
-        (void*) Java_com_github_shadowsocks_system_exec }
+        (void*) Java_com_github_shadowsocks_jnihelper_exec }
 };
 
 

@@ -38,12 +38,12 @@
 
 package com.github.shadowsocks;
 
-public class System {
+public class JniHelper {
   static {
-    java.lang.System.loadLibrary("system");
+    System.loadLibrary("jni-helper");
   }
 
   public static native int exec(String cmd);
-  public static native int sendfd(int fd, String path);
-  public static native void jniclose(int fd);
+  public static native int sendFd(int fd, String path);
+  public static native void close(int fd);
 }

@@ -92,7 +92,7 @@ class ShadowsocksVpnThread(service: ShadowsocksVpnService) extends Thread {
               val ret = service.protect(fd)
 
               // Trick to close file decriptor
-              System.jniclose(fd)
+              JniHelper.close(fd)
 
               if (ret) {
                 output.write(0)

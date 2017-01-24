@@ -388,16 +388,16 @@ LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
-## system
+## jni-helper
 ########################################################
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE:= system
+LOCAL_MODULE:= jni-helper
 
 LOCAL_C_INCLUDES:= $(LOCAL_PATH)/libancillary
 
-LOCAL_SRC_FILES:= system.cpp
+LOCAL_SRC_FILES:= jni-helper.cpp
 
 LOCAL_LDLIBS := -ldl -llog
 

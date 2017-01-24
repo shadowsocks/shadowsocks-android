@@ -6,7 +6,7 @@ version := "4.0.0"
 versionCode := Some(175)
 
 proguardOptions ++=
-  "-keep class com.github.shadowsocks.System { *; }" ::
+  "-keep class com.github.shadowsocks.JniHelper { *; }" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
   "-dontwarn okio.**" ::

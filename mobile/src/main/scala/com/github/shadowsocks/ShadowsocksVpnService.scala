@@ -291,7 +291,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       var tries = 1
       while (tries < 5) {
         Thread.sleep(1000 * tries)
-        if (System.sendfd(fd, new File(getFilesDir, "sock_path").getAbsolutePath) != -1) {
+        if (JniHelper.sendFd(fd, new File(getFilesDir, "sock_path").getAbsolutePath) != -1) {
           return true
         }
         tries += 1
