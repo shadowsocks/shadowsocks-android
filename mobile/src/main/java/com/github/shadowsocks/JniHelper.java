@@ -38,12 +38,23 @@
 
 package com.github.shadowsocks;
 
-public class JniHelper {
-  static {
-    System.loadLibrary("jni-helper");
-  }
+import android.os.Build;
+import android.system.ErrnoException;
 
-  public static native int exec(String cmd);
-  public static native int sendFd(int fd, String path);
-  public static native void close(int fd);
+public class JniHelper {
+    static {
+        System.loadLibrary("jni-helper");
+    }
+
+    @Deprecated // Use Process.destroy() since API 24
+    public static void sigtermCompat(Process process) throws Exception {
+        if (Build.VERSION.SDK_INT >= 24) throw new UnsupportedOperationException("Never call this method in OpenJDK!");
+        int errno = sigterm(process);
+        if (errno != 0) throw Build.VERSION.SDK_INT >= 21
+                ? new ErrnoException("kill", errno) : new Exception("kill failed: " + errno);
+    }
+
+    private static native int sigterm(Process process);
+    public static native int sendFd(int fd, String path);
+    public static native void close(int fd);
 }

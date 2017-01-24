@@ -24,6 +24,7 @@ import java.io._
 import java.lang.System.currentTimeMillis
 import java.util.concurrent.Semaphore
 
+import android.os.Build
 import android.util.Log
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.Commandline
@@ -89,7 +90,7 @@ class GuardedProcess(cmd: String*) {
       } catch {
         case _: InterruptedException =>
           if (BuildConfig.DEBUG) Log.d(TAG, "thread interrupt, destroy process: " + Commandline.toString(cmd))
-          process.destroy()
+          destroyProcess()
         case e: IOException => ioException = e
       } finally semaphore.release()
     }, "GuardThread-" + cmd.head)
@@ -105,16 +106,24 @@ class GuardedProcess(cmd: String*) {
   def destroy() {
     isDestroyed = true
     guardThread.interrupt()
-    process.destroy()
+    destroyProcess()
     try guardThread.join() catch {
       case _: InterruptedException =>
     }
   }
 
+  private def destroyProcess() {
+    if (Build.VERSION.SDK_INT < 24) {
+      JniHelper.sigtermCompat(process)
+      process.waitFor()
+    }
+    process.destroy()
+  }
+
   def restart() {
     this.synchronized {
       isRestart = true
-      process.destroy()
+      destroyProcess()
     }
   }
 

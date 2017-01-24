@@ -1,11 +1,14 @@
-#define LOG_TAG "Shadowsocks"
+#define LOG_TAG "JniHelper"
 
 #include "jni.h"
 #include <android/log.h>
+#include <sys/system_properties.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <sys/un.h>
 #include <sys/stat.h>
@@ -16,28 +19,26 @@
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
+#define THROW(env, clazz, msg) do { env->ThrowNew(env->FindClass(clazz), msg); } while (0)
 
-jint Java_com_github_shadowsocks_jnihelper_exec(JNIEnv *env, jobject thiz, jstring cmd) {
-    const char *cmd_str  = env->GetStringUTFChars(cmd, 0);
+static jclass ProcessImpl;
+static jfieldID ProcessImpl_pid;
 
-    pid_t pid;
+static int sdk_version() {
+    char version[PROP_VALUE_MAX + 1];
+    __system_property_get("ro.build.version.sdk", version);
+    return atoi(version);
+}
 
-    /*  Fork off the parent process */
-    pid = fork();
-    if (pid < 0) {
-        env->ReleaseStringUTFChars(cmd, cmd_str);
+jint Java_com_github_shadowsocks_jnihelper_sigterm(JNIEnv *env, jobject thiz, jobject process) {
+    if (!env->IsInstanceOf(process, ProcessImpl)) {
+        THROW(env, "java/lang/ClassCastException",
+                   "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
         return -1;
     }
-
-    if (pid > 0) {
-        env->ReleaseStringUTFChars(cmd, cmd_str);
-        return pid;
-    }
-
-    execl("/system/bin/sh", "sh", "-c", cmd_str, NULL);
-    env->ReleaseStringUTFChars(cmd, cmd_str);
-
-    return 1;
+    jint pid = env->GetIntField(process, ProcessImpl_pid);
+    // Suppress "No such process" errors. We just want the process killed. It's fine if it's already killed.
+    return kill(pid, SIGTERM) == -1 && errno != ESRCH ? errno : 0;
 }
 
 void Java_com_github_shadowsocks_jnihelper_close(JNIEnv *env, jobject thiz, jint fd) {
@@ -82,8 +83,8 @@ static JNINativeMethod method_table[] = {
         (void*) Java_com_github_shadowsocks_jnihelper_close },
     { "sendFd", "(ILjava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
-    { "exec", "(Ljava/lang/String;)I",
-        (void*) Java_com_github_shadowsocks_jnihelper_exec }
+    { "sigterm", "(Ljava/lang/Process;)I",
+        (void*) Java_com_github_shadowsocks_jnihelper_sigterm }
 };
 
 
@@ -139,20 +140,30 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     jint result = -1;
     JNIEnv* env = NULL;
 
-    LOGI("JNI_OnLoad");
-
-    if (vm->GetEnv(&uenv.venv, JNI_VERSION_1_4) != JNI_OK) {
-        LOGE("ERROR: GetEnv failed");
+    if (vm->GetEnv(&uenv.venv, JNI_VERSION_1_6) != JNI_OK) {
+        THROW(env, "java/lang/RuntimeException", "GetEnv failed");
         goto bail;
     }
     env = uenv.env;
 
     if (registerNatives(env) != JNI_TRUE) {
-        LOGE("ERROR: registerNatives failed");
+        THROW(env, "java/lang/RuntimeException", "registerNativeMethods failed");
         goto bail;
     }
 
-    result = JNI_VERSION_1_4;
+    if (sdk_version() < 24) {
+        if (!(ProcessImpl = env->FindClass("java/lang/ProcessManager$ProcessImpl"))) {
+            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl not found");
+            goto bail;
+        }
+        ProcessImpl = (jclass) env->NewGlobalRef((jobject) ProcessImpl);
+        if (!(ProcessImpl_pid = env->GetFieldID(ProcessImpl, "pid", "I"))) {
+            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.pid not found");
+            goto bail;
+        }
+    }
+
+    result = JNI_VERSION_1_6;
 
 bail:
     return result;
