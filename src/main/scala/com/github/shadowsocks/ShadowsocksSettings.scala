@@ -272,8 +272,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
 
   def downloadAcl(url: String) {
     val progressDialog = ProgressDialog.show(activity, getString(R.string.aclupdate), getString(R.string.aclupdate_downloading), false, false)
-    progressDialog.create()
-    progressDialog.show()
     new Thread {
       override def run() {
         Looper.prepare();
