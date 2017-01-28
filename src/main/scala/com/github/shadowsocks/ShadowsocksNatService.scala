@@ -55,11 +55,11 @@ class ShadowsocksNatService extends BaseService {
   def startShadowsocksDaemon() {
     val conf = if (profile.kcp) {
       ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localPort,
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90, profile.localAddress, profile.localPort,
         profile.password, profile.method, 600)
     } else {
       ConfigUtils
-      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort,
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localAddress, profile.localPort,
         profile.password, profile.method, 600)
     }
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-nat.conf"))(p => {
@@ -67,7 +67,7 @@ class ShadowsocksNatService extends BaseService {
     })
 
     val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so"
-          , "-b" , "127.0.0.1"
+          , "-b" ,profile.localAddress
           , "-t" , "600"
           , "-P", getApplicationInfo.dataDir
           , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
@@ -109,7 +109,7 @@ class ShadowsocksNatService extends BaseService {
   def startDNSTunnel() {
     if (profile.udpdns) {
       val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
+        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localAddress, profile.localPort + 53,
           profile.password, profile.method, 10)
       Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
         p.println(conf)
@@ -117,7 +117,7 @@ class ShadowsocksNatService extends BaseService {
       val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
         , "-u"
         , "-t" , "10"
-        , "-b" , "127.0.0.1"
+        , "-b" , profile.localAddress
         , "-l" , (profile.localPort + 53).toString
         , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
         , "-P" , getApplicationInfo.dataDir
@@ -133,7 +133,7 @@ class ShadowsocksNatService extends BaseService {
       val conf = if (profile.kcp) {
         ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, "127.0.0.1", profile.localPort + 90,
-          profile.localPort + 63, profile.password, profile.method, 10)
+          profile.localAddress, profile.localPort + 63, profile.password, profile.method, 10)
       } else {
         ConfigUtils
         .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
@@ -144,7 +144,7 @@ class ShadowsocksNatService extends BaseService {
       })
       val cmdBuf = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so"
         , "-t" , "10"
-        , "-b" , "127.0.0.1"
+        , "-b" , profile.localAddress
         , "-l" , (profile.localPort + 63).toString
         , "-L" , if (profile.remoteDns == null) "8.8.8.8:53" else profile.remoteDns + ":53"
         , "-P", getApplicationInfo.dataDir

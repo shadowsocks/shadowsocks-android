@@ -32,7 +32,7 @@ object Executable {
 }
 
 object ConfigUtils {
-  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
+  val SHADOWSOCKS = "{\"server\": \"%s\", \"server_port\": %d, \"local_address\": \"%s\", \"local_port\": %d, \"password\": \"%s\", \"method\":\"%s\", \"timeout\": %d}"
   val REDSOCKS = "base {\n" +
     " log_debug = off;\n" +
     " log_info = off;\n" +
@@ -150,8 +150,10 @@ object Key {
   val password = "sitekey"
   val method = "encMethod"
   val remotePort = "remotePortNum"
+  var localAddress = "listenAddress"
   val localPort = "localPortNum"
   val remoteDns = "remoteDns"
+
 
   val kcp = "kcp"
   val kcpPort = "kcpPort"

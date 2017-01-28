@@ -46,6 +46,7 @@
 <string name="tcp_fastopen_summary_unsupported">"ご利用のカーネルバージョンはサポートしておりません：%s &lt; 3.7.1"</string>
 <string name="udp_dns">"UDP転送"</string>
 <string name="udp_dns_summary">"UDPプロトコルでリモードサーバーにパケットを転送"</string>
+<string name="listen_address">"ローカルアドレス"</string>
 
 <!-- notification category -->
 <string name="forward_success">"バックグラウンドでサービスを開始しました"</string>

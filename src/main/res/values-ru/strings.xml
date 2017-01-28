@@ -54,6 +54,8 @@
 <string name="tcp_fastopen_summary_unsupported">"Неподдерживаемая версия ядра: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"Проброс UDP"</string>
 <string name="udp_dns_summary">"Пробрасывать UDP пакеты на удалённый сервер"</string>
+<string name="listen_address">"Локальный Aдрес"</string>
+
 
 <!-- notification category -->
 <string name="forward_success">"Shadowsocks запущен."</string>

@@ -24,6 +24,7 @@ local.sbt
 .idea/
 out/
 .d
+*~
 
 #NDK
 src/main/obj

@@ -36,6 +36,10 @@
                 android:entryValues="@array/enc_method_value"
                 android:summary="%s"
                 android:title="@string/enc_method"/>
+        <be.mygod.preference.EditTextPreference
+                android:key="listenAddress"
+                android:summary="%s"
+                android:title="@string/listen_address"/>
         <SwitchPreference
                 android:key="isAuth"
                 android:summary="@string/onetime_auth_summary"
