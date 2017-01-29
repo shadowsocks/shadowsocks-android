@@ -40,6 +40,9 @@ class Profile {
   @DatabaseField
   var host: String = "198.199.101.152"
 
+  @DatabaseField
+  var localAddress: String = "127.0.0.1"
+
   // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
   @DatabaseField
   var localPort: Int = 1080 + Binder.getCallingUserHandle.hashCode
@@ -111,6 +114,7 @@ class Profile {
   def serialize(editor: SharedPreferences.Editor): SharedPreferences.Editor = editor
     .putString(Key.name, name)
     .putString(Key.host, host)
+    .putString(Key.localAddress, localAddress)
     .putInt(Key.localPort, localPort)
     .putInt(Key.remotePort, remotePort)
     .putString(Key.password, password)
@@ -131,6 +135,7 @@ class Profile {
     // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
     name = pref.getString(Key.name, null)
     host = pref.getString(Key.host, null)
+    localAddress = pref.getString(Key.localAddress, null)
     localPort = pref.getInt(Key.localPort, 0)
     remotePort = pref.getInt(Key.remotePort, 0)
     password = pref.getString(Key.password, null)

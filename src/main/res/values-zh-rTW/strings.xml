@@ -60,6 +60,7 @@
 <string name="vpn_error">"%s"</string>
 <string name="reboot_required">"VPN 服務啟動失敗。您或許需要重新啟動您的裝置。"</string>
 <string name="profile_invalid_input">"未找到有效的設定檔資料。"</string>
+<string name="listen_address">"本地地址"</string>
 
 <!-- alert category -->
 <string name="yes">"是"</string>

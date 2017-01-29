@@ -88,9 +88,9 @@ class DBHelper(val context: Context)
           profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
           TableUtils.createTable(connectionSource, classOf[Profile])
           profileDao.executeRawNoArgs(
-            "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
+            "INSERT INTO `profile`(id, name, host, localAddress, localPort, remotePort, password, method, route, proxyApps, bypass," +
               " udpdns, auth, ipv6, individual) " +
-            "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
+            "SELECT id, name, host, localAddress, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, auth," +
             " ipv6, individual FROM `tmp`;")
           profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
           profileDao.executeRawNoArgs("COMMIT;")
