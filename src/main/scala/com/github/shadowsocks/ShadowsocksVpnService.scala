@@ -142,7 +142,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       case None => throw NameNotResolvedException()
     }
 
-    handleConnection()///////////////////////////////////////;;;;;;;;;;;;;;;;;;;;;;;;;
+    handleConnection()
     changeState(State.CONNECTED)
 
     if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
