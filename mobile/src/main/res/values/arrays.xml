@@ -17,6 +17,9 @@
         <item>SALSA20</item>
         <item>CHACHA20</item>
         <item>CHACHA20-IETF</item>
+        <item>AES-128-GCM</item>
+        <item>AES-192-GCM</item>
+        <item>AES-256-GCM</item>
     </string-array>
 
     <string-array name="enc_method_value">
@@ -36,6 +39,9 @@
         <item>salsa20</item>
         <item>chacha20</item>
         <item>chacha20-ietf</item>
+        <item>aes-128-gcm</item>
+        <item>aes-192-gcm</item>
+        <item>aes-256-gcm</item>
     </string-array>
 
     <string-array name="route_entry">

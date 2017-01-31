@@ -36,10 +36,6 @@
                 android:entryValues="@array/enc_method_value"
                 android:summary="%s"
                 android:title="@string/enc_method"/>
-        <SwitchPreference
-                android:key="isAuth"
-                android:summary="@string/onetime_auth_summary"
-                android:title="@string/onetime_auth"/>
 
     </be.mygod.preference.PreferenceCategory>
 

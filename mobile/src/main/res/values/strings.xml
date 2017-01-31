@@ -36,8 +36,6 @@
   <!-- feature category -->
   <string name="ipv6">IPv6 Route</string>
   <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
-  <string name="onetime_auth">One-time Authentication</string>
-  <string name="onetime_auth_summary">Enable one-time authentication</string>
   <string name="route_list">Route</string>
   <string name="route_entry_all">All</string>
   <string name="route_entry_bypass_lan">Bypass LAN</string>
