@@ -26,7 +26,6 @@ include $(CLEAR_VARS)
 
 SODIUM_SOURCE := \
 	crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c \
-	crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c \
 	crypto_auth/crypto_auth.c \
 	crypto_auth/hmacsha256/auth_hmacsha256_api.c \
 	crypto_auth/hmacsha256/cp/hmac_hmacsha256.c \
