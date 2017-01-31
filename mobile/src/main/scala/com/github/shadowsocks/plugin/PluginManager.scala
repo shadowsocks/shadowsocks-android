@@ -50,6 +50,20 @@ object PluginManager {
         |RSo6EooQ7+NBejOXysqIF1q0BJs8Y5s/CaTOmgbL7uPCkzArB6SS/hzXgDk5gw6v
         |wkGeOtzcj1DlbUTvt1s5GlnwBTGUmkbLx+YUje+n+IBgMbohLUDYBtUHylRVgMsc
         |1WS67kDqeJiiQZvrxvyW6CZZ/MIGI+uAkkj3DqJpaZirkwPgvpcOIrjZy0uFvQM=
+      """, Base64.DEFAULT)) +
+    new Signature(Base64.decode( // @madeye
+      """
+        |MIICQzCCAaygAwIBAgIETV9OhjANBgkqhkiG9w0BAQUFADBmMQswCQYDVQQGEwJjbjERMA8GA1UE
+        |CBMIU2hhbmdoYWkxDzANBgNVBAcTBlB1ZG9uZzEUMBIGA1UEChMLRnVkYW4gVW5pdi4xDDAKBgNV
+        |BAsTA1BQSTEPMA0GA1UEAxMGTWF4IEx2MB4XDTExMDIxOTA1MDA1NFoXDTM2MDIxMzA1MDA1NFow
+        |ZjELMAkGA1UEBhMCY24xETAPBgNVBAgTCFNoYW5naGFpMQ8wDQYDVQQHEwZQdWRvbmcxFDASBgNV
+        |BAoTC0Z1ZGFuIFVuaXYuMQwwCgYDVQQLEwNQUEkxDzANBgNVBAMTBk1heCBMdjCBnzANBgkqhkiG
+        |9w0BAQEFAAOBjQAwgYkCgYEAq6lA8LqdeEI+es9SDX85aIcx8LoL3cc//iRRi+2mFIWvzvZ+bLKr
+        |4Wd0rhu/iU7OeMm2GvySFyw/GdMh1bqh5nNPLiRxAlZxpaZxLOdRcxuvh5Nc5yzjM+QBv8ECmuvu
+        |AOvvT3UDmA0AMQjZqSCmxWIxc/cClZ/0DubreBo2st0CAwEAATANBgkqhkiG9w0BAQUFAAOBgQAQ
+        |Iqonxpwk2ay+Dm5RhFfZyG9SatM/JNFx2OdErU16WzuK1ItotXGVJaxCZv3u/tTwM5aaMACGED5n
+        |AvHaDGCWynY74oDAopM4liF/yLe1wmZDu6Zo/7fXrH+T03LBgj2fcIkUfN1AA4dvnBo8XWAm9VrI
+        |1iNuLIssdhDz3IL9Yg==
       """, Base64.DEFAULT))
 
   private var receiver: BroadcastReceiver = _
