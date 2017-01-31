@@ -26,6 +26,7 @@ include $(CLEAR_VARS)
 
 SODIUM_SOURCE := \
 	crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c \
+	crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c \
 	crypto_auth/crypto_auth.c \
 	crypto_auth/hmacsha256/auth_hmacsha256_api.c \
 	crypto_auth/hmacsha256/cp/hmac_hmacsha256.c \
@@ -48,6 +49,7 @@ SODIUM_SOURCE := \
 	crypto_core/hsalsa20/core_hsalsa20_api.c \
 	crypto_core/salsa20/ref/core_salsa20.c \
 	crypto_core/salsa20/core_salsa20_api.c \
+	crypto_core/hchacha20/core_hchacha20.c \
 	crypto_generichash/crypto_generichash.c \
 	crypto_generichash/blake2/generichash_blake2_api.c \
 	crypto_generichash/blake2/ref/blake2-impl.h \
@@ -120,6 +122,7 @@ SODIUM_SOURCE += \
 	crypto_scalarmult/curve25519/ref10/x25519_ref10.c
 
 SODIUM_SOURCE += \
+	crypto_pwhash/crypto_pwhash.c \
 	crypto_pwhash/argon2/argon2-core.c \
 	crypto_pwhash/argon2/argon2.c \
 	crypto_pwhash/argon2/argon2-encoding.c \
@@ -329,8 +332,10 @@ include $(BUILD_SHARED_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
-	utils.c netutils.c json.c jconf.c acl.c http.c tls.c rule.c \
+SHADOWSOCKS_SOURCES := local.c \
+	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
+	acl.c http.c tls.c rule.c \
+	crypto.c aead.c stream.c \
 	plugin.c \
 	android.c
 
@@ -364,7 +369,11 @@ include $(BUILD_SHARED_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c plugin.c
+SHADOWSOCKS_SOURCES := tunnel.c \
+	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
+	crypto.c aead.c stream.c \
+	plugin.c \
+	android.c
 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))

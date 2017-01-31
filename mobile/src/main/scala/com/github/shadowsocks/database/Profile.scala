@@ -69,9 +69,6 @@ class Profile {
   var udpdns: Boolean = _
 
   @DatabaseField
-  var auth: Boolean = _
-
-  @DatabaseField
   var ipv6: Boolean = _
 
   @DatabaseField(dataType = DataType.LONG_STRING)
@@ -96,8 +93,8 @@ class Profile {
   def nameIsEmpty: Boolean = name == null || name.isEmpty
   def getName: String = if (nameIsEmpty) formattedAddress else name
 
-  override def toString: String = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
-    method, if (auth) "-auth" else "", password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP) +
+  override def toString: String = "ss://" + Base64.encodeToString("%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
+    method, password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP) +
     (if (TextUtils.isEmpty(name)) "" else '#' + URLEncoder.encode(name, "utf-8"))
 
   def isMethodUnsafe: Boolean = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
@@ -114,7 +111,6 @@ class Profile {
     .putBoolean(Key.proxyApps, proxyApps)
     .putBoolean(Key.bypass, bypass)
     .putBoolean(Key.udpdns, udpdns)
-    .putBoolean(Key.auth, auth)
     .putBoolean(Key.ipv6, ipv6)
     .putString(Key.individual, individual)
     .putString(Key.plugin, plugin)
@@ -132,7 +128,6 @@ class Profile {
     proxyApps = pref.getBoolean(Key.proxyApps, false)
     bypass = pref.getBoolean(Key.bypass, false)
     udpdns = pref.getBoolean(Key.udpdns, false)
-    auth = pref.getBoolean(Key.auth, false)
     ipv6 = pref.getBoolean(Key.ipv6, false)
     individual = pref.getString(Key.individual, null)
     plugin = pref.getString(Key.plugin, null)

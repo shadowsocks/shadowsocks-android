@@ -325,7 +325,6 @@ trait BaseService extends Service {
       .put("server_port", profile.remotePort)
       .put("password", profile.password)
       .put("method", profile.method)
-    if (profile.auth) config.put("auth", true)
     if (pluginPath != null) config
       .put("plugin", Commandline.toString(buildPluginCommandLine()))
       .put("plugin_opts", plugin.toString)
