@@ -183,9 +183,6 @@ trait BaseService extends Service {
 
     changeState(State.CONNECTING)
 
-    if (profile.isMethodUnsafe)
-      handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show())
-
     Utils.ThrowableFuture(try connect() catch {
       case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
       case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
