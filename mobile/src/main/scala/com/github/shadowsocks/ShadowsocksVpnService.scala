@@ -23,14 +23,13 @@ package com.github.shadowsocks
 import java.io.File
 import java.util.Locale
 
-import android.annotation.SuppressLint
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
 import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.acl.{Acl, AclSyncJob}
+import com.github.shadowsocks.acl.{Acl, AclSyncJob, Subnet}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 
@@ -212,7 +211,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     pdnsdProcess = new GuardedProcess(cmd: _*).start()
   }
 
-  @SuppressLint(Array("NewApi"))
   def startVpn(): Int = {
 
     val builder = new Builder()
@@ -249,14 +247,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_CHN) {
       builder.addRoute("0.0.0.0", 0)
     } else {
-      val privateList = getResources.getStringArray(R.array.bypass_private_route)
-      privateList.foreach(cidr => {
-        val addr = cidr.split('/')
-        builder.addRoute(addr(0), addr(1).toInt)
+      getResources.getStringArray(R.array.bypass_private_route).foreach(cidr => {
+        val subnet = Subnet.fromString(cidr)
+        builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
     }
-
-    builder.addRoute("8.8.0.0", 16)
 
     conn = builder.establish()
     if (conn == null) throw new NullConnectionException

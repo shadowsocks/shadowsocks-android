@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.utils
 
+import java.lang.reflect.InvocationTargetException
 import java.net._
 import java.security.MessageDigest
 
@@ -108,7 +109,15 @@ object Utils {
       .orElse(resolve(host))
 
   private lazy val isNumericMethod = classOf[InetAddress].getMethod("isNumeric", classOf[String])
+  private lazy val parseNumericAddressMethod = classOf[InetAddress].getMethod("parseNumericAddress", classOf[String])
   def isNumeric(address: String): Boolean = isNumericMethod.invoke(null, address).asInstanceOf[Boolean]
+  def parseNumericAddress(address: String): InetAddress =
+    try parseNumericAddressMethod.invoke(null, address).asInstanceOf[InetAddress] catch {
+      case exc: InvocationTargetException => throw exc.getCause match {
+        case null => exc
+        case cause => cause
+      }
+    }
 
   /**
    * If there exists a valid IPv6 interface
