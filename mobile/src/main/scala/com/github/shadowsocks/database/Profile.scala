@@ -96,12 +96,12 @@ class Profile {
   def toUri: Uri = {
     val builder = new Uri.Builder()
       .scheme("ss")
-      .authority("%s@%s:%d".formatLocal(Locale.ENGLISH,
+      .encodedAuthority("%s@%s:%d".formatLocal(Locale.ENGLISH,
         Base64.encodeToString("%s:%s".formatLocal(Locale.ENGLISH, method, password).getBytes,
           Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE), host, remotePort))
     val configuration = new PluginConfiguration(plugin)
     if (configuration.selected.nonEmpty)
-      builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString)
+      builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))
     if (!nameIsEmpty) builder.fragment(name)
     builder.build()
   }

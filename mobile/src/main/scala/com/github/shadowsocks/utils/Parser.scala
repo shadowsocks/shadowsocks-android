@@ -21,7 +21,7 @@
 package com.github.shadowsocks.utils
 
 import android.net.Uri
-import android.util.Log
+import android.util.{Base64, Log}
 import com.github.shadowsocks.database.Profile
 
 object Parser {
@@ -48,18 +48,21 @@ object Parser {
             Log.e(TAG, "Unrecognized URI: " + m.matched)
             null
         }
-        case userInfoPattern(method, password) =>
-          val profile = new Profile
-          profile.method = method
-          profile.password = password
-          profile.host = uri.getHost
-          profile.remotePort = uri.getPort
-          profile.plugin = uri.getQueryParameter(Key.plugin)
-          profile.name = uri.getFragment
-          profile
-        case _ =>
-          Log.e(TAG, "Unknown user info: " + m.matched)
-          null
+        case userInfo =>
+          new String(Base64.decode(userInfo, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE)) match {
+            case userInfoPattern(method, password) =>
+              val profile = new Profile
+              profile.method = method
+              profile.password = password
+              profile.host = uri.getHost
+              profile.remotePort = uri.getPort
+              profile.plugin = uri.getQueryParameter(Key.plugin)
+              profile.name = uri.getFragment
+              profile
+            case _ =>
+              Log.e(TAG, "Unknown user info: " + m.matched)
+              null
+          }
       }
     }).filter(_ != null)
 }
