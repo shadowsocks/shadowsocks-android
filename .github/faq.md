@@ -30,7 +30,7 @@ The exclamation mark in the Wi-Fi/cellular icon appears because the system fails
 2. Aggressive (or called broken) background service killing policy.
 
 * Fixes for MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
-* Known issue for Huawei: [#1106](https://github.com/shadowsocks/shadowsocks-android/issues/1106)
+* Fixes for Huawei: [#1091 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 
 ### How to pause Shadowsocks service?
 
