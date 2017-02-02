@@ -20,6 +20,7 @@ import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{MainActivity, R, ToolbarFragment}
 
 import scala.collection.mutable
+import scala.io.Source
 
 /**
   * @author Mygod
@@ -144,8 +145,12 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       apply()
       index
     } else -1
-    def addToProxy(input: String): Int = try addSubnet(Subnet.fromString(input)) catch {
-      case _: IllegalArgumentException => addHostname(input)
+    def addToProxy(input: String): Int = {
+      val acl = new Acl().fromSource(Source.fromString(input), defaultBypass = true)
+      var result = -1
+      for (hostname <- acl.proxyHostnames) result = addHostname(hostname)
+      if (acl.bypass) for (subnet <- acl.subnets) result = addSubnet(subnet)
+      result
     }
     def addFromTemplate(template: Int, text: CharSequence): Int = template match {
       case GENERIC => addToProxy(text.toString)
@@ -298,13 +303,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         .create().show()
       true
     case R.id.action_import =>
-      try {
-        val items = clipboard.getPrimaryClip.getItemAt(0).getText.toString.split("\n")
-        if (items.nonEmpty) {
-          items.foreach(adapter.addToProxy)
-          return true
-        }
-      } catch {
+      try if (adapter.addToProxy(clipboard.getPrimaryClip.getItemAt(0).getText.toString) != -1) return true catch {
         case _: Exception =>
       }
       Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()

@@ -10,6 +10,5 @@
     <EditText android:id="@+id/content"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:inputType="textNoSuggestions"
-              android:lines="1"/>
+              android:inputType="textNoSuggestions|textMultiLine"/>
 </LinearLayout>
