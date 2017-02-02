@@ -15,7 +15,7 @@ import android.os.{Bundle, ParcelFileDescriptor}
   *    &lt;application&gt;
   *        ...
   *        &lt;provider android:name="com.github.shadowsocks.$PLUGIN_ID.BinaryProvider"
-  *                     android:authorities="com.github.shadowsocks.plugin.$PLUGIN_ID"&gt;
+  *                     android:authorities="com.github.shadowsocks.plugin.$PLUGIN_ID.BinaryProvider"&gt;
   *            &lt;intent-filter&gt;
   *                &lt;category android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" /&gt;
   *            &lt;/intent-filter&gt;
