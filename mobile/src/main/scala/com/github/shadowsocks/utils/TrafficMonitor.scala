@@ -45,7 +45,7 @@ object TrafficMonitor {
   def formatTraffic(size: Long): String = {
     var n: Double = size
     var i = -1
-    while (n >= 1000) {
+    while (n >= 999.5) {
       n /= 1024
       i = i + 1
     }
