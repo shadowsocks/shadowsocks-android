@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">シャドーソックス R</string>
+  <string name="app_name">SSR</string>
   <string name="quick_toggle">スイッチ</string>
 
   <string name="misc_cat">その他</string>
