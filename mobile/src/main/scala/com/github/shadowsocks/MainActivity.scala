@@ -84,11 +84,6 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   private var txRateText: TextView = _
   private var rxRateText: TextView = _
 
-  private var currentFragment: ToolbarFragment = _
-  private lazy val profilesFragment = new ProfilesFragment()
-  private lazy val customRulesFragment = new CustomRulesFragment()
-  private lazy val globalSettingsFragment = new GlobalSettingsFragment()
-  private lazy val aboutFragment = new AboutFragment()
   private lazy val customTabsIntent = new CustomTabsIntent.Builder()
     .setToolbarColor(ContextCompat.getColor(this, R.color.material_primary_500))
     .build()
@@ -255,7 +250,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
-    if (savedInstanceState == null) displayFragment(profilesFragment)
+    if (savedInstanceState == null) displayFragment(new ProfilesFragment)
     statusText = findViewById(R.id.status).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
@@ -364,14 +359,13 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   }
 
   private def displayFragment(fragment: ToolbarFragment) {
-    currentFragment = fragment
     getFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
     drawer.closeDrawer()
   }
 
   override def onItemClick(view: View, position: Int, drawerItem: IDrawerItem[_, _ <: ViewHolder]): Boolean = {
     drawerItem.getIdentifier match {
-      case DRAWER_PROFILES => displayFragment(profilesFragment)
+      case DRAWER_PROFILES => displayFragment(new ProfilesFragment)
       case DRAWER_RECOVERY =>
         app.track("GlobalConfigFragment", "reset")
         if (bgService != null) bgService.use(-1)
@@ -384,12 +378,12 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           app.copyAssets()
           handler.sendEmptyMessage(0)
         }
-      case DRAWER_GLOBAL_SETTINGS => displayFragment(globalSettingsFragment)
+      case DRAWER_GLOBAL_SETTINGS => displayFragment(new GlobalSettingsFragment)
       case DRAWER_ABOUT =>
         app.track(TAG, "about")
-        displayFragment(aboutFragment)
+        displayFragment(new AboutFragment)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
-      case DRAWER_CUSTOM_RULES => displayFragment(customRulesFragment)
+      case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
     }
     true  // unexpected cases will throw exception
   }
@@ -408,12 +402,14 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     setListeningForBandwidth(true)
   }
 
-  override def onBackPressed(): Unit =
-    if (drawer.isDrawerOpen) drawer.closeDrawer() else if (!currentFragment.onBackPressed())
-      if (currentFragment != profilesFragment) {
-        displayFragment(profilesFragment)
+  override def onBackPressed(): Unit = if (drawer.isDrawerOpen) drawer.closeDrawer() else {
+    val currentFragment = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
+    if (!currentFragment.onBackPressed())
+      if (currentFragment.isInstanceOf[ProfilesFragment]) super.onBackPressed() else {
+        displayFragment(new ProfilesFragment)
         drawer.setSelection(DRAWER_PROFILES)
-      } else super.onBackPressed()
+      }
+  }
 
   override def onStop() {
     setListeningForBandwidth(false)
