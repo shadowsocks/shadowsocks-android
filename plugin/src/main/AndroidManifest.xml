@@ -6,6 +6,6 @@
     <application
             android:theme="@style/Theme.Shadowsocks">
         <meta-data android:name="com.github.shadowsocks.plugin.version"
-                   android:value="0.0.1"/>
+                   android:value="0.0.2"/>
     </application>
 </manifest>

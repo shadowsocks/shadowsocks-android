@@ -226,5 +226,5 @@ Plugin app must include this in their application tag: (which should be automati
 
 ```
 <meta-data android:name="com.github.shadowsocks.plugin.version"
-           android:value="0.0.1"/>
+           android:value="0.0.2"/>
 ```

@@ -37,7 +37,7 @@ First you need to add this library to your dependencies. This library is written
  and it's most convenient to use it with SBT:
 
 ```scala
-libraryDependencies += "com.github.shadowsocks" %% "plugin" % "0.0.1"
+libraryDependencies += "com.github.shadowsocks" %% "plugin" % "0.0.2"
 ```
 
 ### Native binary configuration
