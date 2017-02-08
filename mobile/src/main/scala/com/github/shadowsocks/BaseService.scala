@@ -183,9 +183,6 @@ trait BaseService extends Service {
 
     changeState(State.CONNECTING)
 
-    if (profile.isMethodUnsafe)
-      handler.post(() => Toast.makeText(this, R.string.method_unsafe, Toast.LENGTH_LONG).show())
-
     Utils.ThrowableFuture(try connect() catch {
       case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
       case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
@@ -325,7 +322,6 @@ trait BaseService extends Service {
       .put("server_port", profile.remotePort)
       .put("password", profile.password)
       .put("method", profile.method)
-    if (profile.auth) config.put("auth", true)
     if (pluginPath != null) config
       .put("plugin", Commandline.toString(buildPluginCommandLine()))
       .put("plugin_opts", plugin.toString)

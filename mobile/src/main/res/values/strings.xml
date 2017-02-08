@@ -36,8 +36,6 @@
   <!-- feature category -->
   <string name="ipv6">IPv6 Route</string>
   <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
-  <string name="onetime_auth">One-time Authentication</string>
-  <string name="onetime_auth_summary">Enable one-time authentication</string>
   <string name="route_list">Route</string>
   <string name="route_entry_all">All</string>
   <string name="route_entry_bypass_lan">Bypass LAN</string>
@@ -62,7 +60,6 @@
   <string name="forward_success">Shadowsocks started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
-  <string name="method_unsafe">WARNING: The current encryption method is unsafe</string>
   <string name="nat_deprecated">WARNING: NAT mode has been deprecated since Android 5.0</string>
   <string name="nat_no_root">NAT mode requires ROOT permission</string>
   <string name="switch_to_vpn">Switch to VPN mode</string>

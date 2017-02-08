@@ -29,7 +29,8 @@
 	url = https://android.googlesource.com/platform/external/pcre
 [submodule "mobile/src/main/jni/libsodium"]
 	path = mobile/src/main/jni/libsodium
-	url = https://github.com/shadowsocks/libsodium.git
+	url = https://github.com/jedisct1/libsodium.git
+	branch = stable
 [submodule "mobile/src/main/jni/libev"]
 	path = mobile/src/main/jni/libev
 	url = https://github.com/shadowsocks/libev.git

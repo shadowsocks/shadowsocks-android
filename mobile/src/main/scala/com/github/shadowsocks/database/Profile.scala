@@ -20,13 +20,13 @@
 
 package com.github.shadowsocks.database
 
-import java.net.URLEncoder
 import java.util.Locale
 
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Binder
-import android.text.TextUtils
 import android.util.Base64
+import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.utils.Key
 import com.j256.ormlite.field.{DataType, DatabaseField}
 
@@ -69,9 +69,6 @@ class Profile {
   var udpdns: Boolean = _
 
   @DatabaseField
-  var auth: Boolean = _
-
-  @DatabaseField
   var ipv6: Boolean = _
 
   @DatabaseField(dataType = DataType.LONG_STRING)
@@ -96,11 +93,19 @@ class Profile {
   def nameIsEmpty: Boolean = name == null || name.isEmpty
   def getName: String = if (nameIsEmpty) formattedAddress else name
 
-  override def toString: String = "ss://" + Base64.encodeToString("%s%s:%s@%s:%d".formatLocal(Locale.ENGLISH,
-    method, if (auth) "-auth" else "", password, host, remotePort).getBytes, Base64.NO_PADDING | Base64.NO_WRAP) +
-    (if (TextUtils.isEmpty(name)) "" else '#' + URLEncoder.encode(name, "utf-8"))
-
-  def isMethodUnsafe: Boolean = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
+  def toUri: Uri = {
+    val builder = new Uri.Builder()
+      .scheme("ss")
+      .encodedAuthority("%s@%s:%d".formatLocal(Locale.ENGLISH,
+        Base64.encodeToString("%s:%s".formatLocal(Locale.ENGLISH, method, password).getBytes,
+          Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE), host, remotePort))
+    val configuration = new PluginConfiguration(plugin)
+    if (configuration.selected.nonEmpty)
+      builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))
+    if (!nameIsEmpty) builder.fragment(name)
+    builder.build()
+  }
+  override def toString: String = toUri.toString
 
   def serialize(editor: SharedPreferences.Editor): SharedPreferences.Editor = editor
     .putString(Key.name, name)
@@ -114,7 +119,6 @@ class Profile {
     .putBoolean(Key.proxyApps, proxyApps)
     .putBoolean(Key.bypass, bypass)
     .putBoolean(Key.udpdns, udpdns)
-    .putBoolean(Key.auth, auth)
     .putBoolean(Key.ipv6, ipv6)
     .putString(Key.individual, individual)
     .putString(Key.plugin, plugin)
@@ -132,7 +136,6 @@ class Profile {
     proxyApps = pref.getBoolean(Key.proxyApps, false)
     bypass = pref.getBoolean(Key.bypass, false)
     udpdns = pref.getBoolean(Key.udpdns, false)
-    auth = pref.getBoolean(Key.auth, false)
     ipv6 = pref.getBoolean(Key.ipv6, false)
     individual = pref.getString(Key.individual, null)
     plugin = pref.getString(Key.plugin, null)

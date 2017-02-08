@@ -20,32 +20,49 @@
 
 package com.github.shadowsocks.utils
 
-import java.net.URLDecoder
-
+import android.net.Uri
 import android.util.{Base64, Log}
 import com.github.shadowsocks.database.Profile
 
 object Parser {
   val TAG = "ShadowParser"
-  private val pattern = "(?i)ss://([A-Za-z0-9+-/=_]+)(#(.+))?".r
-  private val decodedPattern = "(?i)^((.+?)(-auth)??:(.*)@(.+?):(\\d+?))$".r
+  private val pattern = "(?i)^ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$".r
+  private val userInfoPattern = "^(.+?):(.*)$".r
+  private val legacyPattern = "^((.+?):(.*)@(.+?):(\\d+?))$".r
 
   def findAll(data: CharSequence): Iterator[Profile] =
-    pattern.findAllMatchIn(if (data == null) "" else data).map(m => try
-      decodedPattern.findFirstMatchIn(new String(Base64.decode(m.group(1), Base64.NO_PADDING), "UTF-8")) match {
-        case Some(ss) =>
-          val profile = new Profile
-          profile.method = ss.group(2).toLowerCase
-          if (ss.group(3) != null) profile.auth = true
-          profile.password = ss.group(4)
-          profile.host = ss.group(5)
-          profile.remotePort = ss.group(6).toInt
-          if (m.group(2) != null) profile.name = URLDecoder.decode(m.group(3), "utf-8")
-          profile
-        case _ => null
-      } catch {
-        case ex: Exception =>
-          Log.e(TAG, "parser error: " + m.source, ex)// Ignore
-          null
-      }).filter(_ != null)
+    pattern.findAllMatchIn(if (data == null) "" else data).map(m => {
+      val uri = Uri.parse(m.matched)
+      uri.getUserInfo match {
+        case null => uri.getHost match {
+          case legacyPattern(_, method, password, host, port) =>  // legacy uri
+            val profile = new Profile
+            profile.method = method.toLowerCase
+            profile.password = password
+            profile.host = host
+            profile.remotePort = port.toInt
+            profile.plugin = uri.getQueryParameter(Key.plugin)
+            profile.name = uri.getFragment
+            profile
+          case _ =>
+            Log.e(TAG, "Unrecognized URI: " + m.matched)
+            null
+        }
+        case userInfo =>
+          new String(Base64.decode(userInfo, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE)) match {
+            case userInfoPattern(method, password) =>
+              val profile = new Profile
+              profile.method = method
+              profile.password = password
+              profile.host = uri.getHost
+              profile.remotePort = uri.getPort
+              profile.plugin = uri.getQueryParameter(Key.plugin)
+              profile.name = uri.getFragment
+              profile
+            case _ =>
+              Log.e(TAG, "Unknown user info: " + m.matched)
+              null
+          }
+      }
+    }).filter(_ != null)
 }

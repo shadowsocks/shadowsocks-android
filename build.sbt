@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
   typedResources := false
 )
 
-val supportLibsVersion = "25.1.0"
+val supportLibsVersion = "25.1.1"
 lazy val root = Project(id = "shadowsocks-android", base = file("."))
   .settings(commonSettings)
   .aggregate(plugin, mobile)

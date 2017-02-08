@@ -26,114 +26,31 @@ include $(CLEAR_VARS)
 
 SODIUM_SOURCE := \
 	crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c \
-	crypto_auth/crypto_auth.c \
-	crypto_auth/hmacsha256/auth_hmacsha256_api.c \
-	crypto_auth/hmacsha256/cp/hmac_hmacsha256.c \
-	crypto_auth/hmacsha256/cp/verify_hmacsha256.c \
-	crypto_auth/hmacsha512/auth_hmacsha512_api.c \
-	crypto_auth/hmacsha512/cp/hmac_hmacsha512.c \
-	crypto_auth/hmacsha512/cp/verify_hmacsha512.c \
-	crypto_auth/hmacsha512256/auth_hmacsha512256_api.c \
-	crypto_auth/hmacsha512256/cp/hmac_hmacsha512256.c \
-	crypto_auth/hmacsha512256/cp/verify_hmacsha512256.c \
-	crypto_box/crypto_box.c \
-	crypto_box/crypto_box_easy.c \
-	crypto_box/crypto_box_seal.c \
-	crypto_box/curve25519xsalsa20poly1305/box_curve25519xsalsa20poly1305_api.c \
-	crypto_box/curve25519xsalsa20poly1305/ref/after_curve25519xsalsa20poly1305.c \
-	crypto_box/curve25519xsalsa20poly1305/ref/before_curve25519xsalsa20poly1305.c \
-	crypto_box/curve25519xsalsa20poly1305/ref/box_curve25519xsalsa20poly1305.c \
-	crypto_box/curve25519xsalsa20poly1305/ref/keypair_curve25519xsalsa20poly1305.c \
-	crypto_core/hsalsa20/ref2/core_hsalsa20.c \
-	crypto_core/hsalsa20/core_hsalsa20_api.c \
 	crypto_core/salsa20/ref/core_salsa20.c \
-	crypto_core/salsa20/core_salsa20_api.c \
-	crypto_generichash/crypto_generichash.c \
-	crypto_generichash/blake2/generichash_blake2_api.c \
-	crypto_generichash/blake2/ref/blake2-impl.h \
-	crypto_generichash/blake2/ref/blake2.h \
 	crypto_generichash/blake2/ref/blake2b-compress-ref.c \
-	crypto_generichash/blake2/ref/blake2b-load-sse2.h \
-	crypto_generichash/blake2/ref/blake2b-load-sse41.h \
 	crypto_generichash/blake2/ref/blake2b-ref.c \
-	crypto_generichash/blake2/ref/blake2b-round.h \
 	crypto_generichash/blake2/ref/generichash_blake2b.c \
-	crypto_hash/crypto_hash.c \
-	crypto_hash/sha256/hash_sha256_api.c \
-	crypto_hash/sha256/cp/hash_sha256.c \
-	crypto_hash/sha512/hash_sha512_api.c \
-	crypto_hash/sha512/cp/hash_sha512.c \
-	crypto_onetimeauth/crypto_onetimeauth.c \
 	crypto_onetimeauth/poly1305/onetimeauth_poly1305.c \
-	crypto_onetimeauth/poly1305/onetimeauth_poly1305.h \
-	crypto_onetimeauth/poly1305/donna/poly1305_donna.h \
-	crypto_onetimeauth/poly1305/donna/poly1305_donna32.h \
-	crypto_onetimeauth/poly1305/donna/poly1305_donna64.h \
 	crypto_onetimeauth/poly1305/donna/poly1305_donna.c \
-	crypto_pwhash/scryptsalsa208sha256/crypto_scrypt-common.c \
-	crypto_pwhash/scryptsalsa208sha256/crypto_scrypt.h \
-	crypto_pwhash/scryptsalsa208sha256/scrypt_platform.c \
-	crypto_pwhash/scryptsalsa208sha256/pbkdf2-sha256.c \
-	crypto_pwhash/scryptsalsa208sha256/pbkdf2-sha256.h \
-	crypto_pwhash/scryptsalsa208sha256/pwhash_scryptsalsa208sha256.c \
-	crypto_pwhash/scryptsalsa208sha256/sysendian.h \
-	crypto_pwhash/scryptsalsa208sha256/nosse/pwhash_scryptsalsa208sha256_nosse.c \
-	crypto_scalarmult/crypto_scalarmult.c \
+	crypto_pwhash/crypto_pwhash.c \
+	crypto_pwhash/argon2/argon2-core.c \
+	crypto_pwhash/argon2/argon2.c \
+	crypto_pwhash/argon2/argon2-encoding.c \
+	crypto_pwhash/argon2/argon2-fill-block-ref.c \
+	crypto_pwhash/argon2/blake2b-long.c \
+	crypto_pwhash/argon2/pwhash_argon2i.c \
 	crypto_scalarmult/curve25519/scalarmult_curve25519.c \
-	crypto_scalarmult/curve25519/scalarmult_curve25519.h \
-	crypto_secretbox/crypto_secretbox.c \
-	crypto_secretbox/crypto_secretbox_easy.c \
-	crypto_secretbox/xsalsa20poly1305/secretbox_xsalsa20poly1305_api.c \
-	crypto_shorthash/crypto_shorthash.c \
-	crypto_shorthash/siphash24/shorthash_siphash24_api.c \
-	crypto_shorthash/siphash24/ref/shorthash_siphash24.c \
-	crypto_sign/crypto_sign.c \
-	crypto_sign/ed25519/ref10/base.h \
-	crypto_sign/ed25519/ref10/base2.h \
-	crypto_sign/ed25519/sign_ed25519_api.c \
-	crypto_sign/ed25519/ref10/keypair.c \
-	crypto_sign/ed25519/ref10/open.c \
-	crypto_sign/ed25519/ref10/obsolete.c \
-	crypto_sign/ed25519/ref10/sign.c \
-	crypto_stream/crypto_stream.c \
 	crypto_stream/chacha20/stream_chacha20.c \
-	crypto_stream/chacha20/stream_chacha20.h \
-	crypto_stream/chacha20/ref/stream_chacha20_ref.h \
 	crypto_stream/chacha20/ref/stream_chacha20_ref.c \
-	crypto_stream/salsa20/stream_salsa20_api.c \
-	crypto_stream/xsalsa20/stream_xsalsa20_api.c \
-	crypto_stream/xsalsa20/ref/stream_xsalsa20.c \
-	crypto_stream/xsalsa20/ref/xor_xsalsa20.c \
-	crypto_verify/16/verify_16_api.c \
+	crypto_stream/salsa20/ref/stream_salsa20_ref.c \
+	crypto_stream/salsa20/ref/xor_salsa20_ref.c \
 	crypto_verify/16/ref/verify_16.c \
-	crypto_verify/32/verify_32_api.c \
-	crypto_verify/32/ref/verify_32.c \
-	crypto_verify/64/verify_64_api.c \
-	crypto_verify/64/ref/verify_64.c \
 	randombytes/randombytes.c \
+	randombytes/sysrandom/randombytes_sysrandom.c \
 	sodium/core.c \
 	sodium/runtime.c \
 	sodium/utils.c \
 	sodium/version.c
-
-SODIUM_SOURCE += \
-	crypto_scalarmult/curve25519/ref10/x25519_ref10.c
-
-SODIUM_SOURCE += \
-	crypto_pwhash/argon2/argon2-core.c \
-	crypto_pwhash/argon2/argon2.c \
-	crypto_pwhash/argon2/argon2-encoding.c \
-	crypto_pwhash/argon2/blake2b-long.c \
-	crypto_pwhash/argon2/argon2-fill-block-ref.c \
-	crypto_pwhash/argon2/pwhash_argon2i.c \
-	crypto_pwhash/argon2/argon2-fill-block-ssse3.c
-
-SODIUM_SOURCE += \
-	crypto_stream/salsa20/ref/stream_salsa20_ref.c \
-	crypto_stream/salsa20/ref/xor_salsa20_ref.c
-
-SODIUM_SOURCE += \
-	randombytes/sysrandom/randombytes_sysrandom.c
 
 LOCAL_MODULE := sodium
 LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/libsodium/src/libsodium/include \
@@ -329,8 +246,10 @@ include $(BUILD_SHARED_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
-	utils.c netutils.c json.c jconf.c acl.c http.c tls.c rule.c \
+SHADOWSOCKS_SOURCES := local.c \
+	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
+	acl.c http.c tls.c rule.c \
+	crypto.c aead.c stream.c base64.c \
 	plugin.c \
 	android.c
 
@@ -364,7 +283,11 @@ include $(BUILD_SHARED_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c plugin.c
+SHADOWSOCKS_SOURCES := tunnel.c \
+	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
+	crypto.c aead.c stream.c base64.c \
+	plugin.c \
+	android.c
 
 LOCAL_MODULE    := ss-tunnel
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))

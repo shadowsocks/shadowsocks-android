@@ -24,6 +24,14 @@ public final class PluginOptions extends HashMap<String, String> {
         super(initialCapacity, loadFactor);
     }
 
+    // TODO: this method is not needed since API 24
+    public String getOrDefault(Object key, String defaultValue) {
+        String v;
+        return (((v = get(key)) != null) || containsKey(key))
+                ? v
+                : defaultValue;
+    }
+
     private PluginOptions(String options, boolean parseId) {
         this();
         if (TextUtils.isEmpty(options)) return;
