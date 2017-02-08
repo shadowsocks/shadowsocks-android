@@ -1,7 +1,6 @@
 # shadowsocks-android plugin framework
 
-[Documentation](https://github.com/shadowsocks/shadowsocks-android/blob/develop/plugin/doc.md) |
- [Change log](https://github.com/shadowsocks/shadowsocks-android/blob/develop/plugin/CHANGES.md)
+[Documentation](doc.md) | [Change log](CHANGES.md)
 
 Support library for easier development on [shadowsocks
  plugin](https://github.com/shadowsocks/shadowsocks-org/issues/28) for Android. Also includes some

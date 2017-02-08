@@ -196,7 +196,7 @@ This feature hasn't been implemented yet.
 Plugins are certified using package signatures and shadowsocks-android will consider these
  signatures as trusted:
 
-* Signatures by [trusted sources](https://github.com/shadowsocks/shadowsocks-android/blob/develop/mobile/src/main/scala/com/github/shadowsocks/plugin/PluginManager.scala#L22)
+* Signatures by [trusted sources](/mobile/src/main/scala/com/github/shadowsocks/plugin/PluginManager.scala#L22)
   which includes:
   - @madeye, i.e. the signer of the main repo;
   - The main repo doesn't contain any other trusted signatures. Third-party forks should add their
