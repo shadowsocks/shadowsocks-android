@@ -1,5 +1,8 @@
 # shadowsocks-android plugin framework
 
+[Documentation](https://github.com/shadowsocks/shadowsocks-android/blob/develop/plugin/doc.md) |
+ [Change log](https://github.com/shadowsocks/shadowsocks-android/blob/develop/plugin/CHANGES.md)
+
 Support library for easier development on [shadowsocks
  plugin](https://github.com/shadowsocks/shadowsocks-org/issues/28) for Android. Also includes some
  useful resources to easily get consistent styling with the main app.
@@ -18,9 +21,6 @@ WARNING: This library is still in beta (0.x) and its content is subject to massi
 This library is designed with Java interoperability in mind so theoretically you can use this
  library with other languages and/or build tools but there isn't documentation for that yet. This
  guide is written for Scala + SBT. Contributions are welcome.
-
-The following is just a simple guide to get you started, for more technical details, see
- [doc.md](https://github.com/shadowsocks/shadowsocks-android/blob/develop/plugin/doc.md).
 
 ### Package name
 
