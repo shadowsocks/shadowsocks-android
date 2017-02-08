@@ -249,7 +249,7 @@ include $(CLEAR_VARS)
 SHADOWSOCKS_SOURCES := local.c \
 	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
 	acl.c http.c tls.c rule.c \
-	crypto.c aead.c stream.c \
+	crypto.c aead.c stream.c base64.c \
 	plugin.c \
 	android.c
 
@@ -285,7 +285,7 @@ include $(CLEAR_VARS)
 
 SHADOWSOCKS_SOURCES := tunnel.c \
 	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
-	crypto.c aead.c stream.c \
+	crypto.c aead.c stream.c base64.c \
 	plugin.c \
 	android.c
 
