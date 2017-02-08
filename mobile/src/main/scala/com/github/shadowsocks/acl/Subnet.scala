@@ -1,6 +1,7 @@
 package com.github.shadowsocks.acl
 
 import java.net.InetAddress
+import java.util.Objects
 
 import com.github.shadowsocks.utils.Utils
 
@@ -26,6 +27,12 @@ class Subnet(val address: InetAddress, val prefixSize: Int) extends Comparable[S
     }
     prefixSize compare that.prefixSize
   }
+
+  override def equals(other: Any): Boolean = other match {
+    case that: Subnet => address == that.address && prefixSize == that.prefixSize
+    case _ => false
+  }
+  override def hashCode: Int = Objects.hash(address, prefixSize: Integer)
 }
 
 object Subnet {
