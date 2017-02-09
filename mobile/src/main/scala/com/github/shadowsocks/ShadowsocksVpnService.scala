@@ -251,6 +251,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
+      builder.addRoute(profile.remoteDns, 32)
     }
 
     conn = builder.establish()
