@@ -34,7 +34,7 @@ object Parser {
     pattern.findAllMatchIn(if (data == null) "" else data).map(m => {
       val uri = Uri.parse(m.matched)
       uri.getUserInfo match {
-        case null => uri.getHost match {
+        case null => new String(Base64.decode(uri.getHost, Base64.NO_PADDING), "UTF-8") match {
           case legacyPattern(_, method, password, host, port) =>  // legacy uri
             val profile = new Profile
             profile.method = method.toLowerCase
@@ -49,7 +49,7 @@ object Parser {
             null
         }
         case userInfo =>
-          new String(Base64.decode(userInfo, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE)) match {
+          new String(Base64.decode(userInfo, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE), "UTF-8") match {
             case userInfoPattern(method, password) =>
               val profile = new Profile
               profile.method = method
