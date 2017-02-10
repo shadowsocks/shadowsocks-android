@@ -30,7 +30,7 @@ _Put an `x` inside the [ ] that applies._
 * [ ] Per-App Proxy
   * [ ] Bypass mode
 * [ ] UDP Forwarding
-* KCP Parameters: (leave blank if not enabled)
+* Plugin configuration (if applicable):
 * [ ] Auto Connect
 * [ ] TCP Fast Open
 * [ ] NAT mode

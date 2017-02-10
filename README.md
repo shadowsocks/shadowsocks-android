@@ -12,7 +12,6 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 * JDK 1.8
 * SBT 0.13.0+
-* Go 1.4+
 * Android SDK
   - Build Tools 25+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
@@ -22,16 +21,15 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
-* Set environment variable `GOROOT_BOOTSTRAP` to `/path/to/go`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
-* Create `local.properties` from `local.properties.example` with your own key information
+* Create `mobile/local.properties` from `mobile/local.properties.example` with your own key information
 * Invoke the building like this
 
 ```bash
-    git submodule update --init
+    git submodule update --init --recursive
 
     # Build the App
-    sbt native-build clean android:package-release
+    sbt clean android:package-release
 ```
 
 ### TRANSLATE
@@ -54,8 +52,8 @@ Translators can go to [POEditor](https://poeditor.com/join/project/u5VHO9vhSf) t
     <li>shadowsocks-libev: <a href="https://github.com/shadowsocks/shadowsocks-libev/blob/master/LICENSE">GPLv3</a></li>
     <li>pdnsd: <a href="https://github.com/shadowsocks/shadowsocks-android/blob/master/src/main/jni/pdnsd/COPYING">GPLv3</a></li>
     <li>libev: <a href="https://github.com/shadowsocks/shadowsocks-libev/blob/master/libev/LICENSE">GPLv2</a></li>
-    <li>kcptun: <a href="https://github.com/xtaci/kcptun/commits/master/LICENSE.md">MIT</a></li>
     <li>libsodium: <a href="https://github.com/jedisct1/libsodium/blob/master/LICENSE">ISC</a></li>
+    <li>libudns: <a href="https://github.com/shadowsocks/libudns/blob/master/COPYING.LGPL">LGPL</a></li>
 </ul>
 
 ### LICENSE

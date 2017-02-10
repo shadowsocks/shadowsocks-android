@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
+
+    <be.mygod.preference.EditTextPreference
+            android:key="profileName"
+            android:summary="%s"
+            android:title="@string/profile_name"/>
+
+    <be.mygod.preference.PreferenceCategory
+            android:title="@string/proxy_cat">
+
+        <be.mygod.preference.EditTextPreference
+                android:key="proxy"
+                android:summary="%s"
+                android:title="@string/proxy"/>
+        <be.mygod.preference.NumberPickerPreference
+                app:min="1"
+                app:max="65535"
+                android:key="remotePortNum"
+                android:summary="%d"
+                android:title="@string/remote_port"/>
+        <be.mygod.preference.NumberPickerPreference
+                app:min="1025"
+                app:max="65535"
+                android:key="localPortNum"
+                android:summary="%d"
+                android:title="@string/port"/>
+        <be.mygod.preference.EditTextPreference
+                android:inputType="textPassword"
+                android:key="sitekey"
+                android:summary="%s"
+                android:title="@string/sitekey"/>
+        <DropDownPreference
+                android:key="encMethod"
+                android:entries="@array/enc_method_entry"
+                android:entryValues="@array/enc_method_value"
+                android:summary="%s"
+                android:title="@string/enc_method"/>
+
+    </be.mygod.preference.PreferenceCategory>
+
+    <be.mygod.preference.PreferenceCategory
+            android:title="@string/feature_cat">
+
+        <DropDownPreference
+                android:key="route"
+                android:entries="@array/route_entry"
+                android:entryValues="@array/route_value"
+                android:summary="%s"
+                android:title="@string/route_list"/>
+        <be.mygod.preference.EditTextPreference
+                android:key="remoteDns"
+                android:title="@string/remote_dns"
+                android:summary="%s"/>
+        <SwitchPreference
+                android:key="isIpv6"
+                android:summary="@string/ipv6_summary"
+                android:title="@string/ipv6"/>
+        <SwitchPreference
+                android:key="isProxyApps"
+                android:summary="@string/proxied_apps_summary"
+                android:title="@string/proxied_apps"/>
+        <SwitchPreference
+                android:key="isUdpDns"
+                android:summary="@string/udp_dns_summary"
+                android:title="@string/udp_dns"/>
+
+    </be.mygod.preference.PreferenceCategory>
+
+    <be.mygod.preference.PreferenceCategory
+            android:title="@string/plugin">
+
+        <com.github.shadowsocks.preference.IconListPreference
+                android:key="plugin"
+                android:persistent="false"
+                android:summary="%s"
+                android:title="@string/plugin"/>
+        <be.mygod.preference.EditTextPreference
+                android:key="plugin.configure"
+                android:persistent="false"
+                android:summary="%s"
+                android:title="@string/plugin_configure"/>
+
+    </be.mygod.preference.PreferenceCategory>
+
+</PreferenceScreen>
