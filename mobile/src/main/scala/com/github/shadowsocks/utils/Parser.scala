@@ -26,7 +26,7 @@ import com.github.shadowsocks.database.Profile
 
 object Parser {
   val TAG = "ShadowParser"
-  private val pattern = "(?i)^ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$".r
+  private val pattern = "(?i)ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]".r
   private val userInfoPattern = "^(.+?):(.*)$".r
   private val legacyPattern = "^((.+?):(.*)@(.+?):(\\d+?))$".r
 
