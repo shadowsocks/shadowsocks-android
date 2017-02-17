@@ -188,7 +188,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       "-t", "10",
       "-b", "127.0.0.1",
       "-l", (profile.localPort + 63).toString,
-      "-L" , profile.remoteDns + ":53",
+      "-L" , profile.remoteDns.trim + ":53",
       "-c", buildShadowsocksConfig("ss-tunnel-vpn.conf")).start()
 
   def startDnsDaemon() {
@@ -219,7 +219,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 
-    builder.addDnsServer(profile.remoteDns)
+    builder.addDnsServer(profile.remoteDns.trim)
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
@@ -251,7 +251,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
-      builder.addRoute(profile.remoteDns, 32)
+      builder.addRoute(profile.remoteDns.trim, 32)
     }
 
     conn = builder.establish()
