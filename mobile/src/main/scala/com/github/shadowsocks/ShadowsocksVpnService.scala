@@ -45,8 +45,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   private var notification: ShadowsocksNotification = _
 
   var sslocalProcess: GuardedProcess = _
-  var sstunnelProcess: GuardedProcess = _
-  var pdnsdProcess: GuardedProcess = _
+  var overtureProcess: GuardedProcess = _
   var tun2socksProcess: GuardedProcess = _
 
   override def onBind(intent: Intent): IBinder = {
@@ -94,17 +93,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       sslocalProcess.destroy()
       sslocalProcess = null
     }
-    if (sstunnelProcess != null) {
-      sstunnelProcess.destroy()
-      sstunnelProcess = null
-    }
     if (tun2socksProcess != null) {
       tun2socksProcess.destroy()
       tun2socksProcess = null
     }
-    if (pdnsdProcess != null) {
-      pdnsdProcess.destroy()
-      pdnsdProcess = null
+    if (overtureProcess != null) {
+      overtureProcess.destroy()
+      overtureProcess = null
     }
   }
 
@@ -149,15 +144,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   /** Called when the activity is first created. */
   def handleConnection() {
     
-    val fd = startVpn()
-    if (!sendFd(fd)) throw new Exception("sendFd failed")
-
     startShadowsocksDaemon()
 
     if (!profile.udpdns) {
       startDnsDaemon()
-      startDnsTunnel()
     }
+
+    val fd = startVpn()
+    if (!sendFd(fd)) throw new Exception("sendFd failed")
   }
 
   override protected def buildPluginCommandLine(): ArrayBuffer[String] = super.buildPluginCommandLine() += "-V"
@@ -182,33 +176,41 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     sslocalProcess = new GuardedProcess(cmd: _*).start()
   }
 
-  def startDnsTunnel(): Unit =
-    sstunnelProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/libss-tunnel.so",
-      "-V",
-      "-t", "10",
-      "-b", "127.0.0.1",
-      "-l", (profile.localPort + 63).toString,
-      "-L" , profile.remoteDns.trim + ":53",
-      "-c", buildShadowsocksConfig("ss-tunnel-vpn.conf")).start()
-
   def startDnsDaemon() {
-    val reject = if (profile.ipv6) "224.0.0.0/3" else "224.0.0.0/3, ::/0"
-    IOUtils.writeString(new File(getFilesDir, "pdnsd-vpn.conf"), profile.route match {
+    val externalIp = getExternalIp()
+    IOUtils.writeString(new File(getFilesDir, "overture-vpn.conf"), profile.route match {
       case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES =>
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "protect = \"protect_path\";", getCacheDir.getAbsolutePath,
-          "0.0.0.0", profile.localPort + 53, "114.114.114.114, 223.5.5.5, 1.2.4.8",
-          getBlackList, reject, profile.localPort + 63, reject)
+        ConfigUtils.OVERTURE_DIRECT.formatLocal(Locale.ENGLISH,
+          profile.localPort + 53, // Local Port
+          "119.29.29.29", // Primary DNS 1
+          "udp", // DNS type of Primary DNS 1
+          "114.114.114.114", // Primary DNS 2
+          "udp", // DNS type of Primary DNS 2
+          "208.67.222.222", // Alternative DNS
+          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
+          externalIp) // External IP
       case Acl.CHINALIST =>
-        ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "protect = \"protect_path\";", getCacheDir.getAbsolutePath,
-          "0.0.0.0", profile.localPort + 53, "8.8.8.8, 8.8.4.4, 208.67.222.222",
-          "", reject, profile.localPort + 63, reject)
+        ConfigUtils.OVERTURE_LOCAL.formatLocal(Locale.ENGLISH,
+          profile.localPort + 53, // Local Port
+          "119.29.29.29", // Primary DNS
+          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
+          externalIp, // External IP
+          "114.114.114.114", // Alternative DNS
+          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
+          externalIp) // External IP
       case _ =>
-        ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "protect = \"protect_path\";", getCacheDir.getAbsolutePath,
-          "0.0.0.0", profile.localPort + 53, profile.localPort + 63, reject)
+        ConfigUtils.OVERTURE_LOCAL.formatLocal(Locale.ENGLISH,
+          profile.localPort + 53, // Local Port
+          profile.remoteDns, // Primary DNS
+          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
+          externalIp, // External IP
+          "208.67.222.222", // Alternative DNS
+          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
+          externalIp) // External IP
     })
-    val cmd = Array(getApplicationInfo.nativeLibraryDir + "/libpdnsd.so", "-c", "pdnsd-vpn.conf")
+    val cmd = Array(getApplicationInfo.nativeLibraryDir + "/liboverture.so", "-c", "overture-vpn.conf", "-V")
 
-    pdnsdProcess = new GuardedProcess(cmd: _*).start()
+    overtureProcess = new GuardedProcess(cmd: _*).start()
   }
 
   def startVpn(): Int = {

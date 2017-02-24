@@ -2,8 +2,8 @@ enablePlugins(AndroidApp)
 android.useSupportVectors
 
 name := "shadowsocks"
-version := "4.0.4"
-versionCode := Some(179)
+version := "4.1.0-SNAPSHOT"
+versionCode := Some(180)
 
 proguardOptions ++=
   "-keep class com.github.shadowsocks.JniHelper { *; }" ::
