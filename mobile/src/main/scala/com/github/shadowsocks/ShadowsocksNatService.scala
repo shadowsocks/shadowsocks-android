@@ -89,9 +89,9 @@ class ShadowsocksNatService extends BaseService {
         ConfigUtils.OVERTURE_DIRECT.formatLocal(Locale.ENGLISH,
           profile.localPort + 53, // Local Port
           "119.29.29.29", // Primary DNS 1
-          "tcp", // DNS type of Primary DNS 1
+          "udp", // DNS type of Primary DNS 1
           "114.114.114.114", // Primary DNS 2
-          "tcp", // DNS type of Primary DNS 2
+          "udp", // DNS type of Primary DNS 2
           profile.remoteDns, // Alternative DNS
           "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
           externalIp) // External IP
