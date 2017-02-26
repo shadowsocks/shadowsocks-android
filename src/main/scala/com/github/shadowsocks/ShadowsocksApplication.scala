@@ -68,7 +68,7 @@ object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
   private final val TAG = "ShadowsocksApplication"
-  
+
   private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS, Executable.KCPTUN)
 
@@ -188,8 +188,6 @@ class ShadowsocksApplication extends Application {
     }
     pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
     JobManager.create(this).addJobCreator(DonaldTrump)
-
-    TcpFastOpen.enabled(settings.getBoolean(Key.tfo, false))
   }
 
   def refreshContainerHolder {

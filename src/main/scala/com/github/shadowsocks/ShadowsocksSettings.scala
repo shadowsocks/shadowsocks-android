@@ -202,7 +202,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     switch.setChecked(BootReceiver.getEnabled(activity))
 
     val tfo = findPreference(Key.tfo).asInstanceOf[SwitchPreference]
-    tfo.setChecked(TcpFastOpen.sendEnabled)
+    tfo.setChecked(false)
     tfo.setOnPreferenceChangeListener((_, v) => {
       val value = v.asInstanceOf[Boolean]
       val result = TcpFastOpen.enabled(value)
