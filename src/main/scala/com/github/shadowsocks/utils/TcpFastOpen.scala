@@ -29,12 +29,15 @@ object TcpFastOpen {
   }
 
   def enabled(value: Boolean): String = if (sendEnabled != value) {
-    val res = Shell.run("su", Array(
-      "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
-      "  echo Success.",
-      "else",
-      "  echo Failed.",
-      "fi"), null, true)
-    if (res != null) res.asScala.mkString("\n") else null
+    val suAvailable = Shell.SU.available();
+    if (suAvailable == true) {
+      val res = Shell.run("su", Array(
+        "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
+        "  echo Success.",
+        "else",
+        "  echo Failed.",
+        "fi"), null, true)
+      if (res != null) res.asScala.mkString("\n") else null
+    } else null
   } else null
 }
