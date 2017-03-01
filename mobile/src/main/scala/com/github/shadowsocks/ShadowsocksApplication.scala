@@ -197,14 +197,14 @@ class ShadowsocksApplication extends Application {
 
   def copyAssets() {
     val assetManager = getAssets
-    for (f <- List("acl", "overture")) {
+    for (dir <- List("acl", "overture")) {
       var files: Array[String] = null
-      try files = assetManager.list(f) catch {
+      try files = assetManager.list(dir) catch {
         case e: IOException =>
           Log.e(TAG, e.getMessage)
           app.track(e)
       }
-      if (files != null) for (file <- files) autoClose(assetManager.open(f + "/" + file))(in =>
+      if (files != null) for (file <- files) autoClose(assetManager.open(dir + "/" + file))(in =>
         autoClose(new FileOutputStream(new File(getFilesDir, file)))(out =>
           IOUtils.copy(in, out)))
     }
