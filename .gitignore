@@ -9,3 +9,4 @@ local.sbt
 
 mobile/src/main/libs
 mobile/src/main/obj
+mobile/src/main/jni/overture

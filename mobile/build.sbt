@@ -36,3 +36,11 @@ libraryDependencies ++=
   "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
+
+lazy val goBuild = TaskKey[Unit]("go-build", "Build go and kcptun")
+goBuild := {
+  Process(Seq("mobile/src/overture/make.bash", minSdkVersion.value)) ! streams.value.log match {
+    case 0 => // Success!
+    case n => sys.error(s"Native build script exit code: $n")
+  }
+}
