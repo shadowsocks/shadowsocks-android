@@ -144,6 +144,8 @@
                  android:process=":bg"/>
         <service android:name="com.evernote.android.job.gcm.PlatformGcmService"
                  android:process=":bg"/>
+        <service android:name="com.evernote.android.job.JobRescheduleService"
+                 android:process=":bg"/>
         <receiver android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
                   android:process=":bg"/>
         <receiver android:name="com.evernote.android.job.JobBootReceiver"
