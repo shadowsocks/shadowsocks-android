@@ -54,7 +54,14 @@ public class JniHelper {
                 ? new ErrnoException("kill", errno) : new Exception("kill failed: " + errno);
     }
 
+    @Deprecated // Use Process.destroy() since API 24
+    public static int waitpidCompat(Process process) throws Exception {
+        if (Build.VERSION.SDK_INT >= 24) throw new UnsupportedOperationException("Never call this method in OpenJDK!");
+        return waitpid(process);
+    }
+
     private static native int sigterm(Process process);
+    private static native int waitpid(Process process);
     public static native int sendFd(int fd, String path);
     public static native void close(int fd);
 }

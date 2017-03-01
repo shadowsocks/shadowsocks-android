@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <ancillary.h>
 
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
@@ -39,6 +40,17 @@ jint Java_com_github_shadowsocks_jnihelper_sigterm(JNIEnv *env, jobject thiz, jo
     jint pid = env->GetIntField(process, ProcessImpl_pid);
     // Suppress "No such process" errors. We just want the process killed. It's fine if it's already killed.
     return kill(pid, SIGTERM) == -1 && errno != ESRCH ? errno : 0;
+}
+
+jint Java_com_github_shadowsocks_jnihelper_waitpid(JNIEnv *env, jobject thiz, jobject process) {
+    if (!env->IsInstanceOf(process, ProcessImpl)) {
+        THROW(env, "java/lang/ClassCastException",
+                   "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
+        return -1;
+    }
+    jint pid = env->GetIntField(process, ProcessImpl_pid);
+    int status;
+    return waitpid(pid, &status, WNOHANG);
 }
 
 void Java_com_github_shadowsocks_jnihelper_close(JNIEnv *env, jobject thiz, jint fd) {
@@ -84,10 +96,10 @@ static JNINativeMethod method_table[] = {
     { "sendFd", "(ILjava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
     { "sigterm", "(Ljava/lang/Process;)I",
-        (void*) Java_com_github_shadowsocks_jnihelper_sigterm }
+        (void*) Java_com_github_shadowsocks_jnihelper_sigterm },
+    { "waitpid", "(Ljava/lang/Process;)I",
+        (void*) Java_com_github_shadowsocks_jnihelper_waitpid }
 };
-
-
 
 /*
  * Register several native methods for one class.
