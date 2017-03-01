@@ -123,6 +123,23 @@ trait BaseService extends Service {
     false
   } else true
 
+  def getExternalIp(): String = {
+    val url = "http://icanhazip.com"
+    val client = new OkHttpClient.Builder()
+      .connectTimeout(10, TimeUnit.SECONDS)
+      .writeTimeout(10, TimeUnit.SECONDS)
+      .readTimeout(30, TimeUnit.SECONDS)
+      .build()
+    val request = new Request.Builder()
+      .url(url)
+      .build()
+    val response = client.newCall(request).execute()
+    if (response.isSuccessful)
+      response.body.string.trim
+    else
+      ""
+  }
+
   def connect() {
     if (profile.host == "198.199.101.152") {
       val holder = app.containerHolder

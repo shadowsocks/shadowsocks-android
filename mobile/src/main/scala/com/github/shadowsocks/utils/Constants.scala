@@ -46,84 +46,95 @@ object ConfigUtils {
     " type = socks5;\n" +
     "}\n"
 
-  val PDNSD_LOCAL =
+  val OVERTURE_DIRECT =
     """
-      |global {
-      | perm_cache = 2048;
-      | %s
-      | cache_dir = "%s";
-      | server_ip = %s;
-      | server_port = %d;
-      | query_method = tcp_only;
-      | min_ttl = 15m;
-      | max_ttl = 1w;
-      | timeout = 10;
-      | daemon = off;
-      |}
-      |
-      |server {
-      | label = "local";
-      | ip = 127.0.0.1;
-      | port = %d;
-      | reject = %s;
-      | reject_policy = negate;
-      | reject_recursively = on;
-      |}
-      |
-      |rr {
-      | name=localhost;
-      | reverse=on;
-      | a=127.0.0.1;
-      | owner=localhost;
-      | soa=localhost,root.localhost,42,86400,900,86400,86400;
-      |}
+    |{
+    |  "BindAddress": ":%d",
+    |  "PrimaryDNS": [
+    |    {
+    |      "Name": "Primary-1",
+    |      "Address": "%s:53",
+    |      "Protocol": "%s",
+    |      "Socks5Address": "",
+    |      "Timeout": 6,
+    |      "EDNSClientSubnet": {
+    |        "Policy": "disable",
+    |        "ExternalIP": ""
+    |      }
+    |    },
+    |    {
+    |      "Name": "Primary-2",
+    |      "Address": "%s:53",
+    |      "Protocol": "%s",
+    |      "Socks5Address": "",
+    |      "Timeout": 6,
+    |      "EDNSClientSubnet": {
+    |        "Policy": "disable",
+    |        "ExternalIP": ""
+    |      }
+    |    }
+    |  ],
+    |  "AlternativeDNS":[
+    |    {
+    |      "Name": "Alternative",
+    |      "Address": "%s:53",
+    |      "Protocol": "tcp",
+    |      "Socks5Address": "%s",
+    |      "Timeout": 6,
+    |      "EDNSClientSubnet":{
+    |        "Policy": "auto",
+    |        "ExternalIP": "%s"
+    |      }
+    |   }
+    |  ],
+    |  "RedirectIPv6Record": true,
+    |  "IPNetworkFile": "china_ip_list.txt",
+    |  "DomainFile": "gfwlist.txt",
+    |  "DomainBase64Decode": true,
+    |  "HostsFile": "hosts",
+    |  "MinimumTTL": 3600,
+    |  "CacheSize" : 4096
+    |}
     """.stripMargin
 
-  val PDNSD_DIRECT =
+  val OVERTURE_LOCAL =
     """
-      |global {
-      | perm_cache = 2048;
-      | %s
-      | cache_dir = "%s";
-      | server_ip = %s;
-      | server_port = %d;
-      | query_method = udp_only;
-      | min_ttl = 15m;
-      | max_ttl = 1w;
-      | timeout = 10;
-      | daemon = off;
-      | par_queries = 4;
-      |}
-      |
-      |server {
-      | label = "remote-servers";
-      | ip = %s;
-      | timeout = 3;
-      | query_method = udp_only;
-      | %s
-      | policy = included;
-      | reject = %s;
-      | reject_policy = fail;
-      | reject_recursively = on;
-      |}
-      |
-      |server {
-      | label = "local-server";
-      | ip = 127.0.0.1;
-      | query_method = tcp_only;
-      | port = %d;
-      | reject = %s;
-      | reject_policy = negate;
-      | reject_recursively = on;
-      |}
-      |
-      |rr {
-      | name=localhost;
-      | reverse=on;
-      | a=127.0.0.1;
-      | owner=localhost;
-      | soa=localhost,root.localhost,42,86400,900,86400,86400;
-      |}
+    |{
+    |  "BindAddress": ":%d",
+    |  "PrimaryDNS": [
+    |    {
+    |      "Name": "Primary",
+    |      "Address": "%s:53",
+    |      "Protocol": "tcp",
+    |      "Socks5Address": "%s",
+    |      "Timeout": 6,
+    |      "EDNSClientSubnet": {
+    |        "Policy": "auto",
+    |        "ExternalIP": "%s"
+    |      }
+    |    }
+    |  ],
+    |  "AlternativeDNS":[
+    |    {
+    |      "Name": "Alternative",
+    |      "Address": "%s:53",
+    |      "Protocol": "tcp",
+    |      "Socks5Address": "%s",
+    |      "Timeout": 6,
+    |      "EDNSClientSubnet":{
+    |        "Policy": "auto",
+    |        "ExternalIP": "%s"
+    |      }
+    |   }
+    |  ],
+    |  "RedirectIPv6Record": true,
+    |  "IPNetworkFile": "",
+    |  "DomainFile": "",
+    |  "DomainBase64Decode": true,
+    |  "HostsFile": "hosts",
+    |  "MinimumTTL": 3600,
+    |  "CacheSize" : 4096
+    |}
     """.stripMargin
 }
 
