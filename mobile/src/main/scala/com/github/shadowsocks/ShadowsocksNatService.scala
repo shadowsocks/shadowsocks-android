@@ -83,38 +83,8 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startDnsDaemon() {
-    val externalIp = getExternalIp()
-    IOUtils.writeString(new File(getFilesDir, "overture-nat.conf"), profile.route match {
-      case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES =>
-        ConfigUtils.OVERTURE_DIRECT.formatLocal(Locale.ENGLISH,
-          profile.localPort + 53, // Local Port
-          "119.29.29.29", // Primary DNS 1
-          "udp", // DNS type of Primary DNS 1
-          "114.114.114.114", // Primary DNS 2
-          "udp", // DNS type of Primary DNS 2
-          profile.remoteDns, // Alternative DNS
-          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
-          externalIp) // External IP
-      case Acl.CHINALIST =>
-        ConfigUtils.OVERTURE_LOCAL.formatLocal(Locale.ENGLISH,
-          profile.localPort + 53, // Local Port
-          "119.29.29.29", // Primary DNS
-          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
-          externalIp, // External IP
-          "114.114.114.114", // Alternative DNS
-          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
-          externalIp) // External IP
-      case _ =>
-        ConfigUtils.OVERTURE_LOCAL.formatLocal(Locale.ENGLISH,
-          profile.localPort + 53, // Local Port
-          profile.remoteDns, // Primary DNS
-          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
-          externalIp, // External IP
-          "208.67.222.222", // Alternative DNS
-          "127.0.0.1:" + profile.localPort, // Local SOCKS5 Proxy
-          externalIp) // External IP
-    })
-    overtureProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/liboverture.so", "-c", "overture-nat.conf")
+    overtureProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/liboverture.so",
+      "-c", buildOvertureConfig("overture-nat.conf"))
       .start()
   }
 
