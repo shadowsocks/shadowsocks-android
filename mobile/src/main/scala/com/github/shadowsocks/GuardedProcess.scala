@@ -115,12 +115,7 @@ class GuardedProcess(cmd: String*) {
   private def destroyProcess() {
     if (Build.VERSION.SDK_INT < 24) {
       JniHelper.sigtermCompat(process)
-      var tries = 0
-      while (JniHelper.waitpidCompat(process) == 0 && tries < 3) {
-        Log.w(TAG, "still waiting for process " + Commandline.toString(cmd))
-        Thread.sleep(200)
-        tries += 1
-      }
+      JniHelper.waitForCompat(process, 500)
     }
     process.destroy()
   }

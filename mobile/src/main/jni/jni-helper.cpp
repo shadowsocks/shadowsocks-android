@@ -14,7 +14,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/wait.h>
 #include <ancillary.h>
 
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
@@ -23,7 +22,7 @@
 #define THROW(env, clazz, msg) do { env->ThrowNew(env->FindClass(clazz), msg); } while (0)
 
 static jclass ProcessImpl;
-static jfieldID ProcessImpl_pid;
+static jfieldID ProcessImpl_pid, ProcessImpl_exitValue, ProcessImpl_exitValueMutex;
 
 static int sdk_version() {
     char version[PROP_VALUE_MAX + 1];
@@ -42,15 +41,22 @@ jint Java_com_github_shadowsocks_jnihelper_sigterm(JNIEnv *env, jobject thiz, jo
     return kill(pid, SIGTERM) == -1 && errno != ESRCH ? errno : 0;
 }
 
-jint Java_com_github_shadowsocks_jnihelper_waitpid(JNIEnv *env, jobject thiz, jobject process) {
+jobject Java_com_github_shadowsocks_jnihelper_getExitValue(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
-        return -1;
+        return NULL;
     }
-    jint pid = env->GetIntField(process, ProcessImpl_pid);
-    int status;
-    return waitpid(pid, &status, WNOHANG);
+    return env->GetObjectField(process, ProcessImpl_exitValue);
+}
+
+jobject Java_com_github_shadowsocks_jnihelper_getExitValueMutex(JNIEnv *env, jobject thiz, jobject process) {
+    if (!env->IsInstanceOf(process, ProcessImpl)) {
+        THROW(env, "java/lang/ClassCastException",
+                   "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
+        return NULL;
+    }
+    return env->GetObjectField(process, ProcessImpl_exitValueMutex);
 }
 
 void Java_com_github_shadowsocks_jnihelper_close(JNIEnv *env, jobject thiz, jint fd) {
@@ -97,8 +103,10 @@ static JNINativeMethod method_table[] = {
         (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
     { "sigterm", "(Ljava/lang/Process;)I",
         (void*) Java_com_github_shadowsocks_jnihelper_sigterm },
-    { "waitpid", "(Ljava/lang/Process;)I",
-        (void*) Java_com_github_shadowsocks_jnihelper_waitpid }
+    { "getExitValue", "(Ljava/lang/Process;)Ljava/lang/Integer",
+        (void*) Java_com_github_shadowsocks_jnihelper_getExitValue },
+    { "getExitValueMutex", "(Ljava/lang/Process;)Ljava/lang/Object",
+        (void*) Java_com_github_shadowsocks_jnihelper_getExitValueMutex }
 };
 
 /*
@@ -171,6 +179,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         ProcessImpl = (jclass) env->NewGlobalRef((jobject) ProcessImpl);
         if (!(ProcessImpl_pid = env->GetFieldID(ProcessImpl, "pid", "I"))) {
             THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.pid not found");
+            goto bail;
+        }
+        if (!(ProcessImpl_exitValue = env->GetFieldID(ProcessImpl, "exitValue", "Ljava/lang/Integer"))) {
+            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValue not found");
+            goto bail;
+        }
+        if (!(ProcessImpl_exitValueMutex = env->GetFieldID(ProcessImpl, "exitValueMutex", "Ljava/lang/Object"))) {
+            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValueMutex not found");
             goto bail;
         }
     }
