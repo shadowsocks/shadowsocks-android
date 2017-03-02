@@ -103,9 +103,9 @@ static JNINativeMethod method_table[] = {
         (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
     { "sigterm", "(Ljava/lang/Process;)I",
         (void*) Java_com_github_shadowsocks_jnihelper_sigterm },
-    { "getExitValue", "(Ljava/lang/Process;)Ljava/lang/Integer",
+    { "getExitValue", "(Ljava/lang/Process;)Ljava/lang/Integer;",
         (void*) Java_com_github_shadowsocks_jnihelper_getExitValue },
-    { "getExitValueMutex", "(Ljava/lang/Process;)Ljava/lang/Object",
+    { "getExitValueMutex", "(Ljava/lang/Process;)Ljava/lang/Object;",
         (void*) Java_com_github_shadowsocks_jnihelper_getExitValueMutex }
 };
 
@@ -181,11 +181,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
             THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.pid not found");
             goto bail;
         }
-        if (!(ProcessImpl_exitValue = env->GetFieldID(ProcessImpl, "exitValue", "Ljava/lang/Integer"))) {
+        if (!(ProcessImpl_exitValue = env->GetFieldID(ProcessImpl, "exitValue", "Ljava/lang/Integer;"))) {
             THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValue not found");
             goto bail;
         }
-        if (!(ProcessImpl_exitValueMutex = env->GetFieldID(ProcessImpl, "exitValueMutex", "Ljava/lang/Object"))) {
+        if (!(ProcessImpl_exitValueMutex = env->GetFieldID(ProcessImpl, "exitValueMutex", "Ljava/lang/Object;"))) {
             THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValueMutex not found");
             goto bail;
         }
