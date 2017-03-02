@@ -178,7 +178,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   def startDnsDaemon() {
     overtureProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/liboverture.so",
-      "-c", buildOvertureConfig("overture-vpn.conf"))
+      "-c", buildOvertureConfig("overture-vpn.conf"), "-V")
       .start()
   }
 
