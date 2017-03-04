@@ -135,9 +135,9 @@ trait BaseService extends Service {
           case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
           case _ => Dns.SYSTEM.lookup(hostname)
         })
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .writeTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
         .build()
       val requestBody = new FormBody.Builder()
         .add("sig", sig)
@@ -330,18 +330,6 @@ trait BaseService extends Service {
   }
 
   protected final def buildOvertureConfig(file: String): String = {
-    val url = "http://icanhazip.com"
-    val client = new OkHttpClient.Builder()
-      .connectTimeout(10, TimeUnit.SECONDS)
-      .writeTimeout(10, TimeUnit.SECONDS)
-      .readTimeout(30, TimeUnit.SECONDS)
-      .build()
-    val request = new Request.Builder()
-      .url(url)
-      .build()
-    val response = client.newCall(request).execute()
-    val externalIp = if (response.isSuccessful) response.body.string.trim else ""
-
     val config = new JSONObject()
       .put("BindAddress", ":" + (profile.localPort + 53))
       .put("RedirectIPv6Record", true)
@@ -357,9 +345,7 @@ trait BaseService extends Service {
       if (edns) dns
         .put("Protocol", "tcp")
         .put("Socks5Address", "127.0.0.1:" + profile.localPort)
-        .put("EDNSClientSubnet", new JSONObject()
-          .put("Policy", "auto")
-          .put("ExternalIP", externalIp))
+        .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
       else dns
         .put("Protocol", "udp")
         .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
