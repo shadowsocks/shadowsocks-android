@@ -12,15 +12,17 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 
 * JDK 1.8
 * SBT 0.13.0+
+* Go 1.4+
 * Android SDK
   - Build Tools 25+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
-* Android NDK r12b+
+* Android NDK r14+
 
 ### BUILD
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
+* Set environment variable `GOROOT_BOOTSTRAP` to `/path/to/go`
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Create `mobile/local.properties` from `mobile/local.properties.example` with your own key information
 * Invoke the building like this
@@ -29,7 +31,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
     git submodule update --init --recursive
 
     # Build the App
-    sbt clean android:package-release
+    sbt clean go-build android:package-release
 ```
 
 ### TRANSLATE
