@@ -342,13 +342,11 @@ trait BaseService extends Service {
         .put("Name", name)
         .put("Address", address + ":53")
         .put("Timeout", 6)
+        .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
       if (edns) dns
         .put("Protocol", "tcp")
         .put("Socks5Address", "127.0.0.1:" + profile.localPort)
-        .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
-      else dns
-        .put("Protocol", "udp")
-        .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
+      else dns.put("Protocol", "udp")
       dns
     }
     profile.route match {
