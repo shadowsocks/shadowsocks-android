@@ -26,7 +26,7 @@
 /* #undef HAVE_CCCRYPTORCREATEWITHMODE */
 
 /* Define to 1 if you have the `clock_gettime' function. */
-/* #undef HAVE_CLOCK_GETTIME */
+#define HAVE_CLOCK_GETTIME 1
 
 /* Define to 1 to use the syscall interface for clock_gettime */
 /* #undef HAVE_CLOCK_SYSCALL */
@@ -42,13 +42,13 @@
 #define HAVE_DLFCN_H 1
 
 /* Define to 1 if you have the `epoll_ctl' function. */
-/* #undef HAVE_EPOLL_CTL */
+#define HAVE_EPOLL_CTL 1
 
 /* Define to 1 if you have the `eventfd' function. */
-/* #undef HAVE_EVENTFD */
+#define HAVE_EVENTFD 1
 
 /* Define to 1 if you have the `EVP_EncryptInit_ex' function. */
-/* #undef HAVE_EVP_ENCRYPTINIT_EX */
+#define HAVE_EVP_ENCRYPTINIT_EX 1
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
@@ -66,7 +66,7 @@
 /* #undef HAVE_INET_NTOP */
 
 /* Define to 1 if you have the `inotify_init' function. */
-/* #undef HAVE_INOTIFY_INIT */
+#define HAVE_INOTIFY_INIT 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
@@ -75,7 +75,7 @@
 #define HAVE_IPv6 1
 
 /* Define to 1 if you have the `kqueue' function. */
-#define HAVE_KQUEUE 1
+/* #undef HAVE_KQUEUE */
 
 /* Define to 1 if you have the <langinfo.h> header file. */
 #define HAVE_LANGINFO_H 1
@@ -90,14 +90,14 @@
 #define HAVE_LIMITS_H 1
 
 /* Define to 1 if you have the <linux/if.h> header file. */
-/* #undef HAVE_LINUX_IF_H */
+#define HAVE_LINUX_IF_H 1
 
 /* Define to 1 if you have the <linux/netfilter_ipv4.h> header file. */
-/* #undef HAVE_LINUX_NETFILTER_IPV4_H */
+#define HAVE_LINUX_NETFILTER_IPV4_H 1
 
 /* Define to 1 if you have the <linux/netfilter_ipv6/ip6_tables.h> header
    file. */
-/* #undef HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H */
+#define HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H 1
 
 /* Define to 1 if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
@@ -124,25 +124,25 @@
 #define HAVE_NET_IF_H 1
 
 /* Define to 1 if you have the <openssl/engine.h> header file. */
-/* #undef HAVE_OPENSSL_ENGINE_H */
+#define HAVE_OPENSSL_ENGINE_H 1
 
 /* Define to 1 if you have the <openssl/err.h> header file. */
-/* #undef HAVE_OPENSSL_ERR_H */
+#define HAVE_OPENSSL_ERR_H 1
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
-/* #undef HAVE_OPENSSL_EVP_H */
+#define HAVE_OPENSSL_EVP_H 1
 
 /* Define to 1 if you have the <openssl/pem.h> header file. */
-/* #undef HAVE_OPENSSL_PEM_H */
+#define HAVE_OPENSSL_PEM_H 1
 
 /* Define to 1 if you have the <openssl/rand.h> header file. */
-/* #undef HAVE_OPENSSL_RAND_H */
+#define HAVE_OPENSSL_RAND_H 1
 
 /* Define to 1 if you have the <openssl/rsa.h> header file. */
-/* #undef HAVE_OPENSSL_RSA_H */
+#define HAVE_OPENSSL_RSA_H 1
 
 /* Define to 1 if you have the <openssl/sha.h> header file. */
-/* #undef HAVE_OPENSSL_SHA_H */
+#define HAVE_OPENSSL_SHA_H 1
 
 /* Define to 1 if you have the `poll' function. */
 #define HAVE_POLL 1
@@ -160,13 +160,13 @@
 #define HAVE_PTHREAD_PRIO_INHERIT 1
 
 /* Define to 1 if you have the `RAND_pseudo_bytes' function. */
-/* #undef HAVE_RAND_PSEUDO_BYTES */
+#define HAVE_RAND_PSEUDO_BYTES 1
 
 /* Define to 1 if you have the 'select' function. */
 #define HAVE_SELECT 1
 
 /* Define to 1 if you have the `setresuid' function. */
-/* #undef HAVE_SETRESUID */
+#define HAVE_SETRESUID 1
 
 /* Define to 1 if you have the `setreuid' function. */
 #define HAVE_SETREUID 1
@@ -175,7 +175,7 @@
 #define HAVE_SETRLIMIT 1
 
 /* Define to 1 if you have the `signalfd' function. */
-/* #undef HAVE_SIGNALFD */
+#define HAVE_SIGNALFD 1
 
 /* Define to 1 if you have the `socket' function. */
 #define HAVE_SOCKET 1
@@ -196,16 +196,16 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <sys/epoll.h> header file. */
-/* #undef HAVE_SYS_EPOLL_H */
+#define HAVE_SYS_EPOLL_H 1
 
 /* Define to 1 if you have the <sys/eventfd.h> header file. */
-/* #undef HAVE_SYS_EVENTFD_H */
+#define HAVE_SYS_EVENTFD_H 1
 
 /* Define to 1 if you have the <sys/event.h> header file. */
-#define HAVE_SYS_EVENT_H 1
+/* #undef HAVE_SYS_EVENT_H */
 
 /* Define to 1 if you have the <sys/inotify.h> header file. */
-/* #undef HAVE_SYS_INOTIFY_H */
+#define HAVE_SYS_INOTIFY_H 1
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #define HAVE_SYS_IOCTL_H 1
@@ -214,7 +214,7 @@
 #define HAVE_SYS_SELECT_H 1
 
 /* Define to 1 if you have the <sys/signalfd.h> header file. */
-/* #undef HAVE_SYS_SIGNALFD_H */
+#define HAVE_SYS_SIGNALFD_H 1
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #define HAVE_SYS_SOCKET_H 1
@@ -253,10 +253,10 @@
 /* #undef HAVE_WS2TCPIP_H */
 
 /* have zlib compression support */
-/* #undef HAVE_ZLIB */
+#define HAVE_ZLIB 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
-/* #undef HAVE_ZLIB_H */
+#define HAVE_ZLIB_H 1
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
@@ -275,7 +275,7 @@
 #define PACKAGE_NAME "shadowsocks-libev"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "shadowsocks-libev 2.4.8"
+#define PACKAGE_STRING "shadowsocks-libev 2.4.7"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "shadowsocks-libev"
@@ -284,7 +284,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.4.8"
+#define PACKAGE_VERSION "2.4.7"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -315,10 +315,10 @@
 /* #undef USE_CRYPTO_APPLECC */
 
 /* Use mbed TLS library */
-#define USE_CRYPTO_MBEDTLS 1
+/* #undef USE_CRYPTO_MBEDTLS */
 
 /* Use OpenSSL library */
-/* #undef USE_CRYPTO_OPENSSL */
+#define USE_CRYPTO_OPENSSL 1
 
 /* Use PolarSSL library */
 /* #undef USE_CRYPTO_POLARSSL */
@@ -346,7 +346,7 @@
 
 
 /* Version number of package */
-#define VERSION "2.4.8"
+#define VERSION "2.4.7"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
