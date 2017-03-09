@@ -28,14 +28,14 @@ object Parser {
   val TAG = "ShadowParser"
   private val pattern = "(?i)ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]".r
   private val userInfoPattern = "^(.+?):(.*)$".r
-  private val legacyPattern = "^((.+?):(.*)@(.+?):(\\d+?))$".r
+  private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".r
 
   def findAll(data: CharSequence): Iterator[Profile] =
     pattern.findAllMatchIn(if (data == null) "" else data).map(m => {
       val uri = Uri.parse(m.matched)
       uri.getUserInfo match {
-        case null => new String(Base64.decode(uri.getHost, Base64.NO_PADDING), "UTF-8") match {
-          case legacyPattern(_, method, password, host, port) =>  // legacy uri
+        case null => val str = new String(Base64.decode(uri.getHost, Base64.NO_PADDING), "UTF-8"); str match {
+          case legacyPattern(method, password, host, port) =>  // legacy uri
             val profile = new Profile
             profile.method = method.toLowerCase
             profile.password = password
