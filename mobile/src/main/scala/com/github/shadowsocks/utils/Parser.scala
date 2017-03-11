@@ -20,13 +20,15 @@
 
 package com.github.shadowsocks.utils
 
+import java.net.URI
+
 import android.net.Uri
 import android.util.{Base64, Log}
 import com.github.shadowsocks.database.Profile
 
 object Parser {
   val TAG = "ShadowParser"
-  private val pattern = "(?i)ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]".r
+  private val pattern = "(?i)ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;\\[\\]]*[-a-zA-Z0-9+&@#/%=~_|\\[\\]]".r
   private val userInfoPattern = "^(.+?):(.*)$".r
   private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".r
 
@@ -54,8 +56,12 @@ object Parser {
               val profile = new Profile
               profile.method = method
               profile.password = password
-              profile.host = uri.getHost
-              profile.remotePort = uri.getPort
+              // bug in Android: https://code.google.com/p/android/issues/detail?id=192855
+              val javaURI = new URI(m.matched)
+              profile.host = javaURI.getHost
+              if (profile.host.headOption.contains('[') && profile.host.lastOption.contains(']'))
+                profile.host = profile.host.substring(1, profile.host.length - 1)
+              profile.remotePort = javaURI.getPort
               profile.plugin = uri.getQueryParameter(Key.plugin)
               profile.name = uri.getFragment
               profile
