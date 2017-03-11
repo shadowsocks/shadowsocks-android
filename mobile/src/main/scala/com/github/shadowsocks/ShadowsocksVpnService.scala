@@ -159,12 +159,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   def startShadowsocksDaemon() {
     val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so",
       "-V",
+      "-u",
       "-b", "127.0.0.1",
       "-l", profile.localPort.toString,
       "-t", "600",
       "-c", buildShadowsocksConfig("ss-local-vpn.conf"))
-
-    if (profile.udpdns) cmd += "-u"
 
     if (profile.route != Acl.ALL) {
       cmd += "--acl"
@@ -242,9 +241,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.ipv6)
       cmd += ("--netif-ip6addr", PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "2"))
 
-    if (profile.udpdns)
-      cmd += "--enable-udprelay"
-    else
+    cmd += "--enable-udprelay"
+
+    if (!profile.udpdns)
       cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"),
         profile.localPort + 53))
 
