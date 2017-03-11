@@ -52,8 +52,8 @@
 <string name="auto_connect_summary">"Запускать Shadowsocks при включении"</string>
 <string name="tcp_fastopen_summary">"Переключение требует наличия ROOT прав"</string>
 <string name="tcp_fastopen_summary_unsupported">"Неподдерживаемая версия ядра: %s &lt; 3.7.1"</string>
-<string name="udp_dns">"Проброс UDP"</string>
-<string name="udp_dns_summary">"Пробрасывать UDP пакеты на удалённый сервер"</string>
+<string name="udp_dns">"Проброс DNS"</string>
+<string name="udp_dns_summary">"Пробрасывать DNS пакеты на удалённый сервер"</string>
 
 <!-- notification category -->
 <string name="forward_success">"Shadowsocks запущен."</string>

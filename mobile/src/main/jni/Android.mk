@@ -97,7 +97,7 @@ LIBEVENT_SOURCES := \
 
 LOCAL_MODULE := event
 LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
-LOCAL_CFLAGS := -O2 -I$(LOCAL_PATH)/libevent \
+LOCAL_CFLAGS := -O2 -D_EVENT_HAVE_ARC4RANDOM -I$(LOCAL_PATH)/libevent \
 	-I$(LOCAL_PATH)/libevent/include \
 
 include $(BUILD_STATIC_LIBRARY)
@@ -236,23 +236,6 @@ LOCAL_CFLAGS := -O2 -std=gnu99 -DUSE_IPTABLES \
 	-I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
 	-I$(LOCAL_PATH)/libevent
-
-include $(BUILD_SHARED_EXECUTABLE)
-
-########################################################
-## pdnsd
-########################################################
-
-include $(CLEAR_VARS)
-
-PDNSD_SOURCES  := $(wildcard $(LOCAL_PATH)/pdnsd/src/*.c)
-
-LOCAL_MODULE    := pdnsd
-LOCAL_SRC_FILES := $(PDNSD_SOURCES:$(LOCAL_PATH)/%=%)
-LOCAL_CFLAGS    := -DANDROID -Wall -O2 -I$(LOCAL_PATH)/pdnsd \
-				   -I$(LOCAL_PATH)/include/pdnsd -I$(LOCAL_PATH)/libancillary
-LOCAL_STATIC_LIBRARIES := libancillary
-LOCAL_LDLIBS := -llog
 
 include $(BUILD_SHARED_EXECUTABLE)
 
@@ -493,6 +476,17 @@ libpcre_src_files := \
 LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files))
 
 include $(BUILD_STATIC_LIBRARY)
+
+########################################################
+## overture
+########################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := overture
+LOCAL_SRC_FILES := overture/$(TARGET_ARCH_ABI)/liboverture.so
+
+include $(PREBUILT_SHARED_LIBRARY)
 
 # Import cpufeatures
 $(call import-module,android/cpufeatures)

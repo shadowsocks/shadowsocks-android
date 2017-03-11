@@ -22,7 +22,7 @@
 #define THROW(env, clazz, msg) do { env->ThrowNew(env->FindClass(clazz), msg); } while (0)
 
 static jclass ProcessImpl;
-static jfieldID ProcessImpl_pid;
+static jfieldID ProcessImpl_pid, ProcessImpl_exitValue, ProcessImpl_exitValueMutex;
 
 static int sdk_version() {
     char version[PROP_VALUE_MAX + 1];
@@ -39,6 +39,24 @@ jint Java_com_github_shadowsocks_jnihelper_sigterm(JNIEnv *env, jobject thiz, jo
     jint pid = env->GetIntField(process, ProcessImpl_pid);
     // Suppress "No such process" errors. We just want the process killed. It's fine if it's already killed.
     return kill(pid, SIGTERM) == -1 && errno != ESRCH ? errno : 0;
+}
+
+jobject Java_com_github_shadowsocks_jnihelper_getExitValue(JNIEnv *env, jobject thiz, jobject process) {
+    if (!env->IsInstanceOf(process, ProcessImpl)) {
+        THROW(env, "java/lang/ClassCastException",
+                   "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
+        return NULL;
+    }
+    return env->GetObjectField(process, ProcessImpl_exitValue);
+}
+
+jobject Java_com_github_shadowsocks_jnihelper_getExitValueMutex(JNIEnv *env, jobject thiz, jobject process) {
+    if (!env->IsInstanceOf(process, ProcessImpl)) {
+        THROW(env, "java/lang/ClassCastException",
+                   "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
+        return NULL;
+    }
+    return env->GetObjectField(process, ProcessImpl_exitValueMutex);
 }
 
 void Java_com_github_shadowsocks_jnihelper_close(JNIEnv *env, jobject thiz, jint fd) {
@@ -84,10 +102,12 @@ static JNINativeMethod method_table[] = {
     { "sendFd", "(ILjava/lang/String;)I",
         (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
     { "sigterm", "(Ljava/lang/Process;)I",
-        (void*) Java_com_github_shadowsocks_jnihelper_sigterm }
+        (void*) Java_com_github_shadowsocks_jnihelper_sigterm },
+    { "getExitValue", "(Ljava/lang/Process;)Ljava/lang/Integer;",
+        (void*) Java_com_github_shadowsocks_jnihelper_getExitValue },
+    { "getExitValueMutex", "(Ljava/lang/Process;)Ljava/lang/Object;",
+        (void*) Java_com_github_shadowsocks_jnihelper_getExitValueMutex }
 };
-
-
 
 /*
  * Register several native methods for one class.
@@ -159,6 +179,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         ProcessImpl = (jclass) env->NewGlobalRef((jobject) ProcessImpl);
         if (!(ProcessImpl_pid = env->GetFieldID(ProcessImpl, "pid", "I"))) {
             THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.pid not found");
+            goto bail;
+        }
+        if (!(ProcessImpl_exitValue = env->GetFieldID(ProcessImpl, "exitValue", "Ljava/lang/Integer;"))) {
+            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValue not found");
+            goto bail;
+        }
+        if (!(ProcessImpl_exitValueMutex = env->GetFieldID(ProcessImpl, "exitValueMutex", "Ljava/lang/Object;"))) {
+            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValueMutex not found");
             goto bail;
         }
     }

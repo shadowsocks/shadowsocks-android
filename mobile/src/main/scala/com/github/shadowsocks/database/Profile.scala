@@ -98,7 +98,8 @@ class Profile {
       .scheme("ss")
       .encodedAuthority("%s@%s:%d".formatLocal(Locale.ENGLISH,
         Base64.encodeToString("%s:%s".formatLocal(Locale.ENGLISH, method, password).getBytes,
-          Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE), host, remotePort))
+          Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE),
+        if (host.contains(':')) '[' + host + ']' else host, remotePort))
     val configuration = new PluginConfiguration(plugin)
     if (configuration.selected.nonEmpty)
       builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))

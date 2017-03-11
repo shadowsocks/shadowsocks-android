@@ -45,8 +45,8 @@
 <string name="auto_connect_summary">"随系统启动后台服务"</string>
 <string name="tcp_fastopen_summary">"切换需要 ROOT 权限"</string>
 <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本：%s &lt; 3.7.1"</string>
-<string name="udp_dns">"UDP 转发"</string>
-<string name="udp_dns_summary">"由远程服务器转发 UDP 协议的数据包"</string>
+<string name="udp_dns">"DNS 转发"</string>
+<string name="udp_dns_summary">"由远程服务器转发 DNS 协议的数据包"</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>

@@ -44,8 +44,8 @@
 <string name="auto_connect_summary">"在裝置啟動時啟用 Shadowsocks"</string>
 <string name="tcp_fastopen_summary">"切換需要 ROOT 權限"</string>
 <string name="tcp_fastopen_summary_unsupported">"不支援的核心版本：%s &lt; 3.7.1"</string>
-<string name="udp_dns">"UDP 轉送"</string>
-<string name="udp_dns_summary">"向遠端轉送 UDP 封包"</string>
+<string name="udp_dns">"DNS 轉送"</string>
+<string name="udp_dns_summary">"向遠端轉送 DNS 封包"</string>
 
 <!-- notification category -->
 <string name="forward_success">"Shadowsocks 已啟動。"</string>

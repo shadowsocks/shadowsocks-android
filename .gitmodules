@@ -17,10 +17,6 @@
 	path = mobile/src/main/jni/redsocks
 	url = https://github.com/shadowsocks/redsocks.git
 	branch = shadowsocks-android
-[submodule "mobile/src/main/jni/pdnsd"]
-	path = mobile/src/main/jni/pdnsd
-	url = https://github.com/shadowsocks/pdnsd.git
-	branch = shadowsocks-android
 [submodule "mobile/src/main/jni/mbedtls"]
 	path = mobile/src/main/jni/mbedtls
 	url = https://github.com/ARMmbed/mbedtls
@@ -37,3 +33,6 @@
 [submodule "mobile/src/main/jni/libudns"]
 	path = mobile/src/main/jni/libudns
 	url = https://github.com/shadowsocks/libudns.git
+[submodule "mobile/src/overture"]
+	path = mobile/src/overture
+	url = https://github.com/shadowsocks/overture-android.git
