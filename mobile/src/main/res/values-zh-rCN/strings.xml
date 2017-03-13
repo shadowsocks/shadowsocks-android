@@ -20,7 +20,6 @@
 <string name="connection_test_error_status_code">"状态码无效（#%d）"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"服务器设置"</string>
 <string name="profile_name">"配置名称"</string>
 <string name="proxy">"服务器"</string>
 <string name="remote_port">"远程端口"</string>
@@ -29,11 +28,8 @@
 <string name="enc_method">"加密方法"</string>
 
 <!-- feature category -->
-<string name="feature_cat">"功能设置"</string>
 <string name="ipv6">"IPv6 路由"</string>
 <string name="ipv6_summary">"向远程服务器转发 IPv6 流量"</string>
-<string name="onetime_auth">"一次性认证"</string>
-<string name="onetime_auth_summary">"启用一次性认证"</string>
 <string name="route_list">"路由"</string>
 <string name="route_entry_gfwlist">"仅代理中国大陆无法访问的地址"</string>
 <string name="proxied_apps">"分应用代理"</string>
@@ -46,13 +42,12 @@
 <string name="tcp_fastopen_summary">"切换需要 ROOT 权限"</string>
 <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本：%s &lt; 3.7.1"</string>
 <string name="udp_dns">"DNS 转发"</string>
-<string name="udp_dns_summary">"由远程服务器转发 DNS 协议的数据包"</string>
+<string name="udp_dns_summary">"通过 UDP 将所有 DNS 查询全部转发至远程服务器"</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>
 <string name="invalid_server">"服务器名无效"</string>
 <string name="service_failed">"无法连接远程服务器"</string>
-<string name="method_unsafe">"警告：当前使用的加密算法不安全"</string>
 <string name="nat_deprecated">"警告：在 Android 5.0 及更高版本中不建议使用 NAT 模式"</string>
 <string name="nat_no_root">"NAT 模式需要 ROOT 权限"</string>
 <string name="switch_to_vpn">"切换到 VPN 模式"</string>
@@ -63,14 +58,12 @@
 <string name="profile_invalid_input">"未找到有效的配置文件。"</string>
 
 <!-- alert category -->
-<string name="yes">"是"</string>
-<string name="no">"否"</string>
 <string name="close">"关闭"</string>
 <string name="profile_empty">"请选择配置文件"</string>
 <string name="proxy_empty">"代理服务器地址及密码不能为空"</string>
 <string name="connect">"连接"</string>
 <string name="recovering">"重置中…"</string>
-<string name="remove_profile">"删除此配置文件「%s」?"</string>
+<string name="remove_profile">"删除此配置文件“%s”?"</string>
 
 <!-- menu category -->
 <string name="profiles">"配置文件"</string>
@@ -92,8 +85,6 @@
 
 <!-- profile -->
 <string name="profile_config">"配置文件设置"</string>
-<string name="unsaved_changes_prompt">"保存修改吗？"</string>
-<string name="apply">"应用"</string>
 <string name="delete">"删除"</string>
 <string name="delete_confirm_prompt">"您确定要删除此配置文件？"</string>
 <string name="share_qr_nfc">"二维码 / NFC"</string>
@@ -121,12 +112,6 @@
 <string name="nat_connected">"已连接"</string>
 <string name="not_connected">"未连接"</string>
 
-<!-- kcp -->
-<string name="kcp_summary">"启用 KCP 协议"</string>
-<string name="kcp_port">"KCP 端口"</string>
-<string name="kcp_port_summary">"%d（远端 KCPTUN 服务器的端口号）"</string>
-<string name="kcpcli">"KCP 参数"</string>
-
 <!-- acl -->
 <string name="custom_rules">"自定义规则"</string>
 <string name="action_selection">"选择…"</string>
@@ -140,4 +125,12 @@
 <string name="proxied_apps_summary_v21">"为应用程序分别设置代理"</string>
 <string name="acl_rule_templates_generic">"子网/域名 PCRE 正则表达式"</string>
 <string name="acl_rule_templates_domain">"域名及其子域名"</string>
+
+<!-- plugin -->
+<string name="plugin">"插件"</string>
+<string name="plugin_configure">"配置…"</string>
+<string name="plugin_disabled">"禁用"</string>
+<string name="plugin_unknown">"未知插件 %s"</string>
+<string name="plugin_untrusted">"警告：该插件似乎并非来自已知的可信源。"</string>
+<string name="profile_plugin">"插件：%s"</string>
 </resources>

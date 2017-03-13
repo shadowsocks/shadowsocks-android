@@ -7,7 +7,7 @@
 <string name="profile">"プロファイル"</string>
 <string name="profile_summary">"新規作成または既存ファイルを開く"</string>
 <string name="nat">"NAT モード (デバックのみ)"</string>
-<string name="nat_summary">"VPNモードからNATモードに切り替えるにはROOT権限が必要です"</string>
+<string name="nat_summary">"VPN モードから NAT モードに切り替えるには ROOT 権限が必要です"</string>
 <string name="remote_dns">"リモートDNS"</string>
 <string name="stat_summary">"送信済み: \t%3$s\t↑\t%1$s/s
 受信済み: \t%4$s\t↓\t%2$s/s"</string>
@@ -19,7 +19,6 @@
 <string name="connection_test_error_status_code">"ステータスコード無効（#%d）"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"サーバー設定"</string>
 <string name="profile_name">"サーバー名"</string>
 <string name="proxy">"サーバーアドレス"</string>
 <string name="remote_port">"リモートポート"</string>
@@ -28,11 +27,8 @@
 <string name="enc_method">"暗号化方式"</string>
 
 <!-- feature category -->
-<string name="feature_cat">"ファンクション設定"</string>
-<string name="ipv6">"IPv6プロキシ"</string>
-<string name="ipv6_summary">"リモートサーバーにIPv6パケットを転送"</string>
-<string name="onetime_auth">"ワンタイム認証"</string>
-<string name="onetime_auth_summary">"ワンタイム認証を使用する"</string>
+<string name="ipv6">"IPv6 プロキシ"</string>
+<string name="ipv6_summary">"リモートサーバーに IPv6 パケットを転送"</string>
 <string name="route_list">"プロキシ方式"</string>
 <string name="route_entry_gfwlist">"中国本土からアクセス不可なアドレス以外を迂回する"</string>
 <string name="proxied_apps">"アプリ別のプロキシを使用"</string>
@@ -42,28 +38,25 @@
 <string name="bypass_apps_summary">"このモードを選択した場合、指定したアプリのパケットはプロキシを経由しない"</string>
 <string name="auto_connect">"自動接続"</string>
 <string name="auto_connect_summary">"システム起動時にバックグラウンドで本サービスを開始"</string>
-<string name="tcp_fastopen_summary">"使用するにはROOT権限が必要"</string>
+<string name="tcp_fastopen_summary">"使用するには ROOT 権限が必要"</string>
 <string name="tcp_fastopen_summary_unsupported">"ご利用のカーネルバージョンはサポートしておりません：%s &lt; 3.7.1"</string>
-<string name="udp_dns">"DNS転送"</string>
-<string name="udp_dns_summary">"DNSプロトコルでリモードサーバーにパケットを転送"</string>
+<string name="udp_dns">"DNS 転送"</string>
+<string name="udp_dns_summary">"DNS プロトコルでリモードサーバーにパケットを転送"</string>
 
 <!-- notification category -->
 <string name="forward_success">"バックグラウンドでサービスを開始しました"</string>
 <string name="invalid_server">"サーバーが無効です"</string>
 <string name="service_failed">"リモートサーバーに接続できません"</string>
-<string name="method_unsafe">"注意：現在の暗号化方式は安全ではありません"</string>
-<string name="nat_deprecated">"注意：Android 5.0及びそれ以降のバージョンではNATモードの使用はお勧めしません"</string>
-<string name="nat_no_root">"NATモードはROOT権限が必要です"</string>
-<string name="switch_to_vpn">"VPNモードに切り替える"</string>
+<string name="nat_deprecated">"注意：Android 5.0 及びそれ以降のバージョンでは NAT モードの使用はお勧めしません"</string>
+<string name="nat_no_root">"NAT モードは ROOT 権限が必要です"</string>
+<string name="switch_to_vpn">"VPN モードに切り替える"</string>
 <string name="stop">"中止"</string>
 <string name="stopping">"停止中……"</string>
 <string name="vpn_error">"バックグランドサービスの起動に失敗しました：%s"</string>
-<string name="reboot_required">"VPNサービスの起動に失敗しました、デバイスの再起動を試みて下さい"</string>
-<string name="profile_invalid_input">"有効なデータが見つかりません"</string>
+<string name="reboot_required">"VPN サービスの起動に失敗しました、デバイスの再起動を試みて下さい"</string>
+<string name="profile_invalid_input">"有効なプロファイルが見つかりません"</string>
 
 <!-- alert category -->
-<string name="yes">"はい"</string>
-<string name="no">"いいえ"</string>
 <string name="close">"閉じる"</string>
 <string name="profile_empty">"プロファイルを選択して下さい"</string>
 <string name="proxy_empty">"サーバアドレスやパスワードの入力が必要です"</string>
@@ -74,9 +67,10 @@
 <!-- menu category -->
 <string name="profiles">"プロファイル"</string>
 <string name="settings">"オプション設定"</string>
-<string name="faq">"質問"</string>
+<string name="faq">"よくある質問"</string>
 <string name="recovery">"リセット"</string>
 <string name="about">"本アプリについて"</string>
+<string name="about_title">"Shadowsocks %s"</string>
 <string name="edit">"編集"</string>
 <string name="share">"共有"</string>
 <string name="add_profile">"プロファイルを追加"</string>
@@ -85,24 +79,22 @@
 <string name="action_import">"クリップボードからインポート"</string>
 <string name="action_export_msg">"クリップボードの出力に成功しました"</string>
 <string name="action_export_err">"クリップボードの出力に失敗しました"</string>
-<string name="action_import_msg">"インポートは成功しました"</string>
-<string name="action_import_err">"インポートは失敗しました"</string>
+<string name="action_import_msg">"インポートに成功しました"</string>
+<string name="action_import_err">"インポートに失敗しました"</string>
 
 <!-- profile -->
 <string name="profile_config">"プロファイル編集"</string>
-<string name="unsaved_changes_prompt">"編集は保存されておりません、保存しますか？"</string>
-<string name="apply">"適応する"</string>
-<string name="delete">"削除する"</string>
-<string name="delete_confirm_prompt">"このプロファイルを削除しますか？"</string>
-<string name="share_qr_nfc">"QRコード/NFC"</string>
-<string name="add_profile_dialog">"シャドーソックスにプロファイルを追加しますか"</string>
-<string name="add_profile_methods_scan_qr_code">"QRコードを読み取る"</string>
-<string name="add_profile_methods_manual_settings">"手動でセットアップ"</string>
+<string name="delete">"削除"</string>
+<string name="delete_confirm_prompt">"このプロファイルを削除しますか"</string>
+<string name="share_qr_nfc">"QR コード / NFC"</string>
+<string name="add_profile_dialog">"Shadowsocks用プロファイルを追加しますか"</string>
+<string name="add_profile_methods_scan_qr_code">"QR コードを読み取る"</string>
+<string name="add_profile_methods_manual_settings">"手動設定"</string>
 <string name="add_profile_scanner_not_installed">"Zxingに準拠したQRコードスキャンアプリをインストールして下さい"</string>
 <plurals name="removed">
 <item quantity="other">"削除済み"</item>
 </plurals>
-<string name="undo">"撤回"</string>
+<string name="undo">"元に戻す"</string>
 
 <!-- tasker -->
 <string name="toggle_service_state">"サービスを開始"</string>
@@ -114,28 +106,30 @@
 <!-- status -->
 <string name="sent">"送信済み:"</string>
 <string name="received">"受信済み:"</string>
-<string name="connecting">"接続中..."</string>
+<string name="connecting">"接続中…"</string>
 <string name="vpn_connected">"接続済み、タップして接続状況をチェック"</string>
 <string name="nat_connected">"接続済み"</string>
-<string name="not_connected">"接続されませんでした"</string>
-
-<!-- kcp -->
-<string name="kcp_summary">"KCP プロトコル を有効にする"</string>
-<string name="kcp_port">"KCP ポート"</string>
-<string name="kcp_port_summary">"%d（リモート KCPTUN サーバーのポート番号）"</string>
-<string name="kcpcli">"KCP パラメータ"</string>
+<string name="not_connected">"未接続"</string>
 
 <!-- acl -->
 <string name="custom_rules">"カスタムルール"</string>
 <string name="action_selection">"選択"</string>
-<string name="action_add_rule">"ルールを追加"</string>
+<string name="action_add_rule">"ルールを追加…"</string>
 <string name="edit_rule">"ルールを編集"</string>
 <string name="route_entry_all">"すべて"</string>
-<string name="route_entry_bypass_lan">"LANアドレスを迂回する"</string>
+<string name="route_entry_bypass_lan">"LAN アドレスを迂回する"</string>
 <string name="route_entry_bypass_chn">"中国本土のアドレスを迂回する"</string>
-<string name="route_entry_bypass_lan_chn">"LAN及び中国本土のアドレスを迂回する"</string>
+<string name="route_entry_bypass_lan_chn">"LAN 及び中国本土のアドレスを迂回する"</string>
 <string name="route_entry_chinalist">"中国本土のアドレス以外を迂回する"</string>
 <string name="proxied_apps_summary_v21">"選択したアプリにプロキシを設定する"</string>
-<string name="acl_rule_templates_generic">"サブネット/ホストネームPCREパターン"</string>
-<string name="acl_rule_templates_domain">"ドメイン及びサブドメイン"</string>
+<string name="acl_rule_templates_generic">"サブネット/ホスト名 PCRE パターン"</string>
+<string name="acl_rule_templates_domain">"ドメイン及び全てのサブドメイン"</string>
+
+<!-- plugin -->
+<string name="plugin">"プラグイン"</string>
+<string name="plugin_configure">"設定..."</string>
+<string name="plugin_disabled">"無効"</string>
+<string name="plugin_unknown">"不明なプラグイン"</string>
+<string name="plugin_untrusted">"警告：このプラグインは信頼されていないソースからの可能性があります"</string>
+<string name="profile_plugin">"プラグイン"</string>
 </resources>

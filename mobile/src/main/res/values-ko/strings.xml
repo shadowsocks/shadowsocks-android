@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="quick_toggle">"켜기/끄기"</string>
+
+<!-- global/misc category -->
+<string name="misc_cat">"기타"</string>
+<string name="profile">"프로필"</string>
+<string name="profile_summary">"다른 프로필로 전환하거나 새 프로필 추가"</string>
+<string name="nat">"NAT 모드 (지원 중단)"</string>
+<string name="nat_summary">"VPN 모드 대신 NAT 모드를 사용합니다. 루트 권한이 필요합니다."</string>
+<string name="remote_dns">"원격 DNS"</string>
+<string name="stat_summary">"송신: \t\t\t\t\t%3$s\t↑\t%1$s/s
+수신: \t%4$s\t↓\t%2$s/s "</string>
+<string name="stat_profiles">"%1$s↑\t%2$s↓"</string>
+<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
+<plurals name="bytes">
+<item quantity="other">"바이트"</item>
+</plurals>
+<string name="connection_test_pending">"인터넷 연결 상태 검사하기"</string>
+<string name="connection_test_testing">"검사 중…"</string>
+<string name="connection_test_available">"성공: %dms"</string>
+<string name="connection_test_error">"인터넷 연결을 찾을 수 없습니다: %s"</string>
+<string name="connection_test_fail">"인터넷에 연결할 수 없습니다"</string>
+<string name="connection_test_error_status_code">"오류 코드: #%d"</string>
+
+<!-- proxy category -->
+<string name="profile_name">"프로필 이름"</string>
+<string name="proxy">"서버 주소"</string>
+<string name="remote_port">"원격 포트"</string>
+<string name="port">"로컬 포트"</string>
+<string name="sitekey">"비밀번호"</string>
+<string name="enc_method">"암호화 방법"</string>
+
+<!-- feature category -->
+<string name="ipv6">"IPv6 라우팅"</string>
+<string name="ipv6_summary">"IPv6 트래픽도 원격으로 리다이렉트 합니다"</string>
+<string name="route_list">"라우팅 대상"</string>
+<string name="proxied_apps">"원하는 앱만 프락시 적용하기"</string>
+<string name="proxied_apps_summary">"선택한 앱에만 프락시를 적용합니다. Android 4.x 이하에서는 NAT 모드를 써야 합니다."</string>
+<string name="on">"활성화"</string>
+<string name="bypass_apps">"선택된 앱들만 프록시 적용 제외하기"</string>
+<string name="bypass_apps_summary">"이 옵션을 활성화하면 선택된 앱들은 프락시를 사용하지 않습니다"</string>
+<string name="auto_connect">"자동 접속"</string>
+<string name="auto_connect_summary">"장치가 켜질 때 Shadowsocks를 자동으로 활성화합니다"</string>
+<string name="tcp_fastopen_summary">"루트 권한이 필요합니다"</string>
+<string name="tcp_fastopen_summary_unsupported">"지원하지 않는 버전의 커널입니다: %s &lt; 3.7.1"</string>
+<string name="udp_dns">"DNS 포워딩"</string>
+</resources>

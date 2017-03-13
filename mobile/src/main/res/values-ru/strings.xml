@@ -21,7 +21,6 @@
 <string name="connection_test_error_status_code">"Код ошибки: #%d"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"Настройки Сервера"</string>
 <string name="profile_name">"Имя Профиля"</string>
 <string name="proxy">"Сервер"</string>
 <string name="remote_port">"Удалённый порт"</string>
@@ -30,17 +29,8 @@
 <string name="enc_method">"Метод Шифрования"</string>
 
 <!-- feature category -->
-<string name="feature_cat">"Дополнительные Настройки"</string>
 <string name="ipv6">"IPv6 Маршрут"</string>
 <string name="ipv6_summary">"Перенаправлять IPv6 траффик на удалённый сервер"</string>
-<string name="onetime_auth">"Единоразовая Аутентификация"</string>
-<string name="onetime_auth_summary">"Включить единоразовую аутентификацию"</string>
-<string name="http_proxy">"HTTP Прокси"</string>
-<string name="http_proxy_summary">"Локальный HTTP прокси"</string>
-<string name="dns_proxy">"DNS Прокси"</string>
-<string name="dns_proxy_summary">"Перенаправлять DNS запросы на удалённый сервер"</string>
-<string name="auto_set_gfwlist">"CHN Маршрут"</string>
-<string name="auto_set_gfwlist_summary">"Игнорировать все сайты находящиеся в Китае"</string>
 <string name="route_list">"Маршрут"</string>
 <string name="route_entry_gfwlist">"Список GFW"</string>
 <string name="proxied_apps">"Прокси для выбранных приложений"</string>
@@ -59,20 +49,18 @@
 <string name="forward_success">"Shadowsocks запущен."</string>
 <string name="invalid_server">"Неправильное имя сервера"</string>
 <string name="service_failed">"Ошибка при подключении к удалённому серверу"</string>
-<string name="method_unsafe">"ВНИМАНИЕ:В настоящее время метод шифрования является небезопасным"</string>
 <string name="nat_deprecated">"ВНИМАНИЕ:режим NAT не работает в Android 5.0"</string>
 <string name="nat_no_root">"Режим NAT требует наличия ROOT прав"</string>
 <string name="switch_to_vpn">"Переключить на режим VPN"</string>
 <string name="stop">"Остановить"</string>
 <string name="stopping">"Останавливается…"</string>
-<string name="vpn_error">"%s"</string>
 <string name="reboot_required">"Сбой запуска VPN сервиса. Требуется перезагрузка Вашего устройства."</string>
+
+<!-- alert category -->
 <string name="close">"Закрыть"</string>
 <string name="proxy_empty">"Прокси/Пароль не должны быть пустыми"</string>
 <string name="connect">"Подключить"</string>
-<string name="initializing">"Инициализация…"</string>
 <string name="recovering">"Сброс…"</string>
-<string name="loading">"Загрузка…"</string>
 <string name="remove_profile">"Удалить этот профиль %s?"</string>
 
 <!-- menu category -->
@@ -82,10 +70,6 @@
 <string name="about">"О приложении"</string>
 <string name="about_title">"Shadowsocks %s"</string>
 <string name="share">"Поделиться"</string>
-<string name="flush_dnscache">"Очистить кэш DNS"</string>
-<string name="flush_dnscache_summary">"Работает только в режиме NAT. Требует наличия ROOT прав."</string>
-<string name="flush_dnscache_no_root">"Очистка кэша DNS не работает без налиичя ROOT прав"</string>
-<string name="flushing">"Очистка"</string>
 <string name="add_profile">"Добавить Профиль"</string>
 <string name="action_apply_all">"Применить настройки для всех профилей"</string>
 <string name="action_export">"Экспортировать в буфер обмена"</string>
@@ -97,6 +81,12 @@
 <string name="add_profile_dialog">"Добавить этот Профиль Shadowsocks?"</string>
 <string name="add_profile_methods_scan_qr_code">"Сканировать QR код"</string>
 <string name="add_profile_methods_manual_settings">"Настройка вручную"</string>
+<plurals name="removed">
+<item quantity="one">"Удалён"</item>
+<item quantity="few"></item>
+<item quantity="many"></item>
+<item quantity="other">"%d элементы удалены"</item>
+</plurals>
 <string name="undo">"Вернуть"</string>
 
 <!-- tasker -->
@@ -109,12 +99,6 @@
 <!-- status -->
 <string name="sent">"Отправлено:"</string>
 <string name="received">"Получено:"</string>
-
-<!-- kcp -->
-<string name="kcp_summary">"Включить Shadowsocks над KCPTUN"</string>
-<string name="kcp_port">"KCP порт"</string>
-<string name="kcp_port_summary">"%d (KCPTUN омер порта удалённого сервера)"</string>
-<string name="kcpcli">"KCP параметры"</string>
 <string name="route_entry_all">"Все"</string>
 <string name="route_entry_bypass_lan">"Обход LAN"</string>
 <string name="route_entry_bypass_chn">"Обходной Китай"</string>
