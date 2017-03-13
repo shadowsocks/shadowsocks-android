@@ -83,8 +83,8 @@
 <string name="add_profile_methods_manual_settings">"Настройка вручную"</string>
 <plurals name="removed">
 <item quantity="one">"Удалён"</item>
-<item quantity="few"></item>
-<item quantity="many"></item>
+<item quantity="few">"%d элементы удалены"</item>
+<item quantity="many">"%d элементы удалены"</item>
 <item quantity="other">"%d элементы удалены"</item>
 </plurals>
 <string name="undo">"Вернуть"</string>
