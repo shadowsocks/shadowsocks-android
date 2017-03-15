@@ -15,7 +15,9 @@ lazy val commonSettings = Seq(
   proguardCache := Seq(),
 
   shrinkResources := true,
-  typedResources := false
+  typedResources := false,
+
+  resConfigs := Seq("ja", "ko", "ru", "zh-rCN", "zh-rTW")
 )
 
 val supportLibsVersion = "25.2.0"

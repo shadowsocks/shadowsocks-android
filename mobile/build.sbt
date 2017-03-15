@@ -13,8 +13,6 @@ proguardOptions ++=
   "-dontwarn org.xbill.**" ::
   Nil
 
-resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
-
 val playServicesVersion = "10.2.0"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
