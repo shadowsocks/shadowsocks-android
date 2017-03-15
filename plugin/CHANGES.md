@@ -1,3 +1,5 @@
+* 0.0.4:
+  * Update support library version to 25.3.0.
 * 0.0.3:
   * Update support library version to 25.2.0.
 * 0.0.2:
