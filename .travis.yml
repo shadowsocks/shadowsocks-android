@@ -54,8 +54,8 @@ script:
 
 deploy:
   provider: releases
-  user: "lianghuacheng"
-  password: "09030911chenpu"
+  api_key:
+    secure: 3dc31c31793606aff493ce3505b167a0b82c7e54
   file: mobile/shadoesocks-release.apk
   skip_cleanup: true
   on:
