@@ -55,7 +55,7 @@ script:
 deploy:
   provider: releases
   api_key:
-    secure: e5bd71941e8e2409af34e88d6caba570a979e468
+    secure: e08154fac08fc32449690ed9df8a4965ac57389a
   file: mobile/shadoesocks-release.apk
   skip_cleanup: true
   on:
