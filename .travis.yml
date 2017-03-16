@@ -24,6 +24,15 @@ android:
   - build-tools-25.0.2
   - extra-android-m2repository
   - extra-google-m2repository
+before_install:
+- openssl aes-256-cbc -K $encrypted_bb071b683b0c_key -iv $encrypted_bb071b683b0c_iv
+  -in .travis/id_rsa.pub.enc -out ~\/.ssh/id_rsa.pub -d
+- chmod 600 ~/.ssh/id_rsa
+- eval $(ssh-agent)
+- ssh-add ~/.ssh/id_rsa
+- cp .travis/ssh_config ~/.ssh/config
+- git config --global user.name "ben3726"
+- git config --global user.email "ben3726@gmail.com"
 install:
 - |
   if [ ! -d "$ANDROID_NDK_HOME" ]; then
@@ -50,3 +59,4 @@ deploy:
   file: app/build/outputs/apk/app-release.apk
   on:
     repo: ben3726/shadowsocks-android
+
