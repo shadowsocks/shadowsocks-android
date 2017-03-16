@@ -24,7 +24,6 @@ android:
   - build-tools-25.0.2
   - extra-android-m2repository
   - extra-google-m2repository
-
 install:
 - |
   if [ ! -d "$ANDROID_NDK_HOME" ]; then
@@ -44,5 +43,12 @@ install:
   fi
 script:
 - "$SBTPATH/sbt go-build android:package"
-
-
+deploy:
+  provider: releases
+  api_key:
+    secure: DgPCMWf/lAlc92FnmLGKIN6GdOExAzlii6YCNpBK6WCw5dPVyrLhbYHum/zJqNz3MI8FdYl4MZ84cI/CH/HayRRZ2J6aSDh64ThqQ/L3aldaWvfflYjirdnmRjG9MADMMI/XGKa0/+neQ9KUGMnHPvVGaU5nAsw3SvSZaxPWzi+sEKpYfs53v2lazrhAyITF44RMFt+RtA+O0exLSpvxLVP1xVFapUrqqnBpQv5WWlFC4w2mSt8OMMdBVaY/T5VstMd4Kw942hmlFK4Gwl5t2mORsWRSEiMhwbY+AzmtSRAvaEodA4gg0OKMWQVyyjAaZtST/Rcxn0cF70DmPBKw7VYkkq7oAd+DQijg6WlKwyw/Bro4EbWMlybaZiKYbHdrKfYzqf7+iHyQkLZwHRSDbJtOLFzQFmWOp8zTGF5/kYRZcMrIrpbmt1ah15s/q9c+Hh2u99Y+i5T0zRUqJ88uJ4z3YiHFXOvqZKhPdjejeq/iH/qonDQqhuD4TP52F0nvgILd/LwsI4YSaDMHrvWyPyN6wvr7Ethq10A8ClIP5N6/WLdrXdlQigifGKs0wa0Vz2uNBJgLI/r4472wwn+AZE6D8m2eU5tX1tDI9IRv+4Nwt+CnpyL8rxmA7MCxmUTcSy/YIxAYuRLqWYoQuP+DLLU13O1iiskKXxr8LdNdmKg=
+  file: target/android/output/shadowsocks-debug.apk
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: ben3726/shadowsocks-android
