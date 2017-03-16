@@ -1,53 +1,52 @@
 language: android
-
 jdk:
-  - oraclejdk8
-
+- oraclejdk8
 env:
-    global:
-        - NDK_VERSION=r14
-        - NDK_CCACHE=ccache
-        - GOROOT_BOOTSTRAP=$GOROOT
-        - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
-        - SBTPATH=$HOME/.sbt
-        - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
-
+  global:
+  - NDK_VERSION=r14
+  - NDK_CCACHE=ccache
+  - GOROOT_BOOTSTRAP=$GOROOT
+  - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
+  - SBTPATH=$HOME/.sbt
+  - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 scala:
-    - 2.11.8
-
+- 2.11.8
 before_cache:
-    - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2 -name "*.lock" | xargs rm
-
+- find $HOME/.sbt -name "*.lock" | xargs rm
+- find $HOME/.ivy2 -name "*.lock" | xargs rm
 cache:
-    directories:
-        - $HOME/.ivy2
-        - $HOME/.sbt
-
+  directories:
+  - "$HOME/.ivy2"
+  - "$HOME/.sbt"
 android:
-    components:
-        - tools
-        - build-tools-25.0.2
-        - extra-android-m2repository
-        - extra-google-m2repository
-
+  components:
+  - tools
+  - build-tools-25.0.2
+  - extra-android-m2repository
+  - extra-google-m2repository
 install:
-    - >
-      if [ ! -d "$ANDROID_NDK_HOME" ]; then
-          mkdir -p $ANDROID_NDK_HOME;
-          pushd $HOME/.android;
-          export ARCH=`uname -m`;
-          wget -q http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          unzip -q android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          popd;
-      fi
-    - >
-      if [ ! -f "$SBTPATH/sbt" ]; then
-          pushd $SBTPATH;
-          wget -q https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt;
-          chmod a+x sbt;
-          popd;
-      fi
-
+- |
+  if [ ! -d "$ANDROID_NDK_HOME" ]; then
+      mkdir -p $ANDROID_NDK_HOME;
+      pushd $HOME/.android;
+      export ARCH=`uname -m`;
+      wget -q http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
+      unzip -q android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
+      popd;
+  fi
+- |
+  if [ ! -f "$SBTPATH/sbt" ]; then
+      pushd $SBTPATH;
+      wget -q https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt;
+      chmod a+x sbt;
+      popd;
+  fi
 script:
-    - $SBTPATH/sbt go-build android:package
+- "$SBTPATH/sbt go-build android:package"
+deploy:
+  provider: releases
+  api_key:
+    secure: nKOfrnbNQCMhDZpcpQbmNcdvqTd9nyl116chQ5KO050zURaXvXMUyEp+2GS3lRprtE4zqs4/lwhl9o+1uFDFLKtyo2vGVpBnN7FQEo7JbFCFoGta2p7l2FUA/U/IJHPBTAK5e6rMNpSBFw2JOt1X+VgVyGEEuVzowOnnVEFb1sqmcFDkhK+y74kZXx5kG4RR7/af+F+HmaUr+bxfkG4mCePP223pnbTJO2NuNxagJAumOq249jOYJHnhsxfZyPqmXzwjgZpe+WFWstfShwMru5I0/Z4TfYle2MJxR1ocKq2MBOoM0YsQD6XDHGAAMgHN0CPmpWRHObms/Rb3wOXGNAE8bbPTSq5+UZyNhnafpi7cGPURMfgtfeWqffBKtcBelRDzYyB+sBjiCIl+UApV7KLpMf4gs6UKWvrUD4JWdTc9PuU/L8QCdGb/igIfxnAS9MQGepR6HwVPh5QL8HQfaIhl52M8+A4xsyyKqze/2aRB1faRVZNSUWvt6Lo7+X9eN+I2GIeF3+z1tGSJUBNoLAyxWAXB1hoXZ7mcQWEUcqAd6baw6tYUzdekHVpYKFzNuOCWL0GCJbXqNy9Ogssshapiob8aqA1Sb9M7k5S0KOSyyx55RgbWC1kgK+6SnCVzOAYIVOGMoR8q7YoUQRZ7jHy4kVgJBYRKp0dW1L86RUk=
+  file: app/build/outputs/apk/app-release.apk
+  on:
+    repo: ben3726/shadowsocks-android
