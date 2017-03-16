@@ -18,7 +18,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
   - Android Support Repository and Google Repository (see `build.sbt` for version)
   - Android NDK r14+
 
-### BUILD
+### BUILD build
 
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk-bundle`)
