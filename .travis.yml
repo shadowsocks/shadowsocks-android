@@ -51,3 +51,12 @@ install:
 
 script:
     - $SBTPATH/sbt go-build android:package
+
+deploy:
+  provider: releases
+  user: "lianghuacheng"
+  password: "09030911chenpu"
+  file: mobile/shadoesocks-release.apk
+  skip_cleanup: true
+  on:
+    tags: true
