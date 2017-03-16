@@ -50,5 +50,8 @@ deploy:
   file: target/android/output/shadowsocks-debug.apk
   skip_cleanup: true
   on:
-    tags: true
     repo: ben3726/shadowsocks-android
+    tags: true
+    branches:
+      only:
+        - master 
