@@ -33,13 +33,12 @@ android:
 
 deploy:
     provider: releases
-    api_key:
-      secure: 94f0518babb81cf63fa6e8199b5a71c2c12496c8 
+    api_key: 94f0518babb81cf63fa6e8199b5a71c2c12496c8 
     file: mobile/shadowsocks-debug-unaligned.apk
     skip_cleanup: true
     on:
       branch: master
-      tags: true
+      tags: false
       repo: lianghuacheng/shadowsocks-android
 
 install:
