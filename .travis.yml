@@ -43,9 +43,18 @@ install:
   fi
 script:
 - "$SBTPATH/sbt go-build android:package"
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-  on:
-    branch: master
+after_script:
+  - cd ./releases
+  - cp -f target/android/output/shadowsocks-debug.apk ./
+  - git init
+  - git config user.name "ben3726"
+  - git config user.email "ben3726@gmail.com"
+  - git add .
+  - git commit -m "Releases apk"
+  - git push --force --quiet "https://${GITHUB_TOKEN}@${GH_REF}" master:master
+branches:
+  only:
+    - master
+env:
+ global:
+   - GH_REF: github.com/ben3726/shadowsocks-android.git
