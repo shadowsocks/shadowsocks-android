@@ -52,11 +52,3 @@ install:
 script:
     - $SBTPATH/sbt go-build android:package
 
-deploy:
-  provider: releases
-  api_key:
-    secure: e08154fac08fc32449690ed9df8a4965ac57389a
-  file: mobile/shadoesocks-release.apk
-  skip_cleanup: true
-  on:
-    tags: false
