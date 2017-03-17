@@ -43,6 +43,7 @@ install:
   fi
 script:
 - "$SBTPATH/sbt go-build android:package"
+- du -a --exclude=".git" --exclude=".idea" --exclude=".github" |grep -i "*.apk"
 
 after_script:
  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/ |grep -i "*.apk"
