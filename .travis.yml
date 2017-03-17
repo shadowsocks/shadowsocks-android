@@ -45,8 +45,8 @@ script:
 - "$SBTPATH/sbt go-build android:package"
 
 after_script:
-  - cd ./releases
-  - cp -f target/android/output/shadowsocks-debug.apk ./
+  - cd /home/travis/build/ben3726/shadowsocks-android/releases
+  - cp -rf /home/travis/build/ben3726/shadowsocks-android/mobile/target/android/outputs ./
   - git init
   - git config user.name ${GIT_USER}
   - git config user.email ${GIT_EMAIL}
