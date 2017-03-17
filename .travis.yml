@@ -45,12 +45,11 @@ script:
 - "$SBTPATH/sbt go-build android:package"
 
 after_script:
-  skip_cleanup: true
-    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/ |grep -i "*.apk"
-    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp |grep -i "*.apk"
-    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/build
-    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/builds
-    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp
+ - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/ |grep -i "*.apk"
+ - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp |grep -i "*.apk"
+ - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/build
+ - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/builds
+ - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp
 branches:
   only:
     - master
