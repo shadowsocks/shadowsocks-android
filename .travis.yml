@@ -54,4 +54,6 @@ after_script:
   - git commit -m "Releases apk"
   - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:master
   - cd ../
-branches:master
+branches:
+  only:
+    - master
