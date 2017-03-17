@@ -45,12 +45,12 @@ script:
 - "$SBTPATH/sbt go-build android:package"
 
 before_deploy:
-- tar czvf out.tgz $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
+- tar czvf out.tgz build/ben3726/shadowsocks-android/mobile/target/streams/android/
     
 deploy:
   provider: pages
   skip_cleanup: true
-  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  github_token: $GH_TOKEN # Set in travis-ci.org dashboard
   file: out.tgz
   on:
     branch: master
