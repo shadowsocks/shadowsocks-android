@@ -44,14 +44,13 @@ install:
 script:
 - "$SBTPATH/sbt go-build android:package"
 
-after_script:
- - du -a  |grep -i "*.apk"
- - du -a  /tmp |grep -i "*.apk"
- - du -a / |grep -i "*.apk"
- - du -a $SBTPATH/ |grep -i "*.apk"
- - du -a $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
- - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/builds
- - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp
-branches:
-  only:
-    - master
+before_deploy:
+- tar czvf out.tgz $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
+    
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  file: out.tgz
+  on:
+    branch: master
