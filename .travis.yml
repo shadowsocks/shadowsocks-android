@@ -46,20 +46,11 @@ script:
 
 after_script:
   skip_cleanup: true
-  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/ |grep -i "*.apk"
-  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp |grep -i "*.apk"
-  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/build
-  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/builds
-  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp
-  - cd /home/travis/build/ben3726/shadowsocks-android/releases
-  - cp -rf /home/travis/build/ben3726/shadowsocks-android/mobile/target/android/outputs ./
-  - git init
-  - git config user.name ${GIT_USER}
-  - git config user.email ${GIT_EMAIL}
-  - git add .
-  - git commit -m "Releases apk"
-  - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:master
-  - cd ../
+    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/ |grep -i "*.apk"
+    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp |grep -i "*.apk"
+    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/build
+    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/builds
+    - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp
 branches:
   only:
     - master
