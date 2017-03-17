@@ -43,12 +43,13 @@ install:
   fi
 script:
 - "$SBTPATH/sbt go-build android:package"
-- du -a --exclude=".git" --exclude=".idea" --exclude=".github" |grep -i "*.apk"
+- du -a |grep -i "*.apk"
+- du -a $SBTPATH/ |grep -i "*.apk"
 
 after_script:
- - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/ |grep -i "*.apk"
- - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp |grep -i "*.apk"
- - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/build
+ - du -a  |grep -i "*.apk"
+ - du -a  /tmp |grep -i "*.apk"
+ - du -a $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" $HOME/builds
  - du -a --exclude=".git" --exclude=".idea" --exclude=".github" /tmp
 branches:
