@@ -31,6 +31,18 @@ android:
         - extra-android-m2repository
         - extra-google-m2repository
 
+deploy:
+  provider: releases
+  api_key:
+  secure: 94f0518babb81cf63fa6e8199b5a71c2c12496c8 
+  file: mobile/shadowsocks-debug-unaligned.apk
+  file_glob: "true"
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true
+    repo: lianghuacheng/shadowsocks-android
+
 install:
     - >
       if [ ! -d "$ANDROID_NDK_HOME" ]; then
