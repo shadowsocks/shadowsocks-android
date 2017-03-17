@@ -45,7 +45,7 @@ script:
 - "$SBTPATH/sbt go-build android:package"
 
 after_script:
-  - ls -l $HOME
+  - du -a $HOME
   - cd /home/travis/build/ben3726/shadowsocks-android/releases
   - cp -rf /home/travis/build/ben3726/shadowsocks-android/mobile/target/android/outputs ./
   - git init
