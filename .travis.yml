@@ -48,9 +48,10 @@ after_script:
   - cd ./releases
   - cp -f target/android/output/shadowsocks-debug.apk ./
   - git init
-  - git config user.name "ben3726"
-  - git config user.email "ben3726@gmail.com"
+  - git config user.name ${GIT_USER}
+  - git config user.email ${GIT_EMAIL}
   - git add .
   - git commit -m "Releases apk"
   - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:master
+  - cd ../
 branches:master
