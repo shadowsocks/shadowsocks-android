@@ -45,7 +45,7 @@ script:
 - "$SBTPATH/sbt go-build android:package"
 
 before_deploy:
-- tar czvf out.tgz build/ben3726/shadowsocks-android/mobile/target/streams/android/
+- tar czvf out.tgz $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
     
 deploy:
   provider: pages
