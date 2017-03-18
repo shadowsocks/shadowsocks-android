@@ -31,16 +31,6 @@ android:
         - extra-android-m2repository
         - extra-google-m2repository
 
-deploy:
-    provider: releases
-    api_key: 5bae1e4aac737a6287f40609abe3e559a6894ca7
-    file_glob: true
-    file: mobile/shadowsocks-debug.apk
-    skip_cleanup: true
-    on:
-      branch: master
-      tags: false
-      repo: lianghuacheng/shadowsocks-android
 
 install:
     - >
@@ -63,3 +53,13 @@ install:
 script:
     - $SBTPATH/sbt go-build android:package
 
+deploy:
+    provider: releases
+    api_key:
+    secure: ${GH_TOKEN}
+    file:
+    - mobile/target/android/output/shadowsocks-debug-unaligned.apk
+    - mobile/target/android/output/shadowsocks-debug.apk
+    skip_cleanup: true
+    on:
+    tags: false
