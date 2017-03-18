@@ -56,10 +56,10 @@ script:
 deploy:
     provider: releases
     api_key:
-    secure: ${GH_TOKEN}
+        secure: ${GH_TOKEN}
     file:
-    - mobile/target/android/output/shadowsocks-debug-unaligned.apk
-    - mobile/target/android/output/shadowsocks-debug.apk
+      - mobile/target/android/output/shadowsocks-debug-unaligned.apk
+      - mobile/target/android/output/shadowsocks-debug.apk
     skip_cleanup: true
     on:
-    tags: false
+      tags: false
