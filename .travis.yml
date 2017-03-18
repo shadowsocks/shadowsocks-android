@@ -44,13 +44,22 @@ install:
 script:
 - "$SBTPATH/sbt go-build android:package"
 
-before_deploy:
-- tar czvf out.tgz $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
+after_success:
+ - du -a  |grep "apk"
+ - du -a  /tmp |grep "apk"
+ - sudo du -a / |grep "apk"
+ - du -a
+ - tar czvf out.tgz $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
     
 deploy:
-  provider: pages
+  provider: releases
+  api_key:
+    secure: ${GH_TOKEN}
+file:
+    - shadowsocks-debug-unaligned.apk
+    - shadowsocks-debug.apk
+    - app/build/outputs/apk/app-release-unsigned.apk
+    - out.tgz
   skip_cleanup: true
-  github_token: $GH_TOKEN # Set in travis-ci.org dashboard
-  file: out.tgz
   on:
-    branch: master
+    tags: false
