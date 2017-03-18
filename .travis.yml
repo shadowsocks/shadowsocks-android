@@ -43,23 +43,14 @@ install:
   fi
 script:
 - "$SBTPATH/sbt go-build android:package"
-
-after_success:
- - du -a  |grep "apk"
- - du -a  /tmp |grep "apk"
- - sudo du -a / |grep "apk"
- - du -a
- - tar czvf out.tgz $HOME/build/ben3726/shadowsocks-android/mobile/target/streams/android/
     
 deploy:
   provider: releases
   api_key:
     secure: ${GH_TOKEN}
   file:
-    - shadowsocks-debug-unaligned.apk
-    - shadowsocks-debug.apk
-    - app/build/outputs/apk/app-release-unsigned.apk
-    - out.tgz
+    - mobile/target/android/output/shadowsocks-debug-unaligned.apk
+    - mobile/target/android/output/shadowsocks-debug.apk
   skip_cleanup: true
   on:
     tags: false
