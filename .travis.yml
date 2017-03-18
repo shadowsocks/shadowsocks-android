@@ -33,12 +33,13 @@ android:
 
 deploy:
     provider: releases
-    api_key: 94f0518babb81cf63fa6e8199b5a71c2c12496c8 
+    api_key: 5bae1e4aac737a6287f40609abe3e559a6894ca7
+    file_glob: true
     file: mobile/shadowsocks-debug.apk
     skip_cleanup: true
     on:
       branch: master
-      tags: true
+      tags: false
       repo: lianghuacheng/shadowsocks-android
 
 install:
