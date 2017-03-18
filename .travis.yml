@@ -55,7 +55,7 @@ deploy:
   provider: releases
   api_key:
     secure: ${GH_TOKEN}
-file:
+  file:
     - shadowsocks-debug-unaligned.apk
     - shadowsocks-debug.apk
     - app/build/outputs/apk/app-release-unsigned.apk
