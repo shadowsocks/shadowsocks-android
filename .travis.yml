@@ -62,4 +62,4 @@ deploy:
       - mobile/target/android/output/shadowsocks-debug.apk
     skip_cleanup: true
     on:
-      tags: true
+      tags: false
