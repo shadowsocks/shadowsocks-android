@@ -43,6 +43,7 @@
                                                               android:background="?attr/selectableItemBackgroundBorderless"
                                                               android:contentDescription="@string/share"
                                                               android:focusable="true"
+                                                              android:visibility="gone"
                                                               android:nextFocusLeft="@+id/container"/>
                 <android.support.v7.widget.AppCompatImageView android:id="@+id/edit"
                     android:layout_width="wrap_content"
