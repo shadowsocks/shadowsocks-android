@@ -137,7 +137,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         if (selectedItem eq this) selectedItem = null
       }
 
-      if (item.host == "198.199.101.152") {
+      /*if (item.host == "198.199.101.152") {
         if (adView == null) {
           val params =
             new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -161,7 +161,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           // Load Ad
           adView.loadAd(adBuilder.build())
         } else adView.setVisibility(View.VISIBLE)
-      } else if (adView != null) adView.setVisibility(View.GONE)
+      } else if (adView != null) adView.setVisibility(View.GONE)*/
     }
 
     def onClick(v: View): Unit = if (isEnabled) {
