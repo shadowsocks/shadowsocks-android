@@ -25,7 +25,7 @@
           android:title="@string/action_export"
           android:alphabeticShortcut="e"
           android:numericShortcut="1"
-          android:visibility="gone"
+          android:visible="false"
           android:icon="@drawable/ic_content_copy"
           app:showAsAction="always"/>
 </menu>
