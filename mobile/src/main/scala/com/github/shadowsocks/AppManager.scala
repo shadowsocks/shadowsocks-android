@@ -37,6 +37,7 @@ import android.widget._
 import com.futuremind.recyclerviewfastscroll.{FastScroller, SectionTitleProvider}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.{Key, Utils}
+import android.util.Log
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -45,6 +46,7 @@ import scala.language.implicitConversions
 object AppManager {
   case class ProxiedApp(name: String, packageName: String, icon: Drawable)
   private case class ListEntry(switch: Switch, text: TextView, icon: ImageView)
+  private final val TAG = "AppManager"
 
   private var instance: AppManager = _
 
@@ -147,8 +149,11 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
         return true
       case R.id.action_export =>
         val bypass = app.settings.getBoolean(Key.bypass, false)
+        Log.i(TAG, "bypass:"+bypass)
         val proxiedAppString = app.settings.getString(Key.individual, null)
+        Log.i(TAG, "proxiedAppString:"+proxiedAppString)
         val clip = ClipData.newPlainText(Key.individual, bypass + "\n" + proxiedAppString)
+        Log.i(TAG, "clip:"+clip)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
         return true
