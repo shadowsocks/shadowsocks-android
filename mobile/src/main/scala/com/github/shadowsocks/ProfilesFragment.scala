@@ -367,7 +367,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       true
     case R.id.action_import =>
       val uri: Uri = Uri.parse("content://com.ape.apetrialfeedback.FeedbackContentProvider/user_info")
-      val cursor: Cursor = getContentResolver.query(uri, null, null, null, null)
+      val cursor: Cursor = getActivity.getContentResolver.query(uri, null, null, null, null)
       var user_id: String = null
 
       if (cursor != null) {
