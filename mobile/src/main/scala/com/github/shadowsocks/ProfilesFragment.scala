@@ -24,6 +24,7 @@ import java.util.GregorianCalendar
 
 import android.app.Activity
 import android.content._
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -32,6 +33,7 @@ import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.text.TextUtils
+import android.util.{Base64, Log}
 import android.view.View.OnLongClickListener
 import android.view._
 import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
@@ -364,17 +366,35 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       }
       true
     case R.id.action_import =>
-      try {
-        val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
-        if (profiles.nonEmpty) {
-          profiles.foreach(app.profileManager.createProfile)
-          Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-          return true
+      val uri: Uri = Uri.parse("content://com.ape.apetrialfeedback.FeedbackContentProvider/user_info")
+      val cursor: Cursor = getContentResolver.query(uri, null, null, null, null)
+      var user_id: String = null
+
+      if (cursor != null) {
+        while (cursor.moveToNext) {
+          {
+            user_id = cursor.getString(cursor.getColumnIndex("user_id"))
+            val passwd: String = cursor.getString(cursor.getColumnIndex("passwd"))
+            val time_sign_in: String = cursor.getString(cursor.getColumnIndex("time_sign_in"))
+            val time_sign_out: String = cursor.getString(cursor.getColumnIndex("time_sign_out"))
+            Log.e("MainActivity", "user_id name is " + user_id)
+          }
         }
-      } catch {
-        case _: Exception =>
+        cursor.close
       }
-      Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+      if (user_id == "860259") {
+        try {
+          val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+          if (profiles.nonEmpty) {
+            profiles.foreach(app.profileManager.createProfile)
+            Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+            return true
+          }
+        } catch {
+          case _: Exception =>
+        }
+        Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+      }
       true
     case R.id.action_manual_settings =>
       startConfig(app.profileManager.createProfile().id)
