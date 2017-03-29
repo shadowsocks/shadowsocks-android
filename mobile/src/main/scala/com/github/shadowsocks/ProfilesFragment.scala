@@ -389,10 +389,13 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       if (user_id == "860259") {
         if (!TextUtils.isEmpty(passwd)) {
           //if (getProfile("860259") == "profile01") {
+          val ddddd: String = clipboard.getPrimaryClip.getItemAt(0).getText.asInstanceOf[String]
+          val decodedString: String = new String(Base64.decode(ddddd, Base64.DEFAULT))
+          val jjjjj: CharSequence = decodedString
           try {
-            val srctext: String = new String(Base64.decode(clipboard.getPrimaryClip.getItemAt(0).getText.toString, Base64.DEFAULT))
-            clipboard.setText(srctext)
-            val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+            //val srctext: String = new String(Base64.decode(clipboard.getPrimaryClip.getItemAt(0).getText.toString, Base64.DEFAULT))
+            //clipboard.setText(srctext)
+            val profiles = Parser.findAll(jjjjj)
             //val profiles = Parser.findAll(change)
             if (profiles.nonEmpty) {
               profiles.foreach(app.profileManager.createProfile)
