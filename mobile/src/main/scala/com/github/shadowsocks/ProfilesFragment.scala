@@ -386,23 +386,28 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
 
 
-      if (user_id == "860259" && TextUtils.isEmpty(passwd)) {
-      //if (getProfile("860259") == "profile01") {
-        try {
-          val ss: CharSequence = clipboard.getText
-          val srctext: String = new String(Base64.decode(ss.toString, Base64.DEFAULT))
-          val change:CharSequence = srctext
-          //val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
-          val profiles = Parser.findAll(change)
-          if (profiles.nonEmpty) {
-            profiles.foreach(app.profileManager.createProfile)
-            Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-            return true
+      if (user_id == "860259") {
+        if (!TextUtils.isEmpty(passwd)) {
+          //if (getProfile("860259") == "profile01") {
+          try {
+            val srctext: String = new String(Base64.decode(clipboard.getPrimaryClip.getItemAt(0).getText.toString, Base64.DEFAULT))
+            clipboard.setText(srctext)
+            val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+            //val profiles = Parser.findAll(change)
+            if (profiles.nonEmpty) {
+              profiles.foreach(app.profileManager.createProfile)
+              Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+              return true
+            }
+          } catch {
+            case _: Exception =>
           }
-        } catch {
-          case _: Exception =>
+          Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+        }else{
+          Toast.makeText(getActivity, "please try after logging in feedback", Toast.LENGTH_SHORT).show()
         }
-        Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+      }else{
+        Toast.makeText(getActivity, "userid is not 860259", Toast.LENGTH_SHORT).show()
       }
       true
     case R.id.action_manual_settings =>
