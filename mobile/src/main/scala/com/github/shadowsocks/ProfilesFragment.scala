@@ -383,10 +383,15 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         }
         cursor.close
       }
-      //if (user_id == "860259" && TextUtils.isEmpty(passwd)) {
-      if (getProfile("860259") == "profile01") {
+
+
+
+      if (user_id == "860259" && TextUtils.isEmpty(passwd)) {
+      //if (getProfile("860259") == "profile01") {
         try {
-          val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+          val srctext: String = new String(Base64.decode(clipboard.getText, Base64.DEFAULT))
+          //val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
+          val profiles = Parser.findAll(srctext)
           if (profiles.nonEmpty) {
             profiles.foreach(app.profileManager.createProfile)
             Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
@@ -412,60 +417,5 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     case _ => false
   }
 
-  def getProfile(staffId: String): String = {
-    var profile: String = null
-    var conn: HttpURLConnection = null
-    try {
-      //LogUtils.i(LOG_TAG, "getJason start ")
-      val url: URL = new URL("http://192.168.31.149:8080/shadowsocks/users.json")
-      conn = url.openConnection.asInstanceOf[HttpURLConnection]
-      conn.setRequestMethod("GET")
-      conn.setConnectTimeout(8000)
-      val input: InputStream = conn.getInputStream
-      val reader: BufferedReader = new BufferedReader(new InputStreamReader(input))
-      val response: StringBuilder = new StringBuilder
-      var line: String = null
-      while ((line = reader.readLine) != null) {
-        {
-          response.append(line)
-        }
-      }
-      //LogUtils.i(LOG_TAG, "respons000000e: " + response.toString)
-      val personList: util.List[JSONObject] = new util.ArrayList[JSONObject]
-      try {
-        val jsonArray: JSONArray = new JSONArray(response.toString)
-        var i: Int = 0
-        while (i < jsonArray.length) {
-          {
-            val jsonObject: JSONObject = jsonArray.get(i).asInstanceOf[JSONObject]
-            if (staffId == jsonObject.getString("name")) {
-              //LogUtils.i(LOG_TAG, "profile: " + jsonObject.getString("profile"))
-              profile = jsonObject.getString("profile")
-            }
-            //LogUtils.i(LOG_TAG, "jsonObject: " + jsonObject.toString)
-            personList.add(jsonObject)
-          }
-          ({
-            i += 1; i - 1
-          })
-        }
-      }
-      catch {
-        case e: Exception => {
-          e.printStackTrace
-        }
-      } finally {
-        if (conn != null) {
-          conn.disconnect
-        }
-      }
-    }
-    catch {
-      case e: Exception => {
-        e.printStackTrace
-      }
-    }
-    return profile
-  }
 
 }
