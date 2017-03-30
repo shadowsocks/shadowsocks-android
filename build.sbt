@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.11.9",
   dexMaxHeap := "4g",
 
   organization := "com.github.shadowsocks",
