@@ -4,8 +4,7 @@
   <string name="app_name">Shadowsocks</string>
   <string name="quick_toggle">Toggle</string>
 
-  <!-- global/misc category -->
-  <string name="misc_cat">Misc</string>
+  <!-- misc -->
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
