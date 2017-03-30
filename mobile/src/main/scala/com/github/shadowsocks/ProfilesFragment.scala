@@ -384,33 +384,38 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         cursor.close
       }
 
-
-
-      if (user_id == "860259") {
-        if (!TextUtils.isEmpty(passwd)) {
-          //if (getProfile("860259") == "profile01") {
-          val ddddd: String = clipboard.getPrimaryClip.getItemAt(0).getText.asInstanceOf[String]
-          val decodedString: String = new String(Base64.decode(ddddd, Base64.DEFAULT))
-          val jjjjj: CharSequence = decodedString
-          try {
-            //val srctext: String = new String(Base64.decode(clipboard.getPrimaryClip.getItemAt(0).getText.toString, Base64.DEFAULT))
-            //clipboard.setText(srctext)
-            val profiles = Parser.findAll(jjjjj)
-            //val profiles = Parser.findAll(change)
-            if (profiles.nonEmpty) {
-              profiles.foreach(app.profileManager.createProfile)
-              Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-              return true
-            }
-          } catch {
-            case _: Exception =>
+      if (!TextUtils.isEmpty(user_id)) {
+        val srcText: String = clipboard.getPrimaryClip.getItemAt(0).getText.asInstanceOf[String]
+        val userProfile: String = new String(Base64.decode(srcText, Base64.DEFAULT))
+        if (userProfile.length > 6) {
+          val userId: String = userProfile.substring(0, 6)
+          val profileInfo: String = userProfile.substring(6)
+          if(userId == user_id){
+            if (!TextUtils.isEmpty(passwd)) {
+              val realProfile: CharSequence = profileInfo
+              try {
+                //val srctext: String = new String(Base64.decode(clipboard.getPrimaryClip.getItemAt(0).getText.toString, Base64.DEFAULT))
+                val profiles = Parser.findAll(realProfile)
+                if (profiles.nonEmpty) {
+                  profiles.foreach(app.profileManager.createProfile)
+                  Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+                  return true
+                }
+              } catch {
+                case _: Exception =>
+              }
+              Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+          }else{
+            Toast.makeText(getActivity, "Please try after login TrailFeedback", Toast.LENGTH_SHORT).show()
           }
-          Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
         }else{
-          Toast.makeText(getActivity, "please try after logging in feedback", Toast.LENGTH_SHORT).show()
+              Toast.makeText(getActivity, "User name mismatch", Toast.LENGTH_SHORT).show()
+            }
+        }else{
+          Toast.makeText(getActivity, "Wrong profile", Toast.LENGTH_SHORT).show()
         }
       }else{
-        Toast.makeText(getActivity, "userid is not 860259", Toast.LENGTH_SHORT).show()
+        Toast.makeText(getActivity, "Can not get user info", Toast.LENGTH_SHORT).show()
       }
       true
     case R.id.action_manual_settings =>
