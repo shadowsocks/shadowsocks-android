@@ -199,6 +199,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_GLOBAL_SETTINGS)
           .withName(R.string.settings)
+          .withEnabled(false)
           .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_settings))
           .withIconTintingEnabled(true)
       )
