@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="quick_toggle">"Подключение"</string>
+
+<!-- global/misc category -->
+<string name="misc_cat">"Разное"</string>
+<string name="profile">"Профиль"</string>
+<string name="profile_summary">"Переключить на другой профиль или добавить новые"</string>
+<string name="nat">"Режим NAT (не рекомендуется)"</string>
+<string name="nat_summary">"Использовать режим NAT вместо VPN. Требует ROOT прав."</string>
+<string name="stat_summary">"Отправлено: \t\t\t\t\t%3$s\t↑\t%1$s/s
+Получено: \t%4$s\t↓\t%2$s/s"</string>
+<string name="stat_profiles">"
+%1$s↑\t%2$s↓"</string>
+<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
+<string name="connection_test_pending">"Проверить подключение"</string>
+<string name="connection_test_testing">"Проверка…"</string>
+<string name="connection_test_available">"Успешно: %dms задержка"</string>
+<string name="connection_test_error">"Сбой проверки интернет подключения: %s"</string>
+<string name="connection_test_fail">"Интернет Недоступен"</string>
+<string name="connection_test_error_status_code">"Код ошибки: #%d"</string>
+
+<!-- proxy category -->
+<string name="profile_name">"Имя Профиля"</string>
+<string name="proxy">"Сервер"</string>
+<string name="remote_port">"Удалённый порт"</string>
+<string name="port">"Локальный порт"</string>
+<string name="sitekey">"Пароль"</string>
+<string name="enc_method">"Метод Шифрования"</string>
+
+<!-- feature category -->
+<string name="ipv6">"IPv6 Маршрут"</string>
+<string name="ipv6_summary">"Перенаправлять IPv6 траффик на удалённый сервер"</string>
+<string name="route_list">"Маршрут"</string>
+<string name="route_entry_gfwlist">"Список GFW"</string>
+<string name="proxied_apps">"Прокси для выбранных приложений"</string>
+<string name="proxied_apps_summary">"Установить прокси для выбранных приложений, требует режим NAT под Android 4.x"</string>
+<string name="on">"Вкл"</string>
+<string name="bypass_apps">"В обход прокси"</string>
+<string name="bypass_apps_summary">"Включите эту опцию для работы выбранных приложений в обход прокси"</string>
+<string name="auto_connect">"Авто Подключение"</string>
+<string name="auto_connect_summary">"Запускать Shadowsocks при включении"</string>
+<string name="tcp_fastopen_summary">"Переключение требует наличия ROOT прав"</string>
+<string name="tcp_fastopen_summary_unsupported">"Неподдерживаемая версия ядра: %s &lt; 3.7.1"</string>
+<string name="udp_dns">"Проброс DNS"</string>
+<string name="udp_dns_summary">"Пробрасывать DNS пакеты на удалённый сервер"</string>
+
+<!-- notification category -->
+<string name="forward_success">"Shadowsocks запущен."</string>
+<string name="invalid_server">"Неправильное имя сервера"</string>
+<string name="service_failed">"Ошибка при подключении к удалённому серверу"</string>
+<string name="nat_deprecated">"ВНИМАНИЕ:режим NAT не работает в Android 5.0"</string>
+<string name="nat_no_root">"Режим NAT требует наличия ROOT прав"</string>
+<string name="switch_to_vpn">"Переключить на режим VPN"</string>
+<string name="stop">"Остановить"</string>
+<string name="stopping">"Останавливается…"</string>
+<string name="reboot_required">"Сбой запуска VPN сервиса. Требуется перезагрузка Вашего устройства."</string>
+
+<!-- alert category -->
+<string name="close">"Закрыть"</string>
+<string name="proxy_empty">"Прокси/Пароль не должны быть пустыми"</string>
+<string name="connect">"Подключить"</string>
+<string name="recovering">"Сброс…"</string>
+<string name="remove_profile">"Удалить этот профиль %s?"</string>
+
+<!-- menu category -->
+<string name="profiles">"Профили"</string>
+<string name="settings">"Настройки"</string>
+<string name="recovery">"Сброс"</string>
+<string name="about">"О приложении"</string>
+<string name="about_title">"Shadowsocks %s"</string>
+<string name="share">"Поделиться"</string>
+<string name="add_profile">"Добавить Профиль"</string>
+<string name="action_apply_all">"Применить настройки для всех профилей"</string>
+<string name="action_export">"Экспортировать в буфер обмена"</string>
+<string name="action_import">"Импортировать из буфера обмена"</string>
+<string name="action_export_msg">"Успешный экспорт!"</string>
+<string name="action_export_err">"Сбой экспорта."</string>
+<string name="action_import_msg">"Успешный импорт!"</string>
+<string name="action_import_err">"Сбой импорта."</string>
+<string name="add_profile_dialog">"Добавить этот Профиль Shadowsocks?"</string>
+<string name="add_profile_methods_scan_qr_code">"Сканировать QR код"</string>
+<string name="add_profile_methods_manual_settings">"Настройка вручную"</string>
+<plurals name="removed">
+<item quantity="one">"Удалён"</item>
+<item quantity="few">"%d элементы удалены"</item>
+<item quantity="many">"%d элементы удалены"</item>
+<item quantity="other">"%d элементы удалены"</item>
+</plurals>
+<string name="undo">"Вернуть"</string>
+
+<!-- tasker -->
+<string name="toggle_service_state">"Запустить сервисStart the service"</string>
+<string name="start_service_default">"Подключиться к текущему серверу"</string>
+<string name="start_service">"Подключиться к %s"</string>
+<string name="stop_service">"Переключить на %s"</string>
+<string name="profile_default">"Использовать текущий профиль"</string>
+
+<!-- status -->
+<string name="sent">"Отправлено:"</string>
+<string name="received">"Получено:"</string>
+<string name="route_entry_all">"Все"</string>
+<string name="route_entry_bypass_lan">"Обход LAN"</string>
+<string name="route_entry_bypass_chn">"Обходной Китай"</string>
+<string name="route_entry_bypass_lan_chn">"Обход LAN и Китай"</string>
+<string name="route_entry_chinalist">"Список Китай"</string>
+<string name="proxied_apps_summary_v21">"Установить прокси для выбранных приложений"</string>
+</resources>

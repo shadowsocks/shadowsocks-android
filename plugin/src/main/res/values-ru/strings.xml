@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- proxy category -->
+<string name="proxy_cat">"Настройки Сервера"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"Дополнительные Настройки"</string>
+</resources>
