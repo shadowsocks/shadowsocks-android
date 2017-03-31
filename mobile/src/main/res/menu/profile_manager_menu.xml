@@ -9,6 +9,7 @@
         <menu>
             <item android:id="@+id/action_scan_qr_code"
                   android:title="@string/add_profile_methods_scan_qr_code"
+                  android:visible="false"
                   android:alphabeticShortcut="s"
                   android:numericShortcut="1"/>
             <item android:id="@+id/action_import"
