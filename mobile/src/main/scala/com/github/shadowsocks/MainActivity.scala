@@ -216,8 +216,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withIconTintingEnabled(true)
           .withSelectable(false),*/
         new PrimaryDrawerItem()
-          .withIdentifier(DRAWER_ABOUT)
-          .withName(R.string.about)
+          //.withIdentifier(DRAWER_ABOUT)
+          //.withName(R.string.about)
+          .withName(getString(R.string.about_title).formatLocal(Locale.ENGLISH, "4.1.3.1"))
           .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_copyright))
           .withIconTintingEnabled(true)
       )
@@ -380,8 +381,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         }
       case DRAWER_GLOBAL_SETTINGS => displayFragment(new GlobalSettingsFragment)
       case DRAWER_ABOUT =>
-        app.track(TAG, "about")
-        displayFragment(new AboutFragment)
+        //app.track(TAG, "about")
+        //displayFragment(new AboutFragment)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
       case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
     }
