@@ -216,7 +216,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withIconTintingEnabled(true)
           .withSelectable(false),*/
         new PrimaryDrawerItem()
-          //.withIdentifier(DRAWER_ABOUT)
+          .withIdentifier(DRAWER_ABOUT)
           //.withName(R.string.about)
           .withName(getString(R.string.about_title).formatLocal(Locale.ENGLISH, "4.1.3.1"))
           .withEnabled(false)
