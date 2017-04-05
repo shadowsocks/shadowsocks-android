@@ -381,9 +381,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           handler.sendEmptyMessage(0)
         }
       case DRAWER_GLOBAL_SETTINGS => displayFragment(new GlobalSettingsFragment)
-      //case DRAWER_ABOUT =>
-        //app.track(TAG, "about")
-        //displayFragment(new AboutFragment)
+      case DRAWER_ABOUT =>
+        app.track(TAG, "about")
+        displayFragment(new AboutFragment)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
       case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
     }
