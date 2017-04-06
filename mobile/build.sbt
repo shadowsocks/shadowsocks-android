@@ -24,14 +24,14 @@ libraryDependencies ++=
   "com.google.android.gms" % "play-services-gcm" % playServicesVersion ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
   "com.mikepenz" % "crossfader" % "1.5.0" ::
-  "com.mikepenz" % "fastadapter" % "2.1.7" ::
+  "com.mikepenz" % "fastadapter" % "2.5.0" ::
   "com.mikepenz" % "iconics-core" % "2.8.2" ::
-  "com.mikepenz" % "materialdrawer" % "5.8.2" ::
+  "com.mikepenz" % "materialdrawer" % "5.9.0" ::
   "com.mikepenz" % "materialize" % "1.0.1" ::
   "com.squareup.okhttp3" % "okhttp" % "3.6.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.8" ::
-  "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809" ::
+  "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 
