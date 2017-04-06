@@ -35,7 +35,7 @@ libraryDependencies ++=
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 
-lazy val goBuild = TaskKey[Unit]("go-build", "Build go and kcptun")
+lazy val goBuild = TaskKey[Unit]("go-build", "Build go and overture")
 goBuild := {
   Process(Seq("mobile/src/overture/make.bash", minSdkVersion.value)) ! streams.value.log match {
     case 0 => // Success!
