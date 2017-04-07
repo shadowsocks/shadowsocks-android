@@ -138,7 +138,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
       AclSyncJob.schedule(profile.route)
 
-    notification = new ShadowsocksNotification(this, profile.getName)
+    notification = new ShadowsocksNotification(this, profile.name)
   }
 
   /** Called when the activity is first created. */

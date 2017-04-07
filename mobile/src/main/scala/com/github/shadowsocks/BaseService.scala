@@ -124,6 +124,7 @@ trait BaseService extends Service {
   } else true
 
   def connect() {
+    profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
     if (profile.host == "198.199.101.152") {
       val holder = app.containerHolder
       val container = holder.getContainer
