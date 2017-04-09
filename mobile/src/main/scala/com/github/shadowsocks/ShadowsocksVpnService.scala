@@ -22,6 +22,8 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.util.Locale
+import java.net.InetAddress
+import java.net.Inet6Address
 
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
@@ -189,7 +191,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 
-    builder.addDnsServer(profile.remoteDns.trim)
+    builder.addDnsServer("8.8.8.8") // It's fake DNS for tun2socks, not the real remote DNS
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
@@ -221,7 +223,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
-      builder.addRoute(profile.remoteDns.trim, 32)
+      val addr = InetAddress.getByName(profile.remoteDns.trim)
+      if (addr.isInstanceOf[Inet6Address])
+        builder.addRoute(addr, 128)
+      else if (addr.isInstanceOf[InetAddress])
+        builder.addRoute(addr, 32)
     }
 
     conn = builder.establish()
