@@ -33,3 +33,9 @@
 [submodule "mobile/src/main/jni/libudns"]
 	path = mobile/src/main/jni/libudns
 	url = https://github.com/shadowsocks/libudns.git
+[submodule "mobile/src/overture/go"]
+	path = mobile/src/overture/go
+	url = https://github.com/shadowsocks/go.git
+[submodule "mobile/src/overture/src/github.com/shadowsocks/overture"]
+	path = mobile/src/overture/src/github.com/shadowsocks/overture
+	url = https://github.com/shadowsocks/overture.git
