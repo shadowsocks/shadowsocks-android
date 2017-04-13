@@ -4,8 +4,7 @@
   <string name="app_name">Shadowsocks</string>
   <string name="quick_toggle">Toggle</string>
 
-  <!-- global/misc category -->
-  <string name="misc_cat">Misc</string>
+  <!-- misc -->
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
@@ -54,7 +53,7 @@
   <string name="tcp_fastopen_summary">Toggling requires ROOT permission</string>
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="udp_dns">DNS Forwarding</string>
-  <string name="udp_dns_summary">Force to forward DNS packets to remote</string>
+  <string name="udp_dns_summary">Forward all DNS requests to remote</string>
 
   <!-- notification category -->
   <string name="forward_success">Shadowsocks started.</string>

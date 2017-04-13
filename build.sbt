@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  scalaVersion := "2.11.8",
+  scalaVersion := "2.11.9",
   dexMaxHeap := "4g",
 
   organization := "com.github.shadowsocks",
@@ -11,7 +11,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= "-target:jvm-1.7" :: "-Xexperimental" :: Nil,
   ndkArgs := "-j" :: java.lang.Runtime.getRuntime.availableProcessors.toString :: Nil,
 
-  proguardVersion := "5.3.2",
+  proguardVersion := "5.3.3",
   proguardCache := Seq(),
 
   shrinkResources := true,
