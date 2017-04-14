@@ -21,7 +21,6 @@
 package com.github.shadowsocks
 
 import java.io.{File, IOException}
-import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
@@ -332,11 +331,15 @@ trait BaseService extends Service {
     file
   }
 
-  private final def buildRemoteDns(remoteDns: String): String = {
-    val addr = InetAddress.getByName(remoteDns)
+  private final def buildRemoteDns(remoteDns: String, i: Int): String = {
+    val dnsArray = remoteDns.split(",")
+    if (dnsArray.length <= i)
+      return null
+    val remoteDnsSelected = dnsArray(i).trim
+    val addr = InetAddress.getByName(remoteDnsSelected)
     if (addr.isInstanceOf[Inet6Address])
       return "[" + remoteDns + "]"
-    remoteDns
+    remoteDnsSelected
   }
 
   protected final def buildOvertureConfig(file: String): String = {
@@ -366,17 +369,20 @@ trait BaseService extends Service {
           makeDns("Primary-2", "114.114.114.114", edns = false)
         )))
         .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
-          buildRemoteDns(profile.remoteDns.trim))))
+          buildRemoteDns(profile.remoteDns.trim, 0))))
         .put("IPNetworkFile", "china_ip_list.txt")
         .put("DomainFile", "gfwlist.txt")
       case Acl.CHINALIST => config
         .put("PrimaryDNS", new JSONArray().put(makeDns("Primary", "119.29.29.29")))
         .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
-          buildRemoteDns(profile.remoteDns.trim))))
+          buildRemoteDns(profile.remoteDns.trim, 0))))
       case _ => config
         .put("PrimaryDNS", new JSONArray().put(makeDns("Primary",
-          buildRemoteDns(profile.remoteDns.trim))))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative", "208.67.222.222")))
+          buildRemoteDns(profile.remoteDns.trim, 0))))
+        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
+          if(buildRemoteDns(profile.remoteDns.trim, 1) != null)
+            buildRemoteDns(profile.remoteDns.trim, 1)
+          else "208.67.222.222")))
     }
     IOUtils.writeString(new File(getFilesDir, file), config.toString)
     file
