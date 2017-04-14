@@ -223,11 +223,13 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
-      val addr = InetAddress.getByName(profile.remoteDns.trim)
-      if (addr.isInstanceOf[Inet6Address])
-        builder.addRoute(addr, 128)
-      else if (addr.isInstanceOf[InetAddress])
-        builder.addRoute(addr, 32)
+      profile.remoteDns.split(",").foreach(remoteDns => {
+        val addr = InetAddress.getByName(remoteDns.trim)
+        if (addr.isInstanceOf[Inet6Address])
+          builder.addRoute(addr, 128)
+        else if (addr.isInstanceOf[InetAddress])
+          builder.addRoute(addr, 32)
+      })
     }
 
     conn = builder.establish()
