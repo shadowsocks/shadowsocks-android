@@ -382,7 +382,6 @@ trait BaseService extends Service {
             yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
         )))
         // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
-        // .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative", "208.67.222.222")))
         .put("OnlyPrimaryDNS", true)
     }
     IOUtils.writeString(new File(getFilesDir, file), config.toString)
