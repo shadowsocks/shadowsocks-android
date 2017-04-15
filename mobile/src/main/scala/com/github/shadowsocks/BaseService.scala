@@ -21,7 +21,6 @@
 package com.github.shadowsocks
 
 import java.io.{File, IOException}
-import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
@@ -365,18 +364,25 @@ trait BaseService extends Service {
           makeDns("Primary-1", "119.29.29.29", edns = false),
           makeDns("Primary-2", "114.114.114.114", edns = false)
         )))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
-          buildRemoteDns(profile.remoteDns.trim))))
+        .put("AlternativeDNS", new JSONArray(
+          for (remoteDns <- profile.remoteDns.split(","))
+            yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
+        )))
         .put("IPNetworkFile", "china_ip_list.txt")
         .put("DomainFile", "gfwlist.txt")
       case Acl.CHINALIST => config
         .put("PrimaryDNS", new JSONArray().put(makeDns("Primary", "119.29.29.29")))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
-          buildRemoteDns(profile.remoteDns.trim))))
+        .put("AlternativeDNS", new JSONArray(
+          for (remoteDns <- profile.remoteDns.split(","))
+            yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
+        )))
       case _ => config
-        .put("PrimaryDNS", new JSONArray().put(makeDns("Primary",
-          buildRemoteDns(profile.remoteDns.trim))))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative", "208.67.222.222")))
+        .put("PrimaryDNS", new JSONArray(
+          for (remoteDns <- profile.remoteDns.split(","))
+            yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
+        )))
+        // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
+        .put("OnlyPrimaryDNS", true)
     }
     IOUtils.writeString(new File(getFilesDir, file), config.toString)
     file
