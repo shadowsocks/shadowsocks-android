@@ -68,7 +68,7 @@ object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
 
   private final val TAG = "ShadowsocksApplication"
-  
+
   private val EXECUTABLES = Array(Executable.PDNSD, Executable.REDSOCKS, Executable.SS_TUNNEL, Executable.SS_LOCAL,
     Executable.TUN2SOCKS, Executable.KCPTUN)
 

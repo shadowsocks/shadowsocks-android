@@ -217,5 +217,5 @@ object Route {
   val BYPASS_LAN_CHN = "bypass-lan-china"
   val GFWLIST = "gfwlist"
   val CHINALIST = "china-list"
-  val ACL = "acl"
+  val ACL = "self"
 }
