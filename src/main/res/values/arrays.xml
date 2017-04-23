@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="enc_method_entry">
+        <item>none</item>
         <item>table</item>
         <item>rc4</item>
         <item>rc4-md5</item>
@@ -21,6 +22,7 @@
     </string-array>
 
     <string-array name="enc_method_value">
+        <item>none</item>
         <item>table</item>
         <item>rc4</item>
         <item>rc4-md5</item>
