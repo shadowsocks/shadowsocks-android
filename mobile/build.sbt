@@ -1,4 +1,6 @@
 enablePlugins(AndroidApp)
+enablePlugins(AndroidGms)
+
 android.useSupportVectors
 
 name := "shadowsocks"
@@ -19,6 +21,8 @@ libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
   "com.evernote" % "android-job" % "1.1.9" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
+  "com.google.firebase" % "firebase-core" % playServicesVersion ::
+  "com.google.firebase" % "firebase-config" % playServicesVersion ::
   "com.google.android.gms" % "play-services-ads" % playServicesVersion ::
   "com.google.android.gms" % "play-services-analytics" % playServicesVersion ::
   "com.google.android.gms" % "play-services-gcm" % playServicesVersion ::

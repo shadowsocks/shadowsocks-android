@@ -127,9 +127,8 @@ trait BaseService extends Service {
   def connect() {
     profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
     if (profile.host == "198.199.101.152") {
-      val holder = app.containerHolder
-      val container = holder.getContainer
-      val url = container.getString("proxy_url")
+      val config = app.remoteConfig
+      val url = config.getString("proxy_url")
       val sig = Utils.getSignature(this)
 
       val client = new OkHttpClient.Builder()
@@ -276,7 +275,7 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    app.refreshContainerHolder()
+    app.remoteConfig.fetch()
     app.updateAssets()
   }
 
@@ -301,23 +300,12 @@ trait BaseService extends Service {
     }
   }
 
-  def getBlackList: String = {
-    val default = getString(R.string.black_list)
-    try {
-      val container = app.containerHolder.getContainer
-      val update = container.getString("black_list_lite")
-      val list = if (update == null || update.isEmpty) default else update
-      "exclude = " + list + ";"
-    } catch {
-      case _: Exception => "exclude = " + default + ";"
-    }
-  }
-
   protected def buildPluginCommandLine(): ArrayBuffer[String] = {
     val result = ArrayBuffer(pluginPath)
     if (TcpFastOpen.sendEnabled) result += "--fast-open"
     result
   }
+
   protected final def buildShadowsocksConfig(file: String): String = {
     val config = new JSONObject()
       .put("server", profile.host)

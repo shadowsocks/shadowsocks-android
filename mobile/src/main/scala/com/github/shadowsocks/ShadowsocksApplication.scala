@@ -38,9 +38,12 @@ import com.github.shadowsocks.acl.DonaldTrump
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser, Tracker}
 import com.google.android.gms.common.api.ResultCallback
-import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.FirebaseApp
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
@@ -61,8 +64,7 @@ object ShadowsocksApplication {
 class ShadowsocksApplication extends Application {
   import ShadowsocksApplication._
 
-  final val SIG_FUNC = "getSignature"
-  var containerHolder: ContainerHolder = _
+  lazy val remoteConfig = FirebaseRemoteConfig.getInstance()
   lazy val tracker: Tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
   lazy val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val editor: SharedPreferences.Editor = settings.edit
@@ -149,33 +151,21 @@ class ShadowsocksApplication extends Application {
     if (!BuildConfig.DEBUG) java.lang.System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     checkChineseLocale(getResources.getConfiguration)
-    val tm = TagManager.getInstance(this)
-    val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
-    val callback = new ResultCallback[ContainerHolder] {
-      override def onResult(holder: ContainerHolder) {
-        if (!holder.getStatus.isSuccess) {
-          return
-        }
-        containerHolder = holder
-        val container = holder.getContainer
-        container.registerFunctionCallMacroCallback(SIG_FUNC,
-          (functionName: String, parameters: util.Map[String, AnyRef]) => {
-            if (functionName == SIG_FUNC) {
-              Utils.getSignature(getApplicationContext)
-            }
-            null
-          })
-      }
-    }
-    pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
+
+    FirebaseApp.initializeApp(this)
+
+	remoteConfig.fetch(60)
+	  .addOnCompleteListener(new OnCompleteListener[Void]() {
+		def onComplete(task: Task[Void]) {
+		  if (task.isSuccessful()) {
+			remoteConfig.activateFetched()
+		  }
+		}
+	  })
+
     JobManager.create(this).addJobCreator(DonaldTrump)
 
     TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
-  }
-
-  def refreshContainerHolder() {
-    val holder = app.containerHolder
-    if (holder != null) holder.refresh()
   }
 
   def crashRecovery() {
