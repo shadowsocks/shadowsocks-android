@@ -80,7 +80,9 @@ object Utils {
   def resolve(host: String, addrType: Int): Option[String] = {
     try {
       val lookup = new Lookup(host, addrType)
-      val resolver = new SimpleResolver("114.114.114.114")
+      val resolver = new SimpleResolver("208.67.220.220")
+      resolver.setTCP(true)
+      resolver.setPort(443)
       resolver.setTimeout(5)
       lookup.setResolver(resolver)
       val result = lookup.run()
