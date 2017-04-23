@@ -372,6 +372,25 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         else null
       case _ => null
     }
+
+    if (TextUtils.isEmpty(sharedStr)) return
+    val profiles_normal = Parser.findAll(sharedStr).toList
+    val profiles_ssr = Parser.findAll_ssr(sharedStr).toList
+    val profiles = profiles_ssr ::: profiles_normal
+    if (profiles.isEmpty) {
+      finish()
+      return
+    }
+    val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+      .setTitle(R.string.add_profile_dialog)
+      .setPositiveButton(android.R.string.yes, ((_, _) =>
+        profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+      .setNeutralButton(R.string.dr, ((_, _) =>
+        profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+      .setMessage(profiles.mkString("\n"))
+      .create()
+    dialog.show()
   }
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
