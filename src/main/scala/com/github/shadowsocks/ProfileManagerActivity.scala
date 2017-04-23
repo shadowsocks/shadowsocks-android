@@ -19,6 +19,7 @@ import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
+import android.net.Uri
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -292,9 +293,18 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         app.switchProfile(profile.id)
         finish
       case R.id.fab_qrcode_add =>
-        menu.toggle(false)
-        val intent = new Intent(this, classOf[ScannerActivity])
-        startActivity(intent)
+        try {
+            menu.toggle(false)
+            val intent = new Intent("com.google.zxing.client.android.SCAN")
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
+
+            startActivityForResult(intent, 0);
+        } catch {
+            case _ : Throwable =>
+                val marketUri = Uri.parse("market://details?id=com.google.zxing.client.android")
+                val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
+                startActivity(marketIntent)
+        }
       case R.id.fab_nfc_add =>
         menu.toggle(true)
         val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
@@ -362,24 +372,35 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         else null
       case _ => null
     }
-    if (TextUtils.isEmpty(sharedStr)) return
-    val profiles_normal = Parser.findAll(sharedStr).toList
-    val profiles_ssr = Parser.findAll_ssr(sharedStr).toList
-    val profiles = profiles_ssr ::: profiles_normal
-    if (profiles.isEmpty) {
-      finish()
-      return
-    }
-    val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-      .setTitle(R.string.add_profile_dialog)
-      .setPositiveButton(android.R.string.yes, ((_, _) =>
-        profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
-      .setNeutralButton(R.string.dr, ((_, _) =>
-        profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
-      .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-      .setMessage(profiles.mkString("\n"))
-      .create()
-    dialog.show()
+  }
+
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+      if (requestCode == 0) {
+          if (resultCode == Activity.RESULT_OK) {
+              val contents = data.getStringExtra("SCAN_RESULT");
+              if (TextUtils.isEmpty(contents)) return
+              val profiles_normal = Parser.findAll(contents).toList
+              val profiles_ssr = Parser.findAll_ssr(contents).toList
+              val profiles = profiles_ssr ::: profiles_normal
+              if (profiles.isEmpty) {
+                finish()
+                return
+              }
+              val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+                .setTitle(R.string.add_profile_dialog)
+                .setPositiveButton(android.R.string.yes, ((_, _) =>
+                  profiles.foreach(app.profileManager.createProfile)): DialogInterface.OnClickListener)
+                .setNeutralButton(R.string.dr, ((_, _) =>
+                  profiles.foreach(app.profileManager.createProfile_dr)): DialogInterface.OnClickListener)
+                .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+                .setMessage(profiles.mkString("\n"))
+                .create()
+              dialog.show()
+          }
+          if(resultCode == Activity.RESULT_CANCELED){
+              //handle cancel
+          }
+      }
   }
 
   override def onStart() {
