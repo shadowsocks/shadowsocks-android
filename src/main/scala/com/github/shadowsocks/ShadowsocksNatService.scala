@@ -42,6 +42,7 @@ package com.github.shadowsocks
 import java.io.File
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
+import scala.io.Source
 
 import android.content._
 import android.os._
@@ -156,9 +157,28 @@ class ShadowsocksNatService extends BaseService {
 
     var china_dns_settings = ""
 
+    var remote_dns = false
+
+    if (profile.route == Route.ACL) {
+        //decide acl route
+        val total_lines = Source.fromFile(new File(getApplicationInfo.dataDir + '/' + profile.route + ".acl")).getLines()
+        total_lines.foreach((line: String) => {
+            if (line.equals("[remote_dns]")) {
+                remote_dns = true
+            }
+        })
+    }
+
     val black_list = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
         getBlackList
+      }
+      case Route.ACL => {
+        if (remote_dns) {
+            ""
+        } else {
+            getBlackList
+        }
       }
       case _ => {
         ""
@@ -178,6 +198,15 @@ class ShadowsocksNatService extends BaseService {
       case Route.CHINALIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
           "127.0.0.1", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
+      }
+      case Route.ACL => {
+        if (!remote_dns) {
+            ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
+              "127.0.0.1", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
+        } else {
+            ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
+              "127.0.0.1", profile.localPort + 53, profile.localPort + 63, reject)
+        }
       }
       case _ => {
         ConfigUtils.PDNSD_LOCAL.formatLocal(Locale.ENGLISH, "", getApplicationInfo.dataDir,
