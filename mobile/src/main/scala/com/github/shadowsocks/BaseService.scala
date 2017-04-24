@@ -315,13 +315,6 @@ trait BaseService extends Service {
     file
   }
 
-  private final def buildRemoteDns(remoteDns: String): String = {
-    val addr = InetAddress.getByName(remoteDns)
-    if (addr.isInstanceOf[Inet6Address])
-      return "[" + remoteDns + "]"
-    remoteDns
-  }
-
   protected final def buildOvertureConfig(file: String): String = {
     val config = new JSONObject()
       .put("BindAddress", ":" + (profile.localPort + 53))
@@ -333,7 +326,10 @@ trait BaseService extends Service {
     def makeDns(name: String, address: String, edns: Boolean = true) = {
       val dns = new JSONObject()
         .put("Name", name)
-        .put("Address", address + ":53")
+        .put("Address", (Utils.parseNumericAddress(address) match {
+          case _: Inet6Address => '[' + address + ']'
+          case _ => address
+        }) + ":53")
         .put("Timeout", 6)
         .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
       if (edns) dns
@@ -342,29 +338,23 @@ trait BaseService extends Service {
       else dns.put("Protocol", "udp")
       dns
     }
+    val remoteDns = new JSONArray(profile.remoteDns.split(",").zipWithIndex.map {
+      case (dns, i) => makeDns("UserDef-" + i, dns.trim)
+    })
     profile.route match {
       case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES => config
         .put("PrimaryDNS", new JSONArray(Array(
           makeDns("Primary-1", "119.29.29.29", edns = false),
           makeDns("Primary-2", "114.114.114.114", edns = false)
         )))
-        .put("AlternativeDNS", new JSONArray(
-          for (remoteDns <- profile.remoteDns.split(","))
-            yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
-        )))
+        .put("AlternativeDNS", remoteDns)
         .put("IPNetworkFile", "china_ip_list.txt")
         .put("DomainFile", "gfwlist.txt")
       case Acl.CHINALIST => config
         .put("PrimaryDNS", new JSONArray().put(makeDns("Primary", "119.29.29.29")))
-        .put("AlternativeDNS", new JSONArray(
-          for (remoteDns <- profile.remoteDns.split(","))
-            yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
-        )))
+        .put("AlternativeDNS", remoteDns)
       case _ => config
-        .put("PrimaryDNS", new JSONArray(
-          for (remoteDns <- profile.remoteDns.split(","))
-            yield makeDns(remoteDns.trim, buildRemoteDns(remoteDns.trim)
-        )))
+        .put("PrimaryDNS", new JSONArray(remoteDns))
         // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
         .put("OnlyPrimaryDNS", true)
     }

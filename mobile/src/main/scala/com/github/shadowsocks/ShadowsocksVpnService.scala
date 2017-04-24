@@ -22,8 +22,6 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.util.Locale
-import java.net.InetAddress
-import java.net.Inet6Address
 
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
@@ -223,13 +221,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
-      profile.remoteDns.split(",").foreach(remoteDns => {
-        val addr = InetAddress.getByName(remoteDns.trim)
-        if (addr.isInstanceOf[Inet6Address])
-          builder.addRoute(addr, 128)
-        else if (addr.isInstanceOf[InetAddress])
-          builder.addRoute(addr, 32)
-      })
+      profile.remoteDns.split(",").map(dns => Utils.parseNumericAddress(dns.trim)).foreach(dns =>
+        builder.addRoute(dns, dns.getAddress.length << 3))
     }
 
     conn = builder.establish()
