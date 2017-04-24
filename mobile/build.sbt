@@ -21,11 +21,10 @@ libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
   "com.evernote" % "android-job" % "1.1.9" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
-  "com.google.firebase" % "firebase-core" % playServicesVersion ::
-  "com.google.firebase" % "firebase-config" % playServicesVersion ::
   "com.google.android.gms" % "play-services-ads" % playServicesVersion ::
   "com.google.android.gms" % "play-services-analytics" % playServicesVersion ::
   "com.google.android.gms" % "play-services-gcm" % playServicesVersion ::
+  "com.google.firebase" % "firebase-config" % playServicesVersion ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
   "com.mikepenz" % "crossfader" % "1.5.0" ::
   "com.mikepenz" % "fastadapter" % "2.5.2" ::
