@@ -21,9 +21,7 @@
 package com.github.shadowsocks
 
 import java.io.{File, FileOutputStream, IOException}
-import java.util
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -38,12 +36,9 @@ import com.github.shadowsocks.acl.DonaldTrump
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser, Tracker}
-import com.google.android.gms.common.api.ResultCallback
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.FirebaseApp
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
@@ -153,15 +148,7 @@ class ShadowsocksApplication extends Application {
     checkChineseLocale(getResources.getConfiguration)
 
     FirebaseApp.initializeApp(this)
-
-	remoteConfig.fetch(60)
-	  .addOnCompleteListener(new OnCompleteListener[Void]() {
-		def onComplete(task: Task[Void]) {
-		  if (task.isSuccessful()) {
-			remoteConfig.activateFetched()
-		  }
-		}
-	  })
+    remoteConfig.fetch().addOnCompleteListener(task => if (task.isSuccessful) remoteConfig.activateFetched())
 
     JobManager.create(this).addJobCreator(DonaldTrump)
 

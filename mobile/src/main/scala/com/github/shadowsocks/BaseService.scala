@@ -127,10 +127,6 @@ trait BaseService extends Service {
   def connect() {
     profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
     if (profile.host == "198.199.101.152") {
-      val config = app.remoteConfig
-      val url = config.getString("proxy_url")
-      val sig = Utils.getSignature(this)
-
       val client = new OkHttpClient.Builder()
         .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
           case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
@@ -141,10 +137,10 @@ trait BaseService extends Service {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
       val requestBody = new FormBody.Builder()
-        .add("sig", sig)
+        .add("sig", Utils.getSignature(this))
         .build()
       val request = new Request.Builder()
-        .url(url)
+        .url(app.remoteConfig.getString("proxy_url"))
         .post(requestBody)
         .build()
 
