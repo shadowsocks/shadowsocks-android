@@ -384,12 +384,14 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         displayFragment(new AboutFragment)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
       case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
+      case _ => // ignore
     }
     true  // unexpected cases will throw exception
   }
 
   protected override def onResume() {
     super.onResume()
+    app.remoteConfig.fetch()
     state match {
       case State.STOPPING | State.CONNECTING =>
       case _ => hideCircle()
