@@ -271,7 +271,6 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    app.remoteConfig.fetch()
     app.updateAssets()
   }
 

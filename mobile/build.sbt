@@ -8,11 +8,18 @@ version := "4.1.5"
 versionCode := Some(185)
 
 proguardOptions ++=
-  "-keep class com.github.shadowsocks.JniHelper { *; }" ::
+  "-dontwarn com.evernote.android.job.gcm.**" ::
+  "-dontwarn com.evernote.android.job.util.GcmAvailableHelper" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
   "-dontwarn okio.**" ::
   "-dontwarn org.xbill.**" ::
+  "-keep public class com.evernote.android.job.v21.PlatformJobService" ::
+  "-keep public class com.evernote.android.job.v14.PlatformAlarmService" ::
+  "-keep public class com.evernote.android.job.v14.PlatformAlarmReceiver" ::
+  "-keep public class com.evernote.android.job.JobBootReceiver" ::
+  "-keep public class com.evernote.android.job.JobRescheduleService" ::
+  "-keep class com.github.shadowsocks.JniHelper { *; }" ::
   Nil
 
 val playServicesVersion = "10.2.1"
