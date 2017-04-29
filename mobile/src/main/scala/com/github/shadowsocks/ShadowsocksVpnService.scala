@@ -214,7 +214,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_CHN) {
+    if (profile.route == Acl.ALL
+      || profile.route == Acl.BYPASS_CHN
+      || profile.route == Acl.CUSTOM_RULES) {
       builder.addRoute("0.0.0.0", 0)
     } else {
       getResources.getStringArray(R.array.bypass_private_route).foreach(cidr => {
