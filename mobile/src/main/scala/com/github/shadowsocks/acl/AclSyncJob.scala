@@ -46,8 +46,6 @@ object AclSyncJob {
 }
 
 class AclSyncJob(route: String) extends Job {
-  var rescheduled = 0
-
   override def onRunJob(params: Params): Result = {
     try {
       //noinspection JavaAccessorMethodCalledAsEmptyParen
@@ -57,11 +55,7 @@ class AclSyncJob(route: String) extends Job {
     } catch {
       case e: IOException =>
         e.printStackTrace()
-        rescheduled += 1
-        if (rescheduled < AclSyncJob.MAX_RESCHEDULE)
-          Result.RESCHEDULE
-        else
-          Result.FAILURE
+        if (params.getFailureCount < AclSyncJob.MAX_RESCHEDULE) Result.RESCHEDULE else Result.FAILURE
       case e: Exception =>  // unknown failures, probably shouldn't retry
         e.printStackTrace()
         Result.FAILURE
