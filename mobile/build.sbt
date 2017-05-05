@@ -8,17 +8,10 @@ version := "4.1.7"
 versionCode := Some(187)
 
 proguardOptions ++=
-  "-dontwarn com.evernote.android.job.gcm.**" ::
-  "-dontwarn com.evernote.android.job.util.GcmAvailableHelper" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
   "-dontwarn okio.**" ::
   "-dontwarn org.xbill.**" ::
-  "-keep public class com.evernote.android.job.v21.PlatformJobService" ::
-  "-keep public class com.evernote.android.job.v14.PlatformAlarmService" ::
-  "-keep public class com.evernote.android.job.v14.PlatformAlarmReceiver" ::
-  "-keep public class com.evernote.android.job.JobBootReceiver" ::
-  "-keep public class com.evernote.android.job.JobRescheduleService" ::
   "-keep class com.github.shadowsocks.JniHelper { *; }" ::
   Nil
 
