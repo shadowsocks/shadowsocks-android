@@ -4,8 +4,8 @@ enablePlugins(AndroidGms)
 android.useSupportVectors
 
 name := "shadowsocks"
-version := "4.1.6"
-versionCode := Some(186)
+version := "4.1.7"
+versionCode := Some(187)
 
 proguardOptions ++=
   "-dontwarn com.evernote.android.job.gcm.**" ::
