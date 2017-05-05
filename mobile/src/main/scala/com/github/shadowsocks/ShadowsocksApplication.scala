@@ -148,7 +148,7 @@ class ShadowsocksApplication extends Application {
     checkChineseLocale(getResources.getConfiguration)
 
     FirebaseApp.initializeApp(this)
-	remoteConfig.setDefaults(R.xml.default_configs);
+    remoteConfig.setDefaults(R.xml.default_configs)
     remoteConfig.fetch().addOnCompleteListener(task => if (task.isSuccessful) remoteConfig.activateFetched())
 
     JobManager.create(this).addJobCreator(DonaldTrump)
