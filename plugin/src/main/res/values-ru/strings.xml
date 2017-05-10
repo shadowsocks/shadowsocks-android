@@ -6,4 +6,10 @@
 
 <!-- feature category -->
 <string name="feature_cat">"Дополнительные Настройки"</string>
+
+<!-- alert category -->
+<string name="yes">"Да"</string>
+<string name="no">"Нет"</string>
+<string name="unsaved_changes_prompt">"Изменения не сохранены. Сохранить?"</string>
+<string name="apply">"Применить"</string>
 </resources>
