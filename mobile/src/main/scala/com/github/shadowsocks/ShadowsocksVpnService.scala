@@ -143,7 +143,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   /** Called when the activity is first created. */
   def handleConnection() {
-    
+
     startShadowsocksDaemon()
 
     if (!profile.udpdns) {
@@ -247,7 +247,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     cmd += "--enable-udprelay"
 
     if (!profile.udpdns)
-      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"),
+      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, "127.0.0.1",
         profile.localPort + 53))
 
     tun2socksProcess = new GuardedProcess(cmd: _*).start(() => sendFd(fd))
