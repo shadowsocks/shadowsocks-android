@@ -324,7 +324,7 @@ LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libudns/,$(UDNS_SOURCES))
 include $(BUILD_STATIC_LIBRARY)
 
 ########################################################
-## libev 
+## libev
 ########################################################
 
 include $(CLEAR_VARS)
@@ -334,7 +334,7 @@ LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H \
 				-I$(LOCAL_PATH)/include/libev
 LOCAL_SRC_FILES := \
 	shadowsocks-libev/libev/ev.c \
-	shadowsocks-libev/libev/event.c 
+	shadowsocks-libev/libev/event.c
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -352,7 +352,7 @@ REDSOCKS_SOURCES := base.c http-connect.c \
 LOCAL_STATIC_LIBRARIES := libevent
 
 LOCAL_MODULE := redsocks
-LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES)) 
+LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES))
 LOCAL_CFLAGS := -O2 -std=gnu99 -DUSE_IPTABLES \
 	-I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
@@ -417,28 +417,7 @@ include $(BUILD_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := tunnel.c cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c
-
-LOCAL_MODULE    := ss-tunnel
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
-					-DUSE_CRYPTO_MBEDTLS -DANDROID -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
-					-DCONNECT_IN_PROGRESS=EINPROGRESS \
-					-I$(LOCAL_PATH)/libancillary \
-					-I$(LOCAL_PATH)/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/mbedtls/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
-					-I$(LOCAL_PATH)/include/shadowsocks-libev
-
-LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libudns libancillary
-
-LOCAL_LDLIBS := -llog
-
-include $(BUILD_EXECUTABLE)
+SHADOWSOCKS_SOURCES := cache.c udprelay.c encrypt.c utils.c netutils.c json.c jconf.c android.c
 
 ########################################################
 ## system
@@ -552,7 +531,7 @@ LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES))
 include $(BUILD_EXECUTABLE)
 
 ########################################################
-## mbed TLS 
+## mbed TLS
 ########################################################
 
 include $(CLEAR_VARS)
@@ -568,12 +547,12 @@ LOCAL_SRC_FILES := $(MBEDTLS_SOURCES:$(LOCAL_PATH)/%=%)
 include $(BUILD_STATIC_LIBRARY)
 
 ########################################################
-## pcre 
+## pcre
 ########################################################
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := pcre 
+LOCAL_MODULE := pcre
 
 LOCAL_CFLAGS += -DHAVE_CONFIG_H
 
@@ -608,4 +587,3 @@ include $(BUILD_STATIC_LIBRARY)
 
 # Import cpufeatures
 $(call import-module,android/cpufeatures)
-

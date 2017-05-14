@@ -52,6 +52,7 @@
 	      <item>auth_sha1_v4</item>
         <item>auth_aes128_sha1</item>
         <item>auth_aes128_md5</item>
+        <item>auth_chain_a</item>
     </string-array>
 
     <string-array name="protocol_value">
@@ -63,6 +64,7 @@
 	      <item>auth_sha1_v4</item>
         <item>auth_aes128_sha1</item>
         <item>auth_aes128_md5</item>
+        <item>auth_chain_a</item>
     </string-array>
 
 
