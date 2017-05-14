@@ -155,6 +155,11 @@
   </plurals>
   <string name="undo">Вернуть</string>
 
+
+  <string name="scan_qrcode_install_title">Сканирование подсказки кода</string>
+  <string name="scan_qrcode_install_text">Кажется, вы не установили сканер в соответствии со стандартами ZXing, нажмите кнопку «OK» приведет вас в магазин приложений, где вы установили загрузку.</string>
+
+
   <!-- tasker -->
   <string name="toggle_service_state">Запустить сервисStart the service</string>
   <string name="start_service_default">Подключиться к текущему серверу</string>

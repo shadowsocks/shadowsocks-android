@@ -120,6 +120,9 @@
   <string name="add_profile_nfc_hint">2台のデバイス画面を立ち上げ、もう一方のデバイスでプロファイルの共有アイコンをタッチし、2台とも背中合わせにして下さい\nNFC またはNFCラベルを直接スキャン</string>
   <string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 
+  <string name="scan_qrcode_install_title">スキャンコードのヒント</string>
+  <string name="scan_qrcode_install_text">あなたが、zxingの基準に沿ってスキャナをインストールするには、ダウンロードをインストールしているアプリストアにあなたを導くでしょう「OK」をクリックしていなかったようです。</string>
+
   <string-array name="route_entry">
     <item>すべて</item>
     <item>LANアドレスを迂回する</item>

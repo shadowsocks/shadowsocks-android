@@ -125,6 +125,10 @@
     保持開啟兩個裝置的螢幕，在另一個裝置上，按一下設定檔的分享按鈕，將它們放在一起（背靠背）。\n您也可以掃描 NFC 標籤。</string>
   <string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 
+  <string name="scan_qrcode_install_title">掃碼贴士</string>
+  <string name="scan_qrcode_install_text">看起來似乎您並沒有安裝符合 zxing 標準的掃描器，點擊“確定”將帶領您前往您所安裝的應用商店裡下載一個。</string>
+
+
   <string-array name="route_entry">
     <item>全部</item>
     <item>略過區域網路</item>
