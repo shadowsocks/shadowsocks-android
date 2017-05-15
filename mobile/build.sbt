@@ -31,7 +31,7 @@ libraryDependencies ++=
   "com.mikepenz" % "iconics-core" % "2.8.4" ::
   "com.mikepenz" % "materialdrawer" % "5.9.1" ::
   "com.mikepenz" % "materialize" % "1.0.1" ::
-  "com.squareup.okhttp3" % "okhttp" % "3.7.0" ::
+  "com.squareup.okhttp3" % "okhttp" % "3.8.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.8" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
