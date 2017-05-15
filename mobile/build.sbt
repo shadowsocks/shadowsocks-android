@@ -10,6 +10,7 @@ versionCode := Some(187)
 proguardOptions ++=
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
+  "-dontwarn okhttp3.**" ::
   "-dontwarn okio.**" ::
   "-dontwarn org.xbill.**" ::
   "-keep class com.github.shadowsocks.JniHelper { *; }" ::
