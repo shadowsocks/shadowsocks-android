@@ -33,9 +33,9 @@ import com.github.shadowsocks.ShadowsocksApplication.app
 import scala.collection.JavaConversions._
 import scala.collection.immutable.Stream
 
-class StreamLogger(is: InputStream, tag: String) extends Thread {
+class StreamLogger(is: InputStream, tag: String, logger: (String, String) => Int) extends Thread {
   override def run(): Unit = autoClose(new BufferedReader(new InputStreamReader(is)))(br =>
-    try Stream.continually(br.readLine()).takeWhile(_ != null).foreach(Log.i(tag, _)) catch {
+    try Stream.continually(br.readLine()).takeWhile(_ != null).foreach(logger(tag, _)) catch {
       case _: IOException =>
     })
 }
@@ -68,8 +68,8 @@ class GuardedProcess(cmd: String*) {
             .directory(app.getFilesDir)
             .start()
 
-          val is = process.getInputStream
-          new StreamLogger(is, TAG).start()
+          new StreamLogger(process.getInputStream(), TAG, Log.i).start()
+          new StreamLogger(process.getErrorStream(), TAG, Log.e).start()
 
           if (callback == null) callback = onRestartCallback else callback()
 
