@@ -4,7 +4,7 @@ lazy val commonSettings = Seq(
 
   organization := "com.github.shadowsocks",
 
-  platformTarget := "android-25",
+  platformTarget := "android-O",
 
   compileOrder := CompileOrder.JavaThenScala,
   javacOptions ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil,
@@ -21,7 +21,7 @@ lazy val commonSettings = Seq(
   resConfigs := Seq("ja", "ko", "ru", "zh-rCN", "zh-rTW")
 )
 
-val supportLibsVersion = "25.3.1"
+val supportLibsVersion = "26.0.0-alpha1"
 lazy val root = Project(id = "shadowsocks-android", base = file("."))
   .settings(commonSettings)
   .aggregate(plugin, mobile)
