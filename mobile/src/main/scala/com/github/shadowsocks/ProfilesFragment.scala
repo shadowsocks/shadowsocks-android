@@ -78,20 +78,20 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
     var item: Profile = _
 
-    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
-    private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
-    private val traffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
-    private val edit = itemView.findViewById(R.id.edit)
+    private val text1 = itemView.findViewById[TextView](android.R.id.text1)
+    private val text2 = itemView.findViewById[TextView](android.R.id.text2)
+    private val traffic = itemView.findViewById[TextView](R.id.traffic)
+    private val edit = itemView.findViewById[View](R.id.edit)
     edit.setOnClickListener(_ => startConfig(item.id))
     edit.setOnLongClickListener(cardButtonLongClickListener)
     itemView.setOnClickListener(this)
     // it will not take effect unless set in code
-    itemView.findViewById(R.id.indicator).setBackgroundResource(R.drawable.background_profile)
+    itemView.findViewById[View](R.id.indicator).setBackgroundResource(R.drawable.background_profile)
 
     private var adView: NativeExpressAdView = _
 
     {
-      val share = itemView.findViewById(R.id.share)
+      val share = itemView.findViewById[View](R.id.share)
       share.setOnClickListener(_ => {
         val popup = new PopupMenu(getActivity, share)
         popup.getMenuInflater.inflate(R.menu.profile_share_popup, popup.getMenu)
@@ -147,7 +147,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/5224027521")
           adView.setAdSize(new AdSize(328, 132))
-          itemView.findViewById(R.id.content).asInstanceOf[LinearLayout].addView(adView)
+          itemView.findViewById[LinearLayout](R.id.content).addView(adView)
 
           // Demographics
           val random = new Random()
@@ -279,7 +279,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     toolbar.setOnMenuItemClickListener(this)
 
     if (app.profileManager.getFirstProfile.isEmpty) app.profileId(app.profileManager.createProfile().id)
-    val profilesList = view.findViewById(R.id.list).asInstanceOf[RecyclerView]
+    val profilesList = view.findViewById[RecyclerView](R.id.list)
     val layoutManager = new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {

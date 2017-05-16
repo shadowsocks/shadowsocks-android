@@ -70,8 +70,8 @@ class AppManager extends AppCompatActivity with OnMenuItemClickListener {
   import AppManager._
 
   private final class AppViewHolder(val view: View) extends RecyclerView.ViewHolder(view) with View.OnClickListener {
-    private val icon = itemView.findViewById(R.id.itemicon).asInstanceOf[ImageView]
-    private val check = itemView.findViewById(R.id.itemcheck).asInstanceOf[Switch]
+    private val icon = itemView.findViewById[ImageView](R.id.itemicon)
+    private val check = itemView.findViewById[Switch](R.id.itemcheck)
     private var item: ProxiedApp = _
     itemView.setOnClickListener(this)
 

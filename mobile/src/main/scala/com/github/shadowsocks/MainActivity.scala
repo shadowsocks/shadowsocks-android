@@ -246,7 +246,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     } else drawer = drawerBuilder.build()
 
     val header = drawer.getHeader
-    val title = header.findViewById(R.id.drawer_title).asInstanceOf[TextView]
+    val title = header.findViewById[TextView](R.id.drawer_title)
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 

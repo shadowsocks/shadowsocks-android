@@ -30,7 +30,7 @@ class ToolbarFragment extends Fragment {
 
   override def onViewCreated(view: View, savedInstanceState: Bundle) {
     super.onViewCreated(view, savedInstanceState)
-    toolbar = view.findViewById(R.id.toolbar).asInstanceOf[Toolbar]
+    toolbar = view.findViewById[Toolbar](R.id.toolbar)
     val activity = getActivity.asInstanceOf[MainActivity]
     if (activity.crossfader == null) activity.drawer.setToolbar(activity, toolbar, true)
   }
