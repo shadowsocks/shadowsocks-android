@@ -24,11 +24,12 @@ import java.io.{File, FileOutputStream, IOException}
 import java.util.Locale
 
 import android.annotation.SuppressLint
-import android.app.Application
+import android.app.{Application, NotificationChannel, NotificationManager}
 import android.content._
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
+import android.support.v4.os.BuildCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
@@ -154,6 +155,9 @@ class ShadowsocksApplication extends Application {
     JobManager.create(this).addJobCreator(DonaldTrump)
 
     TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
+
+    if (BuildCompat.isAtLeastO) getSystemService(classOf[NotificationManager]).createNotificationChannel(
+      new NotificationChannel("service", getText(R.string.service), NotificationManager.IMPORTANCE_MIN))
   }
 
   def crashRecovery() {

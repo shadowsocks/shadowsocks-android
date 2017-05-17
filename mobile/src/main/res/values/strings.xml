@@ -56,6 +56,7 @@
   <string name="udp_dns_summary">Forward all DNS requests to remote</string>
 
   <!-- notification category -->
+  <string name="service">Service</string>
   <string name="forward_success">Shadowsocks started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
