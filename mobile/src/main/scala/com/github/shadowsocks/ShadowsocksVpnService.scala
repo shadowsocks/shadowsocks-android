@@ -22,8 +22,6 @@ package com.github.shadowsocks
 
 import java.io.File
 import java.util.Locale
-import java.net.InetAddress
-import java.net.Inet6Address
 
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
@@ -145,7 +143,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
   /** Called when the activity is first created. */
   def handleConnection() {
-    
+
     startShadowsocksDaemon()
 
     if (!profile.udpdns) {
@@ -216,18 +214,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_CHN) {
+    if (profile.route == Acl.ALL
+      || profile.route == Acl.BYPASS_CHN
+      || profile.route == Acl.CUSTOM_RULES) {
       builder.addRoute("0.0.0.0", 0)
     } else {
       getResources.getStringArray(R.array.bypass_private_route).foreach(cidr => {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
-      val addr = InetAddress.getByName(profile.remoteDns.trim)
-      if (addr.isInstanceOf[Inet6Address])
-        builder.addRoute(addr, 128)
-      else if (addr.isInstanceOf[InetAddress])
-        builder.addRoute(addr, 32)
+      profile.remoteDns.split(",").map(dns => Utils.parseNumericAddress(dns.trim)).foreach(dns =>
+        builder.addRoute(dns, dns.getAddress.length << 3))
     }
 
     conn = builder.establish()
@@ -250,7 +247,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     cmd += "--enable-udprelay"
 
     if (!profile.udpdns)
-      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"),
+      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, "127.0.0.1",
         profile.localPort + 53))
 
     tun2socksProcess = new GuardedProcess(cmd: _*).start(() => sendFd(fd))

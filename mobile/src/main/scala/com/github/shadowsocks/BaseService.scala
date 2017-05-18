@@ -21,7 +21,6 @@
 package com.github.shadowsocks
 
 import java.io.{File, IOException}
-import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
@@ -127,12 +126,8 @@ trait BaseService extends Service {
 
   def connect() {
     profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
-    if (profile.host == "198.199.101.152") {
-      val holder = app.containerHolder
-      val container = holder.getContainer
-      val url = container.getString("proxy_url")
-      val sig = Utils.getSignature(this)
 
+    if (profile.host == "198.199.101.152") {
       val client = new OkHttpClient.Builder()
         .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
           case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
@@ -143,10 +138,10 @@ trait BaseService extends Service {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
       val requestBody = new FormBody.Builder()
-        .add("sig", sig)
+        .add("sig", Utils.getSignature(this))
         .build()
       val request = new Request.Builder()
-        .url(url)
+        .url(app.remoteConfig.getString("proxy_url"))
         .post(requestBody)
         .build()
 
@@ -277,7 +272,6 @@ trait BaseService extends Service {
 
   override def onCreate() {
     super.onCreate()
-    app.refreshContainerHolder()
     app.updateAssets()
   }
 
@@ -302,23 +296,12 @@ trait BaseService extends Service {
     }
   }
 
-  def getBlackList: String = {
-    val default = getString(R.string.black_list)
-    try {
-      val container = app.containerHolder.getContainer
-      val update = container.getString("black_list_lite")
-      val list = if (update == null || update.isEmpty) default else update
-      "exclude = " + list + ";"
-    } catch {
-      case _: Exception => "exclude = " + default + ";"
-    }
-  }
-
   protected def buildPluginCommandLine(): ArrayBuffer[String] = {
     val result = ArrayBuffer(pluginPath)
     if (TcpFastOpen.sendEnabled) result += "--fast-open"
     result
   }
+
   protected final def buildShadowsocksConfig(file: String): String = {
     val config = new JSONObject()
       .put("server", profile.host)
@@ -332,16 +315,9 @@ trait BaseService extends Service {
     file
   }
 
-  private final def buildRemoteDns(remoteDns: String): String = {
-    val addr = InetAddress.getByName(remoteDns)
-    if (addr.isInstanceOf[Inet6Address])
-      return "[" + remoteDns + "]"
-    remoteDns
-  }
-
   protected final def buildOvertureConfig(file: String): String = {
     val config = new JSONObject()
-      .put("BindAddress", ":" + (profile.localPort + 53))
+      .put("BindAddress", "127.0.0.1:" + (profile.localPort + 53))
       .put("RedirectIPv6Record", true)
       .put("DomainBase64Decode", true)
       .put("HostsFile", "hosts")
@@ -350,7 +326,10 @@ trait BaseService extends Service {
     def makeDns(name: String, address: String, edns: Boolean = true) = {
       val dns = new JSONObject()
         .put("Name", name)
-        .put("Address", address + ":53")
+        .put("Address", (Utils.parseNumericAddress(address) match {
+          case _: Inet6Address => '[' + address + ']'
+          case _ => address
+        }) + ":53")
         .put("Timeout", 6)
         .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
       if (edns) dns
@@ -359,24 +338,25 @@ trait BaseService extends Service {
       else dns.put("Protocol", "udp")
       dns
     }
+    val remoteDns = new JSONArray(profile.remoteDns.split(",").zipWithIndex.map {
+      case (dns, i) => makeDns("UserDef-" + i, dns.trim)
+    })
     profile.route match {
       case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES => config
         .put("PrimaryDNS", new JSONArray(Array(
           makeDns("Primary-1", "119.29.29.29", edns = false),
           makeDns("Primary-2", "114.114.114.114", edns = false)
         )))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
-          buildRemoteDns(profile.remoteDns.trim))))
+        .put("AlternativeDNS", remoteDns)
         .put("IPNetworkFile", "china_ip_list.txt")
         .put("DomainFile", "gfwlist.txt")
       case Acl.CHINALIST => config
         .put("PrimaryDNS", new JSONArray().put(makeDns("Primary", "119.29.29.29")))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative",
-          buildRemoteDns(profile.remoteDns.trim))))
+        .put("AlternativeDNS", remoteDns)
       case _ => config
-        .put("PrimaryDNS", new JSONArray().put(makeDns("Primary",
-          buildRemoteDns(profile.remoteDns.trim))))
-        .put("AlternativeDNS", new JSONArray().put(makeDns("Alternative", "208.67.222.222")))
+        .put("PrimaryDNS", remoteDns)
+        // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
+        .put("OnlyPrimaryDNS", true)
     }
     IOUtils.writeString(new File(getFilesDir, file), config.toString)
     file

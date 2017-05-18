@@ -34,6 +34,7 @@ import scala.io.Source
   */
 object AclSyncJob {
   final val TAG = "AclSyncJob"
+  final val MAX_RESCHEDULE = 3
 
   def schedule(route: String): Int = new JobRequest.Builder(AclSyncJob.TAG + ':' + route)
     .setExecutionWindow(TimeUnit.SECONDS.toMillis(10), TimeUnit.DAYS.toMillis(28))
@@ -54,7 +55,7 @@ class AclSyncJob(route: String) extends Job {
     } catch {
       case e: IOException =>
         e.printStackTrace()
-        Result.RESCHEDULE
+        if (params.getFailureCount < AclSyncJob.MAX_RESCHEDULE) Result.RESCHEDULE else Result.FAILURE
       case e: Exception =>  // unknown failures, probably shouldn't retry
         e.printStackTrace()
         Result.FAILURE

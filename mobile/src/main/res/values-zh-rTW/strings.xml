@@ -2,8 +2,7 @@
 <resources>
 <string name="quick_toggle">"切換"</string>
 
-<!-- global/misc category -->
-<string name="misc_cat">"其他"</string>
+<!-- misc -->
 <string name="profile">"設定檔"</string>
 <string name="profile_summary">"切換至其他設定檔或新增新設定檔"</string>
 <string name="nat">"NAT 模式 (已過時)"</string>
@@ -124,4 +123,12 @@
 <string name="proxied_apps_summary_v21">"為已選擇的應用程式設定 Proxy"</string>
 <string name="acl_rule_templates_generic">"子網路/主機名稱 PCRE 模式"</string>
 <string name="acl_rule_templates_domain">"網域及其所有子網域"</string>
+
+<!-- plugin -->
+<string name="plugin">"插件"</string>
+<string name="plugin_configure">"配置..."</string>
+<string name="plugin_disabled">"未啟用"</string>
+<string name="plugin_unknown">"未知插件 %s"</string>
+<string name="plugin_untrusted">"警告：該插件似乎不是來自一個已知的可信任源。"</string>
+<string name="profile_plugin">"插件： %s"</string>
 </resources>

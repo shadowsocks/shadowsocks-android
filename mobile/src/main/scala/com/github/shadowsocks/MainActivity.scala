@@ -390,7 +390,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   protected override def onResume() {
     super.onResume()
-    app.refreshContainerHolder()
+    app.remoteConfig.fetch()
     state match {
       case State.STOPPING | State.CONNECTING =>
       case _ => hideCircle()

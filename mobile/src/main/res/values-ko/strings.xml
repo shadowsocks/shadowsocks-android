@@ -2,8 +2,7 @@
 <resources>
 <string name="quick_toggle">"켜기/끄기"</string>
 
-<!-- global/misc category -->
-<string name="misc_cat">"기타"</string>
+<!-- misc -->
 <string name="profile">"프로필"</string>
 <string name="profile_summary">"다른 프로필로 전환하거나 새 프로필 추가"</string>
 <string name="nat">"NAT 모드 (지원 중단)"</string>
@@ -45,4 +44,5 @@
 <string name="tcp_fastopen_summary">"루트 권한이 필요합니다"</string>
 <string name="tcp_fastopen_summary_unsupported">"지원하지 않는 버전의 커널입니다: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"DNS 포워딩"</string>
+<string name="udp_dns_summary">"모든 DNS 요청을 외부로 포워딩 합니다"</string>
 </resources>
