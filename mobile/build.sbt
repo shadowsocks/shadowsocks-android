@@ -39,6 +39,12 @@ libraryDependencies ++=
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 
+lazy val goClean = TaskKey[Unit]("go-clean", "Clean go build dependencies")
+goClean := {
+  IO.delete(baseDirectory(base => base / "src/overture/.deps").value)
+  IO.delete(baseDirectory(base => base / "src/main/jni/overture").value)
+}
+
 lazy val goBuild = TaskKey[Unit]("go-build", "Build go and overture")
 goBuild := {
   Process(Seq("mobile/src/overture/make.bash", minSdkVersion.value)) ! streams.value.log match {
