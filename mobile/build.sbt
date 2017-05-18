@@ -16,7 +16,7 @@ proguardOptions ++=
   "-keep class com.github.shadowsocks.JniHelper { *; }" ::
   Nil
 
-val playServicesVersion = "10.2.4"
+val playServicesVersion = "10.2.6"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
