@@ -20,8 +20,8 @@
 	branch = shadowsocks-android
 [submodule "src/main/jni/shadowsocks-libev"]
 	path = src/main/jni/shadowsocks-libev
-	url = https://github.com/glzjin/shadowsocks-libev.git
-	branch = shadowsocks_android_new
+	url = https://github.com/shadowsocksr/shadowsocksr-libev.git
+	branch = master
 [submodule "src/main/jni/mbedtls"]
 	path = src/main/jni/mbedtls
 	url = https://github.com/ARMmbed/mbedtls

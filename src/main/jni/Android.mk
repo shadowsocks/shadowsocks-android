@@ -402,7 +402,8 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libev
+					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
+					-I$(LOCAL_PATH)/shadowsocks-libev/src
 
 LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns \
 	libsodium libancillary libpcre
