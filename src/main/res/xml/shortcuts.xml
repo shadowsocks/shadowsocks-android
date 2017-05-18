@@ -20,6 +20,9 @@
               android:icon="@drawable/ic_qu_camera_launcher"
               android:shortcutShortLabel="@string/add_profile_methods_scan_qr_code"
               android:shortcutLongLabel="@string/add_profile_methods_scan_qr_code">
+        <intent android:action="android.intent.action.MAIN"
+                android:targetClass="com.github.shadowsocks.Shadowsocks"
+                android:targetPackage="in.zhaoj.shadowsocksr" />
         <intent android:action="in.zhaoj.shadowsocksr.intent.action.SCAN"
                 android:targetPackage="in.zhaoj.shadowsocksr"
                 android:targetClass="com.github.shadowsocks.ProfileManagerActivity" />
