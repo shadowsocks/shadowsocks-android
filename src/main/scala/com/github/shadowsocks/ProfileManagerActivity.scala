@@ -198,6 +198,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+
+    val action = getIntent().getAction();
+    if (action != null && action.equals("in.zhaoj.shadowsocksr.intent.action.SCAN")) {
+       qrcodeScan();
+    }
+
     setContentView(R.layout.layout_profiles)
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
@@ -284,6 +290,29 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     handleShareIntent(intent)
   }
 
+  def qrcodeScan() {
+    try {
+        val intent = new Intent("com.google.zxing.client.android.SCAN")
+        intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
+
+        startActivityForResult(intent, 0);
+    } catch {
+        case _ : Throwable =>
+            val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+              .setTitle(R.string.scan_qrcode_install_title)
+              .setPositiveButton(android.R.string.yes, ((_, _) => {
+                  val marketUri = Uri.parse("market://details?id=com.google.zxing.client.android")
+                  val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
+                  startActivity(marketIntent)
+                }
+              ): DialogInterface.OnClickListener)
+              .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
+              .setMessage(R.string.scan_qrcode_install_text)
+              .create()
+            dialog.show()
+    }
+  }
+
   override def onClick(v: View){
     v.getId match {
       case R.id.fab_manual_add =>
@@ -293,27 +322,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         app.switchProfile(profile.id)
         finish
       case R.id.fab_qrcode_add =>
-        try {
-            menu.toggle(false)
-            val intent = new Intent("com.google.zxing.client.android.SCAN")
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
-
-            startActivityForResult(intent, 0);
-        } catch {
-            case _ : Throwable =>
-                val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
-                  .setTitle(R.string.scan_qrcode_install_title)
-                  .setPositiveButton(android.R.string.yes, ((_, _) => {
-                      val marketUri = Uri.parse("market://details?id=com.google.zxing.client.android")
-                      val marketIntent = new Intent(Intent.ACTION_VIEW, marketUri)
-                      startActivity(marketIntent)
-                    }
-                    ): DialogInterface.OnClickListener)
-                  .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
-                  .setMessage(R.string.scan_qrcode_install_text)
-                  .create()
-                dialog.show()
-        }
+        menu.toggle(false)
+        qrcodeScan()
       case R.id.fab_nfc_add =>
         menu.toggle(true)
         val dialog = new AlertDialog.Builder(ProfileManagerActivity.this, R.style.Theme_Material_Dialog_Alert)
