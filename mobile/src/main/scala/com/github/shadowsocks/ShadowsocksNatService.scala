@@ -43,7 +43,6 @@ class ShadowsocksNatService extends BaseService {
   val CMD_IPTABLES_DNAT_ADD_SOCKS =
     "iptables -t nat -A OUTPUT -p tcp -j DNAT --to-destination 127.0.0.1:8123"
 
-  private var notification: ShadowsocksNotification = _
   val myUid: Int = android.os.Process.myUid()
 
   var sslocalProcess: GuardedProcess = _
@@ -204,12 +203,11 @@ class ShadowsocksNatService extends BaseService {
       AclSyncJob.schedule(profile.route)
 
     changeState(State.CONNECTED)
-    notification = new ShadowsocksNotification(this, profile.name, true)
   }
 
-  override def stopRunner(stopService: Boolean, msg: String = null) {
+  override def createNotification() = new ShadowsocksNotification(this, profile.name, "service-nat", true)
 
-    if (notification != null) notification.destroy()
+  override def stopRunner(stopService: Boolean, msg: String = null) {
 
     // channge the state
     changeState(State.STOPPING)

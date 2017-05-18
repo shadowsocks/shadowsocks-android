@@ -35,7 +35,8 @@ import com.github.shadowsocks.utils.{Action, State, TrafficMonitor, Utils}
 /**
   * @author Mygod
   */
-class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false) {
+class ShadowsocksNotification(private val service: BaseService, profileName: String,
+                              channel: String, visible: Boolean = false) {
   private val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
@@ -61,7 +62,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[MainActivity])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-    .setChannel("service")
+    .setChannel(channel)
   if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
     service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   private lazy val style = new BigTextStyle(builder)
@@ -99,9 +100,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     show()
   } else if (forceShow) show()
 
-  def show(): Unit =
-    if (BuildCompat.isAtLeastO) nm.startServiceInForeground(new Intent(service, service.getClass), 1, builder.build())
-    else service.startForeground(1, builder.build)
+  def show(): Unit = service.startForeground(1, builder.build)
 
   def destroy() {
     if (lockReceiver != null) {

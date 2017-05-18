@@ -256,7 +256,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    findViewById(R.id.stat).setOnClickListener(_ => if (state == State.CONNECTED && app.isVpnEnabled) {
+    findViewById[View](R.id.stat).setOnClickListener(_ => if (state == State.CONNECTED && app.isVpnEnabled) {
       testCount += 1
       statusText.setText(R.string.connection_test_testing)
       val id = testCount  // it would change by other code

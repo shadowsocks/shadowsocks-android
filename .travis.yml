@@ -5,7 +5,7 @@ jdk:
 
 env:
     global:
-        - NDK_VERSION=r14
+        - NDK_VERSION=r15-beta2
         - NDK_CCACHE=ccache
         - GOROOT_BOOTSTRAP=$GOROOT
         - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}

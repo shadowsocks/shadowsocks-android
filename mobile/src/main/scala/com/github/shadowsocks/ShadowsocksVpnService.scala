@@ -42,7 +42,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = _
   var vpnThread: ShadowsocksVpnThread = _
-  private var notification: ShadowsocksNotification = _
 
   var sslocalProcess: GuardedProcess = _
   var overtureProcess: GuardedProcess = _
@@ -68,8 +67,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       vpnThread.stopThread()
       vpnThread = null
     }
-
-    if (notification != null) notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
@@ -117,6 +114,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     super.startRunner(profile)
   }
 
+  override def createNotification() = new ShadowsocksNotification(this, profile.name, "service-vpn")
+
   override def connect() {
     super.connect()
 
@@ -137,8 +136,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
       AclSyncJob.schedule(profile.route)
-
-    notification = new ShadowsocksNotification(this, profile.name)
   }
 
   /** Called when the activity is first created. */

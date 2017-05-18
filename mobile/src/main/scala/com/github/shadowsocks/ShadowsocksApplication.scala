@@ -44,6 +44,7 @@ import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.mutable.ArrayBuffer
+import scala.collection.JavaConversions._
 
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
@@ -156,8 +157,10 @@ class ShadowsocksApplication extends Application {
 
     TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 
-    if (BuildCompat.isAtLeastO) getSystemService(classOf[NotificationManager]).createNotificationChannel(
-      new NotificationChannel("service", getText(R.string.service), NotificationManager.IMPORTANCE_MIN))
+    if (BuildCompat.isAtLeastO) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
+      new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
+      new NotificationChannel("service-nat", getText(R.string.service_nat), NotificationManager.IMPORTANCE_LOW)
+    ))
   }
 
   def crashRecovery() {

@@ -30,6 +30,7 @@ import java.net.Inet6Address
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
 import android.os.{Handler, IBinder, RemoteCallbackList}
+import android.support.v4.os.BuildCompat
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -65,6 +66,7 @@ trait BaseService extends Service {
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
 
+  private var notification: ShadowsocksNotification = _
   private val closeReceiver: BroadcastReceiver = (context: Context, _: Intent) => {
     Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
     stopRunner(stopService = true)
@@ -160,10 +162,12 @@ trait BaseService extends Service {
     pluginPath = PluginManager.init(plugin)
   }
 
+  def createNotification(): ShadowsocksNotification
   def startRunner(profile: Profile) {
     this.profile = profile
 
-    startService(new Intent(this, getClass))
+    if (BuildCompat.isAtLeastO) startForegroundService(new Intent(this, getClass))
+    else startService(new Intent(this, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
     trafficMonitorThread.start()
@@ -177,6 +181,7 @@ trait BaseService extends Service {
       closeReceiverRegistered = true
     }
 
+    notification = createNotification()
     app.track(getClass.getSimpleName, "start")
 
     changeState(State.CONNECTING)
@@ -197,6 +202,8 @@ trait BaseService extends Service {
       unregisterReceiver(closeReceiver)
       closeReceiverRegistered = false
     }
+
+    if (notification != null) notification.destroy()
 
     // Make sure update total traffic when stopping the runner
     updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
