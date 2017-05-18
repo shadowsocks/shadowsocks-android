@@ -39,6 +39,13 @@ libraryDependencies ++=
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 
+packagingOptions := PackagingOptions(excludes =
+  "META-INF/maven/com.squareup.okio/okio/pom.properties" ::
+  "META-INF/maven/com.squareup.okio/okio/pom.xml" ::
+  "META-INF/maven/com.squareup.okhttp3/okhttp/pom.properties" ::
+  "META-INF/maven/com.squareup.okhttp3/okhttp/pom.xml" ::
+  Nil)
+
 lazy val goClean = TaskKey[Unit]("go-clean", "Clean go build dependencies")
 goClean := {
   IO.delete(baseDirectory(base => base / "src/overture/.deps").value)
