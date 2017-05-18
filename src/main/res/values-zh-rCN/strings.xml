@@ -124,7 +124,8 @@
   <string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
 
   <string name="scan_qrcode_install_title">扫码提示</string>
-  <string name="scan_qrcode_install_text">看起来似乎您并没有安装符合 zxing 标准的扫描器，点击“确定”将带领您前往您所安装的应用商店里下载一个。</string>
+  <string name="scan_qrcode_install_text">看起来似乎您并没有安装符合 zxing 标准的扫描器，点击“确定”将带领您前往您所安装的应用商店里下载一个，或者您可以直接点击“直接下载”来下载一个 APK 直接安装。</string>
+  <string name="scan_qrcode_direct_download_text">直接下载</string>
 
   <string-array name="route_entry">
     <item>全局</item>

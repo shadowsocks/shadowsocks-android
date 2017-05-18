@@ -126,8 +126,8 @@
   <string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 
   <string name="scan_qrcode_install_title">掃碼贴士</string>
-  <string name="scan_qrcode_install_text">看起來似乎您並沒有安裝符合 zxing 標準的掃描器，點擊“確定”將帶領您前往您所安裝的應用商店裡下載一個。</string>
-
+  <string name="scan_qrcode_install_text">看起來似乎您並沒有安裝符合 zxing 標準的掃描器，點擊“確定”將帶領您前往您所安裝的應用商店裡下載一個，或者您可以直接點擊“直接下載”來下載一個 APK 直接安裝。</string>
+  <string name="scan_qrcode_direct_download_text">直接下載</string>
 
   <string-array name="route_entry">
     <item>全部</item>

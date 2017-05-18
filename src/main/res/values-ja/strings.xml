@@ -121,7 +121,8 @@
   <string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 
   <string name="scan_qrcode_install_title">スキャンコードのヒント</string>
-  <string name="scan_qrcode_install_text">あなたが、zxingの基準に沿ってスキャナをインストールするには、ダウンロードをインストールしているアプリストアにあなたを導くでしょう「OK」をクリックしていなかったようです。</string>
+  <string name="scan_qrcode_install_text">あなたがダウンロードしてインストールしているアプリストアにあなたを導くでしょう「OK」をクリックし、zxing基準に沿ってスキャナーをインストールしていないようだ、またはあなたはAPKが直接設置ダウンロードするには、「ダウンロード」をクリックします。</string>
+  <string name="scan_qrcode_direct_download_text">ダウンロード</string>
 
   <string-array name="route_entry">
     <item>すべて</item>

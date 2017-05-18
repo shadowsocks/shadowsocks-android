@@ -163,8 +163,8 @@
 
 
   <string name="scan_qrcode_install_title">Scan tips</string>
-  <string name="scan_qrcode_install_text">It seems that You haven\'t installed the zxing scanner, click the ok button will guide you to play store.</string>
-
+  <string name="scan_qrcode_install_text">It seems that You haven\'t installed the zxing scanner, click the ok button will guide you to play store, or you can click the \'direct download\' button to download directly and installed it.</string>
+  <string name="scan_qrcode_direct_download_text">Direct Download</string>
 
   <!-- tasker -->
   <string name="toggle_service_state">Start the service</string>
