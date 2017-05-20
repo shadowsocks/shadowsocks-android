@@ -127,6 +127,8 @@
             android:summary="@string/aclupdate_summary"/>
         <Preference android:key="about" android:title="@string/about"/>
 
+        <Preference android:key="logcat" android:title="Logcat"/>
+
     </PreferenceCategory>
 
 

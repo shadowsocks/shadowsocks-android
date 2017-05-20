@@ -15,6 +15,7 @@ import android.app.ProgressDialog
 import android.content._
 import android.webkit.{WebView, WebViewClient}
 import android.widget.EditText
+import android.widget.TextView
 import android.os.Looper
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
@@ -22,6 +23,9 @@ import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.IOUtils
+
+import java.io.InputStreamReader
+import java.io.BufferedReader
 
 object ShadowsocksSettings {
   // Constants
@@ -264,6 +268,34 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         .setTitle(getString(R.string.about_title).formatLocal(Locale.ENGLISH, BuildConfig.VERSION_NAME))
         .setNegativeButton(getString(android.R.string.ok), null)
         .setView(web)
+        .create()
+        .show()
+      true
+    })
+
+    findPreference("logcat").setOnPreferenceClickListener((preference: Preference) => {
+      app.track(TAG, "logcat")
+
+      val et_logcat = new EditText(activity);
+
+      try {
+        val logcat = Runtime.getRuntime().exec("logcat -d");
+        val br = new BufferedReader(new InputStreamReader(logcat.getInputStream()));
+        var line = "";
+        while ((line = br.readLine()) != null) {
+            et_logcat.append(line);
+            et_logcat.append("\n");
+        }
+        br.close()
+      } catch {
+        case e: Exception =>  // unknown failures, probably shouldn't retry
+          e.printStackTrace()
+      }
+
+      new AlertDialog.Builder(activity)
+        .setTitle("Logcat")
+        .setNegativeButton(getString(android.R.string.ok), null)
+        .setView(et_logcat)
         .create()
         .show()
       true

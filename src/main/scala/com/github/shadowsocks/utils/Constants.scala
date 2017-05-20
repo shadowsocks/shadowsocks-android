@@ -194,6 +194,7 @@ object Key {
 
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"
+  val logcat = "logcat"
 }
 
 object State {

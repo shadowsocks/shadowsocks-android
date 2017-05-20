@@ -108,7 +108,7 @@ class ShadowsocksNatService extends BaseService {
       })
       val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
         , "-u"
-        , "-t" , "10"
+        , "-t" , "60"
         , "-b" , "127.0.0.1"
         , "-l" , (profile.localPort + 53).toString
         , "-P" , getApplicationInfo.dataDir
