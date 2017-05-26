@@ -24,6 +24,8 @@ import android.app.Service
 import android.content.Intent
 import android.net.VpnService
 import android.os.{Handler, IBinder}
+import android.support.v4.app.NotificationCompat
+import android.support.v4.os.BuildCompat
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 class ShadowsocksRunnerService extends Service with ServiceBoundContext {
@@ -47,11 +49,17 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
 
   override def onCreate() {
     super.onCreate()
+    if (BuildCompat.isAtLeastO) {
+      val builder = new NotificationCompat.Builder(this)
+      builder.setPriority(NotificationCompat.PRIORITY_MIN)
+      startForeground(1, builder.build)
+    }
     attachService()
   }
 
   override def onDestroy() {
     super.onDestroy()
+    stopForeground(true)
     detachService()
   }
 }
