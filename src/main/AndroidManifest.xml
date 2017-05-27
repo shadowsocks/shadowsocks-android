@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
-          android:versionCode="249"
-          android:versionName="3.3.8.2">
+          android:versionCode="257"
+          android:versionName="3.3.8.3">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -19,7 +19,7 @@
                   android:required="false"/>
 
     <uses-sdk
-            android:minSdkVersion="16"
+            android:minSdkVersion="18"
             android:targetSdkVersion="25"/>
 
     <application

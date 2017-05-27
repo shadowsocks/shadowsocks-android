@@ -12,7 +12,7 @@
   <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
-  <string name="stat_profiles">\n%1$s↑\t%2$s↓</string>
+  <string name="stat_profiles">\n%1$s↑\t%2$s↓\t%3$sms</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
   <plurals name="bytes" translatable="false">
     <item quantity="one">Byte</item>
@@ -124,6 +124,7 @@
   <string name="recovery_summary">Reset all the background services</string>
   <string name="about">About</string>
   <string name="about_title">ShadowsocksR %s</string>
+  <string name="ping">Ping</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>
@@ -136,6 +137,8 @@
   <string name="flushing">Flushing</string>
   <string name="add_profile">Add Profile</string>
   <string name="action_apply_all">Apply Settings to All Profiles</string>
+  <string name="action_full_test">Full latency test</string>
+  <string name="action_sort">Auto sort by latency</string>
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
   <string name="action_export_msg">Successfully export!</string>

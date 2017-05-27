@@ -42,6 +42,7 @@ package com.github.shadowsocks
 import java.io.File
 import java.util.Locale
 import scala.io.Source
+import java.net._
 
 import android.annotation.SuppressLint
 import android.content._
@@ -194,7 +195,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
@@ -214,7 +215,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V"
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir

@@ -1,13 +1,17 @@
 package com.github.shadowsocks
 
 import java.nio.charset.Charset
+import java.util.Locale
+import java.io.File
 
-import android.app.{Activity, TaskStackBuilder}
+import java.net._
+
+import android.app.{Activity, TaskStackBuilder, ProgressDialog}
 import android.content._
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter.CreateNdefMessageCallback
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter, NfcEvent}
-import android.os.{Bundle, Handler}
+import android.os._
 import android.provider.Settings
 import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -20,13 +24,21 @@ import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import android.net.Uri
+import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
+import com.github.shadowsocks.utils._
+import com.github.shadowsocks.utils.CloseUtils._
 import net.glxn.qrgen.android.QRCode
+import java.lang.System.currentTimeMillis
+import java.lang.Thread
+import java.util.Random;
+import android.util.Log
+import android.content.DialogInterface._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -83,15 +95,132 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       })
     }
 
-    def updateText(txTotal: Long = 0, rxTotal: Long = 0) {
+    {
+      val pingBtn = itemView.findViewById(R.id.ping_single)
+      pingBtn.setOnClickListener(_ => {
+
+        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, "Testing", "Testing", false, false)
+
+        var profile = item
+
+        Utils.ThrowableFuture {
+
+          // Resolve the server address
+          var host = profile.host;
+          if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
+            case Some(addr) => host = addr
+            case None => throw new Exception("can't resolve")
+          }
+
+          val conf = ConfigUtils
+            .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
+              ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
+          Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
+            p.println(conf)
+          })
+
+          val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+            , "-t", "600"
+            , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
+
+          if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+
+          var sslocalProcess = new GuardedProcess(cmd).start()
+
+          val start = currentTimeMillis
+          while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
+            try {
+              Thread.sleep(50)
+            } catch{
+              case e: InterruptedException => Unit
+            }
+          }
+
+          val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
+
+          // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
+          autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
+            .asInstanceOf[HttpURLConnection]) { conn =>
+            conn.setConnectTimeout(5 * 1000)
+            conn.setReadTimeout(5 * 1000)
+            conn.setInstanceFollowRedirects(false)
+            conn.setUseCaches(false)
+            var result: String = null
+            var success = true
+            try {
+              conn.getInputStream
+              val code = conn.getResponseCode
+              if (code == 204 || code == 200 && conn.getContentLength == 0)
+              {
+                autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
+                  .asInstanceOf[HttpURLConnection]) { conn =>
+                  conn.setConnectTimeout(5 * 1000)
+                  conn.setReadTimeout(5 * 1000)
+                  conn.setInstanceFollowRedirects(false)
+                  conn.setUseCaches(false)
+                  var result: String = null
+                  var success = true
+                  try {
+                    val start = currentTimeMillis
+                    conn.getInputStream
+                    val elapsed = currentTimeMillis - start
+                    val code = conn.getResponseCode
+                    if (code == 204 || code == 200 && conn.getContentLength == 0)
+                    {
+                      result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                      profile.elapsed = elapsed
+                      app.profileManager.updateProfile(profile)
+
+                      this.updateText(0, 0, elapsed)
+                    }
+                    else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                  } catch {
+                    case e: Exception =>
+                      success = false
+                      result = getString(R.string.connection_test_error, e.getMessage)
+                  }
+                  Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+                }
+              }
+              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+            } catch {
+              case e: Exception =>
+                success = false
+                result = getString(R.string.connection_test_error, e.getMessage)
+                Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+            }
+          }
+
+          if (sslocalProcess != null) {
+            sslocalProcess.destroy()
+            sslocalProcess = null
+          }
+
+          singleTestProgressDialog.dismiss()
+        }
+
+        // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
+      })
+      pingBtn.setOnLongClickListener(_ => {
+        Utils.positionToast(Toast.makeText(ProfileManagerActivity.this, R.string.ping, Toast.LENGTH_SHORT), pingBtn,
+          getWindow, 0, Utils.dpToPx(ProfileManagerActivity.this, 8)).show
+        true
+      })
+    }
+
+    def updateText(txTotal: Long = 0, rxTotal: Long = 0, elapsedInput: Long = -1) {
       val builder = new SpannableStringBuilder
       val tx = item.tx + txTotal
       val rx = item.rx + rxTotal
+      var elapsed = item.elapsed
+      if (elapsedInput != -1) {
+        elapsed = elapsedInput
+      }
       builder.append(item.name)
-      if (tx != 0 || rx != 0) {
+      if (tx != 0 || rx != 0 || elapsed != 0) {
         val start = builder.length
         builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed)))
         builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
           start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
       }
@@ -194,14 +323,33 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var isNfcEnabled: Boolean = _
   private var isNfcBeamEnabled: Boolean = _
 
+  private var testProgressDialog: ProgressDialog = _
+  private var testAsyncJob: Thread = _
+  private var isTesting: Boolean = true
+
   private val REQUEST_QRCODE = 1
+
+
+  def isPortAvailable (port: Int):Boolean = {
+    // Assume no connection is possible.
+    var result = true;
+
+    try {
+      (new Socket("127.0.0.1", port)).close()
+      result = false;
+    } catch {
+      case e: Exception => Unit
+    }
+
+    return result;
+  }
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
-    val action = getIntent().getAction();
+    val action = getIntent().getAction()
     if (action != null && action.equals("in.zhaoj.shadowsocksr.intent.action.SCAN")) {
-       qrcodeScan();
+       qrcodeScan()
     }
 
     setContentView(R.layout.layout_profiles)
@@ -295,7 +443,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         val intent = new Intent("com.google.zxing.client.android.SCAN")
         intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
 
-        startActivityForResult(intent, 0);
+        startActivityForResult(intent, 0)
     } catch {
         case _ : Throwable =>
             val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
@@ -421,7 +569,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
       if (requestCode == 0) {
           if (resultCode == Activity.RESULT_OK) {
-              val contents = data.getStringExtra("SCAN_RESULT");
+              val contents = data.getStringExtra("SCAN_RESULT")
               if (TextUtils.isEmpty(contents)) return
               val profiles_normal = Parser.findAll(contents).toList
               val profiles_ssr = Parser.findAll_ssr(contents).toList
@@ -470,12 +618,197 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   def createNdefMessage(nfcEvent: NfcEvent) =
     new NdefMessage(Array(new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem)))
 
+  val showProgresshandler = new Handler(Looper.getMainLooper()) {
+    override def handleMessage(msg: Message) {
+      val message = msg.obj.asInstanceOf[String]
+      if (testProgressDialog != null) {
+        testProgressDialog.setMessage(message)
+      }
+    }
+  }
+
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_export =>
       app.profileManager.getAllProfiles match {
         case Some(profiles) =>
           clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.mkString("\n")))
           Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show
+        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+      }
+      true
+    case R.id.action_full_test =>
+      app.profileManager.getAllProfiles match {
+        case Some(profiles) =>
+
+          isTesting = true
+
+          testProgressDialog = ProgressDialog.show(this, "Testing", "Testing", false, true, new OnCancelListener() {
+              def onCancel(dialog: DialogInterface) {
+                  // TODO Auto-generated method stub
+                  // Do something...
+                  if (testProgressDialog != null) {
+                    testProgressDialog = null;
+                  }
+
+                  isTesting = false
+                  testAsyncJob.interrupt()
+
+                  finish()
+                  startActivity(getIntent())
+              }
+          })
+
+          testAsyncJob = new Thread {
+            override def run() {
+              // Do some background work
+              Looper.prepare()
+              profiles.foreach((profile: Profile) => {
+                if (isTesting) {
+
+                  if (testAsyncJob.isInterrupted()) {
+                    isTesting = false
+                  }
+                  // Resolve the server address
+                  var host = profile.host
+                  if (!Utils.isNumeric(host)) Utils.resolve(host, enableIPv6 = true) match {
+                    case Some(addr) => host = addr
+                    case None => throw new Exception("can't resolve")
+                  }
+
+                  val conf = ConfigUtils
+                    .SHADOWSOCKS.formatLocal(Locale.ENGLISH, host, profile.remotePort, profile.localPort + 2,
+                      ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
+                  Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-test.conf"))(p => {
+                    p.println(conf)
+                  })
+
+                  val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+                    , "-t", "600"
+                    , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
+
+                  if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+
+                  var sslocalProcess = new GuardedProcess(cmd).start()
+
+                  val start = currentTimeMillis
+                  while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
+                    try {
+                      Thread.sleep(50)
+                    } catch{
+                      case e: InterruptedException => isTesting = false
+                    }
+                  }
+
+
+                  val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
+
+                  // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
+                  autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
+                    .asInstanceOf[HttpURLConnection]) { conn =>
+                    conn.setConnectTimeout(5 * 1000)
+                    conn.setReadTimeout(5 * 1000)
+                    conn.setInstanceFollowRedirects(false)
+                    conn.setUseCaches(false)
+                    var result: String = null
+                    var success = true
+                    try {
+                      conn.getInputStream
+                      val code = conn.getResponseCode
+                      if (code == 204 || code == 200 && conn.getContentLength == 0)
+                      {
+                        autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
+                          .asInstanceOf[HttpURLConnection]) { conn =>
+                          conn.setConnectTimeout(5 * 1000)
+                          conn.setReadTimeout(5 * 1000)
+                          conn.setInstanceFollowRedirects(false)
+                          conn.setUseCaches(false)
+                          var result: String = null
+                          var success = true
+                          try {
+                            val start = currentTimeMillis
+                            conn.getInputStream
+                            val elapsed = currentTimeMillis - start
+                            val code = conn.getResponseCode
+                            if (code == 204 || code == 200 && conn.getContentLength == 0)
+                            {
+                              result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                              profile.elapsed = elapsed
+                              app.profileManager.updateProfile(profile)
+                            }
+                            else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                          } catch {
+                            case e: Exception =>
+                              success = false
+                              result = getString(R.string.connection_test_error, e.getMessage)
+                          }
+
+                          var msg = Message.obtain()
+                          msg.obj = profile.name + " " + result
+                          msg.setTarget(showProgresshandler)
+                          msg.sendToTarget()
+                        }
+                      }
+                      else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                    } catch {
+                      case e: Exception =>
+                        success = false
+                        result = getString(R.string.connection_test_error, e.getMessage)
+                        var msg = Message.obtain()
+                        msg.obj = profile.name + " " + result;
+                        msg.setTarget(showProgresshandler)
+                        msg.sendToTarget()
+                    }
+                  }
+
+                  if (sslocalProcess != null) {
+                    sslocalProcess.destroy()
+                    sslocalProcess = null
+                  }
+                }
+              })
+
+              if (testProgressDialog != null) {
+                testProgressDialog.dismiss
+                testProgressDialog = null;
+              }
+              finish()
+              startActivity(getIntent())
+              Looper.loop()
+            }
+          }
+
+          testAsyncJob.start()
+
+        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+      }
+      true
+    case R.id.action_sort =>
+      app.profileManager.getAllProfilesByElapsed match {
+        case Some(profiles) => {
+          var counter = 0
+          testProgressDialog = ProgressDialog.show(this, "Sorting", "Sorting", false, false)
+
+          new Thread {
+            override def run() {
+              Looper.prepare()
+              profiles.foreach((profile: Profile) => {
+                if (profile.elapsed != 0) {
+                  profile.userOrder = counter
+                  counter += 1
+                }
+                else
+                {
+                  profile.userOrder = 9999
+                }
+                app.profileManager.updateProfile(profile)
+              })
+              testProgressDialog.dismiss
+              finish()
+              startActivity(getIntent())
+              Looper.loop()
+            }
+          }.start()
+        }
         case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
       }
       true

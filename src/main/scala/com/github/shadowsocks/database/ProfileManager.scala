@@ -186,6 +186,18 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def getAllProfilesByElapsed: Option[List[Profile]] = {
+    try {
+      import scala.collection.JavaConversions._
+      Option(dbHelper.profileDao.query(dbHelper.profileDao.queryBuilder.orderBy("elapsed", true).prepare).toList)
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "getAllProfiles", ex)
+        app.track(ex)
+        None
+    }
+  }
+
   def createDefault(): Profile = {
     val profile = new Profile {
       name = "Default"

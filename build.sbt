@@ -53,6 +53,7 @@ libraryDependencies ++=
   "dnsjava" % "dnsjava" % "2.1.7" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
+  "com.arasthel" % "asyncjob-library" % "1.0.3" ::
   Nil
 
 lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")

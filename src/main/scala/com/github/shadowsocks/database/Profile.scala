@@ -110,6 +110,9 @@ class Profile {
   var rx: Long = 0
 
   @DatabaseField
+  var elapsed: Long = 0
+
+  @DatabaseField
   val date: java.util.Date = new java.util.Date()
 
   @DatabaseField
