@@ -798,7 +798,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 }
                 else
                 {
-                  profile.userOrder = 9999
+                  profile.userOrder = profiles.length
                 }
                 app.profileManager.updateProfile(profile)
               })
