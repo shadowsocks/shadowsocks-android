@@ -162,6 +162,12 @@
   <string name="stop_service">%s に切り替え</string>
   <string name="profile_default">現在のプロファイルを使用する</string>
 
+  <string name="tips_testing">テスティング....</string>
+  <string name="tips_sorting">整理....</string>
+  <string name="action_full_test">完全な待ち時間のテスト</string>
+  <string name="action_sort">レイテンシによる自動ソート</string>
+  <string name="ping">Ping</string>
+
   <!-- status -->
   <string name="sent">送信済み:</string>
   <string name="received">受信済み:</string>

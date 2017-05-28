@@ -153,6 +153,12 @@
   </plurals>
   <string name="undo">Вернуть</string>
 
+  <string name="tips_testing">тестирование....</string>
+  <string name="tips_sorting">сортировка....</string>
+  <string name="action_full_test">Испытание полностью латентность</string>
+  <string name="action_sort">Автоматическая сортировка по времени ожидания</string>
+  <string name="ping">пинг</string>
+
 
   <string name="scan_qrcode_install_title">Сканирование подсказки кода</string>
   <string name="scan_qrcode_install_text">Кажется, вы не установили сканер в соответствии с ZXing стандартами, нажмите кнопку «ОК» приведет вас в магазин приложений, где вы установили загрузку, или вы можете нажать кнопку «Загрузить», чтобы загрузить APK установлен непосредственно.</string>

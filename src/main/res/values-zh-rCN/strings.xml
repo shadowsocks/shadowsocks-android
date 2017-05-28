@@ -165,6 +165,12 @@
   <string name="stop_service">切换到 %s</string>
   <string name="profile_default">使用当前配置</string>
 
+  <string name="tips_testing">测试中...</string>
+  <string name="tips_sorting">排序中...</string>
+  <string name="action_full_test">完整延时测试</string>
+  <string name="action_sort">基于延时自动排序</string>
+  <string name="ping">测试延时</string>
+
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>

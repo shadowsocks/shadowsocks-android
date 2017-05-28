@@ -99,7 +99,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val pingBtn = itemView.findViewById(R.id.ping_single)
       pingBtn.setOnClickListener(_ => {
 
-        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, "Testing", "Testing", false, false)
+        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, false)
 
         var profile = item
 
@@ -642,7 +642,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           isTesting = true
 
-          testProgressDialog = ProgressDialog.show(this, "Testing", "Testing", false, true, new OnCancelListener() {
+          testProgressDialog = ProgressDialog.show(this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true, new OnCancelListener() {
               def onCancel(dialog: DialogInterface) {
                   // TODO Auto-generated method stub
                   // Do something...
@@ -786,7 +786,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       app.profileManager.getAllProfilesByElapsed match {
         case Some(profiles) => {
           var counter = 0
-          testProgressDialog = ProgressDialog.show(this, "Sorting", "Sorting", false, false)
+          testProgressDialog = ProgressDialog.show(this, getString(R.string.tips_sorting), getString(R.string.tips_sorting), false, false)
 
           new Thread {
             override def run() {
