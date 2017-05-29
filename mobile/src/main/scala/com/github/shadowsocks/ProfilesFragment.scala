@@ -354,7 +354,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     case R.id.action_scan_qr_code =>
       def installScanner() = {
         Toast.makeText(getActivity, R.string.add_profile_scanner_not_installed, Toast.LENGTH_LONG).show()
-        try startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark"))) catch {
+        try startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.zxing.client.android"))) catch {
           case exc: ActivityNotFoundException => exc.printStackTrace()
         }
       }
