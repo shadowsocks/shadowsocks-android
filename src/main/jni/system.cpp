@@ -25,6 +25,8 @@ jstring Java_com_github_shadowsocks_system_getabi(JNIEnv *env, jobject thiz) {
 
   if (family == ANDROID_CPU_FAMILY_X86) {
     abi = "x86";
+  } else if (family == ANDROID_CPU_FAMILY_ARM64) {
+    abi = "arm64-v8a";
   } else if (family == ANDROID_CPU_FAMILY_MIPS) {
     abi = "mips";
   } else if (family == ANDROID_CPU_FAMILY_ARM) {

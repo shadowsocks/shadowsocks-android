@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="frontproxy_type_entry">
+        <item>http</item>
+        <item>socks4</item>
+        <item>socks5</item>
+    </string-array>
+
     <string-array name="enc_method_entry">
         <item>none</item>
         <item>table</item>

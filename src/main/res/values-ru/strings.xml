@@ -159,6 +159,14 @@
   <string name="action_sort">Автоматическая сортировка по времени ожидания</string>
   <string name="ping">пинг</string>
 
+  <string name="frontproxy_enable">включить</string>
+  <string name="frontproxy_addr">Адрес</string>
+  <string name="frontproxy_port">порт</string>
+  <string name="frontproxy_username">имя пользователя</string>
+  <string name="frontproxy_password">пароль</string>
+  <string name="frontproxy_type">Тип</string>
+  <string name="frontproxy_set">фронт полномочие</string>
+
 
   <string name="scan_qrcode_install_title">Сканирование подсказки кода</string>
   <string name="scan_qrcode_install_text">Кажется, вы не установили сканер в соответствии с ZXing стандартами, нажмите кнопку «ОК» приведет вас в магазин приложений, где вы установили загрузку, или вы можете нажать кнопку «Загрузить», чтобы загрузить APK установлен непосредственно.</string>

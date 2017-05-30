@@ -28,3 +28,7 @@
 [submodule "src/main/jni/pcre"]
 	path = src/main/jni/pcre
 	url = https://android.googlesource.com/platform/external/pcre
+[submodule "src/main/jni/proxychains"]
+	path = src/main/jni/proxychains
+	url = https://github.com/esdeathlove/proxychains-ng.git
+	branch = master

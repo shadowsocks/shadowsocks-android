@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
-          android:versionCode="257"
-          android:versionName="3.3.8.3">
+          android:versionCode="293"
+          android:versionName="3.3.9">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -31,7 +31,8 @@
             android:backupAgent=".ShadowsocksBackupAgent"
             android:label="@string/app_name"
             android:theme="@style/Theme.Material"
-            android:banner="@drawable/ic_start_connected">
+            android:banner="@drawable/ic_start_connected"
+            android:debuggable="true">
 
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>
@@ -62,7 +63,7 @@
                 android:name=".ShadowsocksRunnerActivity"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:excludeFromRecents="true"
-		android:taskAffinity=""
+		            android:taskAffinity=""
                 android:launchMode="singleTask">
         </activity>
 

@@ -13,9 +13,9 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.app.ProgressDialog
 import android.content._
+import android.view.View
 import android.webkit.{WebView, WebViewClient}
-import android.widget.EditText
-import android.widget.TextView
+import android.widget._
 import android.os.Looper
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
@@ -23,9 +23,12 @@ import com.github.shadowsocks.preferences._
 import com.github.shadowsocks.utils.{Key, TcpFastOpen, Utils}
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils.IOUtils
+import android.content.Context
+import com.github.shadowsocks.utils._
 
 import java.io.InputStreamReader
 import java.io.BufferedReader
+import android.util.Log
 
 object ShadowsocksSettings {
   // Constants
@@ -296,6 +299,85 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
         .setTitle("Logcat")
         .setNegativeButton(getString(android.R.string.ok), null)
         .setView(et_logcat)
+        .create()
+        .show()
+      true
+    })
+
+    findPreference(Key.frontproxy).setOnPreferenceClickListener((preference: Preference) => {
+      getPreferenceManager.setSharedPreferencesMode(Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS)
+      val prefs = getPreferenceManager.getSharedPreferences()
+
+      val view = View.inflate(activity, R.layout.layout_front_proxy, null);
+      val sw_frontproxy_enable = view.findViewById(R.id.sw_frontproxy_enable).asInstanceOf[Switch]
+      val sp_frontproxy_type = view.findViewById(R.id.sp_frontproxy_type).asInstanceOf[Spinner]
+      val et_frontproxy_addr = view.findViewById(R.id.et_frontproxy_addr).asInstanceOf[EditText]
+      val et_frontproxy_port = view.findViewById(R.id.et_frontproxy_port).asInstanceOf[EditText]
+      val et_frontproxy_username = view.findViewById(R.id.et_frontproxy_username).asInstanceOf[EditText]
+      val et_frontproxy_password = view.findViewById(R.id.et_frontproxy_password).asInstanceOf[EditText]
+
+      sp_frontproxy_type.setSelection(getResources().getStringArray(R.array.frontproxy_type_entry).indexOf(prefs.getString("frontproxy_type", "socks5")))
+
+      if (prefs.getInt("frontproxy_enable", 0) == 1) {
+        sw_frontproxy_enable.setChecked(true)
+      }
+
+      et_frontproxy_addr.setText(prefs.getString("frontproxy_addr", ""))
+      et_frontproxy_port.setText(prefs.getString("frontproxy_port", ""))
+      et_frontproxy_username.setText(prefs.getString("frontproxy_username", ""))
+      et_frontproxy_password.setText(prefs.getString("frontproxy_password", ""))
+
+      sw_frontproxy_enable.setOnCheckedChangeListener(((_, isChecked: Boolean) => {
+        val prefs_edit = prefs.edit()
+        if (isChecked) {
+          prefs_edit.putInt("frontproxy_enable", 1)
+          if (!new File(app.getApplicationInfo.dataDir + "/proxychains.conf").exists) {
+            val proxychains_conf = ConfigUtils
+              .PROXYCHAINS.formatLocal(Locale.ENGLISH, prefs.getString("frontproxy_type", "socks5")
+                                                    , prefs.getString("frontproxy_addr", "")
+                                                    , prefs.getString("frontproxy_port", "")
+                                                    , prefs.getString("frontproxy_username", "")
+                                                    , prefs.getString("frontproxy_password", ""))
+            Utils.printToFile(new File(app.getApplicationInfo.dataDir + "/proxychains.conf"))(p => {
+              p.println(proxychains_conf)
+            })
+          }
+        } else {
+          prefs_edit.putInt("frontproxy_enable", 0)
+          if (new File(app.getApplicationInfo.dataDir + "/proxychains.conf").exists) {
+            new File(app.getApplicationInfo.dataDir + "/proxychains.conf").delete
+          }
+        }
+        prefs_edit.apply()
+      }): CompoundButton.OnCheckedChangeListener)
+
+      new AlertDialog.Builder(activity)
+        .setTitle(getString(R.string.frontproxy_set))
+        .setPositiveButton(android.R.string.ok, ((_, _) => {
+          val prefs_edit = prefs.edit()
+          prefs_edit.putString("frontproxy_type", sp_frontproxy_type.getSelectedItem().toString())
+
+          prefs_edit.putString("frontproxy_addr", et_frontproxy_addr.getText().toString())
+          prefs_edit.putString("frontproxy_port", et_frontproxy_port.getText().toString())
+          prefs_edit.putString("frontproxy_username", et_frontproxy_username.getText().toString())
+          prefs_edit.putString("frontproxy_password", et_frontproxy_password.getText().toString())
+
+          prefs_edit.apply()
+
+          if (new File(app.getApplicationInfo.dataDir + "/proxychains.conf").exists) {
+            val proxychains_conf = ConfigUtils
+              .PROXYCHAINS.formatLocal(Locale.ENGLISH, prefs.getString("frontproxy_type", "socks5")
+                                                    , prefs.getString("frontproxy_addr", "")
+                                                    , prefs.getString("frontproxy_port", "")
+                                                    , prefs.getString("frontproxy_username", "")
+                                                    , prefs.getString("frontproxy_password", ""))
+            Utils.printToFile(new File(app.getApplicationInfo.dataDir + "/proxychains.conf"))(p => {
+              p.println(proxychains_conf)
+            })
+          }
+        }): DialogInterface.OnClickListener)
+        .setNegativeButton(android.R.string.no, null)
+        .setView(view)
         .create()
         .show()
       true

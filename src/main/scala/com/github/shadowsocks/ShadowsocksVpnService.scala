@@ -49,6 +49,7 @@ import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
 import android.os._
+import android.system.Os
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
@@ -70,6 +71,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var sstunnelProcess: GuardedProcess = _
   var pdnsdProcess: GuardedProcess = _
   var tun2socksProcess: GuardedProcess = _
+  var proxychains_enable: Boolean = false
 
   override def onBind(intent: Intent): IBinder = {
     val action = intent.getAction
@@ -147,6 +149,14 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   override def connect() = {
     super.connect()
 
+    if (new File(getApplicationInfo.dataDir + "/proxychains.conf").exists) {
+      proxychains_enable = true
+      Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
+      Os.setenv("PROXYCHAINS_PROTECT_FD_PREFIX", getApplicationInfo.dataDir, true)
+    } else {
+      proxychains_enable = false
+    }
+
     vpnThread = new ShadowsocksVpnThread(this)
     vpnThread.start()
 
@@ -195,15 +205,27 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       p.println(conf)
     })
 
-    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U", "-x"
+    //val old_ld = Os.getenv("LD_PRELOAD")
+
+    //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
+    //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
+
+    var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
 
+    if (proxychains_enable) {
+      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "env"
+    }
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
     sstunnelProcess = new GuardedProcess(cmd).start()
+
+    //Os.setenv("LD_PRELOAD", old_ld, true)
   }
 
   def startShadowsocksDaemon() {
@@ -214,6 +236,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-local-vpn.conf"))(p => {
       p.println(conf)
     })
+
+    //val old_ld = Os.getenv("LD_PRELOAD")
+
+    //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
+    //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-x"
       , "-b", "127.0.0.1"
@@ -230,9 +257,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
+    if (proxychains_enable) {
+      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "env"
+    }
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
     sslocalProcess = new GuardedProcess(cmd).start()
+
+    //Os.setenv("LD_PRELOAD", old_ld, true)
   }
 
   def startDnsTunnel() = {
@@ -242,6 +276,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf"))(p => {
       p.println(conf)
     })
+
+    //val old_ld = Os.getenv("LD_PRELOAD")
+
+    //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
+    //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
       , "-V"
@@ -257,9 +296,16 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     else
       cmd += profile.dns.split(",")(0)
 
+    if (proxychains_enable) {
+      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "env"
+    }
+
     if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
 
     sstunnelProcess = new GuardedProcess(cmd).start()
+
+    //Os.setenv("LD_PRELOAD", old_ld, true)
   }
 
   def startDnsDaemon() {

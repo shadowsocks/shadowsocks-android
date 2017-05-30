@@ -167,6 +167,14 @@
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
 
+  <string name="frontproxy_enable">Enable</string>
+  <string name="frontproxy_addr">Address</string>
+  <string name="frontproxy_port">Port</string>
+  <string name="frontproxy_username">Username</string>
+  <string name="frontproxy_password">Password</string>
+  <string name="frontproxy_type">Type</string>
+  <string name="frontproxy_set">FrontProxy</string>
+
 
 
   <string name="scan_qrcode_install_title">Scan tips</string>

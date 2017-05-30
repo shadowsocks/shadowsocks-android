@@ -389,7 +389,7 @@ SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
+LOCAL_CFLAGS    := -Wall -O0 -g -fno-strict-aliasing -DMODULE_LOCAL \
 					-DUSE_CRYPTO_MBEDTLS -DANDROID -DHAVE_CONFIG_H \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev \
@@ -518,7 +518,7 @@ TUN2SOCKS_SOURCES := \
         base/DebugObject.c \
         base/BLog.c \
         base/BPending.c \
-		system/BDatagram_unix.c \
+				system/BDatagram_unix.c \
         flowextra/PacketPassInactivityMonitor.c \
         tun2socks/SocksUdpGwClient.c \
         udpgw_client/UdpGwClient.c
@@ -585,6 +585,36 @@ libpcre_src_files := \
 LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files))
 
 include $(BUILD_STATIC_LIBRARY)
+
+########################################################
+## libproxychains4
+########################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE:= libproxychains4
+
+LOCAL_C_INCLUDES:= $(LOCAL_PATH)/proxychains/src
+
+PROXYCHAINS_SOURCES := version.c core.c common.c libproxychains.c \
+											allocator_thread.c ip_type.c hostsreader.c \
+											hash.c debug.c
+
+LOCAL_SRC_FILES := $(addprefix proxychains/src/, $(PROXYCHAINS_SOURCES))
+
+LOCAL_CFLAGS :=  	-fPIC -pthread -ldl -Wl,--no-as-needed -Wl,-soname=libproxychains4.so \
+									-DANDROID -O0 -g\
+									-I$(LOCAL_PATH)/include/proxychains \
+									-I$(LOCAL_PATH)/proxychains/src \
+				   				-I$(LOCAL_PATH)/libancillary \
+									-DLIB_DIR=\"/data/user/0/in.zhaoj.shadowsocksr/lib\" -DINSTALL_PREFIX=\"/data/user/0/in.zhaoj.shadowsocksr/\" \
+									-DDLL_NAME=\"libproxychains4.so\" -DSYSCONFDIR=\"/data/user/0/in.zhaoj.shadowsocksr/\"
+
+LOCAL_STATIC_LIBRARIES := libancillary
+
+LOCAL_LDLIBS := -ldl -llog
+
+include $(BUILD_SHARED_LIBRARY)
 
 # Import cpufeatures
 $(call import-module,android/cpufeatures)

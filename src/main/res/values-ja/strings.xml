@@ -168,6 +168,14 @@
   <string name="action_sort">レイテンシによる自動ソート</string>
   <string name="ping">Ping</string>
 
+  <string name="frontproxy_enable">有効にする</string>
+  <string name="frontproxy_addr">サーバーアドレス</string>
+  <string name="frontproxy_port">リモートポート</string>
+  <string name="frontproxy_username">ユーザー名</string>
+  <string name="frontproxy_password">パスワード</string>
+  <string name="frontproxy_type">タイプ</string>
+  <string name="frontproxy_set">フロントエージェント</string>
+
   <!-- status -->
   <string name="sent">送信済み:</string>
   <string name="received">受信済み:</string>

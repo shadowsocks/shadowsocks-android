@@ -214,7 +214,7 @@ class ShadowsocksApplication extends Application {
   def crashRecovery() {
     val cmd = new ArrayBuffer[String]()
 
-    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "kcptun")) {
+    for (task <- Array("ss-local", "ss-tunnel", "pdnsd", "redsocks", "tun2socks", "proxychains")) {
       cmd.append("killall %s".formatLocal(Locale.ENGLISH, task))
       cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
         .formatLocal(Locale.ENGLISH, getApplicationInfo.dataDir, task))

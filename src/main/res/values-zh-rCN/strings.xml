@@ -171,6 +171,14 @@
   <string name="action_sort">基于延时自动排序</string>
   <string name="ping">测试延时</string>
 
+  <string name="frontproxy_enable">启用</string>
+  <string name="frontproxy_addr">地址</string>
+  <string name="frontproxy_port">端口</string>
+  <string name="frontproxy_username">用户名</string>
+  <string name="frontproxy_password">密码</string>
+  <string name="frontproxy_type">类型</string>
+  <string name="frontproxy_set">前置代理</string>
+
   <!-- status -->
   <string name="sent">发送:</string>
   <string name="received">接收:</string>

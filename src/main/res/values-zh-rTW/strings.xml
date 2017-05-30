@@ -173,6 +173,14 @@
   <string name="action_sort">基於延時自動排序</string>
   <string name="ping">測試延時</string>
 
+  <string name="frontproxy_enable">啟用</string>
+  <string name="frontproxy_addr">地址</string>
+  <string name="frontproxy_port">連接埠</string>
+  <string name="frontproxy_username">用戶名</string>
+  <string name="frontproxy_password">密碼</string>
+  <string name="frontproxy_type">類型</string>
+  <string name="frontproxy_set">前置代理</string>
+
   <!-- status -->
   <string name="sent">傳送:</string>
   <string name="received">接收:</string>

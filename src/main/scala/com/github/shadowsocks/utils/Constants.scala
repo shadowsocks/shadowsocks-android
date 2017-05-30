@@ -72,6 +72,11 @@ object ConfigUtils {
     " type = socks5;\n" +
     "}\n"
 
+  val PROXYCHAINS = "strict_chain\n" +
+    "localnet 127.0.0.0/255.0.0.0\n" +
+    "[ProxyList]\n" +
+    "%s %s %s %s %s"
+
   val PDNSD_LOCAL =
     """
       |global {
@@ -195,6 +200,7 @@ object Key {
   val tfo = "tcp_fastopen"
   val currentVersionCode = "currentVersionCode"
   val logcat = "logcat"
+  val frontproxy = "frontproxy"
 }
 
 object State {
