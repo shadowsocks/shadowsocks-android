@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
-          android:versionCode="293"
+          android:versionCode="294"
           android:versionName="3.3.9">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -31,8 +31,7 @@
             android:backupAgent=".ShadowsocksBackupAgent"
             android:label="@string/app_name"
             android:theme="@style/Theme.Material"
-            android:banner="@drawable/ic_start_connected"
-            android:debuggable="true">
+            android:banner="@drawable/ic_start_connected">
 
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>
