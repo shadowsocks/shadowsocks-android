@@ -24,6 +24,7 @@ import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
 import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
 import android.net.Uri
+import java.io.IOException
 import android.support.design.widget.Snackbar
 import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.ShadowsocksApplication.app
@@ -39,6 +40,9 @@ import java.lang.Thread
 import java.util.Random;
 import android.util.Log
 import android.content.DialogInterface._
+import okhttp3._
+import java.util.concurrent.TimeUnit
+import javax.net.SocketFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -99,7 +103,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       val pingBtn = itemView.findViewById(R.id.ping_single)
       pingBtn.setOnClickListener(_ => {
 
-        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, false)
+        val singleTestProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.tips_testing), getString(R.string.tips_testing), false, true)
 
         var profile = item
 
@@ -121,11 +125,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
           val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
             , "-t", "600"
+            , "-L", "www.google.com:80"
             , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
 
           if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
-          var sslocalProcess = new GuardedProcess(cmd).start()
+          if (ssTestProcess != null) {
+            ssTestProcess.destroy()
+            ssTestProcess = null
+          }
+
+          ssTestProcess = new GuardedProcess(cmd).start()
 
           val start = currentTimeMillis
           while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
@@ -135,11 +145,51 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               case e: InterruptedException => Unit
             }
           }
-
-          val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
+          //val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
 
           // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-          autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
+
+          //okhttp
+          var result = ""
+          val builder = new OkHttpClient.Builder()
+                          .connectTimeout(5, TimeUnit.SECONDS)
+                          .writeTimeout(5, TimeUnit.SECONDS)
+                          .readTimeout(5, TimeUnit.SECONDS)
+
+          val client = builder.build();
+
+          val request = new Request.Builder()
+            .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
+            .build();
+
+          try {
+            val response = client.newCall(request).execute()
+            val code = response.code()
+            if (code == 204 || code == 200 && response.body().contentLength == 0) {
+              val start = currentTimeMillis
+              val response = client.newCall(request).execute()
+              val elapsed = currentTimeMillis - start
+              val code = response.code()
+              if (code == 204 || code == 200 && response.body().contentLength == 0)
+              {
+                result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                profile.elapsed = elapsed
+                app.profileManager.updateProfile(profile)
+
+                this.updateText(0, 0, elapsed)
+              }
+              else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+              response.body().close()
+            } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+            response.body().close()
+          } catch {
+            case e: IOException =>
+              result = getString(R.string.connection_test_error, e.getMessage)
+          }
+
+          Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
+
+          /*autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
             .asInstanceOf[HttpURLConnection]) { conn =>
             conn.setConnectTimeout(5 * 1000)
             conn.setReadTimeout(5 * 1000)
@@ -189,11 +239,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 result = getString(R.string.connection_test_error, e.getMessage)
                 Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
             }
-          }
+          }*/
 
-          if (sslocalProcess != null) {
-            sslocalProcess.destroy()
-            sslocalProcess = null
+          if (ssTestProcess != null) {
+            ssTestProcess.destroy()
+            ssTestProcess = null
           }
 
           singleTestProgressDialog.dismiss()
@@ -326,6 +376,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var testProgressDialog: ProgressDialog = _
   private var testAsyncJob: Thread = _
   private var isTesting: Boolean = true
+  private var ssTestProcess: GuardedProcess = _
 
   private val REQUEST_QRCODE = 1
 
@@ -606,6 +657,12 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   override def onDestroy {
     detachService()
+
+    if (ssTestProcess != null) {
+      ssTestProcess.destroy()
+      ssTestProcess = null
+    }
+
     undoManager.flush
     app.profileManager.setProfileAddedListener(null)
     super.onDestroy
@@ -684,11 +741,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                   val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
                     , "-t", "600"
+                    , "-L", "www.google.com:80"
                     , "-c", getApplicationInfo.dataDir + "/ss-local-test.conf")
 
                   if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
-                  var sslocalProcess = new GuardedProcess(cmd).start()
+                  if (ssTestProcess != null) {
+                    ssTestProcess.destroy()
+                    ssTestProcess = null
+                  }
+
+                  ssTestProcess = new GuardedProcess(cmd).start()
 
                   val start = currentTimeMillis
                   while (start - currentTimeMillis < 5 * 1000 && isPortAvailable(profile.localPort + 2)) {
@@ -699,11 +762,50 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                     }
                   }
 
+                  var result = ""
+                  val builder = new OkHttpClient.Builder()
+                                  .connectTimeout(5, TimeUnit.SECONDS)
+                                  .writeTimeout(5, TimeUnit.SECONDS)
+                                  .readTimeout(5, TimeUnit.SECONDS)
 
-                  val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
+                  val client = builder.build();
+
+                  val request = new Request.Builder()
+                    .url("http://127.0.0.1:" + (profile.localPort + 2) + "/generate_204").removeHeader("Host").addHeader("Host", "www.google.com")
+                    .build();
+
+                  try {
+                    val response = client.newCall(request).execute()
+                    val code = response.code()
+                    if (code == 204 || code == 200 && response.body().contentLength == 0) {
+                      val start = currentTimeMillis
+                      val response = client.newCall(request).execute()
+                      val elapsed = currentTimeMillis - start
+                      val code = response.code()
+                      if (code == 204 || code == 200 && response.body().contentLength == 0)
+                      {
+                        result = getString(R.string.connection_test_available, elapsed: java.lang.Long)
+                        profile.elapsed = elapsed
+                        app.profileManager.updateProfile(profile)
+                      }
+                      else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                      response.body().close()
+                    } else throw new Exception(getString(R.string.connection_test_error_status_code, code: Integer))
+                    response.body().close()
+                  } catch {
+                    case e: IOException =>
+                      result = getString(R.string.connection_test_error, e.getMessage)
+                  }
+
+                  var msg = Message.obtain()
+                  msg.obj = profile.name + " " + result
+                  msg.setTarget(showProgresshandler)
+                  msg.sendToTarget()
+
+                  //val proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", profile.localPort + 2))
 
                   // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-                  autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
+                  /*autoDisconnect(new URL("https", "www.google.com", "/generate_204").openConnection(proxy)
                     .asInstanceOf[HttpURLConnection]) { conn =>
                     conn.setConnectTimeout(5 * 1000)
                     conn.setReadTimeout(5 * 1000)
@@ -758,11 +860,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                         msg.setTarget(showProgresshandler)
                         msg.sendToTarget()
                     }
-                  }
+                  }*/
 
-                  if (sslocalProcess != null) {
-                    sslocalProcess.destroy()
-                    sslocalProcess = null
+                  if (ssTestProcess != null) {
+                    ssTestProcess.destroy()
+                    ssTestProcess = null
                   }
                 }
               })
@@ -771,6 +873,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                 testProgressDialog.dismiss
                 testProgressDialog = null;
               }
+
               finish()
               startActivity(getIntent())
               Looper.loop()

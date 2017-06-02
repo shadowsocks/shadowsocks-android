@@ -22,10 +22,14 @@ proguardOptions ++=
   "-keep class com.github.shadowsocks.System { *; }" ::
   "-keep class okhttp3.** { *; }" ::
   "-keep interface okhttp3.** { *; }" ::
+  "-keep class okio.** { *; }" ::
+  "-keep interface okio.** { *; }" ::
   "-dontwarn okio.**" ::
   "-dontwarn com.google.android.gms.internal.**" ::
   "-dontwarn com.j256.ormlite.**" ::
   "-dontwarn org.xbill.**" ::
+  "-dontwarn javax.annotation.Nullable" ::
+  "-dontwarn javax.annotation.ParametersAreNonnullByDefault" ::
   Nil
 
 shrinkResources := true
@@ -48,11 +52,12 @@ libraryDependencies ++=
   "com.mikepenz" % "iconics-core" % "2.8.2" ::
   "com.mikepenz" % "materialdrawer" % "5.8.1" ::
   "com.mikepenz" % "materialize" % "1.0.0" ::
-  "com.squareup.okhttp3" % "okhttp" % "3.5.0" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.7" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.+" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
+  "com.squareup.okhttp3" % "okhttp" % "3.8.0" ::
+  "com.google.code.findbugs" % "jsr305" % "1.3.+" ::
   Nil
 
 lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")

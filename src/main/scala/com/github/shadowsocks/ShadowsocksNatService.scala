@@ -100,6 +100,8 @@ class ShadowsocksNatService extends BaseService {
 
     if (proxychains_enable) {
       cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
+      cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
       cmd prepend "env"
     }
 
@@ -131,6 +133,8 @@ class ShadowsocksNatService extends BaseService {
 
       if (proxychains_enable) {
         cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+        cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
+        cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
         cmd prepend "env"
       }
 
@@ -375,8 +379,8 @@ class ShadowsocksNatService extends BaseService {
 
     if (new File(getApplicationInfo.dataDir + "/proxychains.conf").exists) {
       proxychains_enable = true
-      Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
-      Os.setenv("PROXYCHAINS_PROTECT_FD_PREFIX", getApplicationInfo.dataDir, true)
+      //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
+      //Os.setenv("PROXYCHAINS_PROTECT_FD_PREFIX", getApplicationInfo.dataDir, true)
     } else {
       proxychains_enable = false
     }
