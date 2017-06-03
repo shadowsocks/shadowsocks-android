@@ -72,6 +72,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var pdnsdProcess: GuardedProcess = _
   var tun2socksProcess: GuardedProcess = _
   var proxychains_enable: Boolean = false
+  var host_arg = ""
 
   override def onBind(intent: Intent): IBinder = {
     val action = intent.getAction
@@ -164,6 +165,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     killProcesses()
 
     // Resolve the server address
+    host_arg = profile.host
     if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
       case Some(addr) => profile.host = addr
       case None => throw NameNotResolvedException()
@@ -213,6 +215,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
+      , "--host", host_arg
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-udp-vpn.conf")
 
@@ -247,6 +250,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-x"
       , "-b", "127.0.0.1"
       , "-t", "600"
+      , "--host", host_arg
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-local-vpn.conf")
 
@@ -290,6 +294,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       , "-V"
       , "-u"
       , "-t", "60"
+      , "--host", host_arg
       , "-b", "127.0.0.1"
       , "-P", getApplicationInfo.dataDir
       , "-c", getApplicationInfo.dataDir + "/ss-tunnel-vpn.conf")

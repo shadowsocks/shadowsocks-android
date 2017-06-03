@@ -75,6 +75,7 @@ class ShadowsocksNatService extends BaseService {
   var pdnsdProcess: GuardedProcess = _
   var su: Shell.Interactive = _
   var proxychains_enable: Boolean = false
+  var host_arg = ""
 
   def startShadowsocksDaemon() {
 
@@ -88,6 +89,7 @@ class ShadowsocksNatService extends BaseService {
     val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-x"
           , "-b" , "127.0.0.1"
           , "-t" , "600"
+          , "--host", host_arg
           , "-P", getApplicationInfo.dataDir
           , "-c" , getApplicationInfo.dataDir + "/ss-local-nat.conf")
 
@@ -120,6 +122,7 @@ class ShadowsocksNatService extends BaseService {
       val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
         , "-u"
         , "-t" , "60"
+        , "--host", host_arg
         , "-b" , "127.0.0.1"
         , "-l" , (profile.localPort + 53).toString
         , "-P" , getApplicationInfo.dataDir
@@ -151,7 +154,8 @@ class ShadowsocksNatService extends BaseService {
       })
 
       val cmdBuf = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
-        , "-t" , "10"
+        , "-t" , "60"
+        , "--host", host_arg
         , "-b" , "127.0.0.1"
         , "-l" , (profile.localPort + 63).toString
         , "-P", getApplicationInfo.dataDir
@@ -385,6 +389,7 @@ class ShadowsocksNatService extends BaseService {
       proxychains_enable = false
     }
 
+    host_arg = profile.host
     if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
       case Some(a) => profile.host = a
       case None => throw NameNotResolvedException()
