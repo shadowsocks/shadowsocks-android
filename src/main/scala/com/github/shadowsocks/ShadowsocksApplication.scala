@@ -52,7 +52,7 @@ import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
-import com.github.shadowsocks.database.{DBHelper, ProfileManager}
+import com.github.shadowsocks.database.{DBHelper, ProfileManager, SSRSubManager}
 import com.github.shadowsocks.job.DonaldTrump
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
@@ -89,6 +89,8 @@ class ShadowsocksApplication extends Application {
   lazy val settings = PreferenceManager.getDefaultSharedPreferences(this)
   lazy val editor = settings.edit
   lazy val profileManager = new ProfileManager(new DBHelper(this))
+  lazy val ssrsubManager = new SSRSubManager(new DBHelper(this))
+  lazy val resources = getResources()
 
   def isNatEnabled = settings.getBoolean(Key.isNAT, false)
   def isVpnEnabled = !isNatEnabled

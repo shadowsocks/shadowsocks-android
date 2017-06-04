@@ -201,6 +201,8 @@ object Key {
   val currentVersionCode = "currentVersionCode"
   val logcat = "logcat"
   val frontproxy = "frontproxy"
+  val ssrsub_autoupdate = "ssrsub_autoupdate"
+  val group_name = "groupName"
 }
 
 object State {

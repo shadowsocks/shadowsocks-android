@@ -24,6 +24,16 @@
             app:layout_behavior="com.github.shadowsocks.widget.FloatingActionMenuBehavior">
 
             <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fab_ssr_sub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="@color/material_accent_500"
+                app:fab_colorPressed="@color/material_accent_700"
+                app:fab_colorRipple="@android:color/white"
+                app:fab_size="mini"
+                app:fab_label="@string/add_profile_methods_ssr_sub"
+                />
+            <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/fab_manual_add"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -92,6 +92,9 @@ class Profile {
   var udpdns: Boolean = false
 
   @DatabaseField
+  var url_group: String = ""
+
+  @DatabaseField
   var dns: String = "208.67.222.222:53"
 
   @DatabaseField
@@ -119,12 +122,13 @@ class Profile {
   var userOrder: Long = _
 
 
-  override def toString = "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s".formatLocal(Locale.ENGLISH,
+  override def toString = "ssr://" + Base64.encodeToString("%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s&group=%s".formatLocal(Locale.ENGLISH,
     host, remotePort, protocol, method, obfs, Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
     password).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
     obfs_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
     protocol_param).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
-    name).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
+    name).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP), Base64.encodeToString("%s".formatLocal(Locale.ENGLISH,
+    url_group).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)).getBytes, Base64.NO_PADDING | Base64.URL_SAFE | Base64.NO_WRAP)
 
   def isMethodUnsafe = "table".equalsIgnoreCase(method) || "rc4".equalsIgnoreCase(method)
 }

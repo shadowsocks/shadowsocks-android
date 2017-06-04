@@ -12,7 +12,7 @@
   <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
   <string name="stat">Network Traffic</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
-  <string name="stat_profiles">\n%1$s↑\t%2$s↓\t%3$sms</string>
+  <string name="stat_profiles">\n%1$s↑\t%2$s↓\t%3$sms\t%4$s</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
   <plurals name="bytes" translatable="false">
     <item quantity="one">Byte</item>
@@ -175,6 +175,19 @@
   <string name="frontproxy_type">Type</string>
   <string name="frontproxy_set">FrontProxy</string>
 
+  
+  <string name="add_profile_methods_ssr_sub">Add/Update SSR Subscription</string>
+  <string name="ssrsub_autoupdate_enable">Auto Update</string>
+  <string name="ssrsub_add">Add Url</string>
+  <string name="ssrsub_ok">Ok and Update</string>
+  <string name="ssrsub_list">Item List</string>
+  <string name="ssrsub_error">Url invaild or Network unavailable.</string>
+  <string name="ssrsub_progres">Processing...</string>
+  <string name="ssrsub_progres_text">Please wait...</string>
+  <string name="ssrsub_toast_start">Begin updating subscription...</string>
+  <string name="ssrsub_toast_success">Update subscription successfully!</string>
+  <string name="ssrsub_toast_fail">Update subscription fail!</string>
+  <string name="group_name">Group Name</string>
 
 
   <string name="scan_qrcode_install_title">Scan tips</string>

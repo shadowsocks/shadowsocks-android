@@ -65,13 +65,15 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 22) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 24) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
+  lazy val ssrsubDao: Dao[SSRSub, Int] = getDao(classOf[SSRSub])
 
   def onCreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
     TableUtils.createTable(connectionSource, classOf[Profile])
+    TableUtils.createTable(connectionSource, classOf[SSRSub])
   }
 
   def onUpgrade(database: SQLiteDatabase, connectionSource: ConnectionSource, oldVersion: Int,
@@ -145,6 +147,14 @@ class DBHelper(val context: Context)
 
         if (oldVersion < 22) {
           profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN elapsed LONG DEFAULT 0;")
+        }
+
+        if (oldVersion < 23) {
+          profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN url_group VARCHAR DEFAULT '';")
+        }
+
+        if (oldVersion < 24) {
+          TableUtils.createTable(connectionSource, classOf[SSRSub])
         }
       } catch {
         case ex: Exception =>

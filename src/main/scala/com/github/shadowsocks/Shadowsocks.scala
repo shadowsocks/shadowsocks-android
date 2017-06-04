@@ -61,6 +61,7 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
+import com.github.shadowsocks.job.SSRSubUpdateJob
 
 import com.github.shadowsocks.ShadowsocksApplication.app
 
@@ -327,6 +328,16 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       true
     })
     updateTraffic(0, 0, 0, 0)
+
+    app.ssrsubManager.getFirstSSRSub match {
+      case Some(first) => {
+
+      }
+      case None => app.ssrsubManager.createDefault()
+    }
+
+    SSRSubUpdate.update(this)
+    SSRSubUpdateJob.schedule()
 
     handler.post(() => attachService)
   }

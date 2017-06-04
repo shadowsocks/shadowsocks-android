@@ -16,6 +16,7 @@ object DonaldTrump extends JobCreator {
     val parts = tag.split(":")
     parts(0) match {
       case AclSyncJob.TAG => new AclSyncJob(parts(1))
+      case SSRSubUpdateJob.TAG => new SSRSubUpdateJob()
       case _ =>
         Log.w("DonaldTrump", "Unknown job tag: " + tag)
         null

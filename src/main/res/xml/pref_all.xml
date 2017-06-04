@@ -6,6 +6,10 @@
             android:title="@string/proxy_cat">
 
         <com.github.shadowsocks.preferences.SummaryEditTextPreference
+                android:key="groupName"
+                android:persistent="false"
+                android:title="@string/group_name"/>
+        <com.github.shadowsocks.preferences.SummaryEditTextPreference
                 android:key="profileName"
                 android:persistent="false"
                 android:title="@string/profile_name"/>

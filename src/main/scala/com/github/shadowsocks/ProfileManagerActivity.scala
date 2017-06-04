@@ -22,7 +22,7 @@ import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.text.style.TextAppearanceSpan
 import android.text.{SpannableStringBuilder, Spanned, TextUtils}
 import android.view._
-import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast}
+import android.widget.{CheckedTextView, ImageView, LinearLayout, Toast, Switch, CompoundButton, TextView, EditText}
 import android.net.Uri
 import java.io.IOException
 import android.support.design.widget.Snackbar
@@ -30,6 +30,7 @@ import com.github.clans.fab.{FloatingActionButton, FloatingActionMenu}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.database.SSRSub
 import com.github.shadowsocks.utils.{Key, Parser, TrafficMonitor, Utils}
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.utils._
@@ -37,13 +38,12 @@ import com.github.shadowsocks.utils.CloseUtils._
 import net.glxn.qrgen.android.QRCode
 import java.lang.System.currentTimeMillis
 import java.lang.Thread
-import java.util.Random;
-import android.util.Log
+import java.util.Random
+import android.util.{Base64, Log}
 import android.content.DialogInterface._
 import okhttp3._
 import java.util.concurrent.TimeUnit
-import javax.net.SocketFactory
-
+import android.preference.PreferenceManager
 import scala.collection.mutable.ArrayBuffer
 
 final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClickListener with ServiceBoundContext
@@ -267,10 +267,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         elapsed = elapsedInput
       }
       builder.append(item.name)
-      if (tx != 0 || rx != 0 || elapsed != 0) {
+      if (tx != 0 || rx != 0 || elapsed != 0 || item.url_group != "") {
         val start = builder.length
         builder.append(getString(R.string.stat_profiles,
-          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed)))
+          TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx), String.valueOf(elapsed), item.url_group))
         builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
           start + 1, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
       }
@@ -357,12 +357,66 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
   }
 
+  private final class SSRSubViewHolder(val view: View) extends RecyclerView.ViewHolder(view)
+    with View.OnClickListener with View.OnKeyListener {
+
+    var item: SSRSub = _
+    private val text = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+
+    def updateText() {
+      val builder = new SpannableStringBuilder
+      builder.append(this.item.url_group + "\n")
+      val start = builder.length
+      builder.append(this.item.url)
+      builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
+        start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      handler.post(() => text.setText(builder))
+    }
+
+    def bind(item: SSRSub) {
+      this.item = item
+      updateText()
+    }
+
+    def onClick(v: View) = {
+    }
+
+    def onKey(v: View, keyCode: Int, event: KeyEvent) = {
+      true
+    }
+  }
+
+  private class SSRSubAdapter extends RecyclerView.Adapter[SSRSubViewHolder] {
+    var profiles = new ArrayBuffer[SSRSub]
+    profiles ++= app.ssrsubManager.getAllSSRSubs.getOrElse(List.empty[SSRSub])
+
+    def getItemCount = profiles.length
+
+    def onBindViewHolder(vh: SSRSubViewHolder, i: Int) = vh.bind(profiles(i))
+
+    def onCreateViewHolder(vg: ViewGroup, i: Int) =
+      new SSRSubViewHolder(LayoutInflater.from(vg.getContext).inflate(R.layout.layout_ssr_sub_item, vg, false))
+
+    def add(item: SSRSub) {
+      undoManager.flush
+      val pos = getItemCount
+      profiles += item
+      notifyItemInserted(pos)
+    }
+
+    def remove(pos: Int) {
+      profiles.remove(pos)
+      notifyItemRemoved(pos)
+    }
+  }
+
   private var selectedItem: ProfileViewHolder = _
   private val handler = new Handler
 
   private var menu : FloatingActionMenu = _
 
   private lazy val profilesAdapter = new ProfilesAdapter
+  private lazy val ssrsubAdapter = new SSRSubAdapter
   private var undoManager: UndoSnackbarManager[Profile] = _
 
   private lazy val clipboard = getSystemService(Context.CLIPBOARD_SERVICE).asInstanceOf[ClipboardManager]
@@ -474,6 +528,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val importAddFAB = findViewById(R.id.fab_import_add).asInstanceOf[FloatingActionButton]
     importAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_content_paste))
     importAddFAB.setOnClickListener(this)
+    val ssrsubAddFAB = findViewById(R.id.fab_ssr_sub).asInstanceOf[FloatingActionButton]
+    ssrsubAddFAB.setImageDrawable(dm.getDrawable(this, R.drawable.ic_rss))
+    ssrsubAddFAB.setOnClickListener(this)
     menu.setOnMenuToggleListener(opened => if (opened) qrcodeAddFAB.setVisibility(
       if (getPackageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)) View.VISIBLE else View.GONE))
   }
@@ -566,7 +623,173 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           }
         }
         Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show
+      case R.id.fab_ssr_sub =>
+        menu.toggle(true)
+        ssrsubDialog()
     }
+  }
+
+  def ssrsubDialog() {
+    val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+
+    val view = View.inflate(this, R.layout.layout_ssr_sub, null);
+    val sw_ssr_sub_autoupdate_enable = view.findViewById(R.id.sw_ssr_sub_autoupdate_enable).asInstanceOf[Switch]
+
+    app.ssrsubManager.setSSRSubAddedListener(ssrsubAdapter.add)
+    val ssusubsList = view.findViewById(R.id.ssrsubList).asInstanceOf[RecyclerView]
+    val layoutManager = new LinearLayoutManager(this)
+    ssusubsList.setLayoutManager(layoutManager)
+    ssusubsList.setItemAnimator(new DefaultItemAnimator)
+    ssusubsList.setAdapter(ssrsubAdapter)
+    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+      ItemTouchHelper.START | ItemTouchHelper.END) {
+      def onSwiped(viewHolder: ViewHolder, direction: Int) = {
+        val index = viewHolder.getAdapterPosition
+        ssrsubAdapter.remove(index)
+        app.ssrsubManager.delSSRSub(viewHolder.asInstanceOf[SSRSubViewHolder].item.id)
+      }
+      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+        true
+      }
+    }).attachToRecyclerView(ssusubsList)
+
+    if (prefs.getInt(Key.ssrsub_autoupdate, 0) == 1) {
+      sw_ssr_sub_autoupdate_enable.setChecked(true)
+    }
+
+    sw_ssr_sub_autoupdate_enable.setOnCheckedChangeListener(((_, isChecked: Boolean) => {
+      val prefs_edit = prefs.edit()
+      if (isChecked) {
+        prefs_edit.putInt(Key.ssrsub_autoupdate, 1)
+      } else {
+        prefs_edit.putInt(Key.ssrsub_autoupdate, 0)
+      }
+      prefs_edit.apply()
+    }): CompoundButton.OnCheckedChangeListener)
+
+    new AlertDialog.Builder(this)
+      .setTitle(getString(R.string.add_profile_methods_ssr_sub))
+      .setPositiveButton(R.string.ssrsub_ok, ((_, _) => {
+        Utils.ThrowableFuture {
+          app.ssrsubManager.getAllSSRSubs match {
+            case Some(ssrsubs) =>
+              ssrsubs.foreach((ssrsub: SSRSub) => {
+
+                  var delete_profiles = app.profileManager.getAllProfilesByGroup(ssrsub.url_group) match {
+                    case Some(profiles) =>
+                      profiles
+                    case _ => null
+                  }
+                  var result = ""
+                  val builder = new OkHttpClient.Builder()
+                                  .connectTimeout(5, TimeUnit.SECONDS)
+                                  .writeTimeout(5, TimeUnit.SECONDS)
+                                  .readTimeout(5, TimeUnit.SECONDS)
+
+                  val client = builder.build();
+
+                  val request = new Request.Builder()
+                    .url(ssrsub.url)
+                    .build();
+
+                  try {
+                    val response = client.newCall(request).execute()
+                    val code = response.code()
+                    if (code == 200) {
+                      val response_string = new String(Base64.decode(response.body().string, Base64.URL_SAFE))
+                      var limit_num = -1
+                      var encounter_num = 0
+                      if (response_string.indexOf("MAX=") == 0) {
+                        limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
+                      }
+                      var profiles_ssr = Parser.findAll_ssr(response_string)
+                      profiles_ssr.foreach((profile: Profile) => {
+                        if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
+                          val result = app.profileManager.createProfile_sub(profile)
+                          if (result != 0) {
+                            delete_profiles = delete_profiles.filter(_.id != result)
+                          }
+                        }
+                        encounter_num += 1
+                      })
+
+                      delete_profiles.foreach((profile: Profile) => {
+                        if (profile.id != app.profileId) {
+                          app.profileManager.delProfile(profile.id)
+                        }
+                      })
+                    } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
+                    response.body().close()
+                  } catch {
+                    case e: IOException =>
+                      result = getString(R.string.ssrsub_error, e.getMessage)
+                  }
+              })
+            case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
+          }
+
+          finish()
+          startActivity(new Intent(getIntent()))
+        }
+      }): DialogInterface.OnClickListener)
+      .setNegativeButton(android.R.string.no, null)
+      .setNeutralButton(R.string.ssrsub_add, ((_, _) => {
+        val UrlAddEdit = new EditText(this);
+        new AlertDialog.Builder(this)
+          .setTitle(getString(R.string.ssrsub_add))
+          .setPositiveButton(android.R.string.ok, ((_, _) => {
+            if(UrlAddEdit.getText().toString() != "") {
+              Utils.ThrowableFuture {
+                Looper.prepare()
+                val progressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, false)
+                var result = ""
+                val builder = new OkHttpClient.Builder()
+                                .connectTimeout(5, TimeUnit.SECONDS)
+                                .writeTimeout(5, TimeUnit.SECONDS)
+                                .readTimeout(5, TimeUnit.SECONDS)
+
+                val client = builder.build();
+
+                val request = new Request.Builder()
+                  .url(UrlAddEdit.getText().toString())
+                  .build();
+
+                try {
+                  val response = client.newCall(request).execute()
+                  val code = response.code()
+                  if (code == 200) {
+                    val profiles_ssr = Parser.findAll_ssr(new String(Base64.decode(response.body().string, Base64.URL_SAFE))).toList
+                    if(profiles_ssr(0).url_group != "") {
+                      val ssrsub = new SSRSub {
+                        url = UrlAddEdit.getText().toString()
+                        url_group = profiles_ssr(0).url_group
+                      }
+                      handler.post(() => app.ssrsubManager.createSSRSub(ssrsub))
+                    }
+                  } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
+                  response.body().close()
+                } catch {
+                  case e: IOException =>
+                    result = getString(R.string.ssrsub_error, e.getMessage)
+                }
+                progressDialog.dismiss()
+                ssrsubDialog()
+                Looper.loop()
+              }
+            } else {
+              ssrsubDialog()
+            }
+          }): DialogInterface.OnClickListener)
+          .setNegativeButton(android.R.string.no, ((_, _) => {
+            ssrsubDialog()
+          }): DialogInterface.OnClickListener)
+          .setView(UrlAddEdit)
+          .create()
+          .show()
+      }): DialogInterface.OnClickListener)
+      .setView(view)
+      .create()
+      .show()
   }
 
   def updateNfcState() {
@@ -711,7 +934,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   testAsyncJob.interrupt()
 
                   finish()
-                  startActivity(getIntent())
+                  startActivity(new Intent(getIntent()))
               }
           })
 
@@ -875,7 +1098,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               }
 
               finish()
-              startActivity(getIntent())
+              startActivity(new Intent(getIntent()))
               Looper.loop()
             }
           }
@@ -907,7 +1130,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               })
               testProgressDialog.dismiss
               finish()
-              startActivity(getIntent())
+              startActivity(new Intent(getIntent()))
               Looper.loop()
             }
           }.start()

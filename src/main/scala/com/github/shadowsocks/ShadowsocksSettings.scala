@@ -33,7 +33,7 @@ import android.util.Log
 object ShadowsocksSettings {
   // Constants
   private final val TAG = "ShadowsocksSettings"
-  private val PROXY_PREFS = Array(Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
+  private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param)
   private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
 
@@ -62,6 +62,7 @@ object ShadowsocksSettings {
 
   def updatePreference(pref: Preference, name: String, profile: Profile) {
     name match {
+      case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
       case Key.name => updateSummaryEditTextPreference(pref, profile.name)
       case Key.host => updateSummaryEditTextPreference(pref, profile.host)
       case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
@@ -95,6 +96,10 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     addPreferencesFromResource(R.xml.pref_all)
     getPreferenceManager.getSharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
+    findPreference(Key.group_name).setOnPreferenceChangeListener((_, value) => {
+      profile.url_group = value.asInstanceOf[String]
+      app.profileManager.updateProfile(profile)
+    })
     findPreference(Key.name).setOnPreferenceChangeListener((_, value) => {
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
@@ -305,7 +310,6 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     })
 
     findPreference(Key.frontproxy).setOnPreferenceClickListener((preference: Preference) => {
-      getPreferenceManager.setSharedPreferencesMode(Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS)
       val prefs = getPreferenceManager.getSharedPreferences()
 
       val view = View.inflate(activity, R.layout.layout_front_proxy, null);
