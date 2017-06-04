@@ -308,7 +308,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
   private class ProfilesAdapter extends RecyclerView.Adapter[ProfileViewHolder] {
     var profiles = new ArrayBuffer[Profile]
-    profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    if (is_sort) {
+      profiles ++= app.profileManager.getAllProfilesByElapsed.getOrElse(List.empty[Profile])
+    } else {
+      profiles ++= app.profileManager.getAllProfiles.getOrElse(List.empty[Profile])
+    }
 
     def getItemCount = profiles.length
 
@@ -433,6 +437,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
   private var ssTestProcess: GuardedProcess = _
 
   private val REQUEST_QRCODE = 1
+  private var is_sort: Boolean = false
 
 
   def isPortAvailable (port: Int):Boolean = {
@@ -455,6 +460,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     val action = getIntent().getAction()
     if (action != null && action.equals("in.zhaoj.shadowsocksr.intent.action.SCAN")) {
        qrcodeScan()
+    }
+
+    if (action != null && action.equals("in.zhaoj.shadowsocksr.intent.action.SORT")) {
+       is_sort = true
     }
 
     setContentView(R.layout.layout_profiles)
@@ -483,18 +492,20 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       case (profile, i) if profile.id == app.profileId => i
     }.getOrElse(-1))
     undoManager = new UndoSnackbarManager[Profile](profilesList, profilesAdapter.undo, profilesAdapter.commit)
-    new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-      ItemTouchHelper.START | ItemTouchHelper.END) {
-      def onSwiped(viewHolder: ViewHolder, direction: Int) = {
-        val index = viewHolder.getAdapterPosition
-        profilesAdapter.remove(index)
-        undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
-      }
-      def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
-        profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
-        true
-      }
-    }).attachToRecyclerView(profilesList)
+    if (is_sort == false) {
+      new ItemTouchHelper(new SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+        ItemTouchHelper.START | ItemTouchHelper.END) {
+        def onSwiped(viewHolder: ViewHolder, direction: Int) = {
+          val index = viewHolder.getAdapterPosition
+          profilesAdapter.remove(index)
+          undoManager.remove(index, viewHolder.asInstanceOf[ProfileViewHolder].item)
+        }
+        def onMove(recyclerView: RecyclerView, viewHolder: ViewHolder, target: ViewHolder) = {
+          profilesAdapter.move(viewHolder.getAdapterPosition, target.getAdapterPosition)
+          true
+        }
+      }).attachToRecyclerView(profilesList)
+    }
 
     attachService(new IShadowsocksServiceCallback.Stub {
       def stateChanged(state: Int, profileName: String, msg: String) = () // ignore
@@ -1109,34 +1120,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       }
       true
     case R.id.action_sort =>
-      app.profileManager.getAllProfilesByElapsed match {
-        case Some(profiles) => {
-          var counter = 0
-          testProgressDialog = ProgressDialog.show(this, getString(R.string.tips_sorting), getString(R.string.tips_sorting), false, false)
-
-          new Thread {
-            override def run() {
-              Looper.prepare()
-              profiles.foreach((profile: Profile) => {
-                if (profile.elapsed != 0) {
-                  profile.userOrder = counter
-                  counter += 1
-                }
-                else
-                {
-                  profile.userOrder = profiles.length
-                }
-                app.profileManager.updateProfile(profile)
-              })
-              testProgressDialog.dismiss
-              finish()
-              startActivity(new Intent(getIntent()))
-              Looper.loop()
-            }
-          }.start()
-        }
-        case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
-      }
+      finish()
+      val intent = new Intent("in.zhaoj.shadowsocksr.intent.action.SORT")
+      startActivity(intent)
       true
     case _ => false
   }

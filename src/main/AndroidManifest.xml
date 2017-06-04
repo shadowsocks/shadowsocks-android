@@ -77,6 +77,10 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
+                <action android:name="in.zhaoj.shadowsocksr.intent.action.SORT"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
                 <action android:name="in.zhaoj.shadowsocksr.intent.action.SCAN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
