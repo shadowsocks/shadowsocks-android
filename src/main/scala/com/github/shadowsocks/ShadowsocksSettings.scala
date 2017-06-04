@@ -155,8 +155,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
             {
               getPreferenceManager.getSharedPreferences.edit.putString(Key.aclurl, AclUrlEditText.getText().toString()).commit()
               downloadAcl(AclUrlEditText.getText().toString())
-              profile.route = value.asInstanceOf[String]
-              app.profileManager.updateProfile(profile)
+              app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
             }
           }): DialogInterface.OnClickListener)
           .setNegativeButton(android.R.string.no,  ((_, _) => {
@@ -167,8 +166,7 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
           .show()
       }
       else {
-        profile.route = value.asInstanceOf[String]
-        app.profileManager.updateProfile(profile)
+        app.profileManager.updateAllProfile_String(Key.route, value.asInstanceOf[String])
       }
 
       true
@@ -181,25 +179,20 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       false
     })
     isProxyApps.setOnPreferenceChangeListener((_, value) => {
-      profile.proxyApps = value.asInstanceOf[Boolean]
-      app.profileManager.updateProfile(profile)
+      app.profileManager.updateAllProfile_Boolean("proxyApps", value.asInstanceOf[Boolean])
     })
 
     findPreference(Key.udpdns).setOnPreferenceChangeListener((_, value) => {
-      profile.udpdns = value.asInstanceOf[Boolean]
-      app.profileManager.updateProfile(profile)
+      app.profileManager.updateAllProfile_Boolean("udpdns", value.asInstanceOf[Boolean])
     })
     findPreference(Key.dns).setOnPreferenceChangeListener((_, value) => {
-      profile.dns = value.asInstanceOf[String]
-      app.profileManager.updateProfile(profile)
+      app.profileManager.updateAllProfile_String(Key.dns, value.asInstanceOf[String])
     })
     findPreference(Key.china_dns).setOnPreferenceChangeListener((_, value) => {
-      profile.china_dns = value.asInstanceOf[String]
-      app.profileManager.updateProfile(profile)
+      app.profileManager.updateAllProfile_String(Key.china_dns, value.asInstanceOf[String])
     })
     findPreference(Key.ipv6).setOnPreferenceChangeListener((_, value) => {
-      profile.ipv6 = value.asInstanceOf[Boolean]
-      app.profileManager.updateProfile(profile)
+      app.profileManager.updateAllProfile_Boolean("ipv6", value.asInstanceOf[Boolean])
     })
 
     val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]

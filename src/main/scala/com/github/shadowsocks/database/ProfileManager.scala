@@ -182,6 +182,34 @@ class ProfileManager(dbHelper: DBHelper) {
     }
   }
 
+  def updateAllProfile_String(key:String, value:String): Boolean = {
+    try {
+      dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET " + key + " = '" + value + "';")
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "updateProfile", ex)
+        app.track(ex)
+        false
+    }
+  }
+
+  def updateAllProfile_Boolean(key:String, value:Boolean): Boolean = {
+    try {
+      if (value) {
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET " + key + " = '1';")
+      } else {
+        dbHelper.profileDao.executeRawNoArgs("UPDATE `profile` SET " + key + " = '0';")
+      }
+      true
+    } catch {
+      case ex: Exception =>
+        Log.e(TAG, "updateProfile", ex)
+        app.track(ex)
+        false
+    }
+  }
+
   def getProfile(id: Int): Option[Profile] = {
     try {
       dbHelper.profileDao.queryForId(id) match {
