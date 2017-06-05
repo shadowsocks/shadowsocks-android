@@ -8,6 +8,7 @@
     <item android:id="@+id/action_export"
           android:title="@string/action_export"
           android:icon="@drawable/ic_content_copy"
+          android:visible="false"
           app:showAsAction="ifRoom"
           android:alphabeticShortcut="e"
           android:numericShortcut="2"/>

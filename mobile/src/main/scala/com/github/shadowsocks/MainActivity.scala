@@ -203,7 +203,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withIconTintingEnabled(true)
       )
       .addStickyDrawerItems(
-        new PrimaryDrawerItem()
+        /*new PrimaryDrawerItem()
           .withIdentifier(DRAWER_FAQ)
           .withName(R.string.faq)
           .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_help_outline))
@@ -214,10 +214,12 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           .withName(R.string.recovery)
           .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_navigation_refresh))
           .withIconTintingEnabled(true)
-          .withSelectable(false),
+          .withSelectable(false),*/
         new PrimaryDrawerItem()
           .withIdentifier(DRAWER_ABOUT)
-          .withName(R.string.about)
+          //.withName(R.string.about)
+          .withName(getString(R.string.about_title).formatLocal(Locale.ENGLISH, "4.1.3.1"))
+          .withEnabled(false)
           .withIcon(AppCompatResources.getDrawable(this, R.drawable.ic_action_copyright))
           .withIconTintingEnabled(true)
       )

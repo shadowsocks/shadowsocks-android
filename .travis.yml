@@ -31,6 +31,7 @@ android:
         - extra-android-m2repository
         - extra-google-m2repository
 
+
 install:
     - >
       if [ ! -d "$ANDROID_NDK_HOME" ]; then
@@ -51,3 +52,14 @@ install:
 
 script:
     - $SBTPATH/sbt go-build android:package
+
+deploy:
+    provider: releases
+    api_key:
+        secure: ${GH_TOKEN}
+    file:
+      - mobile/target/android/output/shadowsocks-debug-unaligned.apk
+      - mobile/target/android/output/shadowsocks-debug.apk
+    skip_cleanup: true
+    on:
+      tags: false

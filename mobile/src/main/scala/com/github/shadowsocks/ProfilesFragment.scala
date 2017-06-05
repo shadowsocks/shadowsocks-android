@@ -20,10 +20,13 @@
 
 package com.github.shadowsocks
 
+import java.io.{BufferedReader, InputStream, InputStreamReader}
+import java.net.{HttpURLConnection, URL}
 import java.util.GregorianCalendar
 
 import android.app.Activity
 import android.content._
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -32,6 +35,7 @@ import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
 import android.text.TextUtils
+import android.util.{Base64, Log}
 import android.view.View.OnLongClickListener
 import android.view._
 import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
@@ -41,6 +45,7 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.{AdRequest, AdSize, NativeExpressAdView}
+import org.json.{JSONArray, JSONObject}
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Random
@@ -137,7 +142,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         if (selectedItem eq this) selectedItem = null
       }
 
-      if (item.host == "198.199.101.152") {
+      /*if (item.host == "198.199.101.152") {
         if (adView == null) {
           val params =
             new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -161,7 +166,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           // Load Ad
           adView.loadAd(adBuilder.build())
         } else adView.setVisibility(View.VISIBLE)
-      } else if (adView != null) adView.setVisibility(View.GONE)
+      } else if (adView != null) adView.setVisibility(View.GONE)*/
     }
 
     def onClick(v: View): Unit = if (isEnabled) {
@@ -365,17 +370,54 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       }
       true
     case R.id.action_import =>
-      try {
-        val profiles = Parser.findAll(clipboard.getPrimaryClip.getItemAt(0).getText)
-        if (profiles.nonEmpty) {
-          profiles.foreach(app.profileManager.createProfile)
-          Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-          return true
+      val uri: Uri = Uri.parse("content://com.ape.apetrialfeedback.FeedbackContentProvider/user_info")
+      val cursor: Cursor = getActivity.getContentResolver.query(uri, null, null, null, null)
+      var user_id: String = null
+      var passwd: String = null
+
+      if (cursor != null) {
+        while (cursor.moveToNext) {
+          {
+            user_id = cursor.getString(cursor.getColumnIndex("user_id"))
+            passwd = cursor.getString(cursor.getColumnIndex("passwd"))
+          }
         }
-      } catch {
-        case _: Exception =>
+        cursor.close
       }
-      Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+
+      if (!TextUtils.isEmpty(user_id)) {
+        val srcText: String = clipboard.getPrimaryClip.getItemAt(0).getText.asInstanceOf[String]
+        val userProfile: String = new String(Base64.decode(srcText, Base64.DEFAULT))
+        if (userProfile.length > 6) {
+          val userId: String = userProfile.substring(0, 6)
+          val profileInfo: String = userProfile.substring(6)
+          if(userId == user_id){
+            if (!TextUtils.isEmpty(passwd)) {
+              val realProfile: CharSequence = profileInfo
+              try {
+                //val srctext: String = new String(Base64.decode(clipboard.getPrimaryClip.getItemAt(0).getText.toString, Base64.DEFAULT))
+                val profiles = Parser.findAll(realProfile)
+                if (profiles.nonEmpty) {
+                  profiles.foreach(app.profileManager.createProfile)
+                  Toast.makeText(getActivity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+                  return true
+                }
+              } catch {
+                case _: Exception =>
+              }
+              Snackbar.make(getActivity.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+          }else{
+            Toast.makeText(getActivity, "Please try after login TrailFeedback", Toast.LENGTH_SHORT).show()
+          }
+        }else{
+              Toast.makeText(getActivity, "User name mismatch", Toast.LENGTH_SHORT).show()
+            }
+        }else{
+          Toast.makeText(getActivity, "Wrong profile", Toast.LENGTH_SHORT).show()
+        }
+      }else{
+        Toast.makeText(getActivity, "Can not get user info", Toast.LENGTH_SHORT).show()
+      }
       true
     case R.id.action_manual_settings =>
       startConfig(app.profileManager.createProfile().id)
@@ -390,4 +432,6 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       true
     case _ => false
   }
+
+
 }

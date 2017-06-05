@@ -6,6 +6,7 @@
           android:numericShortcut="1"/>
     <item android:id="@+id/action_export"
           android:title="@string/action_export"
+          android:visible="false"
           android:alphabeticShortcut="e"
           android:numericShortcut="2"/>
 </menu>
