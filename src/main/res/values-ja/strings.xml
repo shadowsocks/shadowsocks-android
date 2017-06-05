@@ -176,6 +176,19 @@
   <string name="frontproxy_type">タイプ</string>
   <string name="frontproxy_set">フロントエージェント</string>
 
+  <string name="add_profile_methods_ssr_sub">追加/更新 SSR サブスクリップション </string>
+  <string name="ssrsub_autoupdate_enable">自動更新</string>
+  <string name="ssrsub_add">URL追加</string>
+  <string name="ssrsub_ok">確認と更新</string>
+  <string name="ssrsub_list">アイテムリスト</string>
+  <string name="ssrsub_error">無効なURLまたはネットワークが使用できません。</string>
+  <string name="ssrsub_progres">処理...</string>
+  <string name="ssrsub_progres_text">お待ちください...</string>
+  <string name="ssrsub_toast_start">サブスクリップションの更新を開始する...</string>
+  <string name="ssrsub_toast_success">サブスクリップションを更新してください！</string>
+  <string name="ssrsub_toast_fail">サブスクリップションの更新に失敗しました！</string>
+  <string name="group_name">グループ名</string>
+
   <!-- status -->
   <string name="sent">送信済み:</string>
   <string name="received">受信済み:</string>

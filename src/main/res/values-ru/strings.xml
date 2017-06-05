@@ -167,6 +167,19 @@
   <string name="frontproxy_type">Тип</string>
   <string name="frontproxy_set">фронт полномочие</string>
 
+  <string name="add_profile_methods_ssr_sub">Добавить / обновить подписку на SSR</string>
+  <string name="ssrsub_autoupdate_enable">Автоматическое обновление</string>
+  <string name="ssrsub_add">Добавить URL</string>
+  <string name="ssrsub_ok">Ок и обновление</string>
+  <string name="ssrsub_list">Список предметов</string>
+  <string name="ssrsub_error">Url недействителен или недоступна сеть.</string>
+  <string name="ssrsub_progres">обработка...</string>
+  <string name="ssrsub_progres_text">пожалуйста, подождите...</string>
+  <string name="ssrsub_toast_start">Начать обновление подписки...</string>
+  <string name="ssrsub_toast_success">Успешно обновить подписку!</string>
+  <string name="ssrsub_toast_fail">Ошибка обновления подписки!</string>
+  <string name="group_name">Название группы</string>
+
 
   <string name="scan_qrcode_install_title">Сканирование подсказки кода</string>
   <string name="scan_qrcode_install_text">Кажется, вы не установили сканер в соответствии с ZXing стандартами, нажмите кнопку «ОК» приведет вас в магазин приложений, где вы установили загрузку, или вы можете нажать кнопку «Загрузить», чтобы загрузить APK установлен непосредственно.</string>

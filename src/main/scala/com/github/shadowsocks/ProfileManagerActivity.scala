@@ -682,6 +682,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       .setTitle(getString(R.string.add_profile_methods_ssr_sub))
       .setPositiveButton(R.string.ssrsub_ok, ((_, _) => {
         Utils.ThrowableFuture {
+          handler.post(() => {
+            testProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+          })
           app.ssrsubManager.getAllSSRSubs match {
             case Some(ssrsubs) =>
               ssrsubs.foreach((ssrsub: SSRSub) => {
@@ -739,6 +742,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
             case _ => Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show
           }
 
+          handler.post(() => testProgressDialog.dismiss)
+
           finish()
           startActivity(new Intent(getIntent()))
         }
@@ -751,8 +756,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
           .setPositiveButton(android.R.string.ok, ((_, _) => {
             if(UrlAddEdit.getText().toString() != "") {
               Utils.ThrowableFuture {
-                Looper.prepare()
-                val progressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, false)
+                handler.post(() => {
+                  testProgressDialog = ProgressDialog.show(ProfileManagerActivity.this, getString(R.string.ssrsub_progres), getString(R.string.ssrsub_progres_text), false, true)
+                })
                 var result = ""
                 val builder = new OkHttpClient.Builder()
                                 .connectTimeout(5, TimeUnit.SECONDS)
@@ -761,11 +767,10 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
                 val client = builder.build();
 
-                val request = new Request.Builder()
-                  .url(UrlAddEdit.getText().toString())
-                  .build();
-
                 try {
+                  val request = new Request.Builder()
+                    .url(UrlAddEdit.getText().toString())
+                    .build();
                   val response = client.newCall(request).execute()
                   val code = response.code()
                   if (code == 200) {
@@ -780,15 +785,14 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
                   } else throw new Exception(getString(R.string.ssrsub_error, code: Integer))
                   response.body().close()
                 } catch {
-                  case e: IOException =>
+                  case e: Exception =>
                     result = getString(R.string.ssrsub_error, e.getMessage)
                 }
-                progressDialog.dismiss()
-                ssrsubDialog()
-                Looper.loop()
+                handler.post(() => testProgressDialog.dismiss)
+                handler.post(() => ssrsubDialog())
               }
             } else {
-              ssrsubDialog()
+              handler.post(() => ssrsubDialog())
             }
           }): DialogInterface.OnClickListener)
           .setNegativeButton(android.R.string.no, ((_, _) => {

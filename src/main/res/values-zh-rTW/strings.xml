@@ -181,6 +181,20 @@
   <string name="frontproxy_type">類型</string>
   <string name="frontproxy_set">前置代理</string>
 
+  <string name="add_profile_methods_ssr_sub">添加/升級 SSR 訂閱</string>
+  <string name="ssrsub_autoupdate_enable">自動更新</string>
+  <string name="ssrsub_add">添加訂閱地址</string>
+  <string name="ssrsub_ok">確定併升級</string>
+  <string name="ssrsub_list">訂閱列表</string>
+  <string name="ssrsub_error">地址不正確或網絡不可用。</string>
+  <string name="ssrsub_progres">處理中</string>
+  <string name="ssrsub_progres_text">請稍候</string>
+  <string name="ssrsub_toast_start">開始更新訂閱。</string>
+  <string name="ssrsub_toast_success">成功更新訂閱！</string>
+  <string name="ssrsub_toast_fail">更新訂閱失敗！</string>
+  <string name="group_name">群組名</string>
+
+
   <!-- status -->
   <string name="sent">傳送:</string>
   <string name="received">接收:</string>
