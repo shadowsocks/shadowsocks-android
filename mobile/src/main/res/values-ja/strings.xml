@@ -91,6 +91,7 @@
 <string name="add_profile_methods_scan_qr_code">"QR コードを読み取る"</string>
 <string name="add_profile_methods_manual_settings">"手動設定"</string>
 <string name="add_profile_scanner_not_installed">"Zxingに準拠したQRコードスキャンアプリをインストールして下さい"</string>
+<string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 <plurals name="removed">
 <item quantity="other">"削除済み"</item>
 </plurals>

@@ -90,6 +90,7 @@
 <string name="add_profile_methods_scan_qr_code">"掃描 QR 碼"</string>
 <string name="add_profile_methods_manual_settings">"手動設定"</string>
 <string name="add_profile_scanner_not_installed">"請安裝任何相容 ZXing 的 QR 碼掃描應用程式。"</string>
+<string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 <plurals name="removed">
 <item quantity="other">"已移除 %d 項"</item>
 </plurals>
