@@ -71,6 +71,7 @@ class SSRSubUpdateJob() extends Job {
                     limit_num = response_string.split("\\n")(0).split("MAX=")(1).replaceAll("\\D+","").toInt
                   }
                   var profiles_ssr = Parser.findAll_ssr(response_string)
+                  profiles_ssr = scala.util.Random.shuffle(profiles_ssr)
                   profiles_ssr.foreach((profile: Profile) => {
                     if (encounter_num < limit_num && limit_num != -1 || limit_num == -1) {
                       val result_id = app.profileManager.createProfile_sub(profile)
