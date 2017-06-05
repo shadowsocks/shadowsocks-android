@@ -37,6 +37,7 @@ object SSRSubUpdateJob {
 
 class SSRSubUpdateJob() extends Job {
   override def onRunJob(params: Params): Result = {
+    Looper.prepare()
     if (app.settings.getInt(Key.ssrsub_autoupdate, 0) == 1) {
       app.ssrsubManager.getAllSSRSubs match {
         case Some(ssrsubs) =>
@@ -97,12 +98,19 @@ class SSRSubUpdateJob() extends Job {
           })
           if (result == 1) {
             Log.i(SSRSubUpdateJob.TAG, "update ssr sub successfully!")
+            Toast.makeText(app, app.resources.getString(R.string.ssrsub_toast_success), Toast.LENGTH_SHORT).show
+            Looper.loop()
             Result.SUCCESS
           } else {
             Log.i(SSRSubUpdateJob.TAG, "update ssr sub failed!")
+            Toast.makeText(app, app.resources.getString(R.string.ssrsub_toast_fail), Toast.LENGTH_SHORT).show
+            Looper.loop()
             Result.RESCHEDULE
           }
         case _ => {
+          Log.i(SSRSubUpdateJob.TAG, "update ssr sub failed!")
+          Toast.makeText(app, app.resources.getString(R.string.ssrsub_toast_fail), Toast.LENGTH_SHORT).show
+          Looper.loop()
           Result.FAILURE
         }
       }

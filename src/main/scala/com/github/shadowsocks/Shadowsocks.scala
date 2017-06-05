@@ -336,7 +336,6 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
       case None => app.ssrsubManager.createDefault()
     }
 
-    SSRSubUpdate.update(this)
     SSRSubUpdateJob.schedule()
 
     handler.post(() => attachService)

@@ -110,6 +110,7 @@ class ProfileManager(dbHelper: DBHelper) {
         .and().eq("protocol_param", profile.protocol_param)
         .and().eq("obfs", profile.obfs)
         .and().eq("obfs_param", profile.obfs_param)
+        .and().eq("url_group", profile.url_group)
         .and().eq("method", profile.method).queryForFirst()
       if (last_exist == null)
       {
