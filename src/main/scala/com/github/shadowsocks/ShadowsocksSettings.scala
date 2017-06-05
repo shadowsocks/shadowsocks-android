@@ -64,7 +64,6 @@ object ShadowsocksSettings {
     name match {
       case Key.group_name => updateSummaryEditTextPreference(pref, profile.url_group)
       case Key.name => updateSummaryEditTextPreference(pref, profile.name)
-      case Key.host => updateSummaryEditTextPreference(pref, profile.host)
       case Key.remotePort => updateNumberPickerPreference(pref, profile.remotePort)
       case Key.localPort => updateNumberPickerPreference(pref, profile.localPort)
       case Key.password => updatePasswordEditTextPreference(pref, profile.password)
@@ -79,6 +78,7 @@ object ShadowsocksSettings {
       case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
       case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
+      case Key.host => {}
     }
   }
 }
@@ -104,9 +104,22 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       profile.name = value.asInstanceOf[String]
       app.profileManager.updateProfile(profile)
     })
-    findPreference(Key.host).setOnPreferenceChangeListener((_, value) => {
-      profile.host = value.asInstanceOf[String]
-      app.profileManager.updateProfile(profile)
+    findPreference(Key.host).setOnPreferenceClickListener((preference: Preference) => {
+      val HostEditText = new EditText(activity);
+      HostEditText.setText(profile.host);
+      new AlertDialog.Builder(activity)
+        .setTitle(getString(R.string.proxy))
+        .setPositiveButton(android.R.string.ok, ((_, _) => {
+          profile.host = HostEditText.getText().toString()
+          app.profileManager.updateProfile(profile)
+        }): DialogInterface.OnClickListener)
+        .setNegativeButton(android.R.string.no,  ((_, _) => {
+          setProfile(profile)
+        }): DialogInterface.OnClickListener)
+        .setView(HostEditText)
+        .create()
+        .show()
+      true
     })
     findPreference(Key.remotePort).setOnPreferenceChangeListener((_, value) => {
       profile.remotePort = value.asInstanceOf[Int]

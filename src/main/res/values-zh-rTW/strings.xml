@@ -193,6 +193,7 @@
   <string name="ssrsub_toast_success">成功更新訂閱！</string>
   <string name="ssrsub_toast_fail">更新訂閱失敗！</string>
   <string name="group_name">群組名</string>
+  <string name="proxy_click">點擊查看和編輯地址</string>
 
 
   <!-- status -->

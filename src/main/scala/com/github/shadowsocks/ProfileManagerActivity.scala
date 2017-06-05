@@ -366,14 +366,17 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
 
     var item: SSRSub = _
     private val text = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
+    itemView.setOnClickListener(this)
 
-    def updateText() {
+    def updateText(isShowUrl: Boolean = false) {
       val builder = new SpannableStringBuilder
       builder.append(this.item.url_group + "\n")
-      val start = builder.length
-      builder.append(this.item.url)
-      builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
-        start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      if (isShowUrl) {
+        val start = builder.length
+        builder.append(this.item.url)
+        builder.setSpan(new TextAppearanceSpan(ProfileManagerActivity.this, android.R.style.TextAppearance_Small),
+          start, builder.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      }
       handler.post(() => text.setText(builder))
     }
 
@@ -383,6 +386,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     }
 
     def onClick(v: View) = {
+      updateText(true)
     }
 
     def onKey(v: View, keyCode: Int, event: KeyEvent) = {

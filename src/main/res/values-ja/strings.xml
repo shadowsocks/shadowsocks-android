@@ -188,6 +188,7 @@
   <string name="ssrsub_toast_success">サブスクリップションを更新してください！</string>
   <string name="ssrsub_toast_fail">サブスクリップションの更新に失敗しました！</string>
   <string name="group_name">グループ名</string>
+  <string name="proxy_click">アドレスを表示し、編集するときにクリックします</string>
 
   <!-- status -->
   <string name="sent">送信済み:</string>

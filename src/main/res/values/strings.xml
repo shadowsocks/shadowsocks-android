@@ -175,7 +175,7 @@
   <string name="frontproxy_type">Type</string>
   <string name="frontproxy_set">FrontProxy</string>
 
-  
+
   <string name="add_profile_methods_ssr_sub">Add/Update SSR Subscription</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
   <string name="ssrsub_add">Add Url</string>
@@ -188,6 +188,7 @@
   <string name="ssrsub_toast_success">Update subscription successfully!</string>
   <string name="ssrsub_toast_fail">Update subscription fail!</string>
   <string name="group_name">Group Name</string>
+  <string name="proxy_click">Click to view and edit the address</string>
 
 
   <string name="scan_qrcode_install_title">Scan tips</string>
