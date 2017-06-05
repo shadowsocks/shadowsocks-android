@@ -104,6 +104,7 @@
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_scanner_not_installed">Please install any ZXing-compliant QR code scanning app.</string>
+  <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <plurals name="removed">
     <item quantity="one">Removed</item>
     <item quantity="other">%d items removed</item>

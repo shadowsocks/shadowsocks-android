@@ -96,6 +96,7 @@
 <string name="add_profile_methods_scan_qr_code">"Сканировать QR-код"</string>
 <string name="add_profile_methods_manual_settings">"Ручные настройки"</string>
 <string name="add_profile_scanner_not_installed">"Пожалуйста, установите любое ZXing-совместимое приложение для сканирования QR-кодов."</string>
+<string name="add_profile_scanner_permission_required">Разрешение камеры требуется для сканирования QR код.</string>
 <plurals name="removed">
 <item quantity="one">"Удалено"</item>
 <item quantity="few">"Удалено %d элемента"</item>
