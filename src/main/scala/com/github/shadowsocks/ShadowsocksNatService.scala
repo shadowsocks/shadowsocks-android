@@ -116,70 +116,42 @@ class ShadowsocksNatService extends BaseService {
   }
 
   def startTunnel() {
+    var localPort = profile.localPort + 63
     if (profile.udpdns) {
-      val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 53,
-          ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
-      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
-        p.println(conf)
-      })
-      val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
-        , "-u"
-        , "-t" , "60"
-        , "--host", host_arg
-        , "-b" , "127.0.0.1"
-        , "-l" , (profile.localPort + 53).toString
-        , "-P" , getApplicationInfo.dataDir
-        , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
-
-      cmd += "-L"
-      if (profile.route == Route.CHINALIST)
-        cmd += china_dns_address + ":" + china_dns_port.toString
-      else
-        cmd += dns_address + ":" + dns_port.toString
-
-      if (proxychains_enable) {
-        cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
-        cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
-        cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
-        cmd prepend "env"
-      }
-
-      if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
-
-      sstunnelProcess = new GuardedProcess(cmd).start()
-
-    } else {
-      val conf = ConfigUtils
-        .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, profile.localPort + 63,
-          ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
-      Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
-        p.println(conf)
-      })
-
-      val cmdBuf = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
-        , "-t" , "60"
-        , "--host", host_arg
-        , "-b" , "127.0.0.1"
-        , "-l" , (profile.localPort + 63).toString
-        , "-P", getApplicationInfo.dataDir
-        , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
-
-      cmdBuf += "-L"
-      if (profile.route == Route.CHINALIST)
-        cmdBuf += china_dns_address + ":" + china_dns_port.toString
-      else
-        cmdBuf += dns_address + ":" + dns_port.toString
-
-      if (proxychains_enable) {
-        cmdBuf prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
-        cmdBuf prepend "env"
-      }
-
-      if (BuildConfig.DEBUG) Log.d(TAG, cmdBuf.mkString(" "))
-
-      sstunnelProcess = new GuardedProcess(cmdBuf).start()
+      localPort = profile.localPort + 53
     }
+
+    val conf = ConfigUtils
+      .SHADOWSOCKS.formatLocal(Locale.ENGLISH, profile.host, profile.remotePort, localPort,
+        ConfigUtils.EscapedJson(profile.password), profile.method, 600, profile.protocol, profile.obfs, ConfigUtils.EscapedJson(profile.obfs_param), ConfigUtils.EscapedJson(profile.protocol_param))
+    Utils.printToFile(new File(getApplicationInfo.dataDir + "/ss-tunnel-nat.conf"))(p => {
+      p.println(conf)
+    })
+    val cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local"
+      , "-u"
+      , "-t" , "60"
+      , "--host", host_arg
+      , "-b" , "127.0.0.1"
+      , "-l" , localPort.toString
+      , "-P" , getApplicationInfo.dataDir
+      , "-c" , getApplicationInfo.dataDir + "/ss-tunnel-nat.conf")
+
+    cmd += "-L"
+    if (profile.route == Route.CHINALIST)
+      cmd += china_dns_address + ":" + china_dns_port.toString
+    else
+      cmd += dns_address + ":" + dns_port.toString
+
+    if (proxychains_enable) {
+      cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
+      cmd prepend "PROXYCHAINS_CONF_FILE=" + getApplicationInfo.dataDir + "/proxychains.conf"
+      cmd prepend "PROXYCHAINS_PROTECT_FD_PREFIX=" + getApplicationInfo.dataDir
+      cmd prepend "env"
+    }
+
+    if (BuildConfig.DEBUG) Log.d(TAG, cmd.mkString(" "))
+
+    sstunnelProcess = new GuardedProcess(cmd).start()
   }
 
   def startDnsDaemon() {

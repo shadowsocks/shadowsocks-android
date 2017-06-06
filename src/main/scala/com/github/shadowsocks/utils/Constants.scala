@@ -217,6 +217,8 @@ object Action {
   val SERVICE = "in.zhaoj.shadowsocksr.SERVICE"
   val CLOSE = "in.zhaoj.shadowsocksr.CLOSE"
   val QUICK_SWITCH = "in.zhaoj.shadowsocksr.QUICK_SWITCH"
+  val SCAN = "in.zhaoj.shadowsocksr.intent.action.SCAN"
+  val SORT = "in.zhaoj.shadowsocksr.intent.action.SORT"
 }
 
 object Route {

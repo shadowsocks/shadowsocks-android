@@ -462,11 +462,11 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
     super.onCreate(savedInstanceState)
 
     val action = getIntent().getAction()
-    if (action != null && action.equals("in.zhaoj.shadowsocksr.intent.action.SCAN")) {
+    if (action != null && action.equals(Action.SCAN)) {
        qrcodeScan()
     }
 
-    if (action != null && action.equals("in.zhaoj.shadowsocksr.intent.action.SORT")) {
+    if (action != null && action.equals(Action.SORT)) {
        is_sort = true
     }
 
@@ -1130,7 +1130,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
       true
     case R.id.action_sort =>
       finish()
-      val intent = new Intent("in.zhaoj.shadowsocksr.intent.action.SORT")
+      val intent = new Intent(Action.SORT)
       startActivity(intent)
       true
     case _ => false
