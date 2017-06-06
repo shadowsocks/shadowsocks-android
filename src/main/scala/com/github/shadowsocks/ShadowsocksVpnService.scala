@@ -73,6 +73,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   var tun2socksProcess: GuardedProcess = _
   var proxychains_enable: Boolean = false
   var host_arg = ""
+  var dns_address = ""
+  var dns_port = 0
+  var china_dns_address = ""
+  var china_dns_port = 0
 
   override def onBind(intent: Intent): IBinder = {
     val action = intent.getAction
@@ -157,6 +161,24 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     } else {
       proxychains_enable = false
     }
+
+    try {
+      val dns = scala.util.Random.shuffle(profile.dns.split(",").toList).head
+      dns_address = dns.split(":")(0)
+      dns_port = dns.split(":")(1).toInt
+
+      val china_dns = scala.util.Random.shuffle(profile.china_dns.split(",").toList).head
+      china_dns_address = china_dns.split(":")(0)
+      china_dns_port = china_dns.split(":")(1).toInt
+    } catch {
+      case ex: Exception =>
+        dns_address = "8.8.8.8"
+        dns_port = 53
+
+        china_dns_address = "223.5.5.5"
+        china_dns_port = 53
+    }
+
 
     vpnThread = new ShadowsocksVpnThread(this)
     vpnThread.start()
@@ -301,9 +323,9 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     cmd += "-L"
     if (profile.route == Route.CHINALIST)
-      cmd += profile.china_dns.split(",")(0)
+      cmd += china_dns_address + ":" + china_dns_port.toString
     else
-      cmd += profile.dns.split(",")(0)
+      cmd += dns_address + ":" + dns_port.toString
 
     if (proxychains_enable) {
       cmd prepend "LD_PRELOAD=" + getApplicationInfo.dataDir + "/lib/libproxychains4.so"
@@ -401,7 +423,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 
-    builder.addDnsServer(profile.dns.split(",")(0).split(":")(0))
+    if (profile.route == Route.CHINALIST)
+      builder.addDnsServer(china_dns_address)
+    else
+      builder.addDnsServer(dns_address)
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
@@ -436,7 +461,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       })
     }
 
-    builder.addRoute(profile.dns.split(",")(0).split(":")(0), 32)
+    if (profile.route == Route.CHINALIST)
+      builder.addRoute(china_dns_address, 32)
+    else
+      builder.addRoute(dns_address, 32)
 
     conn = builder.establish()
     if (conn == null) throw new NullConnectionException
