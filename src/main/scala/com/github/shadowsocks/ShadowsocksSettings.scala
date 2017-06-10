@@ -35,7 +35,7 @@ object ShadowsocksSettings {
   private final val TAG = "ShadowsocksSettings"
   private val PROXY_PREFS = Array(Key.group_name, Key.name, Key.host, Key.remotePort, Key.localPort, Key.password, Key.method,
     Key.protocol, Key.obfs, Key.obfs_param, Key.dns, Key.china_dns, Key.protocol_param)
-  private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6)
+  private val FEATURE_PREFS = Array(Key.route, Key.proxyApps, Key.udpdns, Key.ipv6, Key.tfo)
 
   // Helper functions
   def updateDropDownPreference(pref: Preference, value: String) {
@@ -78,7 +78,7 @@ object ShadowsocksSettings {
       case Key.dns => updateSummaryEditTextPreference(pref, profile.dns)
       case Key.china_dns => updateSummaryEditTextPreference(pref, profile.china_dns)
       case Key.ipv6 => updateSwitchPreference(pref, profile.ipv6)
-      case Key.host => {}
+      case _ => {}
     }
   }
 }
@@ -220,13 +220,18 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     switch.setChecked(BootReceiver.getEnabled(activity))
 
     val tfo = findPreference(Key.tfo).asInstanceOf[SwitchPreference]
-    tfo.setChecked(TcpFastOpen.sendEnabled)
     tfo.setOnPreferenceChangeListener((_, v) => {
-      val value = v.asInstanceOf[Boolean]
-      val result = TcpFastOpen.enabled(value)
-      if (result != null && result != "Success.")
-        Snackbar.make(activity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
-      value == TcpFastOpen.sendEnabled
+      new Thread {
+        override def run() {
+          val value = v.asInstanceOf[Boolean]
+          val result = TcpFastOpen.enabled(value)
+          if (result != null && result != "Success.")
+            activity.handler.post(() => {
+              Snackbar.make(activity.findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show()
+            })
+        }
+      }.start
+      true
     })
     if (!TcpFastOpen.supported) {
       tfo.setEnabled(false)
