@@ -1,8 +1,10 @@
 # gfw list rules for shadowsocks-libev $
-# updated on 2016-09-08 12:09:55$
+# updated on 2017-06-12 14:59:55$
 [bypass_all]
 
 [proxy_list]
+# manhuaren
+(^|\.)mangaapi\.manhuaren\.com$
 # Telegram IPs$
 91.108.4.0/22
 91.108.56.0/22
