@@ -131,7 +131,7 @@
 <string name="route_entry_bypass_lan_chn">"Все, кроме LAN и Китая"</string>
 <string name="route_entry_chinalist">"Список Китай"</string>
 <string name="proxied_apps_summary_v21">"Установить прокси для выбранных приложений"</string>
-<string name="acl_rule_templates_generic">"Подсеть/Регулярное выражение (PCRE) имени хоста"</string>
+<string name="acl_rule_templates_generic">"URL/Подсеть/Регулярное выражение (PCRE) имени хоста"</string>
 <string name="acl_rule_templates_domain">"Доменное имя и все его поддомены"</string>
 
 <!-- plugin -->
