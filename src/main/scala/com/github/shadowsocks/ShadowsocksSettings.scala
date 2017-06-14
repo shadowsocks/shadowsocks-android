@@ -295,15 +295,17 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
     findPreference("logcat").setOnPreferenceClickListener((preference: Preference) => {
       app.track(TAG, "logcat")
 
-      val et_logcat = new EditText(activity);
+      val et_logcat = new EditText(activity)
 
       try {
-        val logcat = Runtime.getRuntime().exec("logcat -d");
-        val br = new BufferedReader(new InputStreamReader(logcat.getInputStream()));
-        var line = "";
-        while ((line = br.readLine()) != null) {
-            et_logcat.append(line);
-            et_logcat.append("\n");
+        val logcat = Runtime.getRuntime().exec("logcat -d")
+        val br = new BufferedReader(new InputStreamReader(logcat.getInputStream()))
+        var line = ""
+        line = br.readLine()
+        while (line != null) {
+            et_logcat.append(line)
+            et_logcat.append("\n")
+            line = br.readLine()
         }
         br.close()
       } catch {

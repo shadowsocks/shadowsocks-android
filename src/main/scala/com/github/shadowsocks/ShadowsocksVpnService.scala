@@ -234,7 +234,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     //Os.setenv("LD_PRELOAD", getApplicationInfo.dataDir + "/lib/libproxychains4.so", true)
     //Os.setenv("PROXYCHAINS_CONF_FILE", getApplicationInfo.dataDir + "/proxychains.conf", true)
 
-    var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U", "-x"
+    var cmd = ArrayBuffer[String](getApplicationInfo.dataDir + "/ss-local", "-V", "-U"
       , "-b", "127.0.0.1"
       , "-t", "600"
       , "--host", host_arg

@@ -191,7 +191,7 @@ class ShadowsocksApplication extends Application {
     pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
     JobManager.create(this).addJobCreator(DonaldTrump)
 
-    if (settings.getBoolean(Key.tfo, false) == true) {
+    if (settings.getBoolean(Key.tfo, false) == true && TcpFastOpen.supported) {
       new Thread {
         override def run() {
           TcpFastOpen.enabled(settings.getBoolean(Key.tfo, false))
