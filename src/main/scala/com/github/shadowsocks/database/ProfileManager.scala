@@ -295,6 +295,7 @@ class ProfileManager(dbHelper: DBHelper) {
       protocol = "auth_chain_a"
       obfs = "http_simple"
       method = "none"
+      url_group = "FreeSSR-public"
     }
     createProfile(profile)
   }
