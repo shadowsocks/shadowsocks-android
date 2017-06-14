@@ -123,7 +123,7 @@
 <string name="route_entry_bypass_lan_chn">"LAN 及び中国本土のアドレスを迂回する"</string>
 <string name="route_entry_chinalist">"中国本土のアドレス以外を迂回する"</string>
 <string name="proxied_apps_summary_v21">"選択したアプリにプロキシを設定する"</string>
-<string name="acl_rule_templates_generic">"サブネット/ホスト名 PCRE パターン"</string>
+<string name="acl_rule_templates_generic">"URL/サブネット/ホスト名 PCRE パターン"</string>
 <string name="acl_rule_templates_domain">"ドメイン及び全てのサブドメイン"</string>
 
 <!-- plugin -->

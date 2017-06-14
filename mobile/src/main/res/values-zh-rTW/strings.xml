@@ -122,7 +122,7 @@
 <string name="route_entry_bypass_lan_chn">"略過區域網路及中國大陸"</string>
 <string name="route_entry_chinalist">"China List"</string>
 <string name="proxied_apps_summary_v21">"為已選擇的應用程式設定 Proxy"</string>
-<string name="acl_rule_templates_generic">"子網路/主機名稱 PCRE 模式"</string>
+<string name="acl_rule_templates_generic">"URL/子網路/主機名稱 PCRE 模式"</string>
 <string name="acl_rule_templates_domain">"網域及其所有子網域"</string>
 
 <!-- plugin -->

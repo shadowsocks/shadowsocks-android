@@ -1,6 +1,6 @@
 package com.github.shadowsocks.acl
 
-import java.io.{File, FileNotFoundException}
+import java.io.{File, FileNotFoundException, IOException}
 
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.IOUtils
@@ -22,6 +22,7 @@ class Acl {
   val bypassHostnames = new mutable.SortedList[String]()
   val proxyHostnames = new mutable.SortedList[String]()
   val subnets = new mutable.SortedList[Subnet]()
+  val urls = new mutable.SortedList[String]()
   @DatabaseField
   var bypass: Boolean = _
 
@@ -40,6 +41,10 @@ class Acl {
     subnets.clear()
     subnets ++= value.split("\n").map(Subnet.fromString)
   }
+  def setUrlRules(value: String) {
+    urls.clear()
+    urls ++= value.split("\n")
+  }
 
   def fromAcl(other: Acl): Acl = {
     bypassHostnames.clear()
@@ -48,21 +53,35 @@ class Acl {
     proxyHostnames ++= other.proxyHostnames
     subnets.clear()
     subnets ++= other.subnets
+    urls.clear()
+    urls ++= other.urls
     bypass = other.bypass
     this
   }
-  def fromSource(value: Source, defaultBypass: Boolean = false): Acl = {
+  def fromSource(value: Source, defaultBypass: Boolean = true): Acl = {
     bypassHostnames.clear()
     proxyHostnames.clear()
     this.subnets.clear()
+    this.urls.clear()
     bypass = defaultBypass
     lazy val bypassSubnets = new mutable.SortedList[Subnet]()
     lazy val proxySubnets = new mutable.SortedList[Subnet]()
     var hostnames: mutable.SortedList[String] = if (defaultBypass) proxyHostnames else bypassHostnames
     var subnets: mutable.SortedList[Subnet] = if (defaultBypass) proxySubnets else bypassSubnets
+    var in_urls = false
     for (line <- value.getLines()) (line.indexOf('#') match {
-      case -1 => line
-      case index => line.substring(0, index)  // trim comments
+      case -1 => if (!in_urls) line else ""
+      case index => {
+        line.indexOf("URLS_BEGIN") match {
+          case -1 =>
+          case index => in_urls = true
+        }
+        line.indexOf("URLS_END") match {
+          case -1 =>
+          case index => in_urls = false
+        }
+        "" // ignore any comment lines
+      }
     }).trim match {
       case "[outbound_block_list]" =>
         hostnames = null
@@ -76,7 +95,10 @@ class Acl {
       case "[reject_all]" | "[bypass_all]" => bypass = true
       case "[accept_all]" | "[proxy_all]" => bypass = false
       case input if subnets != null && input.nonEmpty => try subnets += Subnet.fromString(input) catch {
-        case _: IllegalArgumentException => hostnames += input
+        case _: IllegalArgumentException => if (input.startsWith("http://") || input.startsWith("https://")) {
+          urls += input
+        }
+        hostnames += input
       }
       case _ =>
     }
@@ -85,9 +107,24 @@ class Acl {
   }
   final def fromId(id: String): Acl = fromSource(Source.fromFile(Acl.getFile(id)))
 
-  override def toString: String = {
+  def getAclString(network: Boolean): String = {
     val result = new StringBuilder()
-    result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
+    if (urls.nonEmpty) {
+      result.append("#URLS_BEGIN\n")
+      result.append(urls.mkString("\n"))
+      if (network) {
+        try {
+          urls.foreach((url: String) => result.append(Source.fromURL(url).mkString))
+        } catch {
+          case e: IOException => // ignore
+        }
+      }
+      result.append("#URLS_END\n")
+
+    }
+    if (result.isEmpty) {
+      result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
+    }
     val (bypassList, proxyList) =
       if (bypass) (bypassHostnames.toStream, subnets.toStream.map(_.toString) #::: proxyHostnames.toStream)
       else (subnets.toStream.map(_.toString) #::: bypassHostnames.toStream, proxyHostnames.toStream)
@@ -102,6 +139,10 @@ class Acl {
       result.append('\n')
     }
     result.toString
+  }
+
+  override def toString: String = {
+    getAclString(false)
   }
 
   def isValidCustomRules: Boolean = bypass && bypassHostnames.isEmpty
@@ -134,9 +175,9 @@ object Acl {
     try acl.fromId(CUSTOM_RULES) catch {
       case _: FileNotFoundException =>
     }
-    acl.bypass = true
-    acl.bypassHostnames.clear() // everything is bypassed
     acl
   }
-  def save(id: String, acl: Acl): Unit = IOUtils.writeString(getFile(id), acl.toString)
+  def save(id: String, acl: Acl, network: Boolean = false): Unit = {
+    IOUtils.writeString(getFile(id), acl.getAclString(network))
+  }
 }
