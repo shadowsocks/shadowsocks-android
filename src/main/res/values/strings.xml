@@ -189,6 +189,10 @@
   <string name="ssrsub_toast_fail">Update subscription fail!</string>
   <string name="group_name">Group Name</string>
   <string name="proxy_click">Click to view and edit the address</string>
+  <string name="ssrsub_remove_tip_title">Remove</string>
+  <string name="ssrsub_remove_tip">Do you want to delete this subscription directly without remove the nodes which has the same node name with it or not?</string>
+  <string name="ssrsub_remove_tip_direct">Delete directly</string>
+  <string name="ssrsub_remove_tip_delete">Delete with it\'s nodes</string>
 
 
   <string name="scan_qrcode_install_title">Scan tips</string>

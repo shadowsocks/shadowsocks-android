@@ -189,6 +189,10 @@
   <string name="ssrsub_toast_fail">サブスクリップションの更新に失敗しました！</string>
   <string name="group_name">グループ名</string>
   <string name="proxy_click">アドレスを表示し、編集するときにクリックします</string>
+  <string name="ssrsub_remove_tip_title">削除</string>
+  <string name="ssrsub_remove_tip">あなたはそれを削除したい、あるいは同じ名前およびサブスクリプションノードそれでグループを削除したいですか？</string>
+  <string name="ssrsub_remove_tip_direct">削除</string>
+  <string name="ssrsub_remove_tip_delete">ノードと一緒に削除されました</string>
 
   <!-- status -->
   <string name="sent">送信済み:</string>

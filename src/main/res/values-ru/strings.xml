@@ -180,6 +180,10 @@
   <string name="ssrsub_toast_fail">Ошибка обновления подписки!</string>
   <string name="group_name">Название группы</string>
   <string name="proxy_click">Нажмите для просмотра и редактирования адреса</string>
+  <string name="ssrsub_remove_tip_title">удалять</string>
+  <string name="ssrsub_remove_tip">Вы хотите, чтобы удалить его, или даже хотите удалить группу с тем же именем и узлом подписки это?</string>
+  <string name="ssrsub_remove_tip_direct">удалять</string>
+  <string name="ssrsub_remove_tip_delete">Удаляется вместе с узлом</string>
 
 
   <string name="scan_qrcode_install_title">Сканирование подсказки кода</string>

@@ -192,6 +192,10 @@
   <string name="ssrsub_toast_fail">更新订阅失败！</string>
   <string name="group_name">群组名</string>
   <string name="proxy_click">点击查看和编辑地址</string>
+  <string name="ssrsub_remove_tip_title">删除</string>
+  <string name="ssrsub_remove_tip">您是想直接删除呢，还是想连带着删除群组和这个订阅名一样的节点呢？</string>
+  <string name="ssrsub_remove_tip_direct">直接删除</string>
+  <string name="ssrsub_remove_tip_delete">与节点一起删除</string>
 
 
 
