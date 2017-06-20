@@ -43,7 +43,7 @@
   <string name="obfs">Obfs</string>
   <string name="obfs_summary">Obfs you selected in your server</string>
   <string name="obfs_param">Obfs Param</string>
-  <string name="obfs_param_summary">Obfs param you input in your server</string>
+  <string name="obfs_param_summary">Obfs param you put in your server</string>
   <string name="enc_method">Encrypt Method</string>
 
   <!-- feature category -->
@@ -72,10 +72,10 @@
   <string name="acl_file">ACL File URL</string>
   <string name="aclupdate">ACL Update</string>
   <string name="aclupdate_summary">Update Your ACL file</string>
-  <string name="aclupdate_url_notset">Sorry, due to you didn\'t set an acl url, this action can\'t take place. Please chose \'Customize ACL File\' in the route setting and try again.</string>
-  <string name="aclupdate_downloading">File updateing...</string>
-  <string name="aclupdate_successfully">Update successfully!</string>
-  <string name="aclupdate_failed">Update failed!</string>
+  <string name="aclupdate_url_notset">Sorry, an ACL file URL has to be set before you can update it. Please click on \'Customize ACL File\' in \'Route Setting\' and try again.</string>
+  <string name="aclupdate_downloading">Updating ACL file...</string>
+  <string name="aclupdate_successfully">Successfully updated ACL file.</string>
+  <string name="aclupdate_failed">Failed to update ACL file!</string>
   <string name="proxied_apps">Per-App Proxy</string>
   <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
   <string name="on">On</string>
@@ -88,9 +88,9 @@
   <string name="udp_dns">UDP Forwarding</string>
   <string name="udp_dns_summary">Forward UDP packets to remote</string>
   <string name="dns">DNS</string>
-  <string name="dns_summary">The dns server you want to use to resolve special domain,e.g. 8.8.8.8:53</string>
+  <string name="dns_summary">The DNS server you want to use to resolve special domain,e.g. 8.8.8.8:53</string>
   <string name="china_dns">China DNS</string>
-  <string name="china_dns_summary">The dns server you want to use to resolve normal domain,e.g. 223.5.5.5:53</string>
+  <string name="china_dns_summary">The DNS server you want to use to resolve normal domain,e.g. 223.5.5.5:53</string>
 
   <!-- notification category -->
   <string name="forward_success">ShadowsocksR started.</string>
@@ -108,7 +108,7 @@
 
   <!-- alert category -->
   <string name="close">Close</string>
-  <string name="proxy_empty">Proxy/Password should not be empty</string>
+  <string name="proxy_empty">\'Proxy\' and \'Password\' should not be empty</string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
@@ -138,21 +138,21 @@
   <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
-  <string name="action_export_msg">Successfully export!</string>
-  <string name="action_export_err">Failed to export.</string>
-  <string name="action_import_msg">Successfully import!</string>
-  <string name="action_import_err">Failed to import.</string>
+  <string name="action_export_msg">Successfully exported profiles.</string>
+  <string name="action_export_err">Failed to export profiles!</string>
+  <string name="action_import_msg">Successfully imported profiles.</string>
+  <string name="action_import_err">Failed to import profiles!</string>
 
   <!-- profile -->
   <string name="profile_manager_dialog">Profiles</string>
   <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe left/right or press left
     to remove;\n&#8226; Long press to reorder profiles.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Add this SSR Profile?</string>
+  <string name="add_profile_dialog">Add this SSR profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
-  <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add profile</string>
-  <string name="add_profile_nfc_hint">Keep both devices screen on, on the other device, click profile\'s share button, bring them together (back to back).\nYou also can scan a nfc tag.</string>
+  <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add a profile</string>
+  <string name="add_profile_nfc_hint">Keep both devices\' screen on. On the other device, click on the \'share\' button. Place both devices\' backs against each other.\nYou may also scan a nfc tag.</string>
   <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <string name="copy_url">Copy URL</string>
   <plurals name="removed">
@@ -161,8 +161,8 @@
   </plurals>
   <string name="undo">Undo</string>
 
-  <string name="tips_testing">Testing....</string>
-  <string name="tips_sorting">Sorting....</string>
+  <string name="tips_testing">Testing...</string>
+  <string name="tips_sorting">Sorting...</string>
   <string name="action_full_test">Full latency test</string>
   <string name="action_sort">Auto sort by latency</string>
   <string name="ping">Ping</string>
@@ -178,26 +178,26 @@
 
   <string name="add_profile_methods_ssr_sub">Add/Update SSR Subscription</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
-  <string name="ssrsub_add">Add Url</string>
-  <string name="ssrsub_ok">Ok and Update</string>
+  <string name="ssrsub_add">Add URL</string>
+  <string name="ssrsub_ok">Save and Update</string>
   <string name="ssrsub_list">Item List</string>
-  <string name="ssrsub_error">Url invaild or Network unavailable.</string>
+  <string name="ssrsub_error">Error: URL invaild or internet unavailable.</string>
   <string name="ssrsub_progres">Processing...</string>
   <string name="ssrsub_progres_text">Please wait...</string>
-  <string name="ssrsub_toast_start">Begin updating subscription...</string>
-  <string name="ssrsub_toast_success">Update subscription successfully!</string>
-  <string name="ssrsub_toast_fail">Update subscription fail!</string>
+  <string name="ssrsub_toast_start">Updating subscriptions...</string>
+  <string name="ssrsub_toast_success">Successfully updated subscriptions.</string>
+  <string name="ssrsub_toast_fail">Failed to update subscriptions!</string>
   <string name="group_name">Group Name</string>
-  <string name="proxy_click">Click to view and edit the address</string>
-  <string name="ssrsub_remove_tip_title">Remove</string>
-  <string name="ssrsub_remove_tip">Do you want to delete this subscription directly without remove the nodes which has the same node name with it or not?</string>
-  <string name="ssrsub_remove_tip_direct">Delete directly</string>
-  <string name="ssrsub_remove_tip_delete">Delete with it\'s nodes</string>
+  <string name="proxy_click">Click on the group name to view its URL</string>
+  <string name="ssrsub_remove_tip_title">Subscription removal</string>
+  <string name="ssrsub_remove_tip">Delete this subscription without removing its nodes (nodes that bear its group name)?</string>
+  <string name="ssrsub_remove_tip_direct">Delete the URL only</string>
+  <string name="ssrsub_remove_tip_delete">Delete the nodes too</string>
 
 
-  <string name="scan_qrcode_install_title">Scan tips</string>
-  <string name="scan_qrcode_install_text">It seems that You haven\'t installed the zxing scanner, click the ok button will guide you to play store, or you can click the \'direct download\' button to download directly and installed it.</string>
-  <string name="scan_qrcode_direct_download_text">Direct Download</string>
+  <string name="scan_qrcode_install_title">Scanner installation</string>
+  <string name="scan_qrcode_install_text">It seems that 'zxing scanner' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>
+  <string name="scan_qrcode_direct_download_text">Install Manually</string>
 
   <!-- tasker -->
   <string name="toggle_service_state">Start the service</string>
