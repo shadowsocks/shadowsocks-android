@@ -43,7 +43,7 @@
   <string name="obfs">Obfs</string>
   <string name="obfs_summary">Obfs you selected in your server</string>
   <string name="obfs_param">Obfs Param</string>
-  <string name="obfs_param_summary">Obfs param you input in your server</string>
+  <string name="obfs_param_summary">Obfs param you put in your server</string>
   <string name="enc_method">Encrypt Method</string>
 
   <!-- feature category -->
@@ -72,10 +72,10 @@
   <string name="acl_file">ACL File URL</string>
   <string name="aclupdate">ACL Update</string>
   <string name="aclupdate_summary">Update Your ACL file</string>
-  <string name="aclupdate_url_notset">Sorry, due to you didn\'t set an acl URL, this action can\'t take place. Please chose \'Customize ACL File\' in the route setting and try again.</string>
-  <string name="aclupdate_downloading">File updateing...</string>
-  <string name="aclupdate_successfully">Update successfully!</string>
-  <string name="aclupdate_failed">Update failed!</string>
+  <string name="aclupdate_url_notset">Sorry, an ACL file URL has to be set before you can update it. Please click on \'Customize ACL File\' in \'Route Setting\' and try again.</string>
+  <string name="aclupdate_downloading">Updating ACL file...</string>
+  <string name="aclupdate_successfully">Successfully updated ACL file.</string>
+  <string name="aclupdate_failed">Failed to update ACL file!</string>
   <string name="proxied_apps">Per-App Proxy</string>
   <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
   <string name="on">On</string>
@@ -88,9 +88,9 @@
   <string name="udp_dns">UDP Forwarding</string>
   <string name="udp_dns_summary">Forward UDP packets to remote</string>
   <string name="dns">DNS</string>
-  <string name="dns_summary">The dns server you want to use to resolve special domain,e.g. 8.8.8.8:53</string>
+  <string name="dns_summary">The DNS server you want to use to resolve special domain,e.g. 8.8.8.8:53</string>
   <string name="china_dns">China DNS</string>
-  <string name="china_dns_summary">The dns server you want to use to resolve normal domain,e.g. 223.5.5.5:53</string>
+  <string name="china_dns_summary">The DNS server you want to use to resolve normal domain,e.g. 223.5.5.5:53</string>
 
   <!-- notification category -->
   <string name="forward_success">ShadowsocksR started.</string>
@@ -108,7 +108,7 @@
 
   <!-- alert category -->
   <string name="close">Close</string>
-  <string name="proxy_empty">Proxy/Password should not be empty</string>
+  <string name="proxy_empty">\'Proxy\' and \'Password\' should not be empty</string>
   <string name="connect">Connect</string>
   <string name="initializing">Initializing…</string>
   <string name="recovering">Resetting…</string>
@@ -138,17 +138,17 @@
   <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
-  <string name="action_export_msg">Successfully export!</string>
-  <string name="action_export_err">Failed to export.</string>
-  <string name="action_import_msg">Successfully import!</string>
-  <string name="action_import_err">Failed to import.</string>
+  <string name="action_export_msg">Successfully exported profiles!</string>
+  <string name="action_export_err">Failed to export profiles!</string>
+  <string name="action_import_msg">Successfully imported profiles!</string>
+  <string name="action_import_err">Failed to import profiles.</string>
 
   <!-- profile -->
   <string name="profile_manager_dialog">Profiles</string>
   <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe left/right or press left
     to remove;\n&#8226; Long press to reorder profiles.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Add this SSR Profile?</string>
+  <string name="add_profile_dialog">Add this SSR profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add a profile</string>
