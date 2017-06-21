@@ -92,6 +92,7 @@
 <string name="add_profile_methods_scan_qr_code">"扫描二维码"</string>
 <string name="add_profile_methods_manual_settings">"手动设置"</string>
 <string name="add_profile_scanner_not_installed">"请安装任意兼容 ZXing 的二维码扫描应用。"</string>
+<string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
 <plurals name="removed">
 <item quantity="other">"已删除 %d 项"</item>
 </plurals>
@@ -123,7 +124,7 @@
 <string name="route_entry_bypass_lan_chn">"绕过局域网及中国大陆地址"</string>
 <string name="route_entry_chinalist">"仅代理中国大陆地址"</string>
 <string name="proxied_apps_summary_v21">"为应用程序分别设置代理"</string>
-<string name="acl_rule_templates_generic">"子网/域名 PCRE 正则表达式"</string>
+<string name="acl_rule_templates_generic">"URL/子网/域名 PCRE 正则表达式"</string>
 <string name="acl_rule_templates_domain">"域名及其子域名"</string>
 
 <!-- plugin -->

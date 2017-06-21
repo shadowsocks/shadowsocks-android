@@ -90,6 +90,7 @@
 <string name="add_profile_methods_scan_qr_code">"掃描 QR 碼"</string>
 <string name="add_profile_methods_manual_settings">"手動設定"</string>
 <string name="add_profile_scanner_not_installed">"請安裝任何相容 ZXing 的 QR 碼掃描應用程式。"</string>
+<string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 <plurals name="removed">
 <item quantity="other">"已移除 %d 項"</item>
 </plurals>
@@ -121,7 +122,7 @@
 <string name="route_entry_bypass_lan_chn">"略過區域網路及中國大陸"</string>
 <string name="route_entry_chinalist">"China List"</string>
 <string name="proxied_apps_summary_v21">"為已選擇的應用程式設定 Proxy"</string>
-<string name="acl_rule_templates_generic">"子網路/主機名稱 PCRE 模式"</string>
+<string name="acl_rule_templates_generic">"URL/子網路/主機名稱 PCRE 模式"</string>
 <string name="acl_rule_templates_domain">"網域及其所有子網域"</string>
 
 <!-- plugin -->

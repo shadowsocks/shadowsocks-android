@@ -91,6 +91,7 @@
 <string name="add_profile_methods_scan_qr_code">"QR コードを読み取る"</string>
 <string name="add_profile_methods_manual_settings">"手動設定"</string>
 <string name="add_profile_scanner_not_installed">"Zxingに準拠したQRコードスキャンアプリをインストールして下さい"</string>
+<string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 <plurals name="removed">
 <item quantity="other">"削除済み"</item>
 </plurals>
@@ -122,7 +123,7 @@
 <string name="route_entry_bypass_lan_chn">"LAN 及び中国本土のアドレスを迂回する"</string>
 <string name="route_entry_chinalist">"中国本土のアドレス以外を迂回する"</string>
 <string name="proxied_apps_summary_v21">"選択したアプリにプロキシを設定する"</string>
-<string name="acl_rule_templates_generic">"サブネット/ホスト名 PCRE パターン"</string>
+<string name="acl_rule_templates_generic">"URL/サブネット/ホスト名 PCRE パターン"</string>
 <string name="acl_rule_templates_domain">"ドメイン及び全てのサブドメイン"</string>
 
 <!-- plugin -->

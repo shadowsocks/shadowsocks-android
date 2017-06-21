@@ -154,7 +154,7 @@ trait BaseService extends Service {
     }
 
     if (profile.route == Acl.CUSTOM_RULES)  // rationalize custom rules
-      Acl.save(Acl.CUSTOM_RULES, new Acl().fromId(Acl.CUSTOM_RULES))
+      Acl.save(Acl.CUSTOM_RULES, new Acl().fromId(Acl.CUSTOM_RULES), true)
 
     plugin = new PluginConfiguration(profile.plugin).selectedOptions
     pluginPath = PluginManager.init(plugin)
@@ -341,12 +341,21 @@ trait BaseService extends Service {
     val remoteDns = new JSONArray(profile.remoteDns.split(",").zipWithIndex.map {
       case (dns, i) => makeDns("UserDef-" + i, dns.trim)
     })
+    val localDns = new JSONArray(Array(
+      makeDns("Primary-1", "119.29.29.29", edns = false),
+      makeDns("Primary-2", "114.114.114.114", edns = false)
+    ))
+
+    try {
+      val localLinkDns = com.github.shadowsocks.utils.Dns.getDnsResolver(this)
+      localDns.put(makeDns("Primary-3", localLinkDns, edns = false))
+    } catch {
+      case _: Exception => // Ignore
+    }
+
     profile.route match {
       case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES => config
-        .put("PrimaryDNS", new JSONArray(Array(
-          makeDns("Primary-1", "119.29.29.29", edns = false),
-          makeDns("Primary-2", "114.114.114.114", edns = false)
-        )))
+        .put("PrimaryDNS", localDns)
         .put("AlternativeDNS", remoteDns)
         .put("IPNetworkFile", "china_ip_list.txt")
         .put("DomainFile", "gfwlist.txt")

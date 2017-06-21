@@ -4,8 +4,8 @@ enablePlugins(AndroidGms)
 android.useSupportVectors
 
 name := "shadowsocks"
-version := "4.1.7"
-versionCode := Some(187)
+version := "4.1.8"
+versionCode := Some(188)
 
 proguardOptions ++=
   "-dontwarn com.google.android.gms.internal.**" ::
@@ -36,6 +36,7 @@ libraryDependencies ++=
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.8" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
+  "me.dm7.barcodescanner" % "zxing" % "1.9.3" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 

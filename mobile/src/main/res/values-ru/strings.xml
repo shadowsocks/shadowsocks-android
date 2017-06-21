@@ -96,6 +96,7 @@
 <string name="add_profile_methods_scan_qr_code">"Сканировать QR-код"</string>
 <string name="add_profile_methods_manual_settings">"Ручные настройки"</string>
 <string name="add_profile_scanner_not_installed">"Пожалуйста, установите любое ZXing-совместимое приложение для сканирования QR-кодов."</string>
+<string name="add_profile_scanner_permission_required">Разрешение камеры требуется для сканирования QR код.</string>
 <plurals name="removed">
 <item quantity="one">"Удалено"</item>
 <item quantity="few">"Удалено %d элемента"</item>
@@ -130,7 +131,7 @@
 <string name="route_entry_bypass_lan_chn">"Все, кроме LAN и Китая"</string>
 <string name="route_entry_chinalist">"Список Китай"</string>
 <string name="proxied_apps_summary_v21">"Установить прокси для выбранных приложений"</string>
-<string name="acl_rule_templates_generic">"Подсеть/Регулярное выражение (PCRE) имени хоста"</string>
+<string name="acl_rule_templates_generic">"URL/Подсеть/Регулярное выражение (PCRE) имени хоста"</string>
 <string name="acl_rule_templates_domain">"Доменное имя и все его поддомены"</string>
 
 <!-- plugin -->
