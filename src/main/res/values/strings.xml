@@ -196,7 +196,7 @@
 
 
   <string name="scan_qrcode_install_title">Scanner installation</string>
-  <string name="scan_qrcode_install_text">It seems that 'zxing scanner' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>
+  <string name="scan_qrcode_install_text">It seems that \'zxing scanner\' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>
   <string name="scan_qrcode_direct_download_text">Install Manually</string>
 
   <!-- tasker -->
