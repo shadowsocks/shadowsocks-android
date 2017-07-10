@@ -124,7 +124,7 @@
 <string name="route_entry_bypass_lan_chn">"绕过局域网及中国大陆地址"</string>
 <string name="route_entry_chinalist">"仅代理中国大陆地址"</string>
 <string name="proxied_apps_summary_v21">"为应用程序分别设置代理"</string>
-<string name="acl_rule_templates_generic">"子网/域名 PCRE 正则表达式"</string>
+<string name="acl_rule_templates_generic">"URL/子网/域名 PCRE 正则表达式"</string>
 <string name="acl_rule_templates_domain">"域名及其子域名"</string>
 
 <!-- plugin -->
