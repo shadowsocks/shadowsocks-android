@@ -175,7 +175,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   })
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
-    case Activity.RESULT_OK => bgService.use(app.dataStore.profileId)
+    case Activity.RESULT_OK => Utils.startSsService(this)
     case _ => Log.e(TAG, "Failed to start VpnService")
   }
 
@@ -299,8 +299,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener(_ => if (state == State.CONNECTED) bgService.use(-1) else Utils.ThrowableFuture {
-      if (app.isNatEnabled) bgService.use(app.dataStore.profileId) else {
+    fab.setOnClickListener(_ => if (state == State.CONNECTED) Utils.stopSsService(this) else Utils.ThrowableFuture {
+      if (app.isNatEnabled) Utils.startSsService(this) else {
         val intent = VpnService.prepare(this)
         if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
         else handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))
@@ -369,7 +369,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_PROFILES => displayFragment(new ProfilesFragment)
       case DRAWER_RECOVERY =>
         app.track("GlobalConfigFragment", "reset")
-        if (bgService != null) bgService.use(-1)
+        Utils.stopSsService(this)
         val dialog = ProgressDialog.show(this, "", getString(R.string.recovering), true, false)
         val handler = new Handler {
           override def handleMessage(msg: Message): Unit = if (dialog.isShowing && !isDestroyed) dialog.dismiss()

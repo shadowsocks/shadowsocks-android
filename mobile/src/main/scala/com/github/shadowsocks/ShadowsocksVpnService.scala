@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import java.io.File
 import java.util.Locale
 
+import android.app.Service
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
@@ -30,7 +31,6 @@ import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.acl.{Acl, AclSyncJob, Subnet}
-import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 
 import scala.collection.mutable.ArrayBuffer
@@ -100,18 +100,15 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
-  override def startRunner(profile: Profile) {
-
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
     // ensure the VPNService is prepared
     if (VpnService.prepare(this) != null) {
       val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       startActivity(i)
       stopRunner(stopService = true)
-      return
-    }
-
-    super.startRunner(profile)
+      Service.START_NOT_STICKY
+    } else super.onStartCommand(intent, flags, startId)
   }
 
   override def createNotification() = new ShadowsocksNotification(this, profile.name, "service-vpn")

@@ -170,7 +170,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       app.switchProfile(item.id)
       profilesAdapter.refreshId(old)
       itemView.setSelected(true)
-      if (activity.state == State.CONNECTED) activity.bgService.use(item.id)  // reconnect to new profile
+      if (activity.state == State.CONNECTED) Utils.reloadSsService(activity)
     }
 
     override def onMenuItemClick(menu: MenuItem): Boolean = menu.getItemId match {

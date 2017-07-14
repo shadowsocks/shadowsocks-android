@@ -96,17 +96,13 @@
                 android:label="@string/quick_toggle"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"
                 android:excludeFromRecents="true"
-		android:taskAffinity=""
+                android:taskAffinity=""
+                android:process=":bg"
                 android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
         </activity>
-
-        <service
-                android:name=".ShadowsocksRunnerService"
-                android:exported="false">
-        </service>
 
         <service
                 android:name=".ShadowsocksNatService"
@@ -134,13 +130,13 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".BootReceiver" android:enabled="false">
+        <receiver android:name=".BootReceiver" android:process=":bg" android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".TaskerReceiver" tools:ignore="ExportedReceiver">
+        <receiver android:name=".TaskerReceiver" android:process=":bg" tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
