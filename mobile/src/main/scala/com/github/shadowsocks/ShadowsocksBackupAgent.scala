@@ -20,26 +20,11 @@
 
 package com.github.shadowsocks
 
-import android.app.backup.{BackupAgentHelper, FileBackupHelper, SharedPreferencesBackupHelper}
+import android.app.backup.{BackupAgentHelper, FileBackupHelper}
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.database.DBHelper
 
 class ShadowsocksBackupAgent extends BackupAgentHelper {
-
-  // The names of the SharedPreferences groups that the application maintains.  These
-  // are the same strings that are passed to getSharedPreferences(String, int).
-  val PREFS_DISPLAY = "com.github.shadowsocks_preferences"
-
-  // An arbitrary string used within the BackupAgentHelper implementation to
-  // identify the SharedPreferencesBackupHelper's data.
-  val MY_PREFS_BACKUP_KEY = "com.github.shadowsocks"
-
-  val DATABASE = "com.github.shadowsocks.database.profile"
-
-  override def onCreate() {
-    val helper = new SharedPreferencesBackupHelper(this, PREFS_DISPLAY)
-    addHelper(MY_PREFS_BACKUP_KEY, helper)
-    addHelper(DATABASE, new FileBackupHelper(this, "../databases/" + DBHelper.PROFILE,
-      Acl.CUSTOM_RULES + ".acl"))
-  }
+  override def onCreate(): Unit = addHelper("com.github.shadowsocks.database.profile",
+    new FileBackupHelper(this, "../databases/" + DBHelper.PROFILE, Acl.CUSTOM_RULES + ".acl"))
 }

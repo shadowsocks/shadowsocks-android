@@ -45,7 +45,7 @@ class ShadowsocksRunnerService extends Service with ServiceBoundContext {
     }, 1000)
   }
 
-  def startBackgroundService(): Unit = bgService.useSync(app.profileId)
+  def startBackgroundService(): Unit = bgService.useSync(app.dataStore.profileId)
 
   override def onCreate() {
     super.onCreate()

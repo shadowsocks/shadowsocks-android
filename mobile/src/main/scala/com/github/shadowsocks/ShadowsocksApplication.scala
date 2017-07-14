@@ -28,12 +28,12 @@ import android.app.{Application, NotificationChannel, NotificationManager}
 import android.content._
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
-import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
 import com.github.shadowsocks.acl.DonaldTrump
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
+import com.github.shadowsocks.preference.OrmLitePreferenceDataStore
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser, Tracker}
@@ -60,13 +60,13 @@ object ShadowsocksApplication {
 class ShadowsocksApplication extends Application {
   import ShadowsocksApplication._
 
-  lazy val remoteConfig = FirebaseRemoteConfig.getInstance()
+  lazy val remoteConfig: FirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
   lazy val tracker: Tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
-  lazy val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-  lazy val editor: SharedPreferences.Editor = settings.edit
-  lazy val profileManager = new ProfileManager(new DBHelper(this))
+  private lazy val dbHelper = new DBHelper(this)
+  lazy val profileManager = new ProfileManager(dbHelper)
+  lazy val dataStore = new OrmLitePreferenceDataStore(dbHelper)
 
-  def isNatEnabled: Boolean = settings.getBoolean(Key.isNAT, false)
+  def isNatEnabled: Boolean = dataStore.isNAT
   def isVpnEnabled: Boolean = !isNatEnabled
 
   // send event
@@ -79,13 +79,11 @@ class ShadowsocksApplication extends Application {
     .setFatal(false)
     .build())
 
-  def profileId: Int = settings.getInt(Key.id, 0)
-  def profileId(i: Int): Unit = editor.putInt(Key.id, i).apply()
-  def currentProfile: Option[Profile] = profileManager.getProfile(profileId)
+  def currentProfile: Option[Profile] = profileManager.getProfile(dataStore.profileId)
 
   def switchProfile(id: Int): Profile = {
     val result = profileManager.getProfile(id) getOrElse profileManager.createProfile()
-    profileId(result.id)
+    dataStore.profileId = result.id
     result
   }
 
@@ -154,7 +152,7 @@ class ShadowsocksApplication extends Application {
 
     JobManager.create(this).addJobCreator(DonaldTrump)
 
-    TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
+    TcpFastOpen.enabled(dataStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 
     if (Build.VERSION.SDK_INT >= 26) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
       new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
@@ -192,10 +190,10 @@ class ShadowsocksApplication extends Application {
         autoClose(new FileOutputStream(new File(getFilesDir, file)))(out =>
           IOUtils.copy(in, out)))
     }
-    editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
+    dataStore.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE)
   }
 
-  def updateAssets(): Unit = if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
+  def updateAssets(): Unit = if (dataStore.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
 
   def listenForPackageChanges(callback: => Unit): BroadcastReceiver = {
     val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
