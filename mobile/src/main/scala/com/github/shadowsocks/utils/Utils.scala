@@ -28,7 +28,6 @@ import android.content.pm.PackageManager
 import android.content.{Context, Intent}
 import android.graphics._
 import android.os.Build
-import android.support.v4.os.BuildCompat
 import android.util.{Base64, DisplayMetrics, Log}
 import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
@@ -139,7 +138,7 @@ object Utils {
 
   def startSsService(context: Context) {
     val intent = new Intent(context, classOf[ShadowsocksRunnerService])
-    if (BuildCompat.isAtLeastO) context.startForegroundService(intent)
+    if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(intent)
     else context.startService(intent)
   }
 

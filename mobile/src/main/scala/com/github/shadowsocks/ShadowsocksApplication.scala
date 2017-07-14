@@ -29,7 +29,6 @@ import android.content._
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
 import android.preference.PreferenceManager
-import android.support.v4.os.BuildCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
@@ -43,8 +42,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
@@ -157,7 +156,7 @@ class ShadowsocksApplication extends Application {
 
     TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 
-    if (BuildCompat.isAtLeastO) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
+    if (Build.VERSION.SDK_INT >= 26) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
       new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
       new NotificationChannel("service-nat", getText(R.string.service_nat), NotificationManager.IMPORTANCE_LOW)
     ))

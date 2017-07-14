@@ -21,16 +21,14 @@
 package com.github.shadowsocks
 
 import java.io.{File, IOException}
+import java.net.{Inet6Address, InetAddress}
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
-import java.net.InetAddress
-import java.net.Inet6Address
 
 import android.app.Service
 import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.os.{Handler, IBinder, RemoteCallbackList}
-import android.support.v4.os.BuildCompat
+import android.os.{Build, Handler, IBinder, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -166,7 +164,7 @@ trait BaseService extends Service {
   def startRunner(profile: Profile) {
     this.profile = profile
 
-    if (BuildCompat.isAtLeastO) startForegroundService(new Intent(this, getClass))
+    if (Build.VERSION.SDK_INT >= 26) startForegroundService(new Intent(this, getClass))
     else startService(new Intent(this, getClass))
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
