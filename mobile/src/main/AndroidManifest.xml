@@ -159,9 +159,6 @@
                   android:process=":bg"/>
         <receiver android:name="com.evernote.android.job.JobBootReceiver"
                   android:process=":bg"/>
-
-        <!-- Strip useless components -->
-        <activity android:name="com.google.android.gms.ads.purchase.InAppPurchaseActivity" tools:node="remove"/>
     </application>
 
 </manifest>
