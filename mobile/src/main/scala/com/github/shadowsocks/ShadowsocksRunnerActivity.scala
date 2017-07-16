@@ -74,7 +74,6 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
     } else {
       attachService()
     }
-    finish()
   }
 
   override def onDestroy() {
