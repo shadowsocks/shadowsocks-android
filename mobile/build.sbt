@@ -20,7 +20,7 @@ val playServicesVersion = "11.0.2"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
-  "com.evernote" % "android-job" % "1.1.11" ::
+  "com.evernote" % "android-job" % "1.2.0-alpha3" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.google.android.gms" % "play-services-ads" % playServicesVersion ::
   "com.google.android.gms" % "play-services-analytics" % playServicesVersion ::
