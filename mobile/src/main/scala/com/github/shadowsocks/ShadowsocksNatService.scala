@@ -24,11 +24,12 @@ import java.io.File
 import java.net.{Inet6Address, InetAddress}
 import java.util.Locale
 
+import android.app.Service
 import android.content._
 import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.acl.{AclSyncJob, Acl}
+import com.github.shadowsocks.acl.{Acl, AclSyncJob}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 import eu.chainfire.libsuperuser.Shell
@@ -43,7 +44,6 @@ class ShadowsocksNatService extends BaseService {
   val CMD_IPTABLES_DNAT_ADD_SOCKS =
     "iptables -t nat -A OUTPUT -p tcp -j DNAT --to-destination 127.0.0.1:8123"
 
-  private var notification: ShadowsocksNotification = _
   val myUid: Int = android.os.Process.myUid()
 
   var sslocalProcess: GuardedProcess = _
@@ -177,15 +177,17 @@ class ShadowsocksNatService extends BaseService {
     su.addCommand((init_sb ++ http_sb).toArray)
   }
 
-  override def startRunner(profile: Profile): Unit = if (su == null)
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = if (su == null) {
     su = new Shell.Builder().useSU().setWantSTDERR(true).setWatchdogTimeout(10).open((_, exitCode, _) =>
-      if (exitCode == 0) super.startRunner(profile) else {
+      if (exitCode == 0) super.onStartCommand(intent, flags, startId) else {
         if (su != null) {
           su.close()
           su = null
         }
         super.stopRunner(stopService = true, getString(R.string.nat_no_root))
       })
+    Service.START_NOT_STICKY
+  } else super.onStartCommand(intent, flags, startId)
 
   override def connect() {
     super.connect()
@@ -204,12 +206,11 @@ class ShadowsocksNatService extends BaseService {
       AclSyncJob.schedule(profile.route)
 
     changeState(State.CONNECTED)
-    notification = new ShadowsocksNotification(this, profile.name, true)
   }
 
-  override def stopRunner(stopService: Boolean, msg: String = null) {
+  override def createNotification() = new ShadowsocksNotification(this, profile.name, "service-nat", true)
 
-    if (notification != null) notification.destroy()
+  override def stopRunner(stopService: Boolean, msg: String = null) {
 
     // channge the state
     changeState(State.STOPPING)

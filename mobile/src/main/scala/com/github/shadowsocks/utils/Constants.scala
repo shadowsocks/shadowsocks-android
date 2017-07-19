@@ -94,6 +94,7 @@ object State {
 object Action {
   final val SERVICE = "com.github.shadowsocks.SERVICE"
   final val CLOSE = "com.github.shadowsocks.CLOSE"
+  final val RELOAD = "com.github.shadowsocks.RELOAD"
 
   final val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }

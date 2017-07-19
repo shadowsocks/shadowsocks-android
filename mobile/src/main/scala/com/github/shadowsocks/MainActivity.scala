@@ -26,7 +26,6 @@ import java.util.Locale
 
 import android.app.backup.BackupManager
 import android.app.{Activity, ProgressDialog}
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.content._
 import android.net.{Uri, VpnService}
 import android.nfc.{NdefMessage, NfcAdapter}
@@ -36,6 +35,7 @@ import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.content.res.AppCompatResources
+import android.support.v7.preference.PreferenceDataStore
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.text.TextUtils
 import android.util.Log
@@ -45,6 +45,7 @@ import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.acl.{Acl, CustomRulesFragment}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.CloseUtils.autoDisconnect
 import com.github.shadowsocks.utils._
 import com.mikepenz.crossfader.Crossfader
@@ -67,7 +68,7 @@ object MainActivity {
 }
 
 class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
-  with OnSharedPreferenceChangeListener {
+  with OnPreferenceDataStoreChangeListener {
   import MainActivity._
 
   // UI
@@ -165,7 +166,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onServiceDisconnected(): Unit = changeState(State.IDLE)
 
   private def addDisableNatToSnackbar(snackbar: Snackbar) = snackbar.setAction(R.string.switch_to_vpn, (_ =>
-    if (state == State.STOPPED) app.editor.putBoolean(Key.isNAT, false).apply()): View.OnClickListener)
+    if (state == State.STOPPED) app.dataStore.isNAT = false): View.OnClickListener)
 
   override def binderDied(): Unit = handler.post(() => {
     detachService()
@@ -174,7 +175,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   })
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
-    case Activity.RESULT_OK => bgService.use(app.profileId)
+    case Activity.RESULT_OK => Utils.startSsService(this)
     case _ => Log.e(TAG, "Failed to start VpnService")
   }
 
@@ -246,7 +247,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     } else drawer = drawerBuilder.build()
 
     val header = drawer.getHeader
-    val title = header.findViewById(R.id.drawer_title).asInstanceOf[TextView]
+    val title = header.findViewById[TextView](R.id.drawer_title)
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
@@ -256,7 +257,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    findViewById(R.id.stat).setOnClickListener(_ => if (state == State.CONNECTED && app.isVpnEnabled) {
+    findViewById[View](R.id.stat).setOnClickListener(_ => if (state == State.CONNECTED && app.isVpnEnabled) {
       testCount += 1
       statusText.setText(R.string.connection_test_testing)
       val id = testCount  // it would change by other code
@@ -298,8 +299,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
-    fab.setOnClickListener(_ => if (state == State.CONNECTED) bgService.use(-1) else Utils.ThrowableFuture {
-      if (app.isNatEnabled) bgService.use(app.profileId) else {
+    fab.setOnClickListener(_ => if (state == State.CONNECTED) Utils.stopSsService(this) else Utils.ThrowableFuture {
+      if (app.isNatEnabled) Utils.startSsService(this) else {
         val intent = VpnService.prepare(this)
         if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
         else handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))
@@ -313,7 +314,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
     changeState(State.IDLE) // reset everything to init state
     handler.post(() => attachService(callback))
-    app.settings.registerOnSharedPreferenceChangeListener(this)
+    app.dataStore.registerChangeListener(this)
 
     val intent = getIntent
     if (intent != null) handleShareIntent(intent)
@@ -350,7 +351,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       .show()
   }
 
-  def onSharedPreferenceChanged(pref: SharedPreferences, key: String): Unit = key match {
+  def onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String): Unit = key match {
     case Key.isNAT => handler.post(() => {
       detachService()
       attachService(callback)
@@ -368,7 +369,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_PROFILES => displayFragment(new ProfilesFragment)
       case DRAWER_RECOVERY =>
         app.track("GlobalConfigFragment", "reset")
-        if (bgService != null) bgService.use(-1)
+        Utils.stopSsService(this)
         val dialog = ProgressDialog.show(this, "", getString(R.string.recovering), true, false)
         val handler = new Handler {
           override def handleMessage(msg: Message): Unit = if (dialog.isShowing && !isDestroyed) dialog.dismiss()
@@ -424,7 +425,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   override def onDestroy() {
     super.onDestroy()
-    app.settings.unregisterOnSharedPreferenceChangeListener(this)
+    app.dataStore.unregisterChangeListener(this)
     detachService()
     new BackupManager(this).dataChanged()
     handler.removeCallbacksAndMessages(null)

@@ -20,27 +20,24 @@
 
 package com.github.shadowsocks
 
-import android.content.SharedPreferences
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
+import android.support.v7.preference.PreferenceDataStore
 import be.mygod.preference.PreferenceFragment
-import com.github.shadowsocks.utils.{Key, TcpFastOpen}
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
+import com.github.shadowsocks.utils.{Key, TcpFastOpen}
 
-class GlobalConfigFragment extends PreferenceFragment with OnSharedPreferenceChangeListener {
+class GlobalConfigFragment extends PreferenceFragment with OnPreferenceDataStoreChangeListener {
   override def onCreatePreferences(bundle: Bundle, key: String) {
+    getPreferenceManager.setPreferenceDataStore(app.dataStore)
     addPreferencesFromResource(R.xml.pref_global)
     val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
     switch.setOnPreferenceChangeListener((_, value) => {
       BootReceiver.setEnabled(getActivity, value.asInstanceOf[Boolean])
       true
     })
-    if (getPreferenceManager.getSharedPreferences.getBoolean(Key.isAutoConnect, false)) {
-      BootReceiver.setEnabled(getActivity, true)
-      getPreferenceManager.getSharedPreferences.edit.remove(Key.isAutoConnect).apply()
-    }
     switch.setChecked(BootReceiver.getEnabled(getActivity))
 
     val tfo = findPreference(Key.tfo).asInstanceOf[SwitchPreference]
@@ -56,16 +53,16 @@ class GlobalConfigFragment extends PreferenceFragment with OnSharedPreferenceCha
       tfo.setEnabled(false)
       tfo.setSummary(getString(R.string.tcp_fastopen_summary_unsupported, java.lang.System.getProperty("os.version")))
     }
-    app.settings.registerOnSharedPreferenceChangeListener(this)
+    app.dataStore.registerChangeListener(this)
   }
 
   override def onDestroy() {
-    app.settings.unregisterOnSharedPreferenceChangeListener(this)
+    app.dataStore.unregisterChangeListener(this)
     super.onDestroy()
   }
 
-  def onSharedPreferenceChanged(pref: SharedPreferences, key: String): Unit = key match {
-    case Key.isNAT => findPreference(key).asInstanceOf[SwitchPreference].setChecked(pref.getBoolean(key, false))
+  def onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String): Unit = key match {
+    case Key.isNAT => findPreference(key).asInstanceOf[SwitchPreference].setChecked(store.getBoolean(key, false))
     case _ =>
   }
 }

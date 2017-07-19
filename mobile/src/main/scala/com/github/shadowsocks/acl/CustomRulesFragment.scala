@@ -46,8 +46,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
 
   private def createAclRuleDialog(text: CharSequence = "") = {
     val view = getActivity.getLayoutInflater.inflate(R.layout.dialog_acl_rule, null)
-    val templateSelector = view.findViewById(R.id.template_selector).asInstanceOf[Spinner]
-    val editText = view.findViewById(R.id.content).asInstanceOf[EditText]
+    val templateSelector = view.findViewById[Spinner](R.id.template_selector)
+    val editText = view.findViewById[EditText](R.id.content)
     PATTERN_DOMAIN.findFirstMatchIn(text) match {
       case Some(m) =>
         templateSelector.setSelection(DOMAIN)
@@ -70,7 +70,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
   private final class AclRuleViewHolder(view: View) extends RecyclerView.ViewHolder(view)
     with View.OnClickListener with View.OnLongClickListener {
     var item: AnyRef = _
-    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
+    private val text = itemView.findViewById[TextView](android.R.id.text1)
     itemView.setOnClickListener(this)
     itemView.setOnLongClickListener(this)
     itemView.setBackgroundResource(R.drawable.background_selectable)
@@ -252,12 +252,11 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     toolbar.setOnMenuItemClickListener(this)
     selectionItem = toolbar.getMenu.findItem(R.id.selection)
     selectionItem.setVisible(selectedItems.nonEmpty)
-    list = view.findViewById(R.id.list).asInstanceOf[RecyclerView]
+    list = view.findViewById(R.id.list)
     list.setLayoutManager(new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false))
     list.setItemAnimator(new DefaultItemAnimator)
     list.setAdapter(adapter)
-    val fastScroller = view.findViewById(R.id.fastscroller).asInstanceOf[FastScroller]
-    fastScroller.setRecyclerView(list)
+    view.findViewById[FastScroller](R.id.fastscroller).setRecyclerView(list)
     undoManager = new UndoSnackbarManager[AnyRef](getActivity.findViewById(R.id.snackbar), adapter.undo)
     new ItemTouchHelper(new SimpleCallback(0, ItemTouchHelper.START | ItemTouchHelper.END) {
       override def getSwipeDirs(recyclerView: RecyclerView, viewHolder: ViewHolder): Int =

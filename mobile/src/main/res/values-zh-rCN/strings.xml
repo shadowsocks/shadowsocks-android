@@ -92,6 +92,7 @@
 <string name="add_profile_methods_scan_qr_code">"扫描二维码"</string>
 <string name="add_profile_methods_manual_settings">"手动设置"</string>
 <string name="add_profile_scanner_not_installed">"请安装任意兼容 ZXing 的二维码扫描应用。"</string>
+<string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
 <plurals name="removed">
 <item quantity="other">"已删除 %d 项"</item>
 </plurals>

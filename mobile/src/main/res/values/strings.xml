@@ -56,6 +56,8 @@
   <string name="udp_dns_summary">Forward all DNS requests to remote</string>
 
   <!-- notification category -->
+  <string name="service_vpn">VPN Service</string>
+  <string name="service_nat">NAT Service</string>
   <string name="forward_success">Shadowsocks started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
@@ -104,6 +106,7 @@
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_scanner_not_installed">Please install any ZXing-compliant QR code scanning app.</string>
+  <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <plurals name="removed">
     <item quantity="one">Removed</item>
     <item quantity="other">%d items removed</item>
