@@ -16,24 +16,18 @@
 
 package com.github.shadowsocks.utils;
 
-import android.annotation.SuppressLint;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.annotation.TargetApi;
-import android.util.Log;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.os.Build;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.net.InetAddress;
 
 public class Dns {
-
     public static String getDnsResolver(Context context) throws Exception {
         Collection<InetAddress> dnsResolvers = getDnsResolvers(context);
         if (dnsResolvers.isEmpty()) {
@@ -46,25 +40,22 @@ public class Dns {
         return dnsResolver;
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static Collection<InetAddress> getDnsResolvers(Context context) throws Exception {
         ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
         ConnectivityManager connectivityManager =
             (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         Class<?> LinkPropertiesClass = Class.forName("android.net.LinkProperties");
-        Method getActiveLinkPropertiesMethod = ConnectivityManager.class.getMethod("getActiveLinkProperties", new Class []{});
+        Method getActiveLinkPropertiesMethod = ConnectivityManager.class.getMethod("getActiveLinkProperties");
         Object linkProperties = getActiveLinkPropertiesMethod.invoke(connectivityManager);
         if (linkProperties != null) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                Method getDnsesMethod = LinkPropertiesClass.getMethod("getDnses", new Class []{});
+                Method getDnsesMethod = LinkPropertiesClass.getMethod("getDnses");
                 Collection<?> dnses = (Collection<?>)getDnsesMethod.invoke(linkProperties);
                 for (Object dns : dnses) {
                     addresses.add((InetAddress)dns);
                 }
             } else {
-                for (InetAddress dns : ((LinkProperties)linkProperties).getDnsServers()) {
-                    addresses.add(dns);
-                }
+                addresses.addAll(((LinkProperties) linkProperties).getDnsServers());
             }
         }
 
