@@ -54,7 +54,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _
 
-  private val builder = new NotificationCompat.Builder(service)
+  private val builder = new NotificationCompat.Builder(service, channel)
     .setWhen(0)
     .setColor(ContextCompat.getColor(service, R.color.material_primary_500))
     .setTicker(service.getString(R.string.forward_success))
@@ -62,7 +62,6 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
     .setContentIntent(PendingIntent.getActivity(service, 0, new Intent(service, classOf[MainActivity])
       .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
     .setSmallIcon(R.drawable.ic_stat_shadowsocks)
-    .setChannel(channel)
   if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
     service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, new Intent(Action.CLOSE), 0))
   private lazy val style = new BigTextStyle(builder)

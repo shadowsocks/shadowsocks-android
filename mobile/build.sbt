@@ -23,7 +23,7 @@ proguardOptions ++=
   "-keep public class com.evernote.android.job.JobRescheduleService" ::
   Nil
 
-val playServicesVersion = "11.0.2"
+val playServicesVersion = "11.0.4"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
@@ -38,12 +38,12 @@ libraryDependencies ++=
   "com.mikepenz" % "fastadapter" % "2.6.2" ::
   "com.mikepenz" % "iconics-core" % "2.8.9" ::
   "com.mikepenz" % "materialdrawer" % "5.9.4" ::
-  "com.mikepenz" % "materialize" % "1.0.2" ::
+  "com.mikepenz" % "materialize" % "1.0.3" ::
   "com.squareup.okhttp3" % "okhttp" % "3.8.1" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.8" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
-  "me.dm7.barcodescanner" % "zxing" % "1.9.3" ::
+  "me.dm7.barcodescanner" % "zxing" % "1.9.5" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 
