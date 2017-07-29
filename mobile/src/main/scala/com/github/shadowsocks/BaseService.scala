@@ -124,8 +124,6 @@ trait BaseService extends Service {
   }
 
   def connect() {
-    profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
-
     if (profile.host == "198.199.101.152") {
       val client = new OkHttpClient.Builder()
         .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
@@ -256,6 +254,8 @@ trait BaseService extends Service {
       case _ => return Service.START_NOT_STICKY // ignore request
     }
     profile = app.currentProfile.orNull
+    profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
+
     TrafficMonitor.reset()
     trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
     trafficMonitorThread.start()
