@@ -253,7 +253,13 @@ trait BaseService extends Service {
       case State.STOPPED | State.IDLE =>
       case _ => return Service.START_NOT_STICKY // ignore request
     }
+
     profile = app.currentProfile.orNull
+    if (profile == null) {
+      stopRunner(stopService = true)
+      return Service.START_NOT_STICKY
+    }
+
     profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
 
     TrafficMonitor.reset()
