@@ -2,10 +2,10 @@
           package="com.github.shadowsocks.plugin">
     <uses-sdk
             android:minSdkVersion="19"
-            android:targetSdkVersion="25"/>
+            android:targetSdkVersion="26"/>
     <application
             android:theme="@style/Theme.Shadowsocks">
         <meta-data android:name="com.github.shadowsocks.plugin.version"
-                   android:value="0.0.2"/>
+                   android:value="0.0.4"/>
     </application>
 </manifest>

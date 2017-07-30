@@ -14,9 +14,9 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 * SBT 0.13.0+
 * Go 1.4+
 * Android SDK
-  - Build Tools 25+
+  - Build Tools 26+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
-  - Android NDK r14+
+  - Android NDK r15+
 
 ### BUILD
 

@@ -46,9 +46,9 @@ final class BottomSheetPreferenceDialogFragment extends PreferenceDialogFragment
   private final class IconListViewHolder(val dialog: BottomSheetDialog, view: View) extends ViewHolder(view)
     with View.OnClickListener with View.OnLongClickListener {
     private var index: Int = _
-    private val text1 = view.findViewById(android.R.id.text1).asInstanceOf[TextView]
-    private val text2 = view.findViewById(android.R.id.text2).asInstanceOf[TextView]
-    private val icon = view.findViewById(android.R.id.icon).asInstanceOf[ImageView]
+    private val text1 = view.findViewById[TextView](android.R.id.text1)
+    private val text2 = view.findViewById[TextView](android.R.id.text2)
+    private val icon = view.findViewById[ImageView](android.R.id.icon)
     view.setOnClickListener(this)
     view.setOnLongClickListener(this)
 

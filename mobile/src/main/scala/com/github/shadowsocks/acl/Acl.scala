@@ -26,26 +26,6 @@ class Acl {
   @DatabaseField
   var bypass: Boolean = _
 
-  def getBypassHostnamesString: String = bypassHostnames.mkString("\n")
-  def getProxyHostnamesString: String = proxyHostnames.mkString("\n")
-  def getSubnetsString: String = subnets.mkString("\n")
-  def setBypassHostnamesString(value: String) {
-    bypassHostnames.clear()
-    bypassHostnames ++= value.split("\n")
-  }
-  def setProxyHostnamesString(value: String) {
-    proxyHostnames.clear()
-    proxyHostnames ++= value.split("\n")
-  }
-  def setSubnetsString(value: String) {
-    subnets.clear()
-    subnets ++= value.split("\n").map(Subnet.fromString)
-  }
-  def setUrlRules(value: String) {
-    urls.clear()
-    urls ++= value.split("\n")
-  }
-
   def fromAcl(other: Acl): Acl = {
     bypassHostnames.clear()
     bypassHostnames ++= other.bypassHostnames
@@ -71,17 +51,10 @@ class Acl {
     var in_urls = false
     for (line <- value.getLines()) (line.indexOf('#') match {
       case -1 => if (!in_urls) line else ""
-      case index => {
-        line.indexOf("URLS_BEGIN") match {
-          case -1 =>
-          case index => in_urls = true
-        }
-        line.indexOf("URLS_END") match {
-          case -1 =>
-          case index => in_urls = false
-        }
-        "" // ignore any comment lines
-      }
+      case index =>
+        if (line.contains("URLS_BEGIN")) in_urls = true
+        if (line.contains("URLS_END")) in_urls = false
+        line.substring(0, index) // trim comments
     }).trim match {
       case "[outbound_block_list]" =>
         hostnames = null
@@ -95,10 +68,8 @@ class Acl {
       case "[reject_all]" | "[bypass_all]" => bypass = true
       case "[accept_all]" | "[proxy_all]" => bypass = false
       case input if subnets != null && input.nonEmpty => try subnets += Subnet.fromString(input) catch {
-        case _: IllegalArgumentException => if (input.startsWith("http://") || input.startsWith("https://")) {
-          urls += input
-        }
-        hostnames += input
+        case _: IllegalArgumentException => if (input.startsWith("http://") || input.startsWith("https://"))
+          urls += input else hostnames += input
       }
       case _ =>
     }
@@ -116,7 +87,7 @@ class Acl {
         try {
           urls.foreach((url: String) => result.append(Source.fromURL(url).mkString))
         } catch {
-          case e: IOException => // ignore
+          case _: IOException => // ignore
         }
       }
       result.append("#URLS_END\n")
@@ -141,9 +112,7 @@ class Acl {
     result.toString
   }
 
-  override def toString: String = {
-    getAclString(false)
-  }
+  override def toString: String = getAclString(false)
 
   def isValidCustomRules: Boolean = bypass && bypassHostnames.isEmpty
 

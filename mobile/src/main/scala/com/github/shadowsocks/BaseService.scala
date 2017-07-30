@@ -21,15 +21,14 @@
 package com.github.shadowsocks
 
 import java.io.{File, IOException}
+import java.net.{Inet6Address, InetAddress}
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
-import java.net.InetAddress
-import java.net.Inet6Address
 
 import android.app.Service
-import android.content.{BroadcastReceiver, Context, Intent, IntentFilter}
-import android.os.{Handler, IBinder, RemoteCallbackList}
+import android.content._
+import android.os.{Build, Handler, IBinder, RemoteCallbackList}
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -65,9 +64,12 @@ trait BaseService extends Service {
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
 
-  private val closeReceiver: BroadcastReceiver = (context: Context, _: Intent) => {
-    Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
-    stopRunner(stopService = true)
+  private var notification: ShadowsocksNotification = _
+  private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => intent.getAction match {
+    case Action.RELOAD => forceLoad()
+    case _ =>
+      Toast.makeText(context, R.string.stopping, Toast.LENGTH_SHORT).show()
+      stopRunner(stopService = true)
   }
   var closeReceiverRegistered: Boolean = _
 
@@ -103,20 +105,6 @@ trait BaseService extends Service {
       stopListeningForBandwidth(cb) // saves an RPC, and safer
       callbacks.unregister(cb)
     }
-
-    override def use(profileId: Int): Unit = synchronized(if (profileId < 0) stopRunner(stopService = true) else {
-      val profile = app.profileManager.getProfile(profileId).orNull
-      if (profile == null) stopRunner(stopService = true, getString(R.string.profile_empty)) else state match {
-        case State.STOPPED => if (checkProfile(profile)) startRunner(profile)
-        case State.CONNECTED => if (profileId != BaseService.this.profile.id && checkProfile(profile)) {
-          stopRunner(stopService = false)
-          startRunner(profile)
-        }
-        case _ => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + state)
-      }
-    })
-
-    override def useSync(profileId: Int): Unit = use(profileId)
   }
 
   def checkProfile(profile: Profile): Boolean = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
@@ -124,9 +112,18 @@ trait BaseService extends Service {
     false
   } else true
 
-  def connect() {
-    profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
+  def forceLoad(): Unit = app.currentProfile.orNull match {
+    case null => stopRunner(stopService = true, getString(R.string.profile_empty))
+    case p => if (checkProfile(p)) state match {
+      case State.STOPPED => startRunner()
+      case State.CONNECTED =>
+        stopRunner(stopService = false)
+        startRunner()
+      case s => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + s)
+    }
+  }
 
+  def connect() {
     if (profile.host == "198.199.101.152") {
       val client = new OkHttpClient.Builder()
         .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
@@ -160,36 +157,9 @@ trait BaseService extends Service {
     pluginPath = PluginManager.init(plugin)
   }
 
-  def startRunner(profile: Profile) {
-    this.profile = profile
-
-    startService(new Intent(this, getClass))
-    TrafficMonitor.reset()
-    trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
-    trafficMonitorThread.start()
-
-    if (!closeReceiverRegistered) {
-      // register close receiver
-      val filter = new IntentFilter()
-      filter.addAction(Intent.ACTION_SHUTDOWN)
-      filter.addAction(Action.CLOSE)
-      registerReceiver(closeReceiver, filter)
-      closeReceiverRegistered = true
-    }
-
-    app.track(getClass.getSimpleName, "start")
-
-    changeState(State.CONNECTING)
-
-    Utils.ThrowableFuture(try connect() catch {
-      case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
-      case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
-      case exc: Throwable =>
-        stopRunner(stopService = true, getString(R.string.service_failed) + ": " + exc.getMessage)
-        exc.printStackTrace()
-        app.track(exc)
-    })
-  }
+  def createNotification(): ShadowsocksNotification
+  def startRunner(): Unit = if (Build.VERSION.SDK_INT >= 26) startForegroundService(new Intent(this, getClass))
+    else startService(new Intent(this, getClass))
 
   def stopRunner(stopService: Boolean, msg: String = null) {
     // clean up recevier
@@ -197,6 +167,8 @@ trait BaseService extends Service {
       unregisterReceiver(closeReceiver)
       closeReceiverRegistered = false
     }
+
+    if (notification != null) notification.destroy()
 
     // Make sure update total traffic when stopping the runner
     updateTrafficTotal(TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
@@ -276,7 +248,49 @@ trait BaseService extends Service {
   }
 
   // Service of shadowsocks should always be started explicitly
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = Service.START_NOT_STICKY
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
+    state match {
+      case State.STOPPED | State.IDLE =>
+      case _ => return Service.START_NOT_STICKY // ignore request
+    }
+
+    profile = app.currentProfile.orNull
+    if (profile == null) {
+      stopRunner(stopService = true)
+      return Service.START_NOT_STICKY
+    }
+
+    profile.name = profile.getName  // save original name before it's (possibly) overwritten by IP addresses
+
+    TrafficMonitor.reset()
+    trafficMonitorThread = new TrafficMonitorThread(getApplicationContext)
+    trafficMonitorThread.start()
+
+    if (!closeReceiverRegistered) {
+      // register close receiver
+      val filter = new IntentFilter()
+      filter.addAction(Action.RELOAD)
+      filter.addAction(Intent.ACTION_SHUTDOWN)
+      filter.addAction(Action.CLOSE)
+      registerReceiver(closeReceiver, filter)
+      closeReceiverRegistered = true
+    }
+
+    notification = createNotification()
+    app.track(getClass.getSimpleName, "start")
+
+    changeState(State.CONNECTING)
+
+    Utils.ThrowableFuture(try connect() catch {
+      case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
+      case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
+      case exc: Throwable =>
+        stopRunner(stopService = true, getString(R.string.service_failed) + ": " + exc.getMessage)
+        exc.printStackTrace()
+        app.track(exc)
+    })
+    Service.START_NOT_STICKY
+  }
 
   protected def changeState(s: Int, msg: String = null) {
     val handler = new Handler(getMainLooper)

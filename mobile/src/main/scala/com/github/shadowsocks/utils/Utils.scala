@@ -33,7 +33,7 @@ import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
 import android.widget.Toast
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.{BuildConfig, ShadowsocksRunnerService}
+import com.github.shadowsocks.{BuildConfig, ShadowsocksNatService, ShadowsocksVpnService}
 import org.xbill.DNS._
 
 import scala.collection.JavaConversions._
@@ -137,10 +137,11 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    val intent = new Intent(context, classOf[ShadowsocksRunnerService])
-    context.startService(intent)
+    val intent =
+      new Intent(context, if (app.dataStore.isNAT) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService])
+    if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(intent) else context.startService(intent)
   }
-
+  def reloadSsService(context: Context): Unit = context.sendBroadcast(new Intent(Action.RELOAD))
   def stopSsService(context: Context) {
     val intent = new Intent(Action.CLOSE)
     context.sendBroadcast(intent)

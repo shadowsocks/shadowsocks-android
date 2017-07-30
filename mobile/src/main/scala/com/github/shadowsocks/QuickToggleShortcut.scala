@@ -24,6 +24,8 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.ShortcutManager
 import android.os.{Build, Bundle}
+import android.support.v4.content.pm.{ShortcutInfoCompat, ShortcutManagerCompat}
+import android.support.v4.graphics.drawable.IconCompat
 import com.github.shadowsocks.utils.{State, Utils}
 
 /**
@@ -34,11 +36,12 @@ class QuickToggleShortcut extends Activity with ServiceBoundContext {
     super.onCreate(savedInstanceState)
     getIntent.getAction match {
       case Intent.ACTION_CREATE_SHORTCUT =>
-        setResult(Activity.RESULT_OK, new Intent()
-          .putExtra(Intent.EXTRA_SHORTCUT_INTENT, new Intent(this, classOf[QuickToggleShortcut]))
-          .putExtra(Intent.EXTRA_SHORTCUT_NAME, getString(R.string.quick_toggle))
-          .putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-            Intent.ShortcutIconResource.fromContext(this, R.mipmap.ic_launcher)))
+        setResult(Activity.RESULT_OK, ShortcutManagerCompat.createShortcutResultIntent(this,
+          new ShortcutInfoCompat.Builder(this, "toggle")
+            .setIntent(new Intent(this, classOf[QuickToggleShortcut]).setAction(Intent.ACTION_MAIN))
+            .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_shadowsocks_launcher))
+            .setShortLabel(getString(R.string.quick_toggle))
+            .build()))
         finish()
       case _ =>
         attachService()

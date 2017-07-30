@@ -49,7 +49,7 @@ class ProfileConfigActivity extends Activity {
     toolbar.setOnMenuItemClickListener(child)
   }
 
-  override def onBackPressed(): Unit = if (app.settings.getBoolean(Key.dirty, false)) new AlertDialog.Builder(this)
+  override def onBackPressed(): Unit = if (app.dataStore.dirty) new AlertDialog.Builder(this)
     .setTitle(R.string.unsaved_changes_prompt)
     .setPositiveButton(R.string.yes, ((_, _) => child.saveAndExit()): DialogInterface.OnClickListener)
     .setNegativeButton(R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)

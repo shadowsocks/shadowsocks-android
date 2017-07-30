@@ -28,13 +28,15 @@ import android.os.{Build, PowerManager}
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationCompat.BigTextStyle
 import android.support.v4.content.ContextCompat
+import android.support.v4.os.BuildCompat
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback.Stub
 import com.github.shadowsocks.utils.{Action, State, TrafficMonitor, Utils}
 
 /**
   * @author Mygod
   */
-class ShadowsocksNotification(private val service: BaseService, profileName: String, visible: Boolean = false) {
+class ShadowsocksNotification(private val service: BaseService, profileName: String,
+                              channel: String, visible: Boolean = false) {
   private val keyGuard = service.getSystemService(Context.KEYGUARD_SERVICE).asInstanceOf[KeyguardManager]
   private lazy val nm = service.getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
   private lazy val callback = new Stub {
@@ -52,7 +54,7 @@ class ShadowsocksNotification(private val service: BaseService, profileName: Str
   private var lockReceiver: BroadcastReceiver = _
   private var callbackRegistered: Boolean = _
 
-  private val builder = new NotificationCompat.Builder(service)
+  private val builder = new NotificationCompat.Builder(service, channel)
     .setWhen(0)
     .setColor(ContextCompat.getColor(service, R.color.material_primary_500))
     .setTicker(service.getString(R.string.forward_success))

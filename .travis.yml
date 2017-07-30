@@ -5,7 +5,7 @@ jdk:
 
 env:
     global:
-        - NDK_VERSION=r14
+        - NDK_VERSION=r15b
         - NDK_CCACHE=ccache
         - GOROOT_BOOTSTRAP=$GOROOT
         - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
@@ -13,7 +13,7 @@ env:
         - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
 scala:
-    - 2.11.8
+    - 2.11.11
 
 before_cache:
     - find $HOME/.sbt -name "*.lock" | xargs rm
@@ -27,7 +27,7 @@ cache:
 android:
     components:
         - tools
-        - build-tools-25.0.2
+        - build-tools-26.0.0
         - extra-android-m2repository
         - extra-google-m2repository
 

@@ -68,7 +68,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     case _ => false
   }
   private def isProfileEditable(id: => Int) = getActivity.asInstanceOf[MainActivity].state match {
-    case State.CONNECTED => id != app.profileId
+    case State.CONNECTED => id != app.dataStore.profileId
     case State.STOPPED => true
     case _ => false
   }
@@ -78,20 +78,20 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
     var item: Profile = _
 
-    private val text1 = itemView.findViewById(android.R.id.text1).asInstanceOf[TextView]
-    private val text2 = itemView.findViewById(android.R.id.text2).asInstanceOf[TextView]
-    private val traffic = itemView.findViewById(R.id.traffic).asInstanceOf[TextView]
-    private val edit = itemView.findViewById(R.id.edit)
+    private val text1 = itemView.findViewById[TextView](android.R.id.text1)
+    private val text2 = itemView.findViewById[TextView](android.R.id.text2)
+    private val traffic = itemView.findViewById[TextView](R.id.traffic)
+    private val edit = itemView.findViewById[View](R.id.edit)
     edit.setOnClickListener(_ => startConfig(item.id))
     edit.setOnLongClickListener(cardButtonLongClickListener)
     itemView.setOnClickListener(this)
     // it will not take effect unless set in code
-    itemView.findViewById(R.id.indicator).setBackgroundResource(R.drawable.background_profile)
+    itemView.findViewById[View](R.id.indicator).setBackgroundResource(R.drawable.background_profile)
 
     private var adView: NativeExpressAdView = _
 
     {
-      val share = itemView.findViewById(R.id.share)
+      val share = itemView.findViewById[View](R.id.share)
       share.setOnClickListener(_ => {
         val popup = new PopupMenu(getActivity, share)
         popup.getMenuInflater.inflate(R.menu.profile_share_popup, popup.getMenu)
@@ -129,7 +129,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx)))
       }
 
-      if (item.id == app.profileId) {
+      if (item.id == app.dataStore.profileId) {
         itemView.setSelected(true)
         selectedItem = this
       } else {
@@ -147,7 +147,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/5224027521")
           adView.setAdSize(new AdSize(328, 132))
-          itemView.findViewById(R.id.content).asInstanceOf[LinearLayout].addView(adView)
+          itemView.findViewById[LinearLayout](R.id.content).addView(adView)
 
           // Demographics
           val random = new Random()
@@ -166,11 +166,11 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
 
     def onClick(v: View): Unit = if (isEnabled) {
       val activity = getActivity.asInstanceOf[MainActivity]
-      val old = app.profileId
+      val old = app.dataStore.profileId
       app.switchProfile(item.id)
       profilesAdapter.refreshId(old)
       itemView.setSelected(true)
-      if (activity.state == State.CONNECTED) activity.bgService.use(item.id)  // reconnect to new profile
+      if (activity.state == State.CONNECTED) Utils.reloadSsService(activity)
     }
 
     override def onMenuItemClick(menu: MenuItem): Boolean = menu.getItemId match {
@@ -251,7 +251,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
       if (index >= 0) {
         profiles.remove(index)
         notifyItemRemoved(index)
-        if (id == app.profileId) app.profileId(0) // switch to null profile
+        if (id == app.dataStore.profileId) app.dataStore.profileId = 0  // switch to null profile
       }
     }
   }
@@ -278,12 +278,12 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    if (app.profileManager.getFirstProfile.isEmpty) app.profileId(app.profileManager.createProfile().id)
-    val profilesList = view.findViewById(R.id.list).asInstanceOf[RecyclerView]
+    if (app.profileManager.getFirstProfile.isEmpty) app.dataStore.profileId = app.profileManager.createProfile().id
+    val profilesList = view.findViewById[RecyclerView](R.id.list)
     val layoutManager = new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
-      case (profile, i) if profile.id == app.profileId => i
+      case (profile, i) if profile.id == app.dataStore.profileId => i
     }.getOrElse(-1))
     val animator = new DefaultItemAnimator()
     animator.setSupportsChangeAnimations(false) // prevent fading-in/out when rebinding

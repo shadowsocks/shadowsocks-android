@@ -77,7 +77,7 @@ class PreferenceGroupAdapter(group: PreferenceGroup) extends Old(group) {
         view.setBackground(background)
         ViewCompat.setPaddingRelative(view, s, t, e, b)
       }
-      val widgetFrame = view.findViewById(android.R.id.widget_frame).asInstanceOf[ViewGroup]
+      val widgetFrame = view.findViewById[ViewGroup](android.R.id.widget_frame)
       if (widgetFrame != null) {
         val widgetResId = fieldWidgetResId.get(pl).asInstanceOf[Int]
         if (widgetResId != 0) inflater.inflate(widgetResId, widgetFrame) else widgetFrame.setVisibility(View.GONE)
