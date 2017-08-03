@@ -183,10 +183,10 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         undoManager.remove((i, acl.urls(i)))
         acl.urls.remove(i)
       } else if (k < 0) {
-        undoManager.remove((j, acl.subnets(j)))
+        undoManager.remove((i, acl.subnets(j)))
         acl.subnets.remove(j)
       } else {
-        undoManager.remove((k, acl.proxyHostnames(k)))
+        undoManager.remove((i, acl.proxyHostnames(k)))
         acl.proxyHostnames.remove(k)
       }
       notifyItemRemoved(i)
@@ -194,7 +194,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     }
     def remove(item: AnyRef): Unit = item match {
       case subnet: Subnet =>
-        notifyItemRemoved(acl.subnets.indexOf(subnet))
+        notifyItemRemoved(acl.subnets.indexOf(subnet) + acl.urls.size)
         acl.subnets.remove(subnet)
         apply()
       case hostname: String => if (acl.isUrl(hostname)) {
@@ -202,7 +202,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         acl.urls.remove(hostname)
         apply()
       } else {
-        notifyItemRemoved(acl.proxyHostnames.indexOf(hostname))
+        notifyItemRemoved(acl.proxyHostnames.indexOf(hostname)
+          + acl.urls.size + acl.subnets.size)
         acl.proxyHostnames.remove(hostname)
         apply()
       }
