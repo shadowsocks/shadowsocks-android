@@ -125,22 +125,34 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       })
     }
 
-    def getItemCount: Int = acl.subnets.size + acl.proxyHostnames.size
+    def getItemCount: Int = acl.subnets.size + acl.proxyHostnames.size + acl.urls.size
     def onBindViewHolder(vh: AclRuleViewHolder, i: Int): Unit = {
-      val j = i - acl.subnets.size
-      if (j < 0) vh.bind(acl.subnets(i)) else vh.bind(acl.proxyHostnames(j))
+      val j = i - acl.urls.size
+      val k = i - acl.subnets.size - acl.urls.size
+      if (j < 0)
+        vh.bind(acl.urls(i))
+      else if (k < 0)
+        vh.bind(acl.subnets(j))
+      else
+        vh.bind(acl.proxyHostnames(k))
     }
     def onCreateViewHolder(vg: ViewGroup, i: Int) = new AclRuleViewHolder(LayoutInflater.from(vg.getContext)
       .inflate(android.R.layout.simple_list_item_1, vg, false))
 
+    def addUrl(url: String): Int = if (acl.urls.add(url)) {
+      val index = acl.urls.indexOf(url)
+      notifyItemInserted(index)
+      apply()
+      index
+    } else -1
     def addSubnet(subnet: Subnet): Int = if (acl.subnets.add(subnet)) {
-      val index = acl.subnets.indexOf(subnet)
+      val index = acl.subnets.indexOf(subnet) + acl.urls.size
       notifyItemInserted(index)
       apply()
       index
     } else -1
     def addHostname(hostname: String): Int = if (acl.proxyHostnames.add(hostname)) {
-      val index = acl.proxyHostnames.indexOf(hostname) + acl.subnets.size
+      val index = acl.proxyHostnames.indexOf(hostname) + acl.urls.size + acl.subnets.size
       notifyItemInserted(index)
       apply()
       index
@@ -148,6 +160,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     def addToProxy(input: String): Int = {
       val acl = new Acl().fromSource(Source.fromString(input), defaultBypass = true)
       var result = -1
+      for (url <- acl.urls) result = addUrl(url)
       for (hostname <- acl.proxyHostnames) result = addHostname(hostname)
       if (acl.bypass) for (subnet <- acl.subnets) result = addSubnet(subnet)
       result
@@ -164,13 +177,17 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     }
 
     def remove(i: Int) {
-      val j = i - acl.subnets.size
+      val j = i - acl.urls.size
+      val k = i - acl.urls.size - acl.subnets.size
       if (j < 0) {
-        undoManager.remove((i, acl.subnets(i)))
-        acl.subnets.remove(i)
+        undoManager.remove((i, acl.urls(i)))
+        acl.urls.remove(i)
+      } else if (k < 0) {
+        undoManager.remove((j, acl.subnets(j)))
+        acl.subnets.remove(j)
       } else {
-        undoManager.remove((j, acl.proxyHostnames(j)))
-        acl.proxyHostnames.remove(j)
+        undoManager.remove((k, acl.proxyHostnames(k)))
+        acl.proxyHostnames.remove(k)
       }
       notifyItemRemoved(i)
       apply()
@@ -180,10 +197,15 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         notifyItemRemoved(acl.subnets.indexOf(subnet))
         acl.subnets.remove(subnet)
         apply()
-      case hostname: String =>
+      case hostname: String => if (acl.isUrl(hostname)) {
+        notifyItemRemoved(acl.urls.indexOf(hostname))
+        acl.urls.remove(hostname)
+        apply()
+      } else {
         notifyItemRemoved(acl.proxyHostnames.indexOf(hostname))
         acl.proxyHostnames.remove(hostname)
         apply()
+      }
     }
     def removeSelected() {
       undoManager.remove(selectedItems.map((-1, _)).toSeq: _*)
@@ -192,12 +214,19 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       onSelectedItemsUpdated()
     }
     def undo(actions: Iterator[(Int, AnyRef)]): Unit = for ((_, item) <- actions) item match {
-      case hostname: String => if (acl.proxyHostnames.insert(hostname)) {
-        notifyItemInserted(acl.proxyHostnames.indexOf(hostname) + acl.subnets.size)
-        apply()
+      case hostname: String => if (acl.isUrl(hostname)) {
+        if (acl.urls.insert(hostname)) {
+          notifyItemInserted(acl.urls.indexOf(hostname))
+          apply()
+        }
+      } else {
+        if (acl.proxyHostnames.insert(hostname)) {
+          notifyItemInserted(acl.proxyHostnames.indexOf(hostname) + acl.urls.size + acl.subnets.size)
+          apply()
+        }
       }
       case subnet: Subnet => if (acl.subnets.insert(subnet)) {
-        notifyItemInserted(acl.subnets.indexOf(subnet))
+        notifyItemInserted(acl.subnets.indexOf(subnet) + acl.urls.size)
         apply()
       }
     }
