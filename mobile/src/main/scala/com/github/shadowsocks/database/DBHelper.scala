@@ -141,6 +141,7 @@ class DBHelper(val context: Context)
         }
 
         if (oldVersion < 23) {
+          TableUtils.createTable(connectionSource, classOf[KeyValuePair])
           import KeyValuePair._
           val old = PreferenceManager.getDefaultSharedPreferences(app)
           kvPairDao.createOrUpdate(new KeyValuePair(Key.id, TYPE_INT,
