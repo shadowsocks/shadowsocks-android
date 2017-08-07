@@ -6,7 +6,7 @@ android.useSupportVectors
 
 name := "shadowsocksr"
 
-applicationId := "in.zhaoj.shadowsocksr.nobackground"
+applicationId := "in.zhaoj.shadowsocksrr"
 
 platformTarget := "android-25"
 

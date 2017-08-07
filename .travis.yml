@@ -45,12 +45,3 @@ install:
 
 script:
     - sbt native-build android:package-release
-deploy:
-  provider: releases
-  api_key:
-    secure: 
-fHITx5JBIyE4dTXsIui9pNUjiPY/KCQUyf1drvZe0b6lYq4JG+Vd/4gsYKDU64UYFtVFLAmWb1/arii9LGRJep8zlbXwawmTyJFzFA4FMTfiwPYlHv2E9ZDsuMEdz4cNUJ3ZxtMipV18/B5db42/sNf9mjeoulBYiWSVQF5Ef5EVZBFpUVTT4xuXBzDANS6URfdi6WVDlrKfSP6EzCwgsKL+T8igrQXAMeFySAM3247jsgAVvFjxaP32F5F4ShP+bFz8JhS7+XxViitXFenX7QG7gW6C2W90SIMkkfsyevwOJMwgbbZMWYRBlX6JoPubIFZ4x3U0pDRPIfsENNjJRhysrU7Ps4LKpozprDHwbkkg0rlSmk7UZvpmuFv5LCsasWIYuvIL7kS3jBiOrC0qAXvEDWugY3gPA1umDg2oLytA6B+LtDmbWZPMrczZAgea9D6eWoH1x2DG0OtU68S6kF11h3RH4RheK28Xk6qcxT5Up27B1Mmvl44ScWo7IBdCd91pyllYWT88ktPQXdcBGUTop5fdQ5cKs9P4AEtw2h1uXOCCEoyOzOWz6m88U7hEh1F/86DecYEhQ2xWZQutRvkg8Rn6cx7QV7nElrT8hrK+P38K845MjKDn8/d+HDwyJ+fk11lbQamwRf7DOA9a0tZYj4imNCv2zGIC0sEPs4Y=
-  file: "/home/travis/build/milkice233/shadowsocksr-android/target/android/output/shadowsocksr-release.apk"
-  skip_cleanup: true
-  on:
-    tags: true
