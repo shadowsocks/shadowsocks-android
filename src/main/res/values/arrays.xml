@@ -59,6 +59,9 @@
         <item>auth_aes128_sha1</item>
         <item>auth_aes128_md5</item>
         <item>auth_chain_a</item>
+        <item>auth_chain_b</item>
+        <item>auth_chain_c</item>
+        <item>auth_chain_d</item>
     </string-array>
 
     <string-array name="protocol_value">
@@ -71,6 +74,9 @@
         <item>auth_aes128_sha1</item>
         <item>auth_aes128_md5</item>
         <item>auth_chain_a</item>
+        <item>auth_chain_b</item>
+        <item>auth_chain_c</item>
+        <item>auth_chain_d</item>
     </string-array>
 
 

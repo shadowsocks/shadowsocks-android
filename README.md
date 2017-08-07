@@ -15,23 +15,51 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 * Android SDK
   - Build Tools 25+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
-* Android NDK r12b+
+* Android NDK r12b `High version may case something build fail`
 
 ### BUILD
 
+*Warnning: Cannot build in windows*
+
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
+* And you can set http.proxy for sbt
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.htmlf
-* Put your key in ~/.keystore
+* Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
 * Invoke the building like this
 
 ```bash
+    export ANDROID_HOME=/path/to/Android/Sdk/
+    export ANDROID_NDK_HOME=/path/to/Android/Sdk/ndk-bundle/
+    export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=yourserver -Dhttp.proxyPort=port -Dhttp.proxyUser=username -Dhttp.proxyPassword=password"
+```
+
+```bash
+    # install and update all git submodule
     git submodule update --init
     
     # Build the App
     sbt native-build clean android:package-release
 ```
+
+##### If you use x64 linux like Archlinux x86_64, or your linux have new version ncurses lib, you may need install the 32bit version ncurses and link it as follow:
+
+```bash
+    # use Archlinux x86_64 as example
+    
+    # install ncurses x64 and x86 version
+    sudo pacman -S lib32-ncurses ncurses
+    
+    # link the version-6 ncurses to version-5
+    sudo ln -s /usr/lib/libncursesw.so /usr/lib/libncurses.so.5
+    sudo ln -s /usr/lib32/libncursesw.so /usr/lib32/libncurses.so.5
+    
+    # link libncurses to libtinfo
+    sudo ln -s /usr/lib/libncurses.so.5 /usr/lib/libtinfo.so.5
+    sudo ln -s /usr/lib32/libncurses.so.5 /usr/lib32/libtinfo.so.5
+```
+
 
 #### BUILD on Mac OS X (with HomeBrew)
 

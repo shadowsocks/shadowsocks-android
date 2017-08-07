@@ -205,8 +205,8 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   /** Called when the activity is first created. */
   def handleConnection() {
 
-    //val fd = startVpn()
-    //if (!sendFd(fd)) throw new Exception("sendFd failed")
+    val fd = startVpn()
+    if (!sendFd(fd)) throw new Exception("sendFd failed")
 
     startShadowsocksDaemon()
 

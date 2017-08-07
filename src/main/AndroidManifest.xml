@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks"
-          android:versionCode="315"
-          android:versionName="3.4.0.5">
+          android:versionCode="320"
+          android:versionName="3.5.0">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -76,11 +76,11 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="in.zhaoj.shadowsocksr.nobackground.intent.action.SORT"/>
+                <action android:name="in.zhaoj.shadowsocksrr.intent.action.SORT"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="in.zhaoj.shadowsocksr.nobackground.intent.action.SCAN"/>
+                <action android:name="in.zhaoj.shadowsocksrr.intent.action.SCAN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
             <intent-filter>
@@ -134,7 +134,7 @@
                   android:taskAffinity=""
                   android:theme="@style/PopupTheme.QuickSwitch">
             <intent-filter>
-                <action android:name="in.zhaoj.shadowsocksr.nobackground.QUICK_SWITCH" />
+                <action android:name="in.zhaoj.shadowsocksrr.QUICK_SWITCH" />
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

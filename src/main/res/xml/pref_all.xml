@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res/in.zhaoj.shadowsocksr.nobackground">
+                  xmlns:app="http://schemas.android.com/apk/res/in.zhaoj.shadowsocksrr">
 
     <PreferenceCategory
             android:title="@string/proxy_cat">
