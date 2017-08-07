@@ -30,17 +30,36 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 * Invoke the building like this
 
 ```bash
-export ANDROID_HOME=/path/to/Android/Sdk/
-export ANDROID_NDK_HOME=/path/to/Android/Sdk/ndk-bundle/
-export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=yourserver -Dhttp.proxyPort=port -Dhttp.proxyUser=username -Dhttp.proxyPassword=password"
+    export ANDROID_HOME=/path/to/Android/Sdk/
+    export ANDROID_NDK_HOME=/path/to/Android/Sdk/ndk-bundle/
+    export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=yourserver -Dhttp.proxyPort=port -Dhttp.proxyUser=username -Dhttp.proxyPassword=password"
 ```
 
 ```bash
+    # install and update all git submodule
     git submodule update --init
     
     # Build the App
     sbt native-build clean android:package-release
 ```
+
+##### If you use x64 linux like Archlinux x86_64, or your linux have new version ncurses lib, you may need install the 32bit version ncurses and link it as follow:
+
+```bash
+    # use Archlinux x86_64 as example
+    
+    # install ncurses x64 and x86 version
+    sudo pacman -S lib32-ncurses ncurses
+    
+    # link the version-6 ncurses to version-5
+    sudo ln -s /usr/lib/libncursesw.so /usr/lib/libncurses.so.5
+    sudo ln -s /usr/lib32/libncursesw.so /usr/lib32/libncurses.so.5
+    
+    # link libncurses to libtinfo
+    sudo ln -s /usr/lib/libncurses.so.5 /usr/lib/libtinfo.so.5
+    sudo ln -s /usr/lib32/libncurses.so.5 /usr/lib32/libtinfo.so.5
+```
+
 
 #### BUILD on Mac OS X (with HomeBrew)
 
