@@ -94,15 +94,14 @@ class Acl {
     val result = new StringBuilder()
     if (urls.nonEmpty) {
       result.append(urls.mkString("\n"))
-      result.append("\n")
       if (network) {
-        result.append("#NETWORK_ACL_BEGIN\n")
+        result.append("\n#NETWORK_ACL_BEGIN\n")
         try {
           urls.foreach((url: String) => result.append(Source.fromURL(url).mkString))
         } catch {
           case e: IOException => // ignore
         }
-        result.append("#NETWORK_ACL_END\n")
+        result.append("\n#NETWORK_ACL_END\n")
       }
     }
     if (result.isEmpty) {
