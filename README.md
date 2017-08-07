@@ -32,7 +32,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 ```bash
 export ANDROID_HOME=/path/to/Android/Sdk/
 export ANDROID_NDK_HOME=/path/to/Android/Sdk/ndk-bundle/
-export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=IPµØÖ· -Dhttp.proxyPort=¶Ë¿Ú"
+export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=yourserver -Dhttp.proxyPort=port -Dhttp.proxyUser=username -Dhttp.proxyPassword=password"
 ```
 
 ```bash
