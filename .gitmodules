@@ -21,7 +21,7 @@
 [submodule "src/main/jni/shadowsocks-libev"]
 	path = src/main/jni/shadowsocks-libev
 	url = https://github.com/shadowsocksrr/shadowsocksr-libev.git
-	branch = Akkariiin/develop
+	branch = Akkariiin/master
 [submodule "src/main/jni/mbedtls"]
 	path = src/main/jni/mbedtls
 	url = https://github.com/ARMmbed/mbedtls
