@@ -15,16 +15,25 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 * Android SDK
   - Build Tools 25+
   - Android Support Repository and Google Repository (see `build.sbt` for version)
-* Android NDK r12b+
+* Android NDK r12b `High version may case something build fail`
 
 ### BUILD
 
+*Warnning: Cannot build in windows*
+
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
+* And you can set http.proxy for sbt
 * Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.htmlf
-* Put your key in ~/.keystore
+* Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
 * Invoke the building like this
+
+```bash
+export ANDROID_HOME=/path/to/Android/Sdk/
+export ANDROID_NDK_HOME=/path/to/Android/Sdk/ndk-bundle/
+export JAVA_OPTS="$JAVA_OPTS -Dhttp.proxyHost=IPµØÖ· -Dhttp.proxyPort=¶Ë¿Ú"
+```
 
 ```bash
     git submodule update --init
