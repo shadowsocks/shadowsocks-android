@@ -141,7 +141,9 @@ class DBHelper(val context: Context)
         }
 
         if (oldVersion < 23) {
+          profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
           TableUtils.createTable(connectionSource, classOf[KeyValuePair])
+          profileDao.executeRawNoArgs("COMMIT;")
           import KeyValuePair._
           val old = PreferenceManager.getDefaultSharedPreferences(app)
           kvPairDao.createOrUpdate(new KeyValuePair(Key.id, TYPE_INT,
