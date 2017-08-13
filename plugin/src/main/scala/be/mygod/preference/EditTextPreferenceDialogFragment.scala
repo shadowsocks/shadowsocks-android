@@ -36,7 +36,7 @@ class EditTextPreferenceDialogFragment extends PreferenceDialogFragment {
     val oldParent = editText.getParent.asInstanceOf[ViewGroup]
     if (oldParent eq view) return
     if (oldParent != null) oldParent.removeView(editText)
-    val oldEdit = view.findViewById(android.R.id.edit)
+    val oldEdit = view.findViewById[View](android.R.id.edit)
     if (oldEdit == null) return
     val container = oldEdit.getParent.asInstanceOf[ViewGroup]
     if (container == null) return

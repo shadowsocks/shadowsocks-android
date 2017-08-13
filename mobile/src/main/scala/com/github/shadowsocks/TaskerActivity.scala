@@ -42,7 +42,7 @@ class TaskerActivity extends AppCompatActivity {
       typedArray.recycle()
     }
     private var item: Profile = _
-    private val text = itemView.findViewById(android.R.id.text1).asInstanceOf[CheckedTextView]
+    private val text = itemView.findViewById[CheckedTextView](android.R.id.text1)
     itemView.setOnClickListener(this)
 
     def bindDefault() {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- proxy category -->
+<string name="proxy_cat">"サーバー設定"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"ファンクション設定"</string>
+
+<!-- alert category -->
+<string name="yes">"はい"</string>
+<string name="no">"いいえ"</string>
+<string name="unsaved_changes_prompt">"変更は適応されておりません、保存しますか？"</string>
+<string name="apply">"適用"</string>
+</resources>

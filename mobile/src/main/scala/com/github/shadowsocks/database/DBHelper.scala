@@ -20,10 +20,14 @@
 
 package com.github.shadowsocks.database
 
-import android.content.Context
+import java.nio.ByteBuffer
+
+import android.content.{Context, SharedPreferences}
 import android.content.pm.ApplicationInfo
 import android.database.sqlite.SQLiteDatabase
+import android.preference.PreferenceManager
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.utils.Key
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
@@ -46,17 +50,20 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 22) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 23) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
+  lazy val kvPairDao: Dao[KeyValuePair, String] = getDao(classOf[KeyValuePair])
 
   def onCreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
     TableUtils.createTable(connectionSource, classOf[Profile])
+    TableUtils.createTable(connectionSource, classOf[KeyValuePair])
   }
 
   def recreate(database: SQLiteDatabase, connectionSource: ConnectionSource) {
     TableUtils.dropTable(connectionSource, classOf[Profile], true)
+    TableUtils.dropTable(connectionSource, classOf[KeyValuePair], true)
     onCreate(database, connectionSource)
   }
 
@@ -131,6 +138,22 @@ class DBHelper(val context: Context)
             "CASE WHEN kcp = 1 THEN 'kcptun ' || kcpcli ELSE NULL END FROM `tmp`;")
           profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
           profileDao.executeRawNoArgs("COMMIT;")
+        }
+
+        if (oldVersion < 23) {
+          profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
+          TableUtils.createTable(connectionSource, classOf[KeyValuePair])
+          profileDao.executeRawNoArgs("COMMIT;")
+          import KeyValuePair._
+          val old = PreferenceManager.getDefaultSharedPreferences(app)
+          kvPairDao.createOrUpdate(new KeyValuePair(Key.id, TYPE_INT,
+            ByteBuffer.allocate(4).putInt(old.getInt(Key.id, 0)).array()))
+          kvPairDao.createOrUpdate(new KeyValuePair(Key.isNAT, TYPE_BOOLEAN,
+            ByteBuffer.allocate(1).put((if (old.getBoolean(Key.isNAT, false)) 1 else 0).toByte).array()))
+          kvPairDao.createOrUpdate(new KeyValuePair(Key.tfo, TYPE_BOOLEAN,
+            ByteBuffer.allocate(1).put((if (old.getBoolean(Key.tfo, false)) 1 else 0).toByte).array()))
+          kvPairDao.createOrUpdate(new KeyValuePair(Key.currentVersionCode, TYPE_INT,
+            ByteBuffer.allocate(4).putInt(-1).array()))
         }
       } catch {
         case ex: Exception =>

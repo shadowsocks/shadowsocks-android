@@ -29,7 +29,8 @@ _Put an `x` inside the [ ] that applies._
 * [ ] IPv6 route
 * [ ] Per-App Proxy
   * [ ] Bypass mode
-* [ ] UDP Forwarding
+* Remote DNS: 8.8.8.8
+* [ ] DNS Forwarding
 * Plugin configuration (if applicable):
 * [ ] Auto Connect
 * [ ] TCP Fast Open

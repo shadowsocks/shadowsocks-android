@@ -2,7 +2,7 @@ enablePlugins(AndroidLib)
 android.useSupportVectors
 
 name := "plugin"
-version := "0.0.3"
+version := "0.0.4"
 
 pomExtra in Global := {
   <url>https://github.com/shadowsocks/shadowsocks-android</url>

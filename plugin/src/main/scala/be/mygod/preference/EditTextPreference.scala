@@ -60,7 +60,8 @@ class EditTextPreference(context: Context, attrs: AttributeSet = null) extends P
   }
 
   override def setText(text: String): Unit = {
+    val old = getText
     super.setText(text)
-    notifyChanged()
+    if (old != text) notifyChanged()
   }
 }

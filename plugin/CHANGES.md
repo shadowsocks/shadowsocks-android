@@ -1,3 +1,6 @@
+* 0.0.4:
+  * Enlarge text size of number pickers;
+  * Update support library version to 26.0.0.
 * 0.0.3:
   * Update support library version to 25.2.0.
 * 0.0.2:

@@ -4,8 +4,7 @@
   <string name="app_name">Shadowsocks</string>
   <string name="quick_toggle">Toggle</string>
 
-  <!-- global/misc category -->
-  <string name="misc_cat">Misc</string>
+  <!-- misc -->
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="nat">NAT mode (deprecated)</string>
@@ -54,9 +53,11 @@
   <string name="tcp_fastopen_summary">Toggling requires ROOT permission</string>
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="udp_dns">DNS Forwarding</string>
-  <string name="udp_dns_summary">Force to forward DNS packets to remote</string>
+  <string name="udp_dns_summary">Forward all DNS requests to remote</string>
 
   <!-- notification category -->
+  <string name="service_vpn">VPN Service</string>
+  <string name="service_nat">NAT Service</string>
   <string name="forward_success">Shadowsocks started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
@@ -105,6 +106,7 @@
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_scanner_not_installed">Please install any ZXing-compliant QR code scanning app.</string>
+  <string name="add_profile_scanner_permission_required">Camera permission is required for scanning QR code.</string>
   <plurals name="removed">
     <item quantity="one">Removed</item>
     <item quantity="other">%d items removed</item>
@@ -130,7 +132,7 @@
   <string name="custom_rules">Custom rules</string>
   <string name="action_selection">Selection…</string>
   <string name="action_add_rule">Add rule(s)…</string>
-  <string name="acl_rule_templates_generic">Subnet/Hostname PCRE pattern</string>
+  <string name="acl_rule_templates_generic">URL, Subnet or Hostname PCRE pattern</string>
   <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
   <string name="edit_rule">Edit rule</string>
 

@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import java.io.File
 import java.util.Locale
 
+import android.app.Service
 import android.content._
 import android.content.pm.PackageManager.NameNotFoundException
 import android.net.VpnService
@@ -30,7 +31,6 @@ import android.os._
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.acl.{Acl, AclSyncJob, Subnet}
-import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.utils._
 
 import scala.collection.mutable.ArrayBuffer
@@ -42,7 +42,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = _
   var vpnThread: ShadowsocksVpnThread = _
-  private var notification: ShadowsocksNotification = _
 
   var sslocalProcess: GuardedProcess = _
   var overtureProcess: GuardedProcess = _
@@ -68,8 +67,6 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       vpnThread.stopThread()
       vpnThread = null
     }
-
-    if (notification != null) notification.destroy()
 
     // channge the state
     changeState(State.STOPPING)
@@ -103,19 +100,18 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     }
   }
 
-  override def startRunner(profile: Profile) {
-
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
     // ensure the VPNService is prepared
     if (VpnService.prepare(this) != null) {
       val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       startActivity(i)
       stopRunner(stopService = true)
-      return
-    }
-
-    super.startRunner(profile)
+      Service.START_NOT_STICKY
+    } else super.onStartCommand(intent, flags, startId)
   }
+
+  override def createNotification() = new ShadowsocksNotification(this, profile.name, "service-vpn")
 
   override def connect() {
     super.connect()
@@ -137,13 +133,11 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
       AclSyncJob.schedule(profile.route)
-
-    notification = new ShadowsocksNotification(this, profile.getName)
   }
 
   /** Called when the activity is first created. */
   def handleConnection() {
-    
+
     startShadowsocksDaemon()
 
     if (!profile.udpdns) {
@@ -189,7 +183,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 
-    builder.addDnsServer(profile.remoteDns.trim)
+    builder.addDnsServer("8.8.8.8") // It's fake DNS for tun2socks, not the real remote DNS
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
@@ -214,14 +208,17 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       }
     }
 
-    if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_CHN) {
+    if (profile.route == Acl.ALL
+      || profile.route == Acl.BYPASS_CHN
+      || profile.route == Acl.CUSTOM_RULES) {
       builder.addRoute("0.0.0.0", 0)
     } else {
       getResources.getStringArray(R.array.bypass_private_route).foreach(cidr => {
         val subnet = Subnet.fromString(cidr)
         builder.addRoute(subnet.address.getHostAddress, subnet.prefixSize)
       })
-      builder.addRoute(profile.remoteDns.trim, 32)
+      profile.remoteDns.split(",").map(dns => Utils.parseNumericAddress(dns.trim)).foreach(dns =>
+        builder.addRoute(dns, dns.getAddress.length << 3))
     }
 
     conn = builder.establish()
@@ -244,7 +241,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     cmd += "--enable-udprelay"
 
     if (!profile.udpdns)
-      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"),
+      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, "127.0.0.1",
         profile.localPort + 53))
 
     tun2socksProcess = new GuardedProcess(cmd: _*).start(() => sendFd(fd))

@@ -40,6 +40,6 @@
         <item name="android:scrollbars">vertical</item>
     </style>
     <style name="NumberPickerStyle">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 </resources>

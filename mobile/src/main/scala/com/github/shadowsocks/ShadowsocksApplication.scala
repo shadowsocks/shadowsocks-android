@@ -21,29 +21,28 @@
 package com.github.shadowsocks
 
 import java.io.{File, FileOutputStream, IOException}
-import java.util
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 import android.annotation.SuppressLint
-import android.app.Application
+import android.app.{Application, NotificationChannel, NotificationManager}
 import android.content._
 import android.content.res.Configuration
 import android.os.{Build, LocaleList}
-import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
 import com.github.shadowsocks.acl.DonaldTrump
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
+import com.github.shadowsocks.preference.OrmLitePreferenceDataStore
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser, Tracker}
-import com.google.android.gms.common.api.ResultCallback
-import com.google.android.gms.tagmanager.{ContainerHolder, TagManager}
+import com.google.firebase.FirebaseApp
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.j256.ormlite.logger.LocalLog
 import eu.chainfire.libsuperuser.Shell
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 
 object ShadowsocksApplication {
@@ -61,14 +60,13 @@ object ShadowsocksApplication {
 class ShadowsocksApplication extends Application {
   import ShadowsocksApplication._
 
-  final val SIG_FUNC = "getSignature"
-  var containerHolder: ContainerHolder = _
+  lazy val remoteConfig: FirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
   lazy val tracker: Tracker = GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker)
-  lazy val settings: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-  lazy val editor: SharedPreferences.Editor = settings.edit
-  lazy val profileManager = new ProfileManager(new DBHelper(this))
+  private lazy val dbHelper = new DBHelper(this)
+  lazy val profileManager = new ProfileManager(dbHelper)
+  lazy val dataStore = new OrmLitePreferenceDataStore(dbHelper)
 
-  def isNatEnabled: Boolean = settings.getBoolean(Key.isNAT, false)
+  def isNatEnabled: Boolean = dataStore.isNAT
   def isVpnEnabled: Boolean = !isNatEnabled
 
   // send event
@@ -81,13 +79,11 @@ class ShadowsocksApplication extends Application {
     .setFatal(false)
     .build())
 
-  def profileId: Int = settings.getInt(Key.id, 0)
-  def profileId(i: Int): Unit = editor.putInt(Key.id, i).apply()
-  def currentProfile: Option[Profile] = profileManager.getProfile(profileId)
+  def currentProfile: Option[Profile] = profileManager.getProfile(dataStore.profileId)
 
   def switchProfile(id: Int): Profile = {
     val result = profileManager.getProfile(id) getOrElse profileManager.createProfile()
-    profileId(result.id)
+    dataStore.profileId = result.id
     result
   }
 
@@ -149,33 +145,19 @@ class ShadowsocksApplication extends Application {
     if (!BuildConfig.DEBUG) java.lang.System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
     AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     checkChineseLocale(getResources.getConfiguration)
-    val tm = TagManager.getInstance(this)
-    val pending = tm.loadContainerPreferNonDefault("GTM-NT8WS8", R.raw.gtm_default_container)
-    val callback = new ResultCallback[ContainerHolder] {
-      override def onResult(holder: ContainerHolder) {
-        if (!holder.getStatus.isSuccess) {
-          return
-        }
-        containerHolder = holder
-        val container = holder.getContainer
-        container.registerFunctionCallMacroCallback(SIG_FUNC,
-          (functionName: String, parameters: util.Map[String, AnyRef]) => {
-            if (functionName == SIG_FUNC) {
-              Utils.getSignature(getApplicationContext)
-            }
-            null
-          })
-      }
-    }
-    pending.setResultCallback(callback, 2, TimeUnit.SECONDS)
+
+    FirebaseApp.initializeApp(this)
+    remoteConfig.setDefaults(R.xml.default_configs)
+    remoteConfig.fetch().addOnCompleteListener(task => if (task.isSuccessful) remoteConfig.activateFetched())
+
     JobManager.create(this).addJobCreator(DonaldTrump)
 
-    TcpFastOpen.enabled(settings.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
-  }
+    TcpFastOpen.enabled(dataStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 
-  def refreshContainerHolder() {
-    val holder = app.containerHolder
-    if (holder != null) holder.refresh()
+    if (Build.VERSION.SDK_INT >= 26) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
+      new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
+      new NotificationChannel("service-nat", getText(R.string.service_nat), NotificationManager.IMPORTANCE_LOW)
+    ))
   }
 
   def crashRecovery() {
@@ -208,10 +190,10 @@ class ShadowsocksApplication extends Application {
         autoClose(new FileOutputStream(new File(getFilesDir, file)))(out =>
           IOUtils.copy(in, out)))
     }
-    editor.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE).apply()
+    dataStore.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE)
   }
 
-  def updateAssets(): Unit = if (settings.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
+  def updateAssets(): Unit = if (dataStore.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
 
   def listenForPackageChanges(callback: => Unit): BroadcastReceiver = {
     val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)
