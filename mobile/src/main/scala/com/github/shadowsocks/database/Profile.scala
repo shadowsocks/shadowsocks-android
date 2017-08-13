@@ -54,7 +54,7 @@ class Profile {
   var method: String = "aes-256-cfb"
 
   @DatabaseField
-  var route: String = "all"
+  var route: String = "bypass-lan-china"
 
   @DatabaseField
   var remoteDns: String = "8.8.8.8"

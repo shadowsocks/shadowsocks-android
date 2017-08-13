@@ -278,7 +278,6 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     toolbar.inflateMenu(R.menu.profile_manager_menu)
     toolbar.setOnMenuItemClickListener(this)
 
-    if (app.profileManager.getFirstProfile.isEmpty) app.dataStore.profileId = app.profileManager.createProfile().id
     val profilesList = view.findViewById[RecyclerView](R.id.list)
     val layoutManager = new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false)
     profilesList.setLayoutManager(layoutManager)
