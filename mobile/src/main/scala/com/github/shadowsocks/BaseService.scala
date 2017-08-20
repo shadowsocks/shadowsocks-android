@@ -374,7 +374,7 @@ trait BaseService extends Service {
         .put("IPNetworkFile", "china_ip_list.txt")
         .put("DomainFile", "gfwlist.txt")
       case Acl.CHINALIST => config
-        .put("PrimaryDNS", new JSONArray().put(makeDns("Primary", "119.29.29.29")))
+        .put("PrimaryDNS", localDns)
         .put("AlternativeDNS", remoteDns)
       case _ => config
         .put("PrimaryDNS", remoteDns)
