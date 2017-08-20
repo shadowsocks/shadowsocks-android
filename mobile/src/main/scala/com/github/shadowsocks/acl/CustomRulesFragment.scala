@@ -234,6 +234,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
 
     def selectAll() {
       selectedItems.clear()
+      selectedItems ++= acl.urls
       selectedItems ++= acl.subnets
       selectedItems ++= acl.proxyHostnames
       onSelectedItemsUpdated()
