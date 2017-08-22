@@ -19,20 +19,19 @@ import scala.io.Source
 class Acl {
   @DatabaseField(generatedId = true)
   var id: Int = _
-  val bypassHostnames = new mutable.SortedList[String]()
-  val proxyHostnames = new mutable.SortedList[String]()
+
+  val hostnames = new mutable.SortedList[String]()
   val subnets = new mutable.SortedList[Subnet]()
   val urls = new mutable.SortedList[String]()
+
   @DatabaseField
   var bypass: Boolean = _
 
   def isUrl(url: String): Boolean = url.startsWith("http://") || url.startsWith("https://")
 
   def fromAcl(other: Acl): Acl = {
-    bypassHostnames.clear()
-    bypassHostnames ++= other.bypassHostnames
-    proxyHostnames.clear()
-    proxyHostnames ++= other.proxyHostnames
+    hostnames.clear()
+    hostnames ++= other.hostnames
     subnets.clear()
     subnets ++= other.subnets
     urls.clear()
@@ -40,16 +39,11 @@ class Acl {
     bypass = other.bypass
     this
   }
+
   def fromSource(value: Source, defaultBypass: Boolean = true): Acl = {
-    bypassHostnames.clear()
-    proxyHostnames.clear()
-    this.subnets.clear()
-    this.urls.clear()
+    subnets.clear()
+    urls.clear()
     bypass = defaultBypass
-    lazy val bypassSubnets = new mutable.SortedList[Subnet]()
-    lazy val proxySubnets = new mutable.SortedList[Subnet]()
-    var hostnames: mutable.SortedList[String] = if (defaultBypass) proxyHostnames else bypassHostnames
-    var subnets: mutable.SortedList[Subnet] = if (defaultBypass) proxySubnets else bypassSubnets
     var in_urls = false
     for (line <- value.getLines()) (line.trim.indexOf('#') match {
        case 0 => {
@@ -65,17 +59,12 @@ class Acl {
        }
        case index => if (!in_urls) line else ""
     }).trim match {
+      // Ignore all section controls
       case "[outbound_block_list]" =>
-        hostnames = null
-        subnets = null
       case "[black_list]" | "[bypass_list]" =>
-        hostnames = bypassHostnames
-        subnets = bypassSubnets
       case "[white_list]" | "[proxy_list]" =>
-        hostnames = proxyHostnames
-        subnets = proxySubnets
-      case "[reject_all]" | "[bypass_all]" => bypass = true
-      case "[accept_all]" | "[proxy_all]" => bypass = false
+      case "[reject_all]" | "[bypass_all]" =>
+      case "[accept_all]" | "[proxy_all]" =>
       case input if subnets != null && input.nonEmpty => try subnets += Subnet.fromString(input) catch {
         case _: IllegalArgumentException => if (isUrl(input)) {
           urls += input
@@ -85,7 +74,6 @@ class Acl {
       }
       case _ =>
     }
-    this.subnets ++= (if (bypass) proxySubnets else bypassSubnets)
     this
   }
   final def fromId(id: String): Acl = fromSource(Source.fromFile(Acl.getFile(id)))
@@ -103,21 +91,15 @@ class Acl {
         }
         result.append("\n#NETWORK_ACL_END\n")
       }
+      result.append("\n")
     }
     if (result.isEmpty) {
-      result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
+      result.append("[bypass_all]\n")
     }
-    val (bypassList, proxyList) =
-      if (bypass) (bypassHostnames.toStream, subnets.toStream.map(_.toString) #::: proxyHostnames.toStream)
-      else (subnets.toStream.map(_.toString) #::: bypassHostnames.toStream, proxyHostnames.toStream)
-    if (bypassList.nonEmpty) {
-      result.append("[bypass_list]\n")
-      result.append(bypassList.mkString("\n"))
-      result.append('\n')
-    }
-    if (proxyList.nonEmpty) {
+    val list = subnets.toStream.map(_.toString) #::: hostnames.toStream
+    if (list.nonEmpty) {
       result.append("[proxy_list]\n")
-      result.append(proxyList.mkString("\n"))
+      result.append(list.mkString("\n"))
       result.append('\n')
     }
     result.toString
@@ -127,7 +109,7 @@ class Acl {
     getAclString(false)
   }
 
-  def isValidCustomRules: Boolean = bypass && bypassHostnames.isEmpty
+  def isValidCustomRules: Boolean = !hostnames.isEmpty
 
   // Don't change: dummy fields for OrmLite interaction
 

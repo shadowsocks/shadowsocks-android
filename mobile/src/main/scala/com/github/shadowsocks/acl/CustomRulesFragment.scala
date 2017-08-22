@@ -125,7 +125,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       })
     }
 
-    def getItemCount: Int = acl.subnets.size + acl.proxyHostnames.size + acl.urls.size
+    def getItemCount: Int = acl.subnets.size + acl.hostnames.size + acl.urls.size
     def onBindViewHolder(vh: AclRuleViewHolder, i: Int): Unit = {
       val j = i - acl.urls.size
       val k = i - acl.subnets.size - acl.urls.size
@@ -134,7 +134,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       else if (k < 0)
         vh.bind(acl.subnets(j))
       else
-        vh.bind(acl.proxyHostnames(k))
+        vh.bind(acl.hostnames(k))
     }
     def onCreateViewHolder(vg: ViewGroup, i: Int) = new AclRuleViewHolder(LayoutInflater.from(vg.getContext)
       .inflate(android.R.layout.simple_list_item_1, vg, false))
@@ -151,18 +151,18 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       apply()
       index
     } else -1
-    def addHostname(hostname: String): Int = if (acl.proxyHostnames.add(hostname)) {
-      val index = acl.proxyHostnames.indexOf(hostname) + acl.urls.size + acl.subnets.size
+    def addHostname(hostname: String): Int = if (acl.hostnames.add(hostname)) {
+      val index = acl.hostnames.indexOf(hostname) + acl.urls.size + acl.subnets.size
       notifyItemInserted(index)
       apply()
       index
     } else -1
     def addToProxy(input: String): Int = {
-      val acl = new Acl().fromSource(Source.fromString(input), defaultBypass = true)
+      val acl = new Acl().fromSource(Source.fromString(input))
       var result = -1
       for (url <- acl.urls) result = addUrl(url)
-      for (hostname <- acl.proxyHostnames) result = addHostname(hostname)
-      if (acl.bypass) for (subnet <- acl.subnets) result = addSubnet(subnet)
+      for (hostname <- acl.hostnames) result = addHostname(hostname)
+      for (subnet <- acl.subnets) result = addSubnet(subnet)
       result
     }
     def addFromTemplate(template: Int, text: CharSequence): Int = template match {
@@ -186,8 +186,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         undoManager.remove((i, acl.subnets(j)))
         acl.subnets.remove(j)
       } else {
-        undoManager.remove((i, acl.proxyHostnames(k)))
-        acl.proxyHostnames.remove(k)
+        undoManager.remove((i, acl.hostnames(k)))
+        acl.hostnames.remove(k)
       }
       notifyItemRemoved(i)
       apply()
@@ -202,9 +202,9 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
         acl.urls.remove(hostname)
         apply()
       } else {
-        notifyItemRemoved(acl.proxyHostnames.indexOf(hostname)
+        notifyItemRemoved(acl.hostnames.indexOf(hostname)
           + acl.urls.size + acl.subnets.size)
-        acl.proxyHostnames.remove(hostname)
+        acl.hostnames.remove(hostname)
         apply()
       }
     }
@@ -221,8 +221,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
           apply()
         }
       } else {
-        if (acl.proxyHostnames.insert(hostname)) {
-          notifyItemInserted(acl.proxyHostnames.indexOf(hostname) + acl.urls.size + acl.subnets.size)
+        if (acl.hostnames.insert(hostname)) {
+          notifyItemInserted(acl.hostnames.indexOf(hostname) + acl.urls.size + acl.subnets.size)
           apply()
         }
       }
@@ -236,7 +236,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       selectedItems.clear()
       selectedItems ++= acl.urls
       selectedItems ++= acl.subnets
-      selectedItems ++= acl.proxyHostnames
+      selectedItems ++= acl.hostnames
       onSelectedItemsUpdated()
       notifyDataSetChanged()
     }
@@ -245,7 +245,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
       val j = i - acl.subnets.size
       try {
         (if (j < 0) acl.subnets(i).address.getHostAddress.substring(0, 1) else {
-          val hostname = acl.proxyHostnames(i)
+          val hostname = acl.hostnames(i)
           PATTERN_DOMAIN.findFirstMatchIn(hostname) match {
             case Some(m) => m.matched.replaceAll("\\\\.", ".")  // don't convert IDN yet
             case None => hostname
@@ -341,7 +341,7 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
     case R.id.action_import_gfwlist =>
       val acl = new Acl().fromId(Acl.GFWLIST)
       acl.subnets.foreach(adapter.addSubnet)
-      acl.proxyHostnames.foreach(adapter.addHostname)
+      acl.hostnames.foreach(adapter.addHostname)
       true
     case _ => false
   }
