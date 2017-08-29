@@ -385,6 +385,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         displayFragment(new AboutFragment)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
       case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
+      case _ => // Ignore
     }
     true  // unexpected cases will throw exception
   }
