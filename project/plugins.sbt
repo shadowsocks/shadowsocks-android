@@ -1,4 +1,4 @@
-addSbtPlugin("org.scala-android" % "sbt-android" % "1.7.8")
+addSbtPlugin("org.scala-android" % "sbt-android" % "1.7.9")
 
 addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.10")
 

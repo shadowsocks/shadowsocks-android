@@ -23,11 +23,11 @@ proguardOptions ++=
   "-keep public class com.evernote.android.job.JobRescheduleService" ::
   Nil
 
-val playServicesVersion = "11.0.4"
+val playServicesVersion = "11.2.0"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
-  "com.evernote" % "android-job" % "1.2.0-alpha3" ::
+  "com.evernote" % "android-job" % "1.2.0-alpha4" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.google.android.gms" % "play-services-ads" % playServicesVersion ::
   "com.google.android.gms" % "play-services-analytics" % playServicesVersion ::
@@ -35,15 +35,15 @@ libraryDependencies ++=
   "com.google.firebase" % "firebase-config" % playServicesVersion ::
   "com.j256.ormlite" % "ormlite-android" % "5.0" ::
   "com.mikepenz" % "crossfader" % "1.5.0" ::
-  "com.mikepenz" % "fastadapter" % "2.6.2" ::
-  "com.mikepenz" % "iconics-core" % "2.8.9" ::
-  "com.mikepenz" % "materialdrawer" % "5.9.4" ::
+  "com.mikepenz" % "fastadapter" % "2.6.3" ::
+  "com.mikepenz" % "iconics-core" % "2.9.3" ::
+  "com.mikepenz" % "materialdrawer" % "5.9.5" ::
   "com.mikepenz" % "materialize" % "1.0.3" ::
   "com.squareup.okhttp3" % "okhttp" % "3.8.1" ::
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.8" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.201704021214" ::
-  "me.dm7.barcodescanner" % "zxing" % "1.9.3" ::
+  "me.dm7.barcodescanner" % "zxing" % "1.9.8" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   Nil
 
