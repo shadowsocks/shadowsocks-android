@@ -55,6 +55,7 @@ libraryDependencies ++=
   "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
   "dnsjava" % "dnsjava" % "2.1.7" ::
   "eu.chainfire" % "libsuperuser" % "1.0.0.+" ::
+  "me.dm7.barcodescanner" % "zxing" % "1.9.8" ::
   "net.glxn.qrgen" % "android" % "2.0" ::
   "com.squareup.okhttp3" % "okhttp" % "3.8.0" ::
   "com.google.code.findbugs" % "jsr305" % "1.3.+" ::
