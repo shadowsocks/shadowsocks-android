@@ -569,7 +569,7 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
         startActivityForResult(intent, 0)
     } catch {
         case _ : Throwable =>
-            val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
+            /*val dialog = new AlertDialog.Builder(this, R.style.Theme_Material_Dialog_Alert)
               .setTitle(R.string.scan_qrcode_install_title)
               .setPositiveButton(android.R.string.yes, ((_, _) => {
                   val marketUri = Uri.parse("market://details?id=com.google.zxing.client.android")
@@ -586,7 +586,9 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
               .setNegativeButton(android.R.string.no, ((_, _) => finish()): DialogInterface.OnClickListener)
               .setMessage(R.string.scan_qrcode_install_text)
               .create()
-            dialog.show()
+            dialog.show()*/
+            menu.toggle(false)
+            startActivity(new Intent(this, classOf[ScannerActivity]))
     }
   }
 
