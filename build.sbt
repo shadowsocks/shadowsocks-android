@@ -18,7 +18,7 @@ lazy val commonSettings = Seq(
   shrinkResources := true,
   typedResources := false,
 
-  resConfigs := Seq("ja", "ko", "ru", "zh-rCN", "zh-rTW"),
+  resConfigs := Seq("fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"),
 
   resolvers += "google" at "https://maven.google.com"
 )
