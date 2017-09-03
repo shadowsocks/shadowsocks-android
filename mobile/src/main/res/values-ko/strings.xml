@@ -8,16 +8,11 @@
 <string name="nat">"NAT 모드 (지원 중단)"</string>
 <string name="nat_summary">"VPN 모드 대신 NAT 모드를 사용합니다. 루트 권한이 필요합니다."</string>
 <string name="remote_dns">"원격 DNS"</string>
-<string name="stat_summary">"송신: \t\t\t\t\t%3$s\t↑\t%1$s/s
-수신: \t%4$s\t↓\t%2$s/s "</string>
-<string name="stat_profiles">"%1$s↑\t%2$s↓"</string>
-<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
-<plurals name="bytes">
-<item quantity="other">"바이트"</item>
-</plurals>
+<string name="stat_summary">"송신: \t%3$s\t↑\t%1$s/s
+수신: \t%4$s\t↓\t%2$s/s"</string>
 <string name="connection_test_pending">"인터넷 연결 상태 검사하기"</string>
 <string name="connection_test_testing">"검사 중…"</string>
-<string name="connection_test_available">"성공: %dms"</string>
+<string name="connection_test_available">"성공: 지연시간 %dms"</string>
 <string name="connection_test_error">"인터넷 연결을 찾을 수 없습니다: %s"</string>
 <string name="connection_test_fail">"인터넷에 연결할 수 없습니다"</string>
 <string name="connection_test_error_status_code">"오류 코드: #%d"</string>
@@ -45,4 +40,73 @@
 <string name="tcp_fastopen_summary_unsupported">"지원하지 않는 버전의 커널입니다: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"DNS 포워딩"</string>
 <string name="udp_dns_summary">"모든 DNS 요청을 외부로 포워딩 합니다"</string>
+
+<!-- notification category -->
+<string name="forward_success">"Shadowsocks가 시작되었습니다"</string>
+<string name="invalid_server">"잘못된 서버 이름입니다"</string>
+<string name="service_failed">"원격 서버에 접속하는 데 실패했습니다"</string>
+<string name="nat_deprecated">"경고: NAT 모드는 Android 5.0부터 지원 중단되었습니다"</string>
+<string name="nat_no_root">"NAT 모드는 루트 권한이 필요합니다"</string>
+<string name="switch_to_vpn">"VPN 모드로 전환"</string>
+<string name="stop">"중지"</string>
+<string name="stopping">"종료 중…"</string>
+<string name="reboot_required">"VPN 서비스를 시작하는 데 실패했습니다. 장치를 재시작해 보세요."</string>
+<string name="profile_invalid_input">"올바른 프로필 데이터를 찾을 수 없습니다"</string>
+
+<!-- alert category -->
+<string name="close">"닫기"</string>
+<string name="profile_empty">"프로필을 선택해 주세요"</string>
+<string name="proxy_empty">"서버 주소와 비밀번호는 반드시 입력해야 합니다"</string>
+<string name="connect">"접속"</string>
+<string name="recovering">"재설정 중…"</string>
+<string name="remove_profile">"'%s' 프로필을 삭제 하시겠습니까?"</string>
+
+<!-- menu category -->
+<string name="profiles">"프로필"</string>
+<string name="settings">"설정"</string>
+<string name="faq">"자주 묻는 질문"</string>
+<string name="recovery">"재설정"</string>
+<string name="about">"이 앱에 대하여"</string>
+<string name="edit">"수정"</string>
+<string name="share">"공유"</string>
+<string name="add_profile">"프로필 추가"</string>
+<string name="action_export">"클립보드로 내보내기"</string>
+<string name="action_import">"클립보드에서 불러오기"</string>
+<string name="action_export_msg">"성공적으로 내보냈습니다"</string>
+<string name="action_export_err">"내보내기에 실패했습니다"</string>
+<string name="action_import_msg">"성공적으로 불러왔습니다"</string>
+<string name="action_import_err">"불러오는 데 실패했습니다"</string>
+
+<!-- profile -->
+<string name="profile_config">"프로필 설정"</string>
+<string name="delete">"삭제"</string>
+<string name="delete_confirm_prompt">"정말 이 프로필을 삭제하시겠습니까?"</string>
+<string name="share_qr_nfc">"QR 코드/NFC"</string>
+<string name="add_profile_dialog">"이 Shadowsocks 프로필을 추가하시겠습니까?"</string>
+<string name="add_profile_methods_scan_qr_code">"QR 코드 읽기"</string>
+<string name="add_profile_methods_manual_settings">"손수 써넣기"</string>
+<plurals name="removed">
+<item quantity="other">"삭제했습니다"</item>
+</plurals>
+<string name="undo">"실행 취소"</string>
+
+<!-- status -->
+<string name="sent">"송신:"</string>
+<string name="received">"수신:"</string>
+<string name="connecting">"연결 중…"</string>
+<string name="vpn_connected">"연결 완료. 탭 하면 연결 상태를 검사합니다."</string>
+<string name="nat_connected">"연결 완료"</string>
+
+<!-- acl -->
+<string name="custom_rules">"사용자 정의 규칙"</string>
+<string name="acl_rule_templates_generic">"URL, 서브넷 혹은 호스트 이름 PCRE 패턴"</string>
+
+<!-- plugin -->
+<string name="plugin">"플러그인"</string>
+<string name="plugin_configure">"플러그인 설정…"</string>
+<string name="plugin_disabled">"비활성화 됨"</string>
+<string name="plugin_unknown">"알 수 없는 플러그인: %s"</string>
+<string name="plugin_untrusted">"경고: 이 플러그인은 신뢰할 수 있는 출처에서 온 것이 아닌 것 같습니다"</string>
+<string name="profile_plugin">"플러그인: %s"</string>
+<string name="add_profile_scanner_permission_required">"QR 코드를 읽어 들이려면 카메라 권한이 필요합니다"</string>
 </resources>

@@ -3,8 +3,7 @@
 <string name="app_name">"影梭"</string>
 <string name="quick_toggle">"开关"</string>
 
-<!-- global/misc category -->
-<string name="misc_cat">"其他"</string>
+<!-- misc -->
 <string name="profile">"配置文件"</string>
 <string name="profile_summary">"新建或切换到其他配置文件"</string>
 <string name="nat">"NAT 模式（仅限调试）"</string>
@@ -12,6 +11,9 @@
 <string name="remote_dns">"远程 DNS"</string>
 <string name="stat_summary">"发送: \t%3$s\t↑\t%1$s/s
 接收: \t%4$s\t↓\t%2$s/s"</string>
+<plurals name="bytes">
+<item quantity="other">"字节"</item>
+</plurals>
 <string name="connection_test_pending">"检查网络连接"</string>
 <string name="connection_test_testing">"测试中…"</string>
 <string name="connection_test_available">"连接有效：延时 %d 毫秒"</string>
@@ -63,7 +65,7 @@
 <string name="proxy_empty">"代理服务器地址及密码不能为空"</string>
 <string name="connect">"连接"</string>
 <string name="recovering">"重置中…"</string>
-<string name="remove_profile">"删除此配置文件“%s”?"</string>
+<string name="remove_profile">"删除此配置文件“%s”？"</string>
 
 <!-- menu category -->
 <string name="profiles">"配置文件"</string>
@@ -71,7 +73,7 @@
 <string name="faq">"常见问题"</string>
 <string name="recovery">"重置"</string>
 <string name="about">"关于"</string>
-<string name="about_title">"影梭 (shadowsocks) %s"</string>
+<string name="about_title">"影梭 (Shadowsocks) %s"</string>
 <string name="edit">"编辑"</string>
 <string name="share">"分享"</string>
 <string name="add_profile">"添加配置文件"</string>
@@ -91,8 +93,6 @@
 <string name="add_profile_dialog">"为影梭添加此配置文件？"</string>
 <string name="add_profile_methods_scan_qr_code">"扫描二维码"</string>
 <string name="add_profile_methods_manual_settings">"手动设置"</string>
-<string name="add_profile_scanner_not_installed">"请安装任意兼容 ZXing 的二维码扫描应用。"</string>
-<string name="add_profile_scanner_permission_required">扫描二维码需要相机权限。</string>
 <plurals name="removed">
 <item quantity="other">"已删除 %d 项"</item>
 </plurals>
@@ -134,4 +134,9 @@
 <string name="plugin_unknown">"未知插件 %s"</string>
 <string name="plugin_untrusted">"警告：该插件似乎并非来自已知的可信源。"</string>
 <string name="profile_plugin">"插件：%s"</string>
+<string name="add_profile_scanner_permission_required">"扫描二维码需要获得使用相机的权限。"</string>
+
+<!-- notification category -->
+<string name="service_vpn">"VPN 服务"</string>
+<string name="service_nat">"NAT 服务"</string>
 </resources>

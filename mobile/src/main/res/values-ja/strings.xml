@@ -2,8 +2,7 @@
 <resources>
 <string name="quick_toggle">"ON/OFF"</string>
 
-<!-- global/misc category -->
-<string name="misc_cat">"その他"</string>
+<!-- misc -->
 <string name="profile">"プロファイル"</string>
 <string name="profile_summary">"新規作成または既存ファイルを開く"</string>
 <string name="nat">"NAT モード (デバックのみ)"</string>
@@ -90,8 +89,6 @@
 <string name="add_profile_dialog">"Shadowsocks用プロファイルを追加しますか"</string>
 <string name="add_profile_methods_scan_qr_code">"QR コードを読み取る"</string>
 <string name="add_profile_methods_manual_settings">"手動設定"</string>
-<string name="add_profile_scanner_not_installed">"Zxingに準拠したQRコードスキャンアプリをインストールして下さい"</string>
-<string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 <plurals name="removed">
 <item quantity="other">"削除済み"</item>
 </plurals>
@@ -133,4 +130,9 @@
 <string name="plugin_unknown">"不明なプラグイン"</string>
 <string name="plugin_untrusted">"警告：このプラグインは信頼されていないソースからの可能性があります"</string>
 <string name="profile_plugin">"プラグイン"</string>
+<string name="add_profile_scanner_permission_required">"QRコードをスキャンするにはカメラ権限が必要です。"</string>
+
+<!-- notification category -->
+<string name="service_vpn">"VPNサービス"</string>
+<string name="service_nat">"NATサービス"</string>
 </resources>

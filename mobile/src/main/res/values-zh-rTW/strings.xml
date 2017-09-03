@@ -89,8 +89,6 @@
 <string name="add_profile_dialog">"為 Shadowsocks 新增此設定檔？"</string>
 <string name="add_profile_methods_scan_qr_code">"掃描 QR 碼"</string>
 <string name="add_profile_methods_manual_settings">"手動設定"</string>
-<string name="add_profile_scanner_not_installed">"請安裝任何相容 ZXing 的 QR 碼掃描應用程式。"</string>
-<string name="add_profile_scanner_permission_required">掃描 QR 碼需要相機權限。</string>
 <plurals name="removed">
 <item quantity="other">"已移除 %d 項"</item>
 </plurals>
@@ -126,10 +124,15 @@
 <string name="acl_rule_templates_domain">"網域及其所有子網域"</string>
 
 <!-- plugin -->
-<string name="plugin">"插件"</string>
-<string name="plugin_configure">"配置..."</string>
-<string name="plugin_disabled">"未啟用"</string>
+<string name="plugin">"外掛程式"</string>
+<string name="plugin_configure">"設定..."</string>
+<string name="plugin_disabled">"停用"</string>
 <string name="plugin_unknown">"未知插件 %s"</string>
-<string name="plugin_untrusted">"警告：該插件似乎不是來自一個已知的可信任源。"</string>
-<string name="profile_plugin">"插件： %s"</string>
+<string name="plugin_untrusted">"警告：此外掛程式似乎不是來自一個已知的受信任來源。"</string>
+<string name="profile_plugin">"外掛程式： %s"</string>
+<string name="add_profile_scanner_permission_required">"掃描 QR 碼需要相機權限。"</string>
+
+<!-- notification category -->
+<string name="service_vpn">"VPN 服務"</string>
+<string name="service_nat">"NAT 服務"</string>
 </resources>
