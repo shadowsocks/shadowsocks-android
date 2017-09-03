@@ -6,6 +6,7 @@ local.sbt
 #Intellij IDEA
 .idea/
 .d
+gen/
 
 mobile/src/main/libs
 mobile/src/main/obj
