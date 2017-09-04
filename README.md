@@ -24,7 +24,7 @@ A [shadowsocksR](https://github.com/breakwa11/shadowsocks-rss/) client for Andro
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk`
 * And you can set http.proxy for sbt
-* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.htmlf
+* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
 * Put your key in ~/.keystore or any other place
 * Create `local.properties` from `local.properties.example` with your own key information
 * Invoke the building like this
