@@ -161,7 +161,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     if (profile.route != Acl.ALL) {
       cmd += "--acl"
-      cmd += Acl.getFile(profile.route).getAbsolutePath
+      cmd += Acl.getFile(profile.route match {
+        case Acl.CUSTOM_RULES => Acl.CUSTOM_RULES_FLATTENED
+        case route => route
+      }).getAbsolutePath
     }
 
     if (TcpFastOpen.sendEnabled) cmd += "--fast-open"

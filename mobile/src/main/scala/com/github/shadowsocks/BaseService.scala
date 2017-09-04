@@ -150,8 +150,7 @@ trait BaseService extends Service {
       profile.method = proxy(3).trim
     }
 
-    if (profile.route == Acl.CUSTOM_RULES)  // rationalize custom rules
-      Acl.save(Acl.CUSTOM_RULES, new Acl().fromId(Acl.CUSTOM_RULES), true)
+    if (profile.route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES_FLATTENED, Acl.customRules.flatten(10))
 
     plugin = new PluginConfiguration(profile.plugin).selectedOptions
     pluginPath = PluginManager.init(plugin)
