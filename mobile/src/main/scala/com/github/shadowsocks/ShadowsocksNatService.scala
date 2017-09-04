@@ -63,7 +63,10 @@ class ShadowsocksNatService extends BaseService {
 
     if (profile.route != Acl.ALL) {
       cmd += "--acl"
-      cmd += Acl.getFile(profile.route).getAbsolutePath
+      cmd += Acl.getFile(profile.route match {
+        case Acl.CUSTOM_RULES => Acl.CUSTOM_RULES_FLATTENED
+        case route => route
+      }).getAbsolutePath
     }
 
     sslocalProcess = new GuardedProcess(cmd: _*).start()
