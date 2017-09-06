@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- proxy category -->
+<string name="proxy_cat">"서버 설정"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"기능 설정"</string>
+
+<!-- alert category -->
+<string name="yes">"예"</string>
+<string name="no">"아니오"</string>
+<string name="unsaved_changes_prompt">"변경 사항이 저장되지 않았습니다. 저장하시겠습니까?"</string>
+<string name="apply">"적용"</string>
+</resources>

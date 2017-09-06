@@ -1,59 +1,50 @@
-scalaVersion := "2.11.8"
-dexMaxHeap := "4g"
+lazy val commonSettings = Seq(
+  scalaVersion := "2.11.11",
+  dexMaxHeap := "4g",
 
-enablePlugins(AndroidApp)
-android.useSupportVectors
+  organization := "com.github.shadowsocks",
 
-name := "shadowsocks"
-version := "3.3.1"
-versionCode := Some(171)
+  platformTarget := "android-26",
 
-platformTarget := "android-25"
+  compileOrder := CompileOrder.JavaThenScala,
+  javacOptions ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil,
+  scalacOptions ++= "-target:jvm-1.7" :: "-Xexperimental" :: Nil,
+  ndkArgs := "-j" :: java.lang.Runtime.getRuntime.availableProcessors.toString :: Nil,
+  ndkAbiFilter := Seq("armeabi-v7a", "arm64-v8a", "x86"),
 
-compileOrder := CompileOrder.JavaThenScala
-javacOptions ++= "-source" :: "1.7" :: "-target" :: "1.7" :: Nil
-scalacOptions ++= "-target:jvm-1.7" :: "-Xexperimental" :: Nil
-ndkJavah := Seq()
-ndkBuild := Seq()
+  proguardVersion := "5.3.3",
+  proguardCache := Seq(),
 
-proguardVersion := "5.3.2"
-proguardCache := Seq()
-proguardOptions ++=
-  "-keep class com.github.shadowsocks.System { *; }" ::
-  "-dontwarn com.google.android.gms.internal.**" ::
-  "-dontwarn com.j256.ormlite.**" ::
-  "-dontwarn org.xbill.**" ::
-  Nil
+  shrinkResources := true,
+  typedResources := false,
 
-shrinkResources := true
-typedResources := false
-resConfigs := Seq("ja", "ru", "zh-rCN", "zh-rTW")
+  resConfigs := Seq("fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"),
 
-resolvers += Resolver.jcenterRepo
-libraryDependencies ++=
-  "com.android.support" % "design" % "25.0.1" ::
-  "com.android.support" % "gridlayout-v7" % "25.0.1" ::
-  "com.android.support" % "preference-v14" % "25.0.1" ::
-  "com.evernote" % "android-job" % "1.1.3" ::
-  "com.github.clans" % "fab" % "1.6.4" ::
-  "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
-  "com.github.kevinsawicki" % "http-request" % "6.0" ::
-  "com.google.android.gms" % "play-services-ads" % "10.0.1" ::
-  "com.google.android.gms" % "play-services-analytics" % "10.0.1" ::
-  "com.google.android.gms" % "play-services-gcm" % "10.0.1" ::
-  "com.j256.ormlite" % "ormlite-android" % "5.0" ::
-  "com.twofortyfouram" % "android-plugin-api-for-locale" % "1.0.2" ::
-  "dnsjava" % "dnsjava" % "2.1.7" ::
-  "eu.chainfire" % "libsuperuser" % "1.0.0.201608240809" ::
-  "me.dm7.barcodescanner" % "zxing" % "1.9" ::
-  "net.glxn.qrgen" % "android" % "2.0" ::
-  Nil
+  resolvers += "google" at "https://maven.google.com"
+)
 
-lazy val nativeBuild = TaskKey[Unit]("native-build", "Build native executables")
-nativeBuild := {
-  val logger = streams.value.log
-  Process("./build.sh") ! logger match {
-    case 0 => // Success!
-    case n => sys.error(s"Native build script exit code: $n")
-  }
-}
+val supportLibsVersion = "26.0.0"
+lazy val root = Project(id = "shadowsocks-android", base = file("."))
+  .settings(commonSettings)
+  .aggregate(plugin, mobile)
+
+install in Android := (install in (mobile, Android)).value
+run in Android := (run in (mobile, Android)).evaluated
+
+lazy val plugin = project
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies += "com.android.support" % "preference-v14" % supportLibsVersion
+  )
+
+lazy val mobile = project
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++=
+      "com.android.support" % "cardview-v7" % supportLibsVersion ::
+      "com.android.support" % "customtabs" % supportLibsVersion ::
+      "com.android.support" % "design" % supportLibsVersion ::
+      "com.android.support" % "gridlayout-v7" % supportLibsVersion ::
+      Nil
+  )
+  .dependsOn(plugin)

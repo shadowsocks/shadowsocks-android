@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- proxy category -->
+<string name="proxy_cat">"伺服器設定"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"功能設定"</string>
+
+<!-- alert category -->
+<string name="yes">"是"</string>
+<string name="no">"否"</string>
+<string name="unsaved_changes_prompt">"要儲存變更嗎？"</string>
+<string name="apply">"套用"</string>
+</resources>

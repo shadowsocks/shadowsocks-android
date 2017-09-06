@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">"شدوساکس"</string>
+
+<!-- misc -->
+<string name="profile">"پروفایل"</string>
+<string name="connection_test_testing">"در حال آزمایش..."</string>
+
+<!-- proxy category -->
+<string name="profile_name">"نام پروفایل"</string>
+<string name="proxy">"سرور"</string>
+<string name="sitekey">"کلمه عبور"</string>
+<string name="enc_method">"طریقه رمزگذاری"</string>
+<string name="on">"روشن"</string>
+<string name="auto_connect">"وصل‌شدن اتوماتیک"</string>
+<string name="auto_connect_summary">"فعال‌شدن شدوساکس لحظه روشن‌شدن گوشی"</string>
+
+<!-- notification category -->
+<string name="forward_success">"شدوساکس فعال شد."</string>
+<string name="invalid_server">"آدرس سرور نامعتبر است"</string>
+<string name="service_failed">"اتصال به سرور ناموفق بود!"</string>
+<string name="stop">"غیرفعال‌کردن"</string>
+<string name="stopping">"در حال قطع‌کردن اتصال..."</string>
+<string name="profile_invalid_input">"هیچ پروفایل معتبری یافت نشد!"</string>
+
+<!-- alert category -->
+<string name="close">"خروج"</string>
+<string name="profile_empty">"لطفا یک پروفایل انتخاب کنید."</string>
+<string name="proxy_empty">"پروکسی یا کلمه عبور نباید خالی باشند!"</string>
+<string name="connect">"اتصال"</string>
+
+<!-- menu category -->
+<string name="profiles">"پروفایل‌ها"</string>
+<string name="settings">"تنظیمات"</string>
+<string name="faq">"سوالات مداول"</string>
+<string name="recovery">"ریست"</string>
+<string name="about">"درباره ما"</string>
+<string name="edit">"ویرایش"</string>
+<string name="share">"به اشتراک گذاری"</string>
+<string name="add_profile">"افزودن پروفایل"</string>
+<string name="delete">"حذف"</string>
+<string name="delete_confirm_prompt">"آیا مطمئن هستید که می‌خواهید این پروفایل را حذف کنید؟"</string>
+<string name="share_qr_nfc">"NFC یا QR Code"</string>
+<string name="add_profile_methods_scan_qr_code">"اسکن‌کردن QR Code"</string>
+<string name="add_profile_methods_manual_settings">"تنظیمات دستی"</string>
+
+<!-- tasker -->
+<string name="toggle_service_state">"فعال‌کردن سرویس"</string>
+<string name="start_service_default">"وصل‌شدن به سرور فعلی"</string>
+<string name="profile_default">"استفاده از پروفایل فعلی"</string>
+
+<!-- status -->
+<string name="sent">"فرستاده‌شده:"</string>
+<string name="received">"دریافت‌شده:"</string>
+<string name="connecting">"در حال اتصال..."</string>
+<string name="vpn_connected">"وصل شد. برای بررسی اتصال ضربه (Tap) بزنید."</string>
+<string name="nat_connected">"اتصال برقرار است."</string>
+<string name="not_connected">"اتصال برقرار نیست!"</string>
+<string name="route_entry_all">"همه"</string>
+</resources>

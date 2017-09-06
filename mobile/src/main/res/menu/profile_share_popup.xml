@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_qr_code_nfc"
+          android:title="@string/share_qr_nfc"
+          android:alphabeticShortcut="q"
+          android:numericShortcut="1"/>
+    <item android:id="@+id/action_export"
+          android:title="@string/action_export"
+          android:alphabeticShortcut="e"
+          android:numericShortcut="2"/>
+</menu>

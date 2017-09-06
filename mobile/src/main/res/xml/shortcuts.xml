@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut android:shortcutId="toggle"
+              android:icon="@drawable/ic_qu_shadowsocks_launcher"
+              android:shortcutShortLabel="@string/quick_toggle"
+              android:shortcutLongLabel="@string/quick_toggle">
+        <intent android:action="android.intent.action.MAIN"
+                android:targetPackage="com.github.shadowsocks"
+                android:targetClass="com.github.shadowsocks.QuickToggleShortcut" />
+    </shortcut>
+</shortcuts>

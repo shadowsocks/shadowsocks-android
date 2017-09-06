@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="profile_item_max_width">480dp</dimen>
+    <dimen name="qr_code_size">250dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <!-- TODO: Remove when this issue is fixed: https://github.com/JorgeCastilloPrz/FABProgressCircle/issues/19 -->
+    <dimen name="fab_margin_top">-44dp</dimen>
+</resources>
