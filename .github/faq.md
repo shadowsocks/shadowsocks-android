@@ -49,6 +49,8 @@ As Shadowsocks takes over the whole device network, any battery used by network 
 
 So if you notice a significant increase in battery usage after you use Shadowsocks, it's most likely caused by other apps. For example, Google Play services can consume more battery after being able to connecting to Google, etc.
 
+More details: https://kb.adguard.com/en/android/solving-problems/battery
+
 ### It works fine under Wi-Fi but can't connect through cellular data?
 
 Allow this app to consume background data in app settings.
