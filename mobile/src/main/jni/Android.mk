@@ -186,26 +186,7 @@ LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/src/libcork/,$(CORK_SOU
 include $(BUILD_STATIC_LIBRARY)
 
 ########################################################
-## libudns
-########################################################
-
-include $(CLEAR_VARS)
-
-UDNS_SOURCES := udns_dn.c udns_dntosp.c udns_parse.c udns_resolver.c udns_init.c \
-	udns_misc.c udns_XtoX.c \
-	udns_rr_a.c udns_rr_ptr.c udns_rr_mx.c udns_rr_txt.c udns_bl.c \
-	udns_rr_srv.c udns_rr_naptr.c udns_codes.c udns_jran.c
-
-LOCAL_MODULE := libudns
-LOCAL_CFLAGS += -O2 -I$(LOCAL_PATH)/libudns \
-				-DHAVE_DECL_INET_NTOP
-
-LOCAL_SRC_FILES := $(addprefix libudns/,$(UDNS_SOURCES))
-
-include $(BUILD_STATIC_LIBRARY)
-
-########################################################
-## libev 
+## libev
 ########################################################
 
 include $(CLEAR_VARS)
@@ -215,7 +196,7 @@ LOCAL_CFLAGS += -O2 -DNDEBUG -DHAVE_CONFIG_H \
 				-I$(LOCAL_PATH)/include/libev
 LOCAL_SRC_FILES := \
 	libev/ev.c \
-	libev/event.c 
+	libev/event.c
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -264,7 +245,6 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/mbedtls/include  \
 					-I$(LOCAL_PATH)/pcre \
-					-I$(LOCAL_PATH)/libudns \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
@@ -272,7 +252,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_LOCAL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libbloom \
 					-I$(LOCAL_PATH)/libev
 
-LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libbloom libudns \
+LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libbloom \
 	libsodium libancillary libpcre
 
 LOCAL_LDLIBS := -llog
@@ -298,7 +278,6 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/include \
-					-I$(LOCAL_PATH)/libudns \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 					-I$(LOCAL_PATH)/mbedtls/include \
@@ -307,7 +286,7 @@ LOCAL_CFLAGS    := -Wall -O2 -fno-strict-aliasing -DMODULE_TUNNEL \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libbloom \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev
 
-LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libbloom libudns libancillary
+LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libbloom libancillary
 
 LOCAL_LDLIBS := -llog
 
