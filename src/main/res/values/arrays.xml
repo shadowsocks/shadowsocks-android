@@ -62,6 +62,8 @@
         <item>auth_chain_b</item>
         <item>auth_chain_c</item>
         <item>auth_chain_d</item>
+        <item>auth_chain_e</item>
+        <item>auth_chain_f</item>
     </string-array>
 
     <string-array name="protocol_value">
@@ -77,6 +79,8 @@
         <item>auth_chain_b</item>
         <item>auth_chain_c</item>
         <item>auth_chain_d</item>
+        <item>auth_chain_e</item>
+        <item>auth_chain_f</item>
     </string-array>
 
 
