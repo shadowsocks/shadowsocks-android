@@ -358,7 +358,7 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
         REQUEST_SCAN_QR_CODE) catch {
         case _: ActivityNotFoundException =>
           startActivity(new Intent(getActivity, classOf[ScannerActivity]))
-        case e: SecurityException =>
+        case e: Exception =>
           e.printStackTrace()
           app.track(e)
           startActivity(new Intent(getActivity, classOf[ScannerActivity]))
