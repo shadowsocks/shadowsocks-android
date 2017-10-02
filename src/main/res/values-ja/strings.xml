@@ -10,7 +10,9 @@
   <string name="profile_summary">新規作成または既存ファイルを開く</string>
   <string name="proxy">サーバーアドレス</string>
   <string name="remote_port">リモートポート</string>
+  <string name="remote_port_summary">%d (リモートサーバーのポート)</string>
   <string name="port">ローカルポート</string>
+  <string name="port_summary">%d (ロカールサーバーのポート)</string>
   <string name="sitekey">パスワード</string>
   <string name="enc_method">暗号化方式</string>
   <string name="protocol">ファンクション設定</string>
