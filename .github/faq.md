@@ -29,13 +29,15 @@ Scan it with a third-party scanner like [QuickMark Barcode Scanner](https://play
 
 The exclamation mark in the Wi-Fi/cellular icon appears because the system fails to connect to portal server (defaults to `clients3.google.com`) without VPN connection. To remove it, follow the instructions in [this article](https://www.noisyfox.cn/45.html). (in Simplified Chinese)
 
-### Why are MIUI, EMUI and other AOSPs in China not officially supported?
+### Why is my ROM not supported?
 
-1. Broken VPNService implementation, especially for IPv6;
-2. Aggressive (or called broken) background service killing policy.
+1. Some ROM has broken VPNService implementation, especially for IPv6;
+2. Some ROM has aggressive (or called broken) background service killing policy;
+3. If you have Xposed framework and/or battery saver apps, it's likely that this app wouldn't work well with these either.
 
 * Fixes for MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
 * Fixes for Huawei: [#1091 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
+* Related to Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 
 ### How to pause Shadowsocks service?
 
@@ -58,4 +60,6 @@ Allow this app to consume background data in app settings.
 ### Why Camera permission is required on devices below Android 6.0?
 
 To scan the QR code through the integrated QR scanner.
+
+By the way, upgrade your Android system already.
 
