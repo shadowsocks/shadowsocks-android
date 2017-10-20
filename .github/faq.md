@@ -38,6 +38,7 @@ The exclamation mark in the Wi-Fi/cellular icon appears because the system fails
 * Fixes for MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
 * Fixes for Huawei: [#1091 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Related to Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
+* Samsung and/or Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
 
 ### How to pause Shadowsocks service?
 
