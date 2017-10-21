@@ -186,7 +186,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       .setMtu(VPN_MTU)
       .addAddress(PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "1"), 24)
 
-    builder.addDnsServer("8.8.8.8") // It's fake DNS for tun2socks, not the real remote DNS
+    profile.remoteDns.split(",").foreach(dns => builder.addDnsServer(dns.trim))
 
     if (profile.ipv6) {
       builder.addAddress(PRIVATE_VLAN6.formatLocal(Locale.ENGLISH, "1"), 126)
