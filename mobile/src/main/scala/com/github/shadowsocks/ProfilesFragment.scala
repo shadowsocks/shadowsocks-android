@@ -20,18 +20,13 @@
 
 package com.github.shadowsocks
 
-import java.util.GregorianCalendar
-
-import android.app.Activity
 import android.content._
-import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget._
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback
-import android.text.TextUtils
 import android.view.View.OnLongClickListener
 import android.view._
 import android.widget.{LinearLayout, PopupMenu, TextView, Toast}
@@ -43,12 +38,9 @@ import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.{AdRequest, AdSize, AdView}
 
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.util.Random
 
 object ProfilesFragment {
   var instance: ProfilesFragment = _  // used for callback from ProfileManager and stateChanged from MainActivity
-
-  private final val REQUEST_SCAN_QR_CODE = 0
 }
 
 final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickListener {
@@ -334,27 +326,9 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     super.onDestroy()
   }
 
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = requestCode match {
-    case REQUEST_SCAN_QR_CODE => if (resultCode == Activity.RESULT_OK) {
-      val contents = data.getStringExtra("SCAN_RESULT")
-      if (!TextUtils.isEmpty(contents)) Parser.findAll(contents).foreach(app.profileManager.createProfile)
-    }
-    case _ => super.onActivityResult(resultCode, resultCode, data)
-  }
-
   def onMenuItemClick(item: MenuItem): Boolean = item.getItemId match {
     case R.id.action_scan_qr_code =>
-      try startActivityForResult(new Intent("com.google.zxing.client.android.SCAN")
-        .addCategory(Intent.CATEGORY_DEFAULT)
-        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_DOCUMENT),
-        REQUEST_SCAN_QR_CODE) catch {
-        case _: ActivityNotFoundException =>
-          startActivity(new Intent(getActivity, classOf[ScannerActivity]))
-        case e: Exception =>
-          e.printStackTrace()
-          app.track(e)
-          startActivity(new Intent(getActivity, classOf[ScannerActivity]))
-      }
+      startActivity(new Intent(getActivity, classOf[ScannerActivity]))
       true
     case R.id.action_import =>
       try {
