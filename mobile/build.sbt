@@ -54,7 +54,7 @@ packagingOptions := PackagingOptions(excludes =
   "META-INF/maven/com.squareup.okhttp3/okhttp/pom.xml" ::
   Nil)
 
-lazy val goClean = TaskKey[Unit]("go-clean", "Clean go build dependencies")
+lazy val goClean: TaskKey[Unit] = TaskKey[Unit]("go-clean", "Clean go build dependencies")
 goClean := {
   IO.delete(baseDirectory(base => base / "src/overture/.deps").value)
   IO.delete(baseDirectory(base => base / "src/overture/bin").value)
@@ -62,7 +62,7 @@ goClean := {
   IO.delete(baseDirectory(base => base / "src/main/jni/overture").value)
 }
 
-lazy val goBuild = TaskKey[Unit]("go-build", "Build go and overture")
+lazy val goBuild: TaskKey[Unit] = TaskKey[Unit]("go-build", "Build go and overture")
 goBuild := {
   Process(Seq("mobile/src/overture/make.bash", minSdkVersion.value)) ! streams.value.log match {
     case 0 => // Success!
