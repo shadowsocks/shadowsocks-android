@@ -17,7 +17,7 @@
 
     <uses-sdk
             android:minSdkVersion="19"
-            android:targetSdkVersion="26"/>
+            android:targetSdkVersion="27"/>
 
     <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
                android:value="true" />
