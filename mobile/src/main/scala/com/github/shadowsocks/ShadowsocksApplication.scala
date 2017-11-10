@@ -66,8 +66,8 @@ class ShadowsocksApplication extends Application {
   lazy val profileManager = new ProfileManager(dbHelper)
   lazy val dataStore = new OrmLitePreferenceDataStore(dbHelper)
 
-  def isNatEnabled: Boolean = dataStore.isNAT
-  def isVpnEnabled: Boolean = !isNatEnabled
+  def isLocalEnabled: Boolean = dataStore.isNAT
+  def isVpnEnabled: Boolean = !isLocalEnabled
 
   // send event
   def track(category: String, action: String): Unit = tracker.send(new HitBuilders.EventBuilder()
@@ -156,7 +156,7 @@ class ShadowsocksApplication extends Application {
 
     if (Build.VERSION.SDK_INT >= 26) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
       new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
-      new NotificationChannel("service-nat", getText(R.string.service_nat), NotificationManager.IMPORTANCE_LOW)
+      new NotificationChannel("service-local", getText(R.string.service_local), NotificationManager.IMPORTANCE_LOW)
     ))
   }
 
@@ -165,14 +165,8 @@ class ShadowsocksApplication extends Application {
 
     for (task <- Executable.EXECUTABLES) {
       cmd.append("killall lib%s.so".formatLocal(Locale.ENGLISH, task))
-      cmd.append("rm -f %1$s/%2$s-nat.conf %1$s/%2$s-vpn.conf"
+      cmd.append("rm -f %1$s/%2$s-local.conf %1$s/%2$s-vpn.conf"
         .formatLocal(Locale.ENGLISH, getFilesDir.getAbsolutePath, task))
-    }
-    if (app.isNatEnabled) {
-      cmd.append("iptables -t nat -F OUTPUT")
-      cmd.append("echo done")
-      val result = Shell.SU.run(cmd.toArray)
-      if (result != null && !result.isEmpty) return // fallback to SH
     }
     Shell.SH.run(cmd.toArray)
   }

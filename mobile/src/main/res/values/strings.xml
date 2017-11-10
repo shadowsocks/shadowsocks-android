@@ -7,8 +7,8 @@
   <!-- misc -->
   <string name="profile">Profile</string>
   <string name="profile_summary">Switch to another profile or add new profiles</string>
-  <string name="nat">NAT mode (deprecated)</string>
-  <string name="nat_summary">Use NAT mode instead of VPN mode. Requires ROOT permission.</string>
+  <string name="local">SOCKS5 mode</string>
+  <string name="local_summary">Enable SOCKS5 proxy mode instead of VPN mode to work with AFWall+ or Orbot</string>
   <string name="remote_dns">Remote DNS</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">%1$s↑\t%2$s↓</string>
@@ -43,7 +43,7 @@
   <string name="route_entry_gfwlist">GFW List</string>
   <string name="route_entry_chinalist">China List</string>
   <string name="proxied_apps">Per-App Proxy</string>
-  <string name="proxied_apps_summary">Set proxy for selected apps, requires NAT mode under Android 4.x</string>
+  <string name="proxied_apps_summary">Set proxy for selected apps</string>
   <string name="proxied_apps_summary_v21">Set proxy for selected apps</string>
   <string name="on">On</string>
   <string name="bypass_apps">Bypass Mode</string>
@@ -57,12 +57,10 @@
 
   <!-- notification category -->
   <string name="service_vpn">VPN Service</string>
-  <string name="service_nat">NAT Service</string>
+  <string name="service_local">SOCKS5 Service</string>
   <string name="forward_success">Shadowsocks started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
-  <string name="nat_deprecated">WARNING: NAT mode has been deprecated since Android 5.0</string>
-  <string name="nat_no_root">NAT mode requires ROOT permission</string>
   <string name="switch_to_vpn">Switch to VPN mode</string>
   <string name="stop">Stop</string>
   <string name="stopping">Shutting down…</string>
@@ -124,7 +122,7 @@
   <string name="received">Received:</string>
   <string name="connecting">Connecting…</string>
   <string name="vpn_connected">Connected, tap to check connection</string>
-  <string name="nat_connected">Connected</string>
+  <string name="local_connected">Connected</string>
   <string name="not_connected">Not connected</string>
 
   <!-- acl -->

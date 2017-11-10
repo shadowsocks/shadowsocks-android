@@ -12,7 +12,7 @@
                   android:required="false"/>
     <uses-feature android:name="android.software.leanback"
                   android:required="false"/>
-    <uses-feature android:name="android.hardware.camera"        
+    <uses-feature android:name="android.hardware.camera"
                   android:required="false"/>
 
     <uses-sdk
@@ -109,7 +109,7 @@
         </activity>
 
         <service
-                android:name=".ShadowsocksNatService"
+                android:name=".ShadowsocksLocalService"
                 android:process=":bg"
                 android:exported="false">
         </service>

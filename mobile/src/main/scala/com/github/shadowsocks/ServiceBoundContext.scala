@@ -85,7 +85,7 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
   protected def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
     this.callback = callback
     if (bgService == null) {
-      val s = if (app.isNatEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
+      val s = if (app.isLocalEnabled) classOf[ShadowsocksLocalService] else classOf[ShadowsocksVpnService]
 
       val intent = new Intent(this, s)
       intent.setAction(Action.SERVICE)

@@ -46,7 +46,7 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
   }
 
   def startBackgroundService() {
-    if (app.isNatEnabled) {
+    if (app.isLocalEnabled) {
       Utils.startSsService(this)
       finish()
     } else {
