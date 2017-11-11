@@ -244,6 +244,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     if (tf != null) title.setTypeface(tf)
 
     if (savedInstanceState == null) displayFragment(new ProfilesFragment)
+    else previousPosition = drawer.getCurrentSelectedPosition
     statusText = findViewById(R.id.status).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
@@ -356,8 +357,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     drawer.closeDrawer()
   }
 
+  private var previousPosition: Int = _
   override def onItemClick(view: View, position: Int, drawerItem: IDrawerItem[_, _ <: ViewHolder]): Boolean = {
-    drawerItem.getIdentifier match {
+    if (position == previousPosition) drawer.closeDrawer() else drawerItem.getIdentifier match {
       case DRAWER_PROFILES => displayFragment(new ProfilesFragment)
       case DRAWER_RECOVERY =>
         app.track("GlobalConfigFragment", "reset")
@@ -379,6 +381,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
       case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
       case _ => // Ignore
     }
+    previousPosition = position
     true  // unexpected cases will throw exception
   }
 
