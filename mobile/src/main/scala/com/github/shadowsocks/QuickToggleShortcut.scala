@@ -26,7 +26,8 @@ import android.content.pm.ShortcutManager
 import android.os.{Build, Bundle}
 import android.support.v4.content.pm.{ShortcutInfoCompat, ShortcutManagerCompat}
 import android.support.v4.graphics.drawable.IconCompat
-import com.github.shadowsocks.utils.{State, Utils}
+import com.github.shadowsocks.bg.ServiceState
+import com.github.shadowsocks.utils.Utils
 
 /**
   * @author Mygod
@@ -56,8 +57,8 @@ class QuickToggleShortcut extends Activity with ServiceBoundContext {
 
   override def onServiceConnected() {
     bgService.getState match {
-      case State.STOPPED => Utils.startSsService(this)
-      case State.CONNECTED => Utils.stopSsService(this)
+      case ServiceState.STOPPED => Utils.startSsService(this)
+      case ServiceState.CONNECTED => Utils.stopSsService(this)
       case _ => // ignore
     }
     finish()

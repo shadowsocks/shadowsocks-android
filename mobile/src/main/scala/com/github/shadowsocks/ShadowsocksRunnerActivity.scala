@@ -46,16 +46,12 @@ class ShadowsocksRunnerActivity extends Activity with ServiceBoundContext {
   }
 
   def startBackgroundService() {
-    if (app.isNatEnabled) {
+    if (app.usingVpnMode) VpnService.prepare(ShadowsocksRunnerActivity.this) match {
+      case null => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+      case intent => startActivityForResult(intent, REQUEST_CONNECT)
+    } else {
       Utils.startSsService(this)
       finish()
-    } else {
-      val intent = VpnService.prepare(ShadowsocksRunnerActivity.this)
-      if (intent != null) {
-        startActivityForResult(intent, REQUEST_CONNECT)
-      } else {
-        onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
-      }
     }
   }
 

@@ -21,10 +21,11 @@
 package com.github.shadowsocks
 
 import android.content.{ComponentName, Context, Intent, ServiceConnection}
-import android.os.{RemoteException, IBinder}
-import com.github.shadowsocks.aidl.{IShadowsocksServiceCallback, IShadowsocksService}
+import android.os.{IBinder, RemoteException}
+import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.bg.{TransproxyService, VpnService}
 
 /**
   * @author Mygod
@@ -85,9 +86,7 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
   protected def attachService(callback: IShadowsocksServiceCallback.Stub = null) {
     this.callback = callback
     if (bgService == null) {
-      val s = if (app.isNatEnabled) classOf[ShadowsocksNatService] else classOf[ShadowsocksVpnService]
-
-      val intent = new Intent(this, s)
+      val intent = new Intent(this, app.serviceClass)
       intent.setAction(Action.SERVICE)
 
       connection = new ShadowsocksServiceConnection()

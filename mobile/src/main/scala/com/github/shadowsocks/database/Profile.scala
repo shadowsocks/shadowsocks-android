@@ -40,10 +40,6 @@ class Profile {
   @DatabaseField
   var host: String = "198.199.101.152"
 
-  // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
-  @DatabaseField
-  var localPort: Int = 1080 + Binder.getCallingUserHandle.hashCode
-
   @DatabaseField
   var remotePort: Int = 8388
 
@@ -111,7 +107,6 @@ class Profile {
   def serialize(store: OrmLitePreferenceDataStore) {
     store.putString(Key.name, name)
     store.putString(Key.host, host)
-    store.putInt(Key.localPort, localPort)
     store.putInt(Key.remotePort, remotePort)
     store.putString(Key.password, password)
     store.putString(Key.route, route)
@@ -129,7 +124,6 @@ class Profile {
     // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
     name = store.getString(Key.name, null)
     host = store.getString(Key.host, null)
-    localPort = store.getInt(Key.localPort, 0)
     remotePort = store.getInt(Key.remotePort, 0)
     password = store.getString(Key.password, null)
     method = store.getString(Key.method, null)

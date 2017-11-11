@@ -66,7 +66,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       findPreference(Key.password).setSummary("\u2022" * 32)
     }
     isProxyApps = findPreference(Key.proxyApps).asInstanceOf[SwitchPreference]
-    isProxyApps.setEnabled(Utils.isLollipopOrAbove || app.isNatEnabled)
+    isProxyApps.setEnabled(Utils.isLollipopOrAbove && app.usingVpnMode)
     isProxyApps.setOnPreferenceClickListener(_ => {
       startActivity(new Intent(getActivity, classOf[AppManager]))
       isProxyApps.setChecked(true)

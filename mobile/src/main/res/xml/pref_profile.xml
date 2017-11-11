@@ -20,12 +20,6 @@
                 android:key="remotePortNum"
                 android:summary="%d"
                 android:title="@string/remote_port"/>
-        <be.mygod.preference.NumberPickerPreference
-                app:min="1025"
-                app:max="65535"
-                android:key="localPortNum"
-                android:summary="%d"
-                android:title="@string/port"/>
         <be.mygod.preference.EditTextPreference
                 android:inputType="textPassword"
                 android:key="sitekey"

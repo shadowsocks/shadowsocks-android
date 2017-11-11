@@ -18,20 +18,20 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.bg
 
 import android.annotation.TargetApi
 import android.graphics.drawable.Icon
 import android.service.quicksettings.{Tile, TileService}
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
-import com.github.shadowsocks.utils.{State, Utils}
+import com.github.shadowsocks.utils.Utils
+import com.github.shadowsocks.{R, ServiceBoundContext}
 
 /**
   * @author Mygod
   */
 @TargetApi(24)
-final class ShadowsocksTileService extends TileService with ServiceBoundContext {
-
+final class ServiceTileService extends TileService with ServiceBoundContext {
   private lazy val iconIdle = Icon.createWithResource(this, R.drawable.ic_start_idle).setTint(0x80ffffff)
   private lazy val iconBusy = Icon.createWithResource(this, R.drawable.ic_start_busy)
   private lazy val iconConnected = Icon.createWithResource(this, R.drawable.ic_start_connected)
@@ -41,11 +41,11 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
       val tile = getQsTile
       if (tile != null) {
         state match {
-          case State.STOPPED =>
+          case ServiceState.STOPPED =>
             tile.setIcon(iconIdle)
             tile.setLabel(getString(R.string.app_name))
             tile.setState(Tile.STATE_INACTIVE)
-          case State.CONNECTED =>
+          case ServiceState.CONNECTED =>
             tile.setIcon(iconConnected)
             tile.setLabel(if (profileName == null) getString(R.string.app_name) else profileName)
             tile.setState(Tile.STATE_ACTIVE)
@@ -74,8 +74,8 @@ final class ShadowsocksTileService extends TileService with ServiceBoundContext 
   override def onClick(): Unit = if (isLocked) unlockAndRun(toggle) else toggle()
 
   private def toggle() = if (bgService != null) bgService.getState match {
-    case State.STOPPED => Utils.startSsService(this)
-    case State.CONNECTED => Utils.stopSsService(this)
+    case ServiceState.STOPPED => Utils.startSsService(this)
+    case ServiceState.CONNECTED => Utils.stopSsService(this)
     case _ => // ignore
   }
 }

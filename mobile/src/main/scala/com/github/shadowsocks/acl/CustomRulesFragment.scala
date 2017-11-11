@@ -15,7 +15,7 @@ import android.view._
 import android.widget.{EditText, Spinner, TextView, Toast}
 import com.futuremind.recyclerviewfastscroll.{FastScroller, SectionTitleProvider}
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.utils.State
+import com.github.shadowsocks.bg.ServiceState
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.github.shadowsocks.{MainActivity, R, ToolbarFragment}
 
@@ -41,8 +41,8 @@ class CustomRulesFragment extends ToolbarFragment with Toolbar.OnMenuItemClickLi
   import CustomRulesFragment._
 
   private def isEnabled = getActivity.asInstanceOf[MainActivity].state match {
-    case State.CONNECTED => app.currentProfile.get.route != Acl.CUSTOM_RULES
-    case State.STOPPED => true
+    case ServiceState.CONNECTED => app.currentProfile.get.route != Acl.CUSTOM_RULES
+    case ServiceState.STOPPED => true
     case _ => false
   }
 
