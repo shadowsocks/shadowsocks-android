@@ -244,7 +244,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     if (tf != null) title.setTypeface(tf)
 
     if (savedInstanceState == null) displayFragment(new ProfilesFragment)
-    else previousPosition = drawer.getCurrentSelectedPosition
+    previousPosition = drawer.getCurrentSelectedPosition
     statusText = findViewById(R.id.status).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
