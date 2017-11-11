@@ -117,7 +117,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         if (state == State.CONNECTING) fabProgressCircle.beginFinalAnimation()
         else fabProgressCircle.postDelayed(hideCircle, 1000)
         fab.setImageResource(R.drawable.ic_start_connected)
-        statusText.setText(if (app.isLocalEnabled) R.string.local_connected else R.string.vpn_connected)
+        statusText.setText(if (app.isNatEnabled) R.string.nat_connected else R.string.vpn_connected)
       case State.STOPPING =>
         fab.setImageResource(R.drawable.ic_start_busy)
         if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
@@ -128,6 +128,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         if (m != null) {
           val snackbar = Snackbar.make(findViewById(R.id.snackbar),
             getString(R.string.vpn_error).formatLocal(Locale.ENGLISH, m), Snackbar.LENGTH_LONG)
+          if (m == getString(R.string.nat_no_root)) addDisableNatToSnackbar(snackbar)
           snackbar.show()
           Log.e(TAG, "Error to start VPN service: " + m)
         }
@@ -156,9 +157,16 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   override def onServiceConnected() {
     changeState(bgService.getState)
+    if (Build.VERSION.SDK_INT >= 21 && app.isNatEnabled) {
+      val snackbar = Snackbar.make(findViewById(R.id.snackbar), R.string.nat_deprecated, Snackbar.LENGTH_LONG)
+      addDisableNatToSnackbar(snackbar)
+      snackbar.show()
+    }
   }
   override def onServiceDisconnected(): Unit = changeState(State.IDLE)
 
+  private def addDisableNatToSnackbar(snackbar: Snackbar) = snackbar.setAction(R.string.switch_to_vpn, (_ =>
+    if (state == State.STOPPED) app.dataStore.isNAT = false): View.OnClickListener)
 
   override def binderDied(): Unit = handler.post(() => {
     detachService()
@@ -292,7 +300,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (state == State.CONNECTED) Utils.stopSsService(this) else Utils.ThrowableFuture {
-      if (app.isLocalEnabled) Utils.startSsService(this) else {
+      if (app.isNatEnabled) Utils.startSsService(this) else {
         val intent = VpnService.prepare(this)
         if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
         else handler.post(() => onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null))

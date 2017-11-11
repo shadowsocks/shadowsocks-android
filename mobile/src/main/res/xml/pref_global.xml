@@ -8,6 +8,6 @@
                       android:summary="@string/tcp_fastopen_summary"
                       android:title="TCP Fast Open"/>
     <SwitchPreference android:key="isNAT"
-                      android:title="@string/local"
-                      android:summary="@string/local_summary"/>
+                      android:title="@string/nat"
+                      android:summary="@string/nat_summary"/>
 </PreferenceScreen>
