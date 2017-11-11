@@ -399,10 +399,8 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   override def onBackPressed(): Unit = if (drawer.isDrawerOpen) drawer.closeDrawer() else {
     val currentFragment = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
     if (!currentFragment.onBackPressed())
-      if (currentFragment.isInstanceOf[ProfilesFragment]) super.onBackPressed() else {
-        displayFragment(new ProfilesFragment)
-        drawer.setSelection(DRAWER_PROFILES)
-      }
+      if (currentFragment.isInstanceOf[ProfilesFragment]) super.onBackPressed()
+      else drawer.setSelection(DRAWER_PROFILES)
   }
 
   override def onStop() {
