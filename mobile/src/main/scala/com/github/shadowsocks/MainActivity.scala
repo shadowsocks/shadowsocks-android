@@ -243,7 +243,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     val tf = Typefaces.get(this, "fonts/Iceland.ttf")
     if (tf != null) title.setTypeface(tf)
 
-    if (savedInstanceState == null) displayFragment(new ProfilesFragment)
+    if (savedInstanceState == null) drawer.setSelection(DRAWER_PROFILES)
     statusText = findViewById(R.id.status).asInstanceOf[TextView]
     txText = findViewById(R.id.tx).asInstanceOf[TextView]
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
@@ -351,14 +351,33 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     case _ =>
   }
 
-  private def displayFragment(fragment: ToolbarFragment) {
-    getFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
-    drawer.closeDrawer()
+  private def displayFragment(fragmentId :Long) = {
+    var fragment: ToolbarFragment = getFragmentManager.findFragmentByTag(String.valueOf(fragmentId)).asInstanceOf[ToolbarFragment]
+    if (fragment == null){
+      fragmentId match {
+        case DRAWER_PROFILES =>
+          fragment = new ProfilesFragment
+        case DRAWER_TOPUP =>
+          fragment = new TopupFragment
+        case DRAWER_CUSTOM_RULES =>
+          fragment = new CustomRulesFragment
+        case DRAWER_GLOBAL_SETTINGS =>
+          fragment = new GlobalSettingsFragment
+        case DRAWER_ABOUT =>
+          fragment = new AboutFragment
+        case _ =>
+      }
+    }
+
+    if (fragment != null){
+      getFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment, String.valueOf(fragmentId)).commitAllowingStateLoss()
+      drawer.closeDrawer()
+    }
   }
 
   override def onItemClick(view: View, position: Int, drawerItem: IDrawerItem[_, _ <: ViewHolder]): Boolean = {
     drawerItem.getIdentifier match {
-      case DRAWER_PROFILES => displayFragment(new ProfilesFragment)
+      case DRAWER_PROFILES => displayFragment(drawerItem.getIdentifier)
       case DRAWER_RECOVERY =>
         app.track("GlobalConfigFragment", "reset")
         Utils.stopSsService(this)
@@ -371,12 +390,12 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
           app.copyAssets()
           handler.sendEmptyMessage(0)
         }
-      case DRAWER_GLOBAL_SETTINGS => displayFragment(new GlobalSettingsFragment)
+      case DRAWER_GLOBAL_SETTINGS => displayFragment(drawerItem.getIdentifier)
       case DRAWER_ABOUT =>
         app.track(TAG, "about")
-        displayFragment(new AboutFragment)
+        displayFragment(drawerItem.getIdentifier)
       case DRAWER_FAQ => launchUrl(getString(R.string.faq_url))
-      case DRAWER_CUSTOM_RULES => displayFragment(new CustomRulesFragment)
+      case DRAWER_CUSTOM_RULES => displayFragment(drawerItem.getIdentifier)
       case _ => // Ignore
     }
     true  // unexpected cases will throw exception
@@ -400,7 +419,6 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     val currentFragment = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
     if (!currentFragment.onBackPressed())
       if (currentFragment.isInstanceOf[ProfilesFragment]) super.onBackPressed() else {
-        displayFragment(new ProfilesFragment)
         drawer.setSelection(DRAWER_PROFILES)
       }
   }
