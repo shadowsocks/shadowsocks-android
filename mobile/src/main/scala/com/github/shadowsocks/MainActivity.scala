@@ -21,7 +21,7 @@
 package com.github.shadowsocks
 
 import java.lang.System.currentTimeMillis
-import java.net.{HttpURLConnection, URL}
+import java.net.{HttpURLConnection, InetSocketAddress, URL, Proxy => JavaProxy}
 import java.util.Locale
 
 import android.app.Activity
@@ -119,7 +119,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
         if (state == ServiceState.CONNECTING) fabProgressCircle.beginFinalAnimation()
         else fabProgressCircle.postDelayed(hideCircle, 1000)
         fab.setImageResource(R.drawable.ic_start_connected)
-        statusText.setText(if (app.usingVpnMode) R.string.vpn_connected else R.string.nat_connected)
+        statusText.setText(R.string.vpn_connected)
       case ServiceState.STOPPING =>
         fab.setImageResource(R.drawable.ic_start_busy)
         if (state == ServiceState.CONNECTED) fabProgressCircle.show()  // ignore for stopped
@@ -242,17 +242,21 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     txRateText = findViewById(R.id.txRate).asInstanceOf[TextView]
     rxText = findViewById(R.id.rx).asInstanceOf[TextView]
     rxRateText = findViewById(R.id.rxRate).asInstanceOf[TextView]
-    findViewById[View](R.id.stat).setOnClickListener(_ => if (state == ServiceState.CONNECTED && app.usingVpnMode) {
+    findViewById[View](R.id.stat).setOnClickListener(_ => if (state == ServiceState.CONNECTED) {
       testCount += 1
       statusText.setText(R.string.connection_test_testing)
       val id = testCount  // it would change by other code
       Utils.ThrowableFuture {
         // Based on: https://android.googlesource.com/platform/frameworks/base/+/master/services/core/java/com/android/server/connectivity/NetworkMonitor.java#640
-        autoDisconnect(new URL("https", app.currentProfile.get.route match {
-          case Acl.CHINALIST => "www.qualcomm.cn"
-          case _ => "www.google.com"
-        }, "/generate_204").openConnection()
-          .asInstanceOf[HttpURLConnection]) { conn =>
+        autoDisconnect {
+          val url = new URL("https", app.currentProfile.get.route match {
+            case Acl.CHINALIST => "www.qualcomm.cn"
+            case _ => "www.google.com"
+          }, "/generate_204")
+          (if (app.usingVpnMode) url.openConnection() else url.openConnection(
+            new JavaProxy(JavaProxy.Type.SOCKS, new InetSocketAddress("127.0.0.1", app.dataStore.portProxy))))
+            .asInstanceOf[HttpURLConnection]
+        } { conn =>
           conn.setConnectTimeout(5 * 1000)
           conn.setReadTimeout(5 * 1000)
           conn.setInstanceFollowRedirects(false)
