@@ -23,7 +23,6 @@ package com.github.shadowsocks.database
 import java.util.Locale
 
 import android.net.Uri
-import android.os.Binder
 import android.util.Base64
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.OrmLitePreferenceDataStore

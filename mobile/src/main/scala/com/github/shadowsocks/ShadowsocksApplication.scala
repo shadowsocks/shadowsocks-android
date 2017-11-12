@@ -160,12 +160,10 @@ class ShadowsocksApplication extends Application {
 
     if (dataStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) copyAssets()
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
-    if (!(1025 to 65535 contains dataStore.portProxy))
-      dataStore.putInt(Key.portProxy, 1080 + Binder.getCallingUserHandle.hashCode)
-    if (!(1025 to 65535 contains dataStore.portLocalDns))
-      dataStore.putInt(Key.portLocalDns, 5400 + Binder.getCallingUserHandle.hashCode)
-    if (!(1025 to 65535 contains dataStore.portTransproxy))
-      dataStore.putInt(Key.portTransproxy, 8200 + Binder.getCallingUserHandle.hashCode)
+    lazy val userIndex = Binder.getCallingUserHandle.hashCode
+    if (!(1025 to 65535 contains dataStore.portProxy)) dataStore.putInt(Key.portProxy, 1080 + userIndex)
+    if (!(1025 to 65535 contains dataStore.portLocalDns)) dataStore.putInt(Key.portLocalDns, 5450 + userIndex)
+    if (!(1025 to 65535 contains dataStore.portTransproxy)) dataStore.putInt(Key.portTransproxy, 8200 + userIndex)
 
     if (Build.VERSION.SDK_INT >= 26) {
       val nm = getSystemService(classOf[NotificationManager])
