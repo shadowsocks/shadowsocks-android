@@ -26,12 +26,14 @@ import java.util.Locale
 import android.annotation.SuppressLint
 import android.app.{Application, NotificationChannel, NotificationManager}
 import android.content._
+import android.content.pm.{PackageInfo, PackageManager}
 import android.content.res.Configuration
-import android.os.{Build, LocaleList}
+import android.os.{Binder, Build, LocaleList}
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
 import com.github.shadowsocks.acl.DonaldTrump
+import com.github.shadowsocks.bg.{BaseService, ProxyService, TransproxyService, VpnService}
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
 import com.github.shadowsocks.preference.OrmLitePreferenceDataStore
 import com.github.shadowsocks.utils.CloseUtils._
@@ -40,10 +42,8 @@ import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardE
 import com.google.firebase.FirebaseApp
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.j256.ormlite.logger.LocalLog
-import eu.chainfire.libsuperuser.Shell
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
 
 object ShadowsocksApplication {
   var app: ShadowsocksApplication = _
@@ -66,8 +66,12 @@ class ShadowsocksApplication extends Application {
   lazy val profileManager = new ProfileManager(dbHelper)
   lazy val dataStore = new OrmLitePreferenceDataStore(dbHelper)
 
-  def isLocalEnabled: Boolean = dataStore.isNAT
-  def isVpnEnabled: Boolean = !isLocalEnabled
+  def usingVpnMode: Boolean = dataStore.serviceMode == Key.modeVpn
+  def serviceClass: Class[_] = app.dataStore.serviceMode match {
+    case Key.modeProxy => classOf[ProxyService]
+    case Key.modeVpn => classOf[VpnService]
+    case Key.modeTransproxy => classOf[TransproxyService]
+  }
 
   // send event
   def track(category: String, action: String): Unit = tracker.send(new HitBuilders.EventBuilder()
@@ -154,26 +158,30 @@ class ShadowsocksApplication extends Application {
 
     TcpFastOpen.enabled(dataStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 
-    if (Build.VERSION.SDK_INT >= 26) getSystemService(classOf[NotificationManager]).createNotificationChannels(List(
-      new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
-      new NotificationChannel("service-local", getText(R.string.service_local), NotificationManager.IMPORTANCE_LOW)
-    ))
-  }
+    if (dataStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) copyAssets()
+    // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
+    lazy val userIndex = Binder.getCallingUserHandle.hashCode
+    if (!(1025 to 65535 contains dataStore.portProxy)) dataStore.putInt(Key.portProxy, 1080 + userIndex)
+    if (!(1025 to 65535 contains dataStore.portLocalDns)) dataStore.putInt(Key.portLocalDns, 5450 + userIndex)
+    if (!(1025 to 65535 contains dataStore.portTransproxy)) dataStore.putInt(Key.portTransproxy, 8200 + userIndex)
 
-  def crashRecovery() {
-    val cmd = new ArrayBuffer[String]()
-
-    for (task <- Executable.EXECUTABLES) {
-      cmd.append("killall lib%s.so".formatLocal(Locale.ENGLISH, task))
-      cmd.append("rm -f %1$s/%2$s-local.conf %1$s/%2$s-vpn.conf"
-        .formatLocal(Locale.ENGLISH, getFilesDir.getAbsolutePath, task))
+    if (Build.VERSION.SDK_INT >= 26) {
+      val nm = getSystemService(classOf[NotificationManager])
+      nm.createNotificationChannels(List(
+        new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
+        new NotificationChannel("service-proxy", getText(R.string.service_proxy), NotificationManager.IMPORTANCE_LOW),
+        new NotificationChannel("service-transproxy", getText(R.string.service_transproxy),
+          NotificationManager.IMPORTANCE_LOW)
+      ))
+      nm.deleteNotificationChannel("service-nat") // NAT mode is gone for good
     }
-    Shell.SH.run(cmd.toArray)
   }
+
+  lazy val info: PackageInfo = getPackageManager.getPackageInfo(getPackageName, PackageManager.GET_SIGNATURES)
 
   def copyAssets() {
     val assetManager = getAssets
-    for (dir <- List("acl", "overture")) {
+    for (dir <- Array("acl", "overture")) {
       var files: Array[String] = null
       try files = assetManager.list(dir) catch {
         case e: IOException =>
@@ -184,10 +192,8 @@ class ShadowsocksApplication extends Application {
         autoClose(new FileOutputStream(new File(getFilesDir, file)))(out =>
           IOUtils.copy(in, out)))
     }
-    dataStore.putInt(Key.currentVersionCode, BuildConfig.VERSION_CODE)
+    dataStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
   }
-
-  def updateAssets(): Unit = if (dataStore.getInt(Key.currentVersionCode, -1) != BuildConfig.VERSION_CODE) copyAssets()
 
   def listenForPackageChanges(callback: => Unit): BroadcastReceiver = {
     val filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED)

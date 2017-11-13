@@ -28,8 +28,7 @@ object PluginManager {
     * If you don't plan to publish any plugin but is developing/has developed some, it's not necessary to add your
     * public key yet since it will also automatically trust packages signed by the same signatures, e.g. debug keys.
     */
-  lazy val trustedSignatures: Set[Signature] =
-    app.getPackageManager.getPackageInfo(app.getPackageName, PackageManager.GET_SIGNATURES).signatures.toSet +
+  lazy val trustedSignatures: Set[Signature] = app.info.signatures.toSet +
     new Signature(Base64.decode(  // @Mygod
       """
         |MIIDWzCCAkOgAwIBAgIEUzfv8DANBgkqhkiG9w0BAQsFADBdMQswCQYDVQQGEwJD

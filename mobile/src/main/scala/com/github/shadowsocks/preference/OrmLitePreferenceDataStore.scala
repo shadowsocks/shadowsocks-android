@@ -100,8 +100,10 @@ final class OrmLitePreferenceDataStore(dbHelper: DBHelper) extends PreferenceDat
 
   def profileId: Int = getInt(Key.id, 0)
   def profileId_=(i: Int): Unit = putInt(Key.id, i)
-  def isNAT: Boolean = getBoolean(Key.isNAT)
-  def isNAT_=(value: Boolean): Unit = putBoolean(Key.isNAT, value)
+  def serviceMode: String = getString(Key.serviceMode, Key.modeVpn)
+  def portProxy: Int = getInt(Key.portProxy, 0)
+  def portLocalDns: Int = getInt(Key.portLocalDns, 0)
+  def portTransproxy: Int = getInt(Key.portTransproxy, 0)
 
   def proxyApps: Boolean = getBoolean(Key.proxyApps)
   def proxyApps_=(value: Boolean): Unit = putBoolean(Key.proxyApps, value)

@@ -18,10 +18,10 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.bg
 
 import java.io.{File, IOException}
-import java.net.{Inet6Address, InetAddress}
+import java.net.InetAddress
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.{Timer, TimerTask}
@@ -33,25 +33,27 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.acl.Acl
+import com.github.shadowsocks.acl.{Acl, AclSyncJob}
 import com.github.shadowsocks.aidl.{IShadowsocksService, IShadowsocksServiceCallback}
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.plugin.{PluginConfiguration, PluginManager, PluginOptions}
 import com.github.shadowsocks.utils._
+import com.github.shadowsocks.{GuardedProcess, R}
 import okhttp3.{Dns, FormBody, OkHttpClient, Request}
-import org.json.{JSONArray, JSONObject}
+import org.json.JSONObject
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
 trait BaseService extends Service {
 
-  @volatile private var state = State.STOPPED
+  protected val TAG: String
+  @volatile private var state = ServiceState.STOPPED
   @volatile protected var profile: Profile = _
   @volatile private var plugin: PluginOptions = _
   @volatile protected var pluginPath: String = _
+  var sslocalProcess: GuardedProcess = _
 
   case class NameNotResolvedException() extends IOException
   case class NullConnectionException() extends NullPointerException
@@ -64,7 +66,7 @@ trait BaseService extends Service {
   lazy val handler = new Handler(getMainLooper)
   lazy val restartHanlder = new Handler(getMainLooper)
 
-  private var notification: ShadowsocksNotification = _
+  private var notification: ServiceNotification = _
   private val closeReceiver: BroadcastReceiver = (context: Context, intent: Intent) => intent.getAction match {
     case Action.RELOAD => forceLoad()
     case _ =>
@@ -87,11 +89,11 @@ trait BaseService extends Service {
         if (timer == null) {
           timer = new Timer(true)
           timer.schedule(new TimerTask {
-            def run(): Unit = if (state == State.CONNECTED && TrafficMonitor.updateRate()) updateTrafficRate()
+            def run(): Unit = if (state == ServiceState.CONNECTED && TrafficMonitor.updateRate()) updateTrafficRate()
           }, 1000, 1000)
         }
         TrafficMonitor.updateRate()
-        if (state == State.CONNECTED) cb.trafficUpdated(profile.id,
+        if (state == ServiceState.CONNECTED) cb.trafficUpdated(profile.id,
           TrafficMonitor.txRate, TrafficMonitor.rxRate, TrafficMonitor.txTotal, TrafficMonitor.rxTotal)
       }
 
@@ -107,6 +109,11 @@ trait BaseService extends Service {
     }
   }
 
+  def onBind(intent: Intent): IBinder = intent.getAction match {
+    case Action.SERVICE => binder
+    case _ => null
+  }
+
   def checkProfile(profile: Profile): Boolean = if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
     stopRunner(stopService = true, getString(R.string.proxy_empty))
     false
@@ -115,52 +122,61 @@ trait BaseService extends Service {
   def forceLoad(): Unit = app.currentProfile.orNull match {
     case null => stopRunner(stopService = true, getString(R.string.profile_empty))
     case p => if (checkProfile(p)) state match {
-      case State.STOPPED => startRunner()
-      case State.CONNECTED =>
+      case ServiceState.STOPPED => startRunner()
+      case ServiceState.CONNECTED =>
         stopRunner(stopService = false)
         startRunner()
       case s => Log.w(BaseService.this.getClass.getSimpleName, "Illegal state when invoking use: " + s)
     }
   }
 
-  def connect() {
-    if (profile.host == "198.199.101.152") {
-      val client = new OkHttpClient.Builder()
-        .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
-          case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
-          case _ => Dns.SYSTEM.lookup(hostname)
-        })
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .writeTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
-      val requestBody = new FormBody.Builder()
-        .add("sig", Utils.getSignature(this))
-        .build()
-      val request = new Request.Builder()
-        .url(app.remoteConfig.getString("proxy_url"))
-        .post(requestBody)
-        .build()
+  protected def buildAdditionalArguments(cmd: ArrayBuffer[String]): ArrayBuffer[String] = cmd
 
-      val proxies = Random.shuffle(client.newCall(request).execute().body.string.split('|').toSeq)
-      val proxy = proxies.head.split(':')
-      profile.host = proxy(0).trim
-      profile.remotePort = proxy(1).trim.toInt
-      profile.password = proxy(2).trim
-      profile.method = proxy(3).trim
+  /**
+    * BaseService will only start ss-local. Child class override this class to start other native processes.
+    */
+  def startNativeProcesses() {
+    buildShadowsocksConfig()
+    val cmd = buildAdditionalArguments(ArrayBuffer[String](
+      new File(getApplicationInfo.nativeLibraryDir, Executable.SS_LOCAL).getAbsolutePath,
+      "-u",
+      "-b", "127.0.0.1",
+      "-l", app.dataStore.portProxy.toString,
+      "-t", "600",
+      "-c", "shadowsocks.json"))
+
+    if (profile.route != Acl.ALL) {
+      cmd += "--acl"
+      cmd += Acl.getFile(profile.route match {
+        case Acl.CUSTOM_RULES => Acl.CUSTOM_RULES_FLATTENED
+        case route => route
+      }).getAbsolutePath
     }
 
-    if (profile.route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES_FLATTENED, Acl.customRules.flatten(10))
+    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
-    plugin = new PluginConfiguration(profile.plugin).selectedOptions
-    pluginPath = PluginManager.init(plugin)
+    sslocalProcess = new GuardedProcess(cmd: _*).start()
   }
 
-  def createNotification(): ShadowsocksNotification
+  def createNotification(): ServiceNotification
   def startRunner(): Unit = if (Build.VERSION.SDK_INT >= 26) startForegroundService(new Intent(this, getClass))
     else startService(new Intent(this, getClass))
 
+  def killProcesses() {
+    if (sslocalProcess != null) {
+      sslocalProcess.destroy()
+      sslocalProcess = null
+    }
+  }
+
   def stopRunner(stopService: Boolean, msg: String = null) {
+    // channge the state
+    changeState(ServiceState.STOPPING)
+
+    app.track(TAG, "stop")
+
+    killProcesses()
+
     // clean up recevier
     if (closeReceiverRegistered) {
       unregisterReceiver(closeReceiver)
@@ -179,7 +195,7 @@ trait BaseService extends Service {
     }
 
     // change the state
-    changeState(State.STOPPED, msg)
+    changeState(ServiceState.STOPPED, msg)
 
     // stop the service if nothing has bound to it
     if (stopService) stopSelf()
@@ -240,16 +256,10 @@ trait BaseService extends Service {
     })
   }
 
-
-  override def onCreate() {
-    super.onCreate()
-    app.updateAssets()
-  }
-
   // Service of shadowsocks should always be started explicitly
   override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
     state match {
-      case State.STOPPED | State.IDLE =>
+      case ServiceState.STOPPED | ServiceState.IDLE =>
       case _ => return Service.START_NOT_STICKY // ignore request
     }
 
@@ -278,9 +288,55 @@ trait BaseService extends Service {
     notification = createNotification()
     app.track(getClass.getSimpleName, "start")
 
-    changeState(State.CONNECTING)
+    changeState(ServiceState.CONNECTING)
 
-    Utils.ThrowableFuture(try connect() catch {
+    Utils.ThrowableFuture(try {
+      if (profile.host == "198.199.101.152") {
+        val client = new OkHttpClient.Builder()
+          .dns(hostname => Utils.resolve(hostname, enableIPv6 = false) match {
+            case Some(ip) => util.Arrays.asList(InetAddress.getByName(ip))
+            case _ => Dns.SYSTEM.lookup(hostname)
+          })
+          .connectTimeout(10, TimeUnit.SECONDS)
+          .writeTimeout(10, TimeUnit.SECONDS)
+          .readTimeout(30, TimeUnit.SECONDS)
+          .build()
+        val requestBody = new FormBody.Builder()
+          .add("sig", Utils.getSignature(this))
+          .build()
+        val request = new Request.Builder()
+          .url(app.remoteConfig.getString("proxy_url"))
+          .post(requestBody)
+          .build()
+
+        val proxies = Random.shuffle(client.newCall(request).execute().body.string.split('|').toSeq)
+        val proxy = proxies.head.split(':')
+        profile.host = proxy(0).trim
+        profile.remotePort = proxy(1).trim.toInt
+        profile.password = proxy(2).trim
+        profile.method = proxy(3).trim
+      }
+
+      if (profile.route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES_FLATTENED, Acl.customRules.flatten(10))
+
+      plugin = new PluginConfiguration(profile.plugin).selectedOptions
+      pluginPath = PluginManager.init(plugin)
+
+      // Clean up
+      killProcesses()
+
+      if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
+        case Some(a) => profile.host = a
+        case None => throw NameNotResolvedException()
+      }
+
+      startNativeProcesses()
+
+      if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
+        AclSyncJob.schedule(profile.route)
+
+      changeState(ServiceState.CONNECTED)
+    } catch {
       case _: NameNotResolvedException => stopRunner(stopService = true, getString(R.string.invalid_server))
       case _: NullConnectionException => stopRunner(stopService = true, getString(R.string.reboot_required))
       case exc: Throwable =>
@@ -309,78 +365,19 @@ trait BaseService extends Service {
     }
   }
 
-  protected def buildPluginCommandLine(): ArrayBuffer[String] = {
-    val result = ArrayBuffer(pluginPath)
-    if (TcpFastOpen.sendEnabled) result += "--fast-open"
-    result
-  }
-
-  protected final def buildShadowsocksConfig(file: String): String = {
+  protected final def buildShadowsocksConfig() {
     val config = new JSONObject()
       .put("server", profile.host)
       .put("server_port", profile.remotePort)
       .put("password", profile.password)
       .put("method", profile.method)
-    if (pluginPath != null) config
-      .put("plugin", Commandline.toString(buildPluginCommandLine()))
-      .put("plugin_opts", plugin.toString)
-    IOUtils.writeString(new File(getFilesDir, file), config.toString)
-    file
-  }
-
-  protected final def buildOvertureConfig(file: String): String = {
-    val config = new JSONObject()
-      .put("BindAddress", "127.0.0.1:" + (profile.localPort + 53))
-      .put("RedirectIPv6Record", true)
-      .put("DomainBase64Decode", true)
-      .put("HostsFile", "hosts")
-      .put("MinimumTTL", 3600)
-      .put("CacheSize", 4096)
-    def makeDns(name: String, address: String, edns: Boolean = true) = {
-      val dns = new JSONObject()
-        .put("Name", name)
-        .put("Address", (Utils.parseNumericAddress(address) match {
-          case _: Inet6Address => '[' + address + ']'
-          case _ => address
-        }) + ":53")
-        .put("Timeout", 6)
-        .put("EDNSClientSubnet", new JSONObject().put("Policy", "disable"))
-      if (edns) dns
-        .put("Protocol", "tcp")
-        .put("Socks5Address", "127.0.0.1:" + profile.localPort)
-      else dns.put("Protocol", "udp")
-      dns
+    if (pluginPath != null) {
+      val pluginCmd = ArrayBuffer(pluginPath)
+      if (TcpFastOpen.sendEnabled) pluginCmd += "--fast-open"
+      config
+        .put("plugin", Commandline.toString(buildAdditionalArguments(pluginCmd).toArray))
+        .put("plugin_opts", plugin.toString)
     }
-    val remoteDns = new JSONArray(profile.remoteDns.split(",").zipWithIndex.map {
-      case (dns, i) => makeDns("UserDef-" + i, dns.trim)
-    })
-    val localDns = new JSONArray(Array(
-      makeDns("Primary-1", "119.29.29.29", edns = false),
-      makeDns("Primary-2", "114.114.114.114", edns = false)
-    ))
-
-    try {
-      val localLinkDns = com.github.shadowsocks.utils.Dns.getDnsResolver(this)
-      localDns.put(makeDns("Primary-3", localLinkDns, edns = false))
-    } catch {
-      case _: Exception => // Ignore
-    }
-
-    profile.route match {
-      case Acl.BYPASS_CHN | Acl.BYPASS_LAN_CHN | Acl.GFWLIST | Acl.CUSTOM_RULES => config
-        .put("PrimaryDNS", localDns)
-        .put("AlternativeDNS", remoteDns)
-        .put("IPNetworkFile", "china_ip_list.txt")
-        .put("DomainFile", "gfwlist.txt")
-      case Acl.CHINALIST => config
-        .put("PrimaryDNS", localDns)
-        .put("AlternativeDNS", remoteDns)
-      case _ => config
-        .put("PrimaryDNS", remoteDns)
-        // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
-        .put("OnlyPrimaryDNS", true)
-    }
-    IOUtils.writeString(new File(getFilesDir, file), config.toString)
-    file
+    IOUtils.writeString(new File(getFilesDir, "shadowsocks.json"), config.toString)
   }
 }

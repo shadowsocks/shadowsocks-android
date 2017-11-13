@@ -20,40 +20,20 @@
 
 package com.github.shadowsocks.utils
 
-object Executable {
-  val REDSOCKS = "redsocks"
-  val PDNSD = "pdnsd"
-  val SS_LOCAL = "ss-local"
-  val SS_TUNNEL = "ss-tunnel"
-  val TUN2SOCKS = "tun2socks"
-
-  val EXECUTABLES = Array(SS_LOCAL, SS_TUNNEL, PDNSD, REDSOCKS, TUN2SOCKS)
-}
-
-object ConfigUtils {
-  val REDSOCKS = "base {\n" +
-    " log_debug = off;\n" +
-    " log_info = off;\n" +
-    " log = stderr;\n" +
-    " daemon = off;\n" +
-    " redirector = iptables;\n" +
-    "}\n" +
-    "redsocks {\n" +
-    " local_ip = 127.0.0.1;\n" +
-    " local_port = 8123;\n" +
-    " ip = 127.0.0.1;\n" +
-    " port = %d;\n" +
-    " type = socks5;\n" +
-    "}\n"
-}
-
 object Key {
   val id = "profileId"
   val name = "profileName"
 
   val individual = "Proxyed"
 
-  val isNAT = "isNAT"
+  val serviceMode = "serviceMode"
+  val modeProxy = "proxy"
+  val modeVpn = "vpn"
+  val modeTransproxy = "transproxy"
+  val portProxy = "portProxy"
+  val portLocalDns = "portLocalDns"
+  val portTransproxy = "portTransproxy"
+
   val route = "route"
 
   val isAutoConnect = "isAutoConnect"
@@ -67,7 +47,6 @@ object Key {
   val password = "sitekey"
   val method = "encMethod"
   val remotePort = "remotePortNum"
-  val localPort = "localPortNum"
   val remoteDns = "remoteDns"
 
   val plugin = "plugin"
@@ -76,19 +55,7 @@ object Key {
   val dirty = "profileDirty"
 
   val tfo = "tcp_fastopen"
-  val currentVersionCode = "currentVersionCode"
-}
-
-object State {
-  /**
-    * This state will never be broadcast by the service. This state is only used to indicate that the current context
-    * hasn't bound to any context.
-    */
-  val IDLE = 0
-  val CONNECTING = 1
-  val CONNECTED = 2
-  val STOPPING = 3
-  val STOPPED = 4
+  val assetUpdateTime = "assetUpdateTime"
 }
 
 object Action {

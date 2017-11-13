@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
     <SwitchPreference android:key="isAutoConnect"
                       android:persistent="false"
                       android:summary="@string/auto_connect_summary"
@@ -7,7 +8,32 @@
     <SwitchPreference android:key="tcp_fastopen"
                       android:summary="@string/tcp_fastopen_summary"
                       android:title="TCP Fast Open"/>
-    <SwitchPreference android:key="isNAT"
-                      android:title="@string/local"
-                      android:summary="@string/local_summary"/>
+    <be.mygod.preference.PreferenceCategory
+        android:title="@string/advanced">
+        <DropDownPreference
+            android:key="serviceMode"
+            android:entries="@array/service_modes"
+            android:entryValues="@array/service_mode_values"
+            android:defaultValue="vpn"
+            android:summary="%s"
+            android:title="@string/service_mode"/>
+        <be.mygod.preference.NumberPickerPreference
+            app:min="1025"
+            app:max="65535"
+            android:key="portProxy"
+            android:summary="%d"
+            android:title="@string/port_proxy"/>
+        <be.mygod.preference.NumberPickerPreference
+            app:min="1025"
+            app:max="65535"
+            android:key="portLocalDns"
+            android:summary="%d"
+            android:title="@string/port_local_dns"/>
+        <be.mygod.preference.NumberPickerPreference
+            app:min="1025"
+            app:max="65535"
+            android:key="portTransproxy"
+            android:summary="%d"
+            android:title="@string/port_transproxy"/>
+    </be.mygod.preference.PreferenceCategory>
 </PreferenceScreen>

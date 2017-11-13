@@ -18,78 +18,49 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.bg
 
 import java.io.File
 import java.util.Locale
 
 import android.app.Service
-import android.content._
+import android.content.Intent
 import android.content.pm.PackageManager.NameNotFoundException
-import android.net.VpnService
-import android.os._
+import android.net.{VpnService => BaseVpnService}
+import android.os.{IBinder, ParcelFileDescriptor}
 import android.util.Log
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.acl.{Acl, AclSyncJob, Subnet}
-import com.github.shadowsocks.utils._
+import com.github.shadowsocks._
+import com.github.shadowsocks.acl.{Acl, Subnet}
+import com.github.shadowsocks.utils.Utils
 
 import scala.collection.mutable.ArrayBuffer
 
-class ShadowsocksVpnService extends VpnService with BaseService {
+class VpnService extends BaseVpnService with LocalDnsService {
   val TAG = "ShadowsocksVpnService"
   val VPN_MTU = 1500
   val PRIVATE_VLAN = "26.26.26.%s"
   val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
   var conn: ParcelFileDescriptor = _
-  var vpnThread: ShadowsocksVpnThread = _
+  var vpnThread: VpnThread = _
 
-  var sslocalProcess: GuardedProcess = _
-  var overtureProcess: GuardedProcess = _
   var tun2socksProcess: GuardedProcess = _
 
-  override def onBind(intent: Intent): IBinder = {
-    val action = intent.getAction
-    if (VpnService.SERVICE_INTERFACE == action) {
-      return super.onBind(intent)
-    } else if (Action.SERVICE == action) {
-      return binder
-    }
-    null
+  override def onBind(intent: Intent): IBinder = intent.getAction match {
+    case BaseVpnService.SERVICE_INTERFACE => super[VpnService].onBind(intent)
+    case _ => super[LocalDnsService].onBind(intent)
   }
 
   override def onRevoke() {
     stopRunner(stopService = true)
   }
 
-  override def stopRunner(stopService: Boolean, msg: String = null) {
-
+  override def killProcesses() {
     if (vpnThread != null) {
       vpnThread.stopThread()
       vpnThread = null
     }
-
-    // channge the state
-    changeState(State.STOPPING)
-
-    app.track(TAG, "stop")
-
-    // reset VPN
-    killProcesses()
-
-    // close connections
-    if (conn != null) {
-      conn.close()
-      conn = null
-    }
-
-    super.stopRunner(stopService, msg)
-  }
-
-  def killProcesses() {
-    if (sslocalProcess != null) {
-      sslocalProcess.destroy()
-      sslocalProcess = null
-    }
+    super.killProcesses()
     if (tun2socksProcess != null) {
       tun2socksProcess.destroy()
       tun2socksProcess = null
@@ -98,85 +69,41 @@ class ShadowsocksVpnService extends VpnService with BaseService {
       overtureProcess.destroy()
       overtureProcess = null
     }
+    // close connections
+    if (conn != null) {
+      conn.close()
+      conn = null
+    }
   }
 
-  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = {
+  override def onStartCommand(intent: Intent, flags: Int, startId: Int): Int = if (app.usingVpnMode)
     // ensure the VPNService is prepared
-    if (VpnService.prepare(this) != null) {
+    if (BaseVpnService.prepare(this) != null) {
       val i = new Intent(this, classOf[ShadowsocksRunnerActivity])
       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
       startActivity(i)
       stopRunner(stopService = true)
       Service.START_NOT_STICKY
     } else super.onStartCommand(intent, flags, startId)
+  else {  // system or other apps are trying to start this service but other services could be running
+    stopSelf()
+    Service.START_NOT_STICKY
   }
 
-  override def createNotification() = new ShadowsocksNotification(this, profile.name, "service-vpn")
-
-  override def connect() {
-    super.connect()
-
-    vpnThread = new ShadowsocksVpnThread(this)
-    vpnThread.start()
-
-    // reset the context
-    killProcesses()
-
-    // Resolve the server address
-    if (!Utils.isNumeric(profile.host)) Utils.resolve(profile.host, enableIPv6 = true) match {
-      case Some(addr) => profile.host = addr
-      case None => throw NameNotResolvedException()
-    }
-
-    handleConnection()
-    changeState(State.CONNECTED)
-
-    if (profile.route != Acl.ALL && profile.route != Acl.CUSTOM_RULES)
-      AclSyncJob.schedule(profile.route)
-  }
+  override def createNotification() = new ServiceNotification(this, profile.name, "service-vpn")
 
   /** Called when the activity is first created. */
-  def handleConnection() {
+  override def startNativeProcesses() {
+    vpnThread = new VpnThread(this)
+    vpnThread.start()
 
-    startShadowsocksDaemon()
-
-    if (!profile.udpdns) {
-      startDnsDaemon()
-    }
+    super.startNativeProcesses()
 
     val fd = startVpn()
     if (!sendFd(fd)) throw new Exception("sendFd failed")
   }
 
-  override protected def buildPluginCommandLine(): ArrayBuffer[String] = super.buildPluginCommandLine() += "-V"
-
-  def startShadowsocksDaemon() {
-    val cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libss-local.so",
-      "-V",
-      "-u",
-      "-b", "127.0.0.1",
-      "-l", profile.localPort.toString,
-      "-t", "600",
-      "-c", buildShadowsocksConfig("ss-local-vpn.conf"))
-
-    if (profile.route != Acl.ALL) {
-      cmd += "--acl"
-      cmd += Acl.getFile(profile.route match {
-        case Acl.CUSTOM_RULES => Acl.CUSTOM_RULES_FLATTENED
-        case route => route
-      }).getAbsolutePath
-    }
-
-    if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
-
-    sslocalProcess = new GuardedProcess(cmd: _*).start()
-  }
-
-  def startDnsDaemon() {
-    overtureProcess = new GuardedProcess(getApplicationInfo.nativeLibraryDir + "/liboverture.so",
-      "-c", buildOvertureConfig("overture-vpn.conf"), "-V")
-      .start()
-  }
+  override protected def buildAdditionalArguments(cmd: ArrayBuffer[String]): ArrayBuffer[String] = cmd += "-V"
 
   def startVpn(): Int = {
 
@@ -229,10 +156,10 @@ class ShadowsocksVpnService extends VpnService with BaseService {
 
     val fd = conn.getFd
 
-    var cmd = ArrayBuffer[String](getApplicationInfo.nativeLibraryDir + "/libtun2socks.so",
+    var cmd = ArrayBuffer[String](new File(getApplicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).getAbsolutePath,
       "--netif-ipaddr", PRIVATE_VLAN.formatLocal(Locale.ENGLISH, "2"),
       "--netif-netmask", "255.255.255.0",
-      "--socks-server-addr", "127.0.0.1:" + profile.localPort,
+      "--socks-server-addr", "127.0.0.1:" + app.dataStore.portProxy,
       "--tunfd", fd.toString,
       "--tunmtu", VPN_MTU.toString,
       "--sock-path", "sock_path",
@@ -244,8 +171,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
     cmd += "--enable-udprelay"
 
     if (!profile.udpdns)
-      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, "127.0.0.1",
-        profile.localPort + 53))
+      cmd += ("--dnsgw", "%s:%d".formatLocal(Locale.ENGLISH, "127.0.0.1", app.dataStore.portLocalDns))
 
     tun2socksProcess = new GuardedProcess(cmd: _*).start(() => sendFd(fd))
 

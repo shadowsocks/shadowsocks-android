@@ -65,3 +65,36 @@ To scan the QR code through the integrated QR scanner.
 
 By the way, upgrade your Android system already.
 
+### How to use Transproxy mode?
+
+1. Install [AFWall+](https://github.com/ukanth/afwall);
+2. Set custom script:
+```sh
+IP6TABLES=/system/bin/ip6tables
+IPTABLES=/system/bin/iptables
+ULIMIT=/system/bin/ulimit
+SHADOWSOCKS_UID=`dumpsys package com.github.shadowsocks | grep userId | cut -d= -f2 - | cut -d' ' -f1 -`
+PORT_DNS=5450
+PORT_TRANSPROXY=8200
+$ULIMIT -n 4096
+$IP6TABLES -F
+$IP6TABLES -A INPUT -j DROP
+$IP6TABLES -A OUTPUT -j DROP
+$IPTABLES -t nat -F OUTPUT
+$IPTABLES -t nat -A OUTPUT -o lo -j RETURN
+$IPTABLES -t nat -A OUTPUT -d 127.0.0.1 -j RETURN
+$IPTABLES -t nat -A OUTPUT -m owner --uid-owner $SHADOWSOCKS_UID -j RETURN
+$IPTABLES -t nat -A OUTPUT -p tcp --dport 53 -j DNAT --to-destination 127.0.0.1:$PORT_DNS
+$IPTABLES -t nat -A OUTPUT -p udp --dport 53 -j DNAT --to-destination 127.0.0.1:$PORT_DNS
+$IPTABLES -t nat -A OUTPUT -p tcp -j DNAT --to-destination 127.0.0.1:$PORT_TRANSPROXY
+$IPTABLES -t nat -A OUTPUT -p udp -j DNAT --to-destination 127.0.0.1:$PORT_TRANSPROXY
+```
+3. Set custom shutdown script:
+```sh
+IP6TABLES=/system/bin/ip6tables
+IPTABLES=/system/bin/iptables
+$IPTABLES -t nat -F OUTPUT
+$IP6TABLES -F
+```
+4. Make sure to allow traffic for Shadowsocks;
+5. Start Shadowsocks transproxy service and enable firewall.

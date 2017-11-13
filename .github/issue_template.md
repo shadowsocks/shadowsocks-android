@@ -15,9 +15,7 @@ _Put an `x` inside the [ ] that applies._
 * [ ] IPv6 server address
 * [ ] Client IPv4 availability
 * [ ] Client IPv6 availability
-* Local port: 1080
 * Encrypt method:
-* [ ] One-time authentication
 * Route
   * [ ] All
   * [ ] Bypass LAN
@@ -27,14 +25,14 @@ _Put an `x` inside the [ ] that applies._
   * [ ] China List
   * [ ] Custom rules
 * [ ] IPv6 route
-* [ ] Per-App Proxy
+* [ ] Apps VPN mode
   * [ ] Bypass mode
 * Remote DNS: 8.8.8.8
 * [ ] DNS Forwarding
 * Plugin configuration (if applicable):
 * [ ] Auto Connect
 * [ ] TCP Fast Open
-* [ ] NAT mode
+* If you're not using VPN mode, please supply more details here:
 
 ### What did you do?
 

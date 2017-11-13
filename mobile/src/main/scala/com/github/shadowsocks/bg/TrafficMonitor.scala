@@ -18,7 +18,7 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks.utils
+package com.github.shadowsocks.bg
 
 import java.text.DecimalFormat
 

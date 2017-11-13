@@ -22,11 +22,12 @@ package com.github.shadowsocks.database
 
 import java.nio.ByteBuffer
 
-import android.content.{Context, SharedPreferences}
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.database.sqlite.SQLiteDatabase
 import android.preference.PreferenceManager
 import com.github.shadowsocks.ShadowsocksApplication.app
+import com.github.shadowsocks.preference.OrmLitePreferenceDataStore
 import com.github.shadowsocks.utils.Key
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
 import com.j256.ormlite.dao.Dao
@@ -50,7 +51,7 @@ object DBHelper {
 }
 
 class DBHelper(val context: Context)
-  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 23) {
+  extends OrmLiteSqliteOpenHelper(context, DBHelper.PROFILE, null, 24) {
   import DBHelper._
 
   lazy val profileDao: Dao[Profile, Int] = getDao(classOf[Profile])
@@ -148,12 +149,8 @@ class DBHelper(val context: Context)
           val old = PreferenceManager.getDefaultSharedPreferences(app)
           kvPairDao.createOrUpdate(new KeyValuePair(Key.id, TYPE_INT,
             ByteBuffer.allocate(4).putInt(old.getInt(Key.id, 0)).array()))
-          kvPairDao.createOrUpdate(new KeyValuePair(Key.isNAT, TYPE_BOOLEAN,
-            ByteBuffer.allocate(1).put((if (old.getBoolean(Key.isNAT, false)) 1 else 0).toByte).array()))
           kvPairDao.createOrUpdate(new KeyValuePair(Key.tfo, TYPE_BOOLEAN,
             ByteBuffer.allocate(1).put((if (old.getBoolean(Key.tfo, false)) 1 else 0).toByte).array()))
-          kvPairDao.createOrUpdate(new KeyValuePair(Key.currentVersionCode, TYPE_INT,
-            ByteBuffer.allocate(4).putInt(-1).array()))
         }
       } catch {
         case ex: Exception =>

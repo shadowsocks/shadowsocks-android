@@ -33,7 +33,8 @@ import android.view.View.MeasureSpec
 import android.view.{Gravity, View, Window}
 import android.widget.Toast
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.{BuildConfig, ShadowsocksLocalService, ShadowsocksVpnService}
+import com.github.shadowsocks.bg.{ProxyService, TransproxyService, VpnService}
+import com.github.shadowsocks.BuildConfig
 import org.xbill.DNS._
 
 import scala.collection.JavaConversions._
@@ -47,11 +48,8 @@ object Utils {
   def isLollipopOrAbove: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
 
   def getSignature(context: Context): String = {
-    val info = context
-      .getPackageManager
-      .getPackageInfo(context.getPackageName, PackageManager.GET_SIGNATURES)
     val mdg = MessageDigest.getInstance("SHA-1")
-    mdg.update(info.signatures(0).toByteArray)
+    mdg.update(app.info.signatures(0).toByteArray)
     new String(Base64.encode(mdg.digest, 0))
   }
 
@@ -107,7 +105,7 @@ object Utils {
   }
 
   def resolve(host: String, enableIPv6: Boolean): Option[String] =
-    (if (enableIPv6 && Utils.isIPv6Support) resolve(host, Type.AAAA) else None).orElse(resolve(host, Type.A))
+    (if (enableIPv6 && isIPv6Support) resolve(host, Type.AAAA) else None).orElse(resolve(host, Type.A))
       .orElse(resolve(host))
 
   private lazy val isNumericMethod = classOf[InetAddress].getMethod("isNumeric", classOf[String])
@@ -137,8 +135,7 @@ object Utils {
   }
 
   def startSsService(context: Context) {
-    val intent =
-      new Intent(context, if (app.dataStore.isNAT) classOf[ShadowsocksLocalService] else classOf[ShadowsocksVpnService])
+    val intent = new Intent(context, app.serviceClass)
     if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(intent) else context.startService(intent)
   }
   def reloadSsService(context: Context): Unit = context.sendBroadcast(new Intent(Action.RELOAD))

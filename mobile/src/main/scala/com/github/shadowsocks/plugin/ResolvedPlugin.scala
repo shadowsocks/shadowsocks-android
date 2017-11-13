@@ -19,6 +19,5 @@ abstract class ResolvedPlugin(resolveInfo: ResolveInfo, packageManager: PackageM
   override final lazy val icon: Drawable = resolveInfo.loadIcon(packageManager)
   override final lazy val defaultConfig: String = metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG)
   override def packageName: String = resolveInfo.resolvePackageName
-  override final lazy val trusted: Boolean = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-    .signatures.exists(PluginManager.trustedSignatures.contains)
+  override final lazy val trusted: Boolean = app.info.signatures.exists(PluginManager.trustedSignatures.contains)
 }

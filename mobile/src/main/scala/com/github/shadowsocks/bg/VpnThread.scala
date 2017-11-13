@@ -18,24 +18,29 @@
 /*                                                                             */
 /*******************************************************************************/
 
-package com.github.shadowsocks.utils
+package com.github.shadowsocks.bg
 
-import java.io.{File, IOException}
-import java.nio.{ByteBuffer, ByteOrder}
+import java.io.{File, FileDescriptor, IOException}
+import java.lang.reflect.Method
 import java.util.concurrent.Executors
 
-import android.content.Context
 import android.net.{LocalServerSocket, LocalSocket, LocalSocketAddress}
 import android.util.Log
+import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.ShadowsocksApplication.app
 
-class TrafficMonitorThread(context: Context) extends Thread {
+object VpnThread {
+  val getInt: Method = classOf[FileDescriptor].getDeclaredMethod("getInt$")
+}
 
-  val TAG = "TrafficMonitorThread"
-  val stat = new File(context.getFilesDir, "/stat_path")
+class VpnThread(service: VpnService) extends Thread {
+  import VpnThread._
 
-  @volatile var serverSocket: LocalServerSocket = _
+  val TAG = "ShadowsocksVpnService"
+  val protect = new File(service.getFilesDir, "protect_path")
+
   @volatile var isRunning: Boolean = true
+  @volatile var serverSocket: LocalServerSocket = _
 
   def closeServerSocket() {
     if (serverSocket != null) {
@@ -45,7 +50,7 @@ class TrafficMonitorThread(context: Context) extends Thread {
         case _: Exception => // ignore
       }
       serverSocket = null
-      }
+    }
   }
 
   def stopThread() {
@@ -55,19 +60,20 @@ class TrafficMonitorThread(context: Context) extends Thread {
 
   override def run() {
 
-    stat.delete()
+    protect.delete()
 
     try {
       val localSocket = new LocalSocket
-      localSocket.bind(new LocalSocketAddress(stat.getAbsolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
+      localSocket.bind(new LocalSocketAddress(protect.getAbsolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
       serverSocket = new LocalServerSocket(localSocket.getFileDescriptor)
     } catch {
       case e: IOException =>
         Log.e(TAG, "unable to bind", e)
+        app.track(e)
         return
     }
 
-    val pool = Executors.newFixedThreadPool(1)
+    val pool = Executors.newFixedThreadPool(4)
 
     while (isRunning) {
       try {
@@ -78,19 +84,30 @@ class TrafficMonitorThread(context: Context) extends Thread {
             val input = socket.getInputStream
             val output = socket.getOutputStream
 
-            val buffer = new Array[Byte](16)
-            if (input.read(buffer) != 16) throw new IOException("Unexpected traffic stat length")
-            val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
-            TrafficMonitor.update(stat.getLong(0), stat.getLong(8))
+            input.read()
 
-            output.write(0)
+            val fds = socket.getAncillaryFileDescriptors
+
+            if (fds.nonEmpty) {
+              val fd = getInt.invoke(fds(0)).asInstanceOf[Int]
+              val ret = service.protect(fd)
+
+              // Trick to close file decriptor
+              JniHelper.close(fd)
+
+              if (ret) {
+                output.write(0)
+              } else {
+                output.write(1)
+              }
+            }
 
             input.close()
             output.close()
 
           } catch {
             case e: Exception =>
-              Log.e(TAG, "Error when recv traffic stat", e)
+              Log.e(TAG, "Error when protect socket", e)
               app.track(e)
           }
 

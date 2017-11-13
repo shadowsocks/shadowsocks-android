@@ -23,13 +23,13 @@ package com.github.shadowsocks
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
-import android.support.v7.preference.PreferenceDataStore
+import android.support.v7.preference.Preference
 import be.mygod.preference.PreferenceFragment
 import com.github.shadowsocks.ShadowsocksApplication.app
-import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
+import com.github.shadowsocks.bg.ServiceState
 import com.github.shadowsocks.utils.{Key, TcpFastOpen}
 
-class GlobalConfigFragment extends PreferenceFragment with OnPreferenceDataStoreChangeListener {
+class GlobalConfigFragment extends PreferenceFragment {
   override def onCreatePreferences(bundle: Bundle, key: String) {
     getPreferenceManager.setPreferenceDataStore(app.dataStore)
     addPreferencesFromResource(R.xml.pref_global)
@@ -53,16 +53,38 @@ class GlobalConfigFragment extends PreferenceFragment with OnPreferenceDataStore
       tfo.setEnabled(false)
       tfo.setSummary(getString(R.string.tcp_fastopen_summary_unsupported, java.lang.System.getProperty("os.version")))
     }
-    app.dataStore.registerChangeListener(this)
+
+    val serviceMode = findPreference(Key.serviceMode)
+    val portProxy = findPreference(Key.portProxy)
+    val portLocalDns = findPreference(Key.portLocalDns)
+    val portTransproxy = findPreference(Key.portTransproxy)
+    def onServiceModeChange(p: Preference, v: Any) = {
+      val (enabledLocalDns, enabledTransproxy) = v match {
+        case Key.modeProxy => (false, false)
+        case Key.modeVpn => (true, false)
+        case Key.modeTransproxy => (true, true)
+      }
+      portLocalDns.setEnabled(enabledLocalDns)
+      portTransproxy.setEnabled(enabledTransproxy)
+      true
+    }
+    MainActivity.stateListener = {
+      case ServiceState.IDLE | ServiceState.STOPPED =>
+        serviceMode.setEnabled(true)
+        portProxy.setEnabled(true)
+        onServiceModeChange(null, app.dataStore.serviceMode)
+      case _ =>
+        serviceMode.setEnabled(false)
+        portProxy.setEnabled(false)
+        portLocalDns.setEnabled(false)
+        portTransproxy.setEnabled(false)
+    }
+    MainActivity.stateListener(getActivity.asInstanceOf[MainActivity].state)
+    serviceMode.setOnPreferenceChangeListener(onServiceModeChange)
   }
 
   override def onDestroy() {
-    app.dataStore.unregisterChangeListener(this)
+    MainActivity.stateListener = null
     super.onDestroy()
-  }
-
-  def onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String): Unit = key match {
-    case Key.isNAT => findPreference(key).asInstanceOf[SwitchPreference].setChecked(store.getBoolean(key, false))
-    case _ =>
   }
 }
