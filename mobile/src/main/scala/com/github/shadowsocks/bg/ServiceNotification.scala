@@ -72,7 +72,7 @@ class ServiceNotification(private val service: BaseService, profileName: String,
   val screenFilter = new IntentFilter()
   screenFilter.addAction(Intent.ACTION_SCREEN_ON)
   screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-  if (visible && 21 until 26 contains Build.VERSION.SDK_INT) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
+  if (visible && (21 until 26 contains Build.VERSION.SDK_INT)) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
   service.registerReceiver(lockReceiver, screenFilter)
 
   private def update(action: String, forceShow: Boolean = false) =
