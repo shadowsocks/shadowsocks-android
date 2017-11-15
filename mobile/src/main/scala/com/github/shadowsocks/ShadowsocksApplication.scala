@@ -168,7 +168,7 @@ class ShadowsocksApplication extends Application {
     if (Build.VERSION.SDK_INT >= 26) {
       val nm = getSystemService(classOf[NotificationManager])
       nm.createNotificationChannels(List(
-        new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_MIN),
+        new NotificationChannel("service-vpn", getText(R.string.service_vpn), NotificationManager.IMPORTANCE_LOW),
         new NotificationChannel("service-proxy", getText(R.string.service_proxy), NotificationManager.IMPORTANCE_LOW),
         new NotificationChannel("service-transproxy", getText(R.string.service_transproxy),
           NotificationManager.IMPORTANCE_LOW)
