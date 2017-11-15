@@ -78,10 +78,10 @@ class ServiceNotification(private val service: BaseService, profileName: String,
   private def update(action: String, forceShow: Boolean = false) =
     if (forceShow || service.getState == ServiceState.CONNECTED) action match {
       case Intent.ACTION_SCREEN_OFF =>
-        setVisible(visible && !Utils.isLollipopOrAbove, forceShow)
+        setVisible(visible && Build.VERSION.SDK_INT < 21, forceShow)
         unregisterCallback()  // unregister callback to save battery
       case Intent.ACTION_SCREEN_ON =>
-        setVisible(visible && Utils.isLollipopOrAbove && !keyGuard.inKeyguardRestrictedInputMode, forceShow)
+        setVisible(visible && (Build.VERSION.SDK_INT < 21 || !keyGuard.inKeyguardRestrictedInputMode), forceShow)
         service.binder.registerCallback(callback)
         service.binder.startListeningForBandwidth(callback)
         callbackRegistered = true
