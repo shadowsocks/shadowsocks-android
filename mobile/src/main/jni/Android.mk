@@ -85,21 +85,13 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LIBEVENT_SOURCES := \
-	buffer.c \
-	bufferevent.c bufferevent_filter.c \
-	bufferevent_pair.c bufferevent_ratelim.c \
-	bufferevent_sock.c epoll.c \
-	epoll_sub.c evdns.c event.c \
-    event_tagging.c evmap.c \
-	evrpc.c evthread.c \
-	evthread_pthread.c evutil.c \
-	evutil_rand.c http.c \
-	listener.c log.c poll.c \
-	select.c signal.c strlcpy.c
+	buffer.c bufferevent.c event.c \
+	bufferevent_sock.c bufferevent_ratelim.c \
+	evthread.c log.c evutil.c evutil_time.c evmap.c epoll.c poll.c signal.c select.c
 
 LOCAL_MODULE := event
 LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
-LOCAL_CFLAGS := -O2 -D_EVENT_HAVE_ARC4RANDOM -I$(LOCAL_PATH)/libevent \
+LOCAL_CFLAGS := -O2 -I$(LOCAL_PATH)/libevent \
 	-I$(LOCAL_PATH)/libevent/include \
 
 include $(BUILD_STATIC_LIBRARY)
