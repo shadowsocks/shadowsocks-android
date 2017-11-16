@@ -167,7 +167,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = resultCode match {
     case Activity.RESULT_OK => Utils.startSsService(this)
-    case _ => Log.e(TAG, "Failed to start VpnService")
+    case _ =>
+      Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
+      Log.e(TAG, "Failed to start VpnService: %s".formatLocal(Locale.ENGLISH, data.toString))
   }
 
   override def onCreate(savedInstanceState: Bundle) {

@@ -72,6 +72,7 @@
   <string name="stop">Stop</string>
   <string name="stopping">Shutting down…</string>
   <string name="vpn_error">%s</string>
+  <string name="vpn_permission_denied">Permission denied to create a VPN service</string>
   <string name="reboot_required">Failed to start VPN service. You might need to reboot your device.</string>
   <string name="profile_invalid_input">No valid profile data found.</string>
 
