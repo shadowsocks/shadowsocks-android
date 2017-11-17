@@ -169,7 +169,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     case Activity.RESULT_OK => Utils.startSsService(this)
     case _ =>
       Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
-      Log.e(TAG, "Failed to start VpnService: %s".formatLocal(Locale.ENGLISH, data.toString))
+      Log.e(TAG, "Failed to start VpnService: %s".formatLocal(Locale.ENGLISH, data))
   }
 
   override def onCreate(savedInstanceState: Bundle) {
