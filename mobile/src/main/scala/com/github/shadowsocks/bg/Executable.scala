@@ -4,6 +4,9 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 import android.util.Log
+import android.app.ActivityManager
+import android.content.Context
+import scala.collection.JavaConversions._
 
 /**
   * @author Mygod
@@ -18,10 +21,11 @@ object Executable {
 
   val EXECUTABLES = Array(SS_LOCAL, SS_TUNNEL, PDNSD, REDSOCKS, TUN2SOCKS, OVERTURE)
 
-  def killAll() {
-    val killer = new ProcessBuilder("killall" +: EXECUTABLES: _*).start()
-    if (!killer.waitFor(1, TimeUnit.SECONDS))
-      Log.w("killall", "%s didn't exit within 1s. Post-crash clean-up may have failed."
-        .formatLocal(Locale.ENGLISH, killer.toString))
+  def killAll(context: Context) {
+    val manager = context.getSystemService(Context.ACTIVITY_SERVICE).asInstanceOf[ActivityManager]
+
+    manager.getRunningAppProcesses.foreach(f => if (f.processName.equals(context.getPackageName + ":bg")) {
+      android.os.Process.killProcess(f.pid)
+    })
   }
 }
