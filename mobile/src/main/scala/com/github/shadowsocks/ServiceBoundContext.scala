@@ -63,7 +63,6 @@ trait ServiceBoundContext extends Context with IBinder.DeathRecipient {
     if (bgService != null && callback != null && callbackRegistered) try bgService.unregisterCallback(callback) catch {
       case _: RemoteException =>
     }
-    listeningForBandwidth = false
     callbackRegistered = false
   }
 
