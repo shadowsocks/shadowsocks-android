@@ -135,15 +135,16 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           val params =
             new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
           params.gravity = Gravity.CENTER_HORIZONTAL
-          params.setMargins(0, getResources.getDimensionPixelOffset(R.dimen.margin_small), 0, 0)
+          params.setMargins(0, 0, 0, 0)
           adView = new AdView(getActivity)
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-          adView.setAdSize(AdSize.LARGE_BANNER)
-          itemView.findViewById[LinearLayout](R.id.content).addView(adView)
+          adView.setAdSize(AdSize.SMART_BANNER)
+          itemView.findViewById[LinearLayout](R.id.ads).addView(adView)
 
           // Load Ad
           val adBuilder = new AdRequest.Builder()
+          adBuilder.addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
           adView.loadAd(adBuilder.build())
         } else adView.setVisibility(View.VISIBLE)
       } else if (adView != null) adView.setVisibility(View.GONE)
@@ -266,7 +267,10 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     if (app.profileManager.getFirstProfile.isEmpty) app.dataStore.profileId = app.profileManager.createProfile().id
     val profilesList = view.findViewById[RecyclerView](R.id.list)
     val layoutManager = new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false)
+    val dividerItemDecoration = new DividerItemDecoration(profilesList.getContext(),
+      layoutManager.getOrientation())
     profilesList.setLayoutManager(layoutManager)
+    profilesList.addItemDecoration(dividerItemDecoration)
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.dataStore.profileId => i
     }.getOrElse(-1))

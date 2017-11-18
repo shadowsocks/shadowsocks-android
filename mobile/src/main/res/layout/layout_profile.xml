@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Based on: https://github.com/android/platform_frameworks_base/blob/505e3ab/core/res/res/layout/simple_list_item_2.xml -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content">
-    <com.github.shadowsocks.widget.BoundedCardView android:layout_width="match_parent"
-                                                   android:layout_height="wrap_content"
-                                                   android:layout_marginTop="8dp"
-                                                   android:layout_marginStart="8dp"
-                                                   android:layout_marginEnd="8dp"
-                                                   android:layout_gravity="center_horizontal"
-                                                   app:bounded_width="@dimen/profile_item_max_width"
-                                                   android:id="@+id/indicator">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ads"
+    android:orientation="vertical"
+    android:focusable="false"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <FrameLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/indicator">
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="4dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:focusable="true"
             android:nextFocusRight="@+id/edit"
             android:id="@+id/content"
@@ -31,6 +33,7 @@
                     android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="?android:attr/textColorPrimary"
+                    android:textStyle="bold"
                     android:gravity="center_vertical"
                     android:maxLines="2"
                     android:ellipsize="end"/>
@@ -56,8 +59,7 @@
             </LinearLayout>
             <RelativeLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="4dp">
+                android:layout_marginStart="8dp">
                 <TextView android:id="@android:id/text2"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
@@ -78,5 +80,5 @@
                     android:textColor="?android:attr/textColorSecondary"/>
             </RelativeLayout>
         </LinearLayout>
-    </com.github.shadowsocks.widget.BoundedCardView>
-</FrameLayout>
+    </FrameLayout>
+</LinearLayout>
