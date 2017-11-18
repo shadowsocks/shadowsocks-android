@@ -78,8 +78,6 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     edit.setOnClickListener(_ => startConfig(item.id))
     edit.setOnLongClickListener(cardButtonLongClickListener)
     itemView.setOnClickListener(this)
-    // it will not take effect unless set in code
-    itemView.findViewById[View](R.id.indicator).setBackgroundResource(R.drawable.background_profile)
 
     private var adView: AdView = _
 
@@ -135,12 +133,11 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           val params =
             new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
           params.gravity = Gravity.CENTER_HORIZONTAL
-          params.setMargins(0, 0, 0, 0)
           adView = new AdView(getActivity)
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
           adView.setAdSize(AdSize.SMART_BANNER)
-          itemView.findViewById[LinearLayout](R.id.ads).addView(adView)
+          itemView.findViewById[LinearLayout](R.id.indicator).addView(adView)
 
           // Load Ad
           val adBuilder = new AdRequest.Builder()
@@ -267,10 +264,8 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
     if (app.profileManager.getFirstProfile.isEmpty) app.dataStore.profileId = app.profileManager.createProfile().id
     val profilesList = view.findViewById[RecyclerView](R.id.list)
     val layoutManager = new LinearLayoutManager(getActivity, LinearLayoutManager.VERTICAL, false)
-    val dividerItemDecoration = new DividerItemDecoration(profilesList.getContext(),
-      layoutManager.getOrientation())
     profilesList.setLayoutManager(layoutManager)
-    profilesList.addItemDecoration(dividerItemDecoration)
+    profilesList.addItemDecoration(new DividerItemDecoration(getActivity, layoutManager.getOrientation))
     layoutManager.scrollToPosition(profilesAdapter.profiles.zipWithIndex.collectFirst {
       case (profile, i) if profile.id == app.dataStore.profileId => i
     }.getOrElse(-1))
