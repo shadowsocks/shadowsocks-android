@@ -161,7 +161,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
 
   override def binderDied(): Unit = handler.post(() => {
     detachService()
-    Executable.killAll()
+    Executable.killAll(this)
     attachService(callback)
   })
 
