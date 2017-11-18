@@ -32,6 +32,7 @@ import com.github.shadowsocks.utils.{Key, TcpFastOpen}
 class GlobalConfigFragment extends PreferenceFragment {
   override def onCreatePreferences(bundle: Bundle, key: String) {
     getPreferenceManager.setPreferenceDataStore(app.dataStore)
+    app.dataStore.putString(Key.serviceMode, app.dataStore.serviceMode) // temporary workaround for support lib bug
     addPreferencesFromResource(R.xml.pref_global)
     val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
     switch.setOnPreferenceChangeListener((_, value) => {
