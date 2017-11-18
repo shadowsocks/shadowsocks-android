@@ -66,12 +66,14 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
       findPreference(Key.password).setSummary("\u2022" * 32)
     }
     isProxyApps = findPreference(Key.proxyApps).asInstanceOf[SwitchPreference]
-    isProxyApps.setEnabled(Utils.isLollipopOrAbove && app.usingVpnMode)
-    isProxyApps.setOnPreferenceClickListener(_ => {
-      startActivity(new Intent(getActivity, classOf[AppManager]))
-      isProxyApps.setChecked(true)
-      false
-    })
+    if (Build.VERSION.SDK_INT < 21) isProxyApps.getParent.removePreference(isProxyApps) else {
+      isProxyApps.setEnabled(app.usingVpnMode)
+      isProxyApps.setOnPreferenceClickListener(_ => {
+        startActivity(new Intent(getActivity, classOf[AppManager]))
+        isProxyApps.setChecked(true)
+        false
+      })
+    }
     plugin = findPreference(Key.plugin).asInstanceOf[IconListPreference]
     pluginConfigure = findPreference(Key.pluginConfigure).asInstanceOf[EditTextPreference]
     plugin.unknownValueSummary = getString(R.string.plugin_unknown)
