@@ -19,9 +19,6 @@
             android:minSdkVersion="19"
             android:targetSdkVersion="27"/>
 
-    <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
-               android:value="true" />
-
     <application
             android:name=".ShadowsocksApplication"
             android:icon="@mipmap/ic_launcher"
@@ -30,6 +27,8 @@
             android:networkSecurityConfig="@xml/network_security_config"
             android:banner="@drawable/ic_start_connected">
 
+        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
+                   android:value="true" />
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version"/>
         <meta-data android:name="com.google.android.backup.api_key"
