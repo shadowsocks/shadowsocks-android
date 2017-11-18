@@ -31,7 +31,13 @@ static int sdk_version() {
     return atoi(version);
 }
 
-jint Java_com_github_shadowsocks_jnihelper_sigterm(JNIEnv *env, jobject thiz, jobject process) {
+extern "C" {
+JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigkill(JNIEnv *env, jobject thiz, jint pid) {
+    // Suppress "No such process" errors. We just want the process killed. It's fine if it's already killed.
+    return kill(pid, SIGKILL) == -1 && errno != ESRCH ? errno : 0;
+}
+
+JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigterm(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
@@ -42,7 +48,8 @@ jint Java_com_github_shadowsocks_jnihelper_sigterm(JNIEnv *env, jobject thiz, jo
     return kill(pid, SIGTERM) == -1 && errno != ESRCH ? errno : 0;
 }
 
-jobject Java_com_github_shadowsocks_jnihelper_getExitValue(JNIEnv *env, jobject thiz, jobject process) {
+JNIEXPORT jobject JNICALL
+        Java_com_github_shadowsocks_JniHelper_getExitValue(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
@@ -51,7 +58,8 @@ jobject Java_com_github_shadowsocks_jnihelper_getExitValue(JNIEnv *env, jobject 
     return env->GetObjectField(process, ProcessImpl_exitValue);
 }
 
-jobject Java_com_github_shadowsocks_jnihelper_getExitValueMutex(JNIEnv *env, jobject thiz, jobject process) {
+JNIEXPORT jobject JNICALL
+        Java_com_github_shadowsocks_JniHelper_getExitValueMutex(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
@@ -60,11 +68,12 @@ jobject Java_com_github_shadowsocks_jnihelper_getExitValueMutex(JNIEnv *env, job
     return env->GetObjectField(process, ProcessImpl_exitValueMutex);
 }
 
-void Java_com_github_shadowsocks_jnihelper_close(JNIEnv *env, jobject thiz, jint fd) {
+JNIEXPORT void JNICALL Java_com_github_shadowsocks_JniHelper_close(JNIEnv *env, jobject thiz, jint fd) {
     close(fd);
 }
 
-jint Java_com_github_shadowsocks_jnihelper_sendfd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
+JNIEXPORT jint JNICALL
+        Java_com_github_shadowsocks_JniHelper_sendFd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;
     struct sockaddr_un addr;
     const char *sock_str  = env->GetStringUTFChars(path, 0);
@@ -94,56 +103,6 @@ jint Java_com_github_shadowsocks_jnihelper_sendfd(JNIEnv *env, jobject thiz, jin
     env->ReleaseStringUTFChars(path, sock_str);
     return 0;
 }
-
-static const char *classPathName = "com/github/shadowsocks/JniHelper";
-
-static JNINativeMethod method_table[] = {
-    { "close", "(I)V",
-        (void*) Java_com_github_shadowsocks_jnihelper_close },
-    { "sendFd", "(ILjava/lang/String;)I",
-        (void*) Java_com_github_shadowsocks_jnihelper_sendfd },
-    { "sigterm", "(Ljava/lang/Process;)I",
-        (void*) Java_com_github_shadowsocks_jnihelper_sigterm },
-    { "getExitValue", "(Ljava/lang/Process;)Ljava/lang/Integer;",
-        (void*) Java_com_github_shadowsocks_jnihelper_getExitValue },
-    { "getExitValueMutex", "(Ljava/lang/Process;)Ljava/lang/Object;",
-        (void*) Java_com_github_shadowsocks_jnihelper_getExitValueMutex }
-};
-
-/*
- * Register several native methods for one class.
- */
-static int registerNativeMethods(JNIEnv* env, const char* className,
-    JNINativeMethod* gMethods, int numMethods)
-{
-    jclass clazz;
-
-    clazz = env->FindClass(className);
-    if (clazz == NULL) {
-        LOGE("Native registration unable to find class '%s'", className);
-        return JNI_FALSE;
-    }
-    if (env->RegisterNatives(clazz, gMethods, numMethods) < 0) {
-        LOGE("RegisterNatives failed for '%s'", className);
-        return JNI_FALSE;
-    }
-
-    return JNI_TRUE;
-}
-
-/*
- * Register native methods for all classes we know about.
- *
- * returns JNI_TRUE on success.
- */
-static int registerNatives(JNIEnv* env)
-{
-  if (!registerNativeMethods(env, classPathName, method_table,
-                 sizeof(method_table) / sizeof(method_table[0]))) {
-    return JNI_FALSE;
-  }
-
-  return JNI_TRUE;
 }
 
 /*
@@ -166,11 +125,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         goto bail;
     }
     env = uenv.env;
-
-    if (registerNatives(env) != JNI_TRUE) {
-        THROW(env, "java/lang/RuntimeException", "registerNativeMethods failed");
-        goto bail;
-    }
 
     if (sdk_version() < 24) {
         if (!(ProcessImpl = env->FindClass("java/lang/ProcessManager$ProcessImpl"))) {

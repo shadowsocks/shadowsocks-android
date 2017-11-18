@@ -64,6 +64,7 @@ public class JniHelper {
         }
     }
 
+    public static native int sigkill(int pid);
     private static native int sigterm(Process process);
     private static native Integer getExitValue(Process process);
     private static native Object getExitValueMutex(Process process);
