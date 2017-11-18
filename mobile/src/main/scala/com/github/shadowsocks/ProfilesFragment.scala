@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.content._
+import android.content.res.Configuration
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -136,7 +137,12 @@ final class ProfilesFragment extends ToolbarFragment with Toolbar.OnMenuItemClic
           adView = new AdView(getActivity)
           adView.setLayoutParams(params)
           adView.setAdUnitId("ca-app-pub-9097031975646651/7760346322")
-          adView.setAdSize(AdSize.SMART_BANNER)
+
+          if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+            adView.setAdSize(AdSize.FULL_BANNER)
+          else
+            adView.setAdSize(AdSize.SMART_BANNER)
+
           itemView.findViewById[LinearLayout](R.id.indicator).addView(adView)
 
           // Load Ad

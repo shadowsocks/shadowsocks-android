@@ -41,7 +41,6 @@ lazy val mobile = project
   .settings(commonSettings)
   .settings(
     libraryDependencies ++=
-      "com.android.support" % "cardview-v7" % supportLibsVersion ::
       "com.android.support" % "customtabs" % supportLibsVersion ::
       "com.android.support" % "design" % supportLibsVersion ::
       "com.android.support" % "gridlayout-v7" % supportLibsVersion ::
