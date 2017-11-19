@@ -20,4 +20,5 @@
             <solid android:color="@android:color/white" />
         </shape>
     </item>
+    <item android:drawable="?android:attr/selectableItemBackground"/>
 </layer-list>
