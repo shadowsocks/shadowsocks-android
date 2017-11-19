@@ -35,7 +35,6 @@
   <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>
   <string name="remote_port">Remote Port</string>
-  <string name="port">Local Port</string>
   <string name="sitekey">Password</string>
   <string name="enc_method">Encrypt Method</string>
 
