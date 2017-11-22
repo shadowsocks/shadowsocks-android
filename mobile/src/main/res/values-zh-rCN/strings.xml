@@ -1,58 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
 <string name="app_name">"影梭"</string>
+
 <string name="quick_toggle">"开关"</string>
 
 <!-- misc -->
 <string name="profile">"配置文件"</string>
+
 <string name="profile_summary">"新建或切换到其他配置文件"</string>
-<string name="nat">"NAT 模式（仅限调试）"</string>
-<string name="nat_summary">"从 VPN 模式切换为 NAT 模式，需要 ROOT 权限"</string>
+
 <string name="remote_dns">"远程 DNS"</string>
-<string name="stat_summary">"发送: \t%3$s\t↑\t%1$s/s
-接收: \t%4$s\t↓\t%2$s/s"</string>
+
+<string name="stat_summary">"上传: \t%3$s\t↑\t%1$s/s
+下载: \t%4$s\t↓\t%2$s/s"</string>
+<string name="stat_profiles">"1$s↑\t%2$s↓"</string>
+<string name="traffic_summary">"1$s/s↑\t%2$s/s↓"</string>
+
 <plurals name="bytes">
 <item quantity="other">"字节"</item>
 </plurals>
+
 <string name="connection_test_pending">"检查网络连接"</string>
 <string name="connection_test_testing">"测试中…"</string>
-<string name="connection_test_available">"连接有效：延时 %d 毫秒"</string>
+<string name="connection_test_available">"连接成功：延时 %d 毫秒"</string>
+
 <string name="connection_test_error">"失败：%s"</string>
 <string name="connection_test_fail">"无互联网连接"</string>
+
 <string name="connection_test_error_status_code">"状态码无效（#%d）"</string>
 
 <!-- proxy category -->
+<string name="proxy_cat">"服务器设置"</string>
+
+<!-- proxy category -->
 <string name="profile_name">"配置名称"</string>
+
 <string name="proxy">"服务器"</string>
 <string name="remote_port">"远程端口"</string>
-<string name="port">"本地端口"</string>
 <string name="sitekey">"密码"</string>
-<string name="enc_method">"加密方法"</string>
+<string name="enc_method">"加密方式"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"功能设置"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 路由"</string>
-<string name="ipv6_summary">"向远程服务器转发 IPv6 流量"</string>
+<string name="ipv6_summary">"转发 IPv6 流量到远程服务器"</string>
 <string name="route_list">"路由"</string>
-<string name="route_entry_gfwlist">"仅代理中国大陆无法访问的地址"</string>
-<string name="proxied_apps">"分应用代理"</string>
-<string name="proxied_apps_summary">"为应用程序分别设置代理，在 4.x 下需要启用 NAT 模式"</string>
-<string name="on">"开"</string>
+<string name="route_entry_gfwlist">"GFW 列表"</string>
+<string name="proxied_apps">"分应用 VPN"</string>
+
+<string name="proxied_apps_summary">"允许部分应用绕过 VPN"</string>
+<string name="on">"启用"</string>
 <string name="bypass_apps">"绕行模式"</string>
-<string name="bypass_apps_summary">"启用该选项，以使所选应用程序的流量不经过代理"</string>
+<string name="bypass_apps_summary">"绕过选择的应用"</string>
 <string name="auto_connect">"自动连接"</string>
-<string name="auto_connect_summary">"随系统启动后台服务"</string>
+<string name="auto_connect_summary">"允许 Shadowsocks 随系统启动"</string>
 <string name="tcp_fastopen_summary">"切换需要 ROOT 权限"</string>
-<string name="tcp_fastopen_summary_unsupported">"不支持的内核版本：%s &lt; 3.7.1"</string>
+<string name="tcp_fastopen_summary_unsupported">"不支持的内核版本: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"DNS 转发"</string>
-<string name="udp_dns_summary">"通过 UDP 将所有 DNS 查询全部转发至远程服务器"</string>
+<string name="udp_dns_summary">"转发所有 DNS 请求到远程服务器"</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>
 <string name="invalid_server">"服务器名无效"</string>
 <string name="service_failed">"无法连接远程服务器"</string>
-<string name="nat_deprecated">"警告：在 Android 5.0 及更高版本中不建议使用 NAT 模式"</string>
-<string name="nat_no_root">"NAT 模式需要 ROOT 权限"</string>
-<string name="switch_to_vpn">"切换到 VPN 模式"</string>
 <string name="stop">"停止"</string>
 <string name="stopping">"正在关闭…"</string>
 <string name="vpn_error">"后台服务启动失败：%s"</string>
@@ -60,18 +73,21 @@
 <string name="profile_invalid_input">"未找到有效的配置文件。"</string>
 
 <!-- alert category -->
+<string name="yes">"是"</string>
+<string name="no">"否"</string>
+
+<!-- alert category -->
 <string name="close">"关闭"</string>
 <string name="profile_empty">"请选择配置文件"</string>
 <string name="proxy_empty">"代理服务器地址及密码不能为空"</string>
 <string name="connect">"连接"</string>
-<string name="recovering">"重置中…"</string>
 <string name="remove_profile">"删除此配置文件“%s”？"</string>
 
 <!-- menu category -->
 <string name="profiles">"配置文件"</string>
 <string name="settings">"设置选项"</string>
 <string name="faq">"常见问题"</string>
-<string name="recovery">"重置"</string>
+<string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"关于"</string>
 <string name="about_title">"影梭 (Shadowsocks) %s"</string>
 <string name="edit">"编辑"</string>
@@ -87,12 +103,13 @@
 
 <!-- profile -->
 <string name="profile_config">"配置文件设置"</string>
+<string name="unsaved_changes_prompt">"保存修改吗？"</string>
+<string name="apply">"应用"</string>
 <string name="delete">"删除"</string>
 <string name="delete_confirm_prompt">"您确定要删除此配置文件？"</string>
 <string name="share_qr_nfc">"二维码 / NFC"</string>
 <string name="add_profile_dialog">"为影梭添加此配置文件？"</string>
 <string name="add_profile_methods_scan_qr_code">"扫描二维码"</string>
-<string name="add_profile_methods_manual_settings">"手动设置"</string>
 <plurals name="removed">
 <item quantity="other">"已删除 %d 项"</item>
 </plurals>
@@ -110,7 +127,6 @@
 <string name="received">"接收："</string>
 <string name="connecting">"连接中…"</string>
 <string name="vpn_connected">"已连接，点击测试连接"</string>
-<string name="nat_connected">"已连接"</string>
 <string name="not_connected">"未连接"</string>
 
 <!-- acl -->
@@ -123,7 +139,9 @@
 <string name="route_entry_bypass_chn">"绕过中国大陆地址"</string>
 <string name="route_entry_bypass_lan_chn">"绕过局域网及中国大陆地址"</string>
 <string name="route_entry_chinalist">"仅代理中国大陆地址"</string>
+
 <string name="proxied_apps_summary_v21">"为应用程序分别设置代理"</string>
+
 <string name="acl_rule_templates_generic">"URL/子网/域名 PCRE 正则表达式"</string>
 <string name="acl_rule_templates_domain">"域名及其子域名"</string>
 
@@ -138,5 +156,17 @@
 
 <!-- notification category -->
 <string name="service_vpn">"VPN 服务"</string>
-<string name="service_nat">"NAT 服务"</string>
+<string name="add_profile_methods_manual_settings">"手动设置"</string>
+<string name="advanced">"高级选项"</string>
+<string name="service_mode">"服务模式"</string>
+<string name="service_mode_proxy">"仅代理"</string>
+<string name="service_mode_vpn">"VPN"</string>
+<string name="service_mode_transproxy">"透明代理"</string>
+<string name="port_proxy">"SOCKS5 代理端口"</string>
+<string name="port_local_dns">"本地 DNS 端口"</string>
+<string name="port_transproxy">"透明代理端口"</string>
+<string name="service_proxy">"代理模式"</string>
+<string name="service_transproxy">"透明代理模式"</string>
+<string name="vpn_permission_denied">"创建 VPN 服务权限不足"</string>
+<string name="auto_connect_summary_v24">"允许 Shadowsocks 随系统启动，建议使用始终开启的 VPN"</string>
 </resources>

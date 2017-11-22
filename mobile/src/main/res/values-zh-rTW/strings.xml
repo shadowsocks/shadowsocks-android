@@ -1,36 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="app_name">"影梭"</string>
 <string name="quick_toggle">"切換"</string>
 
 <!-- misc -->
 <string name="profile">"設定檔"</string>
 <string name="profile_summary">"切換至其他設定檔或新增新設定檔"</string>
-<string name="nat">"NAT 模式 (已過時)"</string>
-<string name="nat_summary">"使用 NAT 模式代替 VPN 模式，需要 ROOT 權限"</string>
 <string name="remote_dns">"遠程 DNS"</string>
 <string name="stat_summary">"傳送: \t%3$s\t↑\t%1$s/s
 接收: \t%4$s\t↓\t%2$s/s"</string>
+<string name="stat_profiles">"%1$s↑\t%2$s↓"</string>
+<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
+<plurals name="bytes">
+<item quantity="other">"位元组"</item>
+</plurals>
 <string name="connection_test_pending">"檢查連線能力"</string>
 <string name="connection_test_testing">"測試中……"</string>
 <string name="connection_test_available">"成功: %d 毫秒延遲"</string>
 <string name="connection_test_error">"偵測出網際網路連線失敗: %s"</string>
 <string name="connection_test_fail">"無法使用網際網路"</string>
-<string name="connection_test_error_status_code">"錯誤碼: #%d"</string>
+<string name="connection_test_error_status_code">"錯誤碼: （#%d）"</string>
+
+<!-- proxy category -->
+<string name="proxy_cat">"伺服器設定"</string>
 
 <!-- proxy category -->
 <string name="profile_name">"設定檔名稱"</string>
 <string name="proxy">"伺服器"</string>
 <string name="remote_port">"遠端連接埠"</string>
-<string name="port">"本機連接埠"</string>
 <string name="sitekey">"密碼"</string>
 <string name="enc_method">"加密方法"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"功能設定"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 路由"</string>
 <string name="ipv6_summary">"向遠端重新導向 IPv6 流量"</string>
 <string name="route_list">"路由"</string>
 <string name="route_entry_gfwlist">"GFW List"</string>
+
 <string name="proxied_apps">"個別應用程式的 Proxy"</string>
+
 <string name="proxied_apps_summary">"為已選擇的應用程式設定 Proxy，在 Android 4.X 以下需要開啟 NAT 模式"</string>
 <string name="on">"開"</string>
 <string name="bypass_apps">"略過模式"</string>
@@ -46,9 +57,6 @@
 <string name="forward_success">"Shadowsocks 已啟動。"</string>
 <string name="invalid_server">"伺服器名稱無效"</string>
 <string name="service_failed">"連線至遠端伺服器失敗"</string>
-<string name="nat_deprecated">"警告：自 Android 5.0 開始， NAT 模式已過時"</string>
-<string name="nat_no_root">"NAT 模式需要 ROOT 權限"</string>
-<string name="switch_to_vpn">"切換至 VPN 模式"</string>
 <string name="stop">"停止"</string>
 <string name="stopping">"關閉中…"</string>
 <string name="vpn_error">"%s"</string>
@@ -56,18 +64,21 @@
 <string name="profile_invalid_input">"未找到有效的設定檔資料。"</string>
 
 <!-- alert category -->
+<string name="yes">"是"</string>
+<string name="no">"否"</string>
+
+<!-- alert category -->
 <string name="close">"關閉"</string>
 <string name="profile_empty">"請選擇設定檔"</string>
 <string name="proxy_empty">"Proxy 或密碼不可以空白"</string>
 <string name="connect">"連線"</string>
-<string name="recovering">"重設中…"</string>
 <string name="remove_profile">"移除此設定檔 %s?"</string>
 
 <!-- menu category -->
 <string name="profiles">"設定檔"</string>
 <string name="settings">"設定"</string>
 <string name="faq">"常見問題"</string>
-<string name="recovery">"重設"</string>
+<string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"關於"</string>
 <string name="about_title">"Shadowsocks %s"</string>
 <string name="edit">"編輯"</string>
@@ -83,12 +94,13 @@
 
 <!-- profile -->
 <string name="profile_config">"設定檔設定"</string>
+<string name="unsaved_changes_prompt">"要儲存變更嗎？"</string>
+<string name="apply">"套用"</string>
 <string name="delete">"刪除"</string>
 <string name="delete_confirm_prompt">"您確定要移除這個設定檔嗎？"</string>
 <string name="share_qr_nfc">"QR 碼 / NFC"</string>
 <string name="add_profile_dialog">"為 Shadowsocks 新增此設定檔？"</string>
 <string name="add_profile_methods_scan_qr_code">"掃描 QR 碼"</string>
-<string name="add_profile_methods_manual_settings">"手動設定"</string>
 <plurals name="removed">
 <item quantity="other">"已移除 %d 項"</item>
 </plurals>
@@ -106,7 +118,6 @@
 <string name="received">"接收:"</string>
 <string name="connecting">"連線中…"</string>
 <string name="vpn_connected">"已連線，輕觸以檢查連線能力"</string>
-<string name="nat_connected">"已連線"</string>
 <string name="not_connected">"未連線"</string>
 
 <!-- acl -->
@@ -119,13 +130,15 @@
 <string name="route_entry_bypass_chn">"略過中國大陸"</string>
 <string name="route_entry_bypass_lan_chn">"略過區域網路及中國大陸"</string>
 <string name="route_entry_chinalist">"China List"</string>
+
 <string name="proxied_apps_summary_v21">"為已選擇的應用程式設定 Proxy"</string>
+
 <string name="acl_rule_templates_generic">"URL/子網路/主機名稱 PCRE 模式"</string>
 <string name="acl_rule_templates_domain">"網域及其所有子網域"</string>
 
 <!-- plugin -->
 <string name="plugin">"外掛程式"</string>
-<string name="plugin_configure">"設定..."</string>
+<string name="plugin_configure">"設定…"</string>
 <string name="plugin_disabled">"停用"</string>
 <string name="plugin_unknown">"未知插件 %s"</string>
 <string name="plugin_untrusted">"警告：此外掛程式似乎不是來自一個已知的受信任來源。"</string>
@@ -134,5 +147,17 @@
 
 <!-- notification category -->
 <string name="service_vpn">"VPN 服務"</string>
-<string name="service_nat">"NAT 服務"</string>
+<string name="add_profile_methods_manual_settings">"手動設置"</string>
+<string name="advanced">"高級"</string>
+<string name="service_mode">"服務模式"</string>
+<string name="service_mode_proxy">"仅代理"</string>
+<string name="service_mode_vpn">"VPN"</string>
+<string name="service_mode_transproxy">"透明代理"</string>
+<string name="port_proxy">"SOCKS5 代理連接埠"</string>
+<string name="port_local_dns">"本地 DNS 連接埠"</string>
+<string name="port_transproxy">"透明代理連接埠"</string>
+<string name="service_proxy">"代理服務"</string>
+<string name="service_transproxy">"透明代理服務"</string>
+<string name="vpn_permission_denied">"没有權限創建 VPN 服務"</string>
+<string name="auto_connect_summary_v24">"允許 Shadowsocks 隨系統啟動，建議使用始終開啟的 VPN"</string>
 </resources>
