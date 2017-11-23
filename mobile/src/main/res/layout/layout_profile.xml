@@ -8,16 +8,14 @@
     android:background="@drawable/background_profile"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="8dp"
-    android:paddingRight="4dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
     android:focusable="true"
     android:nextFocusRight="@+id/edit">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="4dp"
         android:id="@+id/container">
         <TextView
             android:id="@android:id/text1"
@@ -56,8 +54,10 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
+        android:paddingLeft="24dp"
+        android:paddingRight="4dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp">
         <TextView
             android:id="@android:id/text2"
             android:layout_width="wrap_content"
@@ -65,7 +65,6 @@
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@+id/traffic"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
             android:maxLines="2"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
@@ -76,7 +75,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="8dp"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"/>
