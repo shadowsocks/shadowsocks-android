@@ -1,9 +1,10 @@
 ## Shadowsocks for Android
 
 [![Build Status](https://api.travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
+[![Releases](https://img.shields.io/github/downloads/shadowsocks/shadowsocks-android/total.svg)](https://github.com/shadowsocks/shadowsocks-android/releases)
 
 A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.  
-<a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a> or [releases](https://github.com/shadowsocks/shadowsocks-android/releases).
+<a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
 
 
 ### PREREQUISITES
