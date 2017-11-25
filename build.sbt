@@ -23,7 +23,7 @@ lazy val commonSettings = Seq(
   resolvers += "google" at "https://maven.google.com"
 )
 
-val supportLibsVersion = "27.0.1"
+val supportLibsVersion = "27.0.2"
 lazy val root = Project(id = "shadowsocks-android", base = file("."))
   .settings(commonSettings)
   .aggregate(plugin, mobile)

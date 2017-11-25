@@ -23,11 +23,11 @@ proguardOptions ++=
   "-keep public class com.evernote.android.job.JobRescheduleService" ::
   Nil
 
-val playServicesVersion = "11.6.0"
+val playServicesVersion = "11.6.2"
 resolvers += Resolver.jcenterRepo
 libraryDependencies ++=
   "com.futuremind.recyclerfastscroll" % "fastscroll" % "0.2.5" ::
-  "com.evernote" % "android-job" % "1.2.0" ::
+  "com.evernote" % "android-job" % "1.2.1" ::
   "com.github.jorgecastilloprz" % "fabprogresscircle" % "1.01" ::
   "com.google.android.gms" % "play-services-ads" % playServicesVersion ::
   "com.google.android.gms" % "play-services-analytics" % playServicesVersion ::
