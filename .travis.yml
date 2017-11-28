@@ -50,4 +50,5 @@ install:
       fi
 
 script:
+    - ccache -C
     - $SBTPATH/sbt go-build android:package
