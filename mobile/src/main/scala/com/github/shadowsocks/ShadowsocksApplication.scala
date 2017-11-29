@@ -152,7 +152,8 @@ class ShadowsocksApplication extends Application {
 
     FirebaseApp.initializeApp(this)
     remoteConfig.setDefaults(R.xml.default_configs)
-    remoteConfig.fetch().addOnCompleteListener(task => if (task.isSuccessful) remoteConfig.activateFetched())
+    remoteConfig.fetch().addOnCompleteListener(task =>
+        if (task.isSuccessful) remoteConfig.activateFetched() else Log.e(TAG, "Failed to fetch config"))
 
     JobManager.create(this).addJobCreator(DonaldTrump)
 
