@@ -9,9 +9,7 @@
 <string name="remote_dns">"Удалённый DNS"</string>
 <string name="stat_summary">"Отправлено: \t%3$s\t↑\t%1$s/s
 Получено: \t%4$s\t↓\t%2$s/s"</string>
-<string name="stat_profiles">"
-%1$s↑\t%2$s↓"</string>
-<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
+
 <plurals name="bytes">
 <item quantity="one">"байт"</item>
 <item quantity="few">"байта"</item>

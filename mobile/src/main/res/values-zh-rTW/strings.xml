@@ -9,8 +9,6 @@
 <string name="remote_dns">"遠程 DNS"</string>
 <string name="stat_summary">"傳送: \t%3$s\t↑\t%1$s/s
 接收: \t%4$s\t↓\t%2$s/s"</string>
-<string name="stat_profiles">"%1$s↑\t%2$s↓"</string>
-<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
 <plurals name="bytes">
 <item quantity="other">"位元组"</item>
 </plurals>
