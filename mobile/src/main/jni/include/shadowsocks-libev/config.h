@@ -41,6 +41,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define HAVE_DLFCN_H 1
 
+/* Define to 1 if you have the <linux/tcp.h> header file. */
+#define HAVE_LINUX_TCP_H 1
+
 /* Define to 1 if you have the `epoll_ctl' function. */
 /* #undef HAVE_EPOLL_CTL */
 
