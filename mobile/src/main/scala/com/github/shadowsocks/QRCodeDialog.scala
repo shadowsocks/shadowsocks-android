@@ -23,8 +23,10 @@ package com.github.shadowsocks
 import java.nio.charset.Charset
 
 import android.app.Activity
+import android.content.Context
 import android.nfc.{NdefMessage, NdefRecord, NfcAdapter}
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{ImageView, LinearLayout}
 import net.glxn.qrgen.android.QRCode
@@ -57,11 +59,12 @@ final class QRCodeDialog extends DialogFragment {
     image
   }
 
-  override def onAttach(activity: Activity) {
-    superOnAttach(activity)
+  override def onAttach(context: Context) {
+    super.onAttach(context)
     adapter = NfcAdapter.getDefaultAdapter(getActivity)
     if (adapter != null) adapter.setNdefPushMessage(new NdefMessage(Array(
-      new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem))), activity)
+      new NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, Array[Byte](), nfcShareItem))),
+      context.asInstanceOf[Activity])
   }
 
   override def onDetach() {

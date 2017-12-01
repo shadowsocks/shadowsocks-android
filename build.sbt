@@ -20,10 +20,13 @@ lazy val commonSettings = Seq(
 
   resConfigs := Seq("fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"),
 
+  resolvers += Resolver.jcenterRepo,
+  resolvers += Resolver.bintrayRepo("gericop", "maven"),
   resolvers += "google" at "https://maven.google.com"
 )
 
 val supportLibsVersion = "27.0.2"
+val takisoftFixVersion = "27.0.2.0"
 lazy val root = Project(id = "shadowsocks-android", base = file("."))
   .settings(commonSettings)
   .aggregate(plugin, mobile)
@@ -34,7 +37,11 @@ run in Android := (run in (mobile, Android)).evaluated
 lazy val plugin = project
   .settings(commonSettings)
   .settings(
-    libraryDependencies += "com.android.support" % "preference-v14" % supportLibsVersion
+    libraryDependencies ++=
+      "com.android.support" % "preference-v14" % supportLibsVersion ::
+      "com.takisoft.fix" % "preference-v7" % takisoftFixVersion ::
+      "com.takisoft.fix" % "preference-v7-simplemenu" % takisoftFixVersion ::
+      Nil
   )
 
 lazy val mobile = project

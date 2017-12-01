@@ -30,18 +30,19 @@ import android.support.v7.preference.{Preference, PreferenceDataStore}
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.text.TextUtils
 import android.view.MenuItem
-import be.mygod.preference.{EditTextPreference, PreferenceFragment}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.plugin._
 import com.github.shadowsocks.preference.{IconListPreference, OnPreferenceDataStoreChangeListener, PluginConfigurationDialogFragment}
-import com.github.shadowsocks.utils.{Action, Key, Utils}
+import com.github.shadowsocks.utils.{Action, Key}
+import com.takisoft.fix.support.v7.preference.{EditTextPreference, PreferenceFragmentCompatDividers}
 
 object ProfileConfigFragment {
   private final val REQUEST_CODE_PLUGIN_CONFIGURE = 1
+  private final val FRAGMENT_DIALOG_TAG = "android.support.v7.preference.PreferenceFragment.DIALOG"
 }
 
-class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListener
+class ProfileConfigFragment extends PreferenceFragmentCompatDividers with OnMenuItemClickListener
   with OnPreferenceDataStoreChangeListener {
   import ProfileConfigFragment._
 
@@ -51,7 +52,7 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
   private var pluginConfigure: EditTextPreference = _
   private var pluginConfiguration: PluginConfiguration = _
 
-  override def onCreatePreferences(bundle: Bundle, key: String) {
+  override def onCreatePreferencesFix(bundle: Bundle, key: String) {
     getPreferenceManager.setPreferenceDataStore(app.dataStore)
     app.profileManager.getProfile(getActivity.getIntent.getIntExtra(Action.EXTRA_PROFILE_ID, -1)) match {
       case Some(p) =>
@@ -136,8 +137,12 @@ class ProfileConfigFragment extends PreferenceFragment with OnMenuItemClickListe
 
   private def showPluginEditor() {
     val bundle = new Bundle()
+    bundle.putString("key", Key.pluginConfigure)
     bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)
-    displayPreferenceDialog(Key.pluginConfigure, new PluginConfigurationDialogFragment, bundle)
+    val fragment = new PluginConfigurationDialogFragment
+    fragment.setArguments(bundle)
+    fragment.setTargetFragment(this, 0)
+    fragment.show(getFragmentManager, FRAGMENT_DIALOG_TAG)
   }
 
   override def onDisplayPreferenceDialog(preference: Preference): Unit = if (preference.getKey == Key.pluginConfigure) {

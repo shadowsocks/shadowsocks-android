@@ -20,8 +20,7 @@
 
 package com.github.shadowsocks
 
-import android.app.{Activity, TaskStackBuilder}
-import android.content.Intent
+import android.app.TaskStackBuilder
 import android.content.pm.{PackageManager, ShortcutManager}
 import android.os.{Build, Bundle}
 import android.support.v4.app.ActivityCompat
@@ -30,9 +29,9 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.text.TextUtils
 import android.widget.Toast
-import com.google.zxing.Result
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.utils.Parser
+import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
 object ScannerActivity {

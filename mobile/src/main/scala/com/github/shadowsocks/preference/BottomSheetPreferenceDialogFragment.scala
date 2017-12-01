@@ -7,7 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.support.design.widget.BottomSheetDialog
-import android.support.v14.preference.PreferenceDialogFragment
+import android.support.v7.preference.PreferenceDialogFragmentCompat
 import android.support.v7.widget.RecyclerView.ViewHolder
 import android.support.v7.widget.{LinearLayoutManager, RecyclerView}
 import android.view.ViewGroup.LayoutParams
@@ -18,7 +18,7 @@ import com.github.shadowsocks.R
 /**
   * @author Mygod
   */
-final class BottomSheetPreferenceDialogFragment extends PreferenceDialogFragment {
+final class BottomSheetPreferenceDialogFragment extends PreferenceDialogFragmentCompat {
   private lazy val preference = getPreference.asInstanceOf[IconListPreference]
   private lazy val index: Int = preference.selectedEntry
   private lazy val entries: Array[CharSequence] = preference.getEntries

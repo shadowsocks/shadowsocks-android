@@ -1,8 +1,8 @@
 package com.github.shadowsocks.plugin
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
 
 /**
@@ -10,7 +10,7 @@ import android.widget.Toast
   *
   * @author Mygod
   */
-trait OptionsCapableActivity extends Activity {
+trait OptionsCapableActivity extends AppCompatActivity {
   protected def pluginOptions(intent: Intent = getIntent): PluginOptions =
     try new PluginOptions(intent.getStringExtra(PluginContract.EXTRA_OPTIONS)) catch {
       case exc: IllegalArgumentException =>

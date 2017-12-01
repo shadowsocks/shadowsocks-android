@@ -33,15 +33,16 @@ import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import com.evernote.android.job.JobManager
 import com.github.shadowsocks.acl.DonaldTrump
-import com.github.shadowsocks.bg.{BaseService, ProxyService, TransproxyService, VpnService}
+import com.github.shadowsocks.bg.{ProxyService, TransproxyService, VpnService}
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
-import com.github.shadowsocks.preference.OrmLitePreferenceDataStore
+import com.github.shadowsocks.preference.{BottomSheetPreferenceDialogFragment, IconListPreference, OrmLitePreferenceDataStore}
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.google.android.gms.analytics.{GoogleAnalytics, HitBuilders, StandardExceptionParser, Tracker}
 import com.google.firebase.FirebaseApp
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.j256.ormlite.logger.LocalLog
+import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 
 import scala.collection.JavaConversions._
 
@@ -156,6 +157,8 @@ class ShadowsocksApplication extends Application {
         if (task.isSuccessful) remoteConfig.activateFetched() else Log.e(TAG, "Failed to fetch config"))
 
     JobManager.create(this).addJobCreator(DonaldTrump)
+    PreferenceFragmentCompat.registerPreferenceFragment(classOf[IconListPreference],
+      classOf[BottomSheetPreferenceDialogFragment])
 
     TcpFastOpen.enabled(dataStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 

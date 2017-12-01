@@ -33,7 +33,7 @@ import android.os.{Bundle, Handler}
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.{FloatingActionButton, Snackbar}
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
+import android.support.v7.app.{AlertDialog, AppCompatActivity}
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
 import android.support.v7.widget.RecyclerView.ViewHolder
@@ -69,7 +69,7 @@ object MainActivity {
   var stateListener: Int => Unit = _
 }
 
-class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
+class MainActivity extends AppCompatActivity with ServiceBoundContext with Drawer.OnDrawerItemClickListener
   with OnPreferenceDataStoreChangeListener {
   import MainActivity._
 
@@ -152,8 +152,9 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
     txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
-    val child = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
-    if (state != ServiceState.STOPPING && child != null) child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+    val child = getSupportFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
+    if (state != ServiceState.STOPPING && child != null)
+      child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
   }
 
   override def onServiceConnected(): Unit = changeState(bgService.getState)
@@ -352,7 +353,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   }
 
   private def displayFragment(fragment: ToolbarFragment) {
-    getFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
+    getSupportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
     drawer.closeDrawer()
   }
 
@@ -387,7 +388,7 @@ class MainActivity extends Activity with ServiceBoundContext with Drawer.OnDrawe
   }
 
   override def onBackPressed(): Unit = if (drawer.isDrawerOpen) drawer.closeDrawer() else {
-    val currentFragment = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
+    val currentFragment = getSupportFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
     if (!currentFragment.onBackPressed())
       if (currentFragment.isInstanceOf[ProfilesFragment]) super.onBackPressed()
       else drawer.setSelection(DRAWER_PROFILES)

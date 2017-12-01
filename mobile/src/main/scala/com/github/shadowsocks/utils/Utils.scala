@@ -152,4 +152,12 @@ object Utils {
   }
 
   def ThrowableFuture[T](f: => T): Unit = Future(f) onComplete handleFailure
+
+  def parsePort(str: String, default: Int, min: Int = 1025): Int = (try str.toInt catch {
+    case _: NumberFormatException => default
+  }) match {
+    case x if x < min => default
+    case x if x > 65535 => default
+    case x => x
+  }
 }

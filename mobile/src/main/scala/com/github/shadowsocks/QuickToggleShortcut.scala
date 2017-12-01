@@ -26,13 +26,14 @@ import android.content.pm.ShortcutManager
 import android.os.{Build, Bundle}
 import android.support.v4.content.pm.{ShortcutInfoCompat, ShortcutManagerCompat}
 import android.support.v4.graphics.drawable.IconCompat
+import android.support.v7.app.AppCompatActivity
 import com.github.shadowsocks.bg.ServiceState
 import com.github.shadowsocks.utils.Utils
 
 /**
   * @author Mygod
   */
-class QuickToggleShortcut extends Activity with ServiceBoundContext {
+class QuickToggleShortcut extends AppCompatActivity with ServiceBoundContext {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     getIntent.getAction match {
