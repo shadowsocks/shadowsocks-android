@@ -82,6 +82,11 @@ class TaskerActivity extends AppCompatActivity {
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+    try taskerOption = TaskerSettings.fromIntent(getIntent) catch {
+      case _: Exception =>
+        finish()
+        return
+    }
     setContentView(R.layout.layout_tasker)
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
@@ -89,7 +94,6 @@ class TaskerActivity extends AppCompatActivity {
     toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
     toolbar.setNavigationOnClickListener(_ => finish())
 
-    taskerOption = TaskerSettings.fromIntent(getIntent)
     switch = findViewById(R.id.serviceSwitch).asInstanceOf[Switch]
     switch.setChecked(taskerOption.switchOn)
     val profilesList = findViewById(R.id.list).asInstanceOf[RecyclerView]

@@ -30,8 +30,7 @@ object TaskerSettings {
   private val KEY_SWITCH_ON = "switch_on"
   private val KEY_PROFILE_ID = "profile_id"
 
-  def fromIntent(intent: Intent) = new TaskerSettings(if (intent.hasExtra(ApiIntent.EXTRA_BUNDLE))
-    intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE) else Bundle.EMPTY)
+  def fromIntent(intent: Intent) = new TaskerSettings(intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE))
 }
 
 class TaskerSettings(bundle: Bundle) {
