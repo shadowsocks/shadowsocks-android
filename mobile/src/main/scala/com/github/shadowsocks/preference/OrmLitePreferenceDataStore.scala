@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.util
 
+import android.os.Binder
 import android.support.v7.preference.PreferenceDataStore
 import com.github.shadowsocks.database.{DBHelper, KeyValuePair}
 import com.github.shadowsocks.utils.{Key, Utils}
@@ -98,8 +99,10 @@ final class OrmLitePreferenceDataStore(dbHelper: DBHelper) extends PreferenceDat
   def registerChangeListener(listener: OnPreferenceDataStoreChangeListener): Unit = listeners += listener
   def unregisterChangeListener(listener: OnPreferenceDataStoreChangeListener): Unit = listeners -= listener
 
-  private def getLocalPort(key: String) = getInt(key, 0) match {
-    case 0 => Utils.parsePort(getString(key), 0)
+  // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
+  private lazy val userIndex = Binder.getCallingUserHandle.hashCode
+  private def getLocalPort(key: String, default: Int) = getInt(key, 0) match {
+    case 0 => Utils.parsePort(getString(key), default + userIndex)
     case value =>
       putString(key, value.toString)
       value
@@ -108,9 +111,9 @@ final class OrmLitePreferenceDataStore(dbHelper: DBHelper) extends PreferenceDat
   def profileId: Int = getInt(Key.id, 0)
   def profileId_=(i: Int): Unit = putInt(Key.id, i)
   def serviceMode: String = getString(Key.serviceMode, Key.modeVpn)
-  def portProxy: Int = getLocalPort(Key.portProxy)
-  def portLocalDns: Int = getLocalPort(Key.portLocalDns)
-  def portTransproxy: Int = getLocalPort(Key.portTransproxy)
+  def portProxy: Int = getLocalPort(Key.portProxy, 1080)
+  def portLocalDns: Int = getLocalPort(Key.portLocalDns, 5450)
+  def portTransproxy: Int = getLocalPort(Key.portTransproxy, 8200)
 
   def proxyApps: Boolean = getBoolean(Key.proxyApps)
   def proxyApps_=(value: Boolean): Unit = putBoolean(Key.proxyApps, value)
