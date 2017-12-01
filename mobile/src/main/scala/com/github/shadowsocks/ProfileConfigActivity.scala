@@ -35,7 +35,7 @@ object ProfileConfigActivity {
 class ProfileConfigActivity extends AppCompatActivity {
   import ProfileConfigActivity._
 
-  private lazy val child = getFragmentManager.findFragmentById(R.id.content).asInstanceOf[ProfileConfigFragment]
+  private lazy val child = getSupportFragmentManager.findFragmentById(R.id.content).asInstanceOf[ProfileConfigFragment]
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)

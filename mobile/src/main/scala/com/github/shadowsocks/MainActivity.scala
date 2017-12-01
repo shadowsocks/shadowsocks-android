@@ -152,8 +152,9 @@ class MainActivity extends AppCompatActivity with ServiceBoundContext with Drawe
     rxText.setText(TrafficMonitor.formatTraffic(rxTotal))
     txRateText.setText(TrafficMonitor.formatTraffic(txRate) + "/s")
     rxRateText.setText(TrafficMonitor.formatTraffic(rxRate) + "/s")
-    val child = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
-    if (state != ServiceState.STOPPING && child != null) child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+    val child = getSupportFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
+    if (state != ServiceState.STOPPING && child != null)
+      child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
   }
 
   override def onServiceConnected(): Unit = changeState(bgService.getState)
@@ -387,7 +388,7 @@ class MainActivity extends AppCompatActivity with ServiceBoundContext with Drawe
   }
 
   override def onBackPressed(): Unit = if (drawer.isDrawerOpen) drawer.closeDrawer() else {
-    val currentFragment = getFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
+    val currentFragment = getSupportFragmentManager.findFragmentById(R.id.fragment_holder).asInstanceOf[ToolbarFragment]
     if (!currentFragment.onBackPressed())
       if (currentFragment.isInstanceOf[ProfilesFragment]) super.onBackPressed()
       else drawer.setSelection(DRAWER_PROFILES)
