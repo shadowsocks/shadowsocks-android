@@ -33,6 +33,9 @@ class GlobalConfigFragment extends PreferenceFragmentCompatDividers {
   override def onCreatePreferencesFix(bundle: Bundle, key: String) {
     getPreferenceManager.setPreferenceDataStore(app.dataStore)
     app.dataStore.putString(Key.serviceMode, app.dataStore.serviceMode) // temporary workaround for support lib bug
+    app.dataStore.putString(Key.portProxy, app.dataStore.portProxy.toString)
+    app.dataStore.putString(Key.portLocalDns, app.dataStore.portLocalDns.toString)
+    app.dataStore.putString(Key.portTransproxy, app.dataStore.portTransproxy.toString)
     addPreferencesFromResource(R.xml.pref_global)
     val switch = findPreference(Key.isAutoConnect).asInstanceOf[SwitchPreference]
     switch.setOnPreferenceChangeListener((_, value) => {

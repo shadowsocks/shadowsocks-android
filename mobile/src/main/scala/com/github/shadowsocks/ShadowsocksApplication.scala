@@ -163,7 +163,6 @@ class ShadowsocksApplication extends Application {
     TcpFastOpen.enabled(dataStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
 
     if (dataStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) copyAssets()
-    (dataStore.portProxy, dataStore.portLocalDns, dataStore.portTransproxy) // initialize ports for UI
 
     if (Build.VERSION.SDK_INT >= 26) {
       val nm = getSystemService(classOf[NotificationManager])
