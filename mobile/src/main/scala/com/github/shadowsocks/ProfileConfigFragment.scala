@@ -30,13 +30,12 @@ import android.support.v7.preference.{Preference, PreferenceDataStore}
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener
 import android.text.TextUtils
 import android.view.MenuItem
-import be.mygod.preference.{NumberPickerPreference, NumberPickerPreferenceDialogFragment}
 import com.github.shadowsocks.ShadowsocksApplication.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.plugin._
-import com.github.shadowsocks.preference.{BottomSheetPreferenceDialogFragment, IconListPreference, OnPreferenceDataStoreChangeListener, PluginConfigurationDialogFragment}
-import com.github.shadowsocks.utils.{Action, Key, Utils}
-import com.takisoft.fix.support.v7.preference.{EditTextPreference, PreferenceFragmentCompat, PreferenceFragmentCompatDividers}
+import com.github.shadowsocks.preference.{IconListPreference, OnPreferenceDataStoreChangeListener, PluginConfigurationDialogFragment}
+import com.github.shadowsocks.utils.{Action, Key}
+import com.takisoft.fix.support.v7.preference.{EditTextPreference, PreferenceFragmentCompatDividers}
 
 object ProfileConfigFragment {
   private final val REQUEST_CODE_PLUGIN_CONFIGURE = 1

@@ -9,10 +9,9 @@ Cannot connect to server:
 
 Crash: [Submit an issue](https://github.com/shadowsocks/shadowsocks-android/issues/new) with logcat attached, or submit a crash report to Google Play. Then, try wiping app data.
 
-### UI tips
+### How to create a widget and/or switch profile based on network connectivity?
 
-* Tap the number to enter the port you wish to use; (if the keyboard doesn't pop up automatically for some reason)
-* Use Tasker integration to create a desktop widget.
+Use [Tasker](http://tasker.dinglisch.net/) integration.
 
 ### How to add QR code from local gallery?
 

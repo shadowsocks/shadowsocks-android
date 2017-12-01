@@ -14,11 +14,11 @@
                 android:key="proxy"
                 app:pref_summaryHasText="%s"
                 android:title="@string/proxy"/>
-        <be.mygod.preference.NumberPickerPreference
-                app:min="1"
-                app:max="65535"
+        <AutoSummaryEditTextPreference
                 android:key="remotePortNum"
-                android:summary="%d"
+                android:inputType="number"
+                android:maxLength="5"
+                app:pref_summaryHasText="%s"
                 android:title="@string/remote_port"/>
         <AutoSummaryEditTextPreference
                 android:inputType="textPassword"

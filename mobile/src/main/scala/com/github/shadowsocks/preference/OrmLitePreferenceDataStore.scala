@@ -6,7 +6,7 @@ import java.util
 
 import android.support.v7.preference.PreferenceDataStore
 import com.github.shadowsocks.database.{DBHelper, KeyValuePair}
-import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.{Key, Utils}
 
 import scala.collection.JavaConversions._
 
@@ -98,12 +98,19 @@ final class OrmLitePreferenceDataStore(dbHelper: DBHelper) extends PreferenceDat
   def registerChangeListener(listener: OnPreferenceDataStoreChangeListener): Unit = listeners += listener
   def unregisterChangeListener(listener: OnPreferenceDataStoreChangeListener): Unit = listeners -= listener
 
+  private def getLocalPort(key: String) = getInt(key, 0) match {
+    case 0 => Utils.parsePort(getString(key), 0)
+    case value =>
+      putString(key, value.toString)
+      value
+  }
+
   def profileId: Int = getInt(Key.id, 0)
   def profileId_=(i: Int): Unit = putInt(Key.id, i)
   def serviceMode: String = getString(Key.serviceMode, Key.modeVpn)
-  def portProxy: Int = getInt(Key.portProxy, 0)
-  def portLocalDns: Int = getInt(Key.portLocalDns, 0)
-  def portTransproxy: Int = getInt(Key.portTransproxy, 0)
+  def portProxy: Int = getLocalPort(Key.portProxy)
+  def portLocalDns: Int = getLocalPort(Key.portLocalDns)
+  def portTransproxy: Int = getLocalPort(Key.portTransproxy)
 
   def proxyApps: Boolean = getBoolean(Key.proxyApps)
   def proxyApps_=(value: Boolean): Unit = putBoolean(Key.proxyApps, value)

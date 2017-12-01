@@ -10,7 +10,4 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material.Fix</item>
         <item name="preferenceCategory_marginBottom">8dp</item>
     </style>
-    <style name="NumberPickerStyle">
-        <item name="android:textSize">18sp</item>
-    </style>
 </resources>

@@ -17,23 +17,23 @@
             android:defaultValue="vpn"
             android:summary="%s"
             android:title="@string/service_mode"/>
-        <be.mygod.preference.NumberPickerPreference
-            app:min="1025"
-            app:max="65535"
+        <AutoSummaryEditTextPreference
             android:key="portProxy"
-            android:summary="%d"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
             android:title="@string/port_proxy"/>
-        <be.mygod.preference.NumberPickerPreference
-            app:min="1025"
-            app:max="65535"
+        <AutoSummaryEditTextPreference
             android:key="portLocalDns"
-            android:summary="%d"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
             android:title="@string/port_local_dns"/>
-        <be.mygod.preference.NumberPickerPreference
-            app:min="1025"
-            app:max="65535"
+        <AutoSummaryEditTextPreference
             android:key="portTransproxy"
-            android:summary="%d"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
             android:title="@string/port_transproxy"/>
     </PreferenceCategory>
 </PreferenceScreen>

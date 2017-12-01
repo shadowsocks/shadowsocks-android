@@ -31,10 +31,9 @@ import android.content.res.Configuration
 import android.os.{Binder, Build, LocaleList}
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
-import be.mygod.preference.{NumberPickerPreference, NumberPickerPreferenceDialogFragment}
 import com.evernote.android.job.JobManager
 import com.github.shadowsocks.acl.DonaldTrump
-import com.github.shadowsocks.bg.{BaseService, ProxyService, TransproxyService, VpnService}
+import com.github.shadowsocks.bg.{ProxyService, TransproxyService, VpnService}
 import com.github.shadowsocks.database.{DBHelper, Profile, ProfileManager}
 import com.github.shadowsocks.preference.{BottomSheetPreferenceDialogFragment, IconListPreference, OrmLitePreferenceDataStore}
 import com.github.shadowsocks.utils.CloseUtils._
@@ -158,8 +157,6 @@ class ShadowsocksApplication extends Application {
         if (task.isSuccessful) remoteConfig.activateFetched() else Log.e(TAG, "Failed to fetch config"))
 
     JobManager.create(this).addJobCreator(DonaldTrump)
-    PreferenceFragmentCompat.registerPreferenceFragment(classOf[NumberPickerPreference],
-      classOf[NumberPickerPreferenceDialogFragment])
     PreferenceFragmentCompat.registerPreferenceFragment(classOf[IconListPreference],
       classOf[BottomSheetPreferenceDialogFragment])
 
