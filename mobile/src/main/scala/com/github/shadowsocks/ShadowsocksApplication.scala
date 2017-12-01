@@ -103,7 +103,8 @@ class ShadowsocksApplication extends Application {
           case "SG" => SIMPLIFIED_CHINESE
           case "HK" | "MO" => TRADITIONAL_CHINESE
           case _ =>
-            Log.w(TAG, "Unknown zh locale: %s. Falling back to zh-Hans-CN...".format(locale.toLanguageTag))
+            Log.w(TAG, "Unknown zh locale: %s. Falling back to zh-Hans-CN..."
+              .formatLocal(Locale.ENGLISH, if (Build.VERSION.SDK_INT >= 21) locale.toLanguageTag else locale))
             SIMPLIFIED_CHINESE
         }
     }
