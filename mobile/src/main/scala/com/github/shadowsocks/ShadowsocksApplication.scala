@@ -93,8 +93,8 @@ class ShadowsocksApplication extends Application {
   }
 
   private def checkChineseLocale(locale: Locale): Locale = if (locale.getLanguage == "zh") locale.getCountry match {
-    case "CN" | "TW" => null            // already supported
-    case _ => locale.getScript match {  // fallback to the corresponding script
+    case "CN" | "TW" => null
+    case _ => (if (Build.VERSION.SDK_INT >= 21) locale.getScript else null) match {
       case "Hans" => SIMPLIFIED_CHINESE
       case "Hant" => TRADITIONAL_CHINESE
       case script =>
