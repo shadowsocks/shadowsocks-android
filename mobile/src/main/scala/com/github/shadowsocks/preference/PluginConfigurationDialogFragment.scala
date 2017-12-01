@@ -20,9 +20,11 @@
 
 package com.github.shadowsocks.preference
 
-import android.app.AlertDialog
 import android.content.DialogInterface
-import be.mygod.preference.EditTextPreferenceDialogFragment
+import android.support.v7.app.AlertDialog
+import android.support.v7.preference.EditTextPreferenceDialogFragmentCompat
+import android.view.View
+import android.widget.EditText
 import com.github.shadowsocks.ProfileConfigActivity
 import com.github.shadowsocks.plugin.{PluginContract, PluginManager}
 
@@ -33,8 +35,10 @@ object PluginConfigurationDialogFragment {
   final val PLUGIN_ID_FRAGMENT_TAG = "com.github.shadowsocks.preference.PluginConfigurationDialogFragment.PLUGIN_ID"
 }
 
-class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment {
+class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragmentCompat {
   import PluginConfigurationDialogFragment._
+
+  private var editText: EditText = _
 
   override def onPrepareDialogBuilder(builder: AlertDialog.Builder) {
     super.onPrepareDialogBuilder(builder)
@@ -42,5 +46,10 @@ class PluginConfigurationDialogFragment extends EditTextPreferenceDialogFragment
     if (intent.resolveActivity(getActivity.getPackageManager) != null) builder.setNeutralButton("?", ((_, _) =>
       getActivity.startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.getText.toString),
         ProfileConfigActivity.REQUEST_CODE_PLUGIN_HELP)): DialogInterface.OnClickListener)
+  }
+
+  override def onBindDialogView(view: View) {
+    super.onBindDialogView(view)
+    editText = view.findViewById(android.R.id.edit)
   }
 }

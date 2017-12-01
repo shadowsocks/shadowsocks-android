@@ -21,11 +21,11 @@
 package be.mygod.preference
 
 import android.content.Context
-import android.support.v14.preference.PreferenceDialogFragment
+import android.support.v7.preference.PreferenceDialogFragmentCompat
 import android.view.{View, ViewGroup}
 import android.widget.NumberPicker
 
-class NumberPickerPreferenceDialogFragment extends PreferenceDialogFragment {
+class NumberPickerPreferenceDialogFragment extends PreferenceDialogFragmentCompat {
   private lazy val preference = getPreference.asInstanceOf[NumberPickerPreference]
   private lazy val picker = preference.picker
 

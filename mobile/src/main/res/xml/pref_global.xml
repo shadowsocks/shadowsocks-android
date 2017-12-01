@@ -8,9 +8,9 @@
     <SwitchPreference android:key="tcp_fastopen"
                       android:summary="@string/tcp_fastopen_summary"
                       android:title="TCP Fast Open"/>
-    <be.mygod.preference.PreferenceCategory
+    <PreferenceCategory
         android:title="@string/advanced">
-        <DropDownPreference
+        <SimpleMenuPreference
             android:key="serviceMode"
             android:entries="@array/service_modes"
             android:entryValues="@array/service_mode_values"
@@ -35,5 +35,5 @@
             android:key="portTransproxy"
             android:summary="%d"
             android:title="@string/port_transproxy"/>
-    </be.mygod.preference.PreferenceCategory>
+    </PreferenceCategory>
 </PreferenceScreen>

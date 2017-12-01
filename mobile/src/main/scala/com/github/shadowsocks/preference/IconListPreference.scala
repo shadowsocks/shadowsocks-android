@@ -6,15 +6,11 @@ import android.support.annotation.ArrayRes
 import android.support.v7.preference.ListPreference
 import android.support.v7.preference.Preference.OnPreferenceChangeListener
 import android.util.AttributeSet
-import be.mygod.preference.DialogPreferencePlus
 
 /**
   * @author Mygod
   */
-class IconListPreference(context: Context, attrs: AttributeSet = null) extends ListPreference(context, attrs)
-  with DialogPreferencePlus {
-  override def createDialog() = new BottomSheetPreferenceDialogFragment()
-
+class IconListPreference(context: Context, attrs: AttributeSet = null) extends ListPreference(context, attrs) {
   private var mEntryIcons: Array[Drawable] = _
   def selectedEntry: Int = getEntryValues.indexOf(getValue)
 

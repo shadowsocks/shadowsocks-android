@@ -29,7 +29,7 @@ import android.widget.NumberPicker
 import com.github.shadowsocks.plugin.R
 
 class NumberPickerPreference(private val context: Context, attrs: AttributeSet = null)
-  extends DialogPreference(context, attrs) with DialogPreferencePlus with SummaryPreference {
+  extends DialogPreference(context, attrs) with SummaryPreference {
   private[preference] val picker = new NumberPicker(new ContextThemeWrapper(context, R.style.NumberPickerStyle))
   private var value: Int = _
 
@@ -39,8 +39,6 @@ class NumberPickerPreference(private val context: Context, attrs: AttributeSet =
     setMax(a.getInt(R.styleable.NumberPickerPreference_max, Int.MaxValue - 1))
     a.recycle()
   }
-
-  override def createDialog() = new NumberPickerPreferenceDialogFragment()
 
   def getValue: Int = value
   def getMin: Int = if (picker == null) 0 else picker.getMinValue
