@@ -359,7 +359,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         })
     }
 
-    var black_list = profile.route match {
+    val black_list = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST=> {
         getBlackList
       }
@@ -380,7 +380,7 @@ class ShadowsocksVpnService extends VpnService with BaseService {
         black_list, reject)
     }
 
-    var conf = profile.route match {
+    val conf = profile.route match {
       case Route.BYPASS_CHN | Route.BYPASS_LAN_CHN | Route.GFWLIST => {
         ConfigUtils.PDNSD_DIRECT.formatLocal(Locale.ENGLISH, protect, getApplicationInfo.dataDir,
           "0.0.0.0", profile.localPort + 53, china_dns_settings, profile.localPort + 63, reject)
