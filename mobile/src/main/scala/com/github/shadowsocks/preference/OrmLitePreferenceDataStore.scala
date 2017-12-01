@@ -125,4 +125,12 @@ final class OrmLitePreferenceDataStore(dbHelper: DBHelper) extends PreferenceDat
   def plugin_=(value: String): Unit = putString(Key.plugin, value)
   def dirty: Boolean = getBoolean(Key.dirty)
   def dirty_=(value: Boolean): Unit = putBoolean(Key.dirty, value)
+
+  def initGlobal() {
+    // temporary workaround for support lib bug
+    if (getString(Key.serviceMode) == null) putString(Key.serviceMode, serviceMode)
+    if (getString(Key.portProxy) == null) putString(Key.portProxy, portProxy.toString)
+    if (getString(Key.portLocalDns) == null) putString(Key.portLocalDns, portLocalDns.toString)
+    if (getString(Key.portTransproxy) == null) putString(Key.portTransproxy, portTransproxy.toString)
+  }
 }
