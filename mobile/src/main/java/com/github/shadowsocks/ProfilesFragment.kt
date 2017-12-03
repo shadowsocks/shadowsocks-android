@@ -210,12 +210,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
             R.id.action_qr_code_nfc -> {
-                fragmentManager!!.beginTransaction().add(QRCodeDialog(item.toString()), "")
+                fragmentManager!!.beginTransaction().add(QRCodeDialog(this.item.toString()), "")
                         .commitAllowingStateLoss()
                 true
             }
             R.id.action_export -> {
-                clipboard.primaryClip = ClipData.newPlainText(null, item.toString())
+                clipboard.primaryClip = ClipData.newPlainText(null, this.item.toString())
                 true
             }
             else -> false
