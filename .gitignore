@@ -1,25 +1,31 @@
-target
+# Gradle & Android Studio
 local.properties
-local.sbt
-/proguard-sbt.txt
+.gradle/
+.externalNativeBuild/
+build/
+captures/
 
-#Intellij IDEA
 .idea/
 .d
 gen/
+*.iml
 
-mobile/src/main/libs
-mobile/src/main/obj
-mobile/src/main/jni/overture
+core/src/main/libs
+core/src/main/obj
+core/src/main/jni/overture
 
-mobile/src/overture/.deps
-mobile/src/overture/bin
-mobile/src/overture/pkg
+core/src/overture/.deps
+core/src/overture/bin
+core/src/overture/pkg
 
-mobile/src/overture/src/github.com/Sirupsen
-mobile/src/overture/src/github.com/mattn
-mobile/src/overture/src/github.com/miekg
-mobile/src/overture/src/github.com/shawn1m
-mobile/src/overture/src/github.com/tools
-mobile/src/overture/src/golang.org
-mobile/src/overture/src/gopkg.in
+core/src/overture/src/github.com/Sirupsen
+core/src/overture/src/github.com/mattn
+core/src/overture/src/github.com/miekg
+core/src/overture/src/github.com/shawn1m
+core/src/overture/src/github.com/tools
+core/src/overture/src/golang.org
+core/src/overture/src/gopkg.in
+
+# work in progress
+tv/
+things/

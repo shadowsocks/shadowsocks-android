@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools" package="com.github.shadowsocks">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.github.shadowsocks">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -15,17 +16,14 @@
     <uses-feature android:name="android.hardware.camera"
                   android:required="false"/>
 
-    <uses-sdk
-            android:minSdkVersion="19"
-            android:targetSdkVersion="27"/>
-
     <application
-            android:name=".ShadowsocksApplication"
-            android:icon="@mipmap/ic_launcher"
-            android:backupAgent=".ShadowsocksBackupAgent"
-            android:label="@string/app_name"
-            android:networkSecurityConfig="@xml/network_security_config"
-            android:banner="@drawable/ic_start_connected">
+        android:name=".App"
+        android:icon="@mipmap/ic_launcher"
+        android:backupAgent=".ConfigBackupHelper"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:banner="@drawable/ic_start_connected">
 
         <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
                    android:value="true" />
@@ -33,11 +31,14 @@
                    android:value="@integer/google_play_services_version"/>
         <meta-data android:name="com.google.android.backup.api_key"
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts"/>
 
         <activity
-                android:name=".MainActivity"
-                android:label="@string/app_name"
-                android:launchMode="singleTask">
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -62,32 +63,32 @@
         </activity>
 
         <activity
-                android:name=".ProfileConfigActivity"
-                android:excludeFromRecents="true"
-                android:label="@string/profile_config"
-                android:launchMode="singleTask"/>
+            android:name=".ProfileConfigActivity"
+            android:excludeFromRecents="true"
+            android:label="@string/profile_config"
+            android:launchMode="singleTask"/>
 
         <activity
-                android:name=".ShadowsocksRunnerActivity"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"
-                android:excludeFromRecents="true"
-		        android:taskAffinity=""
-                android:launchMode="singleTask"/>
+            android:name=".VpnRequestActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleTask"/>
 
         <activity
-                android:name=".AppManager"
-                android:label="@string/proxied_apps"
-                android:parentActivityName=".ProfileConfigActivity"
-                android:excludeFromRecents="true"
-                android:launchMode="singleTask"/>
+            android:name=".AppManager"
+            android:label="@string/proxied_apps"
+            android:parentActivityName=".ProfileConfigActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"/>
 
         <activity
-                android:name=".ScannerActivity"
-                android:label="@string/add_profile_methods_scan_qr_code"
-                android:parentActivityName=".MainActivity"
-                android:excludeFromRecents="true"/>
+            android:name=".ScannerActivity"
+            android:label="@string/add_profile_methods_scan_qr_code"
+            android:parentActivityName=".MainActivity"
+            android:excludeFromRecents="true"/>
 
-        <activity android:name=".TaskerActivity"
+        <activity android:name=".tasker.ConfigActivity"
                   android:icon="@mipmap/ic_launcher">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
@@ -95,24 +96,24 @@
         </activity>
 
         <activity
-                android:name=".QuickToggleShortcut"
-                android:label="@string/quick_toggle"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"
-                android:excludeFromRecents="true"
-                android:taskAffinity=""
-                android:process=":bg"
-                android:launchMode="singleTask">
+            android:name=".QuickToggleShortcut"
+            android:label="@string/quick_toggle"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:process=":bg"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
         </activity>
 
         <service
-                android:name=".bg.VpnService"
-                android:process=":bg"
-                android:label="@string/app_name"
-                android:permission="android.permission.BIND_VPN_SERVICE"
-                android:exported="false">
+            android:name=".bg.VpnService"
+            android:process=":bg"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>
             </intent-filter>
@@ -130,7 +131,7 @@
             android:exported="false">
         </service>
 
-        <service android:name=".bg.ServiceTileService" android:label="@string/quick_toggle"
+        <service android:name=".bg.TileService" android:label="@string/quick_toggle"
                  android:process=":bg"
                  android:icon="@drawable/ic_start_connected"
                  android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
@@ -145,7 +146,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".TaskerReceiver" android:process=":bg" tools:ignore="ExportedReceiver">
+        <receiver android:name=".tasker.ActionListener" android:process=":bg" tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
@@ -165,5 +166,4 @@
         <receiver android:name="com.evernote.android.job.JobBootReceiver"
                   android:process=":bg"/>
     </application>
-
 </manifest>
