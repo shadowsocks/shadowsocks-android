@@ -3,18 +3,17 @@
 [![Build Status](https://api.travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
 [![Releases](https://img.shields.io/github/downloads/shadowsocks/shadowsocks-android/total.svg)](https://github.com/shadowsocks/shadowsocks-android/releases)
 
-A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.  
+A [shadowsocks](http://shadowsocks.org) client for Android, written in Kotlin.  
 <a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
 
 
 ### PREREQUISITES
 
 * JDK 1.8
-* SBT 0.13.0+
 * Go 1.4+
 * Android SDK
   - Build Tools 26+
-  - Android Support Repository and Google Repository (see `build.sbt` for version)
+  - Android Support Repository and Google Repository (see `build.gradle` for version)
   - Android NDK r16+
 
 ### BUILD
