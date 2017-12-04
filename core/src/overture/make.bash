@@ -26,19 +26,19 @@ ANDROID_X86_STRIP=$ANDROID_X86_TOOLCHAIN/bin/i686-linux-android-strip
 
 try mkdir -p $DEPS $TARGET/armeabi-v7a $TARGET/x86 $TARGET/arm64-v8a
 
-if [ ! -d "$ANDROID_ARM_TOOLCHAIN" ]; then
+if [ ! -f "$ANDROID_ARM_CC" ]; then
     echo "Make standalone toolchain for ARM arch"
     $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch arm \
         --api $MIN_API --install-dir $ANDROID_ARM_TOOLCHAIN
 fi
 
-if [ ! -d "$ANDROID_ARM64_TOOLCHAIN" ]; then
+if [ ! -f "$ANDROID_ARM64_CC" ]; then
     echo "Make standalone toolchain for ARM64 arch"
     $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch arm64 \
         --api 21 --install-dir $ANDROID_ARM64_TOOLCHAIN
 fi
 
-if [ ! -d "$ANDROID_X86_TOOLCHAIN" ]; then
+if [ ! -f "$ANDROID_X86_CC" ]; then
     echo "Make standalone toolchain for X86 arch"
     $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch x86 \
         --api $MIN_API --install-dir $ANDROID_X86_TOOLCHAIN
