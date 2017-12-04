@@ -27,6 +27,7 @@ android:
     components:
         - tools
         - build-tools-27.0.0
+        - build-tools-26.0.2
         - extra-android-m2repository
         - extra-google-m2repository
 
