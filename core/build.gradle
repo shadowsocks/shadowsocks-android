@@ -37,6 +37,18 @@ task goBuild(type: Exec) {
     args "-c", "src/overture/make.bash " + minSdkVersion
 }
 
+task goClean(type: Exec) {
+    executable "sh"
+    args "-c", "src/overture/clean.bash"
+}
+
+tasks.whenTaskAdded { task ->
+  if (task.name == 'externalNativeBuildDebug' ||
+          task.name == 'externalNativeBuildRelease') {
+      task.dependsOn(goBuild)
+    }
+}
+
 dependencies {
     api project(':plugin')
     testImplementation "junit:junit:$junitVersion"
