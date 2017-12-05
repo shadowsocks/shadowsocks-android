@@ -4424,7 +4424,14 @@
 223.255.236.0/22
 223.255.252.0/23
 
-[white_list]
+[proxy_list]
+# manhuaren
+mangaapi.manhuaren.com
+# Telegram IPs$
+91.108.4.0/22
+91.108.56.0/22
+109.239.140.0/24
+149.154.160.0/20
 ^(.*\.)?4tern\.com$
 ^(.*\.)?adorama\.com$
 ^(.*\.)?akiba-web\.com$
@@ -4603,6 +4610,7 @@
 ^(.*\.)?freewww\.info$
 ^(.*\.)?ftp1\.biz$
 ^(.*\.)?ftpserver\.biz$
+^(.*\.)?gamer\.com\.tw$
 ^(.*\.)?gettrials\.com$
 ^(.*\.)?got-game\.org$
 ^(.*\.)?gr8domain\.biz$
@@ -4667,6 +4675,7 @@
 ^(.*\.)?organiccrap\.com$
 ^(.*\.)?otzo\.com$
 ^(.*\.)?ourhobby\.com$
+^(.*\.)?pixiv\.net$
 ^(.*\.)?pcanywhere\.net$
 ^(.*\.)?port25\.biz$
 ^(.*\.)?qhigh\.com$
@@ -4733,7 +4742,7 @@
 ^(.*\.)?android\.com$
 ^(.*\.)?androidify\.com$
 ^(.*\.)?appspot\.com$
-^(.*\.)?blogspot(\.[^.]{2,4}){1,2}$
+^(.*\.)?blogspot(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-)){1,2}$
 ^(.*\.)?certificate-transparency\.org$
 ^(.*\.)?chrome\.com$
 ^(.*\.)?chromecast\.com$
@@ -4756,8 +4765,8 @@
 ^(.*\.)?gmail\.com$
 ^(.*\.)?gmodules\.com$
 ^(.*\.)?goo\.gl$
-^(.*\.)?google(\.[^.]{2,4}){1,2}$
-^(.*\.)?googleapis(\.[^.]{2,4}){1,2}$
+^(.*\.)?google(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-)){1,2}$
+^(.*\.)?googleapis(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-)){1,2}$
 ^(.*\.)?googleapps\.com$
 ^(.*\.)?googleartproject\.com$
 ^(.*\.)?googleblog\.com$
@@ -4815,7 +4824,6 @@
 ^(.*\.)?zynamics\.com$
 ^(.*\.)?kat\.cr$
 ^(.*\.)?naughtyamerica\.com$
-^(.*\.)?v2ex\.com$
 ^(.*\.)?0to255\.com$
 ^(.*\.)?100ke\.org$
 ^(.*\.)?1000giri\.net$
