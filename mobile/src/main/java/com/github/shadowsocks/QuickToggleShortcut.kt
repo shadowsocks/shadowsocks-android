@@ -29,12 +29,11 @@ import android.os.PersistableBundle
 import android.support.v4.content.pm.ShortcutInfoCompat
 import android.support.v4.content.pm.ShortcutManagerCompat
 import android.support.v4.graphics.drawable.IconCompat
-import android.support.v7.app.AppCompatActivity
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 
-class QuickToggleShortcut : AppCompatActivity(), ShadowsocksConnection.Interface {
+class QuickToggleShortcut : Activity(), ShadowsocksConnection.Interface {
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
         if (intent.action == Intent.ACTION_CREATE_SHORTCUT) {

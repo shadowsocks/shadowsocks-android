@@ -38,11 +38,15 @@ android {
         vectorDrawables.useSupportLibrary true
         resConfigs "fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
     }
+    signingConfigs {
+        release
+    }
     buildTypes {
         release {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     lintOptions {
@@ -51,6 +55,18 @@ android {
     sourceSets.main.jniLibs.srcDirs +=
             new File(project(':core').buildDir, "intermediates/bundles/${getCurrentFlavor()}/jni")
     sourceSets.main.jniLibs.srcDirs += new File(project(':core').projectDir, "src/main/jni/overture")
+}
+
+def propsFile = rootProject.file('local.properties')
+if (propsFile.exists()) {
+    def props = new Properties()
+    props.load(new FileInputStream(propsFile))
+    android.signingConfigs.release.storeFile = file(props['storeFile'])
+    android.signingConfigs.release.storePassword = props['storePassword']
+    android.signingConfigs.release.keyAlias = props['keyAlias']
+    android.signingConfigs.release.keyPassword = props['keyPassword']
+} else {
+    android.buildTypes.release.signingConfig = null
 }
 
 dependencies {

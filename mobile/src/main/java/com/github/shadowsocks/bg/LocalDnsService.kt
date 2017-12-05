@@ -46,6 +46,23 @@ object LocalDnsService {
             super.startNativeProcesses()
             val profile = data.profile!!
 
+            fun makeDns(name: String, address: String, edns: Boolean = true): JSONObject {
+                val dns = JSONObject()
+                .put("Name", name)
+                .put("Address", (when (address.parseNumericAddress()) {
+                    is Inet6Address -> "[$address]"
+                    else -> address
+                }) + ":53")
+                .put("Timeout", 6)
+                .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
+                if (edns) dns
+                .put("Protocol", "tcp")
+                .put("Socks5Address", "127.0.0.1:" + DataStore.portProxy)
+                else dns.put("Protocol", "udp")
+
+                return dns
+            }
+
             fun buildOvertureConfig(file: String): String {
                 val config = JSONObject()
                         .put("BindAddress", "127.0.0.1:" + DataStore.portLocalDns)
@@ -54,23 +71,8 @@ object LocalDnsService {
                         .put("HostsFile", "hosts")
                         .put("MinimumTTL", 3600)
                         .put("CacheSize", 4096)
-                fun makeDns(name: String, address: String, edns: Boolean = true) = {
-                    val dns = JSONObject()
-                            .put("Name", name)
-                            .put("Address", (when (address.parseNumericAddress()) {
-                                is Inet6Address -> "[$address]"
-                                else -> address
-                            }) + ":53")
-                            .put("Timeout", 6)
-                            .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
-                    if (edns) dns
-                            .put("Protocol", "tcp")
-                            .put("Socks5Address", "127.0.0.1:" + DataStore.portProxy)
-                    else dns.put("Protocol", "udp")
-                    dns
-                }
                 val remoteDns = JSONArray(profile.remoteDns.split(",")
-                        .mapIndexed { i, dns -> makeDns("UserDef-" + i, dns.trim())() })
+                        .mapIndexed { i, dns -> makeDns("UserDef-" + i, dns.trim()) })
                 val localDns = JSONArray(arrayOf(
                         makeDns("Primary-1", "119.29.29.29", false),
                         makeDns("Primary-2", "114.114.114.114", false)

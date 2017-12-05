@@ -20,14 +20,25 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontwarn com.google.android.gms.internal.**
+-keepattributes *DatabaseField*
+-keepattributes *DatabaseTable*
+-keepattributes *SerializedName*
+-keep class com.j256.**
+-keepclassmembers class com.j256.** { *; }
+-keep enum com.j256.**
+-keepclassmembers enum com.j256.** { *; }
+-keep interface com.j256.**
+-keepclassmembers interface com.j256.** { *; }
+-keep class com.github.shadowsocks.** { *; }
 -dontwarn com.j256.ormlite.**
+
+-dontwarn com.google.android.gms.internal.**
 -dontwarn okhttp3.**
 -dontwarn okio.**
 -dontwarn org.xbill.**
--keep class com.github.shadowsocks.JniHelper { *; }
 -dontwarn com.evernote.android.job.gcm.**
 -dontwarn com.evernote.android.job.util.GcmAvailableHelper
+
 -keep public class com.evernote.android.job.v21.PlatformJobService
 -keep public class com.evernote.android.job.v14.PlatformAlarmService
 -keep public class com.evernote.android.job.v14.PlatformAlarmReceiver

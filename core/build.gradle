@@ -37,12 +37,6 @@ task goBuild(type: Exec) {
     args "-c", "src/overture/make.bash " + minSdkVersion
 }
 
-tasks.whenTaskAdded { task ->
-  if (task.name == 'generateJsonModelDebug') {
-      task.dependsOn(goBuild)
-    }
-}
-
 dependencies {
     api project(':plugin')
     testImplementation "junit:junit:$junitVersion"
