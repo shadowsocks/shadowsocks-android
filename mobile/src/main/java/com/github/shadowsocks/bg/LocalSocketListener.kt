@@ -54,16 +54,26 @@ abstract class LocalSocketListener(private val tag: String) : Thread() {
         while (true) {
             val serverSocket = serverSocket.get() ?: return
             try {
+                val socket = serverSocket.accept()
+
                 try {
-                    serverSocket.accept()
-                } catch (e: IOException) {
-                    Log.e(tag, "Error when accept socket", e)
+                    accept(socket)
+                } catch (e: Exception) {
+                    Log.e(tag, "Error when recv traffic stat", e)
                     app.track(e)
-                    null
-                }?.use(this::accept)
-            } catch (e: Exception) {
-                Log.e(tag, "Error when recv traffic stat", e)
+                }
+
+                try {
+                    socket.close()
+                } catch (e: IOException) {
+                    Log.e(tag, "Error when closing the local socket", e)
+                    app.track(e)
+                }
+
+            } catch (e: IOException) {
+                Log.e(tag, "Error when accept socket", e)
                 app.track(e)
+                return
             }
         }
     }
