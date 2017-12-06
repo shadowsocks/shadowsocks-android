@@ -11,26 +11,16 @@ env:
         - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
         - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
-scala:
-    - 2.11.11
-
-before_cache:
-    - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2 -name "*.lock" | xargs rm
-
 cache:
     directories:
-        - $HOME/.ivy2
-        - $HOME/.sbt
+        - $HOME/.gradle
 
 android:
     components:
         - tools
         - android-27
-        - build-tools-27.0.0
         - build-tools-26.0.2
-        - extra-android-m2repository
-        - extra-google-m2repository
+        - build-tools-27.0.0
 
 install:
     - >
