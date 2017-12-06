@@ -27,13 +27,14 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.BuildConfig
 import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.utils.Commandline
+import com.github.shadowsocks.utils.thread
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.Semaphore
 
 class GuardedProcess(private val cmd: List<String>) {
     companion object {
-        const val TAG = "GuardedProcess"
+        private const val TAG = "GuardedProcess"
     }
 
     private lateinit var guardThread: Thread
@@ -42,7 +43,7 @@ class GuardedProcess(private val cmd: List<String>) {
     @Volatile
     private lateinit var process: Process
 
-    private fun streamLogger(input: InputStream, logger: (String, String) -> Int) = Thread {
+    private fun streamLogger(input: InputStream, logger: (String, String) -> Int) = thread {
         try {
             input.bufferedReader().useLines { it.forEach { logger(TAG, it) } }
         } catch (_: IOException) { }    // ignore
@@ -52,7 +53,7 @@ class GuardedProcess(private val cmd: List<String>) {
         val semaphore = Semaphore(1)
         semaphore.acquire()
         var ioException: IOException? = null
-        guardThread = Thread({
+        guardThread = thread(name = "GuardThread-" + cmd.first()) {
             try {
                 var callback: (() -> Unit)? = null
                 while (!isDestroyed) {
@@ -64,8 +65,8 @@ class GuardedProcess(private val cmd: List<String>) {
                             .directory(app.filesDir)
                             .start()
 
-                    streamLogger(process.inputStream, Log::i).start()
-                    streamLogger(process.errorStream, Log::e).start()
+                    streamLogger(process.inputStream, Log::i)
+                    streamLogger(process.errorStream, Log::e)
 
                     if (callback == null) callback = onRestartCallback else callback()
 
@@ -87,8 +88,7 @@ class GuardedProcess(private val cmd: List<String>) {
             } finally {
                 semaphore.release()
             }
-        }, "GuardThread-" + cmd.first())
-        guardThread.start()
+        }
         semaphore.acquire()
         if (ioException != null) throw ioException!!
         return this
