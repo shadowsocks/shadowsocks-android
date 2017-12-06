@@ -43,8 +43,8 @@ task goClean(type: Exec) {
 }
 
 tasks.whenTaskAdded { task ->
-  if (task.name == 'externalNativeBuildDebug' ||
-          task.name == 'externalNativeBuildRelease') {
+  if (task.name == 'generateJsonModelDebug' ||
+          task.name == 'generateJsonModelRelease') {
       task.dependsOn(goBuild)
     }
 }
