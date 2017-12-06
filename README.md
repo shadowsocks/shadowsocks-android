@@ -20,16 +20,8 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Kotlin.
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk-bundle`)
 * Set environment variable `GOROOT_BOOTSTRAP` to `/path/to/go`
-* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
-* Create `mobile/local.properties` from `mobile/local.properties.example` with your own key information
-* Invoke the building like this
-
-```bash
-    git submodule update --init --recursive
-
-    # Build the App
-    sbt clean go-build android:package-release
-```
+* Fetch submodules using `$ git submodule update --init --recursive`
+* Build it using Android Studio or gradle script
 
 ### TRANSLATE
 

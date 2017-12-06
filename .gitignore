@@ -4,6 +4,7 @@ local.properties
 .externalNativeBuild/
 build/
 captures/
+release/
 
 .idea/
 .d

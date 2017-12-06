@@ -1,4 +1,0 @@
-storeFile=/path/to/your/keystore
-storePassword=passwd
-keyPassword=passwd
-keyAlias=alias
