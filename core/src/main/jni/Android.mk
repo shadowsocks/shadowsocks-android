@@ -476,17 +476,6 @@ LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files))
 
 include $(BUILD_STATIC_LIBRARY)
 
-########################################################
-## overture
-########################################################
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := overture
-LOCAL_SRC_FILES := overture/$(TARGET_ARCH_ABI)/liboverture.so
-
-include $(PREBUILT_SHARED_LIBRARY)
-
 # Import cpufeatures
 $(call import-module,android/cpufeatures)
 

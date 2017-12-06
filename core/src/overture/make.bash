@@ -8,7 +8,7 @@ function try () {
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MIN_API=$1
-TARGET=$DIR/../main/jni/overture
+TARGET=$DIR/bin
 DEPS=$DIR/.deps
 
 ANDROID_ARM_TOOLCHAIN=$DEPS/android-toolchain-${MIN_API}-arm

@@ -7,13 +7,7 @@ captures/
 release/
 
 .idea/
-.d
-gen/
 *.iml
-
-core/src/main/libs
-core/src/main/obj
-core/src/main/jni/overture
 
 core/src/overture/.deps
 core/src/overture/bin

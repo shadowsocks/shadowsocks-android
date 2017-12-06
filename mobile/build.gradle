@@ -54,7 +54,7 @@ android {
     }
     sourceSets.main.jniLibs.srcDirs +=
             new File(project(':core').buildDir, "intermediates/bundles/${getCurrentFlavor()}/jni")
-    sourceSets.main.jniLibs.srcDirs += new File(project(':core').projectDir, "src/main/jni/overture")
+    sourceSets.main.jniLibs.srcDirs += new File(project(':core').projectDir, "src/overture/bin")
 }
 
 dependencies {
