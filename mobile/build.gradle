@@ -38,15 +38,11 @@ android {
         vectorDrawables.useSupportLibrary true
         resConfigs "fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
     }
-    signingConfigs {
-        release
-    }
     buildTypes {
         release {
             shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
     lintOptions {
