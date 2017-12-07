@@ -70,5 +70,4 @@ public class JniHelper {
     private static native Object getExitValueMutex(Process process);
     public static native int sendFd(int fd, String path);
     public static native void close(int fd);
-    public static native void unlink(String path);
 }

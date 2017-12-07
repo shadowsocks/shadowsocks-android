@@ -23,8 +23,6 @@
 -keepattributes *DatabaseField*
 -keepattributes *DatabaseTable*
 -keepattributes *SerializedName*
--keepattributes Exceptions, InnerClasses
-
 -keep class com.j256.**
 -keepclassmembers class com.j256.** { *; }
 -keep enum com.j256.**

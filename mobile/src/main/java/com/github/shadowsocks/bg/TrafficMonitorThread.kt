@@ -21,6 +21,7 @@
 package com.github.shadowsocks.bg
 
 import android.net.LocalSocket
+import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import java.io.File
 import java.io.IOException
@@ -31,10 +32,15 @@ class TrafficMonitorThread : LocalSocketListener("TrafficMonitorThread") {
     override val socketFile = File(app.filesDir, "/stat_path")
 
     override fun accept(socket: LocalSocket) {
-        val buffer = ByteArray(16)
-        if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
-        val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
-        TrafficMonitor.update(stat.getLong(0), stat.getLong(8))
-        socket.outputStream.write(0)
+        try {
+            val buffer = ByteArray(16)
+            if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
+            val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
+            TrafficMonitor.update(stat.getLong(0), stat.getLong(8))
+            socket.outputStream.write(0)
+        } catch (e: Exception) {
+            Log.e(tag, "Error when recv traffic stat", e)
+            app.track(e)
+        }
     }
 }

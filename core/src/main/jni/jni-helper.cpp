@@ -72,12 +72,6 @@ JNIEXPORT void JNICALL Java_com_github_shadowsocks_JniHelper_close(JNIEnv *env, 
     close(fd);
 }
 
-JNIEXPORT void JNICALL Java_com_github_shadowsocks_JniHelper_unlink(JNIEnv *env, jobject thiz, jstring path) {
-    const char *sock_str  = env->GetStringUTFChars(path, 0);
-    unlink(sock_str);
-    env->ReleaseStringUTFChars(path, sock_str);
-}
-
 JNIEXPORT jint JNICALL
         Java_com_github_shadowsocks_JniHelper_sendFd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;
