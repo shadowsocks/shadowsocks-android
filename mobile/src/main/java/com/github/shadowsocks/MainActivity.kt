@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     private lateinit var fabProgressCircle: FABProgressCircle
     internal var crossfader: Crossfader<CrossFadeSlidingPaneLayout>? = null
     internal lateinit var drawer: Drawer
-    private var previousPosition: Int = 0   // it's actually lateinit
+    private var previousSelectedDrawer: Long = 0    // it's actually lateinit
 
     private var testCount = 0
     private lateinit var statusText: TextView
@@ -303,7 +303,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         } else drawer = drawerBuilder.build()
 
         if (savedInstanceState == null) displayFragment(ProfilesFragment())
-        previousPosition = drawer.currentSelectedPosition
+        previousSelectedDrawer = drawer.currentSelection
         statusText = findViewById(R.id.status)
         txText = findViewById(R.id.tx)
         txRateText = findViewById(R.id.txRate)
@@ -387,9 +387,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     override fun onItemClick(view: View?, position: Int, drawerItem: IDrawerItem<*, *>): Boolean {
-        if (position == previousPosition) drawer.closeDrawer() else {
-            previousPosition = position
-            when (drawerItem.identifier) {
+        val id = drawerItem.identifier
+        if (id == previousSelectedDrawer) drawer.closeDrawer() else {
+            previousSelectedDrawer = id
+            when (id) {
                 DRAWER_PROFILES -> displayFragment(ProfilesFragment())
                 DRAWER_GLOBAL_SETTINGS -> displayFragment(GlobalSettingsFragment())
                 DRAWER_ABOUT -> {
