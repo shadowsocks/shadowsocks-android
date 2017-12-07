@@ -157,8 +157,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             if (tx <= 0 && rx <= 0) traffic.visibility = View.GONE else {
                 traffic.visibility = View.VISIBLE
-                @SuppressLint("SetTextI18n")
-                traffic.text = "${TrafficMonitor.formatTraffic(tx)}↑\t${TrafficMonitor.formatTraffic(rx)}↓"
+                traffic.text = getString(R.string.traffic,
+                        TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx))
             }
 
             if (item.id == DataStore.profileId) {

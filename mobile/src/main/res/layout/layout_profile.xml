@@ -3,6 +3,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -11,13 +12,16 @@
     android:nextFocusRight="@+id/edit"
     android:orientation="vertical">
 
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="8dp"/>
+
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="4dp">
+        android:layout_marginLeft="16dp"
+        >
 
         <TextView
             android:id="@android:id/text1"
@@ -30,7 +34,8 @@
             android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            tools:text="@string/profile_name"/>
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/share"
@@ -59,10 +64,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="4dp">
+        android:layout_marginLeft="16dp"
+        >
 
         <TextView
             android:id="@android:id/text2"
@@ -73,6 +76,7 @@
             android:layout_toStartOf="@+id/traffic"
             android:ellipsize="end"
             android:maxLines="2"
+            tools:text="@string/profile_plugin"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"/>
 
@@ -82,8 +86,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_gravity="bottom"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
+            tools:text="@string/traffic"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"/>
     </RelativeLayout>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="8dp"/>
 </LinearLayout>
