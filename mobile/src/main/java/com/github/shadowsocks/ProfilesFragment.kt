@@ -244,10 +244,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         fun move(from: Int, to: Int) {
             undoManager.flush()
-            val step = if (from < to) 1 else -1
             val first = profiles[from]
             var previousOrder = first.userOrder
-            for (i in if (from < to) from until to else from..to + 1 step -1) {
+            val (step, range) = if (from < to) Pair(1, from until to) else Pair(-1, to + 1 downTo from)
+            for (i in range) {
                 val next = profiles[i + step]
                 val order = next.userOrder
                 next.userOrder = previousOrder
