@@ -148,7 +148,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             text1.text = item.formattedName
             val t2 = ArrayList<String>()
-            if (item.name.isNotEmpty()) t2 += item.formattedAddress
+            if (!item.name.isNullOrEmpty()) t2 += item.formattedAddress
             val id = PluginConfiguration(item.plugin ?: "").selected
             if (id.isNotEmpty()) t2 += app.getString(R.string.profile_plugin, id)
             if (t2.isEmpty()) text2.visibility = View.GONE else {

@@ -34,7 +34,7 @@ class ProxyService : Service(), BaseService.Interface {
 
     override val tag: String get() = "ShadowsocksProxyService"
     override fun createNotification(): ServiceNotification =
-            ServiceNotification(this, data.profile!!.name, "service-proxy", true)
+            ServiceNotification(this, data.profile!!.formattedName, "service-proxy", true)
 
     override fun onBind(intent: Intent): IBinder? = super.onBind(intent)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =

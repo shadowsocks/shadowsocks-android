@@ -77,7 +77,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override val tag: String get() = "ShadowsocksVpnService"
     override fun createNotification(): ServiceNotification =
-            ServiceNotification(this, data.profile!!.name, "service-vpn")
+            ServiceNotification(this, data.profile!!.formattedName, "service-vpn")
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null

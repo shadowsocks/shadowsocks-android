@@ -33,7 +33,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
 
     override val tag: String get() = "ShadowsocksTransproxyService"
     override fun createNotification(): ServiceNotification =
-            ServiceNotification(this, data.profile!!.name, "service-transproxy", true)
+            ServiceNotification(this, data.profile!!.formattedName, "service-transproxy", true)
 
     override fun onBind(intent: Intent): IBinder? = super.onBind(intent)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =

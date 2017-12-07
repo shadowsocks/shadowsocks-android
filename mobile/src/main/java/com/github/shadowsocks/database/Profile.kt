@@ -84,7 +84,7 @@ class Profile {
     var id: Int = 0
 
     @DatabaseField
-    var name: String = ""
+    var name: String? = ""
 
     @DatabaseField
     var host: String = "198.199.101.152"
@@ -135,7 +135,7 @@ class Profile {
     var plugin: String? = null
 
     val formattedAddress get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
-    val formattedName get() = if (name.isEmpty()) formattedAddress else name
+    val formattedName get() = if (name.isNullOrEmpty()) formattedAddress else name!!
 
     fun toUri(): Uri {
         val builder = Uri.Builder()
@@ -147,7 +147,7 @@ class Profile {
         val configuration = PluginConfiguration(plugin ?: "")
         if (configuration.selected.isNotEmpty())
             builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))
-        if (name.isNotEmpty()) builder.fragment(name)
+        if (!name.isNullOrEmpty()) builder.fragment(name)
         return builder.build()
     }
     override fun toString() = toUri().toString()
