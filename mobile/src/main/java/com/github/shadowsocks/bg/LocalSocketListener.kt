@@ -42,28 +42,24 @@ abstract class LocalSocketListener(protected val tag: String) : Thread() {
      */
     protected abstract fun accept(socket: LocalSocket)
     override fun run() {
+        while (!socketFile.delete()) Thread.sleep(100)
         try {
-            while (!socketFile.delete()) Thread.sleep(100)
+            val localSocket = LocalSocket()
+            localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
+            serverSocket.set(LocalServerSocket(localSocket.fileDescriptor))
+        } catch (e: IOException) {
+            Log.e(tag, "unable to bind", e)
+            return
+        }
+        while (true) {
+            val serverSocket = serverSocket.get() ?: return
             try {
-                val localSocket = LocalSocket()
-                localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
-                serverSocket.set(LocalServerSocket(localSocket.fileDescriptor))
+                serverSocket.accept()
             } catch (e: IOException) {
-                Log.e(tag, "unable to bind", e)
-                return
-            }
-            while (true) {
-                val serverSocket = serverSocket.get() ?: return
-                try {
-                    serverSocket.accept()
-                } catch (e: IOException) {
-                    Log.e(tag, "Error when accept socket", e)
-                    app.track(e)
-                    null
-                }?.use(this::accept)
-            }
-        } finally {
-            stopThread()
+                Log.e(tag, "Error when accept socket", e)
+                app.track(e)
+                null
+            }?.use(this::accept)
         }
     }
 
@@ -71,7 +67,6 @@ abstract class LocalSocketListener(protected val tag: String) : Thread() {
         val old = serverSocket.getAndSet(null) ?: return
         try {
             old.close()
-            if (!socketFile.delete()) socketFile.deleteOnExit()
         } catch (_: Exception) { }  // ignore
     }
 }
