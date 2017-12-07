@@ -36,9 +36,11 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
                 val iterator = Commandline.translateCommandline(line).drop(1).iterator()
                 while (iterator.hasNext()) {
                     val option = iterator.next()
-                    if (option == "--nocomp") opt.put("nocomp", null)
-                    else if (option.startsWith("--")) opt.put(option.substring(2), iterator.next())
-                    else throw IllegalArgumentException("Unknown kcptun parameter: " + option)
+                    when {
+                        option == "--nocomp" -> opt.put("nocomp", null)
+                        option.startsWith("--") -> opt.put(option.substring(2), iterator.next())
+                        else -> throw IllegalArgumentException("Unknown kcptun parameter: " + option)
+                    }
                 }
             } catch (exc: Exception) {
                 Log.w("PluginConfiguration", exc.message)
@@ -55,6 +57,6 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
         val result = LinkedList<PluginOptions>()
         for ((id, opt) in pluginsOptions) if (id == this.selected) result.addFirst(opt) else result.addLast(opt)
         if (!pluginsOptions.contains(selected)) result.addFirst(selectedOptions)
-        return result.map { it.toString(false) }.joinToString("\n")
+        return result.joinToString("\n") { it.toString(false) }
     }
 }

@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.util.SortedList
 import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.Window
@@ -76,6 +77,8 @@ fun Toast.position(view: View, window: Window, offsetX: Int = 0, offsetY: Int = 
             viewLocation[1] - rect.top + view.height + offsetY)
     return this
 }
+
+fun Float.dp(): Float = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, app.resources.displayMetrics)
 
 /**
  * Based on: https://stackoverflow.com/a/15656428/2245107

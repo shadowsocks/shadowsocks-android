@@ -25,7 +25,7 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.ProfilesFragment
 
 object ProfileManager {
-    const val TAG = "ProfileManager"
+    private const val TAG = "ProfileManager"
 
     fun createProfile(p: Profile? = null): Profile {
         val profile = p ?: Profile()

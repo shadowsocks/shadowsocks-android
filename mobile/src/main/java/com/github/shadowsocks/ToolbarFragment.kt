@@ -33,7 +33,7 @@ open class ToolbarFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar = view.findViewById(R.id.toolbar)
         val activity = activity as MainActivity
         if (activity.crossfader == null) activity.drawer.setToolbar(activity, toolbar, true)
     }

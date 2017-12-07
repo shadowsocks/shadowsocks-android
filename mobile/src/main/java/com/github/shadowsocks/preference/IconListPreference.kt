@@ -22,7 +22,6 @@ package com.github.shadowsocks.preference
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.preference.Preference.OnPreferenceChangeListener
 import android.support.v7.preference.ListPreference
 import android.util.AttributeSet
 
@@ -43,19 +42,19 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
     var unknownValueSummary: String? = null
     var entryPackageNames: Array<String>? = null
 
-    var listener: OnPreferenceChangeListener? = null
+    private var listener: OnPreferenceChangeListener? = null
     override fun getOnPreferenceChangeListener(): OnPreferenceChangeListener? = listener
     override fun setOnPreferenceChangeListener(listener: OnPreferenceChangeListener?) {
         this.listener = listener
     }
 
     init {
-        super.setOnPreferenceChangeListener(OnPreferenceChangeListener { preference, newValue ->
+        super.setOnPreferenceChangeListener({ preference, newValue ->
             val listener = listener
             if (listener == null || listener.onPreferenceChange(preference, newValue)) {
-                setValue(newValue.toString())
+                value = newValue.toString()
                 checkSummary()
-                if (entryIcons != null) setIcon(entryIcon)
+                if (entryIcons != null) icon = entryIcon
                 true
             } else false
         })
@@ -70,7 +69,9 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
         if (unknownValueSummary != null) summary = if (selectedEntry < 0) unknownValueSummary.format(value) else "%s"
     }
 
-    fun init() = setIcon(entryIcon)
+    fun init() {
+        icon = entryIcon
+    }
     override fun onSetInitialValue(restoreValue: Boolean, defaultValue: Any?) {
         super.onSetInitialValue(restoreValue, defaultValue)
         init()

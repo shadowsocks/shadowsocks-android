@@ -110,13 +110,17 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     }
 
     private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>(), SectionTitleProvider {
-        private val apps = getApps(packageManager).sortedWith(Comparator { a, b ->
-            when (Pair(proxiedApps.contains(a.packageName), proxiedApps.contains(b.packageName))) {
-                Pair(true, false) -> -1
-                Pair(false, true) -> 1
-                else -> a.name.compareTo(b.name, true)
-            }
-        })
+        private var apps = listOf<ProxiedApp>()
+
+        fun reload() {
+            apps = getApps(packageManager).sortedWith(Comparator { a, b ->
+                when (Pair(proxiedApps.contains(a.packageName), proxiedApps.contains(b.packageName))) {
+                    Pair(true, false) -> -1
+                    Pair(false, true) -> 1
+                    else -> a.name.compareTo(b.name, true)
+                }
+            })
+        }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(apps[position])
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder =
@@ -143,15 +147,17 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     }
     private fun loadAppsAsync() {
         if (!appsLoading.compareAndSet(false, true)) return
+        appListView.visibility = View.GONE
+        fastScroller.visibility = View.GONE
+        loadingView.visibility = View.VISIBLE
         thread {
-            var adapter: AppsAdapter?
+            val adapter = appListView.adapter as AppsAdapter
             do {
                 appsLoading.set(true)
-                adapter = AppsAdapter()
+                adapter.reload()
             } while (!appsLoading.compareAndSet(true, false))
             handler.post {
-                appListView.adapter = adapter
-                fastScroller.setRecyclerView(appListView)
+                adapter.notifyDataSetChanged()
                 val shortAnimTime = resources.getInteger(android.R.integer.config_shortAnimTime)
                 appListView.alpha = 0F
                 appListView.visibility = View.VISIBLE
@@ -204,7 +210,9 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         appListView = findViewById(R.id.list)
         appListView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         appListView.itemAnimator = DefaultItemAnimator()
+        appListView.adapter = AppsAdapter()
         fastScroller = findViewById(R.id.fastscroller)
+        fastScroller.setRecyclerView(appListView)
 
         instance = this
         loadAppsAsync()
@@ -241,9 +249,6 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         DataStore.individual = apps
                         DataStore.dirty = true
                         Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
-                        appListView.visibility = View.GONE
-                        fastScroller.visibility = View.GONE
-                        loadingView.visibility = View.VISIBLE
                         initProxiedApps(apps)
                         reloadApps()
                         return true

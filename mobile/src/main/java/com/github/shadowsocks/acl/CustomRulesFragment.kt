@@ -48,6 +48,7 @@ import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.dp
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
 import java.net.URL
@@ -76,6 +77,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private val text = view.findViewById<TextView>(android.R.id.text1)
 
         init {
+            view.setPaddingRelative(view.paddingStart, view.paddingTop,
+                    Math.max(view.paddingEnd, 20f.dp().toInt()), view.paddingBottom)
             view.setOnClickListener(this)
             view.setOnLongClickListener(this)
             view.setBackgroundResource(R.drawable.background_selectable)

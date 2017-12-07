@@ -28,6 +28,7 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
 import java.util.*
 
+@Suppress("MemberVisibilityCanPrivate", "unused")
 object DataStore : PreferenceDataStore() {
     fun getBoolean(key: String?) = DBHelper.kvPairDao.queryForId(key)?.boolean
     fun getFloat(key: String?) = DBHelper.kvPairDao.queryForId(key)?.float

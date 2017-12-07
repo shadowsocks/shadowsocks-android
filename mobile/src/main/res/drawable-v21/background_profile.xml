@@ -15,6 +15,7 @@
             </item>
         </selector>
     </item>
+    <!-- android:start not available until API 23 -->
     <item android:left="8dp">
         <shape android:shape="rectangle">
             <solid android:color="@android:color/white" />

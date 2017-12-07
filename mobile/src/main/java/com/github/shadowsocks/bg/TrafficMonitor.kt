@@ -35,11 +35,11 @@ object TrafficMonitor {
     var rxTotal = 0L
 
     // Bytes for the last query
-    var txLast = 0L
-    var rxLast = 0L
-    var timestampLast = 0L
+    private var txLast = 0L
+    private var rxLast = 0L
+    private var timestampLast = 0L
     @Volatile
-    var dirty = true
+    private var dirty = true
 
     private val units = arrayOf("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
     private val numberFormat = DecimalFormat("@@@")
