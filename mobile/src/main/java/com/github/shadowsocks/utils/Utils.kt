@@ -53,8 +53,6 @@ fun thread(start: Boolean = true, isDaemon: Boolean = false, contextClassLoader:
 val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
-fun Float.dp(): Float = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, app.resources.displayMetrics)
-
 /**
  * Based on: https://stackoverflow.com/a/15656428/2245107
  */
