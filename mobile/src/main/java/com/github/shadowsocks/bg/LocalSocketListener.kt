@@ -42,7 +42,7 @@ abstract class LocalSocketListener(protected val tag: String) : Thread() {
      */
     protected abstract fun accept(socket: LocalSocket)
     override fun run() {
-        while (!socketFile.delete()) Thread.sleep(100)
+        Thread.sleep(500)
         try {
             val localSocket = LocalSocket()
             localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
