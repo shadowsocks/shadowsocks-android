@@ -26,6 +26,9 @@ android {
         resConfigs "fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
     }
     buildTypes {
+        debug {
+            pseudoLocalesEnabled true
+        }
         release {
             shrinkResources true
             minifyEnabled true
