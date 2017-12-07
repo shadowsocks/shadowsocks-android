@@ -296,7 +296,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
     private var selectedItem: ProfileViewHolder? = null
 
-    val profilesAdapter = ProfilesAdapter()
+    val profilesAdapter by lazy { ProfilesAdapter() }
     private lateinit var undoManager: UndoSnackbarManager<Profile>
     private var bandwidthProfile: Int = 0
     private var txTotal: Long = 0L
