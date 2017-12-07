@@ -20,13 +20,5 @@
             <solid android:color="@android:color/white" />
         </shape>
     </item>
-    <item>
-        <selector>
-            <item android:state_pressed="true">
-                <shape android:shape="rectangle">
-                    <solid android:color="#12000000" />
-                </shape>
-            </item>
-        </selector>
-    </item>
+    <item android:drawable="?android:attr/selectableItemBackground"/>
 </layer-list>
