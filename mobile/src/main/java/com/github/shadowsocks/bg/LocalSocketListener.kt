@@ -27,7 +27,6 @@ import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.atomic.AtomicReference
 
 abstract class LocalSocketListener(protected val tag: String) : Thread() {
     init {
@@ -35,38 +34,37 @@ abstract class LocalSocketListener(protected val tag: String) : Thread() {
     }
 
     protected abstract val socketFile: File
-    private val serverSocket = AtomicReference<LocalServerSocket?>()
+    @Volatile
+    private var running = true
 
     /**
      * Inherited class do not need to close input/output streams as they will be closed automatically.
      */
     protected abstract fun accept(socket: LocalSocket)
-    override fun run() {
+    override final fun run() {
         Thread.sleep(500)
-        try {
-            val localSocket = LocalSocket()
-            localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
-            serverSocket.set(LocalServerSocket(localSocket.fileDescriptor))
-        } catch (e: IOException) {
-            Log.e(tag, "unable to bind", e)
-            return
-        }
-        while (true) {
-            val serverSocket = serverSocket.get() ?: return
-            try {
-                serverSocket.accept()
+        LocalSocket().use { localSocket ->
+            val serverSocket = try {
+                localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
+                LocalServerSocket(localSocket.fileDescriptor)
             } catch (e: IOException) {
-                Log.e(tag, "Error when accept socket", e)
-                app.track(e)
-                null
-            }?.use(this::accept)
+                Log.e(tag, "unable to bind", e)
+                return
+            }
+            while (running) {
+                try {
+                    serverSocket.accept()
+                } catch (e: IOException) {
+                    Log.e(tag, "Error when accept socket", e)
+                    app.track(e)
+                    null
+                }?.use(this::accept)
+            }
         }
     }
 
     fun stopThread() {
-        val old = serverSocket.getAndSet(null) ?: return
-        try {
-            old.close()
-        } catch (_: Exception) { }  // ignore
+        running = false
+        interrupt()
     }
 }
