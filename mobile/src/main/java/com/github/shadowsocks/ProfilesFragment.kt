@@ -46,7 +46,6 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.position
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -112,7 +111,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view),
-            View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
+            View.OnClickListener, PopupMenu.OnMenuItemClickListener {
         internal lateinit var item: Profile
 
         private val text1 = itemView.findViewById<TextView>(android.R.id.text1)
@@ -123,7 +122,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         init {
             edit.setOnClickListener { startConfig(item.id) }
-            edit.setOnLongClickListener(this)
+            TooltipCompat.setTooltipText(edit, edit.contentDescription)
             itemView.setOnClickListener(this)
             val share = itemView.findViewById<View>(R.id.share)
             share.setOnClickListener {
@@ -132,7 +131,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 popup.setOnMenuItemClickListener(this)
                 popup.show()
             }
-            share.setOnLongClickListener(this)
+            TooltipCompat.setTooltipText(share, share.contentDescription)
         }
 
         fun bind(item: Profile) {
@@ -200,12 +199,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 itemView.isSelected = true
                 if (activity.state == BaseService.CONNECTED) app.reloadService()
             }
-        }
-
-        override fun onLongClick(view: View): Boolean {
-            Toast.makeText(activity, view.contentDescription, Toast.LENGTH_SHORT).position(view, activity!!.window,
-                    0, resources.getDimensionPixelOffset(R.dimen.margin_small)).show()
-            return true
         }
 
         override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {

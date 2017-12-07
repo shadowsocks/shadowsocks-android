@@ -38,11 +38,11 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
+import android.support.v7.widget.TooltipCompat
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
@@ -57,7 +57,6 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.position
 import com.github.shadowsocks.utils.responseLength
 import com.github.shadowsocks.utils.thread
 import com.mikepenz.crossfader.Crossfader
@@ -165,8 +164,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
         }
         this.state = state
-        if (state == BaseService.CONNECTED) fab.backgroundTintList = greenTint else {
+        if (state == BaseService.CONNECTED) {
+            fab.backgroundTintList = greenTint
+            TooltipCompat.setTooltipText(fab, getString(R.string.stop))
+        } else {
             fab.backgroundTintList = greyTint
+            TooltipCompat.setTooltipText(fab, getString(R.string.connect))
             updateTraffic(-1, 0, 0, 0, 0)
             testCount += 1  // suppress previous test messages
         }
@@ -328,13 +331,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                     else app.handler.post { onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null) }
                 } else app.startService()
             }
-        }
-        fab.setOnLongClickListener {
-            Toast.makeText(this, if (state == BaseService.CONNECTED) R.string.stop else R.string.connect,
-                    Toast.LENGTH_SHORT)
-                    .position(fab, window, 0, resources.getDimensionPixelOffset(R.dimen.margin_small))
-                    .show()
-            true
         }
 
         changeState(BaseService.IDLE)   // reset everything to init state

@@ -3,17 +3,11 @@ package com.github.shadowsocks.utils
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.os.Build
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.util.SortedList
-import android.util.DisplayMetrics
 import android.util.TypedValue
-import android.view.Gravity
-import android.view.View
-import android.view.Window
-import android.widget.Toast
 import com.github.shadowsocks.App.Companion.app
 import java.lang.reflect.InvocationTargetException
 import java.net.InetAddress
@@ -58,25 +52,6 @@ fun thread(start: Boolean = true, isDaemon: Boolean = false, contextClassLoader:
 
 val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
-
-/**
- * Based on: http://stackoverflow.com/a/21026866/2245107
- */
-fun Toast.position(view: View, window: Window, offsetX: Int = 0, offsetY: Int = 0): Toast {
-    val rect = Rect()
-    window.decorView.getWindowVisibleDisplayFrame(rect)
-    val viewLocation = IntArray(2)
-    view.getLocationInWindow(viewLocation)
-    val metrics = DisplayMetrics()
-    window.windowManager.defaultDisplay.getMetrics(metrics)
-    val toastView = this.view
-    toastView.measure(View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.UNSPECIFIED))
-    setGravity(Gravity.START or Gravity.TOP,
-            viewLocation[0] - rect.left + (view.width - toastView.measuredWidth) / 2 + offsetX,
-            viewLocation[1] - rect.top + view.height + offsetY)
-    return this
-}
 
 fun Float.dp(): Float = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this, app.resources.displayMetrics)
 
