@@ -5,6 +5,7 @@ buildscript {
         kotlinVersion = '1.2.0'
         minSdkVersion = 19
         sdkVersion = 27
+        buildToolsVersion = '27.0.2'
         supportLibraryVersion = '27.0.2'
         takisoftFixVersion = '27.0.2.0'
         playServicesVersion = '11.6.2'
