@@ -1,5 +1,0 @@
--Xms1g
--Xmx3g
--Xss2m
--XX:+CMSClassUnloadingEnabled
--XX:+UseConcMarkSweepGC

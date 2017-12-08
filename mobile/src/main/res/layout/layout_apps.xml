@@ -14,28 +14,32 @@
                 android:background="@android:color/white"
                 android:orientation="vertical"
                 tools:ignore="RtlSymmetry">
-    <Switch android:checked="true"
-            android:id="@+id/onSwitch"
-            android:text="@string/on"
-            android:textSize="18sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:paddingStart="60dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    <Switch android:checked="true"
-            android:id="@+id/bypassSwitch"
-            android:text="@string/bypass_apps"
-            android:textSize="18sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:paddingStart="60dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+
+    <Switch
+        android:id="@+id/onSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:paddingBottom="12dp"
+        android:paddingEnd="@dimen/fastscroll__bubble_corner"
+        android:paddingStart="60dp"
+        android:paddingTop="12dp"
+        android:text="@string/on"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="18sp"/>
+
+    <Switch
+        android:id="@+id/bypassSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:paddingBottom="12dp"
+        android:paddingEnd="@dimen/fastscroll__bubble_corner"
+        android:paddingStart="60dp"
+        android:paddingTop="12dp"
+        android:text="@string/bypass_apps"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="18sp"/>
   </LinearLayout>
   <FrameLayout android:layout_width="fill_parent"
                android:layout_height="0dp"
@@ -48,7 +52,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/list"
-            android:visibility="gone"/>
+            tools:listitem="@layout/layout_apps_item"/>
     <com.futuremind.recyclerviewfastscroll.FastScroller
             android:id="@+id/fastscroller"
             android:orientation="vertical"
@@ -57,7 +61,6 @@
             android:layout_gravity="end"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:visibility="gone"
             app:fastscroll__handleColor="@color/material_primary_500"
             app:fastscroll__bubbleColor="@color/material_primary_500"
             app:fastscroll__bubbleTextAppearance="@style/StyledScrollerTextAppearance"/>

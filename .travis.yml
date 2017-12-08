@@ -9,27 +9,18 @@ env:
         - NDK_CCACHE=ccache
         - GOROOT_BOOTSTRAP=$GOROOT
         - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
-        - SBTPATH=$HOME/.sbt
         - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
-
-scala:
-    - 2.11.11
-
-before_cache:
-    - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2 -name "*.lock" | xargs rm
 
 cache:
     directories:
-        - $HOME/.ivy2
-        - $HOME/.sbt
+        - $HOME/.gradle
 
 android:
     components:
         - tools
+        - android-27
+        - build-tools-26.0.2
         - build-tools-27.0.0
-        - extra-android-m2repository
-        - extra-google-m2repository
 
 install:
     - >
@@ -42,12 +33,6 @@ install:
           popd;
       fi
     - >
-      if [ ! -f "$SBTPATH/sbt" ]; then
-          pushd $SBTPATH;
-          wget -q https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt;
-          chmod a+x sbt;
-          popd;
-      fi
 
 script:
-    - $SBTPATH/sbt go-build android:package
+    - ./gradlew assembleDebug
