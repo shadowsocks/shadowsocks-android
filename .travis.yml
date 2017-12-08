@@ -5,33 +5,24 @@ jdk:
 
 env:
     global:
-        - NDK_VERSION=r16
-        - NDK_CCACHE=ccache
         - GOROOT_BOOTSTRAP=$GOROOT
-        - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
-        - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
 
 cache:
     directories:
         - $HOME/.gradle
 
-android:
-    components:
-        - tools
-        - android-27
-        - build-tools-27.0.2
-
 install:
-    - >
-      if [ ! -d "$ANDROID_NDK_HOME" ]; then
-          mkdir -p $ANDROID_NDK_HOME;
-          pushd $HOME/.android;
-          export ARCH=`uname -m`;
-          wget -q http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          unzip -q android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          popd;
-      fi
-    - >
+    - pushd $ANDROID_HOME
+    - rm -rf tools
+    - wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O tools.zip
+    - unzip -q tools.zip
+    - popd
+    - touch $HOME/.android/repositories.cfg
+    - yes | sdkmanager
+        "build-tools;27.0.2"
+        ndk-bundle
+        "platforms;android-27"
+      >/dev/null
 
 script:
     - ./gradlew assembleDebug
