@@ -3,9 +3,8 @@
 Cannot connect to server:
 
 1. Stop battery saver if it's active;
-2. If an upgrade breaks anything, do a manual reset first by pressing Reset at the end of the list;
-3. Check your config;
-4. Wipe app data.
+2. Check your config;
+3. Wipe app data.
 
 Crash: [Submit an issue](https://github.com/shadowsocks/shadowsocks-android/issues/new) with logcat attached, or submit a crash report to Google Play. Then, try wiping app data.
 
