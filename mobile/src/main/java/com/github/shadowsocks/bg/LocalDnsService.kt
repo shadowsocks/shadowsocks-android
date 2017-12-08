@@ -67,7 +67,7 @@ object LocalDnsService {
                 val config = JSONObject()
                         .put("BindAddress", "127.0.0.1:" + DataStore.portLocalDns)
                         .put("RedirectIPv6Record", true)
-                        .put("DomainBase64Decode", true)
+                        .put("DomainBase64Decode", false)
                         .put("HostsFile", "hosts")
                         .put("MinimumTTL", 3600)
                         .put("CacheSize", 4096)
@@ -89,7 +89,7 @@ object LocalDnsService {
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
                             .put("IPNetworkFile", "china_ip_list.txt")
-                            .put("DomainFile", "gfwlist.txt")
+                            .put("DomainFile", app.filesDir.absolutePath + "/" + profile.route + ".acl")
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
