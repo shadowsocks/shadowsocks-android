@@ -141,11 +141,18 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         }
 
         if (Build.VERSION.SDK_INT >= 21 && profile.proxyApps) {
-            for (pkg in profile.individual.split('\n')) try {
-                if (profile.bypass) builder.addDisallowedApplication(pkg) else builder.addAllowedApplication(pkg)
-            } catch (ex: PackageManager.NameNotFoundException) {
-                Log.e(tag, "Invalid package name", ex)
-            }
+            val me = packageName
+            profile.individual.split('\n')
+                    .filter { it != me }
+                    .forEach {
+                        try {
+                            if (profile.bypass) builder.addDisallowedApplication(it)
+                            else builder.addAllowedApplication(it)
+                        } catch (ex: PackageManager.NameNotFoundException) {
+                            Log.e(tag, "Invalid package name", ex)
+                        }
+                    }
+            builder.addAllowedApplication(me)
         }
 
         when (profile.route) {

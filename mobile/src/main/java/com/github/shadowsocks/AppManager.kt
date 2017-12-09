@@ -67,7 +67,8 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
             }
             return synchronized(AppManager) {
                 val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                        .filter { it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
+                        .filter { it.packageName != app.packageName &&
+                                it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
                         .map { ProxiedApp(pm.getApplicationLabel(it.applicationInfo).toString(), it.packageName,
                                 it.applicationInfo.loadIcon(pm)) }
                         .toTypedArray()
