@@ -174,10 +174,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val params =
                             LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                     params.gravity = Gravity.CENTER_HORIZONTAL
-                    adView = AdView(activity)
+                    val context = context!!
+                    adView = AdView(context)
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
                     adView.adSize = AdSize.FLUID
+                    val padding = context.resources.getDimensionPixelOffset(R.dimen.profile_padding)
+                    adView.setPadding(padding, 0, 0, padding)
 
                     itemView.findViewById<LinearLayout>(R.id.content).addView(adView)
 
