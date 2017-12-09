@@ -4,8 +4,8 @@ enablePlugins(AndroidGms)
 android.useSupportVectors
 
 name := "shadowsocks"
-version := "4.3.2"
-versionCode := Some(198)
+version := "4.3.3"
+versionCode := Some(199)
 
 proguardOptions ++=
   "-dontwarn com.google.android.gms.internal.**" ::
