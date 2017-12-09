@@ -221,15 +221,21 @@ object BaseService {
                     "-t", "600",
                     "-c", "shadowsocks.json"))
 
-            val route = data.profile!!.route
-            if (route != Acl.ALL) {
+            val acl = getAclFile()
+            if (acl != null) {
                 cmd += "--acl"
-                cmd += Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route).absolutePath
+                cmd += acl.absolutePath
             }
 
             if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
             data.sslocalProcess = GuardedProcess(cmd).start()
+        }
+
+        fun getAclFile(): File? {
+            val route = data.profile!!.route
+            return if (route == Acl.ALL) null else
+                Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route)
         }
 
         fun createNotification(): ServiceNotification
