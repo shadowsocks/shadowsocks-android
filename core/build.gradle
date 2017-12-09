@@ -43,9 +43,12 @@ task goClean(type: Exec) {
     args "-c", "src/overture/clean.bash"
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
 tasks.whenTaskAdded { task ->
-  if (task.name == 'generateJsonModelDebug' ||
-          task.name == 'generateJsonModelRelease') {
+  if ((task.name == 'generateJsonModelDebug' ||
+          task.name == 'generateJsonModelRelease') &&
+          !Os.isFamily(Os.FAMILY_WINDOWS)) {
       task.dependsOn(goBuild)
     }
 }

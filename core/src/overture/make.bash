@@ -44,7 +44,7 @@ if [ ! -f "$ANDROID_X86_CC" ]; then
         --api $MIN_API --install-dir $ANDROID_X86_TOOLCHAIN
 fi
 
-if [ ! -d "$DIR/go/bin" ]; then
+if [ ! -f "$DIR/go/bin/go" ]; then
     echo "Build the custom go"
 
     pushd $DIR/go/src

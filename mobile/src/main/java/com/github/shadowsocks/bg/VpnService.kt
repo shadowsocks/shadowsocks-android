@@ -152,7 +152,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             Log.e(tag, "Invalid package name", ex)
                         }
                     }
-            builder.addAllowedApplication(me)
+            if (!profile.bypass) builder.addAllowedApplication(me)
         }
 
         when (profile.route) {
