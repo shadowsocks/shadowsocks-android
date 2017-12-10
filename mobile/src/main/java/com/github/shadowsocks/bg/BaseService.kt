@@ -238,6 +238,22 @@ object BaseService {
                 Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route)
         }
 
+        fun getListFile(): File? {
+            val aclFile = getAclFile() ?: return null
+            val listFile = File(aclFile.absolutePath + ".lst")
+            val list = StringBuilder()
+            aclFile.bufferedReader().useLines {
+                for (line in it) {
+                    if (line.startsWith("^(.*\\.)?")) {
+                        list.append(line.substring(8).replace("\\","").replace("$",""))
+                        list.append("\n")
+                    }
+                }
+            }
+            listFile.bufferedWriter().use { it.write(list.toString()) }
+            return listFile
+        }
+
         fun createNotification(): ServiceNotification
 
         fun startRunner() {

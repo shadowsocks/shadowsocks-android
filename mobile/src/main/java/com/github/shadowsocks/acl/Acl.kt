@@ -46,6 +46,7 @@ class Acl {
         val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
         fun getFile(id: String) = File(app.filesDir, id + ".acl")
+
         val customRules: Acl get() {
             val acl = Acl()
             try {
@@ -143,6 +144,7 @@ class Acl {
         for (item in (if (bypass) proxySubnets else bypassSubnets).asIterable()) this.subnets.add(item)
         return this
     }
+
     fun fromId(id: String): Acl = fromReader(Acl.getFile(id).bufferedReader())
 
     fun flatten(depth: Int): Acl {
