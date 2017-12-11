@@ -41,22 +41,25 @@ abstract class LocalSocketListener(protected val tag: String) : Thread() {
      * Inherited class do not need to close input/output streams as they will be closed automatically.
      */
     protected abstract fun accept(socket: LocalSocket)
-    override final fun run() = LocalSocket().use { localSocket ->
-        val serverSocket = try {
-            localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
-            LocalServerSocket(localSocket.fileDescriptor)
-        } catch (e: IOException) {
-            Log.e(tag, "unable to bind", e)
-            return
-        }
-        while (running) {
-            try {
-                serverSocket.accept()
+    override final fun run() {
+        socketFile.delete() // It's a must-have to close and reuse previous local socket.
+        LocalSocket().use { localSocket ->
+            val serverSocket = try {
+                localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
+                LocalServerSocket(localSocket.fileDescriptor)
             } catch (e: IOException) {
-                Log.e(tag, "Error when accept socket", e)
-                app.track(e)
-                null
-            }?.use(this::accept)
+                Log.e(tag, "unable to bind", e)
+                return
+            }
+            while (running) {
+                try {
+                    serverSocket.accept()
+                } catch (e: IOException) {
+                    Log.e(tag, "Error when accept socket", e)
+                    app.track(e)
+                    null
+                }?.use(this::accept)
+            }
         }
     }
 
