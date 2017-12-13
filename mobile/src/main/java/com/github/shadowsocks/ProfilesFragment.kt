@@ -76,7 +76,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     @SuppressLint("ValidFragment")
-    private class QRCodeDialog() : DialogFragment() {
+    public class QRCodeDialog() : DialogFragment() {
+
         constructor(url: String) : this() {
             val bundle = Bundle()
             bundle.putString(KEY_URL, url)
@@ -104,9 +105,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
 
         override fun onDetach() {
-            adapter?.setNdefPushMessage(null, activity)
-            adapter = null
             super.onDetach()
+            if (activity != null && !activity!!.isFinishing() && !activity!!.isDestroyed) {
+                adapter?.setNdefPushMessage(null, activity)
+            }
+            adapter = null
         }
     }
 
