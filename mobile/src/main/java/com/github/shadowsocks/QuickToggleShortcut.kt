@@ -34,8 +34,8 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 
 class QuickToggleShortcut : Activity(), ShadowsocksConnection.Interface {
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (intent.action == Intent.ACTION_CREATE_SHORTCUT) {
             setResult(Activity.RESULT_OK, ShortcutManagerCompat.createShortcutResultIntent(this,
                     ShortcutInfoCompat.Builder(this, "toggle")
