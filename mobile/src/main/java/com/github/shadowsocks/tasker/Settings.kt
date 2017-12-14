@@ -35,7 +35,7 @@ class Settings(bundle: Bundle?) {
         fun fromIntent(intent: Intent) = Settings(intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE))
     }
 
-    var switchOn: Boolean = bundle?.getBoolean(KEY_SWITCH_ON, true) ?: false
+    var switchOn: Boolean = bundle?.getBoolean(KEY_SWITCH_ON, true) ?: true
     var profileId: Int = bundle?.getInt(KEY_PROFILE_ID, -1) ?: -1
 
     fun toIntent(context: Context): Intent {
