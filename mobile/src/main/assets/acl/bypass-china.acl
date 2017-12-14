@@ -4742,7 +4742,7 @@ mangaapi.manhuaren.com
 ^(.*\.)?android\.com$
 ^(.*\.)?androidify\.com$
 ^(.*\.)?appspot\.com$
-^(.*\.)?blogspot(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-)){1,2}$
+^(.*\.)?blogspot\.[a-zA-Z0-9-]{1,63}[a-zA-Z0-9-]{1,2}$
 ^(.*\.)?certificate-transparency\.org$
 ^(.*\.)?chrome\.com$
 ^(.*\.)?chromecast\.com$
@@ -4765,8 +4765,8 @@ mangaapi.manhuaren.com
 ^(.*\.)?gmail\.com$
 ^(.*\.)?gmodules\.com$
 ^(.*\.)?goo\.gl$
-^(.*\.)?google(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-)){1,2}$
-^(.*\.)?googleapis(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-)){1,2}$
+^(.*\.)?google\.[a-zA-Z0-9-]{1,63}[a-zA-Z0-9-]{1,2}$
+^(.*\.)?googleapis\.[a-zA-Z0-9-]{1,63}[a-zA-Z0-9-]{1,2}$
 ^(.*\.)?googleapps\.com$
 ^(.*\.)?googleartproject\.com$
 ^(.*\.)?googleblog\.com$
