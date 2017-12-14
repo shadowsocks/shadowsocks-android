@@ -44,6 +44,7 @@ object LocalDnsService {
 
         override fun startNativeProcesses() {
             super.startNativeProcesses()
+            val data = data
             val profile = data.profile!!
 
             fun makeDns(name: String, address: String, edns: Boolean = true): JSONObject {
@@ -89,7 +90,7 @@ object LocalDnsService {
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
                             .put("IPNetworkFile", "china_ip_list.txt")
-                            .put("DomainFile", getAclFile()!!.absolutePath)
+                            .put("DomainFile", data.aclFile!!.absolutePath)
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)

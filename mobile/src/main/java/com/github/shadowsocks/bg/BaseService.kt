@@ -91,10 +91,8 @@ object BaseService {
         }
         var closeReceiverRegistered = false
 
-        private fun state() = state
-
         val binder = object : IShadowsocksService.Stub() {
-            override fun getState(): Int = state()
+            override fun getState(): Int = this@Data.state
             override fun getProfileName(): String = profile?.formattedName ?: "Idle"
 
             override fun registerCallback(cb: IShadowsocksServiceCallback) {
@@ -182,6 +180,24 @@ object BaseService {
             }
             File(app.filesDir, "shadowsocks.json").bufferedWriter().use { it.write(config.toString()) }
         }
+
+        val aclFile: File? get() {
+            val route = profile!!.route
+            return if (route == Acl.ALL) null else
+                Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route)
+        }
+
+        fun changeState(s: Int, msg: String? = null) {
+            if (state == s && msg == null) return
+            if (callbacks.registeredCallbackCount > 0) app.handler.post {
+                val n = callbacks.beginBroadcast()
+                for (i in 0 until n) try {
+                    callbacks.getBroadcastItem(i).stateChanged(s, binder.profileName, msg)
+                } catch (_: Exception) { }  // ignore
+                callbacks.finishBroadcast()
+            }
+            state = s
+        }
     }
     interface Interface {
         val tag: String
@@ -221,7 +237,7 @@ object BaseService {
                     "-t", "600",
                     "-c", "shadowsocks.json"))
 
-            val acl = getAclFile()
+            val acl = data.aclFile
             if (acl != null) {
                 cmd += "--acl"
                 cmd += acl.absolutePath
@@ -230,12 +246,6 @@ object BaseService {
             if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
             data.sslocalProcess = GuardedProcess(cmd).start()
-        }
-
-        fun getAclFile(): File? {
-            val route = data.profile!!.route
-            return if (route == Acl.ALL) null else
-                Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route)
         }
 
         fun createNotification(): ServiceNotification
@@ -254,14 +264,14 @@ object BaseService {
 
         fun stopRunner(stopService: Boolean, msg: String? = null) {
             // channge the state
-            changeState(STOPPING)
+            val data = data
+            data.changeState(STOPPING)
 
             app.track(tag, "stop")
 
             killProcesses()
 
             // clean up recevier
-            val data = data
             this as Service
             if (data.closeReceiverRegistered) {
                 unregisterReceiver(data.closeReceiver)
@@ -279,7 +289,7 @@ object BaseService {
             data.trafficMonitorThread = null
 
             // change the state
-            changeState(STOPPED, msg)
+            data.changeState(STOPPED, msg)
 
             // stop the service if nothing has bound to it
             if (stopService) stopSelf()
@@ -318,7 +328,7 @@ object BaseService {
             data.notification = createNotification()
             app.track(tag, "start")
 
-            changeState(CONNECTING)
+            data.changeState(CONNECTING)
 
             thread {
                 this as Context
@@ -369,7 +379,7 @@ object BaseService {
 
                     if (profile.route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncJob.schedule(profile.route)
 
-                    changeState(CONNECTED)
+                    data.changeState(CONNECTED)
                 } catch (_: UnknownHostException) {
                     stopRunner(true, getString(R.string.invalid_server))
                 } catch (_: VpnService.NullConnectionException) {
@@ -380,19 +390,6 @@ object BaseService {
                 }
             }
             return Service.START_NOT_STICKY
-        }
-
-        fun changeState(s: Int, msg: String? = null) {
-            val data = instances[this]!!
-            if (data.state == s && msg == null) return
-            if (data.callbacks.registeredCallbackCount > 0) app.handler.post {
-                val n = data.callbacks.beginBroadcast()
-                for (i in 0 until n) try {
-                    data.callbacks.getBroadcastItem(i).stateChanged(s, data.binder.profileName, msg)
-                } catch (_: Exception) { }  // ignore
-                data.callbacks.finishBroadcast()
-            }
-            data.state = s
         }
     }
 
