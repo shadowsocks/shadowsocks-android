@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.library'
 
 android {
@@ -42,8 +44,6 @@ task goClean(type: Exec) {
     executable "sh"
     args "-c", "src/overture/clean.bash"
 }
-
-import org.apache.tools.ant.taskdefs.condition.Os
 
 tasks.whenTaskAdded { task ->
   if ((task.name == 'generateJsonModelDebug' ||
