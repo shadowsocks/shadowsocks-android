@@ -7,7 +7,6 @@ import android.os.Build
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.util.SortedList
-import android.util.TypedValue
 import com.github.shadowsocks.App.Companion.app
 import java.lang.reflect.InvocationTargetException
 import java.net.InetAddress
@@ -15,7 +14,11 @@ import java.net.URLConnection
 
 private val isNumericMethod by lazy { InetAddress::class.java.getMethod("isNumeric", String::class.java) }
 private val parseNumericAddressMethod by lazy {
-    InetAddress::class.java.getMethod("parseNumericAddress", String::class.java)
+    try {
+        InetAddress::class.java.getMethod("parseNumericAddress", String::class.java)
+    } catch (_: NoSuchMethodException) {
+        null
+    }
 }
 private val fieldChildFragmentManager by lazy {
     val field = Fragment::class.java.getDeclaredField("mChildFragmentManager")
@@ -24,11 +27,12 @@ private val fieldChildFragmentManager by lazy {
 }
 
 fun String.isNumericAddress(): Boolean = isNumericMethod.invoke(null, this) as Boolean
-fun String.parseNumericAddress(): InetAddress = try {
-    parseNumericAddressMethod.invoke(null, this) as InetAddress
-} catch (exc: InvocationTargetException) {
-    throw exc.cause ?: exc
-}
+fun String.parseNumericAddress(): InetAddress =
+        if (parseNumericAddressMethod == null) InetAddress.getByName(this) else try {
+            parseNumericAddressMethod!!.invoke(null, this) as InetAddress
+        } catch (exc: InvocationTargetException) {
+            throw exc.cause ?: exc
+        }
 
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     val x = str?.toIntOrNull() ?: default

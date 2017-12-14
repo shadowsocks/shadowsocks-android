@@ -1,11 +1,10 @@
 package com.github.shadowsocks.utils
 
-import com.github.shadowsocks.utils.Subnet
 import org.junit.Assert
 import org.junit.Test
 import java.net.InetAddress
 
-object SubnetTest {
+class SubnetTest {
     @Test
     fun parsingAndEquals() {
         Assert.assertEquals(Subnet(InetAddress.getByName("1.10.11.12"), 25), Subnet.fromString("1.10.11.12/25"))
