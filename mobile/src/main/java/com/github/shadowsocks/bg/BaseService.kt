@@ -303,8 +303,9 @@ object BaseService {
             val data = data
             if (data.state != STOPPED) return Service.START_NOT_STICKY
             val profile = app.currentProfile
+            this as Context
             if (profile == null) {
-                stopRunner(true)
+                stopRunner(true, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
             data.profile = profile
@@ -321,7 +322,7 @@ object BaseService {
                 filter.addAction(Action.RELOAD)
                 filter.addAction(Intent.ACTION_SHUTDOWN)
                 filter.addAction(Action.CLOSE)
-                (this as Context).registerReceiver(data.closeReceiver, filter)
+                registerReceiver(data.closeReceiver, filter)
                 data.closeReceiverRegistered = true
             }
 
@@ -331,7 +332,6 @@ object BaseService {
             data.changeState(CONNECTING)
 
             thread {
-                this as Context
                 try {
                     if (profile.host == "198.199.101.152") {
                         val client = OkHttpClient.Builder()
