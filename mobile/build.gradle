@@ -9,7 +9,7 @@ def getCurrentFlavor() {
             .matcher(getGradle().getStartParameter().getTaskRequests().toString())
     if (matcher.find()) return matcher.group(1).toLowerCase() else {
         println "NO MATCH FOUND"
-        return ""
+        return "debug"
     }
 }
 
@@ -35,9 +35,6 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    lintOptions {
-        abortOnError false
     }
     sourceSets.main.jniLibs.srcDirs +=
             new File(project(':core').buildDir, "intermediates/bundles/${getCurrentFlavor()}/jni")

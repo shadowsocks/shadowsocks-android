@@ -30,4 +30,4 @@ install:
       >/dev/null
 
 script:
-    - ./gradlew assembleDebug
+    - ./gradlew assembleDebug check

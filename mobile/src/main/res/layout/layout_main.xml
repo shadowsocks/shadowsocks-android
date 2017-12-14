@@ -26,7 +26,8 @@
                   android:ellipsize="marquee"
                   android:paddingEnd="72dip"
                   android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"/>
+                  android:layout_height="wrap_content"
+                  tools:ignore="RtlSymmetry"/>
         <com.github.shadowsocks.widget.BoundedGridLayout android:layout_width="match_parent"
                                                          android:layout_height="wrap_content"
                                                          app:bounded_width="288dp"

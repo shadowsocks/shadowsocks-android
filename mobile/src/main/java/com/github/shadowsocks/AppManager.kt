@@ -180,7 +180,9 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         setContentView(R.layout.layout_apps)
         toolbar = findViewById(R.id.toolbar)
         toolbar.setTitle(R.string.proxied_apps)
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
+        val arr = obtainStyledAttributes(intArrayOf(R.attr.homeAsUpIndicator))
+        toolbar.navigationIcon = arr.getDrawable(0)
+        arr.recycle()
         toolbar.setNavigationOnClickListener {
             val intent = parentActivityIntent
             if (shouldUpRecreateTask(intent) || isTaskRoot)

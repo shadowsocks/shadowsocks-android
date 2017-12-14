@@ -53,7 +53,7 @@ class KeyValuePair() {
         get() = if (valueType == TYPE_LONG) ByteBuffer.wrap(value).long else null
     val string: String?
         get() = if (valueType == TYPE_STRING) String(value) else null
-    val stringSet: MutableSet<String>?
+    val stringSet: Set<String>?
         get() = if (valueType == TYPE_STRING_SET) {
             val buffer = ByteBuffer.wrap(value)
             val result = HashSet<String>()
@@ -95,7 +95,7 @@ class KeyValuePair() {
         this.value = value.toByteArray()
         return this
     }
-    fun put(value: MutableSet<String>): KeyValuePair {
+    fun put(value: Set<String>): KeyValuePair {
         valueType = TYPE_STRING_SET
         val stream = ByteArrayOutputStream()
         for (v in value) {
