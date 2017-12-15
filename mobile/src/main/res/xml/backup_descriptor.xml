@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <include domain="database" path="profile.db"/>
+    <include domain="file" path="custom-rules.acl"/>
+</full-backup-content>
