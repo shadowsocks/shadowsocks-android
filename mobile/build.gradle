@@ -20,8 +20,8 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 200
-        versionName "4.4.0"
+        versionCode 201
+        versionName "4.4.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary true
         resConfigs "fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
