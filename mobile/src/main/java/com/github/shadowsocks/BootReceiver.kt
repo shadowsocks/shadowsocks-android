@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.preference.DataStore
 
 class BootReceiver : BroadcastReceiver() {
     companion object {
@@ -39,6 +40,11 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) app.startService()
+        val locked = when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED -> false
+            Intent.ACTION_LOCKED_BOOT_COMPLETED -> true // constant will be folded so no need to do version checks
+            else -> return
+        }
+        if (DataStore.directBootAware == locked) app.startService()
     }
 }

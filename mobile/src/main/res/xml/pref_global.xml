@@ -5,6 +5,11 @@
                       android:persistent="false"
                       android:summary="@string/auto_connect_summary"
                       android:title="@string/auto_connect"/>
+    <!-- Direct Boot Aware alone doesn't do anything without auto connect -->
+    <SwitchPreference android:key="directBootAware"
+                      android:dependency="isAutoConnect"
+                      android:summary="@string/direct_boot_aware_summary"
+                      android:title="@string/direct_boot_aware"/>
     <SwitchPreference android:key="tcp_fastopen"
                       android:summary="@string/tcp_fastopen_summary"
                       android:title="TCP Fast Open"/>

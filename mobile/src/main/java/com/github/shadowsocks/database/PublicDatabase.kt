@@ -18,57 +18,33 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.utils
+package com.github.shadowsocks.database
 
-object Key {
-    /**
-     * Public config that doesn't need to be kept secret.
-     */
-    const val DB_PUBLIC = "config.db"
-    const val DB_PROFILE = "profile.db"
+import android.database.sqlite.SQLiteDatabase
+import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.utils.Key
+import com.j256.ormlite.android.AndroidDatabaseConnection
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
+import com.j256.ormlite.dao.Dao
+import com.j256.ormlite.support.ConnectionSource
+import com.j256.ormlite.table.TableUtils
 
-    const val id = "profileId"
-    const val name = "profileName"
+object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC, null, 1) {
+    @Suppress("UNCHECKED_CAST")
+    val kvPairDao: Dao<KeyValuePair, String?> by lazy { getDao(KeyValuePair::class.java) as Dao<KeyValuePair, String?> }
 
-    const val individual = "Proxyed"
+    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource?) {
+        TableUtils.createTable(connectionSource, KeyValuePair::class.java)
+    }
 
-    const val serviceMode = "serviceMode"
-    const val modeProxy = "proxy"
-    const val modeVpn = "vpn"
-    const val modeTransproxy = "transproxy"
-    const val portProxy = "portProxy"
-    const val portLocalDns = "portLocalDns"
-    const val portTransproxy = "portTransproxy"
+    override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?,
+                           oldVersion: Int, newVersion: Int) { }
 
-    const val route = "route"
-
-    const val isAutoConnect = "isAutoConnect"
-    const val directBootAware = "directBootAware"
-
-    const val proxyApps = "isProxyApps"
-    const val bypass = "isBypassApps"
-    const val udpdns = "isUdpDns"
-    const val ipv6 = "isIpv6"
-
-    const val host = "proxy"
-    const val password = "sitekey"
-    const val method = "encMethod"
-    const val remotePort = "remotePortNum"
-    const val remoteDns = "remoteDns"
-
-    const val plugin = "plugin"
-    const val pluginConfigure = "plugin.configure"
-
-    const val dirty = "profileDirty"
-
-    const val tfo = "tcp_fastopen"
-    const val assetUpdateTime = "assetUpdateTime"
-}
-
-object Action {
-    const val SERVICE = "com.github.shadowsocks.SERVICE"
-    const val CLOSE = "com.github.shadowsocks.CLOSE"
-    const val RELOAD = "com.github.shadowsocks.RELOAD"
-
-    const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
+    override fun onDowngrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        val connection = AndroidDatabaseConnection(db, true)
+        connectionSource.saveSpecialConnection(connection)
+        TableUtils.dropTable<KeyValuePair, String?>(connectionSource, KeyValuePair::class.java, true)
+        onCreate(db, connectionSource)
+        connectionSource.clearSpecialConnection(connection)
+    }
 }

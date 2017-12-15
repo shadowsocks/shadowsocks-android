@@ -20,11 +20,15 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.TargetApi
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.*
+import android.os.Build
+import android.os.IBinder
+import android.os.RemoteCallbackList
+import android.support.v4.os.UserManagerCompat
 import android.text.TextUtils
 import android.util.Base64
 import android.util.Log
@@ -65,6 +69,8 @@ object BaseService {
     const val CONNECTED = 2
     const val STOPPING = 3
     const val STOPPED = 4
+
+    const val CONFIG_FILE = "shadowsocks.conf"
 
     class Data internal constructor(private val service: Interface) {
         @Volatile var profile: Profile? = null
@@ -163,7 +169,8 @@ object BaseService {
             }
         }
 
-        internal fun buildShadowsocksConfig() {
+        internal var shadowsocksConfigFile: File? = null
+        internal fun buildShadowsocksConfig(): File {
             val profile = profile!!
             val config = JSONObject()
                     .put("server", profile.host)
@@ -178,7 +185,13 @@ object BaseService {
                         .put("plugin", Commandline.toString(service.buildAdditionalArguments(pluginCmd)))
                         .put("plugin_opts", plugin.toString())
             }
-            File(app.filesDir, "shadowsocks.json").bufferedWriter().use { it.write(config.toString()) }
+            // sensitive Shadowsocks config is stored in
+            val file = File((if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
+                app.deviceContext.noBackupFilesDir  // only API 24+ will be in locked state
+            }), CONFIG_FILE)
+            shadowsocksConfigFile = file
+            file.writeText(config.toString())
+            return file
         }
 
         val aclFile: File? get() {
@@ -228,14 +241,13 @@ object BaseService {
 
         fun startNativeProcesses() {
             val data = data
-            data.buildShadowsocksConfig()
             val cmd = buildAdditionalArguments(arrayListOf(
                     File((this as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                     "-u",
                     "-b", "127.0.0.1",
                     "-l", DataStore.portProxy.toString(),
                     "-t", "600",
-                    "-c", "shadowsocks.json"))
+                    "-c", data.buildShadowsocksConfig().absolutePath))
 
             val acl = data.aclFile
             if (acl != null) {
@@ -277,6 +289,9 @@ object BaseService {
                 unregisterReceiver(data.closeReceiver)
                 data.closeReceiverRegistered = false
             }
+
+            data.shadowsocksConfigFile?.delete()    // remove old config possibly in device storage
+            data.shadowsocksConfigFile = null
 
             data.notification?.destroy()
             data.notification = null

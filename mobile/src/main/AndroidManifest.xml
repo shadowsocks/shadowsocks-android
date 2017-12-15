@@ -113,6 +113,7 @@
         <service
             android:name=".bg.VpnService"
             android:process=":bg"
+            android:directBootAware="true"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="false">
@@ -124,17 +125,20 @@
         <service
             android:name=".bg.TransproxyService"
             android:process=":bg"
+            android:directBootAware="true"
             android:exported="false">
         </service>
 
         <service
             android:name=".bg.ProxyService"
             android:process=":bg"
+            android:directBootAware="true"
             android:exported="false">
         </service>
 
         <service android:name=".bg.TileService" android:label="@string/quick_toggle"
                  android:process=":bg"
+                 android:directBootAware="true"
                  android:icon="@drawable/ic_start_connected"
                  android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
@@ -142,13 +146,20 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".BootReceiver" android:process=":bg" android:enabled="false">
+        <receiver android:name=".BootReceiver"
+                  android:process=":bg"
+                  android:directBootAware="true"
+                  android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".tasker.ActionListener" android:process=":bg" tools:ignore="ExportedReceiver">
+        <receiver android:name=".tasker.ActionListener"
+                  android:process=":bg"
+                  android:directBootAware="true"
+                  tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
@@ -156,16 +167,22 @@
 
         <!-- android-job components -->
         <service android:name="com.evernote.android.job.v21.PlatformJobService"
-                 android:process=":bg"/>
+                 android:process=":bg"
+                 android:directBootAware="true"/>
         <service android:name="com.evernote.android.job.v14.PlatformAlarmService"
-                 android:process=":bg"/>
+                 android:process=":bg"
+                 android:directBootAware="true"/>
         <service android:name="com.evernote.android.job.gcm.PlatformGcmService"
-                 android:process=":bg"/>
+                 android:process=":bg"
+                 android:directBootAware="true"/>
         <service android:name="com.evernote.android.job.JobRescheduleService"
-                 android:process=":bg"/>
+                 android:process=":bg"
+                 android:directBootAware="true"/>
         <receiver android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
-                  android:process=":bg"/>
+                  android:process=":bg"
+                  android:directBootAware="true"/>
         <receiver android:name="com.evernote.android.job.JobBootReceiver"
-                  android:process=":bg"/>
+                  android:process=":bg"
+                  android:directBootAware="true"/>
     </application>
 </manifest>

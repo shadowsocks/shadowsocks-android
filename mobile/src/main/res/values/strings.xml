@@ -57,6 +57,9 @@
   <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
   <string name="auto_connect_summary_v24">Enable Shadowsocks on startup. Recommended to use always-on VPN
     instead</string>
+  <string name="direct_boot_aware">Direct Boot Aware</string>
+  <string name="direct_boot_aware_summary">Allow Shadowsocks to start before your device is unlocked (your selected
+    profile information will be less protected)</string>
   <string name="tcp_fastopen_summary">Toggling requires ROOT permission</string>
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="udp_dns">DNS Forwarding</string>

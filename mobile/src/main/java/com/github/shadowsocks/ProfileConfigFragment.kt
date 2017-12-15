@@ -45,6 +45,7 @@ import com.github.shadowsocks.preference.IconListPreference
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.preference.PluginConfigurationDialogFragment
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.takisoft.fix.support.v7.preference.EditTextPreference
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
@@ -62,7 +63,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     private lateinit var pluginConfiguration: PluginConfiguration
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
-        preferenceManager.preferenceDataStore = DataStore
+        preferenceManager.preferenceDataStore = DataStore.privateStore
         val activity = activity!!
         val profile = ProfileManager.getProfile(activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1))
         if (profile == null) {
@@ -102,7 +103,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
         app.listenForPackageChanges { initPlugins() }
-        DataStore.registerChangeListener(this)
+        DataStore.privateStore.registerChangeListener(this)
     }
 
     private fun initPlugins() {
@@ -130,6 +131,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         profile.deserialize()
         ProfileManager.updateProfile(profile)
         ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profile.id)
+        if (DataStore.profileId == profile.id && DataStore.directBootAware) DirectBoot.update()
         activity!!.finish()
     }
 
@@ -201,7 +203,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     }
 
     override fun onDestroy() {
-        DataStore.unregisterChangeListener(this)
+        DataStore.privateStore.unregisterChangeListener(this)
         super.onDestroy()
     }
 }

@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.acl
 
+import android.content.Context
 import android.support.v7.util.SortedList
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
@@ -45,7 +46,7 @@ class Acl {
 
         val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
-        fun getFile(id: String) = File(app.filesDir, id + ".acl")
+        fun getFile(id: String, context: Context = app.deviceContext) = File(context.filesDir, id + ".acl")
 
         val customRules: Acl get() {
             val acl = Acl()
@@ -56,7 +57,7 @@ class Acl {
             acl.bypassHostnames.clear() // everything is bypassed
             return acl
         }
-        fun save(id: String, acl: Acl): Unit = getFile(id).bufferedWriter().use { it.write(acl.toString()) }
+        fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
     }
 
     private abstract class BaseSorter<T> : SortedList.Callback<T>() {

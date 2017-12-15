@@ -23,6 +23,7 @@ package com.github.shadowsocks.bg
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.preference.DataStore
 import java.io.File
 
@@ -47,14 +48,14 @@ class TransproxyService : Service(), LocalDnsService.Interface {
                 "-t", "10",
                 "-b", "127.0.0.1",
                 "-u",
-                "-l", DataStore.portLocalDns.toString(),    // ss-tunnel listens on the same port as overture
+                "-l", DataStore.portLocalDns.toString(),            // ss-tunnel listens on the same port as overture
                 "-L", data.profile!!.remoteDns.split(",").first().trim() + ":53",
-                "-c", "shadowsocks.json")                       // config is already built by BaseService.Interface
+                "-c", data.shadowsocksConfigFile!!.absolutePath)    // config is already built by BaseService.Interface
         sstunnelProcess = GuardedProcess(cmd).start()
     }
 
     private fun startRedsocksDaemon() {
-        val config = """base {
+        File(app.deviceContext.filesDir, "redsocks.conf").writeText("""base {
  log_debug = off;
  log_info = off;
  log = stderr;
@@ -68,8 +69,7 @@ redsocks {
  port = ${DataStore.portProxy};
  type = socks5;
 }
-"""
-        File(filesDir, "redsocks.conf").bufferedWriter().use { it.write(config) }
+""")
         redsocksProcess = GuardedProcess(arrayListOf(
                 File(applicationInfo.nativeLibraryDir, Executable.REDSOCKS).absolutePath,
                 "-c", "redsocks.conf")

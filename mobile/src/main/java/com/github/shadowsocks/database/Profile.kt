@@ -29,10 +29,11 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
 import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
+import java.io.Serializable
 import java.net.URI
 import java.util.*
 
-class Profile {
+class Profile : Serializable {
     companion object {
         private const val TAG = "ShadowParser"
         private val pattern = """(?i)ss://[-a-zA-Z0-9+&@#/%?=~_|!:,.;\[\]]*[-a-zA-Z0-9+&@#/%=~_|\[\]]""".toRegex()
@@ -153,34 +154,34 @@ class Profile {
     override fun toString() = toUri().toString()
 
     fun serialize() {
-        DataStore.putString(Key.name, name)
-        DataStore.putString(Key.host, host)
-        DataStore.putString(Key.remotePort, remotePort.toString())
-        DataStore.putString(Key.password, password)
-        DataStore.putString(Key.route, route)
-        DataStore.putString(Key.remoteDns, remoteDns)
-        DataStore.putString(Key.method, method)
+        DataStore.privateStore.putString(Key.name, name)
+        DataStore.privateStore.putString(Key.host, host)
+        DataStore.privateStore.putString(Key.remotePort, remotePort.toString())
+        DataStore.privateStore.putString(Key.password, password)
+        DataStore.privateStore.putString(Key.route, route)
+        DataStore.privateStore.putString(Key.remoteDns, remoteDns)
+        DataStore.privateStore.putString(Key.method, method)
         DataStore.proxyApps = proxyApps
         DataStore.bypass = bypass
-        DataStore.putBoolean(Key.udpdns, udpdns)
-        DataStore.putBoolean(Key.ipv6, ipv6)
+        DataStore.privateStore.putBoolean(Key.udpdns, udpdns)
+        DataStore.privateStore.putBoolean(Key.ipv6, ipv6)
         DataStore.individual = individual
         DataStore.plugin = plugin ?: ""
-        DataStore.remove(Key.dirty)
+        DataStore.privateStore.remove(Key.dirty)
     }
     fun deserialize() {
         // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
-        name = DataStore.getString(Key.name) ?: ""
-        host = DataStore.getString(Key.host) ?: ""
-        remotePort = parsePort(DataStore.getString(Key.remotePort), 8388, 1)
-        password = DataStore.getString(Key.password) ?: ""
-        method = DataStore.getString(Key.method) ?: ""
-        route = DataStore.getString(Key.route) ?: ""
-        remoteDns = DataStore.getString(Key.remoteDns) ?: ""
+        name = DataStore.privateStore.getString(Key.name) ?: ""
+        host = DataStore.privateStore.getString(Key.host) ?: ""
+        remotePort = parsePort(DataStore.privateStore.getString(Key.remotePort), 8388, 1)
+        password = DataStore.privateStore.getString(Key.password) ?: ""
+        method = DataStore.privateStore.getString(Key.method) ?: ""
+        route = DataStore.privateStore.getString(Key.route) ?: ""
+        remoteDns = DataStore.privateStore.getString(Key.remoteDns) ?: ""
         proxyApps = DataStore.proxyApps
         bypass = DataStore.bypass
-        udpdns = DataStore.getBoolean(Key.udpdns, false)
-        ipv6 = DataStore.getBoolean(Key.ipv6, false)
+        udpdns = DataStore.privateStore.getBoolean(Key.udpdns, false)
+        ipv6 = DataStore.privateStore.getBoolean(Key.ipv6, false)
         individual = DataStore.individual
         plugin = DataStore.plugin
     }

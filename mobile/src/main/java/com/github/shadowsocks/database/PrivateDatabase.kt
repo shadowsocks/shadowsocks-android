@@ -31,7 +31,7 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 
-object DBHelper : OrmLiteSqliteOpenHelper(app, Key.PROFILE, null, 24) {
+object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) {
     @Suppress("UNCHECKED_CAST")
     val profileDao: Dao<Profile, Int> by lazy { getDao(Profile::class.java) as Dao<Profile, Int> }
     @Suppress("UNCHECKED_CAST")
@@ -134,8 +134,14 @@ object DBHelper : OrmLiteSqliteOpenHelper(app, Key.PROFILE, null, 24) {
                 TableUtils.createTable(connectionSource, KeyValuePair::class.java)
                 profileDao.executeRawNoArgs("COMMIT;")
                 val old = PreferenceManager.getDefaultSharedPreferences(app)
-                kvPairDao.createOrUpdate(KeyValuePair(Key.id).put(old.getInt(Key.id, 0)))
-                kvPairDao.createOrUpdate(KeyValuePair(Key.tfo).put(old.getBoolean(Key.tfo, false)))
+                PublicDatabase.kvPairDao.createOrUpdate(KeyValuePair(Key.id).put(old.getInt(Key.id, 0)))
+                PublicDatabase.kvPairDao.createOrUpdate(KeyValuePair(Key.tfo).put(old.getBoolean(Key.tfo, false)))
+            }
+
+            if (oldVersion < 25) {
+                kvPairDao.queryBuilder().where().`in`("key",
+                        Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
+                        .forEach { PublicDatabase.kvPairDao.createOrUpdate(it) }
             }
         } catch (ex: Exception) {
             app.track(ex)
