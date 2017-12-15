@@ -76,7 +76,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     @SuppressLint("ValidFragment")
-    private class QRCodeDialog() : DialogFragment() {
+    class QRCodeDialog() : DialogFragment() {
 
         constructor(url: String) : this() {
             val bundle = Bundle()
