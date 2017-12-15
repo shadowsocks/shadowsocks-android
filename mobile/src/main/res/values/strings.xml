@@ -18,7 +18,7 @@
 
   <string name="remote_dns">Remote DNS</string>
   <string name="traffic" translatable="false">%s↑\t%s↓</string>
-  <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
+  <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s\nReceived: \t%4$s\t↓\t%2$s</string>
   <string name="speed">%s/s</string>
   <plurals name="bytes">
     <item quantity="one">Byte</item>
