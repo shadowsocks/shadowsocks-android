@@ -20,55 +20,15 @@
 
 package com.github.shadowsocks.utils
 
-object Key {
+import android.annotation.TargetApi
+import android.content.Context
+import android.content.ContextWrapper
+
+@TargetApi(24)
+class DeviceContext(context: Context) : ContextWrapper(context.createDeviceProtectedStorageContext()) {
     /**
-     * Public config that doesn't need to be kept secret.
+     * Thou shalt not get the REAL underlying application context which would no longer be operating under device
+     * protected storage.
      */
-    const val DB_PUBLIC = "config.db"
-    const val DB_PROFILE = "profile.db"
-
-    const val id = "profileId"
-    const val name = "profileName"
-
-    const val individual = "Proxyed"
-
-    const val serviceMode = "serviceMode"
-    const val modeProxy = "proxy"
-    const val modeVpn = "vpn"
-    const val modeTransproxy = "transproxy"
-    const val portProxy = "portProxy"
-    const val portLocalDns = "portLocalDns"
-    const val portTransproxy = "portTransproxy"
-
-    const val route = "route"
-
-    const val isAutoConnect = "isAutoConnect"
-    const val directBootAware = "directBootAware"
-
-    const val proxyApps = "isProxyApps"
-    const val bypass = "isBypassApps"
-    const val udpdns = "isUdpDns"
-    const val ipv6 = "isIpv6"
-
-    const val host = "proxy"
-    const val password = "sitekey"
-    const val method = "encMethod"
-    const val remotePort = "remotePortNum"
-    const val remoteDns = "remoteDns"
-
-    const val plugin = "plugin"
-    const val pluginConfigure = "plugin.configure"
-
-    const val dirty = "profileDirty"
-
-    const val tfo = "tcp_fastopen"
-    const val assetUpdateTime = "assetUpdateTime"
-}
-
-object Action {
-    const val SERVICE = "com.github.shadowsocks.SERVICE"
-    const val CLOSE = "com.github.shadowsocks.CLOSE"
-    const val RELOAD = "com.github.shadowsocks.RELOAD"
-
-    const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
+    override fun getApplicationContext(): Context = this
 }

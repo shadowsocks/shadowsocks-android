@@ -29,7 +29,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class TrafficMonitorThread : LocalSocketListener("TrafficMonitorThread") {
-    override val socketFile = File(app.filesDir, "/stat_path")
+    override val socketFile = File(app.deviceContext.filesDir, "stat_path")
 
     override fun accept(socket: LocalSocket) {
         try {

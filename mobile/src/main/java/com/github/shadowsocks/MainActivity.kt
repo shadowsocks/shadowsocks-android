@@ -335,7 +335,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
         changeState(BaseService.IDLE)   // reset everything to init state
         app.handler.post { connection.connect() }
-        DataStore.registerChangeListener(this)
+        DataStore.publicStore.registerChangeListener(this)
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
@@ -434,7 +434,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     override fun onDestroy() {
         super.onDestroy()
-        DataStore.unregisterChangeListener(this)
+        DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect()
         BackupManager(this).dataChanged()
         app.handler.removeCallbacksAndMessages(null)

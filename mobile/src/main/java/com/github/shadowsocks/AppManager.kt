@@ -47,6 +47,7 @@ import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.thread
 import java.util.concurrent.atomic.AtomicBoolean
@@ -231,6 +232,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         it.individual = proxiedAppString
                         ProfileManager.updateProfile(it)
                     }
+                    if (DataStore.directBootAware) DirectBoot.update()
                     Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show()
                 } else Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show()
                 return true

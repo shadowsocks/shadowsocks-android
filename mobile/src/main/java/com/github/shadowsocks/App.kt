@@ -24,6 +24,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInfo
@@ -34,9 +35,12 @@ import android.os.Handler
 import android.os.LocaleList
 import android.os.Looper
 import android.support.annotation.RequiresApi
+import android.support.v4.os.UserManagerCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
+import com.evernote.android.job.JobConstants
 import com.evernote.android.job.JobManager
+import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncJob
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -44,10 +48,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.BottomSheetPreferenceDialogFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.IconListPreference
-import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.TcpFastOpen
-import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.*
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
 import com.google.android.gms.analytics.StandardExceptionParser
@@ -75,8 +76,9 @@ class App : Application() {
     }
 
     val handler by lazy { Handler(Looper.getMainLooper()) }
+    val deviceContext: Context by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceContext(this) }
     val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
-    private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(this).newTracker(R.xml.tracker) }
+    private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
     val info: PackageInfo by lazy { packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES) }
 
     fun startService() {
@@ -86,7 +88,8 @@ class App : Application() {
     fun reloadService() = sendBroadcast(Intent(Action.RELOAD))
     fun stopService() = sendBroadcast(Intent(Action.CLOSE))
 
-    val currentProfile: Profile? get() = ProfileManager.getProfile(DataStore.profileId)
+    val currentProfile: Profile? get() =
+        if (DataStore.directBootAware) DirectBoot.getDeviceProfile() else ProfileManager.getProfile(DataStore.profileId)
 
     fun switchProfile(id: Int): Profile {
         val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
@@ -162,31 +165,42 @@ class App : Application() {
         if (!BuildConfig.DEBUG) System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         checkChineseLocale(resources.configuration)
+        PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
+                BottomSheetPreferenceDialogFragment::class.java)
 
-        FirebaseApp.initializeApp(this)
+        if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
+            deviceContext.moveDatabaseFrom(this, Key.DB_PUBLIC)
+            deviceContext.moveDatabaseFrom(this, JobConstants.DATABASE_NAME)
+            deviceContext.moveSharedPreferencesFrom(this, JobConstants.PREF_FILE_NAME)
+            val old = Acl.getFile(Acl.CUSTOM_RULES, this)
+            if (old.canRead()) {
+                Acl.getFile(Acl.CUSTOM_RULES).writeText(old.readText())
+                old.delete()
+            }
+        }
+
+        FirebaseApp.initializeApp(deviceContext)
         remoteConfig.setDefaults(R.xml.default_configs)
         remoteConfig.fetch().addOnCompleteListener {
             if (it.isSuccessful) remoteConfig.activateFetched() else Log.e(TAG, "Failed to fetch config")
         }
+        JobManager.create(deviceContext).addJobCreator(AclSyncJob)
 
-        JobManager.create(this).addJobCreator(AclSyncJob)
-        PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
-                BottomSheetPreferenceDialogFragment::class.java)
-
-        TcpFastOpen.enabled(DataStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
-
-        if (DataStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) {
+        // handle data restored
+        if (DataStore.directBootAware && UserManagerCompat.isUserUnlocked(this)) DirectBoot.update()
+        TcpFastOpen.enabled(DataStore.publicStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
+        if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) {
             val assetManager = assets
             for (dir in arrayOf("acl", "overture"))
                 try {
                     for (file in assetManager.list(dir)) assetManager.open(dir + '/' + file).use { input ->
-                        File(filesDir, file).outputStream().use { output -> input.copyTo(output) }
+                        File(deviceContext.filesDir, file).outputStream().use { output -> input.copyTo(output) }
                     }
                 } catch (e: IOException) {
                     Log.e(TAG, e.message)
                     app.track(e)
                 }
-            DataStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
+            DataStore.publicStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
         }
 
         if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {

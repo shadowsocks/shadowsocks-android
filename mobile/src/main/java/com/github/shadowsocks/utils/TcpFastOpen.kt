@@ -42,6 +42,7 @@ object TcpFastOpen {
 
     val sendEnabled: Boolean get() {
         val file = File("/proc/sys/net/ipv4/tcp_fastopen")
+        // File.readText doesn't work since this special file will return length 0
         return file.canRead() && file.bufferedReader().use { it.readText() }.trim().toInt() and 1 > 0
     }
 

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<full-backup-content>
+<full-backup-content xmlns:tools="http://schemas.android.com/tools"
+                     tools:ignore="FullBackupContent">
     <include domain="database" path="profile.db"/>
+    <!-- No device storage yet in Android 6.0 -->
+    <include domain="database" path="config.db"/>
     <include domain="file" path="custom-rules.acl"/>
+    <include domain="device_database" path="config.db"/>
+    <include domain="device_file" path="custom-rules.acl"/>
 </full-backup-content>
