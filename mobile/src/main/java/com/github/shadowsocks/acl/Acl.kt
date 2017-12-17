@@ -116,7 +116,8 @@ class Acl {
         var subnets: SortedList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
         reader.useLines {
             for (line in it) {
-                val blocks = line.split('#', limit = 2)
+                @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+                val blocks = (line as java.lang.String).split("#", 2)
                 val url = networkAclParser.matchEntire(blocks.getOrElse(1, {""}))?.groupValues?.getOrNull(1)
                 if (url != null) urls.add(URL(url))
                 val input = blocks[0].trim()
@@ -135,10 +136,9 @@ class Acl {
                     }
                     "[reject_all]", "[bypass_all]" -> bypass = true
                     "[accept_all]", "[proxy_all]" -> bypass = false
-                    else -> if (subnets != null && input.isNotEmpty()) try {
-                        subnets!!.add(Subnet.fromString(input))
-                    } catch (_: IllegalArgumentException) {
-                        hostnames!!.add(input)
+                    else -> if (subnets != null && input.isNotEmpty()) {
+                        val subnet = Subnet.fromString(input)
+                        if (subnet == null) hostnames!!.add(input) else subnets!!.add(subnet)
                     }
                 }
             }

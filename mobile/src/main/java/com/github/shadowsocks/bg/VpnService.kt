@@ -159,10 +159,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
             else -> {
                 resources.getStringArray(R.array.bypass_private_route).forEach {
-                    val subnet = Subnet.fromString(it)
+                    val subnet = Subnet.fromString(it)!!
                     builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
                 }
-                profile.remoteDns.split(",").map { it.trim().parseNumericAddress() }
+                profile.remoteDns.split(",").mapNotNull { it.trim().parseNumericAddress() }
                         .forEach { builder.addRoute(it, it.address.size shl 3) }
             }
         }

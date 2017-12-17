@@ -4,32 +4,32 @@
 #include <android/log.h>
 #include <sys/system_properties.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <signal.h>
+#include <algorithm>
+#include <cerrno>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
+#include <arpa/inet.h>
+#include <unistd.h>
 #include <sys/un.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <ancillary.h>
 
+using namespace std;
+
 #define LOGI(...) do { __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGW(...) do { __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__); } while(0)
 #define LOGE(...) do { __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__); } while(0)
 #define THROW(env, clazz, msg) do { env->ThrowNew(env->FindClass(clazz), msg); } while (0)
 
-static jclass ProcessImpl;
+static int sdk_version;
+static jclass ProcessImpl, Inet4Address, Inet6Address;
 static jfieldID ProcessImpl_pid, ProcessImpl_exitValue, ProcessImpl_exitValueMutex;
-
-static int sdk_version() {
-    char version[PROP_VALUE_MAX + 1];
-    __system_property_get("ro.build.version.sdk", version);
-    return atoi(version);
-}
+static jmethodID Inet4Address__init_, Inet6Address__init_;
 
 extern "C" {
 JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigkill(JNIEnv *env, jobject thiz, jint pid) {
@@ -103,6 +103,26 @@ JNIEXPORT jint JNICALL
     env->ReleaseStringUTFChars(path, sock_str);
     return 0;
 }
+
+JNIEXPORT jobject JNICALL
+Java_com_github_shadowsocks_JniHelper_parseNumericAddress(JNIEnv *env, jobject thiz, jstring str) {
+    const char *src = env->GetStringUTFChars(str, 0);
+    jbyte dst[max(sizeof(in_addr), sizeof(in6_addr))];
+    jobject result = nullptr;
+    if (inet_pton(AF_INET, src, dst) == 1) {
+        jbyteArray arr = env->NewByteArray(sizeof(in_addr));
+        env->SetByteArrayRegion(arr, 0, sizeof(in_addr), dst);
+        result = sdk_version < 24 ? env->NewObject(Inet4Address, Inet4Address__init_, arr, str)
+                                  : env->NewObject(Inet4Address, Inet4Address__init_, str, arr);
+    } else if (inet_pton(AF_INET6, src, dst) == 1) {
+        jbyteArray arr = env->NewByteArray(sizeof(in6_addr));
+        env->SetByteArrayRegion(arr, 0, sizeof(in6_addr), dst);
+        result = sdk_version < 24 ? env->NewObject(Inet6Address, Inet6Address__init_, arr, str, 0)
+                                  : env->NewObject(Inet6Address, Inet6Address__init_, str, arr, 0);
+    }
+    env->ReleaseStringUTFChars(str, src);
+    return result;
+}
 }
 
 /*
@@ -126,24 +146,39 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     }
     env = uenv.env;
 
-    if (sdk_version() < 24) {
-        if (!(ProcessImpl = env->FindClass("java/lang/ProcessManager$ProcessImpl"))) {
-            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl not found");
-            goto bail;
-        }
-        ProcessImpl = (jclass) env->NewGlobalRef((jobject) ProcessImpl);
-        if (!(ProcessImpl_pid = env->GetFieldID(ProcessImpl, "pid", "I"))) {
-            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.pid not found");
-            goto bail;
-        }
-        if (!(ProcessImpl_exitValue = env->GetFieldID(ProcessImpl, "exitValue", "Ljava/lang/Integer;"))) {
-            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValue not found");
-            goto bail;
-        }
-        if (!(ProcessImpl_exitValueMutex = env->GetFieldID(ProcessImpl, "exitValueMutex", "Ljava/lang/Object;"))) {
-            THROW(env, "java/lang/RuntimeException", "ProcessManager$ProcessImpl.exitValueMutex not found");
-            goto bail;
-        }
+    char version[PROP_VALUE_MAX + 1];
+    __system_property_get("ro.build.version.sdk", version);
+    sdk_version = atoi(version);
+
+#define FIND_CLASS(out, name)                                                           \
+    if (!(out = env->FindClass(name))) {                                                \
+        THROW(env, "java/lang/RuntimeException", name " not found");                    \
+        goto bail;                                                                      \
+    }                                                                                   \
+    out = reinterpret_cast<jclass>(env->NewGlobalRef(reinterpret_cast<jobject>(out)))
+#define GET_FIELD(out, clazz, name, sig)                                                                    \
+    if (!(out = env->GetFieldID(clazz, name, sig))) {                                                       \
+        THROW(env, "java/lang/RuntimeException", "Field " #clazz "." name " with type " sig " not found");  \
+        goto bail;                                                                                          \
+    }
+#define GET_METHOD(out, clazz, name, sig)                                                       \
+    if (!(out = env->GetMethodID(clazz, name, sig))) {                                          \
+        THROW(env, "java/lang/RuntimeException", "Method " #clazz "." name sig " not found");   \
+        goto bail;                                                                              \
+    }
+
+    FIND_CLASS(Inet4Address, "java/net/Inet4Address");
+    FIND_CLASS(Inet6Address, "java/net/Inet6Address");
+    if (sdk_version < 24) {
+        FIND_CLASS(ProcessImpl, "java/lang/ProcessManager$ProcessImpl");
+        GET_FIELD(ProcessImpl_pid, ProcessImpl, "pid", "I")
+        GET_FIELD(ProcessImpl_exitValue, ProcessImpl, "exitValue", "Ljava/lang/Integer;")
+        GET_FIELD(ProcessImpl_exitValueMutex, ProcessImpl, "exitValueMutex", "Ljava/lang/Object;")
+        GET_METHOD(Inet4Address__init_, Inet4Address, "<init>", "([BLjava/lang/String;)V")
+        GET_METHOD(Inet6Address__init_, Inet6Address, "<init>", "([BLjava/lang/String;I)V")
+    } else {
+        GET_METHOD(Inet4Address__init_, Inet4Address, "<init>", "(Ljava/lang/String;[B)V")
+        GET_METHOD(Inet6Address__init_, Inet6Address, "<init>", "(Ljava/lang/String;[BI)V")
     }
 
     result = JNI_VERSION_1_6;

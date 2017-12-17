@@ -333,8 +333,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState != null) {
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)?.map(Subnet.Companion::fromString)
-                    ?: listOf())
+            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
+                    ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_HOSTNAMES)
                     ?: arrayOf())
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }
