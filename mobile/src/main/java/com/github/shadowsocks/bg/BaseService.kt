@@ -29,7 +29,6 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.support.v4.os.UserManagerCompat
-import android.text.TextUtils
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
@@ -218,7 +217,7 @@ object BaseService {
         fun onBind(intent: Intent): IBinder? = if (intent.action == Action.SERVICE) data.binder else null
 
         fun checkProfile(profile: Profile): Boolean =
-                if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
+                if (profile.host.isEmpty() || profile.password.isEmpty()) {
                     stopRunner(true, (this as Context).getString(R.string.proxy_empty))
                     false
                 } else true

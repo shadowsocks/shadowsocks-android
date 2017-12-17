@@ -39,7 +39,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
 import android.support.v7.widget.TooltipCompat
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -355,7 +354,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
             else -> null
         }
-        if (TextUtils.isEmpty(sharedStr)) return
+        if (sharedStr.isNullOrEmpty()) return
         val profiles = Profile.findAll(sharedStr).toList()
         if (profiles.isEmpty()) {
             Snackbar.make(findViewById(R.id.snackbar), R.string.profile_invalid_input, Snackbar.LENGTH_LONG).show()

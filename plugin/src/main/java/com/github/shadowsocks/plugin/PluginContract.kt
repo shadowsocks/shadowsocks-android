@@ -18,35 +18,33 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.plugin;
+package com.github.shadowsocks.plugin
 
 /**
  * The contract between the plugin provider and host. Contains definitions for the supported actions, extras, etc.
  *
  * This class is written in Java to keep Java interoperability.
  */
-public final class PluginContract {
-    private PluginContract() { }
-
+object PluginContract {
     /**
      * ContentProvider Action: Used for NativePluginProvider.
      *
      * Constant Value: "com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"
      */
-    public static final String ACTION_NATIVE_PLUGIN = "com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN";
+    const val ACTION_NATIVE_PLUGIN = "com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"
 
     /**
      * Activity Action: Used for ConfigurationActivity.
      *
      * Constant Value: "com.github.shadowsocks.plugin.ACTION_CONFIGURE"
      */
-    public static final String ACTION_CONFIGURE = "com.github.shadowsocks.plugin.ACTION_CONFIGURE";
+    const val ACTION_CONFIGURE = "com.github.shadowsocks.plugin.ACTION_CONFIGURE"
     /**
      * Activity Action: Used for HelpActivity or HelpCallback.
      *
      * Constant Value: "com.github.shadowsocks.plugin.ACTION_HELP"
      */
-    public static final String ACTION_HELP = "com.github.shadowsocks.plugin.ACTION_HELP";
+    const val ACTION_HELP = "com.github.shadowsocks.plugin.ACTION_HELP"
 
     /**
      * The lookup key for a string that provides the plugin entry binary.
@@ -55,7 +53,7 @@ public final class PluginContract {
      *
      * Constant Value: "com.github.shadowsocks.plugin.EXTRA_ENTRY"
      */
-    public static final String EXTRA_ENTRY = "com.github.shadowsocks.plugin.EXTRA_ENTRY";
+    const val EXTRA_ENTRY = "com.github.shadowsocks.plugin.EXTRA_ENTRY"
     /**
      * The lookup key for a string that provides the options as a string.
      *
@@ -63,34 +61,34 @@ public final class PluginContract {
      *
      * Constant Value: "com.github.shadowsocks.plugin.EXTRA_OPTIONS"
      */
-    public static final String EXTRA_OPTIONS = "com.github.shadowsocks.plugin.EXTRA_OPTIONS";
+    const val EXTRA_OPTIONS = "com.github.shadowsocks.plugin.EXTRA_OPTIONS"
     /**
      * The lookup key for a CharSequence that provides user relevant help message.
      *
-     * Example: "obfs=<http|tls>            Enable obfuscating: HTTP or TLS (Experimental).
-     *           obfs-host=<host_name>      Hostname for obfuscating (Experimental)."
+     * Example: "obfs=<http></http>|tls>            Enable obfuscating: HTTP or TLS (Experimental).
+     * obfs-host=<host_name>      Hostname for obfuscating (Experimental)."
      *
      * Constant Value: "com.github.shadowsocks.plugin.EXTRA_HELP_MESSAGE"
-     */
-    public static final String EXTRA_HELP_MESSAGE = "com.github.shadowsocks.plugin.EXTRA_HELP_MESSAGE";
+    </host_name> */
+    const val EXTRA_HELP_MESSAGE = "com.github.shadowsocks.plugin.EXTRA_HELP_MESSAGE"
 
     /**
      * The metadata key to retrieve plugin id. Required for plugins.
      *
      * Constant Value: "com.github.shadowsocks.plugin.id"
      */
-    public static final String METADATA_KEY_ID = "com.github.shadowsocks.plugin.id";
+    const val METADATA_KEY_ID = "com.github.shadowsocks.plugin.id"
     /**
      * The metadata key to retrieve default configuration. Default value is empty.
      *
      * Constant Value: "com.github.shadowsocks.plugin.default_config"
      */
-    public static final String METADATA_KEY_DEFAULT_CONFIG = "com.github.shadowsocks.plugin.default_config";
+    const val METADATA_KEY_DEFAULT_CONFIG = "com.github.shadowsocks.plugin.default_config"
 
-    public static final String METHOD_GET_EXECUTABLE = "shadowsocks:getExecutable";
+    const val METHOD_GET_EXECUTABLE = "shadowsocks:getExecutable"
 
-    /** ConfigurationActivity result: fallback to manual edit mode. */
-    public static final int RESULT_FALLBACK = 1;
+    /** ConfigurationActivity result: fallback to manual edit mode.  */
+    const val RESULT_FALLBACK = 1
 
     /**
      * Relative to the file to be copied. This column is required.
@@ -99,7 +97,7 @@ public final class PluginContract {
      *
      * Type: String
      */
-    public static final String COLUMN_PATH = "path";
+    const val COLUMN_PATH = "path"
     /**
      * File mode bits. Default value is "644".
      *
@@ -107,14 +105,14 @@ public final class PluginContract {
      *
      * Type: String
      */
-    public static final String COLUMN_MODE = "mode";
+    const val COLUMN_MODE = "mode"
 
     /**
      * The scheme for general plugin actions.
      */
-    public static final String SCHEME = "plugin";
+    const val SCHEME = "plugin"
     /**
      * The authority for general plugin actions.
      */
-    public static final String AUTHORITY = "com.github.shadowsocks";
+    const val AUTHORITY = "com.github.shadowsocks"
 }
