@@ -52,9 +52,12 @@ class Acl {
             val acl = Acl()
             try {
                 acl.fromId(CUSTOM_RULES)
+                if (!acl.bypass) {
+                    acl.subnets.clear()
+                    acl.hostnames.clear()
+                }
             } catch (_: FileNotFoundException) { }
             acl.bypass = true
-            acl.bypassHostnames.clear() // everything is bypassed
             return acl
         }
         fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
@@ -83,32 +86,33 @@ class Acl {
 
     @DatabaseField(generatedId = true)
     var id = 0
-    val bypassHostnames = SortedList(String::class.java, StringSorter)
-    val proxyHostnames = SortedList(String::class.java, StringSorter)
+    val hostnames = SortedList(String::class.java, StringSorter)
     val subnets = SortedList(Subnet::class.java, SubnetSorter)
     val urls = SortedList(URL::class.java, URLSorter)
 
     @DatabaseField
     var bypass = false
 
-    fun fromAcl(other: Acl): Acl {
-        bypassHostnames.clear()
-        for (item in other.bypassHostnames.asIterable()) bypassHostnames.add(item)
-        proxyHostnames.clear()
-        for (item in other.proxyHostnames.asIterable()) proxyHostnames.add(item)
+    fun clear(): Acl {
+        hostnames.clear()
         subnets.clear()
-        for (item in other.subnets.asIterable()) subnets.add(item)
         urls.clear()
+        return this
+    }
+
+    fun fromAcl(other: Acl): Acl {
+        clear()
+        for (item in other.hostnames.asIterable()) hostnames.add(item)
+        for (item in other.subnets.asIterable()) subnets.add(item)
         for (item in other.urls.asIterable()) urls.add(item)
         bypass = other.bypass
         return this
     }
     fun fromReader(reader: Reader, defaultBypass: Boolean = false): Acl {
-        bypassHostnames.clear()
-        proxyHostnames.clear()
-        subnets.clear()
-        urls.clear()
+        clear()
         bypass = defaultBypass
+        val proxyHostnames by lazy { SortedList(String::class.java, StringSorter) }
+        val bypassHostnames by lazy { SortedList(String::class.java, StringSorter) }
         val bypassSubnets by lazy { SortedList(Subnet::class.java, SubnetSorter) }
         val proxySubnets by lazy { SortedList(Subnet::class.java, SubnetSorter) }
         var hostnames: SortedList<String>? = if (defaultBypass) proxyHostnames else bypassHostnames
@@ -142,6 +146,7 @@ class Acl {
                 }
             }
         }
+        for (item in (if (bypass) proxyHostnames else bypassHostnames).asIterable()) this.hostnames.add(item)
         for (item in (if (bypass) proxySubnets else bypassSubnets).asIterable()) this.subnets.add(item)
         return this
     }
@@ -154,11 +159,12 @@ class Acl {
             if (bypass != child.bypass) {
                 Log.w(TAG, "Imported network ACL has a conflicting mode set. " +
                         "This will probably not work as intended. URL: $url")
-                child.subnets.clear() // subnets for the different mode are discarded
+                // rules for the different mode are discarded
+                child.hostnames.clear()
+                child.subnets.clear()
                 child.bypass = bypass
             }
-            for (item in child.bypassHostnames.asIterable()) bypassHostnames.add(item)
-            for (item in child.proxyHostnames.asIterable()) proxyHostnames.add(item)
+            for (item in child.hostnames.asIterable()) hostnames.add(item)
             for (item in child.subnets.asIterable()) subnets.add(item)
         }
         urls.clear()
@@ -167,21 +173,11 @@ class Acl {
 
     override fun toString(): String {
         val result = StringBuilder()
-        result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
-        val bypassList = (if (bypass) bypassHostnames.asIterable().asSequence() else
-            subnets.asIterable().asSequence().map(Subnet::toString) + proxyHostnames.asIterable().asSequence()).toList()
-        val proxyList = (if (bypass) subnets.asIterable().asSequence().map(Subnet::toString) +
-                proxyHostnames.asIterable().asSequence() else bypassHostnames.asIterable().asSequence()).toList()
-        if (bypassList.isNotEmpty()) {
-            result.append("[bypass_list]\n")
-            result.append(bypassList.joinToString("\n"))
-            result.append('\n')
-        }
-        if (proxyList.isNotEmpty()) {
-            result.append("[proxy_list]\n")
-            result.append(proxyList.joinToString("\n"))
-            result.append('\n')
-        }
+        result.append(if (bypass) "[bypass_all]\n[proxy_list]\n" else "[proxy_all]\n[bypass_list]\n")
+        result.append(subnets.asIterable().joinToString("\n"))
+        result.append('\n')
+        result.append(hostnames.asIterable().joinToString("\n"))
+        result.append('\n')
         result.append(urls.asIterable().joinToString("") { "#IMPORT_URL <$it>\n" })
         return result.toString()
     }
