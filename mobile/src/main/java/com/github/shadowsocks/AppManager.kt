@@ -28,6 +28,8 @@ import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -38,7 +40,6 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.util.TypedValue
 import android.view.*
 import android.widget.ImageView
 import android.widget.Switch
@@ -56,29 +57,31 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     companion object {
-        data class ProxiedApp(val name: String, val packageName: String, val icon: Drawable)
-
         @SuppressLint("StaticFieldLeak")
         private var instance: AppManager? = null
 
         private var receiver: BroadcastReceiver? = null
-        private var cachedApps: Array<ProxiedApp>? = null
-        private fun getApps(pm: PackageManager): Array<ProxiedApp> {
+        private var cachedApps: List<PackageInfo>? = null
+        private fun getApps(pm: PackageManager): List<ProxiedApp> {
             if (receiver == null) receiver = app.listenForPackageChanges {
                 synchronized(AppManager) { cachedApps = null }
                 AppManager.instance?.reloadApps()
             }
             return synchronized(AppManager) {
+                // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
                 val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
                         .filter { it.packageName != app.packageName &&
                                 it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
-                        .map { ProxiedApp(pm.getApplicationLabel(it.applicationInfo).toString(), it.packageName,
-                                it.applicationInfo.loadIcon(pm)) }
-                        .toTypedArray()
                 this.cachedApps = cachedApps
                 cachedApps
-            }
+            }.map { ProxiedApp(pm, it.applicationInfo, it.packageName) }
         }
+    }
+
+    private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
+                             val packageName: String) {
+        val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
+        val icon: Drawable get() = appInfo.loadIcon(pm)
     }
 
     private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -117,13 +120,8 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         private var apps = listOf<ProxiedApp>()
 
         fun reload() {
-            apps = getApps(packageManager).sortedWith(Comparator { a, b ->
-                when (Pair(proxiedApps.contains(a.packageName), proxiedApps.contains(b.packageName))) {
-                    Pair(true, false) -> -1
-                    Pair(false, true) -> 1
-                    else -> a.name.compareTo(b.name, true)
-                }
-            })
+            apps = getApps(packageManager)
+                    .sortedWith(compareBy({ !proxiedApps.contains(it.packageName) }, { it.name.toString() }))
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(apps[position])
