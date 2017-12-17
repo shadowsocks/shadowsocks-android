@@ -28,7 +28,6 @@ class AclTest {
         private const val INPUT1 = """[proxy_all]
 [bypass_list]
 1.0.1.0/24
-[proxy_list]
 (^|\.)4tern\.com${'$'}
 """
     }

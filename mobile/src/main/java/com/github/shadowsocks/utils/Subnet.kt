@@ -30,7 +30,8 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
             val parts = (value as java.lang.String).split("/", 2)
             val addr = parts[0].parseNumericAddress() ?: return null
             return if (parts.size == 2) try {
-                Subnet(addr, parts[1].toInt())
+                val prefixSize = parts[1].toInt()
+                if (prefixSize < 0 || prefixSize > addr.address.size shl 3) null else Subnet(addr, prefixSize)
             } catch (_: NumberFormatException) {
                 null
             } else Subnet(addr, addr.address.size shl 3)
