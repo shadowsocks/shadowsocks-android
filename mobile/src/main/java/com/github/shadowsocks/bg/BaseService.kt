@@ -258,7 +258,7 @@ object BaseService {
             data.sslocalProcess = GuardedProcess(cmd).start()
         }
 
-        fun createNotification(): ServiceNotification
+        fun createNotification(profileName: String): ServiceNotification
 
         fun startRunner() {
             this as Context
@@ -318,11 +318,11 @@ object BaseService {
             val profile = app.currentProfile
             this as Context
             if (profile == null) {
+                data.notification = createNotification("")  // gracefully shutdown: https://stackoverflow.com/questions/47337857/context-startforegroundservice-did-not-then-call-service-startforeground-eve
                 stopRunner(true, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
             data.profile = profile
-            profile.name = profile.formattedName
 
             TrafficMonitor.reset()
             val thread = TrafficMonitorThread()
@@ -339,7 +339,7 @@ object BaseService {
                 data.closeReceiverRegistered = true
             }
 
-            data.notification = createNotification()
+            data.notification = createNotification(profile.formattedName)
             app.track(tag, "start")
 
             data.changeState(CONNECTING)
