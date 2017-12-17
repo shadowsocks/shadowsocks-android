@@ -3,8 +3,6 @@
 [bypass_all]
 
 [proxy_list]
-# manhuaren
-mangaapi.manhuaren.com
 # Telegram IPs$
 91.108.4.0/22
 91.108.56.0/22
@@ -70,6 +68,7 @@ mangaapi.manhuaren.com
 ^(.*\.)?lovetvshow\.com$
 ^(.*\.)?macgamestore\.com$
 ^(.*\.)?madonna-av\.com$
+^(.*\.)?manhuaren\.com$
 ^(.*\.)?mangafox\.com$
 ^(.*\.)?mangafox\.me$
 ^(.*\.)?matome-plus\.com$
