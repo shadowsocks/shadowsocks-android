@@ -194,9 +194,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     private fun sendFd(fd: Int): Boolean {
         if (fd != -1) {
-            var tries = 1
-            while (tries < 5) {
-                Thread.sleep(1000L * tries)
+            var tries = 0
+            while (tries < 10) {
+                Thread.sleep(30L shl tries)
                 if (JniHelper.sendFd(fd, File(app.deviceContext.filesDir, "sock_path").absolutePath) != -1) return true
                 tries += 1
             }
