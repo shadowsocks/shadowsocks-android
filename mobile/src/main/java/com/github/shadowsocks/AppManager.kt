@@ -38,6 +38,7 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.util.TypedValue
 import android.view.*
 import android.widget.ImageView
 import android.widget.Switch
@@ -49,6 +50,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.utils.thread
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -181,9 +183,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         setContentView(R.layout.layout_apps)
         toolbar = findViewById(R.id.toolbar)
         toolbar.setTitle(R.string.proxied_apps)
-        val arr = obtainStyledAttributes(intArrayOf(R.attr.homeAsUpIndicator))
-        toolbar.navigationIcon = arr.getDrawable(0)
-        arr.recycle()
+        toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
         toolbar.setNavigationOnClickListener {
             val intent = parentActivityIntent
             if (shouldUpRecreateTask(intent) || isTaskRoot)

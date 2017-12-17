@@ -37,6 +37,7 @@ import android.widget.Switch
 import com.github.shadowsocks.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.utils.resolveResourceId
 
 class ConfigActivity : AppCompatActivity() {
     inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -44,9 +45,7 @@ class ConfigActivity : AppCompatActivity() {
         private val text = itemView.findViewById<CheckedTextView>(android.R.id.text1)
 
         init {
-            val typedArray = obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
-            view.setBackgroundResource(typedArray.getResourceId(0, 0))
-            typedArray.recycle()
+            view.setBackgroundResource(theme.resolveResourceId(android.R.attr.selectableItemBackground))
             itemView.setOnClickListener(this)
         }
 

@@ -3,10 +3,13 @@ package com.github.shadowsocks.utils
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
+import android.support.annotation.AttrRes
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.util.SortedList
+import android.util.TypedValue
 import com.github.shadowsocks.App.Companion.app
 import java.lang.reflect.InvocationTargetException
 import java.net.InetAddress
@@ -63,6 +66,15 @@ val URLConnection.responseLength: Long
 var Fragment.childFragManager: FragmentManager?
     get() = childFragmentManager
     set(value) = fieldChildFragmentManager.set(this, value)
+
+/**
+ * Based on: https://stackoverflow.com/a/26348729/2245107
+ */
+fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
+    val typedValue = TypedValue()
+    if (!resolveAttribute(resId, typedValue, true)) throw Resources.NotFoundException()
+    return typedValue.resourceId
+}
 
 private class SortedListIterable<out T>(private val list: SortedList<T>) : Iterable<T> {
     override fun iterator(): Iterator<T> = SortedListIterator(list)
