@@ -41,6 +41,7 @@ class ShadowsocksConnection(private val instance: Interface) : ServiceConnection
         val serviceCallback: IShadowsocksServiceCallback? get() = null
         val connection: ShadowsocksConnection
             get() = connections.getOrPut(this, { ShadowsocksConnection(this) })
+        val listenForDeath get() = false
 
         fun onServiceConnected(service: IShadowsocksService) { }
         /**
@@ -66,7 +67,7 @@ class ShadowsocksConnection(private val instance: Interface) : ServiceConnection
 
     override fun onServiceConnected(name: ComponentName?, binder: IBinder) {
         this.binder = binder
-        binder.linkToDeath(instance, 0)
+        if (instance.listenForDeath) binder.linkToDeath(instance, 0)
         val service = IShadowsocksService.Stub.asInterface(binder)!!
         this.service = service
         if (instance.serviceCallback != null && !callbackRegistered) try {
@@ -106,7 +107,7 @@ class ShadowsocksConnection(private val instance: Interface) : ServiceConnection
             (instance as Context).unbindService(this)
         } catch (_: IllegalArgumentException) { }   // ignore
         connectionActive = false
-        binder?.unlinkToDeath(instance, 0)
+        if (instance.listenForDeath) binder?.unlinkToDeath(instance, 0)
         binder = null
         service = null
     }

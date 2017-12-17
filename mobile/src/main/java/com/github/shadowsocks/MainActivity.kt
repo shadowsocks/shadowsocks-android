@@ -224,6 +224,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
     }
 
+    override val listenForDeath: Boolean get() = true
     override fun onServiceConnected(service: IShadowsocksService) = changeState(service.state)
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
