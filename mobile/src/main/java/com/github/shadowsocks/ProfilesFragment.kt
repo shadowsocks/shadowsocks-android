@@ -223,6 +223,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
         internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
+        private val updated = HashSet<Profile>()
 
         init {
             setHasStableIds(true)   // see: http://stackoverflow.com/a/32488059/2245107
@@ -252,12 +253,16 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 next.userOrder = previousOrder
                 previousOrder = order
                 profiles[i] = next
-                ProfileManager.updateProfile(next)
+                updated.add(next)
             }
             first.userOrder = previousOrder
             profiles[to] = first
-            ProfileManager.updateProfile(first)
+            updated.add(first)
             notifyItemMoved(from, to)
+        }
+        fun commitMove() {
+            updated.forEach { ProfileManager.updateProfile(it) }
+            updated.clear()
         }
 
         fun remove(pos: Int) {
@@ -346,6 +351,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                                 viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 profilesAdapter.move(viewHolder.adapterPosition, target.adapterPosition)
                 return true
+            }
+            override fun clearView(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?) {
+                super.clearView(recyclerView, viewHolder)
+                profilesAdapter.commitMove()
             }
         }).attachToRecyclerView(profilesList)
     }
