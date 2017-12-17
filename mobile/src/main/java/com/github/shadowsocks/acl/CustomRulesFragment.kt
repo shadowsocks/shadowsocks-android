@@ -157,7 +157,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             if (!savePending) {
                 savePending = true
                 list.post {
-                    Acl.save(Acl.CUSTOM_RULES, acl)
+                    Acl.customRules = acl
                     savePending = false
                 }
             }

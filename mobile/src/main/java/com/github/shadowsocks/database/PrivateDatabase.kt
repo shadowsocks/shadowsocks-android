@@ -139,9 +139,7 @@ object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) 
             }
 
             if (oldVersion < 25) {
-                kvPairDao.queryBuilder().where().`in`("key",
-                        Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
-                        .forEach { PublicDatabase.kvPairDao.createOrUpdate(it) }
+                PublicDatabase.onUpgrade(database, 0, -1)
             }
         } catch (ex: Exception) {
             app.track(ex)

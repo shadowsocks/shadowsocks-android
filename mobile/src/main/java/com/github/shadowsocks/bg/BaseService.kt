@@ -195,8 +195,7 @@ object BaseService {
 
         val aclFile: File? get() {
             val route = profile!!.route
-            return if (route == Acl.ALL) null else
-                Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route)
+            return if (route == Acl.ALL) null else Acl.getFile(route)
         }
 
         fun changeState(s: Int, msg: String? = null) {
@@ -378,7 +377,7 @@ object BaseService {
                     }
 
                     if (profile.route == Acl.CUSTOM_RULES)
-                        Acl.save(Acl.CUSTOM_RULES_FLATTENED, Acl.customRules.flatten(10))
+                        Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10))
 
                     data.plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
                     data.pluginPath = PluginManager.init(data.plugin)

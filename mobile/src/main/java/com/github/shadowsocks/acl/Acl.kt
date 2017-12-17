@@ -24,11 +24,10 @@ import android.content.Context
 import android.support.v7.util.SortedList
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
-import com.j256.ormlite.field.DatabaseField
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.Reader
 import java.net.URL
 
@@ -42,24 +41,26 @@ class Acl {
         const val GFWLIST = "gfwlist"
         const val CHINALIST = "china-list"
         const val CUSTOM_RULES = "custom-rules"
-        const val CUSTOM_RULES_FLATTENED = "custom-rules-flattened"
 
         val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
         fun getFile(id: String, context: Context = app.deviceContext) = File(context.filesDir, id + ".acl")
 
-        val customRules: Acl get() {
-            val acl = Acl()
-            try {
-                acl.fromId(CUSTOM_RULES)
+        var customRules: Acl
+            get() {
+                val acl = Acl()
+                val str = DataStore.publicStore.getString(CUSTOM_RULES) ?: return acl
+                acl.fromReader(str.reader())
                 if (!acl.bypass) {
                     acl.subnets.clear()
                     acl.hostnames.clear()
+                    acl.bypass = true
                 }
-            } catch (_: FileNotFoundException) { }
-            acl.bypass = true
-            return acl
-        }
+                return acl
+            }
+            set(value) = DataStore.publicStore.putString(CUSTOM_RULES, if ((!value.bypass ||
+                    value.subnets.size() == 0 && value.hostnames.size() == 0) && value.urls.size() == 0)
+                null else value.toString())
         fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
     }
 
@@ -84,13 +85,9 @@ class Acl {
         override fun compareNonNull(o1: URL, o2: URL): Int = ordering.compare(o1, o2)
     }
 
-    @DatabaseField(generatedId = true)
-    var id = 0
     val hostnames = SortedList(String::class.java, StringSorter)
     val subnets = SortedList(Subnet::class.java, SubnetSorter)
     val urls = SortedList(URL::class.java, URLSorter)
-
-    @DatabaseField
     var bypass = false
 
     fun clear(): Acl {

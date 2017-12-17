@@ -22,7 +22,6 @@ package com.github.shadowsocks.acl
 
 import org.junit.Assert
 import org.junit.Test
-import java.io.StringReader
 
 class AclTest {
     companion object {
@@ -36,6 +35,6 @@ class AclTest {
 
     @Test
     fun parse() {
-        Assert.assertEquals(INPUT1, Acl().fromReader(StringReader(INPUT1)).toString());
+        Assert.assertEquals(INPUT1, Acl().fromReader(INPUT1.reader()).toString());
     }
 }

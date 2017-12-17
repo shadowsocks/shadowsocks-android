@@ -22,6 +22,7 @@ package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteDatabase
 import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.utils.Key
 import com.j256.ormlite.android.AndroidDatabaseConnection
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
@@ -29,7 +30,7 @@ import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
 
-object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC, null, 1) {
+object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC, null, 2) {
     @Suppress("UNCHECKED_CAST")
     val kvPairDao: Dao<KeyValuePair, String?> by lazy { getDao(KeyValuePair::class.java) as Dao<KeyValuePair, String?> }
 
@@ -38,7 +39,17 @@ object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC
     }
 
     override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?,
-                           oldVersion: Int, newVersion: Int) { }
+                           oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 1) {
+            PrivateDatabase.kvPairDao.queryBuilder().where().`in`("key",
+                    Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
+                    .forEach { kvPairDao.createOrUpdate(it) }
+        }
+
+        if (oldVersion < 2) {
+            kvPairDao.createOrUpdate(KeyValuePair(Acl.CUSTOM_RULES).put(Acl().fromId(Acl.CUSTOM_RULES).toString()))
+        }
+    }
 
     override fun onDowngrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         val connection = AndroidDatabaseConnection(db, true)
