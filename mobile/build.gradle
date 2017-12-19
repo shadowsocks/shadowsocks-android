@@ -5,10 +5,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 def getCurrentFlavor() {
-    Matcher matcher = Pattern.compile("(assemble|generate)(\\w+)(Release|Debug)")
-            .matcher(getGradle().getStartParameter().getTaskRequests().toString())
+    String task = getGradle().getStartParameter().getTaskRequests().toString()
+    Matcher matcher = Pattern.compile("(assemble|generate)\\w*(Release|Debug)").matcher(task)
     if (matcher.find()) return matcher.group(1).toLowerCase() else {
-        println "NO MATCH FOUND"
+        println "Warning: No match found for $task"
         return "debug"
     }
 }
