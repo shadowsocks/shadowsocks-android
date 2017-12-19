@@ -75,5 +75,5 @@ public class JniHelper {
     public static native int sendFd(int fd, @NonNull String path);
     public static native void close(int fd);
     @Nullable
-    public static native InetAddress parseNumericAddress(@NonNull String str);
+    public static native byte[] parseNumericAddress(@NonNull String str);
 }

@@ -12,8 +12,6 @@ import android.support.v7.util.SortedList
 import android.util.TypedValue
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
-import java.lang.reflect.InvocationTargetException
-import java.net.Inet4Address
 import java.net.InetAddress
 import java.net.URLConnection
 
@@ -23,8 +21,11 @@ private val fieldChildFragmentManager by lazy {
     field
 }
 
-fun String.isNumericAddress() = parseNumericAddress() != null
-fun String.parseNumericAddress() = JniHelper.parseNumericAddress(this)
+fun String.isNumericAddress() = JniHelper.parseNumericAddress(this) != null
+fun String.parseNumericAddress(): InetAddress? {
+    val addr = JniHelper.parseNumericAddress(this)
+    return if (addr == null) null else InetAddress.getByAddress(this, addr)
+}
 
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     val x = str?.toIntOrNull() ?: default

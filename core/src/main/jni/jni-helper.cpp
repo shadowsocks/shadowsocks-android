@@ -27,10 +27,10 @@ using namespace std;
 #define THROW(env, clazz, msg) do { env->ThrowNew(env->FindClass(clazz), msg); } while (0)
 
 static int sdk_version;
-static jclass ProcessImpl, Inet4Address, Inet6Address;
+static jclass ProcessImpl;
 static jfieldID ProcessImpl_pid, ProcessImpl_exitValue, ProcessImpl_exitValueMutex;
-static jmethodID Inet4Address__init_, Inet6Address__init_;
 
+#pragma clang diagnostic ignored "-Wunused-parameter"
 extern "C" {
 JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigkill(JNIEnv *env, jobject thiz, jint pid) {
     // Suppress "No such process" errors. We just want the process killed. It's fine if it's already killed.
@@ -104,24 +104,20 @@ JNIEXPORT jint JNICALL
     return 0;
 }
 
-JNIEXPORT jobject JNICALL
+JNIEXPORT jbyteArray JNICALL
 Java_com_github_shadowsocks_JniHelper_parseNumericAddress(JNIEnv *env, jobject thiz, jstring str) {
     const char *src = env->GetStringUTFChars(str, 0);
     jbyte dst[max(sizeof(in_addr), sizeof(in6_addr))];
-    jobject result = nullptr;
+    jbyteArray arr = nullptr;
     if (inet_pton(AF_INET, src, dst) == 1) {
-        jbyteArray arr = env->NewByteArray(sizeof(in_addr));
+        arr = env->NewByteArray(sizeof(in_addr));
         env->SetByteArrayRegion(arr, 0, sizeof(in_addr), dst);
-        result = sdk_version < 24 ? env->NewObject(Inet4Address, Inet4Address__init_, arr, str)
-                                  : env->NewObject(Inet4Address, Inet4Address__init_, str, arr);
     } else if (inet_pton(AF_INET6, src, dst) == 1) {
-        jbyteArray arr = env->NewByteArray(sizeof(in6_addr));
+        arr = env->NewByteArray(sizeof(in6_addr));
         env->SetByteArrayRegion(arr, 0, sizeof(in6_addr), dst);
-        result = sdk_version < 24 ? env->NewObject(Inet6Address, Inet6Address__init_, arr, str, 0)
-                                  : env->NewObject(Inet6Address, Inet6Address__init_, str, arr, 0);
     }
     env->ReleaseStringUTFChars(str, src);
-    return result;
+    return arr;
 }
 }
 
@@ -134,6 +130,7 @@ typedef union {
     void* venv;
 } UnionJNIEnvToVoid;
 
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
     UnionJNIEnvToVoid uenv;
     uenv.venv = NULL;
@@ -161,24 +158,12 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         THROW(env, "java/lang/RuntimeException", "Field " #clazz "." name " with type " sig " not found");  \
         goto bail;                                                                                          \
     }
-#define GET_METHOD(out, clazz, name, sig)                                                       \
-    if (!(out = env->GetMethodID(clazz, name, sig))) {                                          \
-        THROW(env, "java/lang/RuntimeException", "Method " #clazz "." name sig " not found");   \
-        goto bail;                                                                              \
-    }
 
-    FIND_CLASS(Inet4Address, "java/net/Inet4Address");
-    FIND_CLASS(Inet6Address, "java/net/Inet6Address");
     if (sdk_version < 24) {
         FIND_CLASS(ProcessImpl, "java/lang/ProcessManager$ProcessImpl");
         GET_FIELD(ProcessImpl_pid, ProcessImpl, "pid", "I")
         GET_FIELD(ProcessImpl_exitValue, ProcessImpl, "exitValue", "Ljava/lang/Integer;")
         GET_FIELD(ProcessImpl_exitValueMutex, ProcessImpl, "exitValueMutex", "Ljava/lang/Object;")
-        GET_METHOD(Inet4Address__init_, Inet4Address, "<init>", "([BLjava/lang/String;)V")
-        GET_METHOD(Inet6Address__init_, Inet6Address, "<init>", "([BLjava/lang/String;I)V")
-    } else {
-        GET_METHOD(Inet4Address__init_, Inet4Address, "<init>", "(Ljava/lang/String;[B)V")
-        GET_METHOD(Inet6Address__init_, Inet6Address, "<init>", "(Ljava/lang/String;[BI)V")
     }
 
     result = JNI_VERSION_1_6;
