@@ -50,7 +50,11 @@ class Acl {
             get() {
                 val acl = Acl()
                 val str = DataStore.publicStore.getString(CUSTOM_RULES) ?: return acl
-                acl.fromReader(str.reader())
+                try {
+                    acl.fromReader(str.reader())
+                } catch (_: Exception) {
+                    // Ignore
+                }
                 if (!acl.bypass) {
                     acl.subnets.clear()
                     acl.hostnames.clear()
@@ -148,11 +152,15 @@ class Acl {
         return this
     }
 
-    fun fromId(id: String): Acl = fromReader(Acl.getFile(id).bufferedReader())
+    fun fromId(id: String): Acl = try { fromReader(Acl.getFile(id).bufferedReader()) } catch (_: Exception) { Acl() }
 
     fun flatten(depth: Int): Acl {
         if (depth > 0) for (url in urls.asIterable()) {
-            val child = Acl().fromReader(url.openStream().bufferedReader(), bypass).flatten(depth - 1)
+            val child = try {
+                Acl().fromReader(url.openStream().bufferedReader(), bypass).flatten(depth - 1)
+            } catch (_: Exception) {
+                Acl()
+            }
             if (bypass != child.bypass) {
                 Log.w(TAG, "Imported network ACL has a conflicting mode set. " +
                         "This will probably not work as intended. URL: $url")
