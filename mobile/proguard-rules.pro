@@ -12,12 +12,14 @@
 #   public *;
 #}
 
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
 -dontobfuscate
 
--keepattributes SourceFile,LineNumberTable,Signature
--keepattributes *DatabaseField*
--keepattributes *DatabaseTable*
--keepattributes *SerializedName*
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
 
 -dontwarn com.j256.ormlite.**
 -dontwarn com.google.android.gms.internal.**
@@ -26,24 +28,3 @@
 -dontwarn org.xbill.**
 -dontwarn com.evernote.android.job.gcm.**
 -dontwarn com.evernote.android.job.util.GcmAvailableHelper
-
--keep public class android.support.v7.widget.** { *; }
--keep public class android.support.v7.internal.widget.** { *; }
--keep public class android.support.v7.internal.view.menu.** { *; }
-
--keep public class * extends android.support.v4.view.ActionProvider {
-    public <init>(android.content.Context);
-}
-
--keep class com.github.shadowsocks** {*;}
--keep interface com.github.shadowsocks** {*;}
--keep enum com.github.shadowsocks** {*;}
-
--keep class com.j256.**
--keepclassmembers class com.j256.** { *; }
--keep enum com.j256.**
--keepclassmembers enum com.j256.** { *; }
--keep interface com.j256.**
--keepclassmembers interface com.j256.** { *; }
-
--optimizations !code/allocation/variable
