@@ -42,7 +42,6 @@ import android.support.v7.widget.TooltipCompat
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.CustomRulesFragment
@@ -88,7 +87,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     // UI
     private lateinit var fab: FloatingActionButton
-    private lateinit var fabProgressCircle: FABProgressCircle
     internal var crossfader: Crossfader<CrossFadeSlidingPaneLayout>? = null
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
@@ -113,10 +111,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     private val greyTint by lazy { ContextCompat.getColorStateList(this, R.color.material_primary_500) }
     private val greenTint by lazy { ContextCompat.getColorStateList(this, R.color.material_green_700) }
 
-    private fun hideCircle() = try {
-        fabProgressCircle.hide()
-    } catch (_: NullPointerException) { }   // ignore
-
     // service
     var state = BaseService.IDLE
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
@@ -137,23 +131,18 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         when (state) {
             BaseService.CONNECTING -> {
                 fab.setImageResource(R.drawable.ic_start_busy)
-                fabProgressCircle.show()
                 statusText.setText(R.string.connecting)
             }
             BaseService.CONNECTED -> {
-                if (this.state == BaseService.CONNECTING) fabProgressCircle.beginFinalAnimation()
-                else fabProgressCircle.postDelayed(this::hideCircle, 1000)
                 fab.setImageResource(R.drawable.ic_start_connected)
                 statusText.setText(R.string.vpn_connected)
             }
             BaseService.STOPPING -> {
                 fab.setImageResource(R.drawable.ic_start_busy)
-                if (this.state == BaseService.CONNECTED) fabProgressCircle.show()   // ignore for stopped
                 statusText.setText(R.string.stopping)
             }
             else -> {
                 fab.setImageResource(R.drawable.ic_start_idle)
-                fabProgressCircle.postDelayed(this::hideCircle, 1000)
                 if (msg != null) {
                     Snackbar.make(findViewById(R.id.snackbar),
                             getString(R.string.vpn_error).format(Locale.ENGLISH, msg), Snackbar.LENGTH_LONG).show()
@@ -322,7 +311,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
 
         fab = findViewById(R.id.fab)
-        fabProgressCircle = findViewById(R.id.fabProgressCircle)
         fab.setOnClickListener {
             if (state == BaseService.CONNECTED) app.stopService() else thread {
                 if (BaseService.usingVpnMode) {
@@ -404,7 +392,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onResume() {
         super.onResume()
         app.remoteConfig.fetch()
-        if (state !in arrayOf(BaseService.STOPPING, BaseService.CONNECTING)) hideCircle()
     }
 
     override fun onStart() {

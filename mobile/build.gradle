@@ -49,7 +49,6 @@ dependencies {
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
     implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
     implementation 'com.evernote:android-job:1.2.1'
-    implementation 'com.github.jorgecastilloprz:fabprogresscircle:1.01'
     implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
     implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
     implementation "com.google.android.gms:play-services-gcm:$playServicesVersion"
