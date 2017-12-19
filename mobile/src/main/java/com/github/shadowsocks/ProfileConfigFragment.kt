@@ -33,7 +33,6 @@ import android.support.v7.preference.PreferenceDataStore
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
@@ -78,15 +77,18 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
             findPreference(Key.remotePort).summary = "1337"
             findPreference(Key.password).summary = "\u2022".repeat(32)
         }
+        val serviceMode = DataStore.serviceMode
+        findPreference(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
         isProxyApps = findPreference(Key.proxyApps) as SwitchPreference
         if (Build.VERSION.SDK_INT < 21) isProxyApps.parent!!.removePreference(isProxyApps) else {
-            isProxyApps.isEnabled = BaseService.usingVpnMode
+            isProxyApps.isEnabled = serviceMode == Key.modeVpn
             isProxyApps.setOnPreferenceClickListener {
                 startActivity(Intent(activity, AppManager::class.java))
                 isProxyApps.isChecked = true
                 false
             }
         }
+        findPreference(Key.udpdns).isEnabled = serviceMode != Key.modeProxy
         plugin = findPreference(Key.plugin) as IconListPreference
         pluginConfigure = findPreference(Key.pluginConfigure) as EditTextPreference
         plugin.unknownValueSummary = getString(R.string.plugin_unknown)
