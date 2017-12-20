@@ -84,7 +84,7 @@
             app:backgroundTint="@color/material_primary_500"
             app:fabSize="normal"
             app:pressedTranslationZ="6dp"
-            app:srcCompat="@drawable/ic_start_idle"/>
+            app:srcCompat="@drawable/ic_service_idle"/>
     </FrameLayout>
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/snackbar"

@@ -69,7 +69,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             .setContentTitle(profileName)
             .setContentIntent(PendingIntent.getActivity(service, 0, Intent(service, MainActivity::class.java)
                     .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
-            .setSmallIcon(R.drawable.ic_start_connected)
+            .setSmallIcon(R.drawable.ic_service_active)
     private val style = NotificationCompat.BigTextStyle(builder)
     private var isVisible = true
 

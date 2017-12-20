@@ -57,6 +57,7 @@ import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
 import com.github.shadowsocks.utils.thread
+import com.github.shadowsocks.widget.ServiceButton
 import com.mikepenz.crossfader.Crossfader
 import com.mikepenz.crossfader.view.CrossFadeSlidingPaneLayout
 import com.mikepenz.materialdrawer.Drawer
@@ -87,6 +88,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     // UI
     private lateinit var fab: FloatingActionButton
+    private val fabHelper by lazy { ServiceButton(fab) }
     internal var crossfader: Crossfader<CrossFadeSlidingPaneLayout>? = null
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
@@ -116,7 +118,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-                app.handler.post { changeState(state, msg) }
+                app.handler.post { changeState(state, msg, true) }
             }
             override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 app.handler.post { updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal) }
@@ -127,22 +129,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
     }
 
-    fun changeState(state: Int, msg: String? = null) {
+    fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
+        fabHelper.changeState(state, animate)
         when (state) {
-            BaseService.CONNECTING -> {
-                fab.setImageResource(R.drawable.ic_start_busy)
-                statusText.setText(R.string.connecting)
-            }
-            BaseService.CONNECTED -> {
-                fab.setImageResource(R.drawable.ic_start_connected)
-                statusText.setText(R.string.vpn_connected)
-            }
-            BaseService.STOPPING -> {
-                fab.setImageResource(R.drawable.ic_start_busy)
-                statusText.setText(R.string.stopping)
-            }
+            BaseService.CONNECTING -> statusText.setText(R.string.connecting)
+            BaseService.CONNECTED -> statusText.setText(R.string.vpn_connected)
+            BaseService.STOPPING -> statusText.setText(R.string.stopping)
             else -> {
-                fab.setImageResource(R.drawable.ic_start_idle)
                 if (msg != null) {
                     Snackbar.make(findViewById(R.id.snackbar),
                             getString(R.string.vpn_error).format(Locale.ENGLISH, msg), Snackbar.LENGTH_LONG).show()

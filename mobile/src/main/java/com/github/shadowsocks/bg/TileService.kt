@@ -33,9 +33,9 @@ import android.service.quicksettings.TileService as BaseTileService
 
 @RequiresApi(Build.VERSION_CODES.N)
 class TileService : BaseTileService(), ShadowsocksConnection.Interface {
-    private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_start_idle).setTint(0x79ffffff) }
-    private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_start_busy) }
-    private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_start_connected) }
+    private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle).setTint(0x79ffffff) }
+    private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
+    private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
 
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
         @RequiresApi(Build.VERSION_CODES.N)
