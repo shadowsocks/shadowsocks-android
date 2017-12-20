@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     xmlns:tools="http://schemas.android.com/tools"
-    android:drawable="@drawable/ic_service_active"
+    android:drawable="@drawable/ic_service_busy"
     tools:ignore="NewApi">
     <target android:name="path">
         <aapt:attr name="android:animation">

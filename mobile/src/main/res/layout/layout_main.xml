@@ -75,7 +75,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/stat"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="-28dp"
+        android:layout_marginTop="@dimen/fab_margin_top"
         android:elevation="6dp">
         <com.github.shadowsocks.widget.ServiceButton
             android:id="@+id/fab"
