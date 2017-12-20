@@ -50,13 +50,15 @@ class Acl {
         var customRules: Acl
             get() {
                 val acl = Acl()
-                val str = DataStore.publicStore.getString(CUSTOM_RULES) ?: return acl
-                acl.fromReader(str.reader())
-                if (!acl.bypass) {
-                    acl.subnets.clear()
-                    acl.hostnames.clear()
-                    acl.bypass = true
-                }
+                val str = DataStore.publicStore.getString(CUSTOM_RULES)
+                if (str != null) {
+                    acl.fromReader(str.reader())
+                    if (!acl.bypass) {
+                        acl.subnets.clear()
+                        acl.hostnames.clear()
+                        acl.bypass = true
+                    }
+                } else acl.bypass = true
                 return acl
             }
             set(value) = DataStore.publicStore.putString(CUSTOM_RULES, if ((!value.bypass ||
