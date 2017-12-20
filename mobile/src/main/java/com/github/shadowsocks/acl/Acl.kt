@@ -28,6 +28,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
 import java.io.File
+import java.io.IOException
 import java.io.Reader
 import java.net.URL
 
@@ -50,11 +51,7 @@ class Acl {
             get() {
                 val acl = Acl()
                 val str = DataStore.publicStore.getString(CUSTOM_RULES) ?: return acl
-                try {
-                    acl.fromReader(str.reader())
-                } catch (_: Exception) {
-                    // Ignore
-                }
+                acl.fromReader(str.reader())
                 if (!acl.bypass) {
                     acl.subnets.clear()
                     acl.hostnames.clear()
@@ -152,14 +149,17 @@ class Acl {
         return this
     }
 
-    fun fromId(id: String): Acl = try { fromReader(Acl.getFile(id).bufferedReader()) } catch (_: Exception) { Acl() }
+    fun fromId(id: String): Acl = try {
+        fromReader(Acl.getFile(id).bufferedReader())
+    } catch (_: IOException) { this }
 
     fun flatten(depth: Int): Acl {
         if (depth > 0) for (url in urls.asIterable()) {
-            val child = try {
-                Acl().fromReader(url.openStream().bufferedReader(), bypass).flatten(depth - 1)
-            } catch (_: Exception) {
-                Acl()
+            val child = Acl()
+            try {
+                child.fromReader(url.openStream().bufferedReader(), bypass).flatten(depth - 1)
+            } catch (_: IOException) {
+                continue
             }
             if (bypass != child.bypass) {
                 Log.w(TAG, "Imported network ACL has a conflicting mode set. " +

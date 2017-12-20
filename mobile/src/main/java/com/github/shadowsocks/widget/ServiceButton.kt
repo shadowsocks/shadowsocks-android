@@ -29,7 +29,7 @@ import android.support.graphics.drawable.AnimatedVectorDrawableCompat
 import android.support.v7.widget.TooltipCompat
 import android.util.AttributeSet
 import android.view.View
-import com.github.shadowsocks.App
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import java.util.*
@@ -85,7 +85,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         }
         refreshDrawableState()
         isEnabled = false
-        if (state == BaseService.CONNECTED || state == BaseService.STOPPED) App.app.handler.postDelayed(
+        if (state == BaseService.CONNECTED || state == BaseService.STOPPED) app.handler.postDelayed(
                 { isEnabled = state == BaseService.CONNECTED || state == BaseService.STOPPED }, 1000)
     }
 
