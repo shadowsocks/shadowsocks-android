@@ -31,14 +31,12 @@ import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.os.SystemClock
 import android.support.customtabs.CustomTabsIntent
-import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
-import android.support.v7.widget.TooltipCompat
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -87,8 +85,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     // UI
-    private lateinit var fab: FloatingActionButton
-    private val fabHelper by lazy { ServiceButton(fab) }
+    private lateinit var fab: ServiceButton
     internal var crossfader: Crossfader<CrossFadeSlidingPaneLayout>? = null
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
@@ -110,9 +107,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     } catch (_: ActivityNotFoundException) { }  // ignore
     fun launchUrl(uri: String) = launchUrl(Uri.parse(uri))
 
-    private val greyTint by lazy { ContextCompat.getColorStateList(this, R.color.material_primary_500) }
-    private val greenTint by lazy { ContextCompat.getColorStateList(this, R.color.material_green_700) }
-
     // service
     var state = BaseService.IDLE
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
@@ -130,7 +124,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
-        fabHelper.changeState(state, animate)
+        fab.changeState(state, animate)
         when (state) {
             BaseService.CONNECTING -> statusText.setText(R.string.connecting)
             BaseService.CONNECTED -> statusText.setText(R.string.vpn_connected)
@@ -145,20 +139,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
         }
         this.state = state
-        if (state == BaseService.CONNECTED) {
-            fab.backgroundTintList = greenTint
-            TooltipCompat.setTooltipText(fab, getString(R.string.stop))
-        } else {
-            fab.backgroundTintList = greyTint
-            TooltipCompat.setTooltipText(fab, getString(R.string.connect))
+        if (state != BaseService.CONNECTED) {
             updateTraffic(-1, 0, 0, 0, 0)
             testCount += 1  // suppress previous test messages
         }
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
-        fab.isEnabled = false
-        if (state == BaseService.CONNECTED || state == BaseService.STOPPED) app.handler.postDelayed(
-                { fab.isEnabled = state == BaseService.CONNECTED || state == BaseService.STOPPED }, 1000)
     }
     fun updateTraffic(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
         txText.text = TrafficMonitor.formatTraffic(txTotal)

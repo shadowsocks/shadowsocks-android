@@ -77,11 +77,11 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="-28dp"
         android:elevation="6dp">
-        <android.support.design.widget.FloatingActionButton
+        <com.github.shadowsocks.widget.ServiceButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:backgroundTint="@color/material_primary_500"
+            app:backgroundTint="@color/background_service"
             app:fabSize="normal"
             app:pressedTranslationZ="6dp"
             app:srcCompat="@drawable/ic_service_idle"/>
