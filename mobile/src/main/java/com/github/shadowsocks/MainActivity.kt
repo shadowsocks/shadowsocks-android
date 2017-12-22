@@ -24,6 +24,7 @@ import android.app.Activity
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Typeface
 import android.net.Uri
 import android.net.VpnService
 import android.nfc.NdefMessage
@@ -33,6 +34,7 @@ import android.os.SystemClock
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.res.ResourcesCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.content.res.AppCompatResources
@@ -213,6 +215,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
+
         val drawerBuilder = DrawerBuilder()
                 .withActivity(this)
                 .withTranslucentStatusBar(true)
@@ -272,6 +275,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 override fun crossfade() = crossfader.crossFade()
             })
         } else drawer = drawerBuilder.build()
+
+        val drawerTitle = drawer.getHeader().findViewById<TextView>(R.id.drawer_title)
+        ResourcesCompat.getFont(this, R.font.iceland, object : ResourcesCompat.FontCallback() {
+            override fun onFontRetrievalFailed(reason: Int) {} // Do nothing
+            override fun onFontRetrieved(typeface: Typeface) { drawerTitle.setTypeface(typeface) }
+        }, null)
 
         if (savedInstanceState == null) displayFragment(ProfilesFragment())
         previousSelectedDrawer = drawer.currentSelection
