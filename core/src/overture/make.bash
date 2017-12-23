@@ -56,33 +56,38 @@ export GOROOT=$DIR/go
 export GOPATH=$DIR
 export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 
-echo "Get dependences for overture"
-go get -u github.com/tools/godep
+if [ ! -f "$TARGET/armeabi-v7a/liboverture.so" ] || [ ! -f "$TARGET/arm64-v8a/liboverture.so" ] ||
+   [ ! -f "$TARGET/x86/liboverture.so" ]; then
 
-pushd $GOPATH/src/github.com/shadowsocks/overture/main
-godep restore
+    echo "Get dependences for overture"
+    go get -u github.com/tools/godep
 
-echo "Cross compile overture for arm"
-if [ ! -f "$TARGET/armeabi-v7a/liboverture.so" ]; then
-    try env CGO_ENABLED=1 CC=$ANDROID_ARM_CC GOOS=android GOARCH=arm GOARM=7 go build -ldflags="-s -w"
-    try $ANDROID_ARM_STRIP main
-    try mv main $TARGET/armeabi-v7a/liboverture.so
+    pushd $GOPATH/src/github.com/shadowsocks/overture/main
+    godep restore
+
+    echo "Cross compile overture for arm"
+    if [ ! -f "$TARGET/armeabi-v7a/liboverture.so" ]; then
+        try env CGO_ENABLED=1 CC=$ANDROID_ARM_CC GOOS=android GOARCH=arm GOARM=7 go build -ldflags="-s -w"
+        try $ANDROID_ARM_STRIP main
+        try mv main $TARGET/armeabi-v7a/liboverture.so
+    fi
+
+    echo "Cross compile overture for arm64"
+    if [ ! -f "$TARGET/arm64-v8a/liboverture.so" ]; then
+        try env CGO_ENABLED=1 CC=$ANDROID_ARM64_CC GOOS=android GOARCH=arm64 go build -ldflags="-s -w"
+        try $ANDROID_ARM64_STRIP main
+        try mv main $TARGET/arm64-v8a/liboverture.so
+    fi
+
+    echo "Cross compile overture for x86"
+    if [ ! -f "$TARGET/x86/liboverture.so" ]; then
+        try env CGO_ENABLED=1 CC=$ANDROID_X86_CC GOOS=android GOARCH=386 go build -ldflags="-s -w"
+        try $ANDROID_X86_STRIP main
+        try mv main $TARGET/x86/liboverture.so
+    fi
+
+    popd
+
 fi
-
-echo "Cross compile overture for arm64"
-if [ ! -f "$TARGET/arm64-v8a/liboverture.so" ]; then
-    try env CGO_ENABLED=1 CC=$ANDROID_ARM64_CC GOOS=android GOARCH=arm64 go build -ldflags="-s -w"
-    try $ANDROID_ARM64_STRIP main
-    try mv main $TARGET/arm64-v8a/liboverture.so
-fi
-
-echo "Cross compile overture for x86"
-if [ ! -f "$TARGET/x86/liboverture.so" ]; then
-    try env CGO_ENABLED=1 CC=$ANDROID_X86_CC GOOS=android GOARCH=386 go build -ldflags="-s -w"
-    try $ANDROID_X86_STRIP main
-    try mv main $TARGET/x86/liboverture.so
-fi
-
-popd
 
 echo "Successfully build overture"
