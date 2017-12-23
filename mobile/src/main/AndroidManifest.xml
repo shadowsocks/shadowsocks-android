@@ -34,6 +34,9 @@
                    android:value="@integer/google_play_services_version"/>
         <meta-data android:name="com.google.android.backup.api_key"
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts"/>
 
         <activity
             android:name=".MainActivity"

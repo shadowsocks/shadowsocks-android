@@ -14,6 +14,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_centerVertical="true"
+              android:fontFamily="@font/iceland"
               android:gravity="center"
               android:text="shadowsocks"
               android:textColor="@android:color/white"
