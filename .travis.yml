@@ -24,7 +24,7 @@ install:
     - popd
     - touch $HOME/.android/repositories.cfg
     - yes | sdkmanager
-        "build-tools;27.0.2"
+        "build-tools;27.0.3"
         ndk-bundle
         "platforms;android-27"
       >/dev/null

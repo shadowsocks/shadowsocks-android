@@ -5,10 +5,10 @@ buildscript {
         kotlinVersion = '1.2.10'
         minSdkVersion = 19
         sdkVersion = 27
-        buildToolsVersion = '27.0.2'
+        buildToolsVersion = '27.0.3'
         supportLibraryVersion = '27.0.2'
         takisoftFixVersion = '27.0.2.0'
-        playServicesVersion = '11.6.2'
+        playServicesVersion = '11.8.0'
         junitVersion = '4.12'
         androidTestVersion = '1.0.1'
         androidEspressoVersion = '3.0.1'
