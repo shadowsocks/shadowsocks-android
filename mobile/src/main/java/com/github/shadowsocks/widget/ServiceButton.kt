@@ -108,6 +108,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
             animationQueue.peekFirst()?.stop()
             animationQueue.clear()
             setImageDrawable(icon)
+            icon.start()    // force ensureAnimatorSet to be called so that stop() will work
             icon.stop()
         }
     }
