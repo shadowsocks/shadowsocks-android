@@ -103,6 +103,8 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         val activity = activity
         val dialog = BottomSheetDialog(activity!!, theme)
         val recycler = RecyclerView(activity)
+        val padding = resources.getDimensionPixelOffset(R.dimen.bottom_sheet_padding)
+        recycler.setPadding(0, padding, 0, padding)
         recycler.setHasFixedSize(true)
         recycler.layoutManager = LinearLayoutManager(activity)
         recycler.adapter = IconListAdapter(dialog)
