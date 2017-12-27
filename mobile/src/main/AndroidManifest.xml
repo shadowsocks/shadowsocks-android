@@ -20,6 +20,7 @@
     <application
         android:name=".App"
         android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
         android:backupAgent=".ConfigBackupHelper"
         android:fullBackupContent="@xml/backup_descriptor"
         android:fullBackupOnly="true"
