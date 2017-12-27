@@ -1,0 +1,136 @@
+/*
+ * Copyright 2013 Chris Banes
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+@SuppressWarnings(["GroovyUnusedDeclaration", "GrMethodMayBeStatic"])
+def isReleaseBuild() {
+    return !android.defaultConfig.versionName.contains("SNAPSHOT")
+}
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getReleaseRepositoryUrl() {
+    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL
+            : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+}
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getSnapshotRepositoryUrl() {
+    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL
+            : "https://oss.sonatype.org/content/repositories/snapshots/"
+}
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
+
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                pom.groupId = 'com.github.shadowsocks'
+                pom.artifactId = 'plugin'
+                pom.version = android.defaultConfig.versionName
+
+                repository(url: getReleaseRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+                snapshotRepository(url: getSnapshotRepositoryUrl()) {
+                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+                }
+
+                pom.project {
+                    name 'Shadowsocks Plugin'
+                    packaging 'aar'
+                    description 'Shadowsocks Plugin'
+                    url 'https://github.com/shadowsocks/shadowsocks-android'
+
+                    scm {
+                        url 'https://github.com/shadowsocks/shadowsocks-android.git'
+                        connection 'scm:git:git://github.com/shadowsocks/shadowsocks-android.git'
+                        developerConnection 'scm:git:git@github.com:shadowsocks/shadowsocks-android.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'GPLv3'
+                            url 'https://www.gnu.org/licenses/gpl-3.0.html'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'madeye'
+                            name 'Max Lv'
+                            url 'https://github.com/madeye'
+                        }
+                        developer {
+                            id 'Mygod'
+                            name 'Mygod Studio'
+                            url 'https://github.com/Mygod'
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    signing {
+        required { isReleaseBuild() && gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
+
+    android.libraryVariants.all { variant ->
+        def javadocTask = task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
+            description "Generates Javadoc for $variant.name."
+            source = variant.javaCompiler.source
+            ext.androidJar = project.files(android.getBootClasspath().join(File.pathSeparator))
+            classpath = files(variant.javaCompiler.classpath.files) + files(ext.androidJar)
+            exclude '**/BuildConfig.java'
+            exclude '**/R.java'
+        }
+
+        javadocTask.dependsOn variant.javaCompiler
+
+        def jarJavadocTask = task("jar${variant.name.capitalize()}Javadoc", type: Jar) {
+            description "Generate Javadoc Jar for $variant.name"
+            classifier = 'javadoc'
+            from javadocTask.destinationDir
+        }
+
+        jarJavadocTask.dependsOn javadocTask
+        artifacts.add('archives', jarJavadocTask)
+
+        def jarSourceTask = task("jar${variant.name.capitalize()}Sources", type: Jar) {
+            description "Generates Java Sources for $variant.name."
+            classifier = 'sources'
+            from variant.javaCompiler.source
+        }
+
+        jarSourceTask.dependsOn variant.javaCompiler
+        artifacts.add('archives', jarSourceTask)
+    }
+}
