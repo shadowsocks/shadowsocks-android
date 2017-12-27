@@ -61,7 +61,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private const val SELECTED_HOSTNAMES = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
         private const val SELECTED_URLS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
 
-        private val PATTERN_DOMAIN = """(?<=^\(\^\|\\\.\)).*(?=\$$)""".toRegex()
+        // unescaped: (?<=^(\(\^\|\\\.\)|\^\(\.\*\\\.\)\?)).*(?=\$$)
+        private val PATTERN_DOMAIN = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
     }
 
     private enum class Template {
