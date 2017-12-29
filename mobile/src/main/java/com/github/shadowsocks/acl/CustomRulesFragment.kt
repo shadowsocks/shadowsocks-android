@@ -439,4 +439,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
         else -> false
     }
+
+    override fun onDetach() {
+        undoManager.flush()
+        super.onDetach()
+    }
 }
