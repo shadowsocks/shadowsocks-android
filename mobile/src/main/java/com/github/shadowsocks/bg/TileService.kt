@@ -20,8 +20,9 @@
 
 package com.github.shadowsocks.bg
 
+import android.app.KeyguardManager
+import android.content.Context
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.service.quicksettings.Tile
 import android.support.annotation.RequiresApi
 import com.github.shadowsocks.App.Companion.app
@@ -31,34 +32,35 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import android.service.quicksettings.TileService as BaseTileService
 
-@RequiresApi(Build.VERSION_CODES.N)
+@RequiresApi(24)
 class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle).setTint(0x79ffffff) }
     private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
     private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
+    private val keyguard by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
 
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
-        @RequiresApi(Build.VERSION_CODES.N)
+        @RequiresApi(24)
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
                 val tile = qsTile ?: return
+                var label: String? = null
                 when (state) {
                     BaseService.STOPPED -> {
                         tile.icon = iconIdle
-                        tile.label = getString(R.string.app_name)
                         tile.state = Tile.STATE_INACTIVE
                     }
                     BaseService.CONNECTED -> {
                         tile.icon = iconConnected
-                        tile.label = profileName ?: getString(R.string.app_name)
+                        if (!keyguard.isDeviceLocked) label = profileName
                         tile.state = Tile.STATE_ACTIVE
                     }
                     else -> {
                         tile.icon = iconBusy
-                        tile.label = getString(R.string.app_name)
                         tile.state = Tile.STATE_UNAVAILABLE
                     }
                 }
+                tile.label = label ?: getString(R.string.app_name)
                 tile.updateTile()
             }
             override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
