@@ -38,6 +38,13 @@ import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import java.util.*
 
+/**
+ * Android < 8 VPN:     always invisible because of VPN notification/icon
+ * Android 4.x other:   always visible
+ * Android 5-7 other:   only invisible in (possibly unsecure) lockscreen
+ * Android 8+:          always visible due to system limitations
+ *                      (user can choose to hide the notification in secure lockscreen or anywhere)
+ */
 class ServiceNotification(private val service: BaseService.Interface, profileName: String,
                           channel: String, private val visible: Boolean = false) {
     private val keyGuard = (service as Context).getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
