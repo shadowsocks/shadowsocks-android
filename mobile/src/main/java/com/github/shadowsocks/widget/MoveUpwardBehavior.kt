@@ -32,6 +32,8 @@ import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.view.View
 
+import com.github.shadowsocks.utils.isAccessibilityEnabled
+
 /**
  * Full credits go to: https://stackoverflow.com/a/35904421/2245107
  */
@@ -40,7 +42,7 @@ class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean =
-            dependency is Snackbar.SnackbarLayout
+        dependency is Snackbar.SnackbarLayout
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
         child.translationY = Math.min(0f, dependency.translationY - dependency.height)
@@ -51,21 +53,25 @@ class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
      * Based on BaseTransientBottomBar.animateViewOut (support lib 27.0.2).
      */
     override fun onDependentViewRemoved(parent: CoordinatorLayout, child: View, dependency: View) {
-        val animator = ValueAnimator()
-        val start = child.translationY
-        animator.setFloatValues(start, 0f)
-        animator.interpolator = SnackbarAnimation.FAST_OUT_SLOW_IN_INTERPOLATOR
-        animator.duration = SnackbarAnimation.ANIMATION_DURATION
-        animator.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
-            private var previousValue = start
+        if (!isAccessibilityEnabled(parent.getContext())) {
+            val animator = ValueAnimator()
+            val start = child.translationY
+            animator.setFloatValues(start, 0f)
+            animator.interpolator = SnackbarAnimation.FAST_OUT_SLOW_IN_INTERPOLATOR
+            animator.duration = SnackbarAnimation.ANIMATION_DURATION
+            animator.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
+                private var previousValue = start
 
-            override fun onAnimationUpdate(animator: ValueAnimator) {
-                val currentValue = animator.animatedValue as Float
-                if (Build.VERSION.SDK_INT > 19) child.translationY = currentValue
-                else ViewCompat.offsetTopAndBottom(child, (currentValue - previousValue).toInt())
-                previousValue = currentValue
-            }
-        })
-        animator.start()
+                override fun onAnimationUpdate(animator: ValueAnimator) {
+                    val currentValue = animator.animatedValue as Float
+                    if (Build.VERSION.SDK_INT > 19) child.translationY = currentValue
+                    else ViewCompat.offsetTopAndBottom(child, (currentValue - previousValue).toInt())
+                    previousValue = currentValue
+                }
+            })
+            animator.start()
+        } else {
+            child.translationY = 0f
+        }
     }
 }

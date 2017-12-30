@@ -13,8 +13,7 @@
         android:id="@+id/fragment_holder"
         android:background="?android:attr/windowBackground"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="com.github.shadowsocks.widget.BottomMarginBehavior"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/stat"

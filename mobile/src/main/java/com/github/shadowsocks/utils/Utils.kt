@@ -9,6 +9,7 @@ import android.support.annotation.AttrRes
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v7.util.SortedList
+import android.view.accessibility.AccessibilityManager
 import android.util.TypedValue
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
@@ -19,6 +20,11 @@ private val fieldChildFragmentManager by lazy {
     val field = Fragment::class.java.getDeclaredField("mChildFragmentManager")
     field.isAccessible = true
     field
+}
+
+fun isAccessibilityEnabled(context: Context): Boolean {
+    val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    return am.isEnabled()
 }
 
 fun String.isNumericAddress() = JniHelper.parseNumericAddress(this) != null
