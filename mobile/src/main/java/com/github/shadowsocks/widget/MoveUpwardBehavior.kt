@@ -64,8 +64,7 @@ class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
 
                 override fun onAnimationUpdate(animator: ValueAnimator) {
                     val currentValue = animator.animatedValue as Float
-                    if (Build.VERSION.SDK_INT > 19) child.translationY = currentValue
-                    else ViewCompat.offsetTopAndBottom(child, (currentValue - previousValue).toInt())
+                    child.translationY = currentValue
                     previousValue = currentValue
                 }
             })
