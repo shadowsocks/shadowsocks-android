@@ -15,7 +15,7 @@
             </item>
         </selector>
     </item>
-    <item android:left="8dp">
+    <item android:left="@dimen/profile_padding">
         <shape android:shape="rectangle">
             <solid android:color="@android:color/white" />
         </shape>

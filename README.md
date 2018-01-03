@@ -3,18 +3,16 @@
 [![Build Status](https://api.travis-ci.org/shadowsocks/shadowsocks-android.svg)](https://travis-ci.org/shadowsocks/shadowsocks-android)
 [![Releases](https://img.shields.io/github/downloads/shadowsocks/shadowsocks-android/total.svg)](https://github.com/shadowsocks/shadowsocks-android/releases)
 
-A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.  
+A [shadowsocks](http://shadowsocks.org) client for Android, written in Kotlin.  
 <a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
 
 
 ### PREREQUISITES
 
 * JDK 1.8
-* SBT 0.13.0+
 * Go 1.4+
 * Android SDK
-  - Build Tools 26+
-  - Android Support Repository and Google Repository (see `build.sbt` for version)
+  - Build Tools 27+
   - Android NDK r16+
 
 ### BUILD
@@ -22,16 +20,8 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Scala.
 * Set environment variable `ANDROID_HOME` to `/path/to/android-sdk`
 * (optional) Set environment variable `ANDROID_NDK_HOME` to `/path/to/android-ndk` (default: `$ANDROID_HOME/ndk-bundle`)
 * Set environment variable `GOROOT_BOOTSTRAP` to `/path/to/go`
-* Create your key following the instructions at https://developer.android.com/studio/publish/app-signing.html
-* Create `mobile/local.properties` from `mobile/local.properties.example` with your own key information
-* Invoke the building like this
-
-```bash
-    git submodule update --init --recursive
-
-    # Build the App
-    sbt clean go-build android:package-release
-```
+* Fetch submodules using `$ git submodule update --init --recursive`
+* Build it using Android Studio or gradle script
 
 ### TRANSLATE
 
@@ -54,7 +44,6 @@ Translators can go to [POEditor](https://poeditor.com/join/project/u5VHO9vhSf) t
     <li>overture: <a href="https://github.com/shawn1m/overture/blob/master/LICENSE">MIT</a></li>
     <li>libev: <a href="https://github.com/shadowsocks/libev/blob/master/LICENSE">GPLv2</a></li>
     <li>libsodium: <a href="https://github.com/jedisct1/libsodium/blob/master/LICENSE">ISC</a></li>
-    <li>libudns: <a href="https://github.com/shadowsocks/libudns/blob/master/COPYING.LGPL">LGPL</a></li>
 </ul>
 
 ### LICENSE
