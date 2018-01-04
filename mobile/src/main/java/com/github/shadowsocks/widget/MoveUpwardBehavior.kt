@@ -45,7 +45,9 @@ class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
         dependency is Snackbar.SnackbarLayout
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
-        child.translationY = Math.min(0f, dependency.translationY - dependency.height)
+        val params = child.layoutParams
+        params.height = parent.height - dependency.height
+        child.layoutParams = params
         return true
     }
 
@@ -55,22 +57,23 @@ class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
     override fun onDependentViewRemoved(parent: CoordinatorLayout, child: View, dependency: View) {
         if (!isAccessibilityEnabled(parent.getContext())) {
             val animator = ValueAnimator()
-            val start = child.translationY
-            animator.setFloatValues(start, 0f)
+            val start = child.height
+            animator.setIntValues(start, parent.height)
             animator.interpolator = SnackbarAnimation.FAST_OUT_SLOW_IN_INTERPOLATOR
             animator.duration = SnackbarAnimation.ANIMATION_DURATION
             animator.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
-                private var previousValue = start
-
                 override fun onAnimationUpdate(animator: ValueAnimator) {
-                    val currentValue = animator.animatedValue as Float
-                    child.translationY = currentValue
-                    previousValue = currentValue
+                    val currentValue = animator.animatedValue as Int
+                    val params = child.layoutParams
+                    params.height = currentValue
+                    child.layoutParams = params
                 }
             })
             animator.start()
         } else {
-            child.translationY = 0f
+            val params = child.layoutParams
+            params.height = parent.height
+            child.layoutParams = params
         }
     }
 }

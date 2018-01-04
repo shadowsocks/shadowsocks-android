@@ -20,8 +20,8 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 203
-        versionName "4.4.3"
+        versionCode 204
+        versionName "4.4.4"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary true
