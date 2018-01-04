@@ -31,7 +31,7 @@
 
 1. Некоторые ROM используют неправильную реализацию службы VPN, особенно IPv6;
 2. Некоторые ROM используют агрессивную (или так называемую неправильную) фоновую службу с ошибочной политикой остановки;
-3. Если вы используете фреймворк Xposed и/или приложения для энергосбережения, it's likely that this app wouldn't work well with these either.
+3. Если вы используете фреймворк Xposed и/или приложения для энергосбережения, вероятно наше приложение не будет нормально работать с ними.
 
 * Иправления для MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
 * Иправления для Huawei: [#1091 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
@@ -41,17 +41,17 @@
 
 ### Как приостановить службу Shadowsocks?
 
-* Для Android 7.0+: Используйте quick switch tile in Quick Settings;
+* Для Android 7.0+: Используйте переключатель в быстрых настройках;
 * Используйте интеграцию с Tasker;
-* Add a profile with per-app proxy enabled for Shadowsocks only, bypass mode off.
+* Добавьте профиль c выбранными приложениями, которые будут работать через Shadowsocks прокси, выключив обходной режим.
 
-### Why does Shadowsocks consume so much battery on Android 5.0+?
+### Почему Shadowsocks потребляет так много энергии на Android 5.0+?
 
-As Shadowsocks takes over the whole device network, any battery used by network activities from other apps are also counted as those from Shadowsocks. So, the battery usage of Shadowsocks equals to the sum of all the network activities of your device. Shadowsocks itself is a totally I/O bound application on modern Android devices, which is expected not to consume any notable battery.
+Так как Shadowsocks работает со всем траффиком устройства, заряд батареи используемый другими приложениями также считается за тот, что использует Shadowsocks. Таким образом использование батареи Shadowsocks'ом равен сумме всей активности устройства в сети. Shadowsocks сам по себе is a totally I/O bound application on modern Android devices, which is expected not to consume any notable battery.
 
-So if you notice a significant increase in battery usage after you use Shadowsocks, it's most likely caused by other apps. For example, Google Play services can consume more battery after being able to connecting to Google, etc.
+Так что если вы заметите значительное увеличение потребляемой энергии после того, как вы использовали Shadowsocks, это скорее всего вызванно другими приложениями. Например, сервисы Google Play могут потреблять больше энергии после того, как подключатся к Google, и т.д.
 
-More details: https://kb.adguard.com/en/android/solving-problems/battery
+Больше информации: https://kb.adguard.com/en/android/solving-problems/battery
 
 ### Оно прекрасно работает при Wi-Fi но не может подключиться через сотовую связь?
 
