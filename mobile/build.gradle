@@ -25,7 +25,7 @@ android {
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary true
-        resConfigs "fa", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
+        resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
     }
     buildTypes {
         debug {
