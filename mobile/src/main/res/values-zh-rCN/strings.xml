@@ -138,6 +138,7 @@
 
 <string name="acl_rule_templates_generic">"URL/子网/域名 PCRE 正则表达式"</string>
 <string name="acl_rule_templates_domain">"域名及其子域名"</string>
+<string name="acl_rule_online_config">配置文件地址</string>
 
 <!-- plugin -->
 <string name="plugin">"插件"</string>

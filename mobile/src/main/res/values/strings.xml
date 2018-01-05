@@ -139,6 +139,7 @@
   <string name="action_add_rule">Add rule(s)…</string>
   <string name="acl_rule_templates_generic">Subnet or Hostname PCRE pattern</string>
   <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
+  <string name="acl_rule_online_config">URL to online config</string>
   <string name="edit_rule">Edit rule</string>
 
   <!-- plugin -->
