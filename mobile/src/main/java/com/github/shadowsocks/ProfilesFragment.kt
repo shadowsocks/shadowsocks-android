@@ -172,7 +172,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
 
             var adView = adView
-            if (item.host == "198.199.101.152") {
+            if (item.host == "free.xnode.in") {
                 if (adView == null) {
                     val params =
                             LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -180,7 +180,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val context = context!!
                     adView = AdView(context)
                     adView.layoutParams = params
-                    adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
+                    adView.adUnitId = "ca-app-pub-4706145830093249/9297547971"
                     adView.adSize = AdSize.FLUID
                     val padding = context.resources.getDimensionPixelOffset(R.dimen.profile_padding)
                     adView.setPadding(padding, 0, 0, padding)

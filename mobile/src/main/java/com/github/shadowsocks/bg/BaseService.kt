@@ -346,7 +346,7 @@ object BaseService {
 
             thread {
                 try {
-                    if (profile.host == "198.199.101.152") {
+                    if (profile.host == "") {
                         val client = OkHttpClient.Builder()
                                 .dns {
                                     listOf((Dns.resolve(it, false) ?: throw UnknownHostException())
