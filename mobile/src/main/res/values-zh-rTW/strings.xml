@@ -133,6 +133,7 @@
 
 <string name="acl_rule_templates_generic">"URL/子網路/主機名稱 PCRE 模式"</string>
 <string name="acl_rule_templates_domain">"網域及其所有子網域"</string>
+<string name="acl_rule_online_config">配置文件地址</string>
 
 <!-- plugin -->
 <string name="plugin">"外掛程式"</string>

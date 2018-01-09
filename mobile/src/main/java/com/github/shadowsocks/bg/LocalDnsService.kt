@@ -54,7 +54,7 @@ object LocalDnsService {
                     is Inet6Address -> "[$address]"
                     else -> address
                 }) + ":53")
-                .put("Timeout", 6)
+                .put("Timeout", 12)
                 .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
                 if (edns) dns
                 .put("Protocol", "tcp")
@@ -70,7 +70,7 @@ object LocalDnsService {
                         .put("RedirectIPv6Record", true)
                         .put("DomainBase64Decode", false)
                         .put("HostsFile", "hosts")
-                        .put("MinimumTTL", 3600)
+                        .put("MinimumTTL", 120)
                         .put("CacheSize", 4096)
                 val remoteDns = JSONArray(profile.remoteDns.split(",")
                         .mapIndexed { i, dns -> makeDns("UserDef-" + i, dns.trim()) })
