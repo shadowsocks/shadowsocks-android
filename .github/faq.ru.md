@@ -34,10 +34,10 @@
 3. Если вы используете фреймворк Xposed и/или приложения для энергосбережения, вероятно наше приложение не будет нормально работать с ними.
 
 * Иправления для MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
-* Иправления для Huawei: [#1091 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
+* Иправления для Huawei: [#1091 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Вызванные из-за Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung и/или Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
-* Не устанавливайте это приложение на SD карту, из-за проблем с разрешениями: [#1124 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
+* Не устанавливайте это приложение на SD карту, из-за проблем с разрешениями: [#1124 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
 
 ### Как приостановить службу Shadowsocks?
 
@@ -55,7 +55,9 @@
 
 ### Оно прекрасно работает при Wi-Fi но не может подключиться через сотовую связь?
 
-Разрешите этому app to consume background data in app settings.
+Разрешите этому приложению передачу данных в фоновом режиме в настройках приложения.
+
+Если у вас оперератор Yota, то измените точку доступа APN с `yota.ru` на `client.yota.ru`
 
 ### Почему требуется разрешение камере на устройствах младше Android 6.0?
 
