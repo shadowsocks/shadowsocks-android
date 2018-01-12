@@ -50,7 +50,7 @@ afterEvaluate { project ->
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-                pom.groupId = 'com.github.shadowsocks'
+                pom.groupId = 'com.github.freenode'
                 pom.artifactId = 'plugin'
                 pom.version = android.defaultConfig.versionName
 
@@ -65,12 +65,12 @@ afterEvaluate { project ->
                     name 'Shadowsocks Plugin'
                     packaging 'aar'
                     description 'Shadowsocks Plugin'
-                    url 'https://github.com/shadowsocks/shadowsocks-android'
+                    url 'https://github.com/freenode/freenode-android'
 
                     scm {
-                        url 'https://github.com/shadowsocks/shadowsocks-android.git'
-                        connection 'scm:git:git://github.com/shadowsocks/shadowsocks-android.git'
-                        developerConnection 'scm:git:git@github.com:shadowsocks/shadowsocks-android.git'
+                        url 'https://github.com/freenode/freenode-android.git'
+                        connection 'scm:git:git://github.com/freenode/freenode-android.git'
+                        developerConnection 'scm:git:git@github.com:freenode/freenode-android.git'
                     }
 
                     licenses {

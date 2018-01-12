@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:261400168171:android:dbdd6331c434162f",
         "android_client_info": {
-          "package_name": "com.github.shadowsocks"
+          "package_name": "com.github.freenode"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "261400168171-sfik8o3pj7e243583olorh7s5974vab1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.github.shadowsocks",
+            "package_name": "com.github.freenode",
             "certificate_hash": "58a90f84cfe99d4280aec677c9a1292fae131677"
           }
         },

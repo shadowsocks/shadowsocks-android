@@ -66,7 +66,7 @@
     <PreferenceCategory
             android:title="@string/plugin">
 
-        <com.github.shadowsocks.preference.IconListPreference
+        <com.github.freenode.preference.IconListPreference
                 android:key="plugin"
                 android:persistent="false"
                 android:summary="%s"

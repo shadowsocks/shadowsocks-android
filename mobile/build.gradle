@@ -17,12 +17,12 @@ android {
     buildToolsVersion rootProject.buildToolsVersion
     compileSdkVersion rootProject.sdkVersion
     defaultConfig {
-        applicationId "com.github.shadowsocks"
+        applicationId "com.github.freenode"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
         versionCode 204
         versionName "4.4.4"
-        testApplicationId "com.github.shadowsocks.test"
+        testApplicationId "com.github.freenode.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary true
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"

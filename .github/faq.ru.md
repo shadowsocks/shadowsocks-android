@@ -71,7 +71,7 @@
 IP6TABLES=/system/bin/ip6tables
 IPTABLES=/system/bin/iptables
 ULIMIT=/system/bin/ulimit
-SHADOWSOCKS_UID=`dumpsys package com.github.shadowsocks | grep userId | cut -d= -f2 - | cut -d' ' -f1 -`
+SHADOWSOCKS_UID=`dumpsys package freenode | grep userId | cut -d= -f2 - | cut -d' ' -f1 -`
 PORT_DNS=5450
 PORT_TRANSPROXY=8200
 $ULIMIT -n 4096

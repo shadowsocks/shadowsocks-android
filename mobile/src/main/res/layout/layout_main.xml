@@ -46,7 +46,7 @@
                 android:textSize="16sp"
                 tools:ignore="RtlSymmetry"/>
 
-            <com.github.shadowsocks.widget.BoundedGridLayout
+            <com.github.freenode.widget.BoundedGridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:bounded_width="288dp"
@@ -139,7 +139,7 @@
                     app:layout_column="3"
                     app:layout_columnWeight="1"
                     app:layout_row="1"/>
-            </com.github.shadowsocks.widget.BoundedGridLayout>
+            </com.github.freenode.widget.BoundedGridLayout>
         </LinearLayout>
     </RelativeLayout>
 
@@ -152,7 +152,7 @@
         android:elevation="6dp"
         app:layout_anchor="@id/stat"
         app:layout_anchorGravity="top|end">
-        <com.github.shadowsocks.widget.ServiceButton
+        <com.github.freenode.widget.ServiceButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
