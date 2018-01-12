@@ -32,12 +32,12 @@ static jfieldID ProcessImpl_pid, ProcessImpl_exitValue, ProcessImpl_exitValueMut
 
 #pragma clang diagnostic ignored "-Wunused-parameter"
 extern "C" {
-JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigkill(JNIEnv *env, jobject thiz, jint pid) {
+JNIEXPORT jint JNICALL Java_com_github_freenode_JniHelper_sigkill(JNIEnv *env, jobject thiz, jint pid) {
     // Suppress "No such process" errors. We just want the process killed. It's fine if it's already killed.
     return kill(pid, SIGKILL) == -1 && errno != ESRCH ? errno : 0;
 }
 
-JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigterm(JNIEnv *env, jobject thiz, jobject process) {
+JNIEXPORT jint JNICALL Java_com_github_freenode_JniHelper_sigterm(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
@@ -49,7 +49,7 @@ JNIEXPORT jint JNICALL Java_com_github_shadowsocks_JniHelper_sigterm(JNIEnv *env
 }
 
 JNIEXPORT jobject JNICALL
-        Java_com_github_shadowsocks_JniHelper_getExitValue(JNIEnv *env, jobject thiz, jobject process) {
+        Java_com_github_freenode_JniHelper_getExitValue(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
@@ -59,7 +59,7 @@ JNIEXPORT jobject JNICALL
 }
 
 JNIEXPORT jobject JNICALL
-        Java_com_github_shadowsocks_JniHelper_getExitValueMutex(JNIEnv *env, jobject thiz, jobject process) {
+        Java_com_github_freenode_JniHelper_getExitValueMutex(JNIEnv *env, jobject thiz, jobject process) {
     if (!env->IsInstanceOf(process, ProcessImpl)) {
         THROW(env, "java/lang/ClassCastException",
                    "Unsupported process object. Only java.lang.ProcessManager$ProcessImpl is accepted.");
@@ -68,12 +68,12 @@ JNIEXPORT jobject JNICALL
     return env->GetObjectField(process, ProcessImpl_exitValueMutex);
 }
 
-JNIEXPORT void JNICALL Java_com_github_shadowsocks_JniHelper_close(JNIEnv *env, jobject thiz, jint fd) {
+JNIEXPORT void JNICALL Java_com_github_freenode_JniHelper_close(JNIEnv *env, jobject thiz, jint fd) {
     close(fd);
 }
 
 JNIEXPORT jint JNICALL
-        Java_com_github_shadowsocks_JniHelper_sendFd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
+        Java_com_github_freenode_JniHelper_sendFd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;
     struct sockaddr_un addr;
     const char *sock_str  = env->GetStringUTFChars(path, 0);
@@ -105,7 +105,7 @@ JNIEXPORT jint JNICALL
 }
 
 JNIEXPORT jbyteArray JNICALL
-Java_com_github_shadowsocks_JniHelper_parseNumericAddress(JNIEnv *env, jobject thiz, jstring str) {
+Java_com_github_freenode_JniHelper_parseNumericAddress(JNIEnv *env, jobject thiz, jstring str) {
     const char *src = env->GetStringUTFChars(str, 0);
     jbyte dst[max(sizeof(in_addr), sizeof(in6_addr))];
     jbyteArray arr = nullptr;
