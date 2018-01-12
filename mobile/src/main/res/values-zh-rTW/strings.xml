@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">"影梭"</string>
+<string name="app_name">"Free Node"</string>
 <string name="quick_toggle">"切換"</string>
 
 <!-- misc -->
@@ -78,7 +78,7 @@
 <string name="faq">"常見問題"</string>
 <string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"關於"</string>
-<string name="about_title">"Shadowsocks %s"</string>
+<string name="about_title">"Free Node %s"</string>
 <string name="edit">"編輯"</string>
 <string name="share">"分享"</string>
 <string name="add_profile">"新增設定檔"</string>
@@ -158,5 +158,5 @@
 <string name="service_proxy">"代理服務"</string>
 <string name="service_transproxy">"透明代理服務"</string>
 <string name="vpn_permission_denied">"没有權限創建 VPN 服務"</string>
-<string name="auto_connect_summary_v24">"允許 Shadowsocks 隨系統啟動，建議使用始終開啟的 VPN"</string>
+<string name="auto_connect_summary_v24">"允許 Free Node 隨系統啟動，建議使用始終開啟的 VPN"</string>
 </resources>

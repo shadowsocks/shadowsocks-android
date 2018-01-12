@@ -1,35 +1,27 @@
 {
   "project_info": {
-    "project_number": "261400168171",
-    "firebase_url": "https://admob-app-id-3330146721.firebaseio.com",
-    "project_id": "admob-app-id-3330146721",
-    "storage_bucket": "admob-app-id-3330146721.appspot.com"
+    "project_number": "344690347048",
+    "firebase_url": "https://freenode-1a7c2.firebaseio.com",
+    "project_id": "freenode-1a7c2",
+    "storage_bucket": "freenode-1a7c2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:261400168171:android:dbdd6331c434162f",
+        "mobilesdk_app_id": "1:344690347048:android:8f6585f4dc5a06db",
         "android_client_info": {
           "package_name": "com.github.freenode"
         }
       },
       "oauth_client": [
         {
-          "client_id": "261400168171-sfik8o3pj7e243583olorh7s5974vab1.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.github.freenode",
-            "certificate_hash": "58a90f84cfe99d4280aec677c9a1292fae131677"
-          }
-        },
-        {
-          "client_id": "261400168171-g7aelv5bu012ojr7dod7lq09c9anjimh.apps.googleusercontent.com",
+          "client_id": "344690347048-b9c7kdi5er7jbk8cbiqt0963aqtqf6rj.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCee3fAad7nb3YsxeUO9mqqHFfAvsSCbVs"
+          "current_key": "AIzaSyD6UpiokaKnOWPXSBnjEEEddZ2zPl0DQTc"
         }
       ],
       "services": {
