@@ -54,7 +54,7 @@ object LocalDnsService {
                     is Inet6Address -> "[$address]"
                     else -> address
                 }) + ":53")
-                .put("Timeout", 12)
+                .put("Timeout", 3)
                 .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
                 if (edns) dns
                 .put("Protocol", "tcp")
