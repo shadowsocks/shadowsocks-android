@@ -203,6 +203,16 @@ class App : Application() {
             DataStore.publicStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
         }
 
+        updateNotificationChannels()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        checkChineseLocale(newConfig)
+        updateNotificationChannels()
+    }
+
+    private fun updateNotificationChannels() {
         if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {
             val nm = getSystemService(NotificationManager::class.java)
             nm.createNotificationChannels(listOf(
@@ -214,11 +224,6 @@ class App : Application() {
                             NotificationManager.IMPORTANCE_LOW)))
             nm.deleteNotificationChannel("service-nat") // NAT mode is gone for good
         }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        checkChineseLocale(newConfig)
     }
 
     fun listenForPackageChanges(callback: () -> Unit): BroadcastReceiver {
