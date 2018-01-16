@@ -32,7 +32,6 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
-import android.os.LocaleList
 import android.os.Looper
 import android.support.annotation.RequiresApi
 import android.support.v4.os.UserManagerCompat
@@ -59,20 +58,11 @@ import com.j256.ormlite.logger.LocalLog
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 class App : Application() {
     companion object {
         lateinit var app: App
         private const val TAG = "ShadowsocksApplication"
-
-        // The ones in Locale doesn't have script included
-        private val SIMPLIFIED_CHINESE by lazy {
-            if (Build.VERSION.SDK_INT >= 21) Locale.forLanguageTag("zh-Hans-CN") else Locale.SIMPLIFIED_CHINESE
-        }
-        private val TRADITIONAL_CHINESE by lazy {
-            if (Build.VERSION.SDK_INT >= 21) Locale.forLanguageTag("zh-Hant-TW") else Locale.TRADITIONAL_CHINESE
-        }
     }
 
     val handler by lazy { Handler(Looper.getMainLooper()) }
@@ -112,59 +102,11 @@ class App : Application() {
         t.printStackTrace()
     }
 
-    private fun checkChineseLocale(config: Configuration) {
-        fun check(locale: Locale): Locale? {
-            if (locale.language != "zh") return null
-            when (locale.country) { "CN", "TW" -> return null }
-            if (Build.VERSION.SDK_INT >= 21) when (locale.script) {
-                "Hans" -> return SIMPLIFIED_CHINESE
-                "Hant" -> return TRADITIONAL_CHINESE
-                else -> Log.w(TAG, "Unknown zh locale script: ${locale.script}. Falling back to trying countries...")
-            }
-            when (locale.country) {
-                "SG" -> return SIMPLIFIED_CHINESE
-                "HK", "MO" -> return TRADITIONAL_CHINESE
-            }
-            Log.w(TAG, "Unknown zh locale: %s. Falling back to zh-Hans-CN..."
-                    .format(Locale.ENGLISH, if (Build.VERSION.SDK_INT >= 21) locale.toLanguageTag() else locale))
-            return SIMPLIFIED_CHINESE
-        }
-        if (Build.VERSION.SDK_INT >= 24) @RequiresApi(24) {
-            val localeList = config.locales
-            var changed = false
-            val newList = Array<Locale>(localeList.size(), { i ->
-                val locale = localeList[i]
-                val newLocale = check(locale)
-                if (newLocale == null) locale else {
-                    changed = true
-                    newLocale
-                }
-            })
-            if (changed) {
-                val newConfig = Configuration(config)
-                newConfig.locales = LocaleList(*(newList.distinct().toTypedArray()))
-                val res = resources
-                res.updateConfiguration(newConfig, res.displayMetrics)
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            val newLocale = check(config.locale)
-            if (newLocale != null) {
-                val newConfig = Configuration(config)
-                @Suppress("DEPRECATION")
-                newConfig.locale = newLocale
-                val res = resources
-                res.updateConfiguration(newConfig, res.displayMetrics)
-            }
-        }
-    }
-
     override fun onCreate() {
         super.onCreate()
         app = this
         if (!BuildConfig.DEBUG) System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-        checkChineseLocale(resources.configuration)
         PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
                 BottomSheetPreferenceDialogFragment::class.java)
 
@@ -208,7 +150,6 @@ class App : Application() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        checkChineseLocale(newConfig)
         updateNotificationChannels()
     }
 
