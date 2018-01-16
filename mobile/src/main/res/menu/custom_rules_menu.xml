@@ -1,41 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/selection"
-        android:alphabeticShortcut="s"
-        android:icon="?attr/actionModeSelectAllDrawable"
-        android:numericShortcut="0"
-        android:title="@string/action_selection"
-        android:visible="false"
-        app:showAsAction="always">
-        <menu>
-            <item
-                android:id="@+id/action_select_all"
-                android:alphabeticShortcut="a"
-                android:numericShortcut="1"
-                android:title="@android:string/selectAll"
-                app:showAsAction="always"/>
-            <item
-                android:id="@+id/action_cut"
-                android:alphabeticShortcut="t"
-                android:numericShortcut="2"
-                android:title="@android:string/cut"
-                app:showAsAction="always"/>
-            <item
-                android:id="@+id/action_copy"
-                android:alphabeticShortcut="c"
-                android:numericShortcut="3"
-                android:title="@android:string/copy"
-                app:showAsAction="always"/>
-            <item
-                android:id="@+id/action_delete"
-                android:alphabeticShortcut="d"
-                android:numericShortcut="4"
-                android:title="@string/delete"
-                app:showAsAction="always"/>
-        </menu>
-    </item>
     <item android:title="@string/action_add_rule"
           android:icon="@drawable/ic_av_playlist_add"
           android:alphabeticShortcut="a"
