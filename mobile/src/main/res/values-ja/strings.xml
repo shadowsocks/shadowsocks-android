@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="app_name">"Shadowsocks"</string>
 <string name="quick_toggle">"ON/OFF"</string>
 
-<!-- global/misc category -->
-<string name="misc_cat">"その他"</string>
+<!-- misc -->
 <string name="profile">"プロファイル"</string>
 <string name="profile_summary">"新規作成または既存ファイルを開く"</string>
-<string name="nat">"NAT モード (デバックのみ)"</string>
-<string name="nat_summary">"VPN モードから NAT モードに切り替えるには ROOT 権限が必要です"</string>
 <string name="remote_dns">"リモートDNS"</string>
 <string name="stat_summary">"送信済み: \t%3$s\t↑\t%1$s/s
 受信済み: \t%4$s\t↓\t%2$s/s"</string>
+
 <string name="connection_test_pending">"接続状況確認"</string>
 <string name="connection_test_testing">"テスト中…"</string>
 <string name="connection_test_available">"成功: %dmsの遅延"</string>
 <string name="connection_test_error">"失敗しました：%s"</string>
 <string name="connection_test_fail">"インターネット利用不可"</string>
-<string name="connection_test_error_status_code">"ステータスコード無効（#%d）"</string>
+<string name="connection_test_error_status_code">"ステータスコード無効: #%d"</string>
+
+<!-- proxy category -->
+<string name="proxy_cat">"サーバー設定"</string>
 
 <!-- proxy category -->
 <string name="profile_name">"サーバー名"</string>
 <string name="proxy">"サーバーアドレス"</string>
 <string name="remote_port">"リモートポート"</string>
-<string name="port">"ローカルポート"</string>
 <string name="sitekey">"パスワード"</string>
 <string name="enc_method">"暗号化方式"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"ファンクション設定"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 プロキシ"</string>
 <string name="ipv6_summary">"リモートサーバーに IPv6 パケットを転送"</string>
 <string name="route_list">"プロキシ方式"</string>
 <string name="route_entry_gfwlist">"中国本土からアクセス不可なアドレス以外を迂回する"</string>
+
 <string name="proxied_apps">"アプリ別のプロキシを使用"</string>
+
 <string name="proxied_apps_summary">"アプリ別でプロキシを指定、Android 4.x では必ずNATモードを使用して下さい"</string>
 <string name="on">"ON"</string>
 <string name="bypass_apps">"バイパスモード（迂回モード）"</string>
@@ -47,9 +53,6 @@
 <string name="forward_success">"バックグラウンドでサービスを開始しました"</string>
 <string name="invalid_server">"サーバーが無効です"</string>
 <string name="service_failed">"リモートサーバーに接続できません"</string>
-<string name="nat_deprecated">"注意：Android 5.0 及びそれ以降のバージョンでは NAT モードの使用はお勧めしません"</string>
-<string name="nat_no_root">"NAT モードは ROOT 権限が必要です"</string>
-<string name="switch_to_vpn">"VPN モードに切り替える"</string>
 <string name="stop">"中止"</string>
 <string name="stopping">"停止中……"</string>
 <string name="vpn_error">"バックグランドサービスの起動に失敗しました：%s"</string>
@@ -57,18 +60,21 @@
 <string name="profile_invalid_input">"有効なプロファイルが見つかりません"</string>
 
 <!-- alert category -->
+<string name="yes">"はい"</string>
+<string name="no">"いいえ"</string>
+
+<!-- alert category -->
 <string name="close">"閉じる"</string>
 <string name="profile_empty">"プロファイルを選択して下さい"</string>
 <string name="proxy_empty">"サーバアドレスやパスワードの入力が必要です"</string>
 <string name="connect">"接続"</string>
-<string name="recovering">"リセット中……"</string>
-<string name="remove_profile">"このプロファイルを削除「%s」?"</string>
+<string name="remove_profile">"このプロファイルを削除 %s?"</string>
 
 <!-- menu category -->
 <string name="profiles">"プロファイル"</string>
 <string name="settings">"オプション設定"</string>
 <string name="faq">"よくある質問"</string>
-<string name="recovery">"リセット"</string>
+<string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"本アプリについて"</string>
 <string name="about_title">"Shadowsocks %s"</string>
 <string name="edit">"編集"</string>
@@ -84,16 +90,16 @@
 
 <!-- profile -->
 <string name="profile_config">"プロファイル編集"</string>
+<string name="unsaved_changes_prompt">"変更は適応されておりません、保存しますか？"</string>
+<string name="apply">"適用"</string>
 <string name="delete">"削除"</string>
 <string name="delete_confirm_prompt">"このプロファイルを削除しますか"</string>
 <string name="share_qr_nfc">"QR コード / NFC"</string>
 <string name="add_profile_dialog">"Shadowsocks用プロファイルを追加しますか"</string>
 <string name="add_profile_methods_scan_qr_code">"QR コードを読み取る"</string>
-<string name="add_profile_methods_manual_settings">"手動設定"</string>
-<string name="add_profile_scanner_not_installed">"Zxingに準拠したQRコードスキャンアプリをインストールして下さい"</string>
-<string name="add_profile_scanner_permission_required">QRコードを読み取るにはカメラの使用権限が必要です。</string>
 <plurals name="removed">
-<item quantity="other">"削除済み"</item>
+<item quantity="other">"削除しました
+%d 個のアイテムを削除しました"</item>
 </plurals>
 <string name="undo">"元に戻す"</string>
 
@@ -109,7 +115,6 @@
 <string name="received">"受信済み:"</string>
 <string name="connecting">"接続中…"</string>
 <string name="vpn_connected">"接続済み、タップして接続状況をチェック"</string>
-<string name="nat_connected">"接続済み"</string>
 <string name="not_connected">"未接続"</string>
 
 <!-- acl -->
@@ -122,15 +127,34 @@
 <string name="route_entry_bypass_chn">"中国本土のアドレスを迂回する"</string>
 <string name="route_entry_bypass_lan_chn">"LAN 及び中国本土のアドレスを迂回する"</string>
 <string name="route_entry_chinalist">"中国本土のアドレス以外を迂回する"</string>
+
 <string name="proxied_apps_summary_v21">"選択したアプリにプロキシを設定する"</string>
+
 <string name="acl_rule_templates_generic">"URL/サブネット/ホスト名 PCRE パターン"</string>
 <string name="acl_rule_templates_domain">"ドメイン及び全てのサブドメイン"</string>
 
 <!-- plugin -->
 <string name="plugin">"プラグイン"</string>
-<string name="plugin_configure">"設定..."</string>
+<string name="plugin_configure">"設定…"</string>
 <string name="plugin_disabled">"無効"</string>
-<string name="plugin_unknown">"不明なプラグイン"</string>
+<string name="plugin_unknown">"不明なプラグイン %s"</string>
 <string name="plugin_untrusted">"警告：このプラグインは信頼されていないソースからの可能性があります"</string>
-<string name="profile_plugin">"プラグイン"</string>
+<string name="profile_plugin">"プラグイン: %s"</string>
+<string name="add_profile_scanner_permission_required">"QRコードをスキャンするにはカメラ権限が必要です。"</string>
+
+<!-- notification category -->
+<string name="service_vpn">"VPNサービス"</string>
+<string name="add_profile_methods_manual_settings">"手動設定"</string>
+<string name="advanced">"アドバンス"</string>
+<string name="service_mode">"サービスモード"</string>
+<string name="service_mode_proxy">"プロキシのみ"</string>
+<string name="service_mode_vpn">"VPN"</string>
+<string name="service_mode_transproxy">"トランスプロキシ"</string>
+<string name="port_proxy">"SOCKS5プロキシポート"</string>
+<string name="port_local_dns">"ローカルDNSポート"</string>
+<string name="port_transproxy">"トランスプロキシポート"</string>
+<string name="service_proxy">"プロキシサービス"</string>
+<string name="service_transproxy">"トランスプロキシサービス"</string>
+<string name="vpn_permission_denied">"VPNサービス作成のアクセス許可が拒否されました"</string>
+<string name="auto_connect_summary_v24">"起動時にShadowsockを有効。 VPN常時接続の使用をお勧めします"</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="enc_method_entry">
+    <string-array name="enc_method_entry" translatable="false">
         <item>RC4-MD5</item>
         <item>AES-128-CFB</item>
         <item>AES-192-CFB</item>
@@ -22,7 +22,7 @@
         <item>XCHACHA20-IETF-POLY1305</item>
     </string-array>
 
-    <string-array name="enc_method_value">
+    <string-array name="enc_method_value" translatable="false">
         <item>rc4-md5</item>
         <item>aes-128-cfb</item>
         <item>aes-192-cfb</item>
@@ -53,7 +53,7 @@
         <item>@string/route_entry_chinalist</item>
         <item>@string/custom_rules</item>
     </string-array>
-    <string-array name="route_value">
+    <string-array name="route_value" translatable="false">
         <item>all</item>
         <item>bypass-lan</item>
         <item>bypass-china</item>
@@ -63,7 +63,7 @@
         <item>custom-rules</item>
     </string-array>
 
-    <string-array name="bypass_private_route">
+    <string-array name="bypass_private_route" translatable="false">
         <item>1.0.0.0/8</item>
         <item>2.0.0.0/7</item>
         <item>4.0.0.0/6</item>
@@ -221,8 +221,20 @@
         <item>208.0.0.0/4</item>
     </string-array>
 
-    <string-array name="acl_rule_templates">
+    <string-array name="acl_rule_templates" translatable="false">
         <item>@string/acl_rule_templates_generic</item>
         <item>@string/acl_rule_templates_domain</item>
+        <item>@string/acl_rule_online_config</item>
+    </string-array>
+
+    <string-array name="service_modes">
+        <item>@string/service_mode_proxy</item>
+        <item>@string/service_mode_vpn</item>
+        <item>@string/service_mode_transproxy</item>
+    </string-array>
+    <string-array name="service_mode_values" translatable="false">
+        <item>proxy</item>
+        <item>vpn</item>
+        <item>transproxy</item>
     </string-array>
 </resources>

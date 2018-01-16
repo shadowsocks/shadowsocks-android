@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auto_connect_summary">@string/auto_connect_summary_v24</string>
+</resources>

@@ -1,11 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.github.shadowsocks.plugin">
-    <uses-sdk
-            android:minSdkVersion="19"
-            android:targetSdkVersion="26"/>
     <application
-            android:theme="@style/Theme.Shadowsocks">
+        android:theme="@style/Theme.Shadowsocks">
         <meta-data android:name="com.github.shadowsocks.plugin.version"
-                   android:value="0.0.4"/>
+                   android:value="0.1.0"/>
     </application>
 </manifest>

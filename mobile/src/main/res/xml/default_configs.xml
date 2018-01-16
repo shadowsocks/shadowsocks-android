@@ -2,6 +2,6 @@
 <defaultsMap>
     <entry>
         <key>proxy_url</key>
-        <value>https://www.socks123.pw/get.php</value>
+        <value>https://socks123.azureedge.net/get.php</value>
     </entry>
 </defaultsMap>

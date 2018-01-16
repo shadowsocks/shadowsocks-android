@@ -1,45 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Shadowsocks.Material" parent="Theme.AppCompat.Light.NoActionBar"/>
-    <style name="Theme.ShadowsocksBase" parent="Theme.Shadowsocks.Material">
+    <style name="Theme.Shadowsocks" parent="PreferenceFixTheme.Light.NoActionBar">
         <!--suppress NewApi -->
         <item name="android:navigationBarColor">@color/material_primary_700</item>
         <item name="colorAccent">@color/material_accent_200</item>
         <item name="colorButtonNormal">@color/material_accent_200</item>
         <item name="colorPrimary">@color/material_primary_500</item>
         <item name="colorPrimaryDark">@color/material_primary_700</item>
-        <item name="preferenceTheme">@style/Theme.Shadowsocks.PreferenceThemeOverlay</item>
-    </style>
-
-    <style name="Theme.Shadowsocks.Dialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="colorAccent">@color/material_primary_500</item>
-        <item name="colorButtonNormal">@color/material_accent_200</item>
-        <item name="colorPrimary">@color/material_primary_500</item>
-        <item name="colorPrimaryDark">@color/material_primary_700</item>
-        <item name="preferenceTheme">@style/Theme.Shadowsocks.PreferenceThemeOverlay</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <!-- Fix for wrong padding on v17-v20 based on: https://github.com/Gericop/Android-Support-Preference-V7-Fix/blob/a6082cb/preference-v7/src/main/res/values-v17/styles.xml -->
-    <style name="Theme.Shadowsocks" parent="Theme.ShadowsocksBase">
-        <item name="android:listPreferredItemPaddingStart">16dp</item>
-        <item name="android:listPreferredItemPaddingEnd">16dp</item>
-    </style>
-    <!-- This is needed because the default PreferenceCategory appearance doesn't use bold text style -->
-    <style name="Preference_TextAppearanceMaterialBody2">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
-    <style name="Theme.Shadowsocks.PreferenceThemeOverlay" parent="@style/PreferenceThemeOverlay.v14.Material">
-        <item name="preferenceFragmentListStyle">@style/Theme.Shadowsocks.PreferenceFragmentList</item>
-    </style>
-    <style name="Theme.Shadowsocks.PreferenceFragmentList" parent="@style/PreferenceFragmentList.Material">
-        <item name="android:fadeScrollbars">true</item>
-        <item name="android:scrollbars">vertical</item>
-    </style>
-    <style name="NumberPickerStyle">
-        <item name="android:textSize">18sp</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material.Fix</item>
+        <item name="preferenceCategory_marginBottom">8dp</item>
     </style>
 </resources>

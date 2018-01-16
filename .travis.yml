@@ -5,49 +5,29 @@ jdk:
 
 env:
     global:
-        - NDK_VERSION=r15b
-        - NDK_CCACHE=ccache
         - GOROOT_BOOTSTRAP=$GOROOT
-        - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
-        - SBTPATH=$HOME/.sbt
-        - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
-
-scala:
-    - 2.11.11
 
 before_cache:
-    - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2 -name "*.lock" | xargs rm
+    - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+    - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
 cache:
     directories:
-        - $HOME/.ivy2
-        - $HOME/.sbt
-
-android:
-    components:
-        - tools
-        - build-tools-26.0.0
-        - extra-android-m2repository
-        - extra-google-m2repository
+        - $HOME/.gradle/caches/
+        - $HOME/.gradle/wrapper/
 
 install:
-    - >
-      if [ ! -d "$ANDROID_NDK_HOME" ]; then
-          mkdir -p $ANDROID_NDK_HOME;
-          pushd $HOME/.android;
-          export ARCH=`uname -m`;
-          wget -q http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          unzip -q android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          popd;
-      fi
-    - >
-      if [ ! -f "$SBTPATH/sbt" ]; then
-          pushd $SBTPATH;
-          wget -q https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt;
-          chmod a+x sbt;
-          popd;
-      fi
+    - pushd $ANDROID_HOME
+    - rm -rf tools
+    - wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O tools.zip
+    - unzip -q tools.zip
+    - popd
+    - touch $HOME/.android/repositories.cfg
+    - yes | sdkmanager
+        "build-tools;27.0.3"
+        ndk-bundle
+        "platforms;android-27"
+      >/dev/null
 
 script:
-    - $SBTPATH/sbt go-build android:package
+    - ./gradlew assembleDebug check

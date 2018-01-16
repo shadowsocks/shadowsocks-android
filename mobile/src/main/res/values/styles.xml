@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Shadowsocks.Material" parent="MaterialDrawerTheme.Light.DarkToolbar">
-        <item name="material_drawer_selected_text">@color/material_accent_200</item>
-    </style>
     <style name="StyledScrollerTextAppearance" parent="@android:style/TextAppearance">
         <item name="android:textSize">24sp</item>
         <item name="android:textStyle">bold</item>

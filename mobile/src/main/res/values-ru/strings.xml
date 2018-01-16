@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="app_name">"Shadowsocks"</string>
 <string name="quick_toggle">"Подключение"</string>
 
 <!-- misc -->
 <string name="profile">"Профиль"</string>
 <string name="profile_summary">"Переключить на другой профиль или добавить новые"</string>
-<string name="nat">"Режим NAT (не рекомендуется)"</string>
-<string name="nat_summary">"Использовать режим NAT вместо VPN. Требует ROOT прав."</string>
 <string name="remote_dns">"Удалённый DNS"</string>
 <string name="stat_summary">"Отправлено: \t%3$s\t↑\t%1$s/s
 Получено: \t%4$s\t↓\t%2$s/s"</string>
-<string name="stat_profiles">"
-%1$s↑\t%2$s↓"</string>
-<string name="traffic_summary">"%1$s/s↑\t%2$s/s↓"</string>
+
 <plurals name="bytes">
 <item quantity="one">"байт"</item>
 <item quantity="few">"байта"</item>
@@ -27,19 +24,26 @@
 <string name="connection_test_error_status_code">"Код ошибки: #%d"</string>
 
 <!-- proxy category -->
+<string name="proxy_cat">"Настройки Сервера"</string>
+
+<!-- proxy category -->
 <string name="profile_name">"Имя Профиля"</string>
 <string name="proxy">"Сервер"</string>
 <string name="remote_port">"Удалённый порт"</string>
-<string name="port">"Локальный порт"</string>
 <string name="sitekey">"Пароль"</string>
 <string name="enc_method">"Метод Шифрования"</string>
+
+<!-- feature category -->
+<string name="feature_cat">"Дополнительные Настройки"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 Маршрут"</string>
 <string name="ipv6_summary">"Перенаправлять трафик IPv6 на удалённый сервер"</string>
 <string name="route_list">"Маршрут"</string>
 <string name="route_entry_gfwlist">"Список GFW"</string>
+
 <string name="proxied_apps">"Прокси для выбранных приложений"</string>
+
 <string name="proxied_apps_summary">"Установить прокси для выбранных приложений, требует режим NAT под Android 4.x"</string>
 <string name="on">"Вкл"</string>
 <string name="bypass_apps">"В обход прокси"</string>
@@ -55,25 +59,28 @@
 <string name="forward_success">"Shadowsocks запущен."</string>
 <string name="invalid_server">"Неправильное имя сервера"</string>
 <string name="service_failed">"Ошибка при подключении к удалённому серверу"</string>
-<string name="nat_deprecated">"ВНИМАНИЕ: режим NAT не рекомендуется, начиная с Android 5.0"</string>
-<string name="nat_no_root">"Режим NAT требует наличия ROOT прав"</string>
-<string name="switch_to_vpn">"Переключить на режим VPN"</string>
 <string name="stop">"Остановить"</string>
 <string name="stopping">"Останавливается…"</string>
+<string name="vpn_error">"%s"</string>
 <string name="reboot_required">"Не удалось запустить службу VPN. Возможно, требуется перезагрузить ваше устройство."</string>
+<string name="profile_invalid_input">"No valid profile data found."</string>
+
+<!-- alert category -->
+<string name="yes">"Да"</string>
+<string name="no">"Нет"</string>
 
 <!-- alert category -->
 <string name="close">"Закрыть"</string>
 <string name="profile_empty">"Пожалуйста, выберите профиль"</string>
 <string name="proxy_empty">"Прокси/Пароль не должны быть пустыми"</string>
 <string name="connect">"Подключить"</string>
-<string name="recovering">"Сброс…"</string>
 <string name="remove_profile">"Удалить этот профиль %s?"</string>
 
 <!-- menu category -->
 <string name="profiles">"Профили"</string>
 <string name="settings">"Настройки"</string>
-<string name="recovery">"Сброс"</string>
+<string name="faq">"FAQ"</string>
+<string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"О приложении"</string>
 <string name="about_title">"Shadowsocks %s"</string>
 <string name="edit">"Изменить"</string>
@@ -89,16 +96,15 @@
 
 <!-- profile -->
 <string name="profile_config">"Настройка профиля"</string>
+<string name="unsaved_changes_prompt">"Изменения не сохранены. Сохранить?"</string>
+<string name="apply">"Применить"</string>
 <string name="delete">"Удалить"</string>
 <string name="delete_confirm_prompt">"Вы уверены, что хотите удалить этот профиль?"</string>
 <string name="share_qr_nfc">"QR-код/NFC"</string>
 <string name="add_profile_dialog">"Добавить этот Профиль Shadowsocks?"</string>
 <string name="add_profile_methods_scan_qr_code">"Сканировать QR-код"</string>
-<string name="add_profile_methods_manual_settings">"Ручные настройки"</string>
-<string name="add_profile_scanner_not_installed">"Пожалуйста, установите любое ZXing-совместимое приложение для сканирования QR-кодов."</string>
-<string name="add_profile_scanner_permission_required">Разрешение камеры требуется для сканирования QR код.</string>
 <plurals name="removed">
-<item quantity="one">"Удалено"</item>
+<item quantity="one">"Удалено %d элементов"</item>
 <item quantity="few">"Удалено %d элемента"</item>
 <item quantity="many">"Удалено %d элементов"</item>
 <item quantity="other">"Удалено %d элементов"</item>
@@ -115,30 +121,49 @@
 <!-- status -->
 <string name="sent">"Отправлено:"</string>
 <string name="received">"Получено:"</string>
-<string name="connecting">"Соединение..."</string>
+<string name="connecting">"Соединение…"</string>
 <string name="vpn_connected">"Подключено, нажмите для проверки соединения"</string>
-<string name="nat_connected">"Подключено"</string>
 <string name="not_connected">"Не подключено"</string>
 
 <!-- acl -->
 <string name="custom_rules">"Пользовательские правила"</string>
-<string name="action_selection">"Выделение..."</string>
-<string name="action_add_rule">"Добавить правило..."</string>
+<string name="action_selection">"Выделение…"</string>
+<string name="action_add_rule">"Добавить правило…"</string>
 <string name="edit_rule">"Редактировать правило"</string>
 <string name="route_entry_all">"Все"</string>
 <string name="route_entry_bypass_lan">"Все, кроме LAN"</string>
 <string name="route_entry_bypass_chn">"Все, кроме Китая"</string>
 <string name="route_entry_bypass_lan_chn">"Все, кроме LAN и Китая"</string>
 <string name="route_entry_chinalist">"Список Китай"</string>
+
 <string name="proxied_apps_summary_v21">"Установить прокси для выбранных приложений"</string>
+
 <string name="acl_rule_templates_generic">"URL/Подсеть/Регулярное выражение (PCRE) имени хоста"</string>
 <string name="acl_rule_templates_domain">"Доменное имя и все его поддомены"</string>
 
 <!-- plugin -->
 <string name="plugin">"Плагин"</string>
-<string name="plugin_configure">"Настроить..."</string>
+<string name="plugin_configure">"Настроить…"</string>
 <string name="plugin_disabled">"Отключён"</string>
 <string name="plugin_unknown">"Неизвестный плагин %s"</string>
 <string name="plugin_untrusted">"Предупреждение: этот плагин получен из недоверенного источника."</string>
 <string name="profile_plugin">"Плагин: %s"</string>
+<string name="add_profile_scanner_permission_required">"Разрешение камеры требуется для сканирования QR код."</string>
+
+<!-- notification category -->
+<string name="service_vpn">"VPN Service"</string>
+<string name="add_profile_methods_manual_settings">"Manual Settings"</string>
+<string name="advanced">"Advanced"</string>
+<string name="service_mode">"Service mode"</string>
+<string name="service_mode_proxy">"Proxy only"</string>
+<string name="service_mode_vpn">"VPN"</string>
+<string name="service_mode_transproxy">"Transproxy"</string>
+<string name="port_proxy">"SOCKS5 proxy port"</string>
+<string name="port_local_dns">"Local DNS port"</string>
+<string name="port_transproxy">"Transproxy port"</string>
+<string name="service_proxy">"Proxy Service"</string>
+<string name="service_transproxy">"Transproxy Service"</string>
+<string name="vpn_permission_denied">"Permission denied to create a VPN service"</string>
+<string name="auto_connect_summary_v24">"Enable Shadowsocks on startup. Recommended to use always-on VPN
+    instead"</string>
 </resources>
