@@ -5,4 +5,7 @@
     <item android:state_selected="true">
         <color android:color="@color/material_primary_100"/>
     </item>
+    <item android:state_pressed="true">
+        <color android:color="#12000000"/>
+    </item>
 </selector>

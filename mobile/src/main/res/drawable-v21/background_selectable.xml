@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ripple xmlns:android="http://schemas.android.com/apk/res/android" android:color="?android:colorControlHighlight">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <selector android:enterFadeDuration="@android:integer/config_mediumAnimTime"
                   android:exitFadeDuration="@android:integer/config_mediumAnimTime">
@@ -8,4 +8,5 @@
             </item>
         </selector>
     </item>
-</ripple>
+    <item android:drawable="?android:attr/selectableItemBackground"/>
+</layer-list>
