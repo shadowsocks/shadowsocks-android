@@ -12,7 +12,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.github.shadowsocks.widget.MoveUpwardBehavior">
+        app:layout_behavior="com.github.shadowsocks.widget.ShrinkUpwardBehavior">
 
         <FrameLayout
             android:id="@+id/fragment_holder"
