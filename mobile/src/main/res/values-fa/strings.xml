@@ -4,7 +4,7 @@
 
 <!-- misc -->
 <string name="profile">"پروفایل"</string>
-<string name="connection_test_testing">"در حال آزمایش..."</string>
+<string name="connection_test_testing">"در حال آزمایش…"</string>
 
 <!-- proxy category -->
 <string name="profile_name">"نام پروفایل"</string>
@@ -20,7 +20,7 @@
 <string name="invalid_server">"آدرس سرور نامعتبر است"</string>
 <string name="service_failed">"اتصال به سرور ناموفق بود!"</string>
 <string name="stop">"غیرفعال‌کردن"</string>
-<string name="stopping">"در حال قطع‌کردن اتصال..."</string>
+<string name="stopping">"در حال قطع‌کردن اتصال…"</string>
 <string name="profile_invalid_input">"هیچ پروفایل معتبری یافت نشد!"</string>
 
 <!-- alert category -->
@@ -33,7 +33,6 @@
 <string name="profiles">"پروفایل‌ها"</string>
 <string name="settings">"تنظیمات"</string>
 <string name="faq">"سوالات مداول"</string>
-<string name="recovery">"ریست"</string>
 <string name="about">"درباره ما"</string>
 <string name="edit">"ویرایش"</string>
 <string name="share">"به اشتراک گذاری"</string>
@@ -52,9 +51,8 @@
 <!-- status -->
 <string name="sent">"فرستاده‌شده:"</string>
 <string name="received">"دریافت‌شده:"</string>
-<string name="connecting">"در حال اتصال..."</string>
+<string name="connecting">"در حال اتصال…"</string>
 <string name="vpn_connected">"وصل شد. برای بررسی اتصال ضربه (Tap) بزنید."</string>
-<string name="nat_connected">"اتصال برقرار است."</string>
 <string name="not_connected">"اتصال برقرار نیست!"</string>
 <string name="route_entry_all">"همه"</string>
 </resources>

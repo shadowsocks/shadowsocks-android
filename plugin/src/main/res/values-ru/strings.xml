@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-<!-- proxy category -->
-<string name="proxy_cat">"Настройки Сервера"</string>
-
-<!-- feature category -->
-<string name="feature_cat">"Дополнительные Настройки"</string>
-
-<!-- alert category -->
+<string name="proxy_cat">"Настройки сервера"</string>
+<string name="feature_cat">"Настройки опций"</string>
+<string name="unsaved_changes_prompt">"Сохранить изменения?"</string>
 <string name="yes">"Да"</string>
 <string name="no">"Нет"</string>
-<string name="unsaved_changes_prompt">"Изменения не сохранены. Сохранить?"</string>
 <string name="apply">"Применить"</string>
 </resources>
