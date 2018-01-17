@@ -79,12 +79,6 @@ object LocalDnsService {
                         makeDns("Primary-2", "114.114.114.114", false)
                 ))
 
-                this as Context
-                try {
-                    val localLinkDns = Dns.getDnsResolver(this)
-                    localDns.put(makeDns("Primary-3", localLinkDns, false))
-                } catch (_: Exception) { }  // ignore
-
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> config
                             .put("PrimaryDNS", localDns)
