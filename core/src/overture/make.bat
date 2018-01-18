@@ -46,7 +46,7 @@ IF NOT EXIST %ANDROID_X86_CC% (
         --api %MIN_API% --install-dir %ANDROID_X86_TOOLCHAIN%
 )
 
-IF NOT EXIST %DIR%\go\bin\go (
+IF NOT EXIST %DIR%\go\bin\go.exe (
     ECHO "Build the custom go"
 
     PUSHD %DIR%\go\src
