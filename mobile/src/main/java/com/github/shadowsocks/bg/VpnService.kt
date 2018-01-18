@@ -24,7 +24,6 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.LocalSocket
-import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -140,7 +139,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             builder.addRoute("::", 0)
         }
 
-        if (Build.VERSION.SDK_INT >= 21 && profile.proxyApps) {
+        if (profile.proxyApps) {
             val me = packageName
             profile.individual.split('\n')
                     .filter { it != me }
