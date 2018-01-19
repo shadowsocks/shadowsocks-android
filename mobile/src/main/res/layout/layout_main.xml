@@ -148,7 +148,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="@dimen/fab_margin_top"
+        android:layout_marginTop="-28dp"
         android:elevation="6dp"
         app:layout_anchor="@id/stat"
         app:layout_anchorGravity="top|end">
