@@ -21,7 +21,7 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 1
+        versionCode 210
         versionName "4.4.5"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -43,6 +43,7 @@ android {
             enable true
             reset()
             include 'armeabi-v7a', 'arm64-v8a', 'x86'
+            universalApk true
         }
     }
     sourceSets.main.jniLibs.srcDirs +=
@@ -85,6 +86,6 @@ ext.abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, x86: 3]
 android.applicationVariants.all { variant ->
     variant.outputs.each { output ->
         def offset = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
-        if (offset != null) output.versionCodeOverride = variant.versionCode * 1000 + offset
+        if (offset != null) output.versionCodeOverride = variant.versionCode + offset
     }
 }
