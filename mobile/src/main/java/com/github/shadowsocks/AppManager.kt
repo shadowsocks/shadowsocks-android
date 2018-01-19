@@ -28,6 +28,8 @@ import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -47,34 +49,39 @@ import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.utils.thread
 import java.util.concurrent.atomic.AtomicBoolean
 
 class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     companion object {
-        data class ProxiedApp(val name: String, val packageName: String, val icon: Drawable)
-
         @SuppressLint("StaticFieldLeak")
         private var instance: AppManager? = null
 
         private var receiver: BroadcastReceiver? = null
-        private var cachedApps: Array<ProxiedApp>? = null
-        private fun getApps(pm: PackageManager): Array<ProxiedApp> {
+        private var cachedApps: List<PackageInfo>? = null
+        private fun getApps(pm: PackageManager): List<ProxiedApp> {
             if (receiver == null) receiver = app.listenForPackageChanges {
                 synchronized(AppManager) { cachedApps = null }
                 AppManager.instance?.reloadApps()
             }
             return synchronized(AppManager) {
+                // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
                 val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                        .filter { it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
-                        .map { ProxiedApp(pm.getApplicationLabel(it.applicationInfo).toString(), it.packageName,
-                                it.applicationInfo.loadIcon(pm)) }
-                        .toTypedArray()
+                        .filter { it.packageName != app.packageName &&
+                                it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
                 this.cachedApps = cachedApps
                 cachedApps
-            }
+            }.map { ProxiedApp(pm, it.applicationInfo, it.packageName) }
         }
+    }
+
+    private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
+                             val packageName: String) {
+        val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
+        val icon: Drawable get() = appInfo.loadIcon(pm)
     }
 
     private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -113,13 +120,8 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         private var apps = listOf<ProxiedApp>()
 
         fun reload() {
-            apps = getApps(packageManager).sortedWith(Comparator { a, b ->
-                when (Pair(proxiedApps.contains(a.packageName), proxiedApps.contains(b.packageName))) {
-                    Pair(true, false) -> -1
-                    Pair(false, true) -> 1
-                    else -> a.name.compareTo(b.name, true)
-                }
-            })
+            apps = getApps(packageManager)
+                    .sortedWith(compareBy({ !proxiedApps.contains(it.packageName) }, { it.name.toString() }))
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(apps[position])
@@ -179,7 +181,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         setContentView(R.layout.layout_apps)
         toolbar = findViewById(R.id.toolbar)
         toolbar.setTitle(R.string.proxied_apps)
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
+        toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
         toolbar.setNavigationOnClickListener {
             val intent = parentActivityIntent
             if (shouldUpRecreateTask(intent) || isTaskRoot)
@@ -228,6 +230,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         it.individual = proxiedAppString
                         ProfileManager.updateProfile(it)
                     }
+                    if (DataStore.directBootAware) DirectBoot.update()
                     Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show()
                 } else Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show()
                 return true

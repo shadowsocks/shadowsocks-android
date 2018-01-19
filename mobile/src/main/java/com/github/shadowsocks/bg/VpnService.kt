@@ -24,7 +24,6 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.LocalSocket
-import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.util.Log
@@ -52,7 +51,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
-        override val socketFile: File = File(filesDir, "protect_path")
+        override val socketFile: File = File(app.deviceContext.filesDir, "protect_path")
 
         override fun accept(socket: LocalSocket) {
             try {
@@ -76,8 +75,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override val tag: String get() = "ShadowsocksVpnService"
-    override fun createNotification(): ServiceNotification =
-            ServiceNotification(this, data.profile!!.formattedName, "service-vpn")
+    override fun createNotification(profileName: String): ServiceNotification =
+            ServiceNotification(this, profileName, "service-vpn")
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
@@ -140,22 +139,29 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             builder.addRoute("::", 0)
         }
 
-        if (Build.VERSION.SDK_INT >= 21 && profile.proxyApps) {
-            for (pkg in profile.individual.split('\n')) try {
-                if (profile.bypass) builder.addDisallowedApplication(pkg) else builder.addAllowedApplication(pkg)
-            } catch (ex: PackageManager.NameNotFoundException) {
-                Log.e(tag, "Invalid package name", ex)
-            }
+        if (profile.proxyApps) {
+            val me = packageName
+            profile.individual.split('\n')
+                    .filter { it != me }
+                    .forEach {
+                        try {
+                            if (profile.bypass) builder.addDisallowedApplication(it)
+                            else builder.addAllowedApplication(it)
+                        } catch (ex: PackageManager.NameNotFoundException) {
+                            Log.e(tag, "Invalid package name", ex)
+                        }
+                    }
+            if (!profile.bypass) builder.addAllowedApplication(me)
         }
 
         when (profile.route) {
             Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
             else -> {
                 resources.getStringArray(R.array.bypass_private_route).forEach {
-                    val subnet = Subnet.fromString(it)
+                    val subnet = Subnet.fromString(it)!!
                     builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
                 }
-                profile.remoteDns.split(",").map { it.trim().parseNumericAddress() }
+                profile.remoteDns.split(",").mapNotNull { it.trim().parseNumericAddress() }
                         .forEach { builder.addRoute(it, it.address.size shl 3) }
             }
         }
@@ -187,10 +193,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     private fun sendFd(fd: Int): Boolean {
         if (fd != -1) {
-            var tries = 1
-            while (tries < 5) {
-                Thread.sleep(1000L * tries)
-                if (JniHelper.sendFd(fd, File(filesDir, "sock_path").absolutePath) != -1) return true
+            var tries = 0
+            while (tries < 10) {
+                Thread.sleep(30L shl tries)
+                if (JniHelper.sendFd(fd, File(app.deviceContext.filesDir, "sock_path").absolutePath) != -1) return true
                 tries += 1
             }
         }

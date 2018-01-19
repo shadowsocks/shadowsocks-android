@@ -44,6 +44,7 @@ object LocalDnsService {
 
         override fun startNativeProcesses() {
             super.startNativeProcesses()
+            val data = data
             val profile = data.profile!!
 
             fun makeDns(name: String, address: String, edns: Boolean = true): JSONObject {
@@ -53,7 +54,7 @@ object LocalDnsService {
                     is Inet6Address -> "[$address]"
                     else -> address
                 }) + ":53")
-                .put("Timeout", 6)
+                .put("Timeout", 3)
                 .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
                 if (edns) dns
                 .put("Protocol", "tcp")
@@ -67,9 +68,9 @@ object LocalDnsService {
                 val config = JSONObject()
                         .put("BindAddress", "127.0.0.1:" + DataStore.portLocalDns)
                         .put("RedirectIPv6Record", true)
-                        .put("DomainBase64Decode", true)
+                        .put("DomainBase64Decode", false)
                         .put("HostsFile", "hosts")
-                        .put("MinimumTTL", 3600)
+                        .put("MinimumTTL", 120)
                         .put("CacheSize", 4096)
                 val remoteDns = JSONArray(profile.remoteDns.split(",")
                         .mapIndexed { i, dns -> makeDns("UserDef-" + i, dns.trim()) })
@@ -78,18 +79,12 @@ object LocalDnsService {
                         makeDns("Primary-2", "114.114.114.114", false)
                 ))
 
-                this as Context
-                try {
-                    val localLinkDns = Dns.getDnsResolver(this)
-                    localDns.put(makeDns("Primary-3", localLinkDns, false))
-                } catch (_: Exception) { }  // ignore
-
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
                             .put("IPNetworkFile", "china_ip_list.txt")
-                            .put("DomainFile", "gfwlist.txt")
+                            .put("DomainFile", data.aclFile!!.absolutePath)
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
@@ -98,7 +93,7 @@ object LocalDnsService {
                             // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
                             .put("OnlyPrimaryDNS", true)
                 }
-                File(filesDir, file).bufferedWriter().use { it.write(config.toString()) }
+                File(app.deviceContext.filesDir, file).writeText(config.toString())
                 return file
             }
 

@@ -38,6 +38,12 @@ import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import java.util.*
 
+/**
+ * Android < 8 VPN:     always invisible because of VPN notification/icon
+ * Android < 8 other:   only invisible in (possibly unsecure) lockscreen
+ * Android 8+:          always visible due to system limitations
+ *                      (user can choose to hide the notification in secure lockscreen or anywhere)
+ */
 class ServiceNotification(private val service: BaseService.Interface, profileName: String,
                           channel: String, private val visible: Boolean = false) {
     private val keyGuard = (service as Context).getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
@@ -69,7 +75,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             .setContentTitle(profileName)
             .setContentIntent(PendingIntent.getActivity(service, 0, Intent(service, MainActivity::class.java)
                     .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0))
-            .setSmallIcon(R.drawable.ic_start_connected)
+            .setSmallIcon(R.drawable.ic_service_active)
     private val style = NotificationCompat.BigTextStyle(builder)
     private var isVisible = true
 
@@ -78,24 +84,22 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
                 service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0))
         val power = service.getSystemService(Context.POWER_SERVICE) as PowerManager
-        update(if (if (Build.VERSION.SDK_INT >= 20) power.isInteractive else @Suppress("DEPRECATION") power.isScreenOn)
-            Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
+        update(if (power.isInteractive) Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
         val screenFilter = IntentFilter()
         screenFilter.addAction(Intent.ACTION_SCREEN_ON)
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-        if (visible && Build.VERSION.SDK_INT in 21 until 26) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
+        if (visible && Build.VERSION.SDK_INT < 26) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
         service.registerReceiver(lockReceiver, screenFilter)
     }
 
     private fun update(action: String, forceShow: Boolean = false) {
         if (forceShow || service.data.state == BaseService.CONNECTED) when (action) {
             Intent.ACTION_SCREEN_OFF -> {
-                setVisible(visible && Build.VERSION.SDK_INT < 21, forceShow)
+                setVisible(false, forceShow)
                 unregisterCallback()    // unregister callback to save battery
             }
             Intent.ACTION_SCREEN_ON -> {
-                setVisible(visible && (Build.VERSION.SDK_INT < 21 || !keyGuard.inKeyguardRestrictedInputMode()),
-                        forceShow)
+                setVisible(visible && !keyGuard.inKeyguardRestrictedInputMode(), forceShow)
                 service.data.binder.registerCallback(callback)
                 service.data.binder.startListeningForBandwidth(callback)
                 callbackRegistered = true

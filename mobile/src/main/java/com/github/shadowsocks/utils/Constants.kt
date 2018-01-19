@@ -21,7 +21,11 @@
 package com.github.shadowsocks.utils
 
 object Key {
-    const val PROFILE = "profile.db"
+    /**
+     * Public config that doesn't need to be kept secret.
+     */
+    const val DB_PUBLIC = "config.db"
+    const val DB_PROFILE = "profile.db"
 
     const val id = "profileId"
     const val name = "profileName"
@@ -39,6 +43,7 @@ object Key {
     const val route = "route"
 
     const val isAutoConnect = "isAutoConnect"
+    const val directBootAware = "directBootAware"
 
     const val proxyApps = "isProxyApps"
     const val bypass = "isBypassApps"

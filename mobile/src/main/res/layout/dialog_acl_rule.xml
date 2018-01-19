@@ -6,6 +6,7 @@
     <Spinner android:id="@+id/template_selector"
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
+             android:labelFor="@+id/content"
              android:entries="@array/acl_rule_templates"/>
     <EditText android:id="@+id/content"
               android:layout_width="match_parent"

@@ -39,6 +39,8 @@
 package com.github.shadowsocks;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.system.ErrnoException;
 
 public class JniHelper {
@@ -47,15 +49,14 @@ public class JniHelper {
     }
 
     @Deprecated // Use Process.destroy() since API 24
-    public static void sigtermCompat(Process process) throws Exception {
+    public static void sigtermCompat(@NonNull Process process) throws Exception {
         if (Build.VERSION.SDK_INT >= 24) throw new UnsupportedOperationException("Never call this method in OpenJDK!");
         int errno = sigterm(process);
-        if (errno != 0) throw Build.VERSION.SDK_INT >= 21
-                ? new ErrnoException("kill", errno) : new Exception("kill failed: " + errno);
+        if (errno != 0) throw new ErrnoException("kill", errno);
     }
 
     @Deprecated // only implemented for before API 24
-    public static boolean waitForCompat(Process process, long millis) throws Exception {
+    public static boolean waitForCompat(@NonNull Process process, long millis) throws Exception {
         if (Build.VERSION.SDK_INT >= 24) throw new UnsupportedOperationException("Never call this method in OpenJDK!");
         final Object mutex = getExitValueMutex(process);
         synchronized (mutex) {
@@ -68,6 +69,8 @@ public class JniHelper {
     private static native int sigterm(Process process);
     private static native Integer getExitValue(Process process);
     private static native Object getExitValueMutex(Process process);
-    public static native int sendFd(int fd, String path);
+    public static native int sendFd(int fd, @NonNull String path);
     public static native void close(int fd);
+    @Nullable
+    public static native byte[] parseNumericAddress(@NonNull String str);
 }

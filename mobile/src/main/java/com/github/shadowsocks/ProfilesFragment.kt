@@ -76,7 +76,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     @SuppressLint("ValidFragment")
-    private class QRCodeDialog() : DialogFragment() {
+    class QRCodeDialog() : DialogFragment() {
+
         constructor(url: String) : this() {
             val bundle = Bundle()
             bundle.putString(KEY_URL, url)
@@ -104,9 +105,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
 
         override fun onDetach() {
-            adapter?.setNdefPushMessage(null, activity)
-            adapter = null
             super.onDetach()
+            val activity = activity
+            if (activity != null && !activity.isFinishing && !activity.isDestroyed)
+                adapter?.setNdefPushMessage(null, activity)
+            adapter = null
         }
     }
 
@@ -174,10 +177,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val params =
                             LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                     params.gravity = Gravity.CENTER_HORIZONTAL
-                    adView = AdView(activity)
+                    val context = context!!
+                    adView = AdView(context)
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
                     adView.adSize = AdSize.FLUID
+                    val padding = context.resources.getDimensionPixelOffset(R.dimen.profile_padding)
+                    adView.setPadding(padding, 0, 0, padding)
 
                     itemView.findViewById<LinearLayout>(R.id.content).addView(adView)
 
@@ -217,6 +223,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
         internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
+        private val updated = HashSet<Profile>()
 
         init {
             setHasStableIds(true)   // see: http://stackoverflow.com/a/32488059/2245107
@@ -246,12 +253,16 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 next.userOrder = previousOrder
                 previousOrder = order
                 profiles[i] = next
-                ProfileManager.updateProfile(next)
+                updated.add(next)
             }
             first.userOrder = previousOrder
             profiles[to] = first
-            ProfileManager.updateProfile(first)
+            updated.add(first)
             notifyItemMoved(from, to)
+        }
+        fun commitMove() {
+            updated.forEach { ProfileManager.updateProfile(it) }
+            updated.clear()
         }
 
         fun remove(pos: Int) {
@@ -340,6 +351,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                                 viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 profilesAdapter.move(viewHolder.adapterPosition, target.adapterPosition)
                 return true
+            }
+            override fun clearView(recyclerView: RecyclerView?, viewHolder: RecyclerView.ViewHolder?) {
+                super.clearView(recyclerView, viewHolder)
+                profilesAdapter.commitMove()
             }
         }).attachToRecyclerView(profilesList)
     }

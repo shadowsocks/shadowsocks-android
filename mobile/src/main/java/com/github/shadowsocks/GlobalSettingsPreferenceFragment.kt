@@ -20,27 +20,40 @@
 
 package com.github.shadowsocks
 
+import android.app.admin.DevicePolicyManager
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
 import android.support.v7.preference.Preference
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.TcpFastOpen
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
-        preferenceManager.preferenceDataStore = DataStore
+        preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
-        val switch = findPreference(Key.isAutoConnect) as SwitchPreference
-        switch.setOnPreferenceChangeListener { _, value ->
-            BootReceiver.enabled = value as Boolean
+        val boot = findPreference(Key.isAutoConnect) as SwitchPreference
+        val directBootAwareListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            if (newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
             true
         }
-        switch.isChecked = BootReceiver.enabled
+        boot.setOnPreferenceChangeListener { _, value ->
+            BootReceiver.enabled = value as Boolean
+            directBootAwareListener.onPreferenceChange(null, DataStore.directBootAware)
+        }
+        boot.isChecked = BootReceiver.enabled
+
+        val dba = findPreference(Key.directBootAware)
+        if (Build.VERSION.SDK_INT >= 24 && context!!.getSystemService(DevicePolicyManager::class.java)
+                .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER)
+            dba.onPreferenceChangeListener = directBootAwareListener else dba.parent!!.removePreference(dba)
 
         val tfo = findPreference(Key.tfo) as SwitchPreference
         tfo.isChecked = TcpFastOpen.sendEnabled

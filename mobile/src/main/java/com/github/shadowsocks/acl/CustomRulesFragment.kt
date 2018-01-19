@@ -48,7 +48,6 @@ import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
-import com.github.shadowsocks.utils.dp
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
 import java.net.URL
@@ -62,7 +61,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private const val SELECTED_HOSTNAMES = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
         private const val SELECTED_URLS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
 
-        private val PATTERN_DOMAIN = """(?<=^\(\^\|\\\.\)).*(?=\$$)""".toRegex()
+        // unescaped: (?<=^(\(\^\|\\\.\)|\^\(\.\*\\\.\)\?)).*(?=\$$)
+        private val PATTERN_DOMAIN = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
     }
 
     private enum class Template {
@@ -78,7 +78,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         init {
             view.setPaddingRelative(view.paddingStart, view.paddingTop,
-                    Math.max(view.paddingEnd, 20f.dp().toInt()), view.paddingBottom)
+                    Math.max(view.paddingEnd, resources.getDimensionPixelSize(R.dimen.fastscroll__bubble_corner)),
+                    view.paddingBottom)
             view.setOnClickListener(this)
             view.setOnLongClickListener(this)
             view.setBackgroundResource(R.drawable.background_selectable)
@@ -132,20 +133,20 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         override fun onBindViewHolder(holder: AclRuleViewHolder, i: Int) {
             val j = i - acl.subnets.size()
             if (j < 0) holder.bind(acl.subnets[i]) else {
-                val k = j - acl.proxyHostnames.size()
-                if (k < 0) holder.bind(acl.proxyHostnames[j]) else holder.bind(acl.urls[k])
+                val k = j - acl.hostnames.size()
+                if (k < 0) holder.bind(acl.hostnames[j]) else holder.bind(acl.urls[k])
             }
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = AclRuleViewHolder(LayoutInflater
                 .from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false))
-        override fun getItemCount(): Int = acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.size()
+        override fun getItemCount(): Int = acl.subnets.size() + acl.hostnames.size() + acl.urls.size()
         override fun getSectionTitle(i: Int): String {
             val j = i - acl.subnets.size()
             return try {
                 (if (j < 0) acl.subnets[i].address.hostAddress.substring(0, 1) else {
-                    val k = j - acl.proxyHostnames.size()
+                    val k = j - acl.hostnames.size()
                     if (k < 0) {
-                        val hostname = acl.proxyHostnames[j]
+                        val hostname = acl.hostnames[j]
                         // don't convert IDN yet
                         PATTERN_DOMAIN.find(hostname)?.value?.replace("\\.", ".") ?: hostname
                     } else acl.urls[k].host
@@ -157,7 +158,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             if (!savePending) {
                 savePending = true
                 list.post {
-                    Acl.save(Acl.CUSTOM_RULES, acl)
+                    Acl.customRules = acl
                     savePending = false
                 }
             }
@@ -179,9 +180,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             return index
         }
         fun addHostname(hostname: String): Int {
-            val old = acl.proxyHostnames.size()
-            val index = acl.subnets.size() + acl.proxyHostnames.add(hostname)
-            if (old != acl.proxyHostnames.size()) {
+            val old = acl.hostnames.size()
+            val index = acl.subnets.size() + acl.hostnames.add(hostname)
+            if (old != acl.hostnames.size()) {
                 notifyItemInserted(index)
                 apply()
             }
@@ -189,7 +190,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
         fun addURL(url: URL): Int {
             val old = acl.urls.size()
-            val index = acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.add(url)
+            val index = acl.subnets.size() + acl.hostnames.size() + acl.urls.add(url)
             if (old != acl.urls.size()) {
                 notifyItemInserted(index)
                 apply()
@@ -201,7 +202,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             var result: Int? = null
             if (acl.bypass) acl.subnets.asIterable().asSequence().map { addSubnet(it) }
                     .forEach { if (result == null) result = it }
-            (acl.proxyHostnames.asIterable().asSequence().map { addHostname(it) } +
+            (acl.hostnames.asIterable().asSequence().map { addHostname(it) } +
                     acl.urls.asIterable().asSequence().map { addURL(it) })
                     .forEach { if (result == null) result = it }
             return result
@@ -227,10 +228,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 undoManager.remove(Pair(i, acl.subnets[i]))
                 acl.subnets.removeItemAt(i)
             } else {
-                val k = j - acl.proxyHostnames.size()
+                val k = j - acl.hostnames.size()
                 if (k < 0) {
-                    undoManager.remove(Pair(j, acl.proxyHostnames[j]))
-                    acl.proxyHostnames.removeItemAt(j)
+                    undoManager.remove(Pair(j, acl.hostnames[j]))
+                    acl.hostnames.removeItemAt(j)
                 } else {
                     undoManager.remove(Pair(k, acl.urls[k]))
                     acl.urls.removeItemAt(k)
@@ -247,12 +248,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     apply()
                 }
                 is String -> {
-                    notifyItemRemoved(acl.subnets.size() + acl.proxyHostnames.indexOf(item))
-                    acl.proxyHostnames.remove(item)
+                    notifyItemRemoved(acl.subnets.size() + acl.hostnames.indexOf(item))
+                    acl.hostnames.remove(item)
                     apply()
                 }
                 is URL -> {
-                    notifyItemRemoved(acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.indexOf(item))
+                    notifyItemRemoved(acl.subnets.size() + acl.hostnames.size() + acl.urls.indexOf(item))
                     acl.urls.remove(item)
                     apply()
                 }
@@ -271,7 +272,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         fun selectAll() {
             selectedItems.clear()
             selectedItems.addAll(acl.subnets.asIterable())
-            selectedItems.addAll(acl.proxyHostnames.asIterable())
+            selectedItems.addAll(acl.hostnames.asIterable())
             selectedItems.addAll(acl.urls.asIterable())
             onSelectedItemsUpdated()
             notifyDataSetChanged()
@@ -333,8 +334,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState != null) {
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)?.map(Subnet.Companion::fromString)
-                    ?: listOf())
+            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
+                    ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_HOSTNAMES)
                     ?: arrayOf())
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }
@@ -355,7 +356,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         undoManager = UndoSnackbarManager(activity!!.findViewById(R.id.snackbar), adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    if (isEnabled) super.getSwipeDirs(recyclerView, viewHolder) else 0
+                    if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
                     adapter.remove(viewHolder.adapterPosition)
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
@@ -386,7 +387,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         selectedItems.forEach {
             when (it) {
                 is Subnet -> acl.subnets.add(it)
-                is String -> acl.proxyHostnames.add(it)
+                is String -> acl.hostnames.add(it)
                 is URL -> acl.urls.add(it)
             }
         }
@@ -432,10 +433,15 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         R.id.action_import_gfwlist -> {
             val acl = Acl().fromId(Acl.GFWLIST)
             if (!acl.bypass) acl.subnets.asIterable().forEach { adapter.addSubnet(it) }
-            acl.proxyHostnames.asIterable().forEach { adapter.addHostname(it) }
+            acl.hostnames.asIterable().forEach { adapter.addHostname(it) }
             acl.urls.asIterable().forEach { adapter.addURL(it) }
             true
         }
         else -> false
+    }
+
+    override fun onDetach() {
+        undoManager.flush()
+        super.onDetach()
     }
 }

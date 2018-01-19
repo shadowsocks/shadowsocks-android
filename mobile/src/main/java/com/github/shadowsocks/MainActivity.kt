@@ -31,19 +31,15 @@ import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.os.SystemClock
 import android.support.customtabs.CustomTabsIntent
-import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
-import android.support.v7.widget.TooltipCompat
-import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.CustomRulesFragment
@@ -59,6 +55,7 @@ import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
 import com.github.shadowsocks.utils.thread
+import com.github.shadowsocks.widget.ServiceButton
 import com.mikepenz.crossfader.Crossfader
 import com.mikepenz.crossfader.view.CrossFadeSlidingPaneLayout
 import com.mikepenz.materialdrawer.Drawer
@@ -88,8 +85,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     // UI
-    private lateinit var fab: FloatingActionButton
-    private lateinit var fabProgressCircle: FABProgressCircle
+    private lateinit var fab: ServiceButton
     internal var crossfader: Crossfader<CrossFadeSlidingPaneLayout>? = null
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
@@ -111,19 +107,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     } catch (_: ActivityNotFoundException) { }  // ignore
     fun launchUrl(uri: String) = launchUrl(Uri.parse(uri))
 
-    private val greyTint by lazy { ContextCompat.getColorStateList(this, R.color.material_primary_500) }
-    private val greenTint by lazy { ContextCompat.getColorStateList(this, R.color.material_green_700) }
-
-    private fun hideCircle() = try {
-        fabProgressCircle.hide()
-    } catch (_: NullPointerException) { }   // ignore
-
     // service
     var state = BaseService.IDLE
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-                app.handler.post { changeState(state, msg) }
+                app.handler.post { changeState(state, msg, true) }
             }
             override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 app.handler.post { updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal) }
@@ -134,27 +123,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
     }
 
-    fun changeState(state: Int, msg: String? = null) {
+    fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
+        fab.changeState(state, animate)
         when (state) {
-            BaseService.CONNECTING -> {
-                fab.setImageResource(R.drawable.ic_start_busy)
-                fabProgressCircle.show()
-                statusText.setText(R.string.connecting)
-            }
-            BaseService.CONNECTED -> {
-                if (this.state == BaseService.CONNECTING) fabProgressCircle.beginFinalAnimation()
-                else fabProgressCircle.postDelayed(this::hideCircle, 1000)
-                fab.setImageResource(R.drawable.ic_start_connected)
-                statusText.setText(R.string.vpn_connected)
-            }
-            BaseService.STOPPING -> {
-                fab.setImageResource(R.drawable.ic_start_busy)
-                if (this.state == BaseService.CONNECTED) fabProgressCircle.show()   // ignore for stopped
-                statusText.setText(R.string.stopping)
-            }
+            BaseService.CONNECTING -> statusText.setText(R.string.connecting)
+            BaseService.CONNECTED -> statusText.setText(R.string.vpn_connected)
+            BaseService.STOPPING -> statusText.setText(R.string.stopping)
             else -> {
-                fab.setImageResource(R.drawable.ic_start_idle)
-                fabProgressCircle.postDelayed(this::hideCircle, 1000)
                 if (msg != null) {
                     Snackbar.make(findViewById(R.id.snackbar),
                             getString(R.string.vpn_error).format(Locale.ENGLISH, msg), Snackbar.LENGTH_LONG).show()
@@ -164,20 +139,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
         }
         this.state = state
-        if (state == BaseService.CONNECTED) {
-            fab.backgroundTintList = greenTint
-            TooltipCompat.setTooltipText(fab, getString(R.string.stop))
-        } else {
-            fab.backgroundTintList = greyTint
-            TooltipCompat.setTooltipText(fab, getString(R.string.connect))
+        if (state != BaseService.CONNECTED) {
             updateTraffic(-1, 0, 0, 0, 0)
             testCount += 1  // suppress previous test messages
         }
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
-        fab.isEnabled = false
-        if (state == BaseService.CONNECTED || state == BaseService.STOPPED) app.handler.postDelayed(
-                { fab.isEnabled = state == BaseService.CONNECTED || state == BaseService.STOPPED }, 1000)
     }
     fun updateTraffic(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
         txText.text = TrafficMonitor.formatTraffic(txTotal)
@@ -225,6 +192,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
     }
 
+    override val listenForDeath: Boolean get() = true
     override fun onServiceConnected(service: IShadowsocksService) = changeState(service.state)
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
@@ -322,7 +290,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
 
         fab = findViewById(R.id.fab)
-        fabProgressCircle = findViewById(R.id.fabProgressCircle)
         fab.setOnClickListener {
             if (state == BaseService.CONNECTED) app.stopService() else thread {
                 if (BaseService.usingVpnMode) {
@@ -335,7 +302,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
         changeState(BaseService.IDLE)   // reset everything to init state
         app.handler.post { connection.connect() }
-        DataStore.registerChangeListener(this)
+        DataStore.publicStore.registerChangeListener(this)
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
@@ -355,7 +322,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
             else -> null
         }
-        if (TextUtils.isEmpty(sharedStr)) return
+        if (sharedStr.isNullOrEmpty()) return
         val profiles = Profile.findAll(sharedStr).toList()
         if (profiles.isEmpty()) {
             Snackbar.make(findViewById(R.id.snackbar), R.string.profile_invalid_input, Snackbar.LENGTH_LONG).show()
@@ -404,7 +371,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onResume() {
         super.onResume()
         app.remoteConfig.fetch()
-        if (state !in arrayOf(BaseService.STOPPING, BaseService.CONNECTING)) hideCircle()
     }
 
     override fun onStart() {
@@ -434,7 +400,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     override fun onDestroy() {
         super.onDestroy()
-        DataStore.unregisterChangeListener(this)
+        DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect()
         BackupManager(this).dataChanged()
         app.handler.removeCallbacksAndMessages(null)

@@ -62,7 +62,7 @@ class GuardedProcess(private val cmd: List<String>) {
 
                     process = ProcessBuilder(cmd)
                             .redirectErrorStream(true)
-                            .directory(app.filesDir)
+                            .directory(app.deviceContext.filesDir)
                             .start()
 
                     streamLogger(process.inputStream, Log::i)

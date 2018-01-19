@@ -33,7 +33,6 @@ import android.support.v7.preference.PreferenceDataStore
 import android.support.v7.widget.Toolbar
 import android.view.MenuItem
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
@@ -45,6 +44,7 @@ import com.github.shadowsocks.preference.IconListPreference
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.preference.PluginConfigurationDialogFragment
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.takisoft.fix.support.v7.preference.EditTextPreference
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
@@ -62,7 +62,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     private lateinit var pluginConfiguration: PluginConfiguration
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
-        preferenceManager.preferenceDataStore = DataStore
+        preferenceManager.preferenceDataStore = DataStore.privateStore
         val activity = activity!!
         val profile = ProfileManager.getProfile(activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1))
         if (profile == null) {
@@ -77,15 +77,16 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
             findPreference(Key.remotePort).summary = "1337"
             findPreference(Key.password).summary = "\u2022".repeat(32)
         }
+        val serviceMode = DataStore.serviceMode
+        findPreference(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
         isProxyApps = findPreference(Key.proxyApps) as SwitchPreference
-        if (Build.VERSION.SDK_INT < 21) isProxyApps.parent!!.removePreference(isProxyApps) else {
-            isProxyApps.isEnabled = BaseService.usingVpnMode
-            isProxyApps.setOnPreferenceClickListener {
-                startActivity(Intent(activity, AppManager::class.java))
-                isProxyApps.isChecked = true
-                false
-            }
+        isProxyApps.isEnabled = serviceMode == Key.modeVpn
+        isProxyApps.setOnPreferenceClickListener {
+            startActivity(Intent(activity, AppManager::class.java))
+            isProxyApps.isChecked = true
+            false
         }
+        findPreference(Key.udpdns).isEnabled = serviceMode != Key.modeProxy
         plugin = findPreference(Key.plugin) as IconListPreference
         pluginConfigure = findPreference(Key.pluginConfigure) as EditTextPreference
         plugin.unknownValueSummary = getString(R.string.plugin_unknown)
@@ -102,7 +103,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
         app.listenForPackageChanges { initPlugins() }
-        DataStore.registerChangeListener(this)
+        DataStore.privateStore.registerChangeListener(this)
     }
 
     private fun initPlugins() {
@@ -130,6 +131,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         profile.deserialize()
         ProfileManager.updateProfile(profile)
         ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profile.id)
+        if (DataStore.profileId == profile.id && DataStore.directBootAware) DirectBoot.update()
         activity!!.finish()
     }
 
@@ -141,7 +143,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean = try {
         val selected = pluginConfiguration.selected
         pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions +
-                (pluginConfiguration.selected to PluginOptions(selected, newValue as String?)), selected)
+                (pluginConfiguration.selected to PluginOptions(selected, newValue as? String?)), selected)
         DataStore.plugin = pluginConfiguration.toString()
         DataStore.dirty = true
         true
@@ -201,7 +203,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     }
 
     override fun onDestroy() {
-        DataStore.unregisterChangeListener(this)
+        DataStore.privateStore.unregisterChangeListener(this)
         super.onDestroy()
     }
 }

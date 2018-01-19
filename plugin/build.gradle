@@ -1,7 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+apply from: 'gradle-mvn-push.gradle'
+
 android {
+    buildToolsVersion rootProject.buildToolsVersion
     compileSdkVersion rootProject.sdkVersion
 
     defaultConfig {
@@ -21,7 +24,6 @@ android {
 }
 
 dependencies {
-    api "com.android.support:preference-v7:$supportLibraryVersion"
     api "com.android.support:preference-v14:$supportLibraryVersion"
     api "com.takisoft.fix:preference-v7:$takisoftFixVersion"
     api "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"

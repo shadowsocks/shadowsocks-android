@@ -20,12 +20,15 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.TargetApi
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.*
-import android.text.TextUtils
+import android.os.Build
+import android.os.IBinder
+import android.os.RemoteCallbackList
+import android.support.v4.os.UserManagerCompat
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
@@ -66,6 +69,8 @@ object BaseService {
     const val STOPPING = 3
     const val STOPPED = 4
 
+    const val CONFIG_FILE = "shadowsocks.conf"
+
     class Data internal constructor(private val service: Interface) {
         @Volatile var profile: Profile? = null
         @Volatile var state = STOPPED
@@ -91,10 +96,8 @@ object BaseService {
         }
         var closeReceiverRegistered = false
 
-        private fun state() = state
-
         val binder = object : IShadowsocksService.Stub() {
-            override fun getState(): Int = state()
+            override fun getState(): Int = this@Data.state
             override fun getProfileName(): String = profile?.formattedName ?: "Idle"
 
             override fun registerCallback(cb: IShadowsocksServiceCallback) {
@@ -165,7 +168,8 @@ object BaseService {
             }
         }
 
-        internal fun buildShadowsocksConfig() {
+        internal var shadowsocksConfigFile: File? = null
+        internal fun buildShadowsocksConfig(): File {
             val profile = profile!!
             val config = JSONObject()
                     .put("server", profile.host)
@@ -180,7 +184,30 @@ object BaseService {
                         .put("plugin", Commandline.toString(service.buildAdditionalArguments(pluginCmd)))
                         .put("plugin_opts", plugin.toString())
             }
-            File(app.filesDir, "shadowsocks.json").bufferedWriter().use { it.write(config.toString()) }
+            // sensitive Shadowsocks config is stored in
+            val file = File((if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
+                app.deviceContext.noBackupFilesDir  // only API 24+ will be in locked state
+            }), CONFIG_FILE)
+            shadowsocksConfigFile = file
+            file.writeText(config.toString())
+            return file
+        }
+
+        val aclFile: File? get() {
+            val route = profile!!.route
+            return if (route == Acl.ALL) null else Acl.getFile(route)
+        }
+
+        fun changeState(s: Int, msg: String? = null) {
+            if (state == s && msg == null) return
+            if (callbacks.registeredCallbackCount > 0) app.handler.post {
+                val n = callbacks.beginBroadcast()
+                for (i in 0 until n) try {
+                    callbacks.getBroadcastItem(i).stateChanged(s, binder.profileName, msg)
+                } catch (_: Exception) { }  // ignore
+                callbacks.finishBroadcast()
+            }
+            state = s
         }
     }
     interface Interface {
@@ -189,7 +216,7 @@ object BaseService {
         fun onBind(intent: Intent): IBinder? = if (intent.action == Action.SERVICE) data.binder else null
 
         fun checkProfile(profile: Profile): Boolean =
-                if (TextUtils.isEmpty(profile.host) || TextUtils.isEmpty(profile.password)) {
+                if (profile.host.isEmpty() || profile.password.isEmpty()) {
                     stopRunner(true, (this as Context).getString(R.string.proxy_empty))
                     false
                 } else true
@@ -212,19 +239,18 @@ object BaseService {
 
         fun startNativeProcesses() {
             val data = data
-            data.buildShadowsocksConfig()
             val cmd = buildAdditionalArguments(arrayListOf(
                     File((this as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                     "-u",
                     "-b", "127.0.0.1",
                     "-l", DataStore.portProxy.toString(),
                     "-t", "600",
-                    "-c", "shadowsocks.json"))
+                    "-c", data.buildShadowsocksConfig().absolutePath))
 
-            val route = data.profile!!.route
-            if (route != Acl.ALL) {
+            val acl = data.aclFile
+            if (acl != null) {
                 cmd += "--acl"
-                cmd += Acl.getFile(if (route == Acl.CUSTOM_RULES) Acl.CUSTOM_RULES_FLATTENED else route).absolutePath
+                cmd += acl.absolutePath
             }
 
             if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
@@ -232,7 +258,7 @@ object BaseService {
             data.sslocalProcess = GuardedProcess(cmd).start()
         }
 
-        fun createNotification(): ServiceNotification
+        fun createNotification(profileName: String): ServiceNotification
 
         fun startRunner() {
             this as Context
@@ -248,19 +274,22 @@ object BaseService {
 
         fun stopRunner(stopService: Boolean, msg: String? = null) {
             // channge the state
-            changeState(STOPPING)
+            val data = data
+            data.changeState(STOPPING)
 
             app.track(tag, "stop")
 
             killProcesses()
 
             // clean up recevier
-            val data = data
             this as Service
             if (data.closeReceiverRegistered) {
                 unregisterReceiver(data.closeReceiver)
                 data.closeReceiverRegistered = false
             }
+
+            data.shadowsocksConfigFile?.delete()    // remove old config possibly in device storage
+            data.shadowsocksConfigFile = null
 
             data.notification?.destroy()
             data.notification = null
@@ -273,7 +302,7 @@ object BaseService {
             data.trafficMonitorThread = null
 
             // change the state
-            changeState(STOPPED, msg)
+            data.changeState(STOPPED, msg)
 
             // stop the service if nothing has bound to it
             if (stopService) stopSelf()
@@ -287,12 +316,13 @@ object BaseService {
             val data = data
             if (data.state != STOPPED) return Service.START_NOT_STICKY
             val profile = app.currentProfile
+            this as Context
             if (profile == null) {
-                stopRunner(true)
+                data.notification = createNotification("")  // gracefully shutdown: https://stackoverflow.com/questions/47337857/context-startforegroundservice-did-not-then-call-service-startforeground-eve
+                stopRunner(true, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
             data.profile = profile
-            profile.name = profile.formattedName
 
             TrafficMonitor.reset()
             val thread = TrafficMonitorThread()
@@ -305,17 +335,16 @@ object BaseService {
                 filter.addAction(Action.RELOAD)
                 filter.addAction(Intent.ACTION_SHUTDOWN)
                 filter.addAction(Action.CLOSE)
-                (this as Context).registerReceiver(data.closeReceiver, filter)
+                registerReceiver(data.closeReceiver, filter)
                 data.closeReceiverRegistered = true
             }
 
-            data.notification = createNotification()
+            data.notification = createNotification(profile.formattedName)
             app.track(tag, "start")
 
-            changeState(CONNECTING)
+            data.changeState(CONNECTING)
 
             thread {
-                this as Context
                 try {
                     if (profile.host == "198.199.101.152") {
                         val client = OkHttpClient.Builder()
@@ -348,7 +377,7 @@ object BaseService {
                     }
 
                     if (profile.route == Acl.CUSTOM_RULES)
-                        Acl.save(Acl.CUSTOM_RULES_FLATTENED, Acl.customRules.flatten(10))
+                        Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10))
 
                     data.plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
                     data.pluginPath = PluginManager.init(data.plugin)
@@ -363,7 +392,7 @@ object BaseService {
 
                     if (profile.route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncJob.schedule(profile.route)
 
-                    changeState(CONNECTED)
+                    data.changeState(CONNECTED)
                 } catch (_: UnknownHostException) {
                     stopRunner(true, getString(R.string.invalid_server))
                 } catch (_: VpnService.NullConnectionException) {
@@ -374,19 +403,6 @@ object BaseService {
                 }
             }
             return Service.START_NOT_STICKY
-        }
-
-        fun changeState(s: Int, msg: String? = null) {
-            val data = instances[this]!!
-            if (data.state == s && msg == null) return
-            if (data.callbacks.registeredCallbackCount > 0) app.handler.post {
-                val n = data.callbacks.beginBroadcast()
-                for (i in 0 until n) try {
-                    data.callbacks.getBroadcastItem(i).stateChanged(s, data.binder.profileName, msg)
-                } catch (_: Exception) { }  // ignore
-                data.callbacks.finishBroadcast()
-            }
-            data.state = s
         }
     }
 

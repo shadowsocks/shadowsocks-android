@@ -25,15 +25,16 @@ import java.util.*
 
 class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet> {
     companion object {
-        @Throws(IllegalArgumentException::class)
-        fun fromString(value: String): Subnet {
-            val parts = value.split('/')
-            val addr = parts[0].parseNumericAddress()
-            return when (parts.size) {
-                1 -> Subnet(addr, addr.address.size shl 3)
-                2 -> Subnet(addr, parts[1].toInt())
-                else -> throw IllegalArgumentException()
-            }
+        fun fromString(value: String): Subnet? {
+            @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+            val parts = (value as java.lang.String).split("/", 2)
+            val addr = parts[0].parseNumericAddress() ?: return null
+            return if (parts.size == 2) try {
+                val prefixSize = parts[1].toInt()
+                if (prefixSize < 0 || prefixSize > addr.address.size shl 3) null else Subnet(addr, prefixSize)
+            } catch (_: NumberFormatException) {
+                null
+            } else Subnet(addr, addr.address.size shl 3)
         }
     }
 

@@ -12,10 +12,6 @@
     android:nextFocusRight="@+id/edit"
     android:orientation="vertical">
 
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="8dp"/>
-
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
@@ -46,7 +42,7 @@
             android:contentDescription="@string/share"
             android:focusable="true"
             android:nextFocusLeft="@+id/container"
-            android:padding="8dp"
+            android:padding="12dp"
             app:srcCompat="@drawable/ic_social_share"/>
 
         <android.support.v7.widget.AppCompatImageView
@@ -57,7 +53,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/edit"
             android:focusable="true"
-            android:padding="8dp"
+            android:padding="12dp"
             app:srcCompat="@drawable/ic_image_edit"/>
     </LinearLayout>
 
@@ -72,13 +68,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="@dimen/profile_padding"
+            android:layout_marginEnd="12dp"
             android:layout_toStartOf="@+id/traffic"
             android:ellipsize="end"
             android:maxLines="2"
-            tools:text="@string/profile_plugin"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"/>
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="@string/profile_plugin"/>
 
         <TextView
             android:id="@+id/traffic"
@@ -86,13 +83,11 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_gravity="bottom"
-            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="@dimen/profile_padding"
+            android:layout_marginEnd="12dp"
             android:ellipsize="end"
-            tools:text="@string/traffic"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="?android:attr/textColorSecondary"/>
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="@string/traffic"/>
     </RelativeLayout>
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="8dp"/>
 </LinearLayout>

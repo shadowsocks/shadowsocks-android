@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!-- misc -->
+<string name="profile">"Profil"</string>
+<string name="connection_test_error">"Impossible de détecter la connexion Internet :%s"</string>
+<string name="connection_test_fail">"Internet Indisponible"</string>
+<string name="connection_test_error_status_code">"Code de l'Erreur : #%d"</string>
+<string name="proxy">"Serveur"</string>
+<string name="sitekey">"Mot de passe"</string>
+<string name="service_failed">"Échec de la connexion au serveur distant"</string>
+
+<!-- alert category -->
+<string name="close">"Fermer"</string>
+<string name="profile_empty">"Veuillez sélectionner un profil"</string>
+
+<!-- menu category -->
+<string name="profiles">"Profils"</string>
+<string name="settings">"Paramètres"</string>
+<string name="about">"À propos"</string>
+<string name="share">"Partager"</string>
+<string name="add_profile">"Ajouter un Profil"</string>
+<string name="action_apply_all">"Appliquer les Paramètres à tous les Profils"</string>
+<string name="action_export">"Exporter vers le presse-papiers"</string>
+<string name="action_import">"Importer depuis le presse-papiers"</string>
+<string name="delete">"Supprimer"</string>
+<string name="delete_confirm_prompt">"Êtes-vous sûr de vouloir supprimer ce profil?"</string>
+<string name="share_qr_nfc">"QR Code/NFC"</string>
+<string name="add_profile_methods_scan_qr_code">"Scanner le QR Code"</string>
+<plurals name="removed">
+<item quantity="one">"Supprimé"</item>
+<item quantity="other">"%d éléments supprimés"</item>
+</plurals>
+<string name="undo">"Annuler"</string>
+</resources>

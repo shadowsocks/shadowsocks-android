@@ -16,8 +16,8 @@
 # executable program
 #
 # Modified by @Mygod, based on:
-#   https://android.googlesource.com/platform/ndk/+/f2e98f8c066aed59caf61163d4b87c2b858f9814/build/core/build-shared-library.mk
-#   https://android.googlesource.com/platform/ndk/+/f2e98f8c066aed59caf61163d4b87c2b858f9814/build/core/build-executable.mk
+#   https://android.googlesource.com/platform/ndk/+/a355a4e/build/core/build-shared-library.mk
+#   https://android.googlesource.com/platform/ndk/+/a355a4e/build/core/build-executable.mk
 LOCAL_BUILD_SCRIPT := BUILD_EXECUTABLE
 LOCAL_MAKEFILE     := $(local-makefile)
 $(call check-defined-LOCAL_MODULE,$(LOCAL_BUILD_SCRIPT))

@@ -32,6 +32,7 @@ import android.support.v7.widget.Toolbar
 import android.widget.Toast
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.utils.resolveResourceId
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
@@ -54,7 +55,7 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
         setContentView(R.layout.layout_scanner)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.title = title
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_material)
+        toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
         toolbar.setNavigationOnClickListener { navigateUp() }
         scannerView = findViewById(R.id.scanner)
         if (Build.VERSION.SDK_INT >= 25) getSystemService(ShortcutManager::class.java).reportShortcutUsed("scan")

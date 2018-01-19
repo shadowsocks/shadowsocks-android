@@ -224,7 +224,7 @@
     <string-array name="acl_rule_templates" translatable="false">
         <item>@string/acl_rule_templates_generic</item>
         <item>@string/acl_rule_templates_domain</item>
-        <item>URL</item>
+        <item>@string/acl_rule_online_config</item>
     </string-array>
 
     <string-array name="service_modes">

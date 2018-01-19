@@ -29,6 +29,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.support.design.widget.BottomSheetDialog
 import android.support.v7.preference.PreferenceDialogFragmentCompat
+import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -103,12 +104,16 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         val activity = activity
         val dialog = BottomSheetDialog(activity!!, theme)
         val recycler = RecyclerView(activity)
+        val padding = resources.getDimensionPixelOffset(R.dimen.bottom_sheet_padding)
+        recycler.setPadding(0, padding, 0, padding)
         recycler.setHasFixedSize(true)
         recycler.layoutManager = LinearLayoutManager(activity)
+        recycler.itemAnimator = DefaultItemAnimator()
         recycler.adapter = IconListAdapter(dialog)
         recycler.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         dialog.setContentView(recycler)
+        dialog.findViewById<View>(R.id.touch_outside)!!.isFocusable = false
         return dialog
     }
 

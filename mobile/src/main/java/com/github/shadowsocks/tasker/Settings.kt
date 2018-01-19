@@ -27,7 +27,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.database.ProfileManager
 import com.twofortyfouram.locale.api.Intent as ApiIntent
 
-class Settings(bundle: Bundle) {
+class Settings(bundle: Bundle?) {
     companion object {
         private val KEY_SWITCH_ON = "switch_on"
         private val KEY_PROFILE_ID = "profile_id"
@@ -35,8 +35,8 @@ class Settings(bundle: Bundle) {
         fun fromIntent(intent: Intent) = Settings(intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE))
     }
 
-    var switchOn: Boolean = bundle.getBoolean(KEY_SWITCH_ON, true)
-    var profileId: Int = bundle.getInt(KEY_PROFILE_ID, -1)
+    var switchOn: Boolean = bundle?.getBoolean(KEY_SWITCH_ON, true) ?: true
+    var profileId: Int = bundle?.getInt(KEY_PROFILE_ID, -1) ?: -1
 
     fun toIntent(context: Context): Intent {
         val bundle = Bundle()

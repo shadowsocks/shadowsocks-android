@@ -28,12 +28,13 @@ import com.github.shadowsocks.R
 /**
  * Based on: http://stackoverflow.com/a/6212120/2245107
  */
-class BoundedGridLayout(context: Context, attrs: AttributeSet) : GridLayout(context, attrs) {
+class BoundedGridLayout @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0,
+                                                  defStyleRes: Int = 0) : GridLayout(context, attrs, defStyleAttr) {
     private val boundedWidth: Int
     private val boundedHeight: Int
 
     init {
-        val arr = context.obtainStyledAttributes(attrs, R.styleable.BoundedGridLayout)
+        val arr = context.obtainStyledAttributes(attrs, R.styleable.BoundedGridLayout, defStyleAttr, defStyleRes)
         boundedWidth = arr.getDimensionPixelSize(R.styleable.BoundedGridLayout_bounded_width, 0)
         boundedHeight = arr.getDimensionPixelSize(R.styleable.BoundedGridLayout_bounded_height, 0)
         arr.recycle()

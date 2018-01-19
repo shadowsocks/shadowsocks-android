@@ -62,7 +62,7 @@ LOCAL_CFLAGS += -I$(LOCAL_PATH)/libsodium/src/libsodium/include \
 				-I$(LOCAL_PATH)/include/sodium \
 				-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
 				-DPACKAGE_NAME=\"libsodium\" -DPACKAGE_TARNAME=\"libsodium\" \
-				-DPACKAGE_VERSION=\"1.0.15\" -DPACKAGE_STRING=\"libsodium\ 1.0.15\" \
+				-DPACKAGE_VERSION=\"1.0.15\" -DPACKAGE_STRING=\"libsodium-1.0.15\" \
 				-DPACKAGE_BUGREPORT=\"https://github.com/jedisct1/libsodium/issues\" \
 				-DPACKAGE_URL=\"https://github.com/jedisct1/libsodium\" \
 				-DPACKAGE=\"libsodium\" -DVERSION=\"1.0.15\" \
@@ -318,6 +318,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE:= jni-helper
 
+LOCAL_CFLAGS := -std=c++11
+
 LOCAL_C_INCLUDES:= $(LOCAL_PATH)/libancillary
 
 LOCAL_SRC_FILES:= jni-helper.cpp
@@ -422,7 +424,7 @@ LOCAL_SRC_FILES := $(addprefix badvpn/, $(TUN2SOCKS_SOURCES))
 include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
-## mbed TLS 
+## mbed TLS
 ########################################################
 
 include $(CLEAR_VARS)
@@ -438,7 +440,7 @@ LOCAL_SRC_FILES := $(MBEDTLS_SOURCES:$(LOCAL_PATH)/%=%)
 include $(BUILD_STATIC_LIBRARY)
 
 ########################################################
-## pcre 
+## pcre
 ########################################################
 
 include $(CLEAR_VARS)
@@ -450,7 +452,6 @@ LOCAL_CFLAGS += -DHAVE_CONFIG_H
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/pcre/dist $(LOCAL_PATH)/pcre
 
 libpcre_src_files := \
-    pcre_chartables.c \
     dist/pcre_byte_order.c \
     dist/pcre_compile.c \
     dist/pcre_config.c \
@@ -472,7 +473,7 @@ libpcre_src_files := \
     dist/pcre_version.c \
     dist/pcre_xclass.c
 
-LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files))
+LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files)) $(LOCAL_PATH)/patch/pcre/pcre_chartables.c
 
 include $(BUILD_STATIC_LIBRARY)
 

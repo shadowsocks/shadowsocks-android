@@ -15,18 +15,11 @@
             </item>
         </selector>
     </item>
+    <!-- android:start not available until API 23 -->
     <item android:left="8dp">
         <shape android:shape="rectangle">
             <solid android:color="@android:color/white" />
         </shape>
     </item>
-    <item>
-        <selector>
-            <item android:state_pressed="true">
-                <shape android:shape="rectangle">
-                    <solid android:color="#12000000" />
-                </shape>
-            </item>
-        </selector>
-    </item>
+    <item android:drawable="?android:attr/selectableItemBackground"/>
 </layer-list>

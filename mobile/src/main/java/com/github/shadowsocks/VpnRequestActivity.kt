@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks
 
+import android.app.Activity
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -27,15 +28,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.broadcastReceiver
 
-class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface {
+class VpnRequestActivity : Activity(), ShadowsocksConnection.Interface {
     companion object {
         private const val TAG = "VpnRequestActivity"
         private const val REQUEST_CONNECT = 1
@@ -43,8 +42,8 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
 
     private var receiver: BroadcastReceiver? = null
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (!BaseService.usingVpnMode) {
             finish()
             return

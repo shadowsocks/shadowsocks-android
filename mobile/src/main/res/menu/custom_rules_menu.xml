@@ -1,34 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/selection"
-          android:title="@string/action_selection"
-          android:icon="@drawable/abc_ic_menu_selectall_mtrl_alpha"
-          android:alphabeticShortcut="s"
-          android:numericShortcut="0"
-          android:visible="false"
-          app:showAsAction="always">
+    <item
+        android:id="@+id/selection"
+        android:alphabeticShortcut="s"
+        android:icon="?attr/actionModeSelectAllDrawable"
+        android:numericShortcut="0"
+        android:title="@string/action_selection"
+        android:visible="false"
+        app:showAsAction="always">
         <menu>
-            <item android:id="@+id/action_select_all"
-                  android:title="@android:string/selectAll"
-                  android:alphabeticShortcut="a"
-                  android:numericShortcut="1"
-                  app:showAsAction="always"/>
-            <item android:id="@+id/action_cut"
-                  android:title="@android:string/cut"
-                  android:alphabeticShortcut="t"
-                  android:numericShortcut="2"
-                  app:showAsAction="always"/>
-            <item android:id="@+id/action_copy"
-                  android:title="@android:string/copy"
-                  android:alphabeticShortcut="c"
-                  android:numericShortcut="3"
-                  app:showAsAction="always"/>
-            <item android:id="@+id/action_delete"
-                  android:title="@string/delete"
-                  android:alphabeticShortcut="d"
-                  android:numericShortcut="4"
-                  app:showAsAction="always"/>
+            <item
+                android:id="@+id/action_select_all"
+                android:alphabeticShortcut="a"
+                android:numericShortcut="1"
+                android:title="@android:string/selectAll"
+                app:showAsAction="always"/>
+            <item
+                android:id="@+id/action_cut"
+                android:alphabeticShortcut="t"
+                android:numericShortcut="2"
+                android:title="@android:string/cut"
+                app:showAsAction="always"/>
+            <item
+                android:id="@+id/action_copy"
+                android:alphabeticShortcut="c"
+                android:numericShortcut="3"
+                android:title="@android:string/copy"
+                app:showAsAction="always"/>
+            <item
+                android:id="@+id/action_delete"
+                android:alphabeticShortcut="d"
+                android:numericShortcut="4"
+                android:title="@string/delete"
+                app:showAsAction="always"/>
         </menu>
     </item>
     <item android:title="@string/action_add_rule"

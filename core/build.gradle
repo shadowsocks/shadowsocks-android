@@ -1,6 +1,9 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.library'
 
 android {
+    buildToolsVersion rootProject.buildToolsVersion
     compileSdkVersion rootProject.sdkVersion
 
     defaultConfig {
@@ -33,18 +36,28 @@ android {
 }
 
 task goBuild(type: Exec) {
-    executable "sh"
-    args "-c", "src/overture/make.bash " + minSdkVersion
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        executable "cmd.exe"
+        args "/c", "src/overture/make.bat " + minSdkVersion
+    } else {
+        executable "sh"
+        args "-c", "src/overture/make.bash " + minSdkVersion
+    }
 }
 
 task goClean(type: Exec) {
-    executable "sh"
-    args "-c", "src/overture/clean.bash"
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        executable "cmd.exe"
+        args "/c", "src/overture/clean.bat"
+    } else {
+        executable "sh"
+        args "-c", "src/overture/clean.bash"
+    }
 }
 
 tasks.whenTaskAdded { task ->
-  if (task.name == 'generateJsonModelDebug' ||
-          task.name == 'generateJsonModelRelease') {
+  if ((task.name == 'generateJsonModelDebug' ||
+          task.name == 'generateJsonModelRelease')) {
       task.dependsOn(goBuild)
     }
 }

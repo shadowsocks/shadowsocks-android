@@ -37,8 +37,7 @@ object Executable {
 
     fun killAll() {
         for (process in File("/proc").listFiles { _, name -> TextUtils.isDigitsOnly(name) }) {
-            val exe = File(File(process, "cmdline").bufferedReader().use { it.readText() }
-                    .split(Character.MIN_VALUE, limit = 2).first())
+            val exe = File(File(process, "cmdline").readText().split(Character.MIN_VALUE, limit = 2).first())
             if (exe.parent == app.applicationInfo.nativeLibraryDir && EXECUTABLES.contains(exe.name)) {
                 val errno = JniHelper.sigkill(process.name.toInt())
                 if (errno != 0) Log.w("kill", "SIGKILL ${exe.absolutePath} (${process.name}) failed with $errno")
