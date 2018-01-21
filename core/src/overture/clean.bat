@@ -1,10 +1,10 @@
 @ECHO OFF
 
-SET DIR=%CD%
+SET DIR=%~dp0
 SET DEPS=%DIR%\.deps
 
-RD /SQ %DEPS%
-RD /SQ %DIR%\go\bin
-RD /SQ %DIR%\bin
+RD /S /Q %DEPS%
+RD /S /Q %DIR%\go\bin
+RD /S /Q %DIR%\bin
 
 ECHO "Successfully clean overture"
