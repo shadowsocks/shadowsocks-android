@@ -51,6 +51,14 @@ android {
     sourceSets.main.jniLibs.srcDirs += new File(project(':core').projectDir, "src/overture/bin")
 }
 
+ext.abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, 'x86': 3]
+android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def offset = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+        if (offset != null) output.versionCodeOverride = variant.versionCode * 1000 + offset
+    }
+}
+
 dependencies {
     implementation project(':core')
     implementation "com.android.support:customtabs:$supportLibraryVersion"
@@ -82,10 +90,3 @@ repositories {
 
 apply plugin: 'com.google.gms.google-services'
 
-ext.abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, x86: 3]
-if (getCurrentFlavor() == 'release') android.applicationVariants.all { variant ->
-    variant.outputs.each { output ->
-        def offset = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
-        if (offset != null) output.versionCodeOverride = variant.versionCode + offset
-    }
-}
