@@ -21,7 +21,7 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 211
+        versionCode 220
         versionName "4.4.6"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
