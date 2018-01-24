@@ -53,7 +53,7 @@ object LocalDnsService {
                 .put("Address", (when (address.parseNumericAddress()) {
                     is Inet6Address -> "[$address]"
                     else -> address
-                }) + ":53")
+                }))
                 .put("Timeout", timeout)
                 .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
                 if (edns) dns
@@ -75,8 +75,9 @@ object LocalDnsService {
                 val remoteDns = JSONArray(profile.remoteDns.split(",")
                         .mapIndexed { i, dns -> makeDns("UserDef-" + i, dns.trim(), 9) })
                 val localDns = JSONArray(arrayOf(
-                        makeDns("Primary-1", "119.29.29.29", 3, false),
-                        makeDns("Primary-2", "114.114.114.114", 3, false)
+                        makeDns("Primary-1", "119.29.29.29:53", 3, false),
+                        makeDns("Primary-2", "114.114.114.114:53", 3, false),
+                        makeDns("Primary-3", "208.67.222.222:443", 3, false)
                 ))
 
                 when (profile.route) {
