@@ -168,9 +168,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             url.openConnection(Proxy(Proxy.Type.SOCKS,
                     InetSocketAddress("127.0.0.1", DataStore.portProxy))))
                 as HttpURLConnection
+        conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
-        conn.connectTimeout = 10000
-        conn.readTimeout = 10000
         conn.useCaches = false
         val (success, result) = try {
             val start = SystemClock.elapsedRealtime()
