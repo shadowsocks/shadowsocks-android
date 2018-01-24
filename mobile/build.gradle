@@ -8,7 +8,7 @@ apply plugin: 'kotlin-android'
 def getCurrentFlavor() {
     String task = getGradle().getStartParameter().getTaskRequests().toString()
     Matcher matcher = Pattern.compile("(assemble|generate)\\w*(Release|Debug)").matcher(task)
-    if (matcher.find()) return matcher.group(1).toLowerCase() else {
+    if (matcher.find()) return matcher.group(2).toLowerCase() else {
         println "Warning: No match found for $task"
         return "debug"
     }
@@ -21,7 +21,7 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 220
+        versionCode 4040600
         versionName "4.4.6"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
