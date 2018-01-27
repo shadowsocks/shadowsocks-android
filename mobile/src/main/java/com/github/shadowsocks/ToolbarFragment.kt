@@ -35,7 +35,7 @@ open class ToolbarFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         toolbar = view.findViewById(R.id.toolbar)
         val activity = activity as MainActivity
-        if (activity.crossfader == null) activity.drawer.setToolbar(activity, toolbar, true)
+        activity.drawer.setToolbar(activity, toolbar, true)
     }
 
     open fun onTrafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }

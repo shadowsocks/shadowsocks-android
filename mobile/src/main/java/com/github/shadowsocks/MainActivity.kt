@@ -56,11 +56,8 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
 import com.github.shadowsocks.utils.thread
 import com.github.shadowsocks.widget.ServiceButton
-import com.mikepenz.crossfader.Crossfader
-import com.mikepenz.crossfader.view.CrossFadeSlidingPaneLayout
 import com.mikepenz.materialdrawer.Drawer
 import com.mikepenz.materialdrawer.DrawerBuilder
-import com.mikepenz.materialdrawer.interfaces.ICrossfader
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import java.net.HttpURLConnection
@@ -86,7 +83,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     // UI
     private lateinit var fab: ServiceButton
-    internal var crossfader: Crossfader<CrossFadeSlidingPaneLayout>? = null
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
 
@@ -212,7 +208,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
-        val drawerBuilder = DrawerBuilder()
+        drawer = DrawerBuilder()
                 .withActivity(this)
                 .withTranslucentStatusBar(true)
                 .withHeader(R.layout.layout_header)
@@ -249,28 +245,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 .withOnDrawerItemClickListener(this)
                 .withActionBarDrawerToggle(true)
                 .withSavedInstance(savedInstanceState)
-        val miniDrawerWidth = resources.getDimension(R.dimen.material_mini_drawer_item)
-        if (resources.displayMetrics.widthPixels >=
-                resources.getDimension(R.dimen.profile_item_max_width) + miniDrawerWidth) {
-            drawer = drawerBuilder.withGenerateMiniDrawer(true).buildView()
-            val crossfader = Crossfader<CrossFadeSlidingPaneLayout>()
-            this.crossfader = crossfader
-            crossfader
-                    .withContent(findViewById(android.R.id.content))
-                    .withFirst(drawer.slider, resources.getDimensionPixelSize(R.dimen.material_drawer_width))
-                    .withSecond(drawer.miniDrawer.build(this), miniDrawerWidth.toInt())
-                    .withSavedInstance(savedInstanceState)
-                    .build()
-            if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL)
-                crossfader.crossFadeSlidingPaneLayout.setShadowDrawableRight(
-                        AppCompatResources.getDrawable(this, R.drawable.material_drawer_shadow_right))
-            else crossfader.crossFadeSlidingPaneLayout.setShadowDrawableLeft(
-                    AppCompatResources.getDrawable(this, R.drawable.material_drawer_shadow_left))
-            drawer.miniDrawer.withCrossFader(object : ICrossfader { // a wrapper is needed
-                override fun isCrossfaded(): Boolean = crossfader.isCrossFaded
-                override fun crossfade() = crossfader.crossFade()
-            })
-        } else drawer = drawerBuilder.build()
+                .build()
 
         if (savedInstanceState == null) displayFragment(ProfilesFragment())
         previousSelectedDrawer = drawer.currentSelection
@@ -394,7 +369,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
         drawer.saveInstanceState(outState)
-        crossfader?.saveInstanceState(outState)
     }
 
     override fun onDestroy() {
