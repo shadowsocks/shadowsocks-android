@@ -62,8 +62,8 @@ dependencies {
     implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
     implementation "com.google.firebase:firebase-config:$playServicesVersion"
     implementation 'com.j256.ormlite:ormlite-android:5.0'
-    implementation 'com.mikepenz:crossfader:1.5.1'
-    implementation 'com.mikepenz:materialdrawer:6.0.2'
+    implementation 'com.mikepenz:crossfader:1.5.2'
+    implementation 'com.mikepenz:materialdrawer:6.0.3'
     implementation 'com.squareup.okhttp3:okhttp:3.9.1'
     implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
