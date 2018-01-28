@@ -29,6 +29,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
+import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
@@ -128,6 +129,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     private fun startVpn(): Int {
         val profile = data.profile!!
         val builder = Builder()
+                .setConfigureIntent(MainActivity.pendingIntent(this))
                 .setSession(profile.formattedName)
                 .setMtu(VPN_MTU)
                 .addAddress(PRIVATE_VLAN.format(Locale.ENGLISH, "1"), 24)

@@ -21,8 +21,10 @@
 package com.github.shadowsocks
 
 import android.app.Activity
+import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.net.VpnService
@@ -77,6 +79,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         private const val DRAWER_ABOUT = 3L
         private const val DRAWER_FAQ = 4L
         private const val DRAWER_CUSTOM_RULES = 5L
+
+        fun pendingIntent(context: Context) = PendingIntent.getActivity(context, 0,
+                Intent(context, MainActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0)
 
         var stateListener: ((Int) -> Unit)? = null
     }
