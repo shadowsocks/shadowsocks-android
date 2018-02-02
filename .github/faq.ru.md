@@ -30,10 +30,11 @@
 ### Почему мой ROM не поддерживается?
 
 1. Некоторые ROM используют неправильную реализацию службы VPN, особенно IPv6;
-2. Некоторые ROM используют агрессивную (или так называемую неправильную) фоновую службу с ошибочной политикой остановки;
-3. Если вы используете фреймворк Xposed и/или приложения для энергосбережения, вероятно наше приложение не будет нормально работать с ними.
+2. Некоторые ROM используют агрессивную (или так называемую испорченную) фоновую службу с ошибочной политикой остановки;
+3. Некоторые ROM, такие как [Flyme](https://github.com/shadowsocks/shadowsocks-android/issues/1589) имеют **слишком** испорченную поддержку "непосредственной загрузки";
+4. Если вы используете фреймворк Xposed и/или приложения для энергосбережения, вероятно наше приложение не будет нормально работать с ними.
 
-* Иправления для MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
+* Иправления для MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772) [#888](https://github.com/shadowsocks/shadowsocks-android/issues/888)
 * Иправления для Huawei: [#1091 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Вызванные из-за Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung и/или Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
