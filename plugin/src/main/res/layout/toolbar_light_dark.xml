@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:background="?attr/colorPrimary"
     android:elevation="4dp"
+    android:touchscreenBlocksFocus="false"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
     android:id="@+id/toolbar" />

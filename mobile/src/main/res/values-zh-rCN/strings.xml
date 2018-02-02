@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
 <string name="app_name">"影梭"</string>
-
 <string name="quick_toggle">"开关"</string>
 
 <!-- misc -->
 <string name="profile">"配置文件"</string>
-
 <string name="profile_summary">"新建或切换到其他配置文件"</string>
-
 <string name="remote_dns">"远程 DNS"</string>
-
-<string name="stat_summary">"上传: \t%3$s\t↑\t%1$s/s
-下载: \t%4$s\t↓\t%2$s/s"</string>
-
+<string name="stat_summary">"上传: \t%3$s\t↑\t%1$s
+下载: \t%4$s\t↓\t%2$s"</string>
 <string name="connection_test_pending">"检查网络连接"</string>
 <string name="connection_test_testing">"测试中…"</string>
 <string name="connection_test_available">"连接成功：延时 %d 毫秒"</string>
-
 <string name="connection_test_error">"失败：%s"</string>
 <string name="connection_test_fail">"无互联网连接"</string>
-
 <string name="connection_test_error_status_code">"状态码无效（#%d）"</string>
 
 <!-- proxy category -->
@@ -29,7 +21,6 @@
 
 <!-- proxy category -->
 <string name="profile_name">"配置名称"</string>
-
 <string name="proxy">"服务器"</string>
 <string name="remote_port">"远程端口"</string>
 <string name="sitekey">"密码"</string>
@@ -44,7 +35,6 @@
 <string name="route_list">"路由"</string>
 <string name="route_entry_gfwlist">"GFW 列表"</string>
 <string name="proxied_apps">"分应用 VPN"</string>
-
 <string name="proxied_apps_summary">"允许部分应用绕过 VPN"</string>
 <string name="on">"启用"</string>
 <string name="bypass_apps">"绕行模式"</string>
@@ -81,7 +71,6 @@
 <string name="profiles">"配置文件"</string>
 <string name="settings">"设置选项"</string>
 <string name="faq">"常见问题"</string>
-<string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"关于"</string>
 <string name="about_title">"影梭 (Shadowsocks) %s"</string>
 <string name="edit">"编辑"</string>
@@ -133,12 +122,8 @@
 <string name="route_entry_bypass_chn">"绕过中国大陆地址"</string>
 <string name="route_entry_bypass_lan_chn">"绕过局域网及中国大陆地址"</string>
 <string name="route_entry_chinalist">"仅代理中国大陆地址"</string>
-
-<string name="proxied_apps_summary_v21">"为应用程序分别设置代理"</string>
-
-<string name="acl_rule_templates_generic">"URL/子网/域名 PCRE 正则表达式"</string>
+<string name="acl_rule_templates_generic">"子网/域名 PCRE 正则表达式"</string>
 <string name="acl_rule_templates_domain">"域名及其子域名"</string>
-<string name="acl_rule_online_config">配置文件地址</string>
 
 <!-- plugin -->
 <string name="plugin">"插件"</string>
@@ -155,7 +140,6 @@
 <string name="advanced">"高级选项"</string>
 <string name="service_mode">"服务模式"</string>
 <string name="service_mode_proxy">"仅代理"</string>
-<string name="service_mode_vpn">"VPN"</string>
 <string name="service_mode_transproxy">"透明代理"</string>
 <string name="port_proxy">"SOCKS5 代理端口"</string>
 <string name="port_local_dns">"本地 DNS 端口"</string>
@@ -164,4 +148,7 @@
 <string name="service_transproxy">"透明代理模式"</string>
 <string name="vpn_permission_denied">"创建 VPN 服务权限不足"</string>
 <string name="auto_connect_summary_v24">"允许 Shadowsocks 随系统启动，建议使用始终开启的 VPN"</string>
+<string name="direct_boot_aware">"直接启动"</string>
+<string name="direct_boot_aware_summary">"允许在设备解锁前启动服务（选中的配置信息会不那么安全）"</string>
+<string name="acl_rule_online_config">"在线规则文件 URL"</string>
 </resources>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">"Shadowsocks"</string>
 <string name="quick_toggle">"ON/OFF"</string>
 
 <!-- misc -->
@@ -9,7 +8,6 @@
 <string name="remote_dns">"リモートDNS"</string>
 <string name="stat_summary">"送信済み: \t%3$s\t↑\t%1$s/s
 受信済み: \t%4$s\t↓\t%2$s/s"</string>
-
 <string name="connection_test_pending">"接続状況確認"</string>
 <string name="connection_test_testing">"テスト中…"</string>
 <string name="connection_test_available">"成功: %dmsの遅延"</string>
@@ -35,10 +33,8 @@
 <string name="ipv6_summary">"リモートサーバーに IPv6 パケットを転送"</string>
 <string name="route_list">"プロキシ方式"</string>
 <string name="route_entry_gfwlist">"中国本土からアクセス不可なアドレス以外を迂回する"</string>
-
-<string name="proxied_apps">"アプリ別のプロキシを使用"</string>
-
-<string name="proxied_apps_summary">"アプリ別でプロキシを指定、Android 4.x では必ずNATモードを使用して下さい"</string>
+<string name="proxied_apps">"アプリ別のVPNモードを使用"</string>
+<string name="proxied_apps_summary">"アプリ別のVPNモードを設定"</string>
 <string name="on">"ON"</string>
 <string name="bypass_apps">"バイパスモード（迂回モード）"</string>
 <string name="bypass_apps_summary">"このモードを選択した場合、指定したアプリのパケットはプロキシを経由しない"</string>
@@ -74,9 +70,7 @@
 <string name="profiles">"プロファイル"</string>
 <string name="settings">"オプション設定"</string>
 <string name="faq">"よくある質問"</string>
-<string name="faq_url">"https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md"</string>
 <string name="about">"本アプリについて"</string>
-<string name="about_title">"Shadowsocks %s"</string>
 <string name="edit">"編集"</string>
 <string name="share">"共有"</string>
 <string name="add_profile">"プロファイルを追加"</string>
@@ -127,10 +121,7 @@
 <string name="route_entry_bypass_chn">"中国本土のアドレスを迂回する"</string>
 <string name="route_entry_bypass_lan_chn">"LAN 及び中国本土のアドレスを迂回する"</string>
 <string name="route_entry_chinalist">"中国本土のアドレス以外を迂回する"</string>
-
-<string name="proxied_apps_summary_v21">"選択したアプリにプロキシを設定する"</string>
-
-<string name="acl_rule_templates_generic">"URL/サブネット/ホスト名 PCRE パターン"</string>
+<string name="acl_rule_templates_generic">"サブネットまたはホスト名のPCREパターン"</string>
 <string name="acl_rule_templates_domain">"ドメイン及び全てのサブドメイン"</string>
 
 <!-- plugin -->
@@ -148,7 +139,6 @@
 <string name="advanced">"アドバンス"</string>
 <string name="service_mode">"サービスモード"</string>
 <string name="service_mode_proxy">"プロキシのみ"</string>
-<string name="service_mode_vpn">"VPN"</string>
 <string name="service_mode_transproxy">"トランスプロキシ"</string>
 <string name="port_proxy">"SOCKS5プロキシポート"</string>
 <string name="port_local_dns">"ローカルDNSポート"</string>
@@ -157,4 +147,7 @@
 <string name="service_transproxy">"トランスプロキシサービス"</string>
 <string name="vpn_permission_denied">"VPNサービス作成のアクセス許可が拒否されました"</string>
 <string name="auto_connect_summary_v24">"起動時にShadowsockを有効。 VPN常時接続の使用をお勧めします"</string>
+<string name="direct_boot_aware">"ダイレクトブート"</string>
+<string name="direct_boot_aware_summary">"デバイスがロック解除される前にShadowsocksの自動起動を許可（選択されたプロファイル情報はより少ない保護を受けることになります）"</string>
+<string name="acl_rule_online_config">"オンライン設定のURL"</string>
 </resources>

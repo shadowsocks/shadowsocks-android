@@ -2,9 +2,7 @@
 <animated-vector
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:drawable="@drawable/ic_service_idle"
-    tools:ignore="NewApi">
+    android:drawable="@drawable/ic_service_idle">
     <target android:name="strike_thru_path">
         <aapt:attr name="android:animation">
             <objectAnimator

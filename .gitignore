@@ -24,3 +24,6 @@ core/src/overture/src/gopkg.in
 # work in progress
 tv/
 things/
+
+# release apks
+*.apk

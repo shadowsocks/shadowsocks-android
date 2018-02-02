@@ -80,13 +80,11 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         val serviceMode = DataStore.serviceMode
         findPreference(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
         isProxyApps = findPreference(Key.proxyApps) as SwitchPreference
-        if (Build.VERSION.SDK_INT < 21) isProxyApps.parent!!.removePreference(isProxyApps) else {
-            isProxyApps.isEnabled = serviceMode == Key.modeVpn
-            isProxyApps.setOnPreferenceClickListener {
-                startActivity(Intent(activity, AppManager::class.java))
-                isProxyApps.isChecked = true
-                false
-            }
+        isProxyApps.isEnabled = serviceMode == Key.modeVpn
+        isProxyApps.setOnPreferenceClickListener {
+            startActivity(Intent(activity, AppManager::class.java))
+            isProxyApps.isChecked = true
+            false
         }
         findPreference(Key.udpdns).isEnabled = serviceMode != Key.modeProxy
         plugin = findPreference(Key.plugin) as IconListPreference

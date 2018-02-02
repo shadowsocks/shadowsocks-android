@@ -20,34 +20,27 @@
 
 package com.github.shadowsocks.widget
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.os.Build
 import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.SnackbarAnimation
 import android.support.design.widget.Snackbar
-import android.support.v4.view.ViewCompat
+import android.support.design.widget.SnackbarAnimation
 import android.util.AttributeSet
 import android.view.View
-
-import com.github.shadowsocks.utils.isAccessibilityEnabled
+import android.view.accessibility.AccessibilityManager
 
 /**
  * Full credits go to: https://stackoverflow.com/a/35904421/2245107
  */
-class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
-    constructor() : super()
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Behavior<View>(context, attrs) {
+    private val accessibility = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean =
-        dependency is Snackbar.SnackbarLayout
+            dependency is Snackbar.SnackbarLayout
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View): Boolean {
-        val params = child.layoutParams
-        params.height = parent.height - dependency.height
-        child.layoutParams = params
+        child.layoutParams.height = dependency.y.toInt()
+        child.requestLayout()
         return true
     }
 
@@ -55,25 +48,18 @@ class MoveUpwardBehavior : CoordinatorLayout.Behavior<View> {
      * Based on BaseTransientBottomBar.animateViewOut (support lib 27.0.2).
      */
     override fun onDependentViewRemoved(parent: CoordinatorLayout, child: View, dependency: View) {
-        if (!isAccessibilityEnabled(parent.getContext())) {
+        if (accessibility.isEnabled) child.layoutParams.height = parent.height else {
             val animator = ValueAnimator()
             val start = child.height
             animator.setIntValues(start, parent.height)
             animator.interpolator = SnackbarAnimation.FAST_OUT_SLOW_IN_INTERPOLATOR
             animator.duration = SnackbarAnimation.ANIMATION_DURATION
-            animator.addUpdateListener(object : ValueAnimator.AnimatorUpdateListener {
-                override fun onAnimationUpdate(animator: ValueAnimator) {
-                    val currentValue = animator.animatedValue as Int
-                    val params = child.layoutParams
-                    params.height = currentValue
-                    child.layoutParams = params
-                }
-            })
+            @Suppress("NAME_SHADOWING")
+            animator.addUpdateListener { animator ->
+                child.layoutParams.height = animator.animatedValue as Int
+                child.requestLayout()
+            }
             animator.start()
-        } else {
-            val params = child.layoutParams
-            params.height = parent.height
-            child.layoutParams = params
         }
     }
 }

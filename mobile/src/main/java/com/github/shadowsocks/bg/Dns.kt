@@ -20,48 +20,18 @@
 
 package com.github.shadowsocks.bg
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.LinkProperties
-import android.os.Build
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.BuildConfig
-import okhttp3.Dns as Okdns
 import org.xbill.DNS.*
 import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.NetworkInterface
 import java.net.UnknownHostException
-import java.util.*
+import okhttp3.Dns as Okdns
 
 object Dns {
     private const val TAG = "Dns"
-
-    @Throws(Exception::class)
-    fun getDnsResolver(context: Context): String {
-        val dnsResolvers = getDnsResolvers(context)
-        if (dnsResolvers.isEmpty()) throw Exception("Couldn't find an active DNS resolver")
-        val dnsResolver = dnsResolvers.iterator().next().toString()
-        if (dnsResolver.startsWith("/")) return dnsResolver.substring(1)
-        return dnsResolver
-    }
-
-    @Throws(Exception::class)
-    private fun getDnsResolvers(context: Context): Collection<InetAddress> {
-        val addresses = ArrayList<InetAddress>()
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val classLinkProperties = Class.forName("android.net.LinkProperties")
-        val getActiveLinkPropertiesMethod = ConnectivityManager::class.java.getMethod("getActiveLinkProperties")
-        val linkProperties = getActiveLinkPropertiesMethod.invoke(connectivityManager)
-        if (linkProperties != null) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                val dnses = classLinkProperties.getMethod("getDnses").invoke(linkProperties) as Collection<*>
-                dnses.mapTo(addresses) { it as InetAddress }
-            } else addresses.addAll((linkProperties as LinkProperties).dnsServers)
-        }
-        return addresses
-    }
 
     private val hasIPv6Support get() = try {
         val result = NetworkInterface.getNetworkInterfaces().asSequence().flatMap { it.inetAddresses.asSequence() }

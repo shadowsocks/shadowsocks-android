@@ -12,7 +12,7 @@ TARGET=$DIR/bin
 DEPS=$DIR/.deps
 
 ANDROID_ARM_TOOLCHAIN=$DEPS/android-toolchain-${MIN_API}-arm
-ANDROID_ARM64_TOOLCHAIN=$DEPS/android-toolchain-21-arm64
+ANDROID_ARM64_TOOLCHAIN=$DEPS/android-toolchain-${MIN_API}-arm64
 ANDROID_X86_TOOLCHAIN=$DEPS/android-toolchain-${MIN_API}-x86
 
 ANDROID_ARM_CC=$ANDROID_ARM_TOOLCHAIN/bin/arm-linux-androideabi-clang
@@ -35,7 +35,7 @@ fi
 if [ ! -f "$ANDROID_ARM64_CC" ]; then
     echo "Make standalone toolchain for ARM64 arch"
     $ANDROID_NDK_HOME/build/tools/make_standalone_toolchain.py --arch arm64 \
-        --api 21 --install-dir $ANDROID_ARM64_TOOLCHAIN
+        --api $MIN_API --install-dir $ANDROID_ARM64_TOOLCHAIN
 fi
 
 if [ ! -f "$ANDROID_X86_CC" ]; then

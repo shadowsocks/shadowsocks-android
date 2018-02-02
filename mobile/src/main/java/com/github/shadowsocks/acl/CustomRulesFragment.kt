@@ -20,21 +20,21 @@
 
 package com.github.shadowsocks.acl
 
+import android.annotation.TargetApi
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.support.v7.widget.helper.ItemTouchHelper
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
@@ -48,12 +48,13 @@ import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
 import java.net.URL
 import java.util.*
 
-class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
+class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, ActionMode.Callback {
     companion object {
         private const val TEMPLATE_REGEX_DOMAIN = "(^|\\.)%s$"
 
@@ -288,13 +289,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private val selectedItems = HashSet<Any>()
     private val adapter by lazy { AclRulesAdapter() }
     private lateinit var list: RecyclerView
-    private var selectionItem: MenuItem? = null
+    private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<Any>
     private val clipboard by lazy { activity!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
 
     private fun onSelectedItemsUpdated() {
-        val selectionItem = selectionItem
-        if (selectionItem != null) selectionItem.isVisible = selectedItems.isNotEmpty()
+        if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
     }
 
     private fun createAclRuleDialog(item: Any = ""): Triple<Spinner, EditText, AlertDialog.Builder> {
@@ -345,9 +345,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         toolbar.setTitle(R.string.custom_rules)
         toolbar.inflateMenu(R.menu.custom_rules_menu)
         toolbar.setOnMenuItemClickListener(this)
-        val selectionItem = toolbar.menu.findItem(R.id.selection)
-        selectionItem.isVisible = selectedItems.isNotEmpty()
-        this.selectionItem = selectionItem
         list = view.findViewById(R.id.list)
         list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
@@ -365,10 +362,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     override fun onBackPressed(): Boolean {
-        return if (selectedItems.isNotEmpty()) {
-            selectedItems.clear()
-            onSelectedItemsUpdated()
-            adapter.notifyDataSetChanged()
+        val mode = mode
+        return if (mode != null) {
+            mode.finish()
             true
         } else super.onBackPressed()
     }
@@ -395,24 +391,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_select_all -> {
-            adapter.selectAll()
-            true
-        }
-        R.id.action_cut -> {
-            copySelected()
-            adapter.removeSelected()
-            true
-        }
-        R.id.action_copy -> {
-            copySelected()
-            true
-        }
-        R.id.action_delete -> {
-            adapter.removeSelected()
-            true
-        }
-
         R.id.action_manual_settings -> {
             val (templateSelector, editText, dialog) = createAclRuleDialog()
             dialog.setPositiveButton(android.R.string.ok, { _, _ ->
@@ -443,5 +421,51 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     override fun onDetach() {
         undoManager.flush()
         super.onDetach()
+    }
+
+    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+        val activity = activity!!
+        val window = activity.window
+        // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
+        if (Build.VERSION.SDK_INT >= 23) {
+            window.statusBarColor = ContextCompat.getColor(activity, R.color.material_grey_300)
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        } else window.statusBarColor = ContextCompat.getColor(activity, R.color.material_grey_600)
+        activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
+        toolbar.touchscreenBlocksFocus = true
+        return true
+    }
+    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = when (item.itemId) {
+        R.id.action_select_all -> {
+            adapter.selectAll()
+            true
+        }
+        R.id.action_cut -> {
+            copySelected()
+            adapter.removeSelected()
+            true
+        }
+        R.id.action_copy -> {
+            copySelected()
+            true
+        }
+        R.id.action_delete -> {
+            adapter.removeSelected()
+            true
+        }
+        else -> false
+    }
+    override fun onDestroyActionMode(mode: ActionMode) {
+        val activity = activity!!
+        val window = activity.window
+        window.statusBarColor = ContextCompat.getColor(activity,
+                activity.theme.resolveResourceId(android.R.attr.statusBarColor))
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        toolbar.touchscreenBlocksFocus = false
+        selectedItems.clear()
+        onSelectedItemsUpdated()
+        adapter.notifyDataSetChanged()
+        this.mode = null
     }
 }

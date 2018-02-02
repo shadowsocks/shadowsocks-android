@@ -22,7 +22,6 @@ package com.github.shadowsocks.tasker
 
 import android.app.Activity
 import android.content.res.Resources
-import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
@@ -71,13 +70,12 @@ class ConfigActivity : AppCompatActivity() {
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
         internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
-        private val name = "select_dialog_singlechoice_" + (if (Build.VERSION.SDK_INT >= 21) "material" else "holo")
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
                 if (position == 0) holder.bindDefault() else holder.bind(profiles[position - 1])
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
                 LayoutInflater.from(parent.context).inflate(Resources.getSystem()
-                        .getIdentifier(name, "layout", "android"), parent, false))
+                        .getIdentifier("select_dialog_singlechoice_material", "layout", "android"), parent, false))
         override fun getItemCount(): Int = 1 + profiles.size
     }
 
