@@ -37,8 +37,10 @@ import android.support.annotation.RequiresApi
 import android.support.v4.os.UserManagerCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
+import android.widget.Toast
 import com.evernote.android.job.JobConstants
 import com.evernote.android.job.JobManager
+import com.evernote.android.job.JobManagerCreateException
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncJob
 import com.github.shadowsocks.bg.BaseService
@@ -126,7 +128,12 @@ class App : Application() {
         remoteConfig.fetch().addOnCompleteListener {
             if (it.isSuccessful) remoteConfig.activateFetched() else Log.e(TAG, "Failed to fetch config")
         }
-        JobManager.create(deviceContext).addJobCreator(AclSyncJob)
+        try {
+            JobManager.create(deviceContext).addJobCreator(AclSyncJob)
+        } catch (e: JobManagerCreateException) {
+            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+            app.track(e)
+        }
 
         // handle data restored
         if (DataStore.directBootAware && UserManagerCompat.isUserUnlocked(this)) DirectBoot.update()
