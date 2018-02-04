@@ -134,7 +134,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     IDN.toASCII(value.toString(), IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
                     null
                 } catch (e: IllegalArgumentException) {
-                    e.message
+                    e.cause?.message ?: e.message
                 }
                 Template.Url -> try {
                     URL(value.toString())
