@@ -34,6 +34,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
+import android.support.design.widget.Snackbar
 import android.support.v4.app.TaskStackBuilder
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DefaultItemAnimator
@@ -231,14 +232,14 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         ProfileManager.updateProfile(it)
                     }
                     if (DataStore.directBootAware) DirectBoot.update()
-                    Toast.makeText(this, R.string.action_apply_all, Toast.LENGTH_SHORT).show()
-                } else Toast.makeText(this, R.string.action_export_err, Toast.LENGTH_SHORT).show()
+                    Snackbar.make(appListView, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
+                } else Snackbar.make(appListView, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
                 return true
             }
             R.id.action_export -> {
                 clipboard.primaryClip = ClipData.newPlainText(Key.individual,
                         "${DataStore.bypass}\n${DataStore.individual}")
-                Toast.makeText(this, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
+                Snackbar.make(appListView, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
                 return true
             }
             R.id.action_import -> {
@@ -251,13 +252,13 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         bypassSwitch.isChecked = enabled.toBoolean()
                         DataStore.individual = apps
                         DataStore.dirty = true
-                        Toast.makeText(this, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+                        Snackbar.make(appListView, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                         initProxiedApps(apps)
                         reloadApps()
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
-                Toast.makeText(this, R.string.action_import_err, Toast.LENGTH_SHORT).show()
+                Snackbar.make(appListView, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
             }
         }
         return false

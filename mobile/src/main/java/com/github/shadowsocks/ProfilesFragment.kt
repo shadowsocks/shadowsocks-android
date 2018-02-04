@@ -370,7 +370,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val profiles = Profile.findAll(clipboard.primaryClip.getItemAt(0).text).toList()
                     if (profiles.isNotEmpty()) {
                         profiles.forEach { ProfileManager.createProfile(it) }
-                        Toast.makeText(activity, R.string.action_import_msg, Toast.LENGTH_SHORT).show()
+                        Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_msg,
+                                Snackbar.LENGTH_LONG).show()
                         return true
                     }
                 } catch (exc: Exception) {
@@ -386,10 +387,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_export -> {
                 val profiles = ProfileManager.getAllProfiles()
-                if (profiles != null) {
+                Snackbar.make(activity!!.findViewById(R.id.snackbar), if (profiles != null) {
                     clipboard.primaryClip = ClipData.newPlainText(null, profiles.joinToString("\n"))
-                    Toast.makeText(activity, R.string.action_export_msg, Toast.LENGTH_SHORT).show()
-                } else Toast.makeText(activity, R.string.action_export_err, Toast.LENGTH_SHORT).show()
+                    R.string.action_export_msg
+                } else R.string.action_export_err, Snackbar.LENGTH_LONG).show()
                 true
             }
             else -> false
