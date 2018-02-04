@@ -71,7 +71,7 @@
 
         <activity
             android:name=".VpnRequestActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:theme="@style/Theme.Translucent"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:launchMode="singleTask"/>
