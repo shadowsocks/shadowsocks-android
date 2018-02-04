@@ -50,7 +50,6 @@ class ShadowsocksConnection(private val instance: Interface) : ServiceConnection
         fun onServiceDisconnected() { }
         override fun binderDied() {
             connection.service = null
-            connection.disconnect()
         }
     }
 

@@ -198,6 +198,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun binderDied() {
         super.binderDied()
         app.handler.post {
+            connection.disconnect()
             Executable.killAll()
             connection.connect()
         }
