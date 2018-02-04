@@ -31,7 +31,6 @@ import android.os.RemoteCallbackList
 import android.support.v4.os.UserManagerCompat
 import android.util.Base64
 import android.util.Log
-import android.widget.Toast
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.R
 import com.github.shadowsocks.acl.Acl
@@ -146,18 +145,18 @@ object BaseService {
         }
 
         internal fun updateTrafficTotal(tx: Long, rx: Long) {
-            val profile = profile ?: return
-            val p = ProfileManager.getProfile(profile.id) ?: return // profile may have host, etc. modified
-            p.tx += tx
-            p.rx += rx
-            ProfileManager.updateProfile(p)
+            // this.profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
+            val profile = ProfileManager.getProfile((profile ?: return).id) ?: return
+            profile.tx += tx
+            profile.rx += rx
+            ProfileManager.updateProfile(profile)
             app.handler.post {
                 if (bandwidthListeners.isNotEmpty()) {
                     val n = callbacks.beginBroadcast()
                     for (i in 0 until n) {
                         try {
                             val item = callbacks.getBroadcastItem(i)
-                            if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(p.id)
+                            if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
                         } catch (_: Exception) { }  // ignore
                     }
                     callbacks.finishBroadcast()
@@ -182,9 +181,9 @@ object BaseService {
                         .put("plugin_opts", plugin.toString())
             }
             // sensitive Shadowsocks config is stored in
-            val file = File((if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
+            val file = File(if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
                 app.deviceContext.noBackupFilesDir  // only API 24+ will be in locked state
-            }), CONFIG_FILE)
+            }, CONFIG_FILE)
             shadowsocksConfigFile = file
             file.writeText(config.toString())
             return file
@@ -218,9 +217,9 @@ object BaseService {
                     false
                 } else true
         fun forceLoad() {
-            val p = app.currentProfile
+            val profile = app.currentProfile
                     ?: return stopRunner(true, (this as Context).getString(R.string.profile_empty))
-            if (!checkProfile(p)) return
+            if (!checkProfile(profile)) return
             val s = data.state
             when (s) {
                 STOPPED -> startRunner()

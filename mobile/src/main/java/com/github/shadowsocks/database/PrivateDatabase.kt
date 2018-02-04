@@ -72,10 +72,10 @@ object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) 
                 profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
                 TableUtils.createTable(connectionSource, Profile::class.java)
                 profileDao.executeRawNoArgs(
-                        "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
-                                " udpdns, ipv6, individual) " +
-                                "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, ipv6," +
-                                " individual FROM `tmp`;")
+                        "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route," +
+                                " proxyApps, bypass, udpdns, ipv6, individual) " +
+                                "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global," +
+                                " bypass, udpdns, ipv6, individual FROM `tmp`;")
                 profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
                 profileDao.executeRawNoArgs("COMMIT;")
             } else if (oldVersion < 13) {

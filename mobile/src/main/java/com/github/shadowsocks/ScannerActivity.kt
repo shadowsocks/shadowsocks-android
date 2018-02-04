@@ -139,31 +139,29 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
             .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    var list = listOfNotNull(data?.data)
-                    val clipData = data?.clipData
-                    if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
-                    val resolver = contentResolver
-                    val reader = MultiFormatReader()
-                    var success = false
-                    for (uri in list) try {
-                        val bitmap = BitmapFactory.decodeStream(resolver.openInputStream(uri))
-                        val pixels = IntArray(bitmap.width * bitmap.height)
-                        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-                        Profile.findAll(reader.decode(BinaryBitmap(HybridBinarizer(
-                                RGBLuminanceSource(bitmap.width, bitmap.height, pixels)))).text).forEach {
-                            ProfileManager.createProfile(it)
-                            success = true
-                        }
-                    } catch (e: Exception) {
-                        app.track(e)
+            REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
+                var list = listOfNotNull(data?.data)
+                val clipData = data?.clipData
+                if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
+                val resolver = contentResolver
+                val reader = MultiFormatReader()
+                var success = false
+                for (uri in list) try {
+                    val bitmap = BitmapFactory.decodeStream(resolver.openInputStream(uri))
+                    val pixels = IntArray(bitmap.width * bitmap.height)
+                    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+                    Profile.findAll(reader.decode(BinaryBitmap(HybridBinarizer(
+                            RGBLuminanceSource(bitmap.width, bitmap.height, pixels)))).text).forEach {
+                        ProfileManager.createProfile(it)
+                        success = true
                     }
-                    Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
-                            Toast.LENGTH_SHORT).show()
-                    finish()
-                } else if (requestCode == REQUEST_IMPORT_OR_FINISH) finish()
-            }
+                } catch (e: Exception) {
+                    app.track(e)
+                }
+                Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
+                        Toast.LENGTH_SHORT).show()
+                finish()
+            } else if (requestCode == REQUEST_IMPORT_OR_FINISH) finish()
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }

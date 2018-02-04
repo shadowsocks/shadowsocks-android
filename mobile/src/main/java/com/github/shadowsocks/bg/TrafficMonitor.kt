@@ -44,7 +44,7 @@ object TrafficMonitor {
     private val units = arrayOf("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
     private val numberFormat = DecimalFormat("@@@")
     fun formatTraffic(size: Long): String {
-        var n: Double = size.toDouble()
+        var n = size.toDouble()
         var i = -1
         while (n >= 999.5) {
             n /= 1024

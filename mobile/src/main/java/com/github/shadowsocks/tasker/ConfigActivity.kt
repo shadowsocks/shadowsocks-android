@@ -85,12 +85,12 @@ class ConfigActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            taskerOption = Settings.fromIntent(intent!!)
-        } catch (_: Exception) {
+        val intent = intent
+        if (intent == null) {
             finish()
             return
         }
+        taskerOption = Settings.fromIntent(intent)
         setContentView(R.layout.layout_tasker)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)

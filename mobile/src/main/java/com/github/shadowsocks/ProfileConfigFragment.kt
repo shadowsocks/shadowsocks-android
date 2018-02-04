@@ -179,27 +179,25 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         } else super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onMenuItemClick(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_delete -> {
-                val activity = activity!!
-                AlertDialog.Builder(activity)
-                        .setTitle(R.string.delete_confirm_prompt)
-                        .setPositiveButton(R.string.yes, { _, _ ->
-                            ProfileManager.delProfile(profile.id)
-                            activity.finish()
-                        })
-                        .setNegativeButton(R.string.no, null)
-                        .create()
-                        .show()
-                true
-            }
-            R.id.action_apply -> {
-                saveAndExit()
-                true
-            }
-            else -> false
+    override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
+        R.id.action_delete -> {
+            val activity = activity!!
+            AlertDialog.Builder(activity)
+                    .setTitle(R.string.delete_confirm_prompt)
+                    .setPositiveButton(R.string.yes, { _, _ ->
+                        ProfileManager.delProfile(profile.id)
+                        activity.finish()
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .create()
+                    .show()
+            true
         }
+        R.id.action_apply -> {
+            saveAndExit()
+            true
+        }
+        else -> false
     }
 
     override fun onDestroy() {

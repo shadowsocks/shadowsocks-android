@@ -70,8 +70,8 @@ abstract class NativePluginProvider : ContentProvider() {
     /**
      * Returns executable entry absolute path. This is used if plugin is sharing UID with the host.
      *
-     * Default behavior is throwing UnsupportedOperationException. If you don't wish to use this feature, use the default
-     * behavior.
+     * Default behavior is throwing UnsupportedOperationException. If you don't wish to use this feature, use the
+     * default behavior.
      *
      * @return Absolute path for executable entry.
      */

@@ -29,7 +29,6 @@ import android.support.graphics.drawable.AnimatedVectorDrawableCompat
 import android.support.v7.widget.TooltipCompat
 import android.util.AttributeSet
 import android.view.View
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import java.util.*

@@ -124,7 +124,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
         override fun afterTextChanged(s: Editable) = validate(value = s)
-        override fun onNothingSelected(parent: AdapterView<*>?) = throw IllegalStateException()
+        override fun onNothingSelected(parent: AdapterView<*>?) = check(false)
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = validate(position)
 
         private fun validate(template: Int = templateSelector.selectedItemPosition, value: Editable = editText.text) {
@@ -228,16 +228,14 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         override fun getItemCount(): Int = acl.subnets.size() + acl.hostnames.size() + acl.urls.size()
         override fun getSectionTitle(i: Int): String {
             val j = i - acl.subnets.size()
-            return try {
-                (if (j < 0) acl.subnets[i].address.hostAddress.substring(0, 1) else {
-                    val k = j - acl.hostnames.size()
-                    if (k < 0) {
-                        val hostname = acl.hostnames[j]
-                        // don't convert IDN yet
-                        PATTERN_DOMAIN.find(hostname)?.value?.replace("\\.", ".") ?: hostname
-                    } else acl.urls[k].host
-                }).substring(0, 1)
-            } catch (_: IndexOutOfBoundsException) { " " }
+            return (if (j < 0) acl.subnets[i].address.hostAddress.substring(0, 1) else {
+                val k = j - acl.hostnames.size()
+                if (k < 0) {
+                    val hostname = acl.hostnames[j]
+                    // don't convert IDN yet
+                    PATTERN_DOMAIN.find(hostname)?.value?.replace("\\.", ".") ?: hostname
+                } else acl.urls[k].host
+            }).firstOrNull()?.toString() ?: " "
         }
 
         private fun apply() {

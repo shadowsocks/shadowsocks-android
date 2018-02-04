@@ -24,22 +24,19 @@ import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.BuildConfig
 import org.xbill.DNS.*
-import java.net.Inet6Address
-import java.net.InetAddress
-import java.net.NetworkInterface
-import java.net.UnknownHostException
-import okhttp3.Dns as Okdns
+import java.io.IOException
+import java.net.*
 
 object Dns {
     private const val TAG = "Dns"
 
     private val hasIPv6Support get() = try {
         val result = NetworkInterface.getNetworkInterfaces().asSequence().flatMap { it.inetAddresses.asSequence() }
-                .count { it is Inet6Address && !it.isLoopbackAddress && !it.isLinkLocalAddress } > 0
+                .any { it is Inet6Address && !it.isLoopbackAddress && !it.isLinkLocalAddress }
         if (result && BuildConfig.DEBUG) Log.d(TAG, "IPv6 address detected")
         result
-    } catch (ex: Exception) {
-        Log.e(TAG, "Failed to get interfaces' addresses.")
+    } catch (ex: SocketException) {
+        Log.e(TAG, "Failed to get interfaces' addresses.", ex)
         app.track(ex)
         false
     }
@@ -60,7 +57,7 @@ object Dns {
                     Type.AAAA -> return (r as AAAARecord).address.hostAddress
                 }
             }
-        } catch (_: Exception) { }
+        } catch (_: IOException) { }
         return null
     }
     private fun resolve(host: String): String? = try {

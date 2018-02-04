@@ -37,7 +37,6 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.TrafficMonitor
@@ -374,9 +373,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                                 Snackbar.LENGTH_LONG).show()
                         return true
                     }
-                } catch (exc: Exception) {
-                    app.track(exc)
-                }
+                } catch (_: IndexOutOfBoundsException) { }
                 Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG)
                         .show()
                 true
