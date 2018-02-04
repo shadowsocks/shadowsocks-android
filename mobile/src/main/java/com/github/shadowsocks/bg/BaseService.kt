@@ -88,10 +88,7 @@ object BaseService {
         val closeReceiver = broadcastReceiver { _, intent ->
             when (intent.action) {
                 Action.RELOAD -> service.forceLoad()
-                else -> {
-                    Toast.makeText(service as Context, R.string.stopping, Toast.LENGTH_SHORT).show()
-                    service.stopRunner(true)
-                }
+                else -> service.stopRunner(true)
             }
         }
         var closeReceiverRegistered = false
