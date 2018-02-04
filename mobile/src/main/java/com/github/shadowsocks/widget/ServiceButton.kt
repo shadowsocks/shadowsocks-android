@@ -84,9 +84,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
             TooltipCompat.setTooltipText(this, context.getString(R.string.connect))
         }
         refreshDrawableState()
-        isEnabled = false
-        if (state == BaseService.CONNECTED || state == BaseService.STOPPED) app.handler.postDelayed(
-                { isEnabled = state == BaseService.CONNECTED || state == BaseService.STOPPED }, 1000)
+        isEnabled = state == BaseService.CONNECTED || state == BaseService.STOPPED
     }
 
     private fun counters(a: AnimatedVectorDrawableCompat, b: AnimatedVectorDrawableCompat): Boolean =

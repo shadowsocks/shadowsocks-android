@@ -56,11 +56,9 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
     }
 
     override fun onServiceConnected(service: IShadowsocksService) {
-        app.handler.postDelayed({
-            val intent = VpnService.prepare(this)
-            if (intent == null) onActivityResult(REQUEST_CONNECT, RESULT_OK, null)
-            else startActivityForResult(intent, REQUEST_CONNECT)
-        }, 1000)
+        val intent = VpnService.prepare(this)
+        if (intent == null) onActivityResult(REQUEST_CONNECT, RESULT_OK, null)
+        else startActivityForResult(intent, REQUEST_CONNECT)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
