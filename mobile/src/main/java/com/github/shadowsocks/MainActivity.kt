@@ -196,8 +196,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onServiceConnected(service: IShadowsocksService) = changeState(service.state)
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
+        super.binderDied()
         app.handler.post {
-            connection.disconnect()
             Executable.killAll()
             connection.connect()
         }
