@@ -20,8 +20,14 @@
 
 package com.github.shadowsocks
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
+import android.graphics.BitmapFactory
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -29,16 +35,24 @@ import android.support.v4.app.TaskStackBuilder
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.view.MenuItem
 import android.widget.Toast
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.resolveResourceId
+import com.google.zxing.BinaryBitmap
+import com.google.zxing.MultiFormatReader
+import com.google.zxing.RGBLuminanceSource
 import com.google.zxing.Result
+import com.google.zxing.common.HybridBinarizer
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
-class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
+class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Toolbar.OnMenuItemClickListener {
     companion object {
         private const val MY_PERMISSIONS_REQUEST_CAMERA = 1
+        private const val REQUEST_IMPORT = 2
+        private const val REQUEST_IMPORT_OR_FINISH = 3
     }
 
     private lateinit var scannerView: ZXingScannerView
@@ -57,19 +71,36 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
         toolbar.title = title
         toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
         toolbar.setNavigationOnClickListener { navigateUp() }
+        toolbar.inflateMenu(R.menu.scanner_menu)
+        toolbar.setOnMenuItemClickListener(this)
         scannerView = findViewById(R.id.scanner)
         if (Build.VERSION.SDK_INT >= 25) getSystemService(ShortcutManager::class.java).reportShortcutUsed("scan")
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
+        if (try {
+                    (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList.isEmpty()
+                } catch (_: CameraAccessException) {
+                    true
+                }) {
+            startImport()
+            return
+        }
         val permissionCheck = ContextCompat.checkSelfPermission(this,
                 android.Manifest.permission.CAMERA)
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED)
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA),
+                MY_PERMISSIONS_REQUEST_CAMERA)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
         if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
             scannerView.setResultHandler(this)  // Register ourselves as a handler for scan results.
             scannerView.startCamera()           // Start camera on resume
-        } else ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA),
-                MY_PERMISSIONS_REQUEST_CAMERA)
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -79,7 +110,7 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
                 scannerView.startCamera()
             } else {
                 Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
-                finish()
+                startImport()
             }
         else super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
@@ -92,5 +123,48 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
     override fun handleResult(rawResult: Result?) {
         Profile.findAll(rawResult?.text).forEach { ProfileManager.createProfile(it) }
         navigateUp()
+    }
+
+    override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
+        R.id.action_import -> {
+            startImport(true)
+            true
+        }
+        else -> false
+    }
+
+    private fun startImport(manual: Boolean = false) = startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("image/*")
+            .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    var list = listOfNotNull(data?.data)
+                    val clipData = data?.clipData
+                    if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
+                    val resolver = contentResolver
+                    val reader = MultiFormatReader()
+                    var success = false
+                    for (uri in list) try {
+                        val bitmap = BitmapFactory.decodeStream(resolver.openInputStream(uri))
+                        val pixels = IntArray(bitmap.width * bitmap.height)
+                        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+                        Profile.findAll(reader.decode(BinaryBitmap(HybridBinarizer(
+                                RGBLuminanceSource(bitmap.width, bitmap.height, pixels)))).text).forEach {
+                            ProfileManager.createProfile(it)
+                            success = true
+                        }
+                    } catch (e: Exception) {
+                        app.track(e)
+                    }
+                    Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
+                            Toast.LENGTH_SHORT).show()
+                    finish()
+                } else if (requestCode == REQUEST_IMPORT_OR_FINISH) finish()
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 }

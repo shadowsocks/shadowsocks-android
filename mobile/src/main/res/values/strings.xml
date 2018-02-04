@@ -99,6 +99,7 @@
   <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export">Export to Clipboard</string>
   <string name="action_import">Import from Clipboard</string>
+  <string name="action_import_file">Import from file…</string>
   <string name="action_export_msg">Successfully export!</string>
   <string name="action_export_err">Failed to export.</string>
   <string name="action_import_msg">Successfully import!</string>

@@ -12,11 +12,6 @@ Crash: [Submit an issue](https://github.com/shadowsocks/shadowsocks-android/issu
 
 Use [Tasker](http://tasker.dinglisch.net/) integration.
 
-### How to add QR code from local gallery?
-
-Scan it with a third-party scanner like [QuickMark Barcode Scanner](https://play.google.com/store/apps/details?id=tw.com.quickmark) and click the `ss` url.
-
-
 ### Why is NAT mode deprecated?
 
 1. Requiring ROOT permission;
