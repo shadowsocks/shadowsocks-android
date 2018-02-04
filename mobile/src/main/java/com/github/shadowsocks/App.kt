@@ -137,7 +137,7 @@ class App : Application() {
 
         // handle data restored
         if (DataStore.directBootAware && UserManagerCompat.isUserUnlocked(this)) DirectBoot.update()
-        TcpFastOpen.enabled(DataStore.publicStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
+        TcpFastOpen.enabledAsync(DataStore.publicStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) {
             val assetManager = assets
             for (dir in arrayOf("acl", "overture"))
