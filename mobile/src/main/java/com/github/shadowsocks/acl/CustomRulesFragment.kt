@@ -20,13 +20,13 @@
 
 package com.github.shadowsocks.acl
 
-import android.annotation.TargetApi
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.design.widget.TextInputLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
@@ -34,11 +34,10 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
 import android.support.v7.widget.helper.ItemTouchHelper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.futuremind.recyclerviewfastscroll.FastScroller
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import com.github.shadowsocks.App.Companion.app
@@ -51,6 +50,7 @@ import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
+import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 
@@ -70,6 +70,92 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         Generic,
         Domain,
         Url;
+    }
+    private inner class AclRuleDialog(item: Any = "") : TextWatcher, AdapterView.OnItemSelectedListener {
+        val builder: AlertDialog.Builder
+        val templateSelector: Spinner
+        val editText: EditText
+        private val inputLayout: TextInputLayout
+        private lateinit var dialog: AlertDialog
+        private lateinit var positive: Button
+
+        init {
+            val activity = activity!!
+            val view = activity.layoutInflater.inflate(R.layout.dialog_acl_rule, null)
+            templateSelector = view.findViewById(R.id.template_selector)
+            editText = view.findViewById(R.id.content)
+            inputLayout = view.findViewById(R.id.content_layout)
+            when (item) {
+                is String -> {
+                    val match = PATTERN_DOMAIN.find(item)
+                    if (match != null) {
+                        templateSelector.setSelection(Template.Domain.ordinal)
+                        editText.setText(IDN.toUnicode(match.value.replace("\\.", "."),
+                                IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES))
+                    } else {
+                        templateSelector.setSelection(Template.Generic.ordinal)
+                        editText.setText(item)
+                    }
+                }
+                is URL -> {
+                    templateSelector.setSelection(Template.Url.ordinal)
+                    editText.setText(item.toString())
+                }
+                else -> {
+                    templateSelector.setSelection(Template.Generic.ordinal)
+                    editText.setText(item.toString())
+                }
+            }
+            templateSelector.onItemSelectedListener = this
+            editText.addTextChangedListener(this)
+            builder = AlertDialog.Builder(activity)
+                    .setTitle(R.string.edit_rule)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setView(view)
+        }
+
+        fun show() {
+            dialog = builder.create()
+            dialog.show()
+            positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            validate()
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+        override fun afterTextChanged(s: Editable) = validate(value = s)
+        override fun onNothingSelected(parent: AdapterView<*>?) = throw IllegalStateException()
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = validate(position)
+
+        private fun validate(template: Int = templateSelector.selectedItemPosition, value: Editable = editText.text) {
+            val error = when (Template.values()[template]) {
+                Template.Generic -> if (value.isEmpty()) "" else null
+                Template.Domain -> try {
+                    IDN.toASCII(value.toString(), IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
+                    null
+                } catch (e: IllegalArgumentException) {
+                    e.message
+                }
+                Template.Url -> try {
+                    URL(value.toString())
+                    null
+                } catch (e: MalformedURLException) {
+                    e.message
+                }
+            }
+            inputLayout.error = error
+            positive.isEnabled = error == null
+        }
+
+        fun add(): Int? {
+            val text = editText.text.toString()
+            return when (Template.values()[templateSelector.selectedItemPosition]) {
+                Template.Generic -> adapter.addToProxy(text)
+                Template.Domain -> adapter.addHostname(TEMPLATE_REGEX_DOMAIN.format(Locale.ENGLISH, IDN.toASCII(text,
+                        IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES).replace(".", "\\.")))
+                Template.Url -> adapter.addURL(URL(text))
+            }
+        }
     }
 
     private inner class AclRuleViewHolder(view: View) : RecyclerView.ViewHolder(view),
@@ -104,19 +190,18 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
         override fun onClick(v: View?) {
             if (selectedItems.isNotEmpty()) onLongClick(v) else {
-                val (templateSelector, editText, dialog) = createAclRuleDialog(item)
-                dialog
+                val dialog = AclRuleDialog(item)
+                dialog.builder
                         .setNeutralButton(R.string.delete, { _, _ ->
                             adapter.remove(item)
                             undoManager.remove(Pair(-1, item))
                         })
                         .setPositiveButton(android.R.string.ok, { _, _ ->
                             adapter.remove(item)
-                            val index = adapter.addFromTemplate(templateSelector.selectedItemPosition,
-                                    editText.text.toString()) ?: adapter.add(item)
+                            val index = dialog.add() ?: adapter.add(item)
                             if (index != null) list.post { list.scrollToPosition(index) }
                         })
-                        .create().show()
+                dialog.show()
             }
         }
         override fun onLongClick(p0: View?): Boolean {
@@ -208,20 +293,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     .forEach { if (result == null) result = it }
             return result
         }
-        fun addFromTemplate(templateValue: Int, text: String): Int? {
-            val template = Template.values()[templateValue]
-            return when (template) {
-                Template.Generic -> addToProxy(text)
-                Template.Domain -> try {
-                    addHostname(TEMPLATE_REGEX_DOMAIN.format(Locale.ENGLISH, IDN.toASCII(text,
-                            IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES).replace(".", "\\.")))
-                } catch (exc: IllegalArgumentException) {
-                    Toast.makeText(activity, exc.message, Toast.LENGTH_SHORT).show()
-                    null
-                }
-                Template.Url -> addURL(URL(text))
-            }
-        }
 
         fun remove(i: Int) {
             val j = i - acl.subnets.size()
@@ -297,37 +368,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
     }
 
-    private fun createAclRuleDialog(item: Any = ""): Triple<Spinner, EditText, AlertDialog.Builder> {
-        val view = activity!!.layoutInflater.inflate(R.layout.dialog_acl_rule, null)
-        val templateSelector = view.findViewById<Spinner>(R.id.template_selector)
-        val editText = view.findViewById<EditText>(R.id.content)
-        when (item) {
-            is String -> {
-                val match = PATTERN_DOMAIN.find(item)
-                if (match != null) {
-                    templateSelector.setSelection(Template.Domain.ordinal)
-                    editText.setText(IDN.toUnicode(match.value.replace("\\.", "."),
-                            IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES))
-                } else {
-                    templateSelector.setSelection(Template.Generic.ordinal)
-                    editText.setText(item)
-                }
-            }
-            is URL -> {
-                templateSelector.setSelection(Template.Url.ordinal)
-                editText.setText(item.toString())
-            }
-            else -> {
-                templateSelector.setSelection(Template.Generic.ordinal)
-                editText.setText(item.toString())
-            }
-        }
-        return Triple(templateSelector, editText, AlertDialog.Builder(activity!!)
-                .setTitle(R.string.edit_rule)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setView(view))
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.layout_custom_rules, container, false)
 
@@ -392,10 +432,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_manual_settings -> {
-            val (templateSelector, editText, dialog) = createAclRuleDialog()
-            dialog.setPositiveButton(android.R.string.ok, { _, _ ->
-                adapter.addFromTemplate(templateSelector.selectedItemPosition, editText.text.toString())
-            }).create().show()
+            val dialog = AclRuleDialog()
+            dialog.builder.setPositiveButton(android.R.string.ok, { _, _ -> dialog.add() })
+            dialog.show()
             true
         }
         R.id.action_import -> {
