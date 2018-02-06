@@ -111,7 +111,8 @@ class ShadowsocksConnection(private val instance: Interface) : ServiceConnection
         connectionActive = false
         if (instance.listenForDeath) binder?.unlinkToDeath(instance, 0)
         binder = null
-        service?.stopListeningForBandwidth(instance.serviceCallback)
+        if (instance.serviceCallback != null)
+            service?.stopListeningForBandwidth(instance.serviceCallback)
         service = null
     }
 }
