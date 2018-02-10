@@ -60,6 +60,7 @@ dependencies {
     implementation 'com.evernote:android-job:1.2.2'
     implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
     implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-vision:$playServicesVersion"
     implementation "com.google.firebase:firebase-config:$playServicesVersion"
     implementation 'com.j256.ormlite:ormlite-android:5.0'
     implementation 'com.mikepenz:crossfader:1.5.2'

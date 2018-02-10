@@ -41,8 +41,11 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.resolveResourceId
-import com.google.zxing.*
-import com.google.zxing.common.HybridBinarizer
+import com.google.zxing.Result
+import com.google.android.gms.vision.Frame
+import com.google.android.gms.vision.barcode.Barcode
+import com.google.android.gms.vision.barcode.BarcodeDetector
+
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
 class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Toolbar.OnMenuItemClickListener {
@@ -50,8 +53,6 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
         private const val MY_PERMISSIONS_REQUEST_CAMERA = 1
         private const val REQUEST_IMPORT = 2
         private const val REQUEST_IMPORT_OR_FINISH = 3
-
-        private val hints by lazy { mapOf(Pair(DecodeHintType.TRY_HARDER, true)) }
     }
 
     private lateinit var scannerView: ZXingScannerView
@@ -143,14 +144,16 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
                 val clipData = data?.clipData
                 if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
                 val resolver = contentResolver
-                val reader = MultiFormatReader()
                 var success = false
+                val detector = BarcodeDetector.Builder(getApplicationContext())
+                    .setBarcodeFormats(Barcode.DATA_MATRIX or Barcode.QR_CODE)
+                    .build()
                 for (uri in list) try {
                     val bitmap = BitmapFactory.decodeStream(resolver.openInputStream(uri))
-                    val pixels = IntArray(bitmap.width * bitmap.height)
-                    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
-                    Profile.findAll(reader.decode(BinaryBitmap(HybridBinarizer(
-                            RGBLuminanceSource(bitmap.width, bitmap.height, pixels))), hints).text).forEach {
+                    val frame = Frame.Builder().setBitmap(bitmap).build()
+                    val barcodes = detector.detect(frame)
+                    val value = barcodes.valueAt(0).rawValue
+                    Profile.findAll(value).forEach {
                         ProfileManager.createProfile(it)
                         success = true
                     }
