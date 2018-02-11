@@ -29,6 +29,7 @@ android {
     }
     buildTypes {
         debug {
+            multiDexEnabled true
             pseudoLocalesEnabled true
         }
         release {
