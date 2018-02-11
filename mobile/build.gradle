@@ -70,9 +70,9 @@ dependencies {
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
     implementation 'dnsjava:dnsjava:2.1.8'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
-    implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'net.glxn.qrgen:android:2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"

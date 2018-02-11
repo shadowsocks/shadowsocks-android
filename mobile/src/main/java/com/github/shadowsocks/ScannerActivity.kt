@@ -23,40 +23,36 @@ package com.github.shadowsocks
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.graphics.BitmapFactory
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
 import android.support.v4.app.TaskStackBuilder
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.util.SparseArray
 import android.view.MenuItem
 import android.widget.Toast
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.resolveResourceId
-import com.google.zxing.Result
+import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture
+import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic
 import com.google.android.gms.vision.Frame
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import xyz.belvi.mobilevisionbarcodescanner.BarcodeRetriever
 
-import me.dm7.barcodescanner.zxing.ZXingScannerView
-
-class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Toolbar.OnMenuItemClickListener {
+class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, BarcodeRetriever {
     companion object {
-        private const val MY_PERMISSIONS_REQUEST_CAMERA = 1
+        private const val TAG = "ScannerActivity"
         private const val REQUEST_IMPORT = 2
         private const val REQUEST_IMPORT_OR_FINISH = 3
     }
-
-    private lateinit var scannerView: ZXingScannerView
 
     private fun navigateUp() {
         val intent = parentActivityIntent
@@ -67,19 +63,7 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_scanner)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.title = title
-        toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
-        toolbar.setNavigationOnClickListener { navigateUp() }
-        toolbar.inflateMenu(R.menu.scanner_menu)
-        toolbar.setOnMenuItemClickListener(this)
-        scannerView = findViewById(R.id.scanner)
         if (Build.VERSION.SDK_INT >= 25) getSystemService(ShortcutManager::class.java).reportShortcutUsed("scan")
-    }
-
-    override fun onStart() {
-        super.onStart()
         if (try {
                     (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList.isEmpty()
                 } catch (_: CameraAccessException) {
@@ -88,42 +72,28 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
             startImport()
             return
         }
-        val permissionCheck = ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.CAMERA)
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED)
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA),
-                MY_PERMISSIONS_REQUEST_CAMERA)
+        setContentView(R.layout.layout_scanner)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar.title = title
+        toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
+        toolbar.setNavigationOnClickListener { navigateUp() }
+        toolbar.inflateMenu(R.menu.scanner_menu)
+        toolbar.setOnMenuItemClickListener(this)
+        (supportFragmentManager.findFragmentById(R.id.barcode) as BarcodeCapture).setRetrieval(this)
     }
 
-    override fun onResume() {
-        super.onResume()
-        val permissionCheck = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            scannerView.setResultHandler(this)  // Register ourselves as a handler for scan results.
-            scannerView.startCamera()           // Start camera on resume
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA)
-            if (grantResults.getOrNull(0) == PackageManager.PERMISSION_GRANTED) {
-                scannerView.setResultHandler(this)
-                scannerView.startCamera()
-            } else {
-                Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
-                startImport()
-            }
-        else super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        scannerView.stopCamera()    // Stop camera on pause
-    }
-
-    override fun handleResult(rawResult: Result?) {
-        Profile.findAll(rawResult?.text).forEach { ProfileManager.createProfile(it) }
+    override fun onRetrieved(barcode: Barcode) = runOnUiThread {
+        Profile.findAll(barcode.rawValue).forEach { ProfileManager.createProfile(it) }
         navigateUp()
+    }
+    override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
+    override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) { }
+    override fun onRetrievedFailed(reason: String?) {
+        Log.w(TAG, reason)
+    }
+    override fun onPermissionRequestDenied() {
+        Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
+        startImport()
     }
 
     override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
@@ -160,11 +130,11 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
                     } catch (e: Exception) {
                         app.track(e)
                     }
-                } else Log.w("ScannerActivity", "Google vision isn't operational.")
+                } else Log.w(TAG, "Google vision isn't operational.")
                 Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
                         Toast.LENGTH_SHORT).show()
-                finish()
-            } else if (requestCode == REQUEST_IMPORT_OR_FINISH) finish()
+                navigateUp()
+            } else if (requestCode == REQUEST_IMPORT_OR_FINISH) navigateUp()
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
