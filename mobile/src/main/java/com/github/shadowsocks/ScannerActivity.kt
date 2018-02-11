@@ -35,6 +35,7 @@ import android.support.v4.app.TaskStackBuilder
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import com.github.shadowsocks.App.Companion.app
@@ -140,26 +141,26 @@ class ScannerActivity : AppCompatActivity(), ZXingScannerView.ResultHandler, Too
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
-                var list = listOfNotNull(data?.data)
-                val clipData = data?.clipData
-                if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
-                val resolver = contentResolver
                 var success = false
-                val detector = BarcodeDetector.Builder(getApplicationContext())
-                    .setBarcodeFormats(Barcode.DATA_MATRIX or Barcode.QR_CODE)
-                    .build()
-                for (uri in list) try {
-                    val bitmap = BitmapFactory.decodeStream(resolver.openInputStream(uri))
-                    val frame = Frame.Builder().setBitmap(bitmap).build()
-                    val barcodes = detector.detect(frame)
-                    val value = barcodes.valueAt(0).rawValue
-                    Profile.findAll(value).forEach {
-                        ProfileManager.createProfile(it)
-                        success = true
+                val detector = BarcodeDetector.Builder(this)
+                        .setBarcodeFormats(Barcode.QR_CODE)
+                        .build()
+                if (detector.isOperational) {
+                    var list = listOfNotNull(data?.data)
+                    val clipData = data?.clipData
+                    if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
+                    val resolver = contentResolver
+                    for (uri in list) try {
+                        val barcodes = detector.detect(Frame.Builder()
+                                .setBitmap(BitmapFactory.decodeStream(resolver.openInputStream(uri))).build())
+                        for (i in 0 until barcodes.size()) Profile.findAll(barcodes.valueAt(i).rawValue).forEach {
+                            ProfileManager.createProfile(it)
+                            success = true
+                        }
+                    } catch (e: Exception) {
+                        app.track(e)
                     }
-                } catch (e: Exception) {
-                    app.track(e)
-                }
+                } else Log.w("ScannerActivity", "Google vision isn't operational.")
                 Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
                         Toast.LENGTH_SHORT).show()
                 finish()
