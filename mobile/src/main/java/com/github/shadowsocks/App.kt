@@ -179,7 +179,7 @@ class App : Application() {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
         filter.addDataScheme("package")
         val result = broadcastReceiver { _, intent ->
-            if (intent.action != Intent.ACTION_PACKAGE_REMOVED ||
+            if (intent.action == Intent.ACTION_PACKAGE_REMOVED ||
                     !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) callback()
         }
         app.registerReceiver(result, filter)
