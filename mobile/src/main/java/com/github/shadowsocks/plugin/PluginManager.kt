@@ -21,6 +21,7 @@
 package com.github.shadowsocks.plugin
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -84,11 +85,16 @@ object PluginManager {
                   """, Base64.DEFAULT))
     }
 
-    private val receiver by lazy { app.listenForPackageChanges { synchronized(this) { cachedPlugins = null } } }
+    private var receiver: BroadcastReceiver? = null
     private var cachedPlugins: Map<String, Plugin>? = null
     fun fetchPlugins(): Map<String, Plugin> {
-        receiver
         return synchronized(this) {
+            if (receiver == null) receiver = app.listenForPackageChanges {
+                synchronized(this) {
+                    receiver = null
+                    cachedPlugins = null
+                }
+            }
             if (cachedPlugins == null) {
                 val pm = app.packageManager
                 cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),

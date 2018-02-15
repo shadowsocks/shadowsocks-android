@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -60,6 +61,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     private lateinit var plugin: IconListPreference
     private lateinit var pluginConfigure: EditTextPreference
     private lateinit var pluginConfiguration: PluginConfiguration
+    private lateinit var receiver: BroadcastReceiver
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
@@ -102,7 +104,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         }
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
-        app.listenForPackageChanges { initPlugins() }
+        receiver = app.listenForPackageChanges(false) { initPlugins() }
         DataStore.privateStore.registerChangeListener(this)
     }
 
@@ -202,6 +204,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
 
     override fun onDestroy() {
         DataStore.privateStore.unregisterChangeListener(this)
+        app.unregisterReceiver(receiver)
         super.onDestroy()
     }
 }

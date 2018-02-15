@@ -174,12 +174,16 @@ class App : Application() {
         }
     }
 
-    fun listenForPackageChanges(callback: () -> Unit): BroadcastReceiver {
+    fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit): BroadcastReceiver {
         val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
         filter.addDataScheme("package")
-        val result = broadcastReceiver { _, intent ->
-            if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) callback()
+        val result = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
+                callback()
+                if (onetime) app.unregisterReceiver(this)
+            }
         }
         app.registerReceiver(result, filter)
         return result

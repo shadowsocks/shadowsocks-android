@@ -63,11 +63,14 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: List<PackageInfo>? = null
         private fun getApps(pm: PackageManager): List<ProxiedApp> {
-            if (receiver == null) receiver = app.listenForPackageChanges {
-                synchronized(AppManager) { cachedApps = null }
-                AppManager.instance?.reloadApps()
-            }
             return synchronized(AppManager) {
+                if (receiver == null) receiver = app.listenForPackageChanges {
+                    synchronized(AppManager) {
+                        receiver = null
+                        cachedApps = null
+                    }
+                    AppManager.instance?.reloadApps()
+                }
                 // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
                 val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
                         .filter { it.packageName != app.packageName &&
