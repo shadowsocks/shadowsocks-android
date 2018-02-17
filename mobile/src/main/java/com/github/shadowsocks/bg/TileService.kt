@@ -34,7 +34,7 @@ import android.service.quicksettings.TileService as BaseTileService
 
 @RequiresApi(24)
 class TileService : BaseTileService(), ShadowsocksConnection.Interface {
-    private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle).setTint(0x79ffffff) }
+    private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle) }
     private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
     private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
     private val keyguard by lazy { getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager }
