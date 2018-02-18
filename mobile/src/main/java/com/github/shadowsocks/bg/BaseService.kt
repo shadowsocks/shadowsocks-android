@@ -94,7 +94,7 @@ object BaseService {
 
         val binder = object : IShadowsocksService.Stub() {
             override fun getState(): Int = this@Data.state
-            override fun getProfileName(): String = profile?.formattedName ?: "Idle"
+            override fun getProfileName(): String = profile?.name ?: "Idle"
 
             override fun registerCallback(cb: IShadowsocksServiceCallback) {
                 callbacks.register(cb)
@@ -318,6 +318,7 @@ object BaseService {
                 stopRunner(true, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
+            profile.name = profile.formattedName    // save name for later queries
             data.profile = profile
 
             TrafficMonitor.reset()
