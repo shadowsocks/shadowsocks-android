@@ -30,6 +30,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksConnection
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.preference.DataStore
 import android.service.quicksettings.TileService as BaseTileService
 
 @RequiresApi(24)
@@ -81,7 +82,7 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     }
 
     override fun onClick() {
-        if (isLocked) unlockAndRun(this::toggle) else toggle()
+        if (isLocked && !DataStore.directBootAware) unlockAndRun(this::toggle) else toggle()
     }
 
     private fun toggle() {
