@@ -47,8 +47,10 @@ import com.github.shadowsocks.preference.PluginConfigurationDialogFragment
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.snack
 import com.takisoft.fix.support.v7.preference.EditTextPreference
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import kotlinx.android.synthetic.main.layout_apps.*
 
 class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenuItemClickListener,
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
@@ -99,7 +101,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
             pluginConfigure.isEnabled = newValue.isNotEmpty()
             pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
             if (PluginManager.fetchPlugins()[newValue]?.trusted == false)
-                Snackbar.make(view!!, R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
+                view!!.snack(R.string.plugin_untrusted)
             true
         }
         pluginConfigure.onPreferenceChangeListener = this

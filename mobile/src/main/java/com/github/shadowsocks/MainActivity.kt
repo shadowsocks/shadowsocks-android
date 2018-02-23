@@ -56,12 +56,14 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
+import com.github.shadowsocks.utils.snack
 import com.github.shadowsocks.utils.thread
 import com.github.shadowsocks.widget.ServiceButton
 import com.mikepenz.materialdrawer.Drawer
 import com.mikepenz.materialdrawer.DrawerBuilder
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
+import kotlinx.android.synthetic.main.layout_main.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
@@ -133,8 +135,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             BaseService.STOPPING -> statusText.setText(R.string.stopping)
             else -> {
                 if (msg != null) {
-                    Snackbar.make(findViewById(R.id.snackbar),
-                            getString(R.string.vpn_error).format(Locale.ENGLISH, msg), Snackbar.LENGTH_LONG).show()
+                    snackbar.snack(getString(R.string.vpn_error).format(Locale.ENGLISH, msg))
                     Log.e(TAG, "Error to start VPN service: $msg")
                 }
                 statusText.setText(R.string.not_connected)
@@ -207,7 +208,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) app.startService() else {
-            Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
+            snackbar.snack(R.string.vpn_permission_denied)
             Log.e(TAG, "Failed to start VpnService: $data")
         }
     }
@@ -256,12 +257,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
         if (savedInstanceState == null) displayFragment(ProfilesFragment())
         previousSelectedDrawer = drawer.currentSelection
-        statusText = findViewById(R.id.status)
-        txText = findViewById(R.id.tx)
-        txRateText = findViewById(R.id.txRate)
-        rxText = findViewById(R.id.rx)
-        rxRateText = findViewById(R.id.rxRate)
-        findViewById<View>(R.id.stat).setOnClickListener {
+        stat.setOnClickListener {
             if (state == BaseService.CONNECTED) {
                 ++testCount
                 statusText.setText(R.string.connection_test_testing)
@@ -270,7 +266,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
         }
 
-        fab = findViewById(R.id.fab)
         fab.setOnClickListener {
             if (state == BaseService.CONNECTED) app.stopService() else thread {
                 if (BaseService.usingVpnMode) {
@@ -306,7 +301,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         if (sharedStr.isNullOrEmpty()) return
         val profiles = Profile.findAll(sharedStr).toList()
         if (profiles.isEmpty()) {
-            Snackbar.make(findViewById(R.id.snackbar), R.string.profile_invalid_input, Snackbar.LENGTH_LONG).show()
+            snackbar.snack(R.string.profile_invalid_input)
             return
         }
         AlertDialog.Builder(this)

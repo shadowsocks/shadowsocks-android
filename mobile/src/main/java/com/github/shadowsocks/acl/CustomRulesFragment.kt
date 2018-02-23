@@ -48,7 +48,9 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.resolveResourceId
+import com.github.shadowsocks.utils.snack
 import com.github.shadowsocks.widget.UndoSnackbarManager
+import kotlinx.android.synthetic.main.layout_apps.*
 import java.net.IDN
 import java.net.MalformedURLException
 import java.net.URL
@@ -439,8 +441,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             try {
                 adapter.addToProxy(clipboard.primaryClip.getItemAt(0).text.toString()) != null
             } catch (exc: Exception) {
-                Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG)
-                        .show()
+                snackbar.snack(R.string.action_import_err)
                 app.track(exc)
             }
             true

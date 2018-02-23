@@ -37,7 +37,7 @@
             android:layout_alignParentBottom="true">
 
             <TextView
-                android:id="@+id/status"
+                android:id="@+id/statusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="marquee"
@@ -63,7 +63,7 @@
                     app:layout_column="0"/>
 
                 <TextView
-                    android:id="@+id/tx"
+                    android:id="@+id/txText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
@@ -83,7 +83,7 @@
                     app:layout_column="2"/>
 
                 <TextView
-                    android:id="@+id/txRate"
+                    android:id="@+id/txRateText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
@@ -106,7 +106,7 @@
                     app:layout_row="1"/>
 
                 <TextView
-                    android:id="@+id/rx"
+                    android:id="@+id/rxText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
@@ -128,7 +128,7 @@
                     app:layout_row="1"/>
 
                 <TextView
-                    android:id="@+id/rxRate"
+                    android:id="@+id/rxRateText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="fill_horizontal"
