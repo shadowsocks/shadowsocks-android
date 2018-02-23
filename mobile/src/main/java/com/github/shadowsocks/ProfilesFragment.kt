@@ -45,10 +45,12 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.snack
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import kotlinx.android.synthetic.main.layout_apps.*
 import net.glxn.qrgen.android.QRCode
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
@@ -369,13 +371,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val profiles = Profile.findAll(clipboard.primaryClip.getItemAt(0).text).toList()
                     if (profiles.isNotEmpty()) {
                         profiles.forEach { ProfileManager.createProfile(it) }
-                        Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_msg,
-                                Snackbar.LENGTH_LONG).show()
+                        snackbar.snack(R.string.action_import_msg)
                         return true
                     }
                 } catch (_: IndexOutOfBoundsException) { }
-                Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG)
-                        .show()
+                snackbar.snack(R.string.action_import_err)
                 true
             }
             R.id.action_manual_settings -> {
@@ -384,10 +384,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_export -> {
                 val profiles = ProfileManager.getAllProfiles()
-                Snackbar.make(activity!!.findViewById(R.id.snackbar), if (profiles != null) {
+                val m = if (profiles != null) {
                     clipboard.primaryClip = ClipData.newPlainText(null, profiles.joinToString("\n"))
                     R.string.action_export_msg
-                } else R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                } else R.string.action_export_err
+                snackbar.snack(m)
                 true
             }
             else -> false

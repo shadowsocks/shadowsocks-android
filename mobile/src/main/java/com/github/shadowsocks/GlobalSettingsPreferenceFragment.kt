@@ -31,7 +31,9 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.TcpFastOpen
+import com.github.shadowsocks.utils.snack
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import kotlinx.android.synthetic.main.layout_apps.*
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
@@ -58,8 +60,9 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
         tfo.isChecked = TcpFastOpen.sendEnabled
         tfo.setOnPreferenceChangeListener { _, value ->
             val result = TcpFastOpen.enabled(value as Boolean)
-            if (result != null && result != "Success.")
-                Snackbar.make(activity!!.findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+            if (result != null && result != "Success.") {
+                snackbar.snack(result)
+            }
             value == TcpFastOpen.sendEnabled
         }
         if (!TcpFastOpen.supported) {

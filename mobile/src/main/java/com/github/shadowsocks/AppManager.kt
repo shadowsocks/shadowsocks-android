@@ -49,10 +49,7 @@ import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.resolveResourceId
-import com.github.shadowsocks.utils.thread
+import com.github.shadowsocks.utils.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
@@ -182,7 +179,6 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_apps)
-        toolbar = findViewById(R.id.toolbar)
         toolbar.setTitle(R.string.proxied_apps)
         toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
         toolbar.setNavigationOnClickListener {
@@ -203,7 +199,6 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
             finish()
         }
 
-        bypassSwitch = findViewById(R.id.bypassSwitch)
         bypassSwitch.isChecked = DataStore.bypass
         bypassSwitch.setOnCheckedChangeListener { _, checked ->
             DataStore.bypass = checked
@@ -211,8 +206,6 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         }
 
         initProxiedApps()
-        loadingView = findViewById(R.id.loading)
-        appListView = findViewById(R.id.list)
         appListView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         appListView.itemAnimator = DefaultItemAnimator()
         appListView.adapter = AppsAdapter()
@@ -234,14 +227,14 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         ProfileManager.updateProfile(it)
                     }
                     if (DataStore.directBootAware) DirectBoot.update()
-                    Snackbar.make(appListView, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
-                } else Snackbar.make(appListView, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                    appListView.snack(R.string.action_apply_all)
+                } else appListView.snack(R.string.action_export_err)
                 return true
             }
             R.id.action_export -> {
                 clipboard.primaryClip = ClipData.newPlainText(Key.individual,
                         "${DataStore.bypass}\n${DataStore.individual}")
-                Snackbar.make(appListView, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
+                appListView.snack(R.string.action_export_msg)
                 return true
             }
             R.id.action_import -> {
@@ -254,13 +247,13 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                         bypassSwitch.isChecked = enabled.toBoolean()
                         DataStore.individual = apps
                         DataStore.dirty = true
-                        Snackbar.make(appListView, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
+                        appListView.snack(R.string.action_import_msg)
                         initProxiedApps(apps)
                         reloadApps()
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
-                Snackbar.make(appListView, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+                appListView.snack(R.string.action_import_err)
             }
         }
         return false
