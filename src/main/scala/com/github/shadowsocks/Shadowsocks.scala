@@ -54,7 +54,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.util.Log
-import android.view.{View, ViewGroup}
+import android.view.{View, ViewGroup, WindowManager}
 import android.widget._
 import com.github.jorgecastilloprz.FABProgressCircle
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -62,7 +62,6 @@ import com.github.shadowsocks.database._
 import com.github.shadowsocks.utils.CloseUtils._
 import com.github.shadowsocks.utils._
 import com.github.shadowsocks.job.SSRSubUpdateJob
-
 import com.github.shadowsocks.ShadowsocksApplication.app
 
 import scala.util.Random
@@ -250,8 +249,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   override def onCreate(savedInstanceState: Bundle) {
-
     super.onCreate(savedInstanceState)
+    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     setContentView(R.layout.layout_main)
     // Initialize Toolbar
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]

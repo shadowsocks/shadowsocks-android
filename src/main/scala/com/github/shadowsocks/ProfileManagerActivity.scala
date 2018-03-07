@@ -470,6 +470,8 @@ final class ProfileManagerActivity extends AppCompatActivity with OnMenuItemClic
        is_sort = true
     }
 
+    getWindow.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+    getWindow.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
     setContentView(R.layout.layout_profiles)
 
     val toolbar = findViewById(R.id.toolbar).asInstanceOf[Toolbar]
