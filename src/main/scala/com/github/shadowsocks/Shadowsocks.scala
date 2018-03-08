@@ -96,6 +96,7 @@ object Shadowsocks {
 }
 
 class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
+
   import Shadowsocks._
 
   // Variables
@@ -129,7 +130,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             changeSwitch(checked = true)
             preferences.setEnabled(false)
             stat.setVisibility(View.VISIBLE)
-            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
+            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE)
+            else {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
@@ -152,13 +154,14 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
             fab.setBackgroundTintList(greyTint)
             fab.setImageResource(R.drawable.ic_start_busy)
             fab.setEnabled(false)
-            if (state == State.CONNECTED) fabProgressCircle.show()  // ignore for stopped
+            if (state == State.CONNECTED) fabProgressCircle.show() // ignore for stopped
             preferences.setEnabled(false)
             stat.setVisibility(View.GONE)
         }
         state = s
       })
     }
+
     def trafficUpdated(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
       handler.post(() => updateTraffic(txRate, rxRate, txTotal, rxTotal))
     }
@@ -207,7 +210,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   private lazy val greenTint = ContextCompat.getColorStateList(this, R.color.material_green_700)
   //private var adView: AdView = _
   private lazy val preferences =
-    getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
+  getFragmentManager.findFragmentById(android.R.id.content).asInstanceOf[ShadowsocksSettings]
 
   val handler = new Handler()
 
@@ -237,7 +240,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   def prepareStartService() {
     Utils.ThrowableFuture {
-      if (app.isNatEnabled) serviceLoad() else {
+      if (app.isNatEnabled) serviceLoad()
+      else {
         val intent = VpnService.prepare(this)
         if (intent != null) {
           startActivityForResult(intent, REQUEST_CONNECT)
@@ -308,7 +312,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
                 result = getString(R.string.connection_test_error, e.getMessage)
             }
             synchronized(if (testCount == id && app.isVpnEnabled) handler.post(() =>
-              if (success) connectionTestText.setText(result) else {
+              if (success) connectionTestText.setText(result)
+              else {
                 connectionTestText.setText(R.string.connection_test_fail)
                 Snackbar.make(findViewById(android.R.id.content), result, Snackbar.LENGTH_LONG).show
               }))
@@ -320,8 +325,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     fab = findViewById(R.id.fab).asInstanceOf[FloatingActionButton]
     fabProgressCircle = findViewById(R.id.fabProgressCircle).asInstanceOf[FABProgressCircle]
     fab.setOnClickListener(_ => if (serviceStarted) serviceStop()
-      else if (bgService != null) prepareStartService()
-      else changeSwitch(checked = false))
+    else if (bgService != null) prepareStartService()
+    else changeSwitch(checked = false))
     fab.setOnLongClickListener((v: View) => {
       Utils.positionToast(Toast.makeText(this, if (serviceStarted) R.string.stop else R.string.connect,
         Toast.LENGTH_SHORT), fab, getWindow, 0, Utils.dpToPx(this, 8)).show
@@ -367,7 +372,8 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
           fabProgressCircle.postDelayed(hideCircle, 100)
           stat.setVisibility(View.VISIBLE)
           if (resetConnectionTest || state != State.CONNECTED)
-            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE) else {
+            if (app.isNatEnabled) connectionTestText.setVisibility(View.GONE)
+            else {
               connectionTestText.setVisibility(View.VISIBLE)
               connectionTestText.setText(getString(R.string.connection_test_pending))
             }
@@ -395,7 +401,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     if (preferences.profile == null || app.profileId != preferences.profile.id) {
       updatePreferenceScreen(app.currentProfile match {
         case Some(profile) => profile // updated
-        case None =>                  // removed
+        case None => // removed
           app.switchProfile((app.profileManager.getFirstProfile match {
             case Some(first) => first
             case None => app.profileManager.createDefault()
@@ -427,6 +433,7 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     super.onStart()
     registerCallback
   }
+
   override def onStop() {
     super.onStop()
     unregisterCallback
@@ -434,7 +441,9 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
   }
 
   private var _isDestroyed: Boolean = _
+
   override def isDestroyed = if (Build.VERSION.SDK_INT >= 17) super.isDestroyed else _isDestroyed
+
   override def onDestroy() {
     super.onDestroy()
     _isDestroyed = true
@@ -454,11 +463,44 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
 
   def ignoreBatteryOptimization() {
     // TODO do . ignore_battery_optimization ......................................
-    if (serviceStarted) serviceStop()
-    val h = showProgress(R.string.recovering)
-    Utils.ThrowableFuture {
-      app.copyAssets()
-      h.sendEmptyMessage(0)
+    // http://blog.csdn.net/laxian2009/article/details/52474214
+
+    var exception = false
+    try {
+      val powerManager: PowerManager = this.getSystemService(Context.POWER_SERVICE).asInstanceOf[PowerManager]
+      val packageName = this.getPackageName
+      val hasIgnored = powerManager.isIgnoringBatteryOptimizations(packageName)
+      if (!hasIgnored) {
+        val intent = new Intent()
+        intent.setAction(android.provider.Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+        intent.setData(android.net.Uri.parse("package:" + packageName))
+        startActivity(intent)
+      }
+      exception = false
+    } catch {
+      case _: Throwable =>
+        exception = true
+    } finally {
+    }
+    if (exception) {
+      try {
+        val intent = new Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+
+        val cn = new ComponentName(
+          "com.android.settings",
+          "com.android.com.settings.Settings@HighPowerApplicationsActivity"
+        )
+
+        intent.setComponent(cn)
+        startActivity(intent)
+
+        exception = false
+      } catch {
+        case _: Throwable =>
+          exception = true
+      } finally {
+      }
     }
   }
 
