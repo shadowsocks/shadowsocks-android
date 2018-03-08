@@ -69,6 +69,8 @@
   <string name="remove_profile">移除此設定檔 "%s"?</string>
   <string name="recovery">重設</string>
   <string name="recovery_summary">重設一切背景服務</string>
+  <string name="ignore_battery_optimization">請求忽略電池優化</string>
+  <string name="ignore_battery_optimization_summary">點擊來請求觸發忽略電池優化，可避免息屏休眠導致的後台斷流，會增加電池消耗，在部分設備上可能無法正常觸發。</string>
   <string name="about">關於</string>
   <string name="about_title">ShadowsocksR %s</string>
   <string name="flush_dnscache">清除 DNS 快取</string>

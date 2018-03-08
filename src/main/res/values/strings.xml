@@ -122,6 +122,8 @@
   <string name="settings">Settings</string>
   <string name="recovery">Reset</string>
   <string name="recovery_summary">Reset all the background services</string>
+  <string name="ignore_battery_optimization">Request ignore battery optimizations</string>
+  <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">About</string>
   <string name="about_title">ShadowsocksR %s</string>
   <string name="share">Share</string>

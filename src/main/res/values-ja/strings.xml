@@ -66,6 +66,8 @@
   <string name="remove_profile">このプロファイルを削除「%s」?</string>
   <string name="recovery">リセット</string>
   <string name="recovery_summary">すべてのバックグラウンドサービスをリセット</string>
+  <string name="ignore_battery_optimization">Request ignore battery optimizations</string>
+  <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">本アプリについて</string>
   <string name="about_title">シャドーソックス（shadowsocks）%s</string>
   <string name="flush_dnscache">DNS キャッシュをリフレッシュ</string>
