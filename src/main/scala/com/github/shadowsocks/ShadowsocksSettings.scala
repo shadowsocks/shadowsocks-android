@@ -244,6 +244,12 @@ class ShadowsocksSettings extends PreferenceFragment with OnSharedPreferenceChan
       true
     })
 
+    findPreference("ignore_battery_optimization").setOnPreferenceClickListener((preference: Preference) => {
+      app.track(TAG, "ignore_battery_optimization")
+      activity.ignoreBatteryOptimization()
+      true
+    })
+
     findPreference("aclupdate").setOnPreferenceClickListener((preference: Preference) => {
       app.track(TAG, "aclupdate")
       val url = getPreferenceManager.getSharedPreferences.getString(Key.aclurl, "");

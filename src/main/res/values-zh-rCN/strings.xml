@@ -68,6 +68,8 @@
   <string name="remove_profile">删除此配置文件「%s」?</string>
   <string name="recovery">重置</string>
   <string name="recovery_summary">重置所有后台服务</string>
+  <string name="ignore_battery_optimization">请求忽略电池优化</string>
+  <string name="ignore_battery_optimization_summary">点击来请求触发忽略电池优化，可避免息屏休眠导致的后台断流，会增加电池消耗，在部分设备上可能无法正常触发。</string>
   <string name="about">关于</string>
   <string name="about_title">ShadowsocksR %s</string>
   <string name="flush_dnscache">刷新 DNS 缓存</string>

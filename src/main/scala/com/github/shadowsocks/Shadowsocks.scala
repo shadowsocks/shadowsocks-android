@@ -452,6 +452,16 @@ class Shadowsocks extends AppCompatActivity with ServiceBoundContext {
     }
   }
 
+  def ignoreBatteryOptimization() {
+    // TODO do . ignore_battery_optimization ......................................
+    if (serviceStarted) serviceStop()
+    val h = showProgress(R.string.recovering)
+    Utils.ThrowableFuture {
+      app.copyAssets()
+      h.sendEmptyMessage(0)
+    }
+  }
+
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) = resultCode match {
     case Activity.RESULT_OK =>
       serviceLoad()

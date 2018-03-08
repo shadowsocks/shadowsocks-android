@@ -113,6 +113,8 @@
   <string name="settings">Настройки</string>
   <string name="recovery">Сброс</string>
   <string name="recovery_summary">Сброс всех фоновых задач</string>
+  <string name="ignore_battery_optimization">Request ignore battery optimizations</string>
+  <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">О приложении</string>
   <string name="about_title">Shadowsocks R %s</string>
   <string name="share">Поделиться</string>

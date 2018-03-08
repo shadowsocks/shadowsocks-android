@@ -127,6 +127,8 @@
                           android:summary="@string/nat_summary"/>
         <Preference android:key="recovery" android:title="@string/recovery"
             android:summary="@string/recovery_summary"/>
+        <Preference android:key="ignore_battery_optimization" android:title="@string/ignore_battery_optimization"
+            android:summary="@string/ignore_battery_optimization_summary"/>
         <Preference android:key="aclupdate" android:title="@string/aclupdate"
             android:summary="@string/aclupdate_summary"/>
         <Preference android:key="frontproxy" android:title="@string/frontproxy_set"/>
