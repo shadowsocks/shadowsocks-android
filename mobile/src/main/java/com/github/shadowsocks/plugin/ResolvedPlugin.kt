@@ -33,5 +33,7 @@ abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin()
     override val icon: Drawable by lazy { resolveInfo.loadIcon(app.packageManager) }
     override val defaultConfig: String by lazy { metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
     override val packageName: String get() = resolveInfo.resolvePackageName
-    override val trusted by lazy { app.info.signatures.any(PluginManager.trustedSignatures::contains) }
+    override val trusted by lazy {
+        app.getPackageInfo(packageName).signatures.any(PluginManager.trustedSignatures::contains)
+    }
 }
