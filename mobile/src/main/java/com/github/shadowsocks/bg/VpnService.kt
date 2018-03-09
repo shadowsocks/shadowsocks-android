@@ -20,12 +20,16 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.TargetApi
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.LocalSocket
+import android.net.*
+import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import android.support.v4.os.BuildCompat
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
@@ -50,6 +54,20 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         private const val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
 
         private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
+
+        /**
+         * Unfortunately registerDefaultNetworkCallback is going to return our VPN interface: https://android.googlesource.com/platform/frameworks/base/+/dda156ab0c5d66ad82bdcf76cda07cbc0a9c8a2e
+         *
+         * This makes doing a requestNetwork with REQUEST necessary so that we don't get ALL possible networks that
+         * satisfies default network capabilities but only THE default network. Unfortunately we need to have
+         * android.permission.CHANGE_NETWORK_STATE to be able to call requestNetwork.
+         *
+         * Source: https://android.googlesource.com/platform/frameworks/base/+/2df4c7d/services/core/java/com/android/server/ConnectivityService.java#887
+         */
+        private val defaultNetworkRequest = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                .build()
     }
 
     private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
@@ -90,6 +108,22 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     private var worker: ProtectWorker? = null
     private var tun2socksProcess: GuardedProcess? = null
 
+    private val connectivity by lazy { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    @TargetApi(Build.VERSION_CODES.P)
+    private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            setUnderlyingNetworks(arrayOf(network))
+        }
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities?) {
+            // it's a good idea to refresh capabilities
+            setUnderlyingNetworks(arrayOf(network))
+        }
+        override fun onLost(network: Network) {
+            setUnderlyingNetworks(null)
+        }
+    }
+    private var listeningForDefaultNetwork = false
+
     override fun onBind(intent: Intent): IBinder? = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
         else -> super<LocalDnsService.Interface>.onBind(intent)
@@ -98,6 +132,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override fun onRevoke() = stopRunner(true)
 
     override fun killProcesses() {
+        if (BuildCompat.isAtLeastP() && listeningForDefaultNetwork) {
+            connectivity.unregisterNetworkCallback(defaultNetworkCallback)
+            listeningForDefaultNetwork = false
+        }
         worker?.stopThread()
         worker = null
         super.killProcesses()
@@ -178,6 +216,13 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn
         val fd = conn.fd
+
+        // We only need to update since Android P: https://android.googlesource.com/platform/frameworks/base/+/72f9c42b9e59761a28d6b32c42f65de57c98daed
+        if (BuildCompat.isAtLeastP()) {
+            // we want REQUEST here instead of LISTEN
+            connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
+            listeningForDefaultNetwork = true
+        }
 
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN.format(Locale.ENGLISH, "2"),
