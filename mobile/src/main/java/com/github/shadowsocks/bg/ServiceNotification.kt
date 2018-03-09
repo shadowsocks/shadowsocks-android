@@ -36,6 +36,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.systemService
 import java.util.*
 
 /**
@@ -46,7 +47,7 @@ import java.util.*
  */
 class ServiceNotification(private val service: BaseService.Interface, profileName: String,
                           channel: String, private val visible: Boolean = false) {
-    private val keyGuard = (service as Context).getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+    private val keyGuard = (service as Context).systemService<KeyguardManager>()
     private val nm by lazy {
         (service as Context).getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
@@ -82,7 +83,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         service as Context
         if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
                 service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0))
-        val power = service.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val power = service.systemService<PowerManager>()
         update(if (power.isInteractive) Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
         val screenFilter = IntentFilter()
         screenFilter.addAction(Intent.ACTION_SCREEN_ON)

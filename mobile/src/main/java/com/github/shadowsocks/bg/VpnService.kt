@@ -22,7 +22,6 @@ package com.github.shadowsocks.bg
 
 import android.annotation.TargetApi
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.*
@@ -40,6 +39,7 @@ import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.utils.systemService
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
@@ -108,7 +108,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     private var worker: ProtectWorker? = null
     private var tun2socksProcess: GuardedProcess? = null
 
-    private val connectivity by lazy { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    private val connectivity by lazy { systemService<ConnectivityManager>() }
     @TargetApi(Build.VERSION_CODES.P)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {

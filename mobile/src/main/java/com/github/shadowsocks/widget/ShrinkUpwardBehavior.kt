@@ -29,12 +29,13 @@ import android.support.design.widget.SnackbarConsts
 import android.util.AttributeSet
 import android.view.View
 import android.view.accessibility.AccessibilityManager
+import com.github.shadowsocks.utils.systemService
 
 /**
  * Full credits go to: https://stackoverflow.com/a/35904421/2245107
  */
 class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Behavior<View>(context, attrs) {
-    private val accessibility = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    private val accessibility = context.systemService<AccessibilityManager>()
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean =
             dependency is Snackbar.SnackbarLayout

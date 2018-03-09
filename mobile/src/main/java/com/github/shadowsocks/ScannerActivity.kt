@@ -21,7 +21,6 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutManager
 import android.graphics.BitmapFactory
@@ -40,6 +39,7 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.resolveResourceId
+import com.github.shadowsocks.utils.systemService
 import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture
 import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic
 import com.google.android.gms.vision.Frame
@@ -65,7 +65,7 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= 25) getSystemService(ShortcutManager::class.java).reportShortcutUsed("scan")
         if (try {
-                    (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList.isEmpty()
+                    systemService<CameraManager>().cameraIdList.isEmpty()
                 } catch (_: CameraAccessException) {
                     true
                 }) {
