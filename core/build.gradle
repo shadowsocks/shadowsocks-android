@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
-    compileSdkVersion rootProject.sdkVersion
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion

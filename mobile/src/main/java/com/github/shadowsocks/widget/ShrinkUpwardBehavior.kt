@@ -22,9 +22,10 @@ package com.github.shadowsocks.widget
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.support.design.animation.AnimationConsts
 import android.support.design.widget.CoordinatorLayout
 import android.support.design.widget.Snackbar
-import android.support.design.widget.SnackbarAnimation
+import android.support.design.widget.SnackbarConsts
 import android.util.AttributeSet
 import android.view.View
 import android.view.accessibility.AccessibilityManager
@@ -52,8 +53,8 @@ class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet) : CoordinatorL
             val animator = ValueAnimator()
             val start = child.height
             animator.setIntValues(start, parent.height)
-            animator.interpolator = SnackbarAnimation.FAST_OUT_SLOW_IN_INTERPOLATOR
-            animator.duration = SnackbarAnimation.ANIMATION_DURATION
+            animator.interpolator = AnimationConsts.FAST_OUT_SLOW_IN_INTERPOLATOR
+            animator.duration = SnackbarConsts.ANIMATION_DURATION
             @Suppress("NAME_SHADOWING")
             animator.addUpdateListener { animator ->
                 child.layoutParams.height = animator.animatedValue as Int
