@@ -3,6 +3,7 @@
           package="com.github.shadowsocks"
           android:installLocation="internalOnly">
 
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.NFC" />
