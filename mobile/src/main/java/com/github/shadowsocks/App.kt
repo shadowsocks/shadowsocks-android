@@ -71,7 +71,10 @@ class App : Application() {
     val deviceContext: Context by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceContext(this) }
     val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
     private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
-    val info: PackageInfo by lazy { packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES) }
+    val info: PackageInfo by lazy { getPackageInfo(packageName) }
+
+    fun getPackageInfo(packageName: String) =
+            packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)!!
 
     fun startService() {
         val intent = Intent(this, BaseService.serviceClass.java)
