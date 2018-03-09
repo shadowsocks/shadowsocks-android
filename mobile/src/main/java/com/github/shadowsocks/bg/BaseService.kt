@@ -354,7 +354,7 @@ object BaseService {
                                 .readTimeout(30, TimeUnit.SECONDS)
                                 .build()
                         val mdg = MessageDigest.getInstance("SHA-1")
-                        mdg.update(app.info.signatures[0].toByteArray())
+                        mdg.update(app.info.signaturesCompat.first().toByteArray())
                         val requestBody = FormBody.Builder()
                                 .add("sig", String(Base64.encode(mdg.digest(), 0)))
                                 .build()

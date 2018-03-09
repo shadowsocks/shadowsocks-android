@@ -3,12 +3,14 @@ package com.github.shadowsocks.utils
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.res.Resources
 import android.os.Build
 import android.support.annotation.AttrRes
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.content.ContextCompat
+import android.support.v4.os.BuildCompat
 import android.support.v7.util.SortedList
 import android.util.TypedValue
 import com.github.shadowsocks.App.Companion.app
@@ -52,6 +54,10 @@ val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
 inline fun <reified T> Context.systemService() = ContextCompat.getSystemService(this, T::class.java)!!
+
+val PackageInfo.signaturesCompat get() =
+    if (BuildCompat.isAtLeastP()) signingCertificateHistory.flatten()
+    else @Suppress("DEPRECATION") signatures.asIterable()
 
 /**
  * Based on: https://stackoverflow.com/a/15656428/2245107

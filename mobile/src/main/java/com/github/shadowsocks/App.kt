@@ -34,6 +34,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.support.annotation.RequiresApi
+import android.support.v4.os.BuildCompat
 import android.support.v4.os.UserManagerCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
@@ -73,8 +74,8 @@ class App : Application() {
     private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
 
-    fun getPackageInfo(packageName: String) =
-            packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)!!
+    fun getPackageInfo(packageName: String) = packageManager.getPackageInfo(packageName, if (BuildCompat.isAtLeastP())
+        PackageManager.GET_SIGNING_CERTIFICATES else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
     fun startService() {
         val intent = Intent(this, BaseService.serviceClass.java)
