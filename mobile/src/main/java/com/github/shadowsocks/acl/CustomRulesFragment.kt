@@ -80,7 +80,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private lateinit var positive: Button
 
         init {
-            val activity = activity!!
+            val activity = requireActivity()
             val view = activity.layoutInflater.inflate(R.layout.dialog_acl_rule, null)
             templateSelector = view.findViewById(R.id.template_selector)
             editText = view.findViewById(R.id.content)
@@ -360,7 +360,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     private lateinit var list: RecyclerView
     private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<Any>
-    private val clipboard by lazy { activity!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    private val clipboard by lazy { requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
 
     private fun onSelectedItemsUpdated() {
         if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
@@ -383,12 +383,13 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         toolbar.setTitle(R.string.custom_rules)
         toolbar.inflateMenu(R.menu.custom_rules_menu)
         toolbar.setOnMenuItemClickListener(this)
+        val activity = requireActivity()
         list = view.findViewById(R.id.list)
         list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
         view.findViewById<FastScroller>(R.id.fastscroller).setRecyclerView(list)
-        undoManager = UndoSnackbarManager(activity!!.findViewById(R.id.snackbar), adapter::undo)
+        undoManager = UndoSnackbarManager(activity.findViewById(R.id.snackbar), adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
@@ -439,8 +440,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             try {
                 adapter.addToProxy(clipboard.primaryClip.getItemAt(0).text.toString()) != null
             } catch (exc: Exception) {
-                Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_err, Snackbar.LENGTH_LONG)
-                        .show()
+                Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
+                        Snackbar.LENGTH_LONG).show()
                 app.track(exc)
             }
             true
@@ -462,7 +463,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     }
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        val activity = activity!!
+        val activity = requireActivity()
         val window = activity.window
         // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
         if (Build.VERSION.SDK_INT >= 23) {
@@ -495,7 +496,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         else -> false
     }
     override fun onDestroyActionMode(mode: ActionMode) {
-        val activity = activity!!
+        val activity = requireActivity()
         val window = activity.window
         window.statusBarColor = ContextCompat.getColor(activity,
                 activity.theme.resolveResourceId(android.R.attr.statusBarColor))

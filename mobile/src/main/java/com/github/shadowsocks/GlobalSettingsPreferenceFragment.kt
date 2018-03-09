@@ -50,7 +50,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
         boot.isChecked = BootReceiver.enabled
 
         val dba = findPreference(Key.directBootAware)
-        if (Build.VERSION.SDK_INT >= 24 && context!!.getSystemService(DevicePolicyManager::class.java)
+        if (Build.VERSION.SDK_INT >= 24 && requireContext().getSystemService(DevicePolicyManager::class.java)
                 .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER)
             dba.onPreferenceChangeListener = directBootAwareListener else dba.parent!!.removePreference(dba)
 
@@ -59,7 +59,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
         tfo.setOnPreferenceChangeListener { _, value ->
             val result = TcpFastOpen.enabled(value as Boolean)
             if (result != null && result != "Success.")
-                Snackbar.make(activity!!.findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(requireActivity().findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
             value == TcpFastOpen.sendEnabled
         }
         if (!TcpFastOpen.supported) {

@@ -65,7 +65,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
-        val activity = activity!!
+        val activity = requireActivity()
         val profile = ProfileManager.getProfile(activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1))
         if (profile == null) {
             activity.finish()
@@ -134,7 +134,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         ProfileManager.updateProfile(profile)
         ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profile.id)
         if (DataStore.profileId == profile.id && DataStore.directBootAware) DirectBoot.update()
-        activity!!.finish()
+        requireActivity().finish()
     }
 
     override fun onResume() {
@@ -161,7 +161,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     override fun onDisplayPreferenceDialog(preference: Preference) {
         if (preference.key == Key.pluginConfigure) {
             val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
-            if (intent.resolveActivity(activity!!.packageManager) != null)
+            if (intent.resolveActivity(requireContext().packageManager) != null)
                 startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS,
                         pluginConfiguration.selectedOptions.toString()), REQUEST_CODE_PLUGIN_CONFIGURE) else {
                 showPluginEditor()
@@ -183,7 +183,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
 
     override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
         R.id.action_delete -> {
-            val activity = activity!!
+            val activity = requireActivity()
             AlertDialog.Builder(activity)
                     .setTitle(R.string.delete_confirm_prompt)
                     .setPositiveButton(R.string.yes, { _, _ ->
