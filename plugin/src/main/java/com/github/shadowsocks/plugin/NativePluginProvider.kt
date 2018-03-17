@@ -61,7 +61,7 @@ abstract class NativePluginProvider : ContentProvider() {
 
     override fun query(uri: Uri, projection: Array<out String>?, selection: String?, selectionArgs: Array<out String>?,
                        sortOrder: String?): Cursor {
-        assert(selection == null && selectionArgs == null && sortOrder == null)
+        check(selection == null && selectionArgs == null && sortOrder == null)
         val result = MatrixCursor(projection)
         populateFiles(PathProvider(uri, result))
         return result
@@ -79,7 +79,7 @@ abstract class NativePluginProvider : ContentProvider() {
 
     abstract fun openFile(uri: Uri?): ParcelFileDescriptor
     override fun openFile(uri: Uri?, mode: String?): ParcelFileDescriptor {
-        assert(mode == "r")
+        check(mode == "r")
         return openFile(uri)
     }
 
