@@ -28,7 +28,7 @@ MKDIR %TARGET%\armeabi-v7a>nul 2>nul
 MKDIR %TARGET%\x86>nul 2>nul 
 MKDIR %TARGET%\arm64-v8a>nul 2>nul 
 
-SET CC=%ANDROID_NDK_HOME%\toolchains\arm-linux-androideabi-4.9\prebuilt\windows-x86_64\bin\arm-linux-androideabi-gcc.exe
+SET CC=%ANDROID_ARM_TOOLCHAIN%\bin\arm-linux-androideabi-gcc.exe
 
 REM Check environment availability
 IF NOT EXIST %CC% (
