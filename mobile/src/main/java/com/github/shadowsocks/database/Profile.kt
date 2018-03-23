@@ -31,6 +31,7 @@ import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
 import java.io.Serializable
 import java.net.URI
+import java.net.URISyntaxException
 import java.util.*
 
 class Profile : Serializable {
@@ -67,14 +68,19 @@ class Profile : Serializable {
                         profile.method = match.groupValues[1]
                         profile.password = match.groupValues[2]
                         // bug in Android: https://code.google.com/p/android/issues/detail?id=192855
-                        val javaURI = URI(it.value)
-                        profile.host = javaURI.host ?: ""
-                        if (profile.host.firstOrNull() == '[' && profile.host.lastOrNull() == ']')
-                            profile.host = profile.host.substring(1, profile.host.length - 1)
-                        profile.remotePort = javaURI.port
-                        profile.plugin = uri.getQueryParameter(Key.plugin)
-                        profile.name = uri.fragment ?: ""
-                        profile
+                        try {
+                            val javaURI = URI(it.value)
+                            profile.host = javaURI.host ?: ""
+                            if (profile.host.firstOrNull() == '[' && profile.host.lastOrNull() == ']')
+                                profile.host = profile.host.substring(1, profile.host.length - 1)
+                            profile.remotePort = javaURI.port
+                            profile.plugin = uri.getQueryParameter(Key.plugin)
+                            profile.name = uri.fragment ?: ""
+                            profile
+                        } catch (e: URISyntaxException) {
+                            Log.e(TAG, "Invalid URI: ${it.value}")
+                            null
+                        }
                     } else {
                         Log.e(TAG, "Unknown user info: ${it.value}")
                         null
