@@ -20,43 +20,42 @@
 
 package com.github.shadowsocks.database
 
-import android.database.sqlite.SQLiteDatabase
-import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.utils.Key
-import com.j256.ormlite.android.AndroidDatabaseConnection
-import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
+import android.database.sqlite.SQLiteDatabaseLockedException
 import com.j256.ormlite.dao.Dao
 import com.j256.ormlite.support.ConnectionSource
 import com.j256.ormlite.table.TableUtils
+import java.sql.SQLException
 
-object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC, null, 2) {
-    @Suppress("UNCHECKED_CAST")
-    val kvPairDao: Dao<KeyValuePair, String?> by lazy { getDao(KeyValuePair::class.java) as Dao<KeyValuePair, String?> }
-
-    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource) {
-        connectionSource.createTableSafe<KeyValuePair>()
-    }
-
-    override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?,
-                           oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 1) {
-            safeWrapper {
-                PrivateDatabase.kvPairDao.queryBuilder().where().`in`("key",
-                    Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
-            }.forEach { kvPairDao.replaceSafe(it) }
-        }
-
-        if (oldVersion < 2) {
-            kvPairDao.replaceSafe(KeyValuePair(Acl.CUSTOM_RULES).put(Acl().fromId(Acl.CUSTOM_RULES).toString()))
-        }
-    }
-
-    override fun onDowngrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        val connection = AndroidDatabaseConnection(db, true)
-        connectionSource.saveSpecialConnection(connection)
-        TableUtils.dropTable<KeyValuePair, String?>(connectionSource, KeyValuePair::class.java, true)
-        onCreate(db, connectionSource)
-        connectionSource.clearSpecialConnection(connection)
+private val Throwable.ultimateCause: Throwable get() {
+    var result = this
+    while (true) {
+        val cause = result.cause ?: return result
+        result = cause
     }
 }
+
+@Throws(SQLException::class)
+fun <T> safeWrapper(func: () -> T): T {
+    while (true) {
+        try {
+            return func()
+        } catch (e: SQLException) {
+            if (e.ultimateCause !is SQLiteDatabaseLockedException) throw e
+        }
+    }
+}
+
+@Throws(SQLException::class)
+inline fun <reified T> ConnectionSource.createTableSafe() = safeWrapper { TableUtils.createTable(this, T::class.java) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.queryAllSafe(): MutableList<T> = safeWrapper { queryForAll() }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.queryByIdSafe(id: ID?): T? = safeWrapper { queryForId(id) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.updateSafe(data: T?): Int = safeWrapper { update(data) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.replaceSafe(data: T?): Dao.CreateOrUpdateStatus? = safeWrapper { createOrUpdate(data) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.deleteByIdSafe(id: ID?) = safeWrapper { deleteById(id) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.executeSafe(statement: String?) = safeWrapper { executeRawNoArgs(statement) }

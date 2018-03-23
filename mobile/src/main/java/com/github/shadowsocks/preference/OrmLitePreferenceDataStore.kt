@@ -22,17 +22,20 @@ package com.github.shadowsocks.preference
 
 import android.support.v7.preference.PreferenceDataStore
 import com.github.shadowsocks.database.KeyValuePair
+import com.github.shadowsocks.database.deleteByIdSafe
+import com.github.shadowsocks.database.queryByIdSafe
+import com.github.shadowsocks.database.replaceSafe
 import com.j256.ormlite.dao.Dao
 import java.util.HashSet
 
 @Suppress("MemberVisibilityCanPrivate", "unused")
 open class OrmLitePreferenceDataStore(private val kvPairDao: Dao<KeyValuePair, String?>) : PreferenceDataStore() {
-    fun getBoolean(key: String?) = kvPairDao.queryForId(key)?.boolean
-    fun getFloat(key: String?) = kvPairDao.queryForId(key)?.float
-    fun getInt(key: String?) = kvPairDao.queryForId(key)?.int
-    fun getLong(key: String?) = kvPairDao.queryForId(key)?.long
-    fun getString(key: String?) = kvPairDao.queryForId(key)?.string
-    fun getStringSet(key: String?) = kvPairDao.queryForId(key)?.stringSet
+    fun getBoolean(key: String?) = kvPairDao.queryByIdSafe(key)?.boolean
+    fun getFloat(key: String?) = kvPairDao.queryByIdSafe(key)?.float
+    fun getInt(key: String?) = kvPairDao.queryByIdSafe(key)?.int
+    fun getLong(key: String?) = kvPairDao.queryByIdSafe(key)?.long
+    fun getString(key: String?) = kvPairDao.queryByIdSafe(key)?.string
+    fun getStringSet(key: String?) = kvPairDao.queryByIdSafe(key)?.stringSet
 
     override fun getBoolean(key: String?, defValue: Boolean) = getBoolean(key) ?: defValue
     override fun getFloat(key: String?, defValue: Float) = getFloat(key) ?: defValue
@@ -46,32 +49,32 @@ open class OrmLitePreferenceDataStore(private val kvPairDao: Dao<KeyValuePair, S
     fun putInt(key: String?, value: Int?) = if (value == null) remove(key) else putInt(key, value)
     fun putLong(key: String?, value: Long?) = if (value == null) remove(key) else putLong(key, value)
     override fun putBoolean(key: String?, value: Boolean) {
-        kvPairDao.createOrUpdate(KeyValuePair(key).put(value))
+        kvPairDao.replaceSafe(KeyValuePair(key).put(value))
         fireChangeListener(key)
     }
     override fun putFloat(key: String?, value: Float) {
-        kvPairDao.createOrUpdate(KeyValuePair(key).put(value))
+        kvPairDao.replaceSafe(KeyValuePair(key).put(value))
         fireChangeListener(key)
     }
     override fun putInt(key: String?, value: Int) {
-        kvPairDao.createOrUpdate(KeyValuePair(key).put(value))
+        kvPairDao.replaceSafe(KeyValuePair(key).put(value))
         fireChangeListener(key)
     }
     override fun putLong(key: String?, value: Long) {
-        kvPairDao.createOrUpdate(KeyValuePair(key).put(value))
+        kvPairDao.replaceSafe(KeyValuePair(key).put(value))
         fireChangeListener(key)
     }
     override fun putString(key: String?, value: String?) = if (value == null) remove(key) else {
-        kvPairDao.createOrUpdate(KeyValuePair(key).put(value))
+        kvPairDao.replaceSafe(KeyValuePair(key).put(value))
         fireChangeListener(key)
     }
     override fun putStringSet(key: String?, values: MutableSet<String>?) = if (values == null) remove(key) else {
-        kvPairDao.createOrUpdate(KeyValuePair(key).put(values))
+        kvPairDao.replaceSafe(KeyValuePair(key).put(values))
         fireChangeListener(key)
     }
 
     fun remove(key: String?) {
-        kvPairDao.deleteById(key)
+        kvPairDao.deleteByIdSafe(key)
         fireChangeListener(key)
     }
 

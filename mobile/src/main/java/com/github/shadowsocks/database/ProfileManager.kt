@@ -48,10 +48,12 @@ object ProfileManager {
             profile.individual = oldProfile.individual
             profile.udpdns = oldProfile.udpdns
         }
-        val last = PrivateDatabase.profileDao.queryRaw(PrivateDatabase.profileDao.queryBuilder()
+        val last = safeWrapper {
+            PrivateDatabase.profileDao.queryRaw(PrivateDatabase.profileDao.queryBuilder()
                 .selectRaw("MAX(userOrder)").prepareStatementString()).firstResult
+        }
         if (last != null && last.size == 1 && last[0] != null) profile.userOrder = last[0].toLong() + 1
-        PrivateDatabase.profileDao.createOrUpdate(profile)
+        PrivateDatabase.profileDao.replaceSafe(profile)
         ProfilesFragment.instance?.profilesAdapter?.add(profile)
         return profile
     }
@@ -60,10 +62,10 @@ object ProfileManager {
      * Note: It's caller's responsibility to update DirectBoot profile if necessary.
      */
     @Throws(SQLException::class)
-    fun updateProfile(profile: Profile) = PrivateDatabase.profileDao.update(profile)
+    fun updateProfile(profile: Profile) = PrivateDatabase.profileDao.updateSafe(profile)
 
     fun getProfile(id: Int): Profile? = try {
-        PrivateDatabase.profileDao.queryForId(id)
+        PrivateDatabase.profileDao.queryByIdSafe(id)
     } catch (ex: SQLException) {
         Log.e(TAG, "getProfile", ex)
         app.track(ex)
@@ -72,13 +74,16 @@ object ProfileManager {
 
     @Throws(SQLException::class)
     fun delProfile(id: Int) {
-        PrivateDatabase.profileDao.deleteById(id)
+        PrivateDatabase.profileDao.deleteByIdSafe(id)
         ProfilesFragment.instance?.profilesAdapter?.removeId(id)
         if (id == DataStore.profileId && DataStore.directBootAware) DirectBoot.clean()
     }
 
     fun getFirstProfile(): Profile? = try {
-        PrivateDatabase.profileDao.query(PrivateDatabase.profileDao.queryBuilder().limit(1L).prepare()).singleOrNull()
+        safeWrapper {
+            PrivateDatabase.profileDao.query(
+                    PrivateDatabase.profileDao.queryBuilder().limit(1L).prepare()).singleOrNull()
+        }
     } catch (ex: SQLException) {
         Log.e(TAG, "getFirstProfile", ex)
         app.track(ex)
@@ -86,7 +91,10 @@ object ProfileManager {
     }
 
     fun getAllProfiles(): List<Profile>? = try {
-        PrivateDatabase.profileDao.query(PrivateDatabase.profileDao.queryBuilder().orderBy("userOrder", true).prepare())
+        safeWrapper {
+            PrivateDatabase.profileDao.query(
+                    PrivateDatabase.profileDao.queryBuilder().orderBy("userOrder", true).prepare())
+        }
     } catch (ex: SQLException) {
         Log.e(TAG, "getAllProfiles", ex)
         app.track(ex)
