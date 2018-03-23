@@ -438,7 +438,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
         R.id.action_import -> {
             try {
-                adapter.addToProxy(clipboard.primaryClip.getItemAt(0).text.toString()) != null
+                check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
             } catch (exc: Exception) {
                 Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
                         Snackbar.LENGTH_LONG).show()

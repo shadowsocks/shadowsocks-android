@@ -368,14 +368,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_import -> {
                 try {
-                    val profiles = Profile.findAll(clipboard.primaryClip.getItemAt(0).text).toList()
+                    val profiles = Profile.findAll(clipboard.primaryClip!!.getItemAt(0).text).toList()
                     if (profiles.isNotEmpty()) {
                         profiles.forEach { ProfileManager.createProfile(it) }
                         Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_msg,
                                 Snackbar.LENGTH_LONG).show()
                         return true
                     }
-                } catch (_: IndexOutOfBoundsException) { }
+                } catch (_: Exception) { }
                 Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
                         Snackbar.LENGTH_LONG).show()
                 true
