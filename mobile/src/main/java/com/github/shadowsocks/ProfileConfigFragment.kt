@@ -124,7 +124,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     }
 
     fun saveAndExit() {
-        val profile = Profile()
+        val profile = ProfileManager.getProfile(profileId) ?: Profile()
         profile.id = profileId
         profile.deserialize()
         ProfileManager.updateProfile(profile)
