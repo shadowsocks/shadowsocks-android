@@ -56,7 +56,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
     }
 
-    private lateinit var profile: Profile
+    private var profileId = -1
     private lateinit var isProxyApps: SwitchPreference
     private lateinit var plugin: IconListPreference
     private lateinit var pluginConfigure: EditTextPreference
@@ -66,13 +66,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
         val activity = requireActivity()
-        val profile = ProfileManager.getProfile(activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1))
-        if (profile == null) {
-            activity.finish()
-            return
-        }
-        this.profile = profile
-        profile.serialize()
+        profileId = activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1)
         addPreferencesFromResource(R.xml.pref_profile)
         if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService(UserManager::class.java).isDemoUser) {
             findPreference(Key.host).summary = "shadowsocks.example.org"
@@ -130,10 +124,12 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     }
 
     fun saveAndExit() {
+        val profile = Profile()
+        profile.id = profileId
         profile.deserialize()
         ProfileManager.updateProfile(profile)
-        ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profile.id)
-        if (DataStore.profileId == profile.id && DataStore.directBootAware) DirectBoot.update()
+        ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profileId)
+        if (DataStore.profileId == profileId && DataStore.directBootAware) DirectBoot.update()
         requireActivity().finish()
     }
 
@@ -187,7 +183,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
             AlertDialog.Builder(activity)
                     .setTitle(R.string.delete_confirm_prompt)
                     .setPositiveButton(R.string.yes, { _, _ ->
-                        ProfileManager.delProfile(profile.id)
+                        ProfileManager.delProfile(profileId)
                         activity.finish()
                     })
                     .setNegativeButton(R.string.no, null)
