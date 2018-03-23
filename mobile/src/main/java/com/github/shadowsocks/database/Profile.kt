@@ -67,7 +67,7 @@ class Profile : Serializable {
                     profile.password = match.groupValues[2]
                     // bug in Android: https://code.google.com/p/android/issues/detail?id=192855
                     val javaURI = URI(it.value)
-                    profile.host = javaURI.host
+                    profile.host = javaURI.host ?: ""
                     if (profile.host.firstOrNull() == '[' && profile.host.lastOrNull() == ']')
                         profile.host = profile.host.substring(1, profile.host.length - 1)
                     profile.remotePort = javaURI.port
