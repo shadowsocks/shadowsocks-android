@@ -84,7 +84,6 @@ object LocalDnsService {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
-                            .put("IPNetworkFile", "china_ip_list.txt")
                             .put("DomainFile", data.aclFile!!.absolutePath)
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)
