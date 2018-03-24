@@ -37,18 +37,18 @@ object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) 
     @Suppress("UNCHECKED_CAST")
     val kvPairDao: Dao<KeyValuePair, String?> by lazy { getDao(KeyValuePair::class.java) as Dao<KeyValuePair, String?> }
 
-    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource?) {
-        TableUtils.createTable(connectionSource, Profile::class.java)
-        TableUtils.createTable(connectionSource, KeyValuePair::class.java)
+    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource) {
+        connectionSource.createTableSafe<Profile>()
+        connectionSource.createTableSafe<KeyValuePair>()
     }
 
-    private fun recreate(database: SQLiteDatabase?, connectionSource: ConnectionSource?) {
+    private fun recreate(database: SQLiteDatabase?, connectionSource: ConnectionSource) {
         TableUtils.dropTable<Profile, Int>(connectionSource, Profile::class.java, true)
         TableUtils.dropTable<KeyValuePair, String?>(connectionSource, KeyValuePair::class.java, true)
         onCreate(database, connectionSource)
     }
 
-    override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?,
+    override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource,
                            oldVersion: Int, newVersion: Int) {
         if (oldVersion < 7) {
             recreate(database, connectionSource)
@@ -57,38 +57,38 @@ object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) 
 
         try {
             if (oldVersion < 8) {
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN udpdns SMALLINT;")
             }
             if (oldVersion < 9) {
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN route VARCHAR DEFAULT 'all';")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN route VARCHAR DEFAULT 'all';")
             } else if (oldVersion < 19) {
-                profileDao.executeRawNoArgs("UPDATE `profile` SET route = 'all' WHERE route IS NULL;")
+                profileDao.executeSafe("UPDATE `profile` SET route = 'all' WHERE route IS NULL;")
             }
             if (oldVersion < 11) {
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN ipv6 SMALLINT;")
             }
             if (oldVersion < 12) {
-                profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
-                TableUtils.createTable(connectionSource, Profile::class.java)
-                profileDao.executeRawNoArgs(
-                        "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, proxyApps, bypass," +
-                                " udpdns, ipv6, individual) " +
-                                "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global, bypass, udpdns, ipv6," +
-                                " individual FROM `tmp`;")
-                profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
-                profileDao.executeRawNoArgs("COMMIT;")
+                profileDao.executeSafe("BEGIN TRANSACTION;")
+                profileDao.executeSafe("ALTER TABLE `profile` RENAME TO `tmp`;")
+                connectionSource.createTableSafe<Profile>()
+                profileDao.executeSafe(
+                        "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route," +
+                                " proxyApps, bypass, udpdns, ipv6, individual) " +
+                                "SELECT id, name, host, localPort, remotePort, password, method, route, 1 - global," +
+                                " bypass, udpdns, ipv6, individual FROM `tmp`;")
+                profileDao.executeSafe("DROP TABLE `tmp`;")
+                profileDao.executeSafe("COMMIT;")
             } else if (oldVersion < 13) {
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN tx LONG;")
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN rx LONG;")
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN tx LONG;")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN rx LONG;")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN date VARCHAR;")
             }
 
             if (oldVersion < 15) {
-                if (oldVersion >= 12) profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
+                if (oldVersion >= 12) profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN userOrder LONG;")
                 var i = 0L
                 val apps by lazy { app.packageManager.getInstalledApplications(0) }
-                for (profile in profileDao.queryForAll()) {
+                for (profile in profileDao.queryAllSafe()) {
                     if (oldVersion < 14) {
                         val uidSet = profile.individual.split('|').filter(TextUtils::isDigitsOnly)
                                 .map(String::toInt).toSet()
@@ -96,28 +96,28 @@ object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) 
                                 .joinToString("\n") { it.packageName }
                     }
                     profile.userOrder = i
-                    profileDao.update(profile)
+                    profileDao.updateSafe(profile)
                     i += 1
                 }
             }
 
             if (oldVersion < 16) {
-                profileDao.executeRawNoArgs(
+                profileDao.executeSafe(
                         "UPDATE `profile` SET route = 'bypass-lan-china' WHERE route = 'bypass-china'")
             }
 
             if (oldVersion < 21) {
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN remoteDns VARCHAR DEFAULT '8.8.8.8';")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN remoteDns VARCHAR DEFAULT '8.8.8.8';")
             }
 
             if (oldVersion < 17) {
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` ADD COLUMN plugin VARCHAR;")
+                profileDao.executeSafe("ALTER TABLE `profile` ADD COLUMN plugin VARCHAR;")
             } else if (oldVersion < 22) {
                 // upgrade kcptun to SIP003 plugin
-                profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
-                profileDao.executeRawNoArgs("ALTER TABLE `profile` RENAME TO `tmp`;")
-                TableUtils.createTable(connectionSource, Profile::class.java)
-                profileDao.executeRawNoArgs(
+                profileDao.executeSafe("BEGIN TRANSACTION;")
+                profileDao.executeSafe("ALTER TABLE `profile` RENAME TO `tmp`;")
+                connectionSource.createTableSafe<Profile>()
+                profileDao.executeSafe(
                         "INSERT INTO `profile`(id, name, host, localPort, remotePort, password, method, route, " +
                                 "remoteDns, proxyApps, bypass, udpdns, ipv6, individual, tx, rx, date, userOrder, " +
                                 "plugin) " +
@@ -125,17 +125,17 @@ object PrivateDatabase : OrmLiteSqliteOpenHelper(app, Key.DB_PROFILE, null, 25) 
                                 "CASE WHEN kcp = 1 THEN kcpPort ELSE remotePort END, password, method, route, " +
                                 "remoteDns, proxyApps, bypass, udpdns, ipv6, individual, tx, rx, date, userOrder, " +
                                 "CASE WHEN kcp = 1 THEN 'kcptun ' || kcpcli ELSE NULL END FROM `tmp`;")
-                profileDao.executeRawNoArgs("DROP TABLE `tmp`;")
-                profileDao.executeRawNoArgs("COMMIT;")
+                profileDao.executeSafe("DROP TABLE `tmp`;")
+                profileDao.executeSafe("COMMIT;")
             }
 
             if (oldVersion < 23) {
-                profileDao.executeRawNoArgs("BEGIN TRANSACTION;")
-                TableUtils.createTable(connectionSource, KeyValuePair::class.java)
-                profileDao.executeRawNoArgs("COMMIT;")
+                profileDao.executeSafe("BEGIN TRANSACTION;")
+                connectionSource.createTableSafe<KeyValuePair>()
+                profileDao.executeSafe("COMMIT;")
                 val old = PreferenceManager.getDefaultSharedPreferences(app)
-                PublicDatabase.kvPairDao.createOrUpdate(KeyValuePair(Key.id).put(old.getInt(Key.id, 0)))
-                PublicDatabase.kvPairDao.createOrUpdate(KeyValuePair(Key.tfo).put(old.getBoolean(Key.tfo, false)))
+                PublicDatabase.kvPairDao.replaceSafe(KeyValuePair(Key.id).put(old.getInt(Key.id, 0)))
+                PublicDatabase.kvPairDao.replaceSafe(KeyValuePair(Key.tfo).put(old.getBoolean(Key.tfo, false)))
             }
 
             if (oldVersion < 25) {

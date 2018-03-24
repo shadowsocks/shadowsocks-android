@@ -61,7 +61,7 @@ abstract class NativePluginProvider : ContentProvider() {
 
     override fun query(uri: Uri, projection: Array<out String>?, selection: String?, selectionArgs: Array<out String>?,
                        sortOrder: String?): Cursor {
-        assert(selection == null && selectionArgs == null && sortOrder == null)
+        check(selection == null && selectionArgs == null && sortOrder == null)
         val result = MatrixCursor(projection)
         populateFiles(PathProvider(uri, result))
         return result
@@ -70,8 +70,8 @@ abstract class NativePluginProvider : ContentProvider() {
     /**
      * Returns executable entry absolute path. This is used if plugin is sharing UID with the host.
      *
-     * Default behavior is throwing UnsupportedOperationException. If you don't wish to use this feature, use the default
-     * behavior.
+     * Default behavior is throwing UnsupportedOperationException. If you don't wish to use this feature, use the
+     * default behavior.
      *
      * @return Absolute path for executable entry.
      */
@@ -79,7 +79,7 @@ abstract class NativePluginProvider : ContentProvider() {
 
     abstract fun openFile(uri: Uri?): ParcelFileDescriptor
     override fun openFile(uri: Uri?, mode: String?): ParcelFileDescriptor {
-        assert(mode == "r")
+        check(mode == "r")
         return openFile(uri)
     }
 

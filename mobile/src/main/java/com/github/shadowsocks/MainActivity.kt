@@ -62,6 +62,7 @@ import com.mikepenz.materialdrawer.Drawer
 import com.mikepenz.materialdrawer.DrawerBuilder
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
 import java.net.Proxy
@@ -178,8 +179,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             val elapsed = SystemClock.elapsedRealtime() - start
             if (code == 204 || code == 200 && conn.responseLength == 0L)
                 Pair(true, getString(R.string.connection_test_available, elapsed))
-            else throw Exception(getString(R.string.connection_test_error_status_code, code))
-        } catch (e: Exception) {
+            else throw IOException(getString(R.string.connection_test_error_status_code, code))
+        } catch (e: IOException) {
             Pair(false, getString(R.string.connection_test_error, e.message))
         } finally {
             conn.disconnect()
@@ -196,6 +197,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onServiceConnected(service: IShadowsocksService) = changeState(service.state)
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
+        super.binderDied()
         app.handler.post {
             connection.disconnect()
             Executable.killAll()

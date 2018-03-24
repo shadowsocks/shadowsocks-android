@@ -3,6 +3,7 @@
           package="com.github.shadowsocks"
           android:installLocation="internalOnly">
 
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.NFC" />
@@ -71,7 +72,7 @@
 
         <activity
             android:name=".VpnRequestActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:theme="@style/Theme.Translucent"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:launchMode="singleTask"/>
@@ -169,19 +170,16 @@
                  android:process=":bg"
                  android:directBootAware="true"/>
         <service android:name="com.evernote.android.job.v14.PlatformAlarmService"
-                 android:process=":bg"
-                 android:directBootAware="true"/>
+                 tools:node="remove"/>
         <service android:name="com.evernote.android.job.v14.PlatformAlarmServiceExact"
-                 android:process=":bg"
-                 android:directBootAware="true"/>
+                 tools:node="remove"/>
         <service android:name="com.evernote.android.job.gcm.PlatformGcmService"
                  tools:node="remove"/>
         <service android:name="com.evernote.android.job.JobRescheduleService"
                  android:process=":bg"
                  android:directBootAware="true"/>
         <receiver android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
-                  android:process=":bg"
-                  android:directBootAware="true"/>
+                  tools:node="remove"/>
         <receiver android:name="com.evernote.android.job.JobBootReceiver"
                   android:process=":bg"
                   android:directBootAware="true"/>

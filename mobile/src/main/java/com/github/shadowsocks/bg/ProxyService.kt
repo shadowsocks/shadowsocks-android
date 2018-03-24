@@ -23,7 +23,6 @@ package com.github.shadowsocks.bg
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.github.shadowsocks.database.Profile
 
 /**
  * Shadowsocks service at its minimum.

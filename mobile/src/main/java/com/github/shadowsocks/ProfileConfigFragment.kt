@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -55,22 +56,17 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
     }
 
-    private lateinit var profile: Profile
+    private var profileId = -1
     private lateinit var isProxyApps: SwitchPreference
     private lateinit var plugin: IconListPreference
     private lateinit var pluginConfigure: EditTextPreference
     private lateinit var pluginConfiguration: PluginConfiguration
+    private lateinit var receiver: BroadcastReceiver
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
-        val activity = activity!!
-        val profile = ProfileManager.getProfile(activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1))
-        if (profile == null) {
-            activity.finish()
-            return
-        }
-        this.profile = profile
-        profile.serialize()
+        val activity = requireActivity()
+        profileId = activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1)
         addPreferencesFromResource(R.xml.pref_profile)
         if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService(UserManager::class.java).isDemoUser) {
             findPreference(Key.host).summary = "shadowsocks.example.org"
@@ -102,7 +98,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         }
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
-        app.listenForPackageChanges { initPlugins() }
+        receiver = app.listenForPackageChanges(false) { initPlugins() }
         DataStore.privateStore.registerChangeListener(this)
     }
 
@@ -128,11 +124,13 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     }
 
     fun saveAndExit() {
+        val profile = ProfileManager.getProfile(profileId) ?: Profile()
+        profile.id = profileId
         profile.deserialize()
         ProfileManager.updateProfile(profile)
-        ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profile.id)
-        if (DataStore.profileId == profile.id && DataStore.directBootAware) DirectBoot.update()
-        activity!!.finish()
+        ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profileId)
+        if (DataStore.profileId == profileId && DataStore.directBootAware) DirectBoot.update()
+        requireActivity().finish()
     }
 
     override fun onResume() {
@@ -159,7 +157,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     override fun onDisplayPreferenceDialog(preference: Preference) {
         if (preference.key == Key.pluginConfigure) {
             val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
-            if (intent.resolveActivity(activity!!.packageManager) != null)
+            if (intent.resolveActivity(requireContext().packageManager) != null)
                 startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS,
                         pluginConfiguration.selectedOptions.toString()), REQUEST_CODE_PLUGIN_CONFIGURE) else {
                 showPluginEditor()
@@ -179,31 +177,30 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         } else super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onMenuItemClick(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_delete -> {
-                val activity = activity!!
-                AlertDialog.Builder(activity)
-                        .setTitle(R.string.delete_confirm_prompt)
-                        .setPositiveButton(R.string.yes, { _, _ ->
-                            ProfileManager.delProfile(profile.id)
-                            activity.finish()
-                        })
-                        .setNegativeButton(R.string.no, null)
-                        .create()
-                        .show()
-                true
-            }
-            R.id.action_apply -> {
-                saveAndExit()
-                true
-            }
-            else -> false
+    override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
+        R.id.action_delete -> {
+            val activity = requireActivity()
+            AlertDialog.Builder(activity)
+                    .setTitle(R.string.delete_confirm_prompt)
+                    .setPositiveButton(R.string.yes, { _, _ ->
+                        ProfileManager.delProfile(profileId)
+                        activity.finish()
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .create()
+                    .show()
+            true
         }
+        R.id.action_apply -> {
+            saveAndExit()
+            true
+        }
+        else -> false
     }
 
     override fun onDestroy() {
         DataStore.privateStore.unregisterChangeListener(this)
+        app.unregisterReceiver(receiver)
         super.onDestroy()
     }
 }

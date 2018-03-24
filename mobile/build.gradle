@@ -21,14 +21,15 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 4040600
-        versionName "4.4.6"
+        versionCode 4050100
+        versionName "4.5.1"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
     }
     buildTypes {
         debug {
+            multiDexEnabled true
             pseudoLocalesEnabled true
         }
         release {
@@ -57,21 +58,21 @@ dependencies {
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
     implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
-    implementation 'com.evernote:android-job:1.2.2'
+    implementation 'com.evernote:android-job:1.2.4'
     implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
     implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-vision:$playServicesVersion"
     implementation "com.google.firebase:firebase-config:$playServicesVersion"
-    implementation 'com.j256.ormlite:ormlite-android:5.0'
-    implementation 'com.mikepenz:crossfader:1.5.2'
-    implementation 'com.mikepenz:materialdrawer:6.0.3'
-    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
+    implementation 'com.j256.ormlite:ormlite-android:5.1'
+    implementation 'com.mikepenz:materialdrawer:6.0.6'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
     implementation 'dnsjava:dnsjava:2.1.8'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
-    implementation 'me.dm7.barcodescanner:zxing:1.9.8'
     implementation 'net.glxn.qrgen:android:2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"

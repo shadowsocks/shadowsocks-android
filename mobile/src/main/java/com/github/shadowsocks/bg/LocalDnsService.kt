@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks.bg
 
-import android.content.Context
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.preference.DataStore
@@ -50,10 +49,10 @@ object LocalDnsService {
             fun makeDns(name: String, address: String, timeout: Int, edns: Boolean = true): JSONObject {
                 val dns = JSONObject()
                 .put("Name", name)
-                .put("Address", (when (address.parseNumericAddress()) {
+                .put("Address", when (address.parseNumericAddress()) {
                     is Inet6Address -> "[$address]"
                     else -> address
-                }))
+                })
                 .put("Timeout", timeout)
                 .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
                 if (edns) dns
@@ -85,7 +84,6 @@ object LocalDnsService {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
-                            .put("IPNetworkFile", "china_ip_list.txt")
                             .put("DomainFile", data.aclFile!!.absolutePath)
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)

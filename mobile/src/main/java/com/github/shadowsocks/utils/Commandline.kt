@@ -20,9 +20,7 @@
 
 package com.github.shadowsocks.utils
 
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.StringTokenizer
+import java.util.*
 
 /**
  * Commandline objects help handling command lines specifying processes to
@@ -86,9 +84,7 @@ object Commandline {
      * @return empty string for null or no command, else every argument split
      * by spaces and quoted by quoting rules.
      */
-    fun toString(args: Array<String>): String {
-        return toString(Arrays.asList(*args))   // thanks to Java, arrays aren't iterable
-    }
+    fun toString(args: Array<String>) = toString(args.asIterable()) // thanks to Java, arrays aren't iterable
 
     /**
      * Crack a command line.

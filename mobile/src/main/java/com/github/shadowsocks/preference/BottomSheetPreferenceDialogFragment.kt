@@ -101,8 +101,8 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     private var clickedIndex = -1
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val activity = activity
-        val dialog = BottomSheetDialog(activity!!, theme)
+        val activity = requireActivity()
+        val dialog = BottomSheetDialog(activity, theme)
         val recycler = RecyclerView(activity)
         val padding = resources.getDimensionPixelOffset(R.dimen.bottom_sheet_padding)
         recycler.setPadding(0, padding, 0, padding)

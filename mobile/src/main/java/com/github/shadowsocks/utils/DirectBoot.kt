@@ -7,7 +7,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import java.io.File
-import java.io.FileNotFoundException
+import java.io.IOException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
@@ -17,7 +17,7 @@ object DirectBoot {
 
     fun getDeviceProfile(): Profile? = try {
         ObjectInputStream(file.inputStream()).use { it.readObject() as Profile }
-    } catch (_: FileNotFoundException) { null }
+    } catch (_: IOException) { null }
 
     fun clean() {
         file.delete()

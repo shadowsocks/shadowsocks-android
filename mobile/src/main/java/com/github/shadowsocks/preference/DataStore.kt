@@ -52,7 +52,7 @@ object DataStore {
     /**
      * Setter is defined in MainActivity.onPreferenceDataStoreChanged.
      */
-    val directBootAware: Boolean get() = BootReceiver.enabled && (publicStore.getBoolean(Key.directBootAware) ?: false)
+    val directBootAware: Boolean get() = BootReceiver.enabled && publicStore.getBoolean(Key.directBootAware) == true
     var serviceMode: String
         get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
         set(value) = publicStore.putString(Key.serviceMode, value)

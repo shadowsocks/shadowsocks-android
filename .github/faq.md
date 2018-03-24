@@ -12,11 +12,6 @@ Crash: [Submit an issue](https://github.com/shadowsocks/shadowsocks-android/issu
 
 Use [Tasker](http://tasker.dinglisch.net/) integration.
 
-### How to add QR code from local gallery?
-
-Scan it with a third-party scanner like [QuickMark Barcode Scanner](https://play.google.com/store/apps/details?id=tw.com.quickmark) and click the `ss` url.
-
-
 ### Why is NAT mode deprecated?
 
 1. Requiring ROOT permission;
@@ -34,7 +29,8 @@ The exclamation mark in the Wi-Fi/cellular icon appears because the system fails
 3. Some ROM like [Flyme](https://github.com/shadowsocks/shadowsocks-android/issues/1589) has **very** broken direct boot support;
 4. If you have Xposed framework and/or battery saver apps, it's likely that this app wouldn't work well with these either.
 
-* Fixes for MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772) [#888](https://github.com/shadowsocks/shadowsocks-android/issues/888)
+* Fixes for MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
+* Fixes for EMUI: [#888](https://github.com/shadowsocks/shadowsocks-android/issues/888)
 * Fixes for Huawei: [#1091 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Related to Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung and/or Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)

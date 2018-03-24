@@ -18,35 +18,44 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.bg
+package com.github.shadowsocks.database
 
-import android.text.TextUtils
-import android.util.Log
-import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.JniHelper
-import java.io.File
-import java.io.FileNotFoundException
+import android.database.sqlite.SQLiteDatabaseLockedException
+import com.j256.ormlite.dao.Dao
+import com.j256.ormlite.support.ConnectionSource
+import com.j256.ormlite.table.TableUtils
+import java.sql.SQLException
 
-object Executable {
-    const val REDSOCKS = "libredsocks.so"
-    const val SS_LOCAL = "libss-local.so"
-    const val SS_TUNNEL = "libss-tunnel.so"
-    const val TUN2SOCKS = "libtun2socks.so"
-    const val OVERTURE = "liboverture.so"
+private val Throwable.ultimateCause: Throwable get() {
+    var result = this
+    while (true) {
+        val cause = result.cause ?: return result
+        result = cause
+    }
+}
 
-    val EXECUTABLES = setOf(SS_LOCAL, SS_TUNNEL, REDSOCKS, TUN2SOCKS, OVERTURE)
-
-    fun killAll() {
-        for (process in File("/proc").listFiles { _, name -> TextUtils.isDigitsOnly(name) }) {
-            val exe = File(try {
-                File(process, "cmdline").readText()
-            } catch (ignore: FileNotFoundException) {
-                continue
-            }.split(Character.MIN_VALUE, limit = 2).first())
-            if (exe.parent == app.applicationInfo.nativeLibraryDir && EXECUTABLES.contains(exe.name)) {
-                val errno = JniHelper.sigkill(process.name.toInt())
-                if (errno != 0) Log.w("kill", "SIGKILL ${exe.absolutePath} (${process.name}) failed with $errno")
-            }
+@Throws(SQLException::class)
+fun <T> safeWrapper(func: () -> T): T {
+    while (true) {
+        try {
+            return func()
+        } catch (e: SQLException) {
+            if (e.ultimateCause !is SQLiteDatabaseLockedException) throw e
         }
     }
 }
+
+@Throws(SQLException::class)
+inline fun <reified T> ConnectionSource.createTableSafe() = safeWrapper { TableUtils.createTable(this, T::class.java) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.queryAllSafe(): MutableList<T> = safeWrapper { queryForAll() }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.queryByIdSafe(id: ID?): T? = safeWrapper { queryForId(id) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.updateSafe(data: T?): Int = safeWrapper { update(data) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.replaceSafe(data: T?): Dao.CreateOrUpdateStatus? = safeWrapper { createOrUpdate(data) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.deleteByIdSafe(id: ID?) = safeWrapper { deleteById(id) }
+@Throws(SQLException::class)
+fun <T, ID> Dao<T, ID>.executeSafe(statement: String?) = safeWrapper { executeRawNoArgs(statement) }
