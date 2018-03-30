@@ -147,6 +147,9 @@ class Profile : Serializable {
     @DatabaseField
     var plugin: String? = null
 
+    // not persisted in db, only used by direct boot
+    var dirty: Boolean = false
+
     val formattedAddress get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
     val formattedName get() = if (name.isNullOrEmpty()) formattedAddress else name!!
 

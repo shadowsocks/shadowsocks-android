@@ -82,7 +82,7 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     }
 
     override fun onClick() {
-        if (isLocked && !DataStore.directBootAware) unlockAndRun(this::toggle) else toggle()
+        if (isLocked && !DataStore.canToggleLocked) unlockAndRun(this::toggle) else toggle()
     }
 
     private fun toggle() {

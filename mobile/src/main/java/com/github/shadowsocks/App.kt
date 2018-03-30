@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -33,8 +34,8 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.UserManager
 import android.support.annotation.RequiresApi
-import android.support.v4.os.UserManagerCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import android.widget.Toast
@@ -73,6 +74,10 @@ class App : Application() {
     private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
     private val exceptionParser by lazy { StandardExceptionParser(this, null) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
+    val directBootSupported by lazy {
+        Build.VERSION.SDK_INT >= 24 && getSystemService(DevicePolicyManager::class.java)
+            .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
+    }
 
     fun getPackageInfo(packageName: String) =
             packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)!!
@@ -139,8 +144,9 @@ class App : Application() {
             app.track(e)
         }
 
-        // handle data restored
-        if (DataStore.directBootAware && UserManagerCompat.isUserUnlocked(this)) DirectBoot.update()
+        // handle data restored/crash
+        if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
+                (getSystemService(Context.USER_SERVICE) as UserManager).isUserUnlocked) DirectBoot.flushTrafficStats()
         TcpFastOpen.enabledAsync(DataStore.publicStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) {
             val assetManager = assets

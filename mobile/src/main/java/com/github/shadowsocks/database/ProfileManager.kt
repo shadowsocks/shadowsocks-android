@@ -20,11 +20,13 @@
 
 package com.github.shadowsocks.database
 
+import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.ProfilesFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
+import java.io.IOException
 import java.sql.SQLException
 
 /**
@@ -62,9 +64,11 @@ object ProfileManager {
     @Throws(SQLException::class)
     fun updateProfile(profile: Profile) = PrivateDatabase.profileDao.update(profile)
 
+    @Throws(IOException::class)
     fun getProfile(id: Int): Profile? = try {
         PrivateDatabase.profileDao.queryForId(id)
     } catch (ex: SQLException) {
+        if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
         Log.e(TAG, "getProfile", ex)
         app.track(ex)
         null
@@ -77,17 +81,21 @@ object ProfileManager {
         if (id == DataStore.profileId && DataStore.directBootAware) DirectBoot.clean()
     }
 
+    @Throws(IOException::class)
     fun getFirstProfile(): Profile? = try {
         PrivateDatabase.profileDao.query(PrivateDatabase.profileDao.queryBuilder().limit(1L).prepare()).singleOrNull()
     } catch (ex: SQLException) {
+        if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
         Log.e(TAG, "getFirstProfile", ex)
         app.track(ex)
         null
     }
 
+    @Throws(IOException::class)
     fun getAllProfiles(): List<Profile>? = try {
         PrivateDatabase.profileDao.query(PrivateDatabase.profileDao.queryBuilder().orderBy("userOrder", true).prepare())
     } catch (ex: SQLException) {
+        if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
         Log.e(TAG, "getAllProfiles", ex)
         app.track(ex)
         null

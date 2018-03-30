@@ -49,6 +49,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.*
@@ -145,22 +146,32 @@ object BaseService {
         }
 
         internal fun updateTrafficTotal(tx: Long, rx: Long) {
-            // this.profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
-            val profile = ProfileManager.getProfile((profile ?: return).id) ?: return
-            profile.tx += tx
-            profile.rx += rx
-            ProfileManager.updateProfile(profile)
-            app.handler.post {
-                if (bandwidthListeners.isNotEmpty()) {
-                    val n = callbacks.beginBroadcast()
-                    for (i in 0 until n) {
-                        try {
-                            val item = callbacks.getBroadcastItem(i)
-                            if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
-                        } catch (_: Exception) { }  // ignore
+            try {
+                // this.profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
+                val profile = ProfileManager.getProfile((profile ?: return).id) ?: return
+                profile.tx += tx
+                profile.rx += rx
+                ProfileManager.updateProfile(profile)
+                app.handler.post {
+                    if (bandwidthListeners.isNotEmpty()) {
+                        val n = callbacks.beginBroadcast()
+                        for (i in 0 until n) {
+                            try {
+                                val item = callbacks.getBroadcastItem(i)
+                                if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
+                            } catch (_: Exception) { }  // ignore
+                        }
+                        callbacks.finishBroadcast()
                     }
-                    callbacks.finishBroadcast()
                 }
+            } catch (e: IOException) {
+                if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
+                val profile = DirectBoot.getDeviceProfile()!!
+                profile.tx += tx
+                profile.rx += rx
+                profile.dirty = true
+                DirectBoot.update(profile)
+                DirectBoot.listenForUnlock()
             }
         }
 
