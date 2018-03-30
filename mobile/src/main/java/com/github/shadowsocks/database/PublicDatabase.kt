@@ -34,21 +34,20 @@ object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC
     @Suppress("UNCHECKED_CAST")
     val kvPairDao: Dao<KeyValuePair, String?> by lazy { getDao(KeyValuePair::class.java) as Dao<KeyValuePair, String?> }
 
-    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource) {
-        connectionSource.createTableSafe<KeyValuePair>()
+    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource?) {
+        TableUtils.createTable(connectionSource, KeyValuePair::class.java)
     }
 
     override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?,
                            oldVersion: Int, newVersion: Int) {
         if (oldVersion < 1) {
-            safeWrapper {
-                PrivateDatabase.kvPairDao.queryBuilder().where().`in`("key",
+            PrivateDatabase.kvPairDao.queryBuilder().where().`in`("key",
                     Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
-            }.forEach { kvPairDao.replaceSafe(it) }
+                    .forEach { kvPairDao.createOrUpdate(it) }
         }
 
         if (oldVersion < 2) {
-            kvPairDao.replaceSafe(KeyValuePair(Acl.CUSTOM_RULES).put(Acl().fromId(Acl.CUSTOM_RULES).toString()))
+            kvPairDao.createOrUpdate(KeyValuePair(Acl.CUSTOM_RULES).put(Acl().fromId(Acl.CUSTOM_RULES).toString()))
         }
     }
 
