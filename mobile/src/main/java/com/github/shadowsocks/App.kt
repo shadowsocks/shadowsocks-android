@@ -71,6 +71,7 @@ class App : Application() {
     val deviceContext: Context by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceContext(this) }
     val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
     private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
+    private val exceptionParser by lazy { StandardExceptionParser(this, null) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
 
     fun getPackageInfo(packageName: String) =
@@ -101,7 +102,7 @@ class App : Application() {
     fun track(t: Throwable) = track(Thread.currentThread(), t)
     fun track(thread: Thread, t: Throwable) {
         tracker.send(HitBuilders.ExceptionBuilder()
-                .setDescription(StandardExceptionParser(this, null).getDescription(thread.name, t))
+                .setDescription("${exceptionParser.getDescription(thread.name, t)} - ${t.message}")
                 .setFatal(false)
                 .build())
         t.printStackTrace()
