@@ -155,7 +155,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         appListView.visibility = View.GONE
         fastScroller.visibility = View.GONE
         loadingView.visibility = View.VISIBLE
-        thread {
+        thread("AppManager-loader") {
             val adapter = appListView.adapter as AppsAdapter
             do {
                 appsLoading.set(true)

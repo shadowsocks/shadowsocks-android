@@ -266,18 +266,20 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 ++testCount
                 statusText.setText(R.string.connection_test_testing)
                 val id = testCount  // it would change by other code
-                thread { testConnection(id) }
+                thread("ConnectionTest") { testConnection(id) }
             }
         }
 
         fab = findViewById(R.id.fab)
         fab.setOnClickListener {
-            if (state == BaseService.CONNECTED) app.stopService() else thread {
-                if (BaseService.usingVpnMode) {
+            when {
+                state == BaseService.CONNECTED -> app.stopService()
+                BaseService.usingVpnMode -> {
                     val intent = VpnService.prepare(this)
                     if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
-                    else app.handler.post { onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null) }
-                } else app.startService()
+                    else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+                }
+                else -> app.startService()
             }
         }
 

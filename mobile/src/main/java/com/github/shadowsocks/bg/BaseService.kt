@@ -341,7 +341,7 @@ object BaseService {
 
             data.changeState(CONNECTING)
 
-            thread {
+            thread("$tag-Connecting") {
                 try {
                     if (profile.host == "198.199.101.152") {
                         val client = OkHttpClient.Builder()

@@ -39,8 +39,8 @@ fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = 
 /**
  * Wrapper for kotlin.concurrent.thread that tracks uncaught exceptions.
  */
-fun thread(start: Boolean = true, isDaemon: Boolean = false, contextClassLoader: ClassLoader? = null,
-           name: String? = null, priority: Int = -1, block: () -> Unit): Thread {
+fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = false,
+           contextClassLoader: ClassLoader? = null, priority: Int = -1, block: () -> Unit): Thread {
     val thread = kotlin.concurrent.thread(false, isDaemon, contextClassLoader, name, priority, block)
     thread.setUncaughtExceptionHandler(app::track)
     if (start) thread.start()
