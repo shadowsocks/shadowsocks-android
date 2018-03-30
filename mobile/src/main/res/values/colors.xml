@@ -2,4 +2,5 @@
 <resources>
     <color name="ic_launcher_background">#7488A1</color>
     <color name="material_drawer_selected_text">@color/material_accent_200</color>
+    <color name="ic_shortcuts_background">#F5F5F5</color>"
 </resources>
