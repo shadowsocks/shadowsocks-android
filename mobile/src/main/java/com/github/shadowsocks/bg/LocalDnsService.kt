@@ -75,9 +75,9 @@ object LocalDnsService {
                         .mapIndexed { i, dns -> makeDns("UserDef-" + i,
                         dns.trim() + ":53", 9) })
                 val localDns = JSONArray(arrayOf(
-                        makeDns("Primary-1", "119.29.29.29:53", 3, false),
-                        makeDns("Primary-2", "114.114.114.114:53", 3, false),
-                        makeDns("Primary-3", "208.67.222.222:443", 3, false)
+                        makeDns("Primary-1", "208.67.222.222:443", 3, false),
+                        makeDns("Primary-2", "119.29.29.29:53", 3, false),
+                        makeDns("Primary-3", "114.114.114.114:53", 3, false)
                 ))
 
                 when (profile.route) {
@@ -85,7 +85,6 @@ object LocalDnsService {
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
                             .put("IPNetworkFile", "china_ip_list.txt")
-                            .put("DomainFile", data.aclFile!!.absolutePath)
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
