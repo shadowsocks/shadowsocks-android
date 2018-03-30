@@ -22,7 +22,6 @@ package com.github.shadowsocks.preference
 
 import android.os.Binder
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot

@@ -117,7 +117,10 @@ object BaseService {
                                             val item = callbacks.getBroadcastItem(i)
                                             if (bandwidthListeners.contains(item.asBinder()))
                                                 item.trafficUpdated(profile!!.id, txRate, rxRate, txTotal, rxTotal)
-                                        } catch (_: Exception) { }  // ignore
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                            app.track(e)
+                                        }
                                         callbacks.finishBroadcast()
                                     }
                                 }
@@ -159,7 +162,10 @@ object BaseService {
                             try {
                                 val item = callbacks.getBroadcastItem(i)
                                 if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
-                            } catch (_: Exception) { }  // ignore
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                app.track(e)
+                            }
                         }
                         callbacks.finishBroadcast()
                     }
@@ -211,7 +217,10 @@ object BaseService {
                 val n = callbacks.beginBroadcast()
                 for (i in 0 until n) try {
                     callbacks.getBroadcastItem(i).stateChanged(s, binder.profileName, msg)
-                } catch (_: Exception) { }  // ignore
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    app.track(e)
+                }
                 callbacks.finishBroadcast()
             }
             state = s

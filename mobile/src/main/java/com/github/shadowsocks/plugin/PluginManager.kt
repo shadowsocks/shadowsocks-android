@@ -87,21 +87,19 @@ object PluginManager {
 
     private var receiver: BroadcastReceiver? = null
     private var cachedPlugins: Map<String, Plugin>? = null
-    fun fetchPlugins(): Map<String, Plugin> {
-        return synchronized(this) {
-            if (receiver == null) receiver = app.listenForPackageChanges {
-                synchronized(this) {
-                    receiver = null
-                    cachedPlugins = null
-                }
+    fun fetchPlugins(): Map<String, Plugin> = synchronized(this) {
+        if (receiver == null) receiver = app.listenForPackageChanges {
+            synchronized(this) {
+                receiver = null
+                cachedPlugins = null
             }
-            if (cachedPlugins == null) {
-                val pm = app.packageManager
-                cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),
-                        PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associate { it.id to it }
-            }
-            cachedPlugins!!
         }
+        if (cachedPlugins == null) {
+            val pm = app.packageManager
+            cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),
+                    PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associate { it.id to it }
+        }
+        cachedPlugins!!
     }
 
     private fun buildUri(id: String) = Uri.Builder()
