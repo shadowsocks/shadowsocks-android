@@ -183,7 +183,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> {
+        val profile = data.profile!!
         cmd += "-V"
+        if (profile.udpdns) cmd += "-D"
         return cmd
     }
 
