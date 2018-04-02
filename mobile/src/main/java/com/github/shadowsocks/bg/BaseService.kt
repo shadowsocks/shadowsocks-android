@@ -255,6 +255,7 @@ object BaseService {
 
         fun startNativeProcesses() {
             val data = data
+            val profile = data.profile!!
             val cmd = buildAdditionalArguments(arrayListOf(
                     File((this as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                     "-u",
@@ -268,6 +269,8 @@ object BaseService {
                 cmd += "--acl"
                 cmd += acl.absolutePath
             }
+
+            if (profile.udpdns) cmd += "-D"
 
             if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
