@@ -144,6 +144,7 @@
 <string name="port_proxy">"SOCKS5 代理端口"</string>
 <string name="port_local_dns">"本地 DNS 端口"</string>
 <string name="port_transproxy">"透明代理端口"</string>
+<string name="time_timeout">"超时时间"</string>
 <string name="service_proxy">"代理模式"</string>
 <string name="service_transproxy">"透明代理模式"</string>
 <string name="vpn_permission_denied">"创建 VPN 服务权限不足"</string>

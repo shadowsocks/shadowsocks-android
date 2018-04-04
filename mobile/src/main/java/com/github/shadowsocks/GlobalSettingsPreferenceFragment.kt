@@ -68,6 +68,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
         val portProxy = findPreference(Key.portProxy)
         val portLocalDns = findPreference(Key.portLocalDns)
         val portTransproxy = findPreference(Key.portTransproxy)
+        val timeTimeout = findPreference(Key.timeTimeout)
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
             val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
                 Key.modeProxy -> Pair(false, false)
@@ -84,6 +85,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
                 BaseService.IDLE, BaseService.STOPPED -> {
                     serviceMode.isEnabled = true
                     portProxy.isEnabled = true
+                    timeTimeout.isEnabled = true
                     onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
                 }
                 else -> {
@@ -91,6 +93,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
                     portProxy.isEnabled = false
                     portLocalDns.isEnabled = false
                     portTransproxy.isEnabled = false
+                    timeTimeout.isEnabled = false
                 }
             }
         }

@@ -261,7 +261,7 @@ object BaseService {
                     "-u",
                     "-b", "127.0.0.1",
                     "-l", DataStore.portProxy.toString(),
-                    "-t", "600",
+                    "-t", DataStore.timeTimeout.toString(),
                     "-c", data.buildShadowsocksConfig().absolutePath))
 
             val acl = data.aclFile
@@ -292,7 +292,7 @@ object BaseService {
         }
 
         fun stopRunner(stopService: Boolean, msg: String? = null) {
-            // channge the state
+            // change the state
             val data = data
             data.changeState(STOPPING)
 
@@ -300,7 +300,7 @@ object BaseService {
 
             killProcesses()
 
-            // clean up recevier
+            // clean up receiver
             this as Service
             if (data.closeReceiverRegistered) {
                 unregisterReceiver(data.closeReceiver)

@@ -39,6 +39,7 @@ object Key {
     const val portProxy = "portProxy"
     const val portLocalDns = "portLocalDns"
     const val portTransproxy = "portTransproxy"
+    const val timeTimeout = "timeTimeout"
 
     const val route = "route"
 

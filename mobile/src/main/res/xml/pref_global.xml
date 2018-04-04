@@ -39,5 +39,11 @@
             android:maxLength="5"
             app:pref_summaryHasText="%s"
             android:title="@string/port_transproxy"/>
+        <AutoSummaryEditTextPreference
+            android:key="timeTimeout"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:title="@string/time_timeout"/>
     </PreferenceCategory>
 </PreferenceScreen>
