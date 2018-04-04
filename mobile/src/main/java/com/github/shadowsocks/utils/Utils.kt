@@ -32,6 +32,11 @@ fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     return if (value < min || value > 65535) default else value
 }
 
+fun parseTime(str: String?, default: Int, min: Int = 10): Int {
+    val value = str?.toIntOrNull() ?: default
+    return if (value < min || value > 3600) default else value
+}
+
 fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = object : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) = callback(context, intent)
 }

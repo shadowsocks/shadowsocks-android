@@ -27,6 +27,7 @@ import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
+import com.github.shadowsocks.utils.parseTime
 
 object DataStore {
     val publicStore = OrmLitePreferenceDataStore(PublicDatabase.kvPairDao)
@@ -41,6 +42,13 @@ object DataStore {
             publicStore.putString(key, value.toString())
             value
         } else parsePort(publicStore.getString(key), default + userIndex)
+    }
+    private fun getTimeoutTime(key: String, default: Int): Int {
+        val value = publicStore.getInt(key)
+        return if (value != null) {
+            publicStore.putString(key, value.toString())
+            value
+        } else parseTime(publicStore.getString(key), default)
     }
 
     var profileId: Int
@@ -63,6 +71,9 @@ object DataStore {
     var portTransproxy: Int
         get() = getLocalPort(Key.portTransproxy, 8200)
         set(value) = publicStore.putString(Key.portTransproxy, value.toString())
+    var timeTimeout: Int
+        get() = getTimeoutTime(Key.timeTimeout, 600)
+        set(value) = publicStore.putString(Key.timeTimeout, value.toString())
 
     fun initGlobal() {
         // temporary workaround for support lib bug
@@ -70,6 +81,7 @@ object DataStore {
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
         if (publicStore.getString(Key.portTransproxy) == null) portTransproxy = portTransproxy
+        if (publicStore.getString(Key.timeTimeout) == null) timeTimeout = timeTimeout
     }
 
     var proxyApps: Boolean

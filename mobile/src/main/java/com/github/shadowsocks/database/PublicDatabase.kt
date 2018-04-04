@@ -42,7 +42,7 @@ object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC
                            oldVersion: Int, newVersion: Int) {
         if (oldVersion < 1) {
             PrivateDatabase.kvPairDao.queryBuilder().where().`in`("key",
-                    Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
+                    Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy, Key.timeTimeout).query()
                     .forEach { kvPairDao.createOrUpdate(it) }
         }
 
