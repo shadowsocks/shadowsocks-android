@@ -16,17 +16,11 @@
 <string name="connection_test_error_status_code">"ステータスコード無効: #%d"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"サーバー設定"</string>
-
-<!-- proxy category -->
 <string name="profile_name">"サーバー名"</string>
 <string name="proxy">"サーバーアドレス"</string>
 <string name="remote_port">"リモートポート"</string>
 <string name="sitekey">"パスワード"</string>
 <string name="enc_method">"暗号化方式"</string>
-
-<!-- feature category -->
-<string name="feature_cat">"ファンクション設定"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 プロキシ"</string>
@@ -56,10 +50,6 @@
 <string name="profile_invalid_input">"有効なプロファイルが見つかりません"</string>
 
 <!-- alert category -->
-<string name="yes">"はい"</string>
-<string name="no">"いいえ"</string>
-
-<!-- alert category -->
 <string name="close">"閉じる"</string>
 <string name="profile_empty">"プロファイルを選択して下さい"</string>
 <string name="proxy_empty">"サーバアドレスやパスワードの入力が必要です"</string>
@@ -84,8 +74,6 @@
 
 <!-- profile -->
 <string name="profile_config">"プロファイル編集"</string>
-<string name="unsaved_changes_prompt">"変更は適応されておりません、保存しますか？"</string>
-<string name="apply">"適用"</string>
 <string name="delete">"削除"</string>
 <string name="delete_confirm_prompt">"このプロファイルを削除しますか"</string>
 <string name="share_qr_nfc">"QR コード / NFC"</string>
@@ -147,7 +135,7 @@
 <string name="service_transproxy">"トランスプロキシサービス"</string>
 <string name="vpn_permission_denied">"VPNサービス作成のアクセス許可が拒否されました"</string>
 <string name="auto_connect_summary_v24">"起動時にShadowsockを有効。 VPN常時接続の使用をお勧めします"</string>
-<string name="direct_boot_aware">"ダイレクトブート"</string>
-<string name="direct_boot_aware_summary">"デバイスがロック解除される前にShadowsocksの自動起動を許可（選択されたプロファイル情報はより少ない保護を受けることになります）"</string>
+<string name="direct_boot_aware_summary">"選択されたプロファイル情報はより少ない保護を受けることになります"</string>
 <string name="acl_rule_online_config">"オンライン設定のURL"</string>
+<string name="action_import_file">"ファイルからのインポート"</string>
 </resources>

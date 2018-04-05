@@ -41,7 +41,6 @@
 <string name="delete_confirm_prompt">"آیا مطمئن هستید که می‌خواهید این پروفایل را حذف کنید؟"</string>
 <string name="share_qr_nfc">"NFC یا QR Code"</string>
 <string name="add_profile_methods_scan_qr_code">"اسکن‌کردن QR Code"</string>
-<string name="add_profile_methods_manual_settings">"تنظیمات دستی"</string>
 
 <!-- tasker -->
 <string name="toggle_service_state">"فعال‌کردن سرویس"</string>
@@ -55,4 +54,5 @@
 <string name="vpn_connected">"وصل شد. برای بررسی اتصال ضربه (Tap) بزنید."</string>
 <string name="not_connected">"اتصال برقرار نیست!"</string>
 <string name="route_entry_all">"همه"</string>
+<string name="add_profile_methods_manual_settings">"تنظیمات دستی"</string>
 </resources>
