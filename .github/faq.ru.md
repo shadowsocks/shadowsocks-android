@@ -34,6 +34,7 @@
 * Иправления для Huawei: [#1091 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Вызванные из-за Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung и/или Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
+* Ещё Samsung: [#1712](https://github.com/shadowsocks/shadowsocks-android/issues/1712)
 * Не устанавливайте это приложение на SD карту, из-за проблем с разрешениями: [#1124 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
 
 ### Как приостановить службу Shadowsocks?
