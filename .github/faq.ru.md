@@ -34,6 +34,7 @@
 * Иправления для Huawei: [#1091 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Вызванные из-за Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung и/или Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
+* Ещё Samsung: [#1712](https://github.com/shadowsocks/shadowsocks-android/issues/1712)
 * Не устанавливайте это приложение на SD карту, из-за проблем с разрешениями: [#1124 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
 
 ### Как приостановить службу Shadowsocks?
@@ -54,7 +55,12 @@
 
 Разрешите этому приложению передачу данных в фоновом режиме в настройках приложения.
 
-Если у вас оперератор Yota, то измените точку доступа APN с `yota.ru` на `client.yota.ru`
+Если у вас оперератор Yota, попробуйте следующее:
+
+* измените точку доступа APN с `yota.ru` на `client.yota.ru`
+* погоняйте программы: Speedtest, Telegram (скачивание файлов)
+
+Я уже уведомил оператора о проблеме и вместе мы стараемся решить её.
 
 ### Почему требуется разрешение камере на устройствах младше Android 6.0?
 
