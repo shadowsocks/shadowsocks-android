@@ -62,23 +62,21 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
 
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: List<PackageInfo>? = null
-        private fun getApps(pm: PackageManager): List<ProxiedApp> {
-            return synchronized(AppManager) {
-                if (receiver == null) receiver = app.listenForPackageChanges {
-                    synchronized(AppManager) {
-                        receiver = null
-                        cachedApps = null
-                    }
-                    AppManager.instance?.reloadApps()
+        private fun getApps(pm: PackageManager) = synchronized(AppManager) {
+            if (receiver == null) receiver = app.listenForPackageChanges {
+                synchronized(AppManager) {
+                    receiver = null
+                    cachedApps = null
                 }
-                // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
-                val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                        .filter { it.packageName != app.packageName &&
-                                it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
-                this.cachedApps = cachedApps
-                cachedApps
-            }.map { ProxiedApp(pm, it.applicationInfo, it.packageName) }
-        }
+                AppManager.instance?.reloadApps()
+            }
+            // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
+            val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+                    .filter { it.packageName != app.packageName &&
+                            it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
+            this.cachedApps = cachedApps
+            cachedApps
+        }.map { ProxiedApp(pm, it.applicationInfo, it.packageName) }
     }
 
     private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
@@ -155,7 +153,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         appListView.visibility = View.GONE
         fastScroller.visibility = View.GONE
         loadingView.visibility = View.VISIBLE
-        thread {
+        thread("AppManager-loader") {
             val adapter = appListView.adapter as AppsAdapter
             do {
                 appsLoading.set(true)

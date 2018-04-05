@@ -72,19 +72,18 @@ object LocalDnsService {
                         .put("MinimumTTL", 120)
                         .put("CacheSize", 4096)
                 val remoteDns = JSONArray(profile.remoteDns.split(",")
-                        .mapIndexed { i, dns -> makeDns("UserDef-" + i,
-                        dns.trim() + ":53", 9) })
+                        .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 9) })
                 val localDns = JSONArray(arrayOf(
-                        makeDns("Primary-1", "119.29.29.29:53", 3, false),
-                        makeDns("Primary-2", "114.114.114.114:53", 3, false),
-                        makeDns("Primary-3", "208.67.222.222:443", 3, false)
+                        makeDns("Primary-1", "208.67.222.222:443", 3, false),
+                        makeDns("Primary-2", "119.29.29.29:53", 3, false),
+                        makeDns("Primary-3", "114.114.114.114:53", 3, false)
                 ))
 
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)
-                            .put("DomainFile", data.aclFile!!.absolutePath)
+                            .put("IPNetworkFile", "china_ip_list.txt")
                     Acl.CHINALIST -> config
                             .put("PrimaryDNS", localDns)
                             .put("AlternativeDNS", remoteDns)

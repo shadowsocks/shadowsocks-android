@@ -21,8 +21,8 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 4050100
-        versionName "4.5.1"
+        versionCode 4050400
+        versionName "4.5.4"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
@@ -58,7 +58,7 @@ dependencies {
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
     implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
-    implementation 'com.evernote:android-job:1.2.4'
+    implementation 'com.evernote:android-job:1.2.5'
     implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
     implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
     implementation "com.google.android.gms:play-services-vision:$playServicesVersion"

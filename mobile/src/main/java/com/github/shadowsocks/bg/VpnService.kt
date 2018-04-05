@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.TargetApi
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -28,6 +29,7 @@ import android.net.*
 import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import android.support.v4.os.BuildCompat
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
@@ -116,12 +118,14 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     private var worker: ProtectWorker? = null
     private var tun2socksProcess: GuardedProcess? = null
     private var underlyingNetwork: Network? = null
+        @TargetApi(28)
         set(value) {
-            if (Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(if (value == null) null else arrayOf(value))
+            setUnderlyingNetworks(if (value == null) null else arrayOf(value))
             field = value
         }
 
     private val connectivity by lazy { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    @TargetApi(28)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             underlyingNetwork = network
@@ -229,9 +233,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         this.conn = conn
         val fd = conn.fd
 
-        // we want REQUEST here instead of LISTEN
-        connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
-        listeningForDefaultNetwork = true
+        if (BuildCompat.isAtLeastP()) {
+            // we want REQUEST here instead of LISTEN
+            connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
+            listeningForDefaultNetwork = true
+        }
 
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN.format(Locale.ENGLISH, "2"),

@@ -49,6 +49,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
+import java.io.IOException
 import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.*
@@ -116,7 +117,10 @@ object BaseService {
                                             val item = callbacks.getBroadcastItem(i)
                                             if (bandwidthListeners.contains(item.asBinder()))
                                                 item.trafficUpdated(profile!!.id, txRate, rxRate, txTotal, rxTotal)
-                                        } catch (_: Exception) { }  // ignore
+                                        } catch (e: Exception) {
+                                            e.printStackTrace()
+                                            app.track(e)
+                                        }
                                         callbacks.finishBroadcast()
                                     }
                                 }
@@ -145,22 +149,35 @@ object BaseService {
         }
 
         internal fun updateTrafficTotal(tx: Long, rx: Long) {
-            // this.profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
-            val profile = ProfileManager.getProfile((profile ?: return).id) ?: return
-            profile.tx += tx
-            profile.rx += rx
-            ProfileManager.updateProfile(profile)
-            app.handler.post {
-                if (bandwidthListeners.isNotEmpty()) {
-                    val n = callbacks.beginBroadcast()
-                    for (i in 0 until n) {
-                        try {
-                            val item = callbacks.getBroadcastItem(i)
-                            if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
-                        } catch (_: Exception) { }  // ignore
+            try {
+                // this.profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
+                val profile = ProfileManager.getProfile((profile ?: return).id) ?: return
+                profile.tx += tx
+                profile.rx += rx
+                ProfileManager.updateProfile(profile)
+                app.handler.post {
+                    if (bandwidthListeners.isNotEmpty()) {
+                        val n = callbacks.beginBroadcast()
+                        for (i in 0 until n) {
+                            try {
+                                val item = callbacks.getBroadcastItem(i)
+                                if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                app.track(e)
+                            }
+                        }
+                        callbacks.finishBroadcast()
                     }
-                    callbacks.finishBroadcast()
                 }
+            } catch (e: IOException) {
+                if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
+                val profile = DirectBoot.getDeviceProfile()!!
+                profile.tx += tx
+                profile.rx += rx
+                profile.dirty = true
+                DirectBoot.update(profile)
+                DirectBoot.listenForUnlock()
             }
         }
 
@@ -200,7 +217,10 @@ object BaseService {
                 val n = callbacks.beginBroadcast()
                 for (i in 0 until n) try {
                     callbacks.getBroadcastItem(i).stateChanged(s, binder.profileName, msg)
-                } catch (_: Exception) { }  // ignore
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    app.track(e)
+                }
                 callbacks.finishBroadcast()
             }
             state = s
@@ -235,6 +255,7 @@ object BaseService {
 
         fun startNativeProcesses() {
             val data = data
+            val profile = data.profile!!
             val cmd = buildAdditionalArguments(arrayListOf(
                     File((this as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                     "-u",
@@ -248,6 +269,8 @@ object BaseService {
                 cmd += "--acl"
                 cmd += acl.absolutePath
             }
+
+            if (profile.udpdns) cmd += "-D"
 
             if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
@@ -341,7 +364,7 @@ object BaseService {
 
             data.changeState(CONNECTING)
 
-            thread {
+            thread("$tag-Connecting") {
                 try {
                     if (profile.host == "198.199.101.152") {
                         val client = OkHttpClient.Builder()

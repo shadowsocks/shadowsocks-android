@@ -29,8 +29,8 @@ import com.twofortyfouram.locale.api.Intent as ApiIntent
 
 class Settings(bundle: Bundle?) {
     companion object {
-        private val KEY_SWITCH_ON = "switch_on"
-        private val KEY_PROFILE_ID = "profile_id"
+        private const val KEY_SWITCH_ON = "switch_on"
+        private const val KEY_PROFILE_ID = "profile_id"
 
         fun fromIntent(intent: Intent) = Settings(intent.getBundleExtra(ApiIntent.EXTRA_BUNDLE))
     }

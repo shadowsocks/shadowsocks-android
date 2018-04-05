@@ -87,21 +87,19 @@ object PluginManager {
 
     private var receiver: BroadcastReceiver? = null
     private var cachedPlugins: Map<String, Plugin>? = null
-    fun fetchPlugins(): Map<String, Plugin> {
-        return synchronized(this) {
-            if (receiver == null) receiver = app.listenForPackageChanges {
-                synchronized(this) {
-                    receiver = null
-                    cachedPlugins = null
-                }
+    fun fetchPlugins(): Map<String, Plugin> = synchronized(this) {
+        if (receiver == null) receiver = app.listenForPackageChanges {
+            synchronized(this) {
+                receiver = null
+                cachedPlugins = null
             }
-            if (cachedPlugins == null) {
-                val pm = app.packageManager
-                cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),
-                        PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associate { it.id to it }
-            }
-            cachedPlugins!!
         }
+        if (cachedPlugins == null) {
+            val pm = app.packageManager
+            cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),
+                    PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associate { it.id to it }
+        }
+        cachedPlugins!!
     }
 
     private fun buildUri(id: String) = Uri.Builder()
@@ -134,10 +132,10 @@ object PluginManager {
     private fun initNative(options: PluginOptions): String? {
         val providers = app.packageManager.queryIntentContentProviders(
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(options.id)), 0)
-        check(providers.size == 1)
+        if (providers.isEmpty()) return null
         val uri = Uri.Builder()
                 .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(providers[0].providerInfo.authority)
+                .authority(providers.single().providerInfo.authority)
                 .build()
         val cr = app.contentResolver
         return try {

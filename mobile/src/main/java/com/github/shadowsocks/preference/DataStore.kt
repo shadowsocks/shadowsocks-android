@@ -21,7 +21,7 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
-import com.github.shadowsocks.BootReceiver
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
@@ -49,10 +49,8 @@ object DataStore {
             publicStore.putInt(Key.id, value)
             if (DataStore.directBootAware) DirectBoot.update()
         }
-    /**
-     * Setter is defined in MainActivity.onPreferenceDataStoreChanged.
-     */
-    val directBootAware: Boolean get() = BootReceiver.enabled && publicStore.getBoolean(Key.directBootAware) == true
+    val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
+    val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
     var serviceMode: String
         get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
         set(value) = publicStore.putString(Key.serviceMode, value)

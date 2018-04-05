@@ -28,6 +28,7 @@ import com.github.shadowsocks.BuildConfig
 import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.utils.Commandline
 import com.github.shadowsocks.utils.thread
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.Semaphore
@@ -42,8 +43,9 @@ class GuardedProcess(private val cmd: List<String>) {
     private var isDestroyed = false
     @Volatile
     private lateinit var process: Process
+    private val name = File(cmd.first()).nameWithoutExtension
 
-    private fun streamLogger(input: InputStream, logger: (String, String) -> Int) = thread {
+    private fun streamLogger(input: InputStream, logger: (String, String) -> Int) = thread("StreamLogger-$name") {
         try {
             input.bufferedReader().useLines { it.forEach { logger(TAG, it) } }
         } catch (_: IOException) { }    // ignore
@@ -53,7 +55,7 @@ class GuardedProcess(private val cmd: List<String>) {
         val semaphore = Semaphore(1)
         semaphore.acquire()
         var ioException: IOException? = null
-        guardThread = thread(name = "GuardThread-" + cmd.first()) {
+        guardThread = thread("GuardThread-$name") {
             try {
                 var callback: (() -> Unit)? = null
                 while (!isDestroyed) {
