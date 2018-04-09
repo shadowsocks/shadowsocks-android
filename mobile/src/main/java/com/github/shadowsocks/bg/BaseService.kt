@@ -191,11 +191,16 @@ object BaseService {
                     .put("method", profile.method)
             val pluginPath = pluginPath
             if (pluginPath != null) {
-                val pluginCmd = arrayListOf(pluginPath)
-                if (TcpFastOpen.sendEnabled) pluginCmd.add("--fast-open")
+                val pluginCmd = pluginPath
+                val pluginOpts = if (TcpFastOpen.sendEnabled) {
+                    plugin.toString() + ";fast-open"
+                }
+                else {
+                    plugin.toString()
+                }
                 config
                         .put("plugin", pluginCmd)
-                        .put("plugin_opts", plugin.toString())
+                        .put("plugin_opts", pluginOpts)
             }
             // sensitive Shadowsocks config is stored in
             val file = File(if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {

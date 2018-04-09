@@ -159,6 +159,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                         }
                     }
             if (profile.bypass) builder.addDisallowedApplication(me)
+        } else {
+            builder.addDisallowedApplication(packageName)
         }
 
         when (profile.route) {
