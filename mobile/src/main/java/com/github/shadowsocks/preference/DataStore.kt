@@ -27,6 +27,8 @@ import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
+import java.net.InetSocketAddress
+import java.net.Proxy
 
 object DataStore {
     val publicStore = OrmLitePreferenceDataStore(PublicDatabase.kvPairDao)
@@ -63,6 +65,8 @@ object DataStore {
     var portTransproxy: Int
         get() = getLocalPort(Key.portTransproxy, 8200)
         set(value) = publicStore.putString(Key.portTransproxy, value.toString())
+
+    val proxy get() = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", portProxy))
 
     fun initGlobal() {
         // temporary workaround for support lib bug

@@ -24,6 +24,7 @@ import android.util.Log
 import com.evernote.android.job.Job
 import com.evernote.android.job.JobCreator
 import com.evernote.android.job.JobRequest
+import com.github.shadowsocks.preference.DataStore
 import java.io.IOException
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -54,8 +55,8 @@ class AclSyncJob(private val route: String) : Job() {
     }
 
     override fun onRunJob(params: Params): Result = try {
-        val acl = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openStream().bufferedReader()
-                .use { it.readText() }
+        val acl = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openConnection(DataStore.proxy)
+                .getInputStream().bufferedReader().use { it.readText() }
         Acl.getFile(route).printWriter().use { it.write(acl) }
         Result.SUCCESS
     } catch (e: IOException) {

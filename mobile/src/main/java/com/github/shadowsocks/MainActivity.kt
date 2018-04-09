@@ -64,8 +64,6 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.InetSocketAddress
-import java.net.Proxy
 import java.net.URL
 import java.util.*
 
@@ -166,10 +164,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             Acl.CHINALIST -> "www.qualcomm.cn"
             else -> "www.google.com"
         }, "/generate_204")
-        val conn = (if (BaseService.usingVpnMode) url.openConnection() else
-            url.openConnection(Proxy(Proxy.Type.SOCKS,
-                    InetSocketAddress("127.0.0.1", DataStore.portProxy))))
-                as HttpURLConnection
+        val conn = (url.openConnection(DataStore.proxy)) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false

@@ -96,10 +96,10 @@ object LocalDnsService {
                 return file
             }
 
-            if (!profile.udpdns) overtureProcess = GuardedProcess(buildAdditionalArguments(arrayListOf(
+            if (!profile.udpdns) overtureProcess = GuardedProcess(arrayListOf(
                     File(app.applicationInfo.nativeLibraryDir, Executable.OVERTURE).absolutePath,
                     "-c", buildOvertureConfig("overture.conf")
-            ))).start()
+            )).start()
         }
 
         override fun killProcesses() {
