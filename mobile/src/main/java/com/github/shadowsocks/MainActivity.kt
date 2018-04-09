@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             Acl.CHINALIST -> "www.qualcomm.cn"
             else -> "www.google.com"
         }, "/generate_204")
-        val conn = (url.openConnection(DataStore.proxy)) as HttpURLConnection
+        val conn = url.openConnection(DataStore.proxy) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
