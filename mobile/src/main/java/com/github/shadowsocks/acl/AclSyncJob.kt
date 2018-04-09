@@ -38,13 +38,13 @@ class AclSyncJob(private val route: String) : Job() {
             return when (parts[0]) {
                 TAG -> AclSyncJob(parts[1])
                 else -> {
-                    Log.w(TAG, "Unknown job tag: " + tag)
+                    Log.w(TAG, "Unknown job tag: $tag")
                     null
                 }
             }
         }
 
-        fun schedule(route: String): Int = JobRequest.Builder(TAG + ':' + route)
+        fun schedule(route: String): Int = JobRequest.Builder("$TAG:$route")
                 .setExecutionWindow(TimeUnit.SECONDS.toMillis(10), TimeUnit.DAYS.toMillis(28))
                 .setRequirementsEnforced(true)
                 .setRequiredNetworkType(JobRequest.NetworkType.UNMETERED)
