@@ -146,8 +146,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             builder.addRoute("::", 0)
         }
 
+        val me = packageName
         if (profile.proxyApps) {
-            val me = packageName
             profile.individual.split('\n')
                     .filter { it != me }
                     .forEach {
@@ -160,7 +160,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                     }
             if (profile.bypass) builder.addDisallowedApplication(me)
         } else {
-            builder.addDisallowedApplication(packageName)
+            builder.addDisallowedApplication(me)
         }
 
         when (profile.route) {
