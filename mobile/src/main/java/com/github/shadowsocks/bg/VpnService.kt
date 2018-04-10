@@ -26,7 +26,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.*
-import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import android.support.v4.os.BuildCompat
@@ -41,9 +40,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import java.io.File
-import java.io.FileDescriptor
 import java.io.IOException
-import java.lang.reflect.Method
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
@@ -52,8 +49,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN = "26.26.26.%s"
         private const val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
-
-        private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
 
         /**
          * Unfortunately registerDefaultNetworkCallback is going to return VPN interface since Android P DP1:
@@ -71,39 +66,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 .build()
     }
 
-    private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
-        override val socketFile: File = File(app.deviceContext.filesDir, "protect_path")
-
-        override fun accept(socket: LocalSocket) {
-            var success = false
-            try {
-                socket.inputStream.read()
-                val fd = socket.ancillaryFileDescriptors!!.single()!!
-                val fdInt = getInt.invoke(fd) as Int
-                try {
-                    val network = underlyingNetwork
-                    success = if (network != null && Build.VERSION.SDK_INT >= 23) {
-                        network.bindSocket(fd)
-                        true
-                    } else protect(fdInt)
-                } catch (e: Exception) {
-                    Log.e(tag, "Error when protect socket", e)
-                    app.track(e)
-                } finally {
-                    JniHelper.close(fdInt) // Trick to close file decriptor
-                }
-            } catch (e: Exception) {
-                Log.e(tag, "Error when receiving ancillary fd", e)
-                app.track(e)
-            }
-            try {
-                socket.outputStream.write(if (success) 0 else 1)
-            } catch (e: IOException) {
-                Log.e(tag, "Error when returning result in protect", e)
-                app.track(e)
-            }
-        }
-    }
     class NullConnectionException : NullPointerException()
 
     init {
@@ -115,27 +77,20 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             ServiceNotification(this, profileName, "service-vpn")
 
     private var conn: ParcelFileDescriptor? = null
-    private var worker: ProtectWorker? = null
     private var tun2socksProcess: GuardedProcess? = null
-    private var underlyingNetwork: Network? = null
-        @TargetApi(28)
-        set(value) {
-            setUnderlyingNetworks(if (value == null) null else arrayOf(value))
-            field = value
-        }
 
     private val connectivity by lazy { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
     @TargetApi(28)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            underlyingNetwork = network
+            setUnderlyingNetworks(arrayOf(network))
         }
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities?) {
             // it's a good idea to refresh capabilities
-            underlyingNetwork = network
+            setUnderlyingNetworks(arrayOf(network))
         }
         override fun onLost(network: Network) {
-            underlyingNetwork = null
+            setUnderlyingNetworks(null)
         }
     }
     private var listeningForDefaultNetwork = false
@@ -152,8 +107,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             connectivity.unregisterNetworkCallback(defaultNetworkCallback)
             listeningForDefaultNetwork = false
         }
-        worker?.stopThread()
-        worker = null
         super.killProcesses()
         tun2socksProcess?.destroy()
         tun2socksProcess = null
@@ -172,19 +125,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun startNativeProcesses() {
-        val worker = ProtectWorker()
-        worker.start()
-        this.worker = worker
-
         super.startNativeProcesses()
 
         val fd = startVpn()
         if (!sendFd(fd)) throw IOException("sendFd failed")
-    }
-
-    override fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> {
-        cmd += "-V"
-        return cmd
     }
 
     private fun startVpn(): Int {
@@ -202,8 +146,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             builder.addRoute("::", 0)
         }
 
+        val me = packageName
         if (profile.proxyApps) {
-            val me = packageName
             profile.individual.split('\n')
                     .filter { it != me }
                     .forEach {
@@ -214,7 +158,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             Log.e(tag, "Invalid package name", ex)
                         }
                     }
-            if (!profile.bypass) builder.addAllowedApplication(me)
+            if (profile.bypass) builder.addDisallowedApplication(me)
+        } else {
+            builder.addDisallowedApplication(me)
         }
 
         when (profile.route) {

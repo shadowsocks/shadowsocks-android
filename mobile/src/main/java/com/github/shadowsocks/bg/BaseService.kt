@@ -191,10 +191,9 @@ object BaseService {
                     .put("method", profile.method)
             val pluginPath = pluginPath
             if (pluginPath != null) {
-                val pluginCmd = arrayListOf(pluginPath)
-                if (TcpFastOpen.sendEnabled) pluginCmd.add("--fast-open")
+                if (TcpFastOpen.sendEnabled) plugin["fast-open"] = null
                 config
-                        .put("plugin", Commandline.toString(service.buildAdditionalArguments(pluginCmd)))
+                        .put("plugin", pluginPath)
                         .put("plugin_opts", plugin.toString())
             }
             // sensitive Shadowsocks config is stored in
@@ -251,18 +250,16 @@ object BaseService {
             }
         }
 
-        fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> = cmd
-
         fun startNativeProcesses() {
             val data = data
             val profile = data.profile!!
-            val cmd = buildAdditionalArguments(arrayListOf(
+            val cmd = arrayListOf(
                     File((this as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                     "-u",
                     "-b", "127.0.0.1",
                     "-l", DataStore.portProxy.toString(),
                     "-t", "600",
-                    "-c", data.buildShadowsocksConfig().absolutePath))
+                    "-c", data.buildShadowsocksConfig().absolutePath)
 
             val acl = data.aclFile
             if (acl != null) {
