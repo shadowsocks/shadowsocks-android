@@ -123,7 +123,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private var adView: AdView? = null
 
         init {
-            edit.setOnClickListener { startConfig(item) }
+            edit.setOnClickListener {
+                item = ProfileManager.getProfile(item.id)!!
+                startConfig(item)
+            }
             TooltipCompat.setTooltipText(edit, edit.contentDescription)
             itemView.setOnClickListener(this)
             val share = itemView.findViewById<View>(R.id.share)
