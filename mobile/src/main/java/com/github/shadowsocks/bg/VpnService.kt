@@ -116,7 +116,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
-    private var tun2socksProcess: GuardedProcess? = null
     private var underlyingNetwork: Network? = null
         @TargetApi(28)
         set(value) {
@@ -155,8 +154,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         worker?.stopThread()
         worker = null
         super.killProcesses()
-        tun2socksProcess?.destroy()
-        tun2socksProcess = null
         conn?.close()
         conn = null
     }
@@ -256,7 +253,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             cmd += "--dnsgw"
             cmd += "127.0.0.1:${DataStore.portLocalDns}"
         }
-        tun2socksProcess = GuardedProcess(cmd).start { sendFd(fd) }
+        data.processes.start(cmd) { sendFd(fd) }
         return fd
     }
 

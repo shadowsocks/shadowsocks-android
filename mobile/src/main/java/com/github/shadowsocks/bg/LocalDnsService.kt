@@ -28,19 +28,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.net.Inet6Address
-import java.util.*
 
-/**
- * This object also uses WeakMap to simulate the effects of multi-inheritance, but more lightweight.
- */
 object LocalDnsService {
     interface Interface : BaseService.Interface {
-        var overtureProcess: GuardedProcess?
-            get() = overtureProcesses[this]
-            set(value) {
-                if (value == null) overtureProcesses.remove(this) else overtureProcesses[this] = value
-            }
-
         override fun startNativeProcesses() {
             super.startNativeProcesses()
             val data = data
@@ -96,18 +86,10 @@ object LocalDnsService {
                 return file
             }
 
-            if (!profile.udpdns) overtureProcess = GuardedProcess(buildAdditionalArguments(arrayListOf(
+            if (!profile.udpdns) data.processes.start(buildAdditionalArguments(arrayListOf(
                     File(app.applicationInfo.nativeLibraryDir, Executable.OVERTURE).absolutePath,
                     "-c", buildOvertureConfig("overture.conf")
-            ))).start()
-        }
-
-        override fun killProcesses() {
-            super.killProcesses()
-            overtureProcess?.destroy()
-            overtureProcess = null
+            )))
         }
     }
-
-    private val overtureProcesses = WeakHashMap<Interface, GuardedProcess>()
 }
