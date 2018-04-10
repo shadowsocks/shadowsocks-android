@@ -8,7 +8,7 @@ buildscript {
         minSdkVersion = 21
         sdkVersion = 27
         buildToolsVersion = '27.0.3'
-        supportLibraryVersion = '27.1.0'
+        supportLibraryVersion = '27.1.1'
         takisoftFixVersion = '27.1.0.0'
         playServicesVersion = '12.0.1'
         junitVersion = '4.12'
