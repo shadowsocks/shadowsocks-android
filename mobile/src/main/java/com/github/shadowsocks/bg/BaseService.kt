@@ -76,7 +76,7 @@ object BaseService {
         @Volatile var state = STOPPED
         @Volatile var plugin = PluginOptions()
         @Volatile var pluginPath: String? = null
-        var sslocalProcess: GuardedProcess? = null
+        val processes = GuardedProcessPool()
 
         var timer: Timer? = null
         var trafficMonitorThread: TrafficMonitorThread? = null
@@ -274,7 +274,7 @@ object BaseService {
 
             if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
 
-            data.sslocalProcess = GuardedProcess(cmd).start()
+            data.processes.start(cmd)
         }
 
         fun createNotification(profileName: String): ServiceNotification
@@ -285,11 +285,7 @@ object BaseService {
             else startService(Intent(this, javaClass))
         }
 
-        fun killProcesses() {
-            val data = data
-            data.sslocalProcess?.destroy()
-            data.sslocalProcess = null
-        }
+        fun killProcesses() = data.processes.killAll()
 
         fun stopRunner(stopService: Boolean, msg: String? = null) {
             // channge the state

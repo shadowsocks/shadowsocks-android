@@ -31,31 +31,34 @@ import com.github.shadowsocks.utils.thread
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.util.concurrent.Semaphore
+import java.util.*
+import java.util.concurrent.ArrayBlockingQueue
 
-class GuardedProcess(private val cmd: List<String>) {
+class GuardedProcessPool {
     companion object {
-        private const val TAG = "GuardedProcess"
+        private const val TAG = "GuardedProcessPool"
+        private val dummy = IOException()
     }
 
-    private lateinit var guardThread: Thread
-    @Volatile
-    private var isDestroyed = false
-    @Volatile
-    private lateinit var process: Process
-    private val name = File(cmd.first()).nameWithoutExtension
+    private inner class Guard(private val cmd: List<String>, private val onRestartCallback: (() -> Unit)?) {
+        val cmdName = File(cmd.first()).nameWithoutExtension
+        val excQueue = ArrayBlockingQueue<IOException>(1)   // ArrayBlockingQueue doesn't want null
+        private var pushed = false
 
-    private fun streamLogger(input: InputStream, logger: (String, String) -> Int) = thread("StreamLogger-$name") {
-        try {
-            input.bufferedReader().useLines { it.forEach { logger(TAG, it) } }
-        } catch (_: IOException) { }    // ignore
-    }
+        private fun streamLogger(input: InputStream, logger: (String, String) -> Int) =
+                thread("StreamLogger-$cmdName") {
+                    try {
+                        input.bufferedReader().useLines { it.forEach { logger(TAG, it) } }
+                    } catch (_: IOException) { }    // ignore
+                }
+        private fun pushException(ioException: IOException?) {
+            if (pushed) return
+            excQueue.put(ioException ?: dummy)
+            pushed = true
+        }
 
-    fun start(onRestartCallback: (() -> Unit)? = null): GuardedProcess {
-        val semaphore = Semaphore(1)
-        semaphore.acquire()
-        var ioException: IOException? = null
-        guardThread = thread("GuardThread-$name") {
+        fun looper() {
+            var process: Process? = null
             try {
                 var callback: (() -> Unit)? = null
                 while (!isDestroyed) {
@@ -72,44 +75,54 @@ class GuardedProcess(private val cmd: List<String>) {
 
                     if (callback == null) callback = onRestartCallback else callback()
 
-                    semaphore.release()
+                    pushException(null)
                     process.waitFor()
 
                     synchronized(this) {
                         if (SystemClock.elapsedRealtime() - startTime < 1000) {
-                            Log.w(TAG, "process exit too fast, stop guard: " + Commandline.toString(cmd))
+                            Log.w(TAG, "process exit too fast, stop guard: $cmdName")
                             isDestroyed = true
                         }
                     }
                 }
             } catch (_: InterruptedException) {
-                if (BuildConfig.DEBUG) Log.d(TAG, "thread interrupt, destroy process: " + Commandline.toString(cmd))
-                destroyProcess()
+                if (BuildConfig.DEBUG) Log.d(TAG, "thread interrupt, destroy process: $cmdName")
             } catch (e: IOException) {
-                ioException = e
+                pushException(e)
             } finally {
-                semaphore.release()
+                if (process != null) {
+                    if (Build.VERSION.SDK_INT < 24) @Suppress("DEPRECATION") {
+                        JniHelper.sigtermCompat(process)
+                        JniHelper.waitForCompat(process, 500)
+                    }
+                    process.destroy()
+                    process.waitFor()   // ensure the process is destroyed
+                }
+                pushException(null)
             }
         }
-        semaphore.acquire()
-        if (ioException != null) throw ioException!!
+    }
+
+    private val guardThreads = HashSet<Thread>()
+    @Volatile
+    private var isDestroyed = false
+
+    fun start(cmd: List<String>, onRestartCallback: (() -> Unit)? = null): GuardedProcessPool {
+        val guard = Guard(cmd, onRestartCallback)
+        guardThreads.add(thread("GuardThread-${guard.cmdName}", block = guard::looper))
+        val ioException = guard.excQueue.take()
+        if (ioException !== dummy) throw ioException
         return this
     }
 
-    fun destroy() {
+    fun killAll() {
         isDestroyed = true
-        guardThread.interrupt()
-        destroyProcess()
+        guardThreads.forEach { it.interrupt() }
         try {
-            guardThread.join()
+            guardThreads.forEach { it.join() }
         } catch (_: InterruptedException) { }
-    }
 
-    private fun destroyProcess() {
-        if (Build.VERSION.SDK_INT < 24) @Suppress("DEPRECATION") {
-            JniHelper.sigtermCompat(process)
-            JniHelper.waitForCompat(process, 500)
-        }
-        process.destroy()
+        guardThreads.clear()
+        isDestroyed = false
     }
 }
