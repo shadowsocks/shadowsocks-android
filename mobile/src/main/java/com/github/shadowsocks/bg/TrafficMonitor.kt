@@ -41,7 +41,7 @@ object TrafficMonitor {
     @Volatile
     private var dirty = true
 
-    private val units = arrayOf("KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "BB", "NB", "DB", "CB")
+    private val units = arrayOf("KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", "BiB", "NiB", "DiB", "CiB")
     private val numberFormat = DecimalFormat("@@@")
     fun formatTraffic(size: Long): String {
         var n = size.toDouble()
