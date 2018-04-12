@@ -164,6 +164,15 @@ class App : Application() {
         }
 
         updateNotificationChannels()
+
+        val nightMode = DataStore.nightMode
+        when (nightMode) {
+            Key.nightModeSystem -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            Key.nightModeAuto -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
+            Key.nightModeOff -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            Key.nightModeOn -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

@@ -51,6 +51,9 @@ object DataStore {
         }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
+    var nightMode: String
+        get() = publicStore.getString(Key.nightMode) ?: Key.nightModeOff
+        set(value) = publicStore.putString(Key.nightMode, value)
     var serviceMode: String
         get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
         set(value) = publicStore.putString(Key.serviceMode, value)
@@ -66,6 +69,7 @@ object DataStore {
 
     fun initGlobal() {
         // temporary workaround for support lib bug
+        if (publicStore.getString(Key.nightMode) == null) nightMode = nightMode
         if (publicStore.getString(Key.serviceMode) == null) serviceMode = serviceMode
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
