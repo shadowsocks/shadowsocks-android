@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">@color/md_grey_800</color>
+    <color name="primary_drawable">@android:color/white</color>
+</resources>
