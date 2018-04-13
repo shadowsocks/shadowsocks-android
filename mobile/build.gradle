@@ -21,8 +21,8 @@ android {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 4050500
-        versionName "4.5.5"
+        versionCode 4050600
+        versionName "4.5.6"
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
