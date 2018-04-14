@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="color_primary">@color/material_primary_800</color>
+    <color name="color_primary_dark">@color/material_primary_900</color>
+
     <!-- MaterialDrawer colors -->
     <color name="drawer_background">@color/material_drawer_dark_background</color>
     <color name="drawer_primary_text">@color/material_drawer_dark_primary_text</color>

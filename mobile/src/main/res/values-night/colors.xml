@@ -2,4 +2,5 @@
 <resources>
     <color name="background">@color/md_grey_800</color>
     <color name="primary_drawable">@android:color/white</color>
+    <color name="background_stat">@color/material_blue_grey_600</color>
 </resources>

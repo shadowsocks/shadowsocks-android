@@ -4,4 +4,5 @@
     <color name="material_drawer_selected_text">@color/material_accent_200</color>
     <color name="background">@android:color/white</color>
     <color name="primary_drawable">@android:color/black</color>
+    <color name="background_stat">@color/material_blue_grey_300</color>
 </resources>
