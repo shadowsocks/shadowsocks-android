@@ -37,6 +37,7 @@ import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
 import android.text.format.Formatter
@@ -324,6 +325,25 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         if (key == Key.serviceMode) app.handler.post {
             connection.disconnect()
             connection.connect()
+        } else if (key == Key.nightMode) {
+            when (store.getString(key, null).toString()) {
+                Key.nightModeSystem -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    recreate()
+                }
+                Key.nightModeAuto -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
+                    recreate()
+                }
+                Key.nightModeOff -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    recreate()
+                }
+                Key.nightModeOn -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    recreate()
+                }
+            }
         }
     }
 
