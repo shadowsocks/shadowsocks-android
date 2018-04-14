@@ -22,7 +22,7 @@
         <item name="material_drawer_selected_text">@color/drawer_selected_text</item>
         <item name="material_drawer_header_selection_text">@color/drawer_header_selection_text</item>
     </style>
-    <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.DayNight.Dialog">
+    <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowContentOverlay">@null</item>
