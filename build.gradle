@@ -10,7 +10,7 @@ buildscript {
         buildToolsVersion = '27.0.3'
         supportLibraryVersion = '27.1.1'
         takisoftFixVersion = '27.1.1.0'
-        playServicesVersion = '12.0.1'
+        playServicesVersion = '15.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.0.1'
         androidEspressoVersion = '3.0.1'
