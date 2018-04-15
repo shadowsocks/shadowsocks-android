@@ -52,7 +52,7 @@ object DataStore {
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
     var nightMode: String
-        get() = publicStore.getString(Key.nightMode) ?: Key.nightModeOff
+        get() = publicStore.getString(Key.nightMode) ?: Key.nightModeSystem
         set(value) = publicStore.putString(Key.nightMode, value)
     var serviceMode: String
         get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn

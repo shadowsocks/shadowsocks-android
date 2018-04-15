@@ -322,27 +322,19 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
-        if (key == Key.serviceMode) app.handler.post {
-            connection.disconnect()
-            connection.connect()
-        } else if (key == Key.nightMode) {
-            when (store.getString(key, null).toString()) {
-                Key.nightModeSystem -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    recreate()
-                }
-                Key.nightModeAuto -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
-                    recreate()
-                }
-                Key.nightModeOff -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    recreate()
-                }
-                Key.nightModeOn -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                    recreate()
-                }
+        when (key) {
+            Key.serviceMode -> app.handler.post {
+                connection.disconnect()
+                connection.connect()
+            }
+            Key.nightMode -> {
+                AppCompatDelegate.setDefaultNightMode(when (store.getString(key, null)) {
+                    Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
+                    Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
+                    Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
+                    else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                })
+                recreate()
             }
         }
     }
