@@ -11,16 +11,6 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material.Fix</item>
         <item name="preferenceCategory_marginBottom">8dp</item>
         <item name="windowActionModeOverlay">true</item>
-        <!-- MaterialDrawer specific values -->
-        <item name="material_drawer_background">@color/drawer_background</item>
-        <item name="material_drawer_primary_text">@color/drawer_primary_text</item>
-        <item name="material_drawer_primary_icon">@color/drawer_primary_icon</item>
-        <item name="material_drawer_secondary_text">@color/drawer_secondary_text</item>
-        <item name="material_drawer_hint_text">@color/drawer_hint_text</item>
-        <item name="material_drawer_divider">@color/drawer_divider</item>
-        <item name="material_drawer_selected">@color/drawer_selected</item>
-        <item name="material_drawer_selected_text">@color/drawer_selected_text</item>
-        <item name="material_drawer_header_selection_text">@color/drawer_header_selection_text</item>
     </style>
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>

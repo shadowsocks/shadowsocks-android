@@ -4,15 +4,4 @@
     <color name="color_primary">@color/material_primary_800</color>
     <color name="color_primary_dark">@color/material_primary_900</color>
 
-    <!-- MaterialDrawer colors -->
-    <color name="drawer_background">@color/material_drawer_dark_background</color>
-    <color name="drawer_primary_text">@color/material_drawer_dark_primary_text</color>
-    <color name="drawer_primary_icon">@color/material_drawer_dark_primary_icon</color>
-    <color name="drawer_secondary_text">@color/material_drawer_dark_secondary_text</color>
-    <color name="drawer_hint_text">@color/material_drawer_dark_hint_text</color>
-    <color name="drawer_divider">@color/material_drawer_dark_divider</color>
-    <color name="drawer_selected">@color/material_drawer_dark_selected</color>
-    <color name="drawer_selected_text">@color/material_accent_200</color>
-    <color name="drawer_header_selection_text">@color/material_drawer_dark_header_selection_text</color>
-
 </resources>
