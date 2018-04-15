@@ -3,7 +3,8 @@
               xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:padding="16dp">
     <Spinner android:id="@+id/template_selector"
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
