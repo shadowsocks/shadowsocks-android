@@ -60,7 +60,7 @@
                     android:ellipsize="marquee"
                     android:gravity="end"
                     android:text="@string/sent"
-                    android:textColor="?android:attr/textColorSecondary"
+                    android:textColor="?android:attr/textColorPrimary"
                     app:layout_column="0"/>
 
                 <TextView
@@ -103,7 +103,7 @@
                     android:ellipsize="marquee"
                     android:gravity="end"
                     android:text="@string/received"
-                    android:textColor="?android:attr/textColorSecondary"
+                    android:textColor="?android:attr/textColorPrimary"
                     app:layout_column="0"
                     app:layout_row="1"/>
 
