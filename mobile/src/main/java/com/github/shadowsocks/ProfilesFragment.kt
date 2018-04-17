@@ -33,13 +33,13 @@ import android.support.design.widget.Snackbar
 import android.support.v4.app.DialogFragment
 import android.support.v7.widget.*
 import android.support.v7.widget.helper.ItemTouchHelper
+import android.text.format.Formatter
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.bg.TrafficMonitor
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
@@ -159,10 +159,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 text2.visibility = View.VISIBLE
                 text2.text = t2.joinToString("\n")
             }
+            val context = requireContext()
             if (tx <= 0 && rx <= 0) traffic.visibility = View.GONE else {
                 traffic.visibility = View.VISIBLE
                 traffic.text = getString(R.string.traffic,
-                        TrafficMonitor.formatTraffic(tx), TrafficMonitor.formatTraffic(rx))
+                        Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
             }
 
             if (item.id == DataStore.profileId) {
@@ -179,7 +180,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT)
                     params.gravity = Gravity.CENTER_HORIZONTAL
-                    val context = requireContext()
                     adView = AdView(context)
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"

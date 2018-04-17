@@ -31,6 +31,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
+import android.text.format.Formatter
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -55,11 +56,11 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             override fun stateChanged(state: Int, profileName: String?, msg: String?) { }   // ignore
             override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 service as Context
-                val txr = service.getString(R.string.speed, TrafficMonitor.formatTraffic(txRate))
-                val rxr = service.getString(R.string.speed, TrafficMonitor.formatTraffic(rxRate))
+                val txr = service.getString(R.string.speed, Formatter.formatFileSize(service, txRate))
+                val rxr = service.getString(R.string.speed, Formatter.formatFileSize(service, rxRate))
                 builder.setContentText("$txr↑\t$rxr↓")
                 style.bigText(service.getString(R.string.stat_summary).format(Locale.ENGLISH, txr, rxr,
-                        TrafficMonitor.formatTraffic(txTotal), TrafficMonitor.formatTraffic(rxTotal)))
+                        Formatter.formatFileSize(service, txTotal), Formatter.formatFileSize(service, rxTotal)))
                 show()
             }
             override fun trafficPersisted(profileId: Int) { }

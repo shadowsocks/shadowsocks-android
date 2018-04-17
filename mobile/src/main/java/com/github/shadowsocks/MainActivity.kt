@@ -39,6 +39,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
+import android.text.format.Formatter
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -49,7 +50,6 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
-import com.github.shadowsocks.bg.TrafficMonitor
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
@@ -149,10 +149,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         stateListener?.invoke(state)
     }
     fun updateTraffic(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-        txText.text = TrafficMonitor.formatTraffic(txTotal)
-        rxText.text = TrafficMonitor.formatTraffic(rxTotal)
-        txRateText.text = getString(R.string.speed, TrafficMonitor.formatTraffic(txRate))
-        rxRateText.text = getString(R.string.speed, TrafficMonitor.formatTraffic(rxRate))
+        txText.text = Formatter.formatFileSize(this, txTotal)
+        rxText.text = Formatter.formatFileSize(this, rxTotal)
+        txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
+        rxRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, rxRate))
         val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
         if (state != BaseService.STOPPING)
             child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
