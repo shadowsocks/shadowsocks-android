@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import android.annotation.TargetApi
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,7 +39,8 @@ class AboutFragment : ToolbarFragment() {
         super.onViewCreated(view, savedInstanceState)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
         val web = view.findViewById<WebView>(R.id.web_view)
-        web.loadUrl("file:///android_asset/pages/about.html")
+        web.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.background))
+        web.loadUrl(getString(R.string.about_url))
         web.webViewClient = object : WebViewClient() {
             @Suppress("OverridingDeprecatedMember")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
