@@ -21,7 +21,6 @@
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s\nReceived: \t%4$s\t↓\t%2$s</string>
   <string name="speed">%s/s</string>
   <string name="connection_test_url">Connection Test URL</string>
-  <string name="connection_test_url_chinalist">Connection Test URL (China List mode only)</string>
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
   <string name="connection_test_available">Success: %dms latency</string>

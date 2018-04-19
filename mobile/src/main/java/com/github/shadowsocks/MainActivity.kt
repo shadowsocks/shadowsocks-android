@@ -166,9 +166,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
      */
     private fun testConnection(id: Int) {
         val (success, result) = try {
-            val urlString = when (app.currentProfile!!.route) {
-                Acl.CHINALIST -> DataStore.testUrlChinaList
-                else -> DataStore.testUrl}
+            val urlString = DataStore.testUrl
             val url = URL(urlString)
             if (url.protocol != "https")
                 throw MalformedURLException(getString(R.string.connection_test_url_non_https, urlString))

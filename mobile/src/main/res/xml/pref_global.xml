@@ -16,10 +16,6 @@
         android:key="testUrl"
         android:title="@string/connection_test_url"
         app:pref_summaryHasText="%s"/>
-    <AutoSummaryEditTextPreference
-        android:key="testUrlChinaList"
-        android:title="@string/connection_test_url_chinalist"
-        app:pref_summaryHasText="%s"/>
     <PreferenceCategory
         android:title="@string/advanced">
         <SimpleMenuPreference
