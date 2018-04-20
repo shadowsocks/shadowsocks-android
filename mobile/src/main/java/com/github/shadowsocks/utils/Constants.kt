@@ -49,7 +49,6 @@ object Key {
     const val bypass = "isBypassApps"
     const val udpdns = "isUdpDns"
     const val ipv6 = "isIpv6"
-    const val testUrl = "testUrl"
 
     const val host = "proxy"
     const val password = "sitekey"

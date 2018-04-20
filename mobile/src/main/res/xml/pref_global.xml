@@ -12,10 +12,6 @@
     <SwitchPreference android:key="tcp_fastopen"
                       android:summary="@string/tcp_fastopen_summary"
                       android:title="TCP Fast Open"/>
-    <AutoSummaryEditTextPreference
-        android:key="testUrl"
-        android:title="@string/connection_test_url"
-        app:pref_summaryHasText="%s"/>
     <PreferenceCategory
         android:title="@string/advanced">
         <SimpleMenuPreference
