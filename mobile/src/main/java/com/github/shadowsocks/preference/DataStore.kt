@@ -54,6 +54,9 @@ object DataStore {
     var nightMode: String
         get() = publicStore.getString(Key.nightMode) ?: Key.nightModeSystem
         set(value) = publicStore.putString(Key.nightMode, value)
+    var testUrl: String
+        get() = publicStore.getString(Key.testUrl) ?: "https://www.google.com/generate_204"
+        set(value) = publicStore.putString(Key.testUrl, value)
     var serviceMode: String
         get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
         set(value) = publicStore.putString(Key.serviceMode, value)
@@ -70,6 +73,7 @@ object DataStore {
     fun initGlobal() {
         // temporary workaround for support lib bug
         if (publicStore.getString(Key.nightMode) == null) nightMode = nightMode
+        if (publicStore.getString(Key.testUrl) == null) testUrl = testUrl
         if (publicStore.getString(Key.serviceMode) == null) serviceMode = serviceMode
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
