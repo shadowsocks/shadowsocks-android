@@ -7,7 +7,6 @@
         <item name="colorButtonNormal">@color/material_accent_200</item>
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
-        <item name="android:preferenceStyle">@style/PreferenceFixTheme.DayNight.NoActionBar</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material.Fix</item>
         <item name="preferenceCategory_marginBottom">8dp</item>
         <item name="windowActionModeOverlay">true</item>
