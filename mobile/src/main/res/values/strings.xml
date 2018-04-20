@@ -20,9 +20,13 @@
   <string name="traffic">%s↑\t%s↓</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s\nReceived: \t%4$s\t↓\t%2$s</string>
   <string name="speed">%s/s</string>
+  <string name="connection_test_url">Connection Test URL</string>
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
   <string name="connection_test_available">Success: %dms latency</string>
+  <string name="connection_test_url_error">Check connection test URL. %s</string>
+  <string name="connection_test_url_non_https">Non-HTTPS URL: %s</string>
+  <string name="connection_test_url_invalid">Invalid URL: %s</string>
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>

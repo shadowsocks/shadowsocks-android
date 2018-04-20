@@ -41,7 +41,9 @@ import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
 import android.text.format.Formatter
 import android.util.Log
+import android.util.Patterns
 import android.view.View
+import android.webkit.URLUtil
 import android.widget.TextView
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
@@ -65,6 +67,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
+import java.net.MalformedURLException
 import java.net.Proxy
 import java.net.URL
 import java.util.*
@@ -162,28 +165,34 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
      * Based on: https://android.googlesource.com/platform/frameworks/base/+/97bfd27/services/core/java/com/android/server/connectivity/NetworkMonitor.java#879
      */
     private fun testConnection(id: Int) {
-        val url = URL("https", when (app.currentProfile!!.route) {
-            Acl.CHINALIST -> "www.qualcomm.cn"
-            else -> "www.google.com"
-        }, "/generate_204")
-        val conn = (if (BaseService.usingVpnMode) url.openConnection() else
-            url.openConnection(Proxy(Proxy.Type.SOCKS,
-                    InetSocketAddress("127.0.0.1", DataStore.portProxy))))
-                as HttpURLConnection
-        conn.setRequestProperty("Connection", "close")
-        conn.instanceFollowRedirects = false
-        conn.useCaches = false
         val (success, result) = try {
-            val start = SystemClock.elapsedRealtime()
-            val code = conn.responseCode
-            val elapsed = SystemClock.elapsedRealtime() - start
-            if (code == 204 || code == 200 && conn.responseLength == 0L)
-                Pair(true, getString(R.string.connection_test_available, elapsed))
-            else throw IOException(getString(R.string.connection_test_error_status_code, code))
-        } catch (e: IOException) {
-            Pair(false, getString(R.string.connection_test_error, e.message))
-        } finally {
-            conn.disconnect()
+            val urlString = DataStore.testUrl
+            val url = URL(urlString)
+            if (url.protocol != "https")
+                throw MalformedURLException(getString(R.string.connection_test_url_non_https, urlString))
+            if (!URLUtil.isValidUrl(urlString) || !Patterns.WEB_URL.matcher(urlString).matches())
+                throw MalformedURLException(getString(R.string.connection_test_url_invalid, urlString))
+            val conn = (if (BaseService.usingVpnMode) url.openConnection() else
+                url.openConnection(Proxy(Proxy.Type.SOCKS,
+                        InetSocketAddress("127.0.0.1", DataStore.portProxy))))
+                    as HttpURLConnection
+            conn.setRequestProperty("Connection", "close")
+            conn.instanceFollowRedirects = false
+            conn.useCaches = false
+            try {
+                val start = SystemClock.elapsedRealtime()
+                val code = conn.responseCode
+                val elapsed = SystemClock.elapsedRealtime() - start
+                if (code == 204 || code == 200 && conn.responseLength == 0L)
+                    Pair(true, getString(R.string.connection_test_available, elapsed))
+                else throw IOException(getString(R.string.connection_test_error_status_code, code))
+            } catch (e: IOException) {
+                Pair(false, getString(R.string.connection_test_error, e.message))
+            } finally {
+                conn.disconnect()
+            }
+        } catch (e: MalformedURLException) {
+            Pair(false, getString(R.string.connection_test_url_error, e.message))
         }
         if (testCount == id) app.handler.post {
             if (success) statusText.text = result else {
