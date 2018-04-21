@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/snackbar"
-    android:background="@color/material_primary_700"
+    android:background="@color/color_primary_dark"
     android:clipChildren="false"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -60,6 +60,7 @@
                     android:ellipsize="marquee"
                     android:gravity="end"
                     android:text="@string/sent"
+                    android:textColor="?android:attr/textColorPrimary"
                     app:layout_column="0"/>
 
                 <TextView
@@ -102,6 +103,7 @@
                     android:ellipsize="marquee"
                     android:gravity="end"
                     android:text="@string/received"
+                    android:textColor="?android:attr/textColorPrimary"
                     app:layout_column="0"
                     app:layout_row="1"/>
 

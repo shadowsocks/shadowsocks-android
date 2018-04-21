@@ -3,6 +3,7 @@
 
   <string name="app_name">Shadowsocks</string>
   <string name="quick_toggle">Toggle</string>
+  <string name="about_url" translatable="false">file:///android_asset/pages/about.html</string>
 
   <!-- misc -->
   <string name="profile">Profile</string>
@@ -59,6 +60,11 @@
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="udp_dns">DNS Forwarding</string>
   <string name="udp_dns_summary">Forward all DNS requests to remote</string>
+  <string name="night_mode">Night mode</string>
+  <string name="night_mode_system">Follow system</string>
+  <string name="night_mode_auto">Auto</string>
+  <string name="night_mode_on">On</string>
+  <string name="night_mode_off">Off</string>
 
   <!-- notification category -->
   <string name="service_vpn">VPN Service</string>

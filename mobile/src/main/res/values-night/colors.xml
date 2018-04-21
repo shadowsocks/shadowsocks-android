@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">@color/md_dark_background</color>
+    <color name="background_selected">@color/material_primary_800</color>
+    <color name="primary_drawable">@android:color/white</color>
+    <color name="background_stat">@color/material_primary_600</color>
+
+    <!-- MaterialDrawer colors -->
+    <color name="drawer_background">@color/material_drawer_dark_background</color>
+    <color name="drawer_primary_text">@color/material_drawer_dark_primary_text</color>
+    <color name="drawer_primary_icon">@color/material_drawer_dark_primary_icon</color>
+    <color name="drawer_secondary_text">@color/material_drawer_dark_secondary_text</color>
+    <color name="drawer_hint_text">@color/material_drawer_dark_hint_text</color>
+    <color name="drawer_divider">@color/material_drawer_dark_divider</color>
+    <color name="drawer_selected">@color/material_drawer_dark_selected</color>
+    <color name="drawer_selected_text">@color/material_accent_200</color>
+    <color name="drawer_header_selection_text">@color/material_drawer_dark_header_selection_text</color>
+</resources>

@@ -162,7 +162,7 @@ class App : Application() {
                 }
             DataStore.publicStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
         }
-
+        AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
         updateNotificationChannels()
     }
 

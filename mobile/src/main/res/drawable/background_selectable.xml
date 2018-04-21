@@ -4,7 +4,7 @@
         <selector android:enterFadeDuration="@android:integer/config_mediumAnimTime"
                   android:exitFadeDuration="@android:integer/config_mediumAnimTime">
             <item android:state_selected="true">
-                <color android:color="@color/material_primary_100"/>
+                <color android:color="@color/background_selected"/>
             </item>
         </selector>
     </item>

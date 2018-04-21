@@ -12,6 +12,13 @@
     <SwitchPreference android:key="tcp_fastopen"
                       android:summary="@string/tcp_fastopen_summary"
                       android:title="TCP Fast Open"/>
+    <SimpleMenuPreference
+        android:key="nightMode"
+        android:entries="@array/night_modes"
+        android:entryValues="@array/night_mode_values"
+        android:defaultValue="system"
+        android:summary="%s"
+        android:title="@string/night_mode"/>
     <PreferenceCategory
         android:title="@string/advanced">
         <SimpleMenuPreference

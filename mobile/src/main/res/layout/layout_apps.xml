@@ -11,7 +11,7 @@
   <LinearLayout android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:elevation="1dp"
-                android:background="@android:color/white"
+                android:background="@color/background"
                 android:orientation="vertical"
                 tools:ignore="RtlSymmetry">
 

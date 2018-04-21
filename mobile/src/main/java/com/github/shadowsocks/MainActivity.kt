@@ -37,6 +37,7 @@ import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
 import android.text.format.Formatter
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     private val customTabsIntent by lazy {
         CustomTabsIntent.Builder()
-                .setToolbarColor(ContextCompat.getColor(this, R.color.material_primary_500))
+                .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
                 .build()
     }
     fun launchUrl(uri: Uri) = try {
@@ -321,9 +322,15 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
-        if (key == Key.serviceMode) app.handler.post {
-            connection.disconnect()
-            connection.connect()
+        when (key) {
+            Key.serviceMode -> app.handler.post {
+                connection.disconnect()
+                connection.connect()
+            }
+            Key.nightMode -> {
+                AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
+                recreate()
+            }
         }
     }
 
