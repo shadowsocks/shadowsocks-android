@@ -30,18 +30,6 @@ MKDIR %TARGET%\arm64-v8a>nul 2>nul
 
 SET CC=%ANDROID_ARM_TOOLCHAIN%\bin\arm-linux-androideabi-gcc.exe
 
-REM Check environment availability
-IF NOT EXIST %CC% (
-    ECHO "gcc not found"
-    EXIT 1
-)
-
-WHERE python.exe
-IF "%ERRORLEVEL%" == 1 (
-    ECHO "python not found"
-    EXIT 1
-)
-
 IF NOT EXIST %ANDROID_ARM_CC% (
 	ECHO "Make standalone toolchain for ARM arch"
     python.exe %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch arm ^
@@ -58,6 +46,18 @@ IF NOT EXIST %ANDROID_X86_CC% (
     ECHO "Make standalone toolchain for X86 arch"
     python.exe %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch x86 ^
         --api %MIN_API% --install-dir %ANDROID_X86_TOOLCHAIN%
+)
+
+REM Check environment availability
+IF NOT EXIST %CC% (
+    ECHO "gcc not found"
+    EXIT 1
+)
+
+WHERE python.exe
+IF "%ERRORLEVEL%" == 1 (
+    ECHO "python not found"
+    EXIT 1
 )
 
 IF NOT EXIST %DIR%\go\bin\go.exe (
