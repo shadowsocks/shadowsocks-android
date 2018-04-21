@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     private val customTabsIntent by lazy {
         CustomTabsIntent.Builder()
-                .setToolbarColor(ContextCompat.getColor(this, R.color.material_primary_500))
+                .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
                 .build()
     }
     fun launchUrl(uri: Uri) = try {
