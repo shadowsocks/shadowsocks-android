@@ -20,8 +20,6 @@
 
 package com.github.shadowsocks
 
-import android.annotation.TargetApi
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
@@ -32,8 +30,13 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 
 class AboutFragment : ToolbarFragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.layout_about, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        // workaround for weird night mode bug
+        val configuration = resources.configuration
+        val result = inflater.inflate(R.layout.layout_about, container, false)
+        if (resources.configuration !== configuration) requireActivity().recreate()
+        return result
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,7 +51,6 @@ class AboutFragment : ToolbarFragment() {
                 return true
             }
 
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
                 (activity as MainActivity).launchUrl(request.url)
                 return true
