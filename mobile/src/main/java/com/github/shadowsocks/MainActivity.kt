@@ -328,7 +328,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 connection.connect()
             }
             Key.nightMode -> {
-                DataStore.applyNightModeSettings()
+                AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
                 recreate()
             }
         }
