@@ -162,15 +162,8 @@ class App : Application() {
                 }
             DataStore.publicStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
         }
-
+        DataStore.applyNightModeSettings()
         updateNotificationChannels()
-
-        when (DataStore.nightMode) {
-            Key.nightModeAuto -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO)
-            Key.nightModeOff -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            Key.nightModeOn -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

@@ -21,6 +21,7 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
+import android.support.v7.app.AppCompatDelegate
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
@@ -51,7 +52,7 @@ object DataStore {
         }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
-    var nightMode: String
+    private var nightMode: String
         get() = publicStore.getString(Key.nightMode) ?: Key.nightModeSystem
         set(value) = publicStore.putString(Key.nightMode, value)
     var serviceMode: String
@@ -91,4 +92,11 @@ object DataStore {
     var dirty: Boolean
         get() = privateStore.getBoolean(Key.dirty) ?: false
         set(value) = privateStore.putBoolean(Key.dirty, value)
+
+    fun applyNightModeSettings() = AppCompatDelegate.setDefaultNightMode(when (nightMode) {
+        Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
+        Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
+        Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
+        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    })
 }
