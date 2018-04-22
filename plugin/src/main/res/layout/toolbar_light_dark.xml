@@ -8,5 +8,5 @@
     android:elevation="4dp"
     android:touchscreenBlocksFocus="false"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+    app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"
     android:id="@+id/toolbar" />
