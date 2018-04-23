@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
 
     private var testCount = 0
+    private var testPhase = -1
     private lateinit var statusText: TextView
     private lateinit var txText: TextView
     private lateinit var rxText: TextView
@@ -161,9 +162,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     /**
      * Based on: https://android.googlesource.com/platform/frameworks/base/+/97bfd27/services/core/java/com/android/server/connectivity/NetworkMonitor.java#879
      */
-    private fun testConnection(id: Int) {
-        val url = URL("https", when (app.currentProfile!!.route) {
-            Acl.CHINALIST -> "www.qualcomm.cn"
+    private fun testConnection(id: Int, phase: Int) {
+        if (app.currentProfile!!.route == Acl.CHINALIST && phase == 0)
+            return  // no need to test google in CHINALIST mode
+        val url = URL("https", when (phase) {
+            1 -> "www.qualcomm.cn"
             else -> "www.google.com"
         }, "/generate_204")
         val conn = (if (BaseService.usingVpnMode) url.openConnection() else
@@ -178,17 +181,28 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             val code = conn.responseCode
             val elapsed = SystemClock.elapsedRealtime() - start
             if (code == 204 || code == 200 && conn.responseLength == 0L)
-                Pair(true, getString(R.string.connection_test_available, elapsed))
+                Pair(true, getString(R.string.connection_test_available, url.host, elapsed))
             else throw IOException(getString(R.string.connection_test_error_status_code, code))
         } catch (e: IOException) {
             Pair(false, getString(R.string.connection_test_error, e.message))
         } finally {
             conn.disconnect()
         }
-        if (testCount == id) app.handler.post {
-            if (success) statusText.text = result else {
-                statusText.setText(R.string.connection_test_fail)
-                Snackbar.make(findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+
+        if (testCount == id) {
+            if (success) {
+                if (phase == 1 && testPhase == 0)
+                    return  // no need to popup qualcomm's success result after google's
+                testPhase = phase
+            } else {
+                if (testPhase != -1)
+                    return  // no need to popup fail result after success one
+            }
+            app.handler.post {
+                if (success) statusText.text = result else {
+                    statusText.setText(R.string.connection_test_fail)
+                    Snackbar.make(findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -266,7 +280,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 ++testCount
                 statusText.setText(R.string.connection_test_testing)
                 val id = testCount  // it would change by other code
-                thread("ConnectionTest") { testConnection(id) }
+                testPhase = -1
+                thread("ConnectionTest") { testConnection(id, 0) }
+                thread("ConnectionTestBackup") { testConnection(id, 1) }
             }
         }
 

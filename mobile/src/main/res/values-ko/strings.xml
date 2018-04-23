@@ -13,7 +13,7 @@
 </plurals>
 <string name="connection_test_pending">"인터넷 연결 상태 검사하기"</string>
 <string name="connection_test_testing">"검사 중…"</string>
-<string name="connection_test_available">"성공: 지연시간 %dms"</string>
+<string name="connection_test_available">"성공 (%s) : 지연시간 %dms"</string>
 <string name="connection_test_error">"인터넷 연결을 찾을 수 없습니다: %s"</string>
 <string name="connection_test_fail">"인터넷에 연결할 수 없습니다"</string>
 <string name="connection_test_error_status_code">"오류 코드: #%d"</string>

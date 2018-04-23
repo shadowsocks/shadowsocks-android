@@ -14,7 +14,7 @@
 </plurals>
 <string name="connection_test_pending">"檢查連線能力"</string>
 <string name="connection_test_testing">"測試中……"</string>
-<string name="connection_test_available">"成功: %d 毫秒延遲"</string>
+<string name="connection_test_available">"成功 (%s) : %d 毫秒延遲"</string>
 <string name="connection_test_error">"偵測出網際網路連線失敗: %s"</string>
 <string name="connection_test_fail">"無法使用網際網路"</string>
 <string name="connection_test_error_status_code">"錯誤碼: （#%d）"</string>
