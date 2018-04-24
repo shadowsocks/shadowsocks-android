@@ -10,7 +10,7 @@
 受信済み: \t%4$s\t↓\t%2$s/s"</string>
 <string name="connection_test_pending">"接続状況確認"</string>
 <string name="connection_test_testing">"テスト中…"</string>
-<string name="connection_test_available">"成功: %dmsの遅延"</string>
+<string name="connection_test_available">"成功 (%s) : %dmsの遅延"</string>
 <string name="connection_test_error">"失敗しました：%s"</string>
 <string name="connection_test_fail">"インターネット利用不可"</string>
 <string name="connection_test_error_status_code">"ステータスコード無効: #%d"</string>
