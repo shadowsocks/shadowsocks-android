@@ -26,7 +26,7 @@ android {
 dependencies {
     api "com.android.support:preference-v14:$supportLibraryVersion"
     api "com.takisoft.fix:preference-v7:$takisoftFixVersion"
-    api "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
