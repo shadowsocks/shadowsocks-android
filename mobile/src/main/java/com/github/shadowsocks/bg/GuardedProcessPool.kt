@@ -31,8 +31,8 @@ import com.github.shadowsocks.utils.thread
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
-import java.util.*
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.atomic.AtomicReference
 
 class GuardedProcessPool {
     companion object {
@@ -57,11 +57,11 @@ class GuardedProcessPool {
             pushed = true
         }
 
-        fun looper() {
+        fun looper(host: HashSet<Thread>) {
             var process: Process? = null
             try {
                 var callback: (() -> Unit)? = null
-                while (!isDestroyed) {
+                while (guardThreads.get() === host) {
                     if (BuildConfig.DEBUG) Log.d(TAG, "start process: " + Commandline.toString(cmd))
                     val startTime = SystemClock.elapsedRealtime()
 
@@ -78,11 +78,8 @@ class GuardedProcessPool {
                     pushException(null)
                     process.waitFor()
 
-                    synchronized(this) {
-                        if (SystemClock.elapsedRealtime() - startTime < 1000) {
-                            Log.w(TAG, "process exit too fast, stop guard: $cmdName")
-                            isDestroyed = true
-                        }
+                    if (SystemClock.elapsedRealtime() - startTime < 1000) {
+                        Log.w(TAG, "process exit too fast, stop guard: $cmdName")
                     }
                 }
             } catch (_: InterruptedException) {
@@ -103,26 +100,32 @@ class GuardedProcessPool {
         }
     }
 
-    private val guardThreads = HashSet<Thread>()
-    @Volatile
-    private var isDestroyed = false
+    /**
+     * This is an indication of which thread pool is being active.
+     * Reading/writing this collection still needs an additional lock to prevent concurrent modification.
+     */
+    private val guardThreads = AtomicReference<HashSet<Thread>>(HashSet())
 
     fun start(cmd: List<String>, onRestartCallback: (() -> Unit)? = null): GuardedProcessPool {
         val guard = Guard(cmd, onRestartCallback)
-        guardThreads.add(thread("GuardThread-${guard.cmdName}", block = guard::looper))
+        val guardThreads = guardThreads.get()
+        synchronized(guardThreads) {
+            guardThreads.add(thread("GuardThread-${guard.cmdName}") {
+                guard.looper(guardThreads)
+            })
+        }
         val ioException = guard.excQueue.take()
         if (ioException !== dummy) throw ioException
         return this
     }
 
     fun killAll() {
-        isDestroyed = true
-        guardThreads.forEach { it.interrupt() }
-        try {
-            guardThreads.forEach { it.join() }
-        } catch (_: InterruptedException) { }
-
-        guardThreads.clear()
-        isDestroyed = false
+        val guardThreads = guardThreads.getAndSet(HashSet())
+        synchronized(guardThreads) {
+            guardThreads.forEach { it.interrupt() }
+            try {
+                guardThreads.forEach { it.join() }
+            } catch (_: InterruptedException) { }
+        }
     }
 }
