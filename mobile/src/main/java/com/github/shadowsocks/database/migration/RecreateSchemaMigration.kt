@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2018 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2018 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,23 +18,18 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.database
+package com.github.shadowsocks.database.migration
 
-import org.junit.Assert
-import org.junit.Test
+import android.arch.persistence.db.SupportSQLiteDatabase
+import android.arch.persistence.room.migration.Migration
 
-class KeyValuePairTest {
-    @Test
-    fun putAndGet() {
-        val kvp = KeyValuePair()
-        Assert.assertEquals(true, kvp.put(true).boolean)
-        Assert.assertEquals(3f, kvp.put(3f).float)
-        @Suppress("DEPRECATION")
-        Assert.assertEquals(3L, kvp.put(3).long)
-        Assert.assertEquals(3L, kvp.put(3L).long)
-        Assert.assertEquals("3", kvp.put("3").string)
-        val set = (0 until 3).map(Int::toString).toSet()
-        Assert.assertEquals(set, kvp.put(set).stringSet)
-        Assert.assertEquals(null, kvp.boolean)
+open class RecreateSchemaMigration(oldVersion: Int, newVersion: Int, private val table: String,
+                                   private val schema: String, private val keys: String) :
+        Migration(oldVersion, newVersion) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("CREATE TABLE `tmp` $schema")
+        database.execSQL("INSERT INTO `tmp` ($keys) SELECT $keys FROM `$table`")
+        database.execSQL("DROP TABLE `$table`")
+        database.execSQL("ALTER TABLE `tmp` RENAME TO `$table`")
     }
 }

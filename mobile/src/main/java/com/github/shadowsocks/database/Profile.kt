@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.database
 
+import android.arch.persistence.room.*
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
@@ -27,13 +28,12 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
-import com.j256.ormlite.field.DataType
-import com.j256.ormlite.field.DatabaseField
 import java.io.Serializable
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.*
 
+@Entity
 class Profile : Serializable {
     companion object {
         private const val TAG = "ShadowParser"
@@ -93,61 +93,50 @@ class Profile : Serializable {
         }.filterNotNull()
     }
 
-    @DatabaseField(generatedId = true)
-    var id: Int = 0
+    @android.arch.persistence.room.Dao
+    interface Dao {
+        @Query("SELECT * FROM `Profile` WHERE `id` = :id")
+        operator fun get(id: Long): Profile?
 
-    @DatabaseField
+        @Query("SELECT * FROM `Profile` ORDER BY `userOrder`")
+        fun list(): List<Profile>
+
+        @Query("SELECT MAX(`userOrder`) + 1 FROM `Profile`")
+        fun nextOrder(): Long?
+
+        @Query("SELECT 1 FROM `Profile` LIMIT 1")
+        fun isNotEmpty(): Boolean
+
+        @Insert
+        fun create(value: Profile): Long
+
+        @Update
+        fun update(value: Profile): Int
+
+        @Query("DELETE FROM `Profile` WHERE `id` = :id")
+        fun delete(id: Long): Int
+    }
+
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0
     var name: String? = ""
-
-    @DatabaseField
     var host: String = "198.199.101.152"
-
-    @DatabaseField
     var remotePort: Int = 8388
-
-    @DatabaseField
     var password: String = "u1rRWTssNv0p"
-
-    @DatabaseField
     var method: String = "aes-256-cfb"
-
-    @DatabaseField
     var route: String = "all"
-
-    @DatabaseField
     var remoteDns: String = "8.8.8.8"
-
-    @DatabaseField
     var proxyApps: Boolean = false
-
-    @DatabaseField
     var bypass: Boolean = false
-
-    @DatabaseField
     var udpdns: Boolean = false
-
-    @DatabaseField
     var ipv6: Boolean = true
-
-    @DatabaseField(dataType = DataType.LONG_STRING)
     var individual: String = ""
-
-    @DatabaseField
     var tx: Long = 0
-
-    @DatabaseField
     var rx: Long = 0
-
-    @DatabaseField
-    val date: Date = Date()
-
-    @DatabaseField
     var userOrder: Long = 0
-
-    @DatabaseField
     var plugin: String? = null
 
-    // not persisted in db, only used by direct boot
+    @Ignore // not persisted in db, only used by direct boot
     var dirty: Boolean = false
 
     val formattedAddress get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)

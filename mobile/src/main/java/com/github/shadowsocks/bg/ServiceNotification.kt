@@ -54,7 +54,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
     private val callback by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) { }   // ignore
-            override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 service as Context
                 val txr = service.getString(R.string.speed, Formatter.formatFileSize(service, txRate))
                 val rxr = service.getString(R.string.speed, Formatter.formatFileSize(service, rxRate))
@@ -63,7 +63,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
                         Formatter.formatFileSize(service, txTotal), Formatter.formatFileSize(service, rxTotal)))
                 show()
             }
-            override fun trafficPersisted(profileId: Int) { }
+            override fun trafficPersisted(profileId: Long) { }
         }
     }
     private val lockReceiver = broadcastReceiver { _, intent -> update(intent.action) }

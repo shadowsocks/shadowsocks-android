@@ -56,7 +56,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
     }
 
-    private var profileId = -1
+    private var profileId = -1L
     private lateinit var isProxyApps: SwitchPreference
     private lateinit var plugin: IconListPreference
     private lateinit var pluginConfigure: EditTextPreference
@@ -66,7 +66,7 @@ class ProfileConfigFragment : PreferenceFragmentCompatDividers(), Toolbar.OnMenu
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
         val activity = requireActivity()
-        profileId = activity.intent.getIntExtra(Action.EXTRA_PROFILE_ID, -1)
+        profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
         addPreferencesFromResource(R.xml.pref_profile)
         if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService(UserManager::class.java).isDemoUser) {
             findPreference(Key.host).summary = "shadowsocks.example.org"

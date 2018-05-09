@@ -4,6 +4,7 @@ import java.util.regex.Pattern
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 def getCurrentFlavor() {
     String task = getGradle().getStartParameter().getTaskRequests().toString()
@@ -26,6 +27,11 @@ android {
         testApplicationId "com.github.shadowsocks.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         debug {
@@ -54,6 +60,7 @@ android {
 
 dependencies {
     implementation project(':core')
+    implementation "android.arch.persistence.room:runtime:$roomVersion"
     implementation "com.android.support:customtabs:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
@@ -63,7 +70,6 @@ dependencies {
     implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
     implementation "com.google.android.gms:play-services-vision:$playServicesVersion"
     implementation "com.google.firebase:firebase-config:$playServicesVersion"
-    implementation 'com.j256.ormlite:ormlite-android:5.1'
     implementation 'com.mikepenz:materialdrawer:6.0.7'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
@@ -73,6 +79,8 @@ dependencies {
     implementation 'net.glxn.qrgen:android:2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
+    kapt "android.arch.persistence.room:compiler:$roomVersion"
+    testImplementation "android.arch.persistence.room:testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"

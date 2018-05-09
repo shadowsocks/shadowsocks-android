@@ -116,10 +116,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
                 app.handler.post { changeState(state, msg, true) }
             }
-            override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 app.handler.post { updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal) }
             }
-            override fun trafficPersisted(profileId: Int) {
+            override fun trafficPersisted(profileId: Long) {
                 app.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
             }
         }
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
     }
-    fun updateTraffic(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+    fun updateTraffic(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
         txText.text = Formatter.formatFileSize(this, txTotal)
         rxText.text = Formatter.formatFileSize(this, rxTotal)
         txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
