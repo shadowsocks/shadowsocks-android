@@ -84,9 +84,9 @@ object ProfileManager {
         PrivateDatabase.profileDao.isNotEmpty()
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "isEmpty", ex)
+        Log.e(TAG, "isNotEmpty", ex)
         app.track(ex)
-        true
+        false
     }
 
     @Throws(IOException::class)
