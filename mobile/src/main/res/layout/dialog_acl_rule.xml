@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:padding="16dp">
+    <Spinner android:id="@+id/template_selector"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:labelFor="@+id/content"
+             android:entries="@array/acl_rule_templates"/>
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/content_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:errorEnabled="true">
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textNoSuggestions|textMultiLine"/>
+    </android.support.design.widget.TextInputLayout>
+</LinearLayout>

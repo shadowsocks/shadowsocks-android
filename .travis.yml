@@ -1,38 +1,33 @@
-language: scala
+language: android
 
-sudo: false
+jdk:
+  - oraclejdk8
 
-addons:
-    apt:
-        packages:
-            - gcc-multilib
-            - g++-multilib
-            - libstdc++6:i386
-            - libgcc1:i386
-            - zlib1g:i386
-            - libncurses5:i386
-
-scala:
-    - 2.11.7
+env:
+    global:
+        - GOROOT_BOOTSTRAP=$GOROOT
 
 before_cache:
-    - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2 -name "*.lock" | xargs rm
+    - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+    - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
 cache:
     directories:
-        - $HOME/.ivy2/cache
-        - $HOME/.sbt/boot
+        - $HOME/.gradle/caches/
+        - $HOME/.gradle/wrapper/
 
-before_install:
-    - ./travis-ci/setup.sh
-    - export NDK_CCACHE=ccache
-    - export ARCH=`uname -m`
-    - export ANDROID_NDK_HOME=$HOME/.android/android-ndk-r10d
-    - export ANDROID_HOME=$HOME/.android/android-sdk-linux
-    - export PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
-    - cp local.properties.travis local.properties
+install:
+    - pushd $ANDROID_HOME
+    - rm -rf tools
+    - wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O tools.zip
+    - unzip -q tools.zip
+    - popd
+    - touch $HOME/.android/repositories.cfg
+    - yes | sdkmanager
+        "build-tools;27.0.3"
+        ndk-bundle
+        "platforms;android-27"
+      >/dev/null
 
 script:
-    - ./build.sh > /dev/null
-    - sbt android:package-release
+    - ./gradlew assembleDebug check

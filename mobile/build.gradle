@@ -1,0 +1,92 @@
+import com.android.build.OutputFile
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+
+def getCurrentFlavor() {
+    String task = getGradle().getStartParameter().getTaskRequests().toString()
+    Matcher matcher = Pattern.compile("(assemble|generate)\\w*(Release|Debug)").matcher(task)
+    if (matcher.find()) return matcher.group(2).toLowerCase() else {
+        println "Warning: No match found for $task"
+        return "debug"
+    }
+}
+
+android {
+    buildToolsVersion rootProject.buildToolsVersion
+    compileSdkVersion rootProject.sdkVersion
+    defaultConfig {
+        applicationId "com.github.shadowsocks"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.sdkVersion
+        versionCode 4050700
+        versionName "4.5.7"
+        testApplicationId "com.github.shadowsocks.test"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
+    }
+    buildTypes {
+        debug {
+            multiDexEnabled true
+            pseudoLocalesEnabled true
+        }
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions.checkReleaseBuilds false
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86'
+            universalApk true
+        }
+    }
+    sourceSets.main.jniLibs.srcDirs +=
+            new File(project(':core').buildDir, "intermediates/bundles/${getCurrentFlavor()}/jni")
+    sourceSets.main.jniLibs.srcDirs += new File(project(':core').projectDir, "src/overture/bin")
+}
+
+dependencies {
+    implementation project(':core')
+    implementation "com.android.support:customtabs:$supportLibraryVersion"
+    implementation "com.android.support:design:$supportLibraryVersion"
+    implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
+    implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
+    implementation 'com.evernote:android-job:1.2.5'
+    implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
+    implementation "com.google.android.gms:play-services-vision:$playServicesVersion"
+    implementation "com.google.firebase:firebase-config:$playServicesVersion"
+    implementation 'com.j256.ormlite:ormlite-android:5.1'
+    implementation 'com.mikepenz:materialdrawer:6.0.7'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
+    implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
+    implementation 'dnsjava:dnsjava:2.1.8'
+    implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
+    implementation 'net.glxn.qrgen:android:2.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+}
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+ext.abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, x86: 3]
+if (getCurrentFlavor() == 'release') android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def offset = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+        if (offset != null) output.versionCodeOverride = variant.versionCode + offset
+    }
+}

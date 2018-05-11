@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="BoundedGridLayout">
+        <attr name="bounded_width" format="dimension" />
+        <attr name="bounded_height" format="dimension" />
+    </declare-styleable>
+</resources>

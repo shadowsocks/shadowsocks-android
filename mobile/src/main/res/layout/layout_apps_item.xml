@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:focusable="true"
+              android:background="?android:attr/selectableItemBackground">
+
+    <ImageView
+        android:id="@+id/itemicon"
+        android:layout_width="60dp"
+        android:layout_height="52dp"
+        android:paddingBottom="4dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:scaleType="fitCenter"/>
+
+    <Switch
+        android:id="@+id/itemcheck"
+        android:layout_width="0dp"
+        android:layout_height="fill_parent"
+        android:layout_marginEnd="@dimen/fastscroll__bubble_corner"
+        android:layout_weight="1"
+        android:clickable="false"
+        android:ellipsize="end"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:gravity="center_vertical"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="18sp"/>
+
+</LinearLayout>

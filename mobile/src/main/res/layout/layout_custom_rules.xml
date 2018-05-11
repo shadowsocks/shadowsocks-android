@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+    <include layout="@layout/toolbar_light_dark"/>
+    <FrameLayout android:layout_width="match_parent"
+                 android:layout_height="0dp"
+                 android:layout_weight="1">
+        <android.support.v7.widget.RecyclerView android:id="@+id/list"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="match_parent"
+                                                android:paddingBottom="32dp"
+                                                tools:listitem="@android:layout/simple_list_item_1"
+                                                android:clipToPadding="false"/>
+        <com.futuremind.recyclerviewfastscroll.FastScroller
+                android:id="@+id/fastscroller"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                app:fastscroll__handleColor="@color/material_primary_500"
+                app:fastscroll__bubbleColor="@color/material_primary_500"
+                app:fastscroll__bubbleTextAppearance="@style/StyledScrollerTextAppearance"/>
+    </FrameLayout>
+</LinearLayout>

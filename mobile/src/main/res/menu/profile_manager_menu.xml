@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:alphabeticShortcut="a"
+        android:icon="@drawable/ic_action_note_add"
+        android:numericShortcut="0"
+        android:title="@string/add_profile"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_scan_qr_code"
+                android:alphabeticShortcut="s"
+                android:numericShortcut="1"
+                android:title="@string/add_profile_methods_scan_qr_code"/>
+            <item
+                android:id="@+id/action_import"
+                android:alphabeticShortcut="i"
+                android:numericShortcut="2"
+                android:title="@string/action_import"/>
+            <item
+                android:id="@+id/action_manual_settings"
+                android:alphabeticShortcut="m"
+                android:numericShortcut="3"
+                android:title="@string/add_profile_methods_manual_settings"/>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_export"
+        android:alphabeticShortcut="e"
+        android:icon="?attr/actionModeCopyDrawable"
+        android:numericShortcut="1"
+        android:title="@string/action_export"
+        app:showAsAction="always"/>
+</menu>

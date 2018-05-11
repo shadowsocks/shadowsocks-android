@@ -1,0 +1,70 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+apply plugin: 'com.android.library'
+
+android {
+    buildToolsVersion rootProject.buildToolsVersion
+    compileSdkVersion rootProject.sdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.sdkVersion
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+                arguments "-j${Runtime.runtime.availableProcessors()}"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
+    }
+}
+
+task goBuild(type: Exec) {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        executable "cmd.exe"
+        args "/c", file("src/overture/make.bat").absolutePath , minSdkVersion
+    } else {
+        executable "sh"
+        args "-c", "src/overture/make.bash " + minSdkVersion
+    }
+}
+
+task goClean(type: Exec) {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        executable "cmd.exe"
+        args "/c", file("src/overture/clean.bat").absolutePath
+    } else {
+        executable "sh"
+        args "-c", "src/overture/clean.bash"
+    }
+}
+
+tasks.whenTaskAdded { task ->
+  if ((task.name == 'generateJsonModelDebug' ||
+          task.name == 'generateJsonModelRelease')) {
+      task.dependsOn(goBuild)
+    }
+}
+
+dependencies {
+    api project(':plugin')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+}

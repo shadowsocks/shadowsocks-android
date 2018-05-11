@@ -1,0 +1,187 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+          package="com.github.shadowsocks"
+          android:installLocation="internalOnly">
+
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.touchscreen"
+                  android:required="false"/>
+    <uses-feature android:name="android.hardware.nfc"
+                  android:required="false"/>
+    <uses-feature android:name="android.software.leanback"
+                  android:required="false"/>
+    <uses-feature android:name="android.hardware.camera"
+                  android:required="false"/>
+
+    <application
+        android:name=".App"
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
+        android:backupAgent=".ConfigBackupHelper"
+        android:fullBackupContent="@xml/backup_descriptor"
+        android:fullBackupOnly="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:banner="@drawable/ic_service_active">
+
+        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
+                   android:value="true" />
+        <meta-data android:name="com.google.android.gms.version"
+                   android:value="@integer/google_play_services_version"/>
+        <meta-data android:name="com.google.android.backup.api_key"
+                   android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ss"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="ss" />
+            </intent-filter>
+            <meta-data android:name="android.app.shortcuts"
+                       android:resource="@xml/shortcuts"/>
+        </activity>
+
+        <activity
+            android:name=".ProfileConfigActivity"
+            android:excludeFromRecents="true"
+            android:label="@string/profile_config"
+            android:launchMode="singleTask"/>
+
+        <activity
+            android:name=".VpnRequestActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:launchMode="singleTask"/>
+
+        <activity
+            android:name=".AppManager"
+            android:label="@string/proxied_apps"
+            android:parentActivityName=".ProfileConfigActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"/>
+
+        <activity
+            android:name=".ScannerActivity"
+            android:label="@string/add_profile_methods_scan_qr_code"
+            android:parentActivityName=".MainActivity"
+            android:excludeFromRecents="true"/>
+
+        <activity android:name=".tasker.ConfigActivity"
+                  android:icon="@mipmap/ic_launcher">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".QuickToggleShortcut"
+            android:label="@string/quick_toggle"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:process=":bg"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".bg.VpnService"
+            android:process=":bg"
+            android:directBootAware="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".bg.TransproxyService"
+            android:process=":bg"
+            android:directBootAware="true"
+            android:exported="false">
+        </service>
+
+        <service
+            android:name=".bg.ProxyService"
+            android:process=":bg"
+            android:directBootAware="true"
+            android:exported="false">
+        </service>
+
+        <service android:name=".bg.TileService" android:label="@string/quick_toggle"
+                 android:process=":bg"
+                 android:directBootAware="true"
+                 android:icon="@drawable/ic_service_active"
+                 android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name=".BootReceiver"
+                  android:process=":bg"
+                  android:directBootAware="true"
+                  android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".tasker.ActionListener"
+                  android:process=":bg"
+                  android:directBootAware="true"
+                  tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- android-job components -->
+        <service android:name="com.evernote.android.job.v21.PlatformJobService"
+                 android:process=":bg"
+                 android:directBootAware="true"/>
+        <service android:name="com.evernote.android.job.v14.PlatformAlarmService"
+                 tools:node="remove"/>
+        <service android:name="com.evernote.android.job.v14.PlatformAlarmServiceExact"
+                 tools:node="remove"/>
+        <service android:name="com.evernote.android.job.gcm.PlatformGcmService"
+                 tools:node="remove"/>
+        <service android:name="com.evernote.android.job.JobRescheduleService"
+                 android:process=":bg"
+                 android:directBootAware="true"/>
+        <receiver android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
+                  tools:node="remove"/>
+        <receiver android:name="com.evernote.android.job.JobBootReceiver"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+    </application>
+</manifest>

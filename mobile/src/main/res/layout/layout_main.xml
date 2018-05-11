@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/snackbar"
+    android:background="@color/material_primary_700"
+    android:clipChildren="false"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.github.shadowsocks.widget.ShrinkUpwardBehavior">
+
+        <FrameLayout
+            android:id="@+id/fragment_holder"
+            android:background="?android:attr/windowBackground"
+            android:layout_above="@+id/stat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/stat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_stat"
+            android:elevation="4dp"
+            android:focusable="true"
+            android:nextFocusRight="@+id/fab"
+            android:orientation="vertical"
+            android:paddingBottom="16dip"
+            android:paddingEnd="16dip"
+            android:paddingStart="16dip"
+            android:paddingTop="16dip"
+            android:layout_alignParentBottom="true">
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:paddingEnd="72dip"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                tools:ignore="RtlSymmetry"/>
+
+            <com.github.shadowsocks.widget.BoundedGridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:bounded_width="288dp"
+                app:columnCount="4">
+
+                <TextView
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:ellipsize="marquee"
+                    android:gravity="end"
+                    android:text="@string/sent"
+                    app:layout_column="0"/>
+
+                <TextView
+                    android:id="@+id/tx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:ellipsize="marquee"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    app:layout_column="1"
+                    app:layout_columnWeight="1"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:text="▲"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    app:layout_column="2"/>
+
+                <TextView
+                    android:id="@+id/txRate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:ellipsize="marquee"
+                    android:gravity="end"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    app:layout_column="3"
+                    app:layout_columnWeight="1"/>
+
+                <TextView
+                    style="@style/TextAppearance.AppCompat.Body2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:ellipsize="marquee"
+                    android:gravity="end"
+                    android:text="@string/received"
+                    app:layout_column="0"
+                    app:layout_row="1"/>
+
+                <TextView
+                    android:id="@+id/rx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:ellipsize="marquee"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    app:layout_column="1"
+                    app:layout_columnWeight="1"
+                    app:layout_row="1"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:text="▼"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    app:layout_column="2"
+                    app:layout_row="1"/>
+
+                <TextView
+                    android:id="@+id/rxRate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill_horizontal"
+                    android:ellipsize="marquee"
+                    android:gravity="end"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    app:layout_column="3"
+                    app:layout_columnWeight="1"
+                    app:layout_row="1"/>
+            </com.github.shadowsocks.widget.BoundedGridLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- workaround for 0 elevation in disabled state -->
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="-28dp"
+        android:elevation="6dp"
+        app:layout_anchor="@id/stat"
+        app:layout_anchorGravity="top|end">
+        <com.github.shadowsocks.widget.ServiceButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundTint="@color/background_service"
+            app:fabSize="normal"
+            app:pressedTranslationZ="6dp"
+            app:srcCompat="@drawable/ic_service_idle"/>
+    </FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

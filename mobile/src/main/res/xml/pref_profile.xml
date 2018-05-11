@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
+
+    <AutoSummaryEditTextPreference
+            android:key="profileName"
+            app:pref_summaryHasText="%s"
+            android:title="@string/profile_name"/>
+
+    <PreferenceCategory
+            android:title="@string/proxy_cat">
+
+        <AutoSummaryEditTextPreference
+                android:key="proxy"
+                app:pref_summaryHasText="%s"
+                android:singleLine="true"
+                android:title="@string/proxy"/>
+        <AutoSummaryEditTextPreference
+                android:key="remotePortNum"
+                android:inputType="number"
+                android:maxLength="5"
+                app:pref_summaryHasText="%s"
+                android:title="@string/remote_port"/>
+        <AutoSummaryEditTextPreference
+                android:inputType="textPassword"
+                app:pref_summaryPasswordSubstituteLength="0"
+                android:key="sitekey"
+                app:pref_summaryHasText="%s"
+                android:singleLine="true"
+                android:title="@string/sitekey"/>
+        <SimpleMenuPreference
+                android:key="encMethod"
+                android:entries="@array/enc_method_entry"
+                android:entryValues="@array/enc_method_value"
+                android:summary="%s"
+                android:title="@string/enc_method"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/feature_cat">
+
+        <SimpleMenuPreference
+                android:key="route"
+                android:entries="@array/route_entry"
+                android:entryValues="@array/route_value"
+                android:summary="%s"
+                android:title="@string/route_list"/>
+        <AutoSummaryEditTextPreference
+                android:key="remoteDns"
+                android:title="@string/remote_dns"
+                app:pref_summaryHasText="%s"/>
+        <SwitchPreference
+                android:key="isIpv6"
+                android:summary="@string/ipv6_summary"
+                android:title="@string/ipv6"/>
+        <SwitchPreference
+                android:key="isProxyApps"
+                android:summary="@string/proxied_apps_summary"
+                android:title="@string/proxied_apps"/>
+        <SwitchPreference
+                android:key="isUdpDns"
+                android:summary="@string/udp_dns_summary"
+                android:title="@string/udp_dns"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/plugin">
+
+        <com.github.shadowsocks.preference.IconListPreference
+                android:key="plugin"
+                android:persistent="false"
+                android:summary="%s"
+                android:title="@string/plugin"/>
+        <AutoSummaryEditTextPreference
+                android:key="plugin.configure"
+                android:persistent="false"
+                app:pref_summaryHasText="%s"
+                android:title="@string/plugin_configure"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

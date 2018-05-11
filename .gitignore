@@ -1,32 +1,29 @@
-classes
-bin
-gen
-target
+# Gradle & Android Studio
 local.properties
-.classpath
-.project
-.settings
-tests/bin
-tests/gen
-tests/local.properties
-NUL
-gen_*
-*.class
-*.o
-local.sbt
+.gradle/
+.externalNativeBuild/
+build/
+captures/
+release/
 
-#Intellij IDEA
-*.iml
-*.ipr
-*.iws
 .idea/
-out/
+*.iml
 
-#NDK
-src/main/obj
-src/main/libs
-src/main/assets/armeabi
-src/main/assets/armeabi-v7a
-src/main/assets/x86
-src/main/assets/api-16/
-jni/Application.mk
+core/src/overture/.deps
+core/src/overture/bin
+core/src/overture/pkg
+
+core/src/overture/src/github.com/Sirupsen
+core/src/overture/src/github.com/mattn
+core/src/overture/src/github.com/miekg
+core/src/overture/src/github.com/shawn1m
+core/src/overture/src/github.com/tools
+core/src/overture/src/golang.org
+core/src/overture/src/gopkg.in
+
+# work in progress
+tv/
+things/
+
+# release apks
+*.apk

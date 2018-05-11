@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#7488A1</color>
+    <color name="material_drawer_selected_text">@color/material_accent_200</color>
+</resources>

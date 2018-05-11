@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res/com.github.shadowsocks">
+    <SwitchPreference android:key="isAutoConnect"
+                      android:persistent="false"
+                      android:summary="@string/auto_connect_summary"
+                      android:title="@string/auto_connect"/>
+    <!-- Direct Boot Aware alone doesn't do anything without auto connect -->
+    <SwitchPreference android:key="directBootAware"
+                      android:summary="@string/direct_boot_aware_summary"
+                      android:title="@string/direct_boot_aware"/>
+    <SwitchPreference android:key="tcp_fastopen"
+                      android:summary="@string/tcp_fastopen_summary"
+                      android:title="TCP Fast Open"/>
+    <PreferenceCategory
+        android:title="@string/advanced">
+        <SimpleMenuPreference
+            android:key="serviceMode"
+            android:entries="@array/service_modes"
+            android:entryValues="@array/service_mode_values"
+            android:defaultValue="vpn"
+            android:summary="%s"
+            android:title="@string/service_mode"/>
+        <AutoSummaryEditTextPreference
+            android:key="portProxy"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:title="@string/port_proxy"/>
+        <AutoSummaryEditTextPreference
+            android:key="portLocalDns"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:title="@string/port_local_dns"/>
+        <AutoSummaryEditTextPreference
+            android:key="portTransproxy"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:title="@string/port_transproxy"/>
+    </PreferenceCategory>
+</PreferenceScreen>

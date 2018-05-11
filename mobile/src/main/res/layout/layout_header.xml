@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+    <ImageView android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background_header"/>
+
+    <TextView android:id="@+id/drawer_title"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_centerVertical="true"
+              android:fontFamily="@font/iceland"
+              android:gravity="center"
+              android:text="shadowsocks"
+              android:textColor="@android:color/white"
+              android:textSize="32sp"
+              tools:ignore="HardcodedText"/>
+</RelativeLayout>
