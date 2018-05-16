@@ -64,8 +64,8 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
                 tile.label = label ?: getString(R.string.app_name)
                 tile.updateTile()
             }
-            override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
-            override fun trafficPersisted(profileId: Int) { }
+            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
+            override fun trafficPersisted(profileId: Long) { }
         }
     }
 

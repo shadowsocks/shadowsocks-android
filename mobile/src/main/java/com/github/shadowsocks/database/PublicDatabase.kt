@@ -20,42 +20,31 @@
 
 package com.github.shadowsocks.database
 
-import android.database.sqlite.SQLiteDatabase
+import android.arch.persistence.room.Database
+import android.arch.persistence.room.Room
+import android.arch.persistence.room.RoomDatabase
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.acl.Acl
+import com.github.shadowsocks.database.migration.RecreateSchemaMigration
 import com.github.shadowsocks.utils.Key
-import com.j256.ormlite.android.AndroidDatabaseConnection
-import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper
-import com.j256.ormlite.dao.Dao
-import com.j256.ormlite.support.ConnectionSource
-import com.j256.ormlite.table.TableUtils
 
-object PublicDatabase : OrmLiteSqliteOpenHelper(app.deviceContext, Key.DB_PUBLIC, null, 2) {
-    @Suppress("UNCHECKED_CAST")
-    val kvPairDao: Dao<KeyValuePair, String?> by lazy { getDao(KeyValuePair::class.java) as Dao<KeyValuePair, String?> }
-
-    override fun onCreate(database: SQLiteDatabase?, connectionSource: ConnectionSource?) {
-        TableUtils.createTable(connectionSource, KeyValuePair::class.java)
-    }
-
-    override fun onUpgrade(database: SQLiteDatabase?, connectionSource: ConnectionSource?,
-                           oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 1) {
-            PrivateDatabase.kvPairDao.queryBuilder().where().`in`("key",
-                    Key.id, Key.tfo, Key.serviceMode, Key.portProxy, Key.portLocalDns, Key.portTransproxy).query()
-                    .forEach { kvPairDao.createOrUpdate(it) }
+@Database(entities = [(KeyValuePair::class)], version = 3)
+abstract class PublicDatabase : RoomDatabase() {
+    companion object {
+        private val instance by lazy {
+            Room.databaseBuilder(app.deviceContext, PublicDatabase::class.java, Key.DB_PUBLIC)
+                    .allowMainThreadQueries()
+                    .addMigrations(
+                            Migration3
+                    )
+                    .fallbackToDestructiveMigration()
+                    .build()
         }
 
-        if (oldVersion < 2) {
-            kvPairDao.createOrUpdate(KeyValuePair(Acl.CUSTOM_RULES).put(Acl().fromId(Acl.CUSTOM_RULES).toString()))
-        }
+        val kvPairDao get() = instance.keyValuePairDao()
     }
+    abstract fun keyValuePairDao(): KeyValuePair.Dao
 
-    override fun onDowngrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        val connection = AndroidDatabaseConnection(db, true)
-        connectionSource.saveSpecialConnection(connection)
-        TableUtils.dropTable<KeyValuePair, String?>(connectionSource, KeyValuePair::class.java, true)
-        onCreate(db, connectionSource)
-        connectionSource.clearSpecialConnection(connection)
-    }
+    internal object Migration3 : RecreateSchemaMigration(2, 3, "KeyValuePair",
+            "(`key` TEXT NOT NULL, `valueType` INTEGER NOT NULL, `value` BLOB NOT NULL, PRIMARY KEY(`key`))",
+            "`key`, `valueType`, `value`")
 }

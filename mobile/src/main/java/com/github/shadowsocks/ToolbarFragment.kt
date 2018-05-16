@@ -38,7 +38,7 @@ open class ToolbarFragment : Fragment() {
         activity.drawer.setToolbar(activity, toolbar, true)
     }
 
-    open fun onTrafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
+    open fun onTrafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
 
     open fun onBackPressed(): Boolean = false
 }

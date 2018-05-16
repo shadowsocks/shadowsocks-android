@@ -57,7 +57,6 @@ import com.google.android.gms.analytics.StandardExceptionParser
 import com.google.android.gms.analytics.Tracker
 import com.google.firebase.FirebaseApp
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.j256.ormlite.logger.LocalLog
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 import java.io.File
 import java.io.IOException
@@ -92,7 +91,7 @@ class App : Application() {
     val currentProfile: Profile? get() =
         if (DataStore.directBootAware) DirectBoot.getDeviceProfile() else ProfileManager.getProfile(DataStore.profileId)
 
-    fun switchProfile(id: Int): Profile {
+    fun switchProfile(id: Long): Profile {
         val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
         DataStore.profileId = result.id
         return result
@@ -116,7 +115,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         app = this
-        if (!BuildConfig.DEBUG) System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,

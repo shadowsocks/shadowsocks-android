@@ -68,7 +68,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         BaseService.CONNECTED, BaseService.STOPPED -> true
         else -> false
     }
-    private fun isProfileEditable(id: Int) = when ((activity as MainActivity).state) {
+    private fun isProfileEditable(id: Long) = when ((activity as MainActivity).state) {
         BaseService.CONNECTED -> id != DataStore.profileId
         BaseService.STOPPED -> true
         else -> false
@@ -281,17 +281,17 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             for ((_, item) in actions) ProfileManager.delProfile(item.id)
         }
 
-        fun refreshId(id: Int) {
+        fun refreshId(id: Long) {
             val index = profiles.indexOfFirst { it.id == id }
             if (index >= 0) notifyItemChanged(index)
         }
-        fun deepRefreshId(id: Int) {
+        fun deepRefreshId(id: Long) {
             val index = profiles.indexOfFirst { it.id == id }
             if (index < 0) return
             profiles[index] = ProfileManager.getProfile(id)!!
             notifyItemChanged(index)
         }
-        fun removeId(id: Int) {
+        fun removeId(id: Long) {
             val index = profiles.indexOfFirst { it.id == id }
             if (index < 0) return
             profiles.removeAt(index)
@@ -304,7 +304,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
     val profilesAdapter by lazy { ProfilesAdapter() }
     private lateinit var undoManager: UndoSnackbarManager<Profile>
-    private var bandwidthProfile: Int = 0
+    private var bandwidthProfile = 0L
     private var txTotal: Long = 0L
     private var rxTotal: Long = 0L
 
@@ -324,8 +324,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         toolbar.inflateMenu(R.menu.profile_manager_menu)
         toolbar.setOnMenuItemClickListener(this)
 
-        if (ProfileManager.getFirstProfile() == null)
-            DataStore.profileId = ProfileManager.createProfile().id
+        if (!ProfileManager.isNotEmpty()) DataStore.profileId = ProfileManager.createProfile().id
         val profilesList = view.findViewById<RecyclerView>(R.id.list)
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         profilesList.layoutManager = layoutManager
@@ -378,7 +377,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                                 Snackbar.LENGTH_LONG).show()
                         return true
                     }
-                } catch (_: Exception) { }
+                } catch (exc: Exception) {
+                    exc.printStackTrace()
+                }
                 Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
                         Snackbar.LENGTH_LONG).show()
                 true
@@ -399,8 +400,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
     }
 
-    override fun onTrafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-        if (profileId != -1) {  // ignore resets from MainActivity
+    override fun onTrafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+        if (profileId != -1L) { // ignore resets from MainActivity
             if (bandwidthProfile != profileId) {
                 onTrafficPersisted(bandwidthProfile)
                 bandwidthProfile = profileId
@@ -410,7 +411,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             profilesAdapter.refreshId(profileId)
         }
     }
-    fun onTrafficPersisted(profileId: Int) {
+    fun onTrafficPersisted(profileId: Long) {
         txTotal = 0
         rxTotal = 0
         if (bandwidthProfile != profileId) {

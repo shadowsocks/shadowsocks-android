@@ -29,9 +29,9 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
 
 object DataStore {
-    val publicStore = OrmLitePreferenceDataStore(PublicDatabase.kvPairDao)
+    val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     // privateStore will only be used as temp storage for ProfileConfigFragment
-    val privateStore = OrmLitePreferenceDataStore(PrivateDatabase.kvPairDao)
+    val privateStore = RoomPreferenceDataStore(PrivateDatabase.kvPairDao)
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
     private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
@@ -43,10 +43,10 @@ object DataStore {
         } else parsePort(publicStore.getString(key), default + userIndex)
     }
 
-    var profileId: Int
-        get() = publicStore.getInt(Key.id) ?: 0
+    var profileId: Long
+        get() = publicStore.getLong(Key.id) ?: 0
         set(value) {
-            publicStore.putInt(Key.id, value)
+            publicStore.putLong(Key.id, value)
             if (DataStore.directBootAware) DirectBoot.update()
         }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
