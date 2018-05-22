@@ -50,7 +50,7 @@ import android.net.VpnService as BaseVpnService
 class VpnService : BaseVpnService(), LocalDnsService.Interface {
     companion object {
         private const val VPN_MTU = 1500
-        private const val PRIVATE_VLAN = "26.26.26.%s"
+        private const val PRIVATE_VLAN = "172.19.0.%s"
         private const val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
 
         private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
