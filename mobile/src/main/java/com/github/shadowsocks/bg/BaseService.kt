@@ -50,7 +50,7 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import java.net.UnknownHostException
+import java.net.*
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -364,10 +364,6 @@ object BaseService {
                 try {
                     if (profile.host == "198.199.101.152") {
                         val client = OkHttpClient.Builder()
-                                .dns {
-                                    listOf((Dns.resolve(it, false) ?: throw UnknownHostException())
-                                            .parseNumericAddress())
-                                }
                                 .connectTimeout(10, TimeUnit.SECONDS)
                                 .writeTimeout(10, TimeUnit.SECONDS)
                                 .readTimeout(30, TimeUnit.SECONDS)
@@ -402,7 +398,7 @@ object BaseService {
                     killProcesses()
 
                     if (!profile.host.isNumericAddress())
-                        profile.host = Dns.resolve(profile.host, true) ?: throw UnknownHostException()
+                        profile.host = InetAddress.getByName(profile.host).hostAddress ?: throw UnknownHostException()
 
                     startNativeProcesses()
 
