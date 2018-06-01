@@ -32,6 +32,12 @@ object Key {
 
     const val individual = "Proxyed"
 
+    const val nightMode = "nightMode"
+    const val nightModeSystem = "system"
+    const val nightModeAuto = "auto"
+    const val nightModeOff = "off"
+    const val nightModeOn = "on"
+
     const val serviceMode = "serviceMode"
     const val modeProxy = "proxy"
     const val modeVpn = "vpn"

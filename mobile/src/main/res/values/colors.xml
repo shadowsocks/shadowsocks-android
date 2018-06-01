@@ -2,4 +2,19 @@
 <resources>
     <color name="ic_launcher_background">#7488A1</color>
     <color name="material_drawer_selected_text">@color/material_accent_200</color>
+    <color name="background">@color/md_light_background</color>
+    <color name="background_selected">@color/material_primary_100</color>
+    <color name="primary_drawable">@android:color/black</color>
+    <color name="background_stat">@color/material_primary_300</color>
+
+    <!-- MaterialDrawer colors -->
+    <color name="drawer_background">@color/material_drawer_background</color>
+    <color name="drawer_primary_text">@color/material_drawer_primary_text</color>
+    <color name="drawer_primary_icon">@color/material_drawer_primary_icon</color>
+    <color name="drawer_secondary_text">@color/material_drawer_secondary_text</color>
+    <color name="drawer_hint_text">@color/material_drawer_hint_text</color>
+    <color name="drawer_divider">@color/material_drawer_divider</color>
+    <color name="drawer_selected">@color/material_drawer_selected</color>
+    <color name="drawer_selected_text">@color/material_accent_200</color>
+    <color name="drawer_header_selection_text">@color/material_drawer_header_selection_text</color>
 </resources>

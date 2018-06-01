@@ -38,6 +38,11 @@
 <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"DNS 转发"</string>
 <string name="udp_dns_summary">"转发所有 DNS 请求到远程服务器"</string>
+    <string name="night_mode">夜间模式</string>
+    <string name="night_mode_system">跟随系统</string>
+    <string name="night_mode_auto">自动</string>
+    <string name="night_mode_on">开启</string>
+    <string name="night_mode_off">关闭</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>
