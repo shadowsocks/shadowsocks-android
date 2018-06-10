@@ -65,11 +65,12 @@ dependencies {
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
     implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
-    implementation 'com.evernote:android-job:1.2.5'
-    implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-vision:$playServicesVersion"
-    implementation "com.google.firebase:firebase-config:$playServicesVersion"
+    implementation 'com.evernote:android-job:1.2.6'
+    implementation "com.google.android.gms:play-services-ads:15.0.1"
+    implementation "com.google.android.gms:play-services-analytics:16.0.0"
+    implementation "com.google.android.gms:play-services-vision:15.0.2"
+    implementation "com.google.firebase:firebase-config:16.0.0"
+    implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.mikepenz:materialdrawer:6.0.7'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
