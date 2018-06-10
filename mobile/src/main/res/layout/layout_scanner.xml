@@ -11,6 +11,5 @@
         android:name="com.google.android.gms.samples.vision.barcodereader.BarcodeCapture"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        app:gvb_auto_focus="true"
-        app:gvb_code_format="qr_code"/>
+        app:gvb_auto_focus="true"/>
 </LinearLayout>
