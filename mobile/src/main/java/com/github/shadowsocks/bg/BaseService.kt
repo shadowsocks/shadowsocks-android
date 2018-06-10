@@ -106,6 +106,7 @@ object BaseService {
                         val t = Timer(true)
                         t.schedule(object : TimerTask() {
                             override fun run() {
+                                val profile = profile ?: return
                                 if (state == CONNECTED && TrafficMonitor.updateRate()) app.handler.post {
                                     if (bandwidthListeners.isNotEmpty()) {
                                         val txRate = TrafficMonitor.txRate
@@ -116,7 +117,7 @@ object BaseService {
                                         for (i in 0 until n) try {
                                             val item = callbacks.getBroadcastItem(i)
                                             if (bandwidthListeners.contains(item.asBinder()))
-                                                item.trafficUpdated(profile!!.id, txRate, rxRate, txTotal, rxTotal)
+                                                item.trafficUpdated(profile.id, txRate, rxRate, txTotal, rxTotal)
                                         } catch (e: Exception) {
                                             e.printStackTrace()
                                             app.track(e)
