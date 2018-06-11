@@ -100,7 +100,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
                 unregisterCallback()    // unregister callback to save battery
             }
             Intent.ACTION_SCREEN_ON -> {
-                setVisible(visible && !keyGuard.inKeyguardRestrictedInputMode(), forceShow)
+                setVisible(visible && !keyGuard.isKeyguardLocked, forceShow)
                 service.data.binder.registerCallback(callback)
                 service.data.binder.startListeningForBandwidth(callback)
                 callbackRegistered = true

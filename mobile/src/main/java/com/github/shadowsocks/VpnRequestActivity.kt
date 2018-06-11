@@ -48,7 +48,7 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
             finish()
             return
         }
-        if (systemService<KeyguardManager>().inKeyguardRestrictedInputMode()) {
+        if (systemService<KeyguardManager>().isKeyguardLocked) {
             receiver = broadcastReceiver { _, _ -> connection.connect() }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
         } else connection.connect()
