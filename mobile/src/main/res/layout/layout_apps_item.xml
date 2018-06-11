@@ -8,10 +8,10 @@
 
     <ImageView
         android:id="@+id/itemicon"
-        android:layout_width="60dp"
-        android:layout_height="52dp"
+        android:layout_width="72dp"
+        android:layout_height="56dp"
         android:paddingBottom="4dp"
-        android:paddingEnd="8dp"
+        android:paddingEnd="16dp"
         android:paddingStart="8dp"
         android:paddingTop="4dp"
         android:scaleType="fitCenter"/>
