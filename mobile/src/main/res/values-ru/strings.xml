@@ -22,17 +22,11 @@
 <string name="connection_test_error_status_code">"Код ошибки: #%d"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"Настройки Сервера"</string>
-
-<!-- proxy category -->
 <string name="profile_name">"Имя профиля"</string>
 <string name="proxy">"Сервер"</string>
 <string name="remote_port">"Удалённый порт"</string>
 <string name="sitekey">"Пароль"</string>
 <string name="enc_method">"Метод шифрования"</string>
-
-<!-- feature category -->
-<string name="feature_cat">"Дополнительные Настройки"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 Маршрут"</string>
@@ -61,10 +55,6 @@
 <string name="profile_invalid_input">"Не найдено действительных данных профиля."</string>
 
 <!-- alert category -->
-<string name="yes">"Да"</string>
-<string name="no">"Нет"</string>
-
-<!-- alert category -->
 <string name="close">"Закрыть"</string>
 <string name="profile_empty">"Пожалуйста, выберите профиль"</string>
 <string name="proxy_empty">"Прокси/Пароль не должны быть пустыми"</string>
@@ -91,8 +81,6 @@
 
 <!-- profile -->
 <string name="profile_config">"Настройка профиля"</string>
-<string name="unsaved_changes_prompt">"Изменения не сохранены. Сохранить?"</string>
-<string name="apply">"Применить"</string>
 <string name="delete">"Удалить"</string>
 <string name="delete_confirm_prompt">"Вы уверены, что хотите удалить этот профиль?"</string>
 <string name="share_qr_nfc">"QR-код/NFC"</string>
@@ -157,7 +145,7 @@
 <string name="vpn_permission_denied">"Нет разрешения на создание VPN соединения"</string>
 <string name="auto_connect_summary_v24">"Включить Shadowsocks во время запуска. Лучше использовать режим постоянной VPN."</string>
 <string name="speed">"%s/с"</string>
-<string name="direct_boot_aware">"Непосредственная загрузка"</string>
-<string name="direct_boot_aware_summary">"Позволить Shadowsocks запускаться до того, как устройство будет разблокировано (данные выбранного профиля будут хуже защищены)"</string>
+<string name="direct_boot_aware_summary">"данные выбранного профиля будут хуже защищены"</string>
 <string name="acl_rule_online_config">"URL конфигурации"</string>
+<string name="action_import_file">"Импортировать из файла..."</string>
 </resources>

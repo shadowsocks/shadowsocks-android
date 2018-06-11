@@ -12,11 +12,6 @@
 
 Использйте интеграцию с [Tasker](http://tasker.dinglisch.net/).
 
-### Как добавить QR код из локальной галереи?
-
-Отсканируйте его при помощи стороннего сканера, например [QuickMark Barcode Scanner](https://play.google.com/store/apps/details?id=tw.com.quickmark) и нажмите на `ss` ссылку.
-
-
 ### Почему режим NAT более не поддерживается?
 
 1. Требуются ROOT права;
@@ -34,10 +29,12 @@
 3. Некоторые ROM, такие как [Flyme](https://github.com/shadowsocks/shadowsocks-android/issues/1589) имеют **слишком** испорченную поддержку "непосредственной загрузки";
 4. Если вы используете фреймворк Xposed и/или приложения для энергосбережения, вероятно наше приложение не будет нормально работать с ними.
 
-* Иправления для MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772) [#888](https://github.com/shadowsocks/shadowsocks-android/issues/888)
+* Исправления для MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
+* Исправления для EMUI: [#888](https://github.com/shadowsocks/shadowsocks-android/issues/888)
 * Иправления для Huawei: [#1091 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1091#issuecomment-276949836)
 * Вызванные из-за Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung и/или Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
+* Ещё Samsung: [#1712](https://github.com/shadowsocks/shadowsocks-android/issues/1712)
 * Не устанавливайте это приложение на SD карту, из-за проблем с разрешениями: [#1124 (комментарий)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
 
 ### Как приостановить службу Shadowsocks?
@@ -58,7 +55,12 @@
 
 Разрешите этому приложению передачу данных в фоновом режиме в настройках приложения.
 
-Если у вас оперератор Yota, то измените точку доступа APN с `yota.ru` на `client.yota.ru`
+Если у вас оперератор Yota, попробуйте следующее:
+
+* измените точку доступа APN с `yota.ru` на `client.yota.ru`
+* погоняйте программы: Speedtest, Telegram (скачивание файлов)
+
+Я уже уведомил оператора о проблеме и вместе мы стараемся решить её.
 
 ### Почему требуется разрешение камере на устройствах младше Android 6.0?
 

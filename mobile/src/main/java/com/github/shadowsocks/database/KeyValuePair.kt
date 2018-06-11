@@ -20,37 +20,54 @@
 
 package com.github.shadowsocks.database
 
-import com.j256.ormlite.field.DataType
-import com.j256.ormlite.field.DatabaseField
+import android.arch.persistence.room.*
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
+@Entity
 class KeyValuePair() {
     companion object {
         const val TYPE_UNINITIALIZED = 0
         const val TYPE_BOOLEAN = 1
         const val TYPE_FLOAT = 2
+        @Deprecated("Use TYPE_LONG.")
         const val TYPE_INT = 3
         const val TYPE_LONG = 4
         const val TYPE_STRING = 5
         const val TYPE_STRING_SET = 6
     }
 
-    @DatabaseField(id = true)
-    var key: String? = ""
-    @DatabaseField
+    @android.arch.persistence.room.Dao
+    interface Dao {
+        @Query("SELECT * FROM `KeyValuePair` WHERE `key` = :key")
+        operator fun get(key: String): KeyValuePair?
+
+        @Insert(onConflict = OnConflictStrategy.REPLACE)
+        fun put(value: KeyValuePair): Long
+
+        @Query("DELETE FROM `KeyValuePair` WHERE `key` = :key")
+        fun delete(key: String): Int
+    }
+
+    @PrimaryKey
+    var key: String = ""
     var valueType: Int = TYPE_UNINITIALIZED
-    @DatabaseField(dataType = DataType.BYTE_ARRAY)
     var value: ByteArray = ByteArray(0)
 
     val boolean: Boolean?
         get() = if (valueType == TYPE_BOOLEAN) ByteBuffer.wrap(value).get() != 0.toByte() else null
     val float: Float?
         get() = if (valueType == TYPE_FLOAT) ByteBuffer.wrap(value).float else null
+    @Suppress("DEPRECATION")
+    @Deprecated("Use long.", ReplaceWith("long"))
     val int: Int?
         get() = if (valueType == TYPE_INT) ByteBuffer.wrap(value).int else null
-    val long: Long?
-        get() = if (valueType == TYPE_LONG) ByteBuffer.wrap(value).long else null
+    val long: Long? get() = when (valueType) {
+        @Suppress("DEPRECATION")
+        TYPE_INT -> ByteBuffer.wrap(value).int.toLong()
+        TYPE_LONG -> ByteBuffer.wrap(value).long
+        else -> null
+    }
     val string: String?
         get() = if (valueType == TYPE_STRING) String(value) else null
     val stringSet: Set<String>?
@@ -65,7 +82,8 @@ class KeyValuePair() {
             result
         } else null
 
-    constructor(key: String?) : this() {
+    @Ignore
+    constructor(key: String) : this() {
         this.key = key
     }
 
@@ -80,6 +98,8 @@ class KeyValuePair() {
         this.value = ByteBuffer.allocate(4).putFloat(value).array()
         return this
     }
+    @Suppress("DEPRECATION")
+    @Deprecated("Use long.")
     fun put(value: Int): KeyValuePair {
         valueType = TYPE_INT
         this.value = ByteBuffer.allocate(4).putInt(value).array()

@@ -20,12 +20,12 @@
 
 package com.github.shadowsocks
 
-import android.app.admin.DevicePolicyManager
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v14.preference.SwitchPreference
 import android.support.v7.preference.Preference
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
@@ -39,20 +39,17 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
         val boot = findPreference(Key.isAutoConnect) as SwitchPreference
-        val directBootAwareListener = Preference.OnPreferenceChangeListener { _, newValue ->
-            if (newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
-            true
-        }
         boot.setOnPreferenceChangeListener { _, value ->
             BootReceiver.enabled = value as Boolean
-            directBootAwareListener.onPreferenceChange(null, DataStore.directBootAware)
+            true
         }
         boot.isChecked = BootReceiver.enabled
 
-        val dba = findPreference(Key.directBootAware)
-        if (Build.VERSION.SDK_INT >= 24 && requireContext().getSystemService(DevicePolicyManager::class.java)
-                .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER)
-            dba.onPreferenceChangeListener = directBootAwareListener else dba.parent!!.removePreference(dba)
+        val canToggleLocked = findPreference(Key.directBootAware)
+        if (Build.VERSION.SDK_INT >= 24) canToggleLocked.setOnPreferenceChangeListener { _, newValue ->
+            if (app.directBootSupported && newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
+            true
+        } else canToggleLocked.parent!!.removePreference(canToggleLocked)
 
         val tfo = findPreference(Key.tfo) as SwitchPreference
         tfo.isChecked = TcpFastOpen.sendEnabled

@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -33,9 +34,8 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.UserManager
 import android.support.annotation.RequiresApi
-import android.support.v4.os.BuildCompat
-import android.support.v4.os.UserManagerCompat
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import android.widget.Toast
@@ -57,7 +57,6 @@ import com.google.android.gms.analytics.StandardExceptionParser
 import com.google.android.gms.analytics.Tracker
 import com.google.firebase.FirebaseApp
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.j256.ormlite.logger.LocalLog
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 import java.io.File
 import java.io.IOException
@@ -72,10 +71,16 @@ class App : Application() {
     val deviceContext: Context by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceContext(this) }
     val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
     private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
+    private val exceptionParser by lazy { StandardExceptionParser(this, null) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
+    val directBootSupported by lazy {
+        Build.VERSION.SDK_INT >= 24 && getSystemService(DevicePolicyManager::class.java)
+            .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
+    }
 
-    fun getPackageInfo(packageName: String) = packageManager.getPackageInfo(packageName, if (BuildCompat.isAtLeastP())
-        PackageManager.GET_SIGNING_CERTIFICATES else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
+    fun getPackageInfo(packageName: String) = packageManager.getPackageInfo(packageName,
+            if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
+            else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
     fun startService() {
         val intent = Intent(this, BaseService.serviceClass.java)
@@ -87,7 +92,7 @@ class App : Application() {
     val currentProfile: Profile? get() =
         if (DataStore.directBootAware) DirectBoot.getDeviceProfile() else ProfileManager.getProfile(DataStore.profileId)
 
-    fun switchProfile(id: Int): Profile {
+    fun switchProfile(id: Long): Profile {
         val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
         DataStore.profileId = result.id
         return result
@@ -102,7 +107,7 @@ class App : Application() {
     fun track(t: Throwable) = track(Thread.currentThread(), t)
     fun track(thread: Thread, t: Throwable) {
         tracker.send(HitBuilders.ExceptionBuilder()
-                .setDescription(StandardExceptionParser(this, null).getDescription(thread.name, t))
+                .setDescription("${exceptionParser.getDescription(thread.name, t)} - ${t.message}")
                 .setFatal(false)
                 .build())
         t.printStackTrace()
@@ -111,8 +116,8 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         app = this
-        if (!BuildConfig.DEBUG) System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR")
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
                 BottomSheetPreferenceDialogFragment::class.java)
 
@@ -139,14 +144,15 @@ class App : Application() {
             app.track(e)
         }
 
-        // handle data restored
-        if (DataStore.directBootAware && UserManagerCompat.isUserUnlocked(this)) DirectBoot.update()
+        // handle data restored/crash
+        if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
+                (getSystemService(Context.USER_SERVICE) as UserManager).isUserUnlocked) DirectBoot.flushTrafficStats()
         TcpFastOpen.enabledAsync(DataStore.publicStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) {
             val assetManager = assets
             for (dir in arrayOf("acl", "overture"))
                 try {
-                    for (file in assetManager.list(dir)) assetManager.open(dir + '/' + file).use { input ->
+                    for (file in assetManager.list(dir)) assetManager.open("$dir/$file").use { input ->
                         File(deviceContext.filesDir, file).outputStream().use { output -> input.copyTo(output) }
                     }
                 } catch (e: IOException) {
@@ -155,7 +161,7 @@ class App : Application() {
                 }
             DataStore.publicStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
         }
-
+        AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
         updateNotificationChannels()
     }
 

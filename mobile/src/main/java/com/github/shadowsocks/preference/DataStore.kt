@@ -21,7 +21,8 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
-import com.github.shadowsocks.BootReceiver
+import android.support.v7.app.AppCompatDelegate
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
@@ -29,9 +30,9 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
 
 object DataStore {
-    val publicStore = OrmLitePreferenceDataStore(PublicDatabase.kvPairDao)
+    val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     // privateStore will only be used as temp storage for ProfileConfigFragment
-    val privateStore = OrmLitePreferenceDataStore(PrivateDatabase.kvPairDao)
+    val privateStore = RoomPreferenceDataStore(PrivateDatabase.kvPairDao)
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
     private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
@@ -43,16 +44,24 @@ object DataStore {
         } else parsePort(publicStore.getString(key), default + userIndex)
     }
 
-    var profileId: Int
-        get() = publicStore.getInt(Key.id) ?: 0
+    var profileId: Long
+        get() = publicStore.getLong(Key.id) ?: 0
         set(value) {
-            publicStore.putInt(Key.id, value)
+            publicStore.putLong(Key.id, value)
             if (DataStore.directBootAware) DirectBoot.update()
         }
-    /**
-     * Setter is defined in MainActivity.onPreferenceDataStoreChanged.
-     */
-    val directBootAware: Boolean get() = BootReceiver.enabled && publicStore.getBoolean(Key.directBootAware) == true
+    val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
+    val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
+    private var nightModeString: String
+        get() = publicStore.getString(Key.nightMode) ?: Key.nightModeSystem
+        set(value) = publicStore.putString(Key.nightMode, value)
+    @AppCompatDelegate.NightMode
+    val nightMode: Int get() = when (nightModeString) {
+        Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
+        Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
+        Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
+        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    }
     var serviceMode: String
         get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
         set(value) = publicStore.putString(Key.serviceMode, value)
@@ -68,6 +77,7 @@ object DataStore {
 
     fun initGlobal() {
         // temporary workaround for support lib bug
+        if (publicStore.getString(Key.nightMode) == null) nightModeString = nightModeString
         if (publicStore.getString(Key.serviceMode) == null) serviceMode = serviceMode
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns

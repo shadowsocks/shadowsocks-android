@@ -1,4 +1,4 @@
-# https://github.com/arturbosch/detekt/blob/801994bd60cc759b181649356cea045b8125301b/detekt-cli/src/main/resources/default-detekt-config.yml
+# https://github.com/arturbosch/detekt/blob/RC6-4/detekt-cli/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -7,7 +7,7 @@ complexity:
   active: true
   ComplexCondition:
     active: true
-    threshold: 3
+    threshold: 4
   ComplexInterface:
     active: true
     threshold: 10
@@ -15,6 +15,7 @@ complexity:
   ComplexMethod:
     active: true
     threshold: 10
+    ignoreSingleWhenExpression: false
   LabeledExpression:
     active: true
   LargeClass:
@@ -25,31 +26,32 @@ complexity:
     threshold: 20
   LongParameterList:
     active: true
-    threshold: 5
+    threshold: 6
     ignoreDefaultParameters: true
   MethodOverloading:
     active: false
   NestedBlockDepth:
     active: true
-    threshold: 3
+    threshold: 4
   StringLiteralDuplication:
     active: true
-    threshold: 2
+    threshold: 3
     ignoreAnnotation: true
     excludeStringsWithLessThan5Characters: true
     ignoreStringsRegex: '$^'
   TooManyFunctions:
     active: true
-    thresholdInFiles: 10
-    thresholdInClasses: 10
-    thresholdInInterfaces: 10
-    thresholdInObjects: 10
-    thresholdInEnums: 10
+    thresholdInFiles: 11
+    thresholdInClasses: 11
+    thresholdInInterfaces: 11
+    thresholdInObjects: 11
+    thresholdInEnums: 11
 
 empty-blocks:
   active: true
   EmptyCatchBlock:
-    active: false
+    active: true
+    allowedExceptionNameRegex: "^(_|ignore|expected).*"
   EmptyClassBlock:
     active: true
   EmptyDefaultConstructor:
@@ -64,6 +66,7 @@ empty-blocks:
     active: true
   EmptyFunctionBlock:
     active: true
+    ignoreOverriddenFunctions: false
   EmptyIfBlock:
     active: true
   EmptyInitBlock:
@@ -105,7 +108,7 @@ exceptions:
     active: true
   TooGenericExceptionCaught:
     active: true
-    exceptions:
+    exceptionNames:
      - ArrayIndexOutOfBoundsException
      - Error
      - Exception
@@ -116,10 +119,9 @@ exceptions:
      - Throwable
   TooGenericExceptionThrown:
     active: true
-    exceptions:
+    exceptionNames:
      - Error
      - Exception
-     - NullPointerException
      - Throwable
      - RuntimeException
 
@@ -143,6 +145,7 @@ naming:
   FunctionNaming:
     active: true
     functionPattern: '^([a-z$][a-zA-Z$0-9]*)|(`.*`)$'
+    excludeClassPattern: '$^'
   MatchingDeclarationName:
     active: true
   MemberNameEqualsClassName:
@@ -167,6 +170,7 @@ naming:
     active: true
     variablePattern: '[a-z][A-Za-z0-9]*'
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
 
 performance:
   active: true
@@ -239,15 +243,17 @@ style:
     maxLineLength: 120
     excludePackageStatements: false
     excludeImportStatements: false
+  MayBeConst:
+    active: true
   ModifierOrder:
     active: true
   NestedClassesVisibility:
     active: true
   NewLineAtEndOfFile:
     active: true
-  OptionalAbstractKeyword:
+  NoTabs:
     active: true
-  OptionalReturnKeyword:
+  OptionalAbstractKeyword:
     active: true
   OptionalUnit:
     active: true
@@ -268,6 +274,8 @@ style:
   ThrowsCount:
     active: true
     max: 2
+  TrailingWhitespace:
+    active: true
   UnnecessaryAbstractClass:
     active: true
   UnnecessaryInheritance:
@@ -277,6 +285,8 @@ style:
   UntilInsteadOfRangeTo:
     active: true
   UnusedImports:
+    active: true
+  UnusedPrivateMember:
     active: true
   UseDataClass:
     active: false

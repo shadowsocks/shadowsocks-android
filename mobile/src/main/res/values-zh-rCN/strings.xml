@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">"影梭"</string>
 <string name="quick_toggle">"开关"</string>
 
 <!-- misc -->
@@ -17,17 +16,11 @@
 <string name="connection_test_error_status_code">"状态码无效（#%d）"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"服务器设置"</string>
-
-<!-- proxy category -->
 <string name="profile_name">"配置名称"</string>
 <string name="proxy">"服务器"</string>
 <string name="remote_port">"远程端口"</string>
 <string name="sitekey">"密码"</string>
 <string name="enc_method">"加密方式"</string>
-
-<!-- feature category -->
-<string name="feature_cat">"功能设置"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 路由"</string>
@@ -45,6 +38,11 @@
 <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"DNS 转发"</string>
 <string name="udp_dns_summary">"转发所有 DNS 请求到远程服务器"</string>
+    <string name="night_mode">夜间模式</string>
+    <string name="night_mode_system">跟随系统</string>
+    <string name="night_mode_auto">自动</string>
+    <string name="night_mode_on">开启</string>
+    <string name="night_mode_off">关闭</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>
@@ -55,10 +53,6 @@
 <string name="vpn_error">"后台服务启动失败：%s"</string>
 <string name="reboot_required">"VPN 服务启动失败。你可能需要重启设备。"</string>
 <string name="profile_invalid_input">"未找到有效的配置文件。"</string>
-
-<!-- alert category -->
-<string name="yes">"是"</string>
-<string name="no">"否"</string>
 
 <!-- alert category -->
 <string name="close">"关闭"</string>
@@ -86,8 +80,6 @@
 
 <!-- profile -->
 <string name="profile_config">"配置文件设置"</string>
-<string name="unsaved_changes_prompt">"保存修改吗？"</string>
-<string name="apply">"应用"</string>
 <string name="delete">"删除"</string>
 <string name="delete_confirm_prompt">"您确定要删除此配置文件？"</string>
 <string name="share_qr_nfc">"二维码 / NFC"</string>
@@ -148,7 +140,8 @@
 <string name="service_transproxy">"透明代理模式"</string>
 <string name="vpn_permission_denied">"创建 VPN 服务权限不足"</string>
 <string name="auto_connect_summary_v24">"允许 Shadowsocks 随系统启动，建议使用始终开启的 VPN"</string>
-<string name="direct_boot_aware">"直接启动"</string>
-<string name="direct_boot_aware_summary">"允许在设备解锁前启动服务（选中的配置信息会不那么安全）"</string>
+<string name="direct_boot_aware">"允许锁屏下切换"</string>
+<string name="direct_boot_aware_summary">"选中的配置信息会不那么安全"</string>
 <string name="acl_rule_online_config">"在线规则文件 URL"</string>
+<string name="action_import_file">"从文件导入…"</string>
 </resources>

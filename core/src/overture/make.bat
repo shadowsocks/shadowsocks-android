@@ -28,22 +28,36 @@ MKDIR %TARGET%\armeabi-v7a>nul 2>nul
 MKDIR %TARGET%\x86>nul 2>nul 
 MKDIR %TARGET%\arm64-v8a>nul 2>nul 
 
+SET CC=%ANDROID_ARM_TOOLCHAIN%\bin\arm-linux-androideabi-gcc.exe
+
 IF NOT EXIST %ANDROID_ARM_CC% (
 	ECHO "Make standalone toolchain for ARM arch"
-    %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch arm ^
+    python.exe %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch arm ^
         --api %MIN_API% --install-dir %ANDROID_ARM_TOOLCHAIN%
 )
 
 IF NOT EXIST %ANDROID_ARM64_CC% (
     ECHO "Make standalone toolchain for ARM64 arch"
-    %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch arm64 ^
+    python.exe %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch arm64 ^
         --api %MIN_API% --install-dir %ANDROID_ARM64_TOOLCHAIN%
 )
 
 IF NOT EXIST %ANDROID_X86_CC% (
     ECHO "Make standalone toolchain for X86 arch"
-    %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch x86 ^
+    python.exe %ANDROID_NDK_HOME%\build\tools\make_standalone_toolchain.py --arch x86 ^
         --api %MIN_API% --install-dir %ANDROID_X86_TOOLCHAIN%
+)
+
+REM Check environment availability
+IF NOT EXIST %CC% (
+    ECHO "gcc not found"
+    EXIT 1
+)
+
+WHERE python.exe
+IF "%ERRORLEVEL%" == 1 (
+    ECHO "python not found"
+    EXIT 1
 )
 
 IF NOT EXIST %DIR%\go\bin\go.exe (

@@ -28,7 +28,7 @@ import com.github.shadowsocks.App.Companion.app
 import java.io.File
 import java.io.IOException
 
-abstract class LocalSocketListener(protected val tag: String) : Thread() {
+abstract class LocalSocketListener(protected val tag: String) : Thread(tag) {
     init {
         setUncaughtExceptionHandler(app::track)
     }

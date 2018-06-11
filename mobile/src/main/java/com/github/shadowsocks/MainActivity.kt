@@ -37,8 +37,10 @@ import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
+import android.text.format.Formatter
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -49,7 +51,6 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
-import com.github.shadowsocks.bg.TrafficMonitor
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     private val customTabsIntent by lazy {
         CustomTabsIntent.Builder()
-                .setToolbarColor(ContextCompat.getColor(this, R.color.material_primary_500))
+                .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
                 .build()
     }
     fun launchUrl(uri: Uri) = try {
@@ -116,10 +117,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
                 app.handler.post { changeState(state, msg, true) }
             }
-            override fun trafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 app.handler.post { updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal) }
             }
-            override fun trafficPersisted(profileId: Int) {
+            override fun trafficPersisted(profileId: Long) {
                 app.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
             }
         }
@@ -148,11 +149,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
     }
-    fun updateTraffic(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-        txText.text = TrafficMonitor.formatTraffic(txTotal)
-        rxText.text = TrafficMonitor.formatTraffic(rxTotal)
-        txRateText.text = getString(R.string.speed, TrafficMonitor.formatTraffic(txRate))
-        rxRateText.text = getString(R.string.speed, TrafficMonitor.formatTraffic(rxRate))
+    fun updateTraffic(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+        txText.text = Formatter.formatFileSize(this, txTotal)
+        rxText.text = Formatter.formatFileSize(this, rxTotal)
+        txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
+        rxRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, rxRate))
         val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
         if (state != BaseService.STOPPING)
             child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
@@ -266,18 +267,20 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 ++testCount
                 statusText.setText(R.string.connection_test_testing)
                 val id = testCount  // it would change by other code
-                thread { testConnection(id) }
+                thread("ConnectionTest") { testConnection(id) }
             }
         }
 
         fab = findViewById(R.id.fab)
         fab.setOnClickListener {
-            if (state == BaseService.CONNECTED) app.stopService() else thread {
-                if (BaseService.usingVpnMode) {
+            when {
+                state == BaseService.CONNECTED -> app.stopService()
+                BaseService.usingVpnMode -> {
                     val intent = VpnService.prepare(this)
                     if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
-                    else app.handler.post { onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null) }
-                } else app.startService()
+                    else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+                }
+                else -> app.startService()
             }
         }
 
@@ -319,9 +322,15 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
-        if (key == Key.serviceMode) app.handler.post {
-            connection.disconnect()
-            connection.connect()
+        when (key) {
+            Key.serviceMode -> app.handler.post {
+                connection.disconnect()
+                connection.connect()
+            }
+            Key.nightMode -> {
+                AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
+                recreate()
+            }
         }
     }
 

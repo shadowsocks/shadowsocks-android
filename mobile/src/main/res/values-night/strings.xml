@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_url" translatable="false">file:///android_asset/pages/about_night.html</string>
+</resources>

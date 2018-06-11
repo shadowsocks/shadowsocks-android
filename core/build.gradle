@@ -38,7 +38,7 @@ android {
 task goBuild(type: Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         executable "cmd.exe"
-        args "/c", "src\\overture\\make.bat " + minSdkVersion
+        args "/c", file("src/overture/make.bat").absolutePath , minSdkVersion
     } else {
         executable "sh"
         args "-c", "src/overture/make.bash " + minSdkVersion
@@ -48,7 +48,7 @@ task goBuild(type: Exec) {
 task goClean(type: Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         executable "cmd.exe"
-        args "/c", "src\\overture\\clean.bat"
+        args "/c", file("src/overture/clean.bat").absolutePath
     } else {
         executable "sh"
         args "-c", "src/overture/clean.bash"

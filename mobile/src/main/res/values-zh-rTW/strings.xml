@@ -20,17 +20,11 @@
 <string name="connection_test_error_status_code">"錯誤碼: （#%d）"</string>
 
 <!-- proxy category -->
-<string name="proxy_cat">"伺服器設定"</string>
-
-<!-- proxy category -->
 <string name="profile_name">"設定檔名稱"</string>
 <string name="proxy">"伺服器"</string>
 <string name="remote_port">"遠端連接埠"</string>
 <string name="sitekey">"密碼"</string>
 <string name="enc_method">"加密方法"</string>
-
-<!-- feature category -->
-<string name="feature_cat">"功能設定"</string>
 
 <!-- feature category -->
 <string name="ipv6">"IPv6 路由"</string>
@@ -59,10 +53,6 @@
 <string name="profile_invalid_input">"未找到有效的設定檔資料。"</string>
 
 <!-- alert category -->
-<string name="yes">"是"</string>
-<string name="no">"否"</string>
-
-<!-- alert category -->
 <string name="close">"關閉"</string>
 <string name="profile_empty">"請選擇設定檔"</string>
 <string name="proxy_empty">"Proxy 或密碼不可以空白"</string>
@@ -88,8 +78,6 @@
 
 <!-- profile -->
 <string name="profile_config">"設定檔設定"</string>
-<string name="unsaved_changes_prompt">"要儲存變更嗎？"</string>
-<string name="apply">"套用"</string>
 <string name="delete">"刪除"</string>
 <string name="delete_confirm_prompt">"您確定要移除這個設定檔嗎？"</string>
 <string name="share_qr_nfc">"QR 碼 / NFC"</string>

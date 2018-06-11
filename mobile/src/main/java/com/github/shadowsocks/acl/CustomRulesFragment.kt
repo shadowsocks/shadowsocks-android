@@ -22,6 +22,7 @@ package com.github.shadowsocks.acl
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -438,7 +439,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
         R.id.action_import -> {
             try {
-                adapter.addToProxy(clipboard.primaryClip.getItemAt(0).text.toString()) != null
+                check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
             } catch (exc: Exception) {
                 Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
                         Snackbar.LENGTH_LONG).show()
@@ -466,10 +467,16 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         val activity = requireActivity()
         val window = activity.window
         // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
-        if (Build.VERSION.SDK_INT >= 23) {
-            window.statusBarColor = ContextCompat.getColor(activity, R.color.material_grey_300)
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        } else window.statusBarColor = ContextCompat.getColor(activity, R.color.material_grey_600)
+        // for dark mode, it's roughly 850? (#303030)
+        window.statusBarColor = ContextCompat.getColor(activity, when {
+            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES ->
+                R.color.md_black_1000
+            Build.VERSION.SDK_INT >= 23 -> {
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                R.color.material_grey_300
+            }
+            else -> R.color.material_grey_600
+        })
         activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
         toolbar.touchscreenBlocksFocus = true
         return true

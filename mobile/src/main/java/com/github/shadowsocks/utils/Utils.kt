@@ -10,7 +10,6 @@ import android.support.annotation.AttrRes
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.content.ContextCompat
-import android.support.v4.os.BuildCompat
 import android.support.v7.util.SortedList
 import android.util.TypedValue
 import com.github.shadowsocks.App.Companion.app
@@ -42,8 +41,8 @@ fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = 
 /**
  * Wrapper for kotlin.concurrent.thread that tracks uncaught exceptions.
  */
-fun thread(start: Boolean = true, isDaemon: Boolean = false, contextClassLoader: ClassLoader? = null,
-           name: String? = null, priority: Int = -1, block: () -> Unit): Thread {
+fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = false,
+           contextClassLoader: ClassLoader? = null, priority: Int = -1, block: () -> Unit): Thread {
     val thread = kotlin.concurrent.thread(false, isDaemon, contextClassLoader, name, priority, block)
     thread.setUncaughtExceptionHandler(app::track)
     if (start) thread.start()
@@ -56,8 +55,7 @@ val URLConnection.responseLength: Long
 inline fun <reified T> Context.systemService() = ContextCompat.getSystemService(this, T::class.java)!!
 
 val PackageInfo.signaturesCompat get() =
-    if (BuildCompat.isAtLeastP()) signingCertificateHistory.flatten()
-    else @Suppress("DEPRECATION") signatures.asIterable()
+    if (Build.VERSION.SDK_INT >= 28) signingInfo.apkContentsSigners else @Suppress("DEPRECATION") signatures
 
 /**
  * Based on: https://stackoverflow.com/a/15656428/2245107
