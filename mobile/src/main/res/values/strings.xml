@@ -6,8 +6,6 @@
   <string name="about_url" translatable="false">file:///android_asset/pages/about.html</string>
 
   <!-- misc -->
-  <string name="profile">Profile</string>
-  <string name="profile_summary">Switch to another profile or add new profiles</string>
   <string name="advanced">Advanced</string>
   <string name="service_mode">Service mode</string>
   <string name="service_mode_proxy">Proxy only</string>
@@ -21,7 +19,6 @@
   <string name="traffic">%s↑\t%s↓</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s\nReceived: \t%4$s\t↓\t%2$s</string>
   <string name="speed">%s/s</string>
-  <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>
   <string name="connection_test_available">Success: %dms latency</string>
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
@@ -81,11 +78,9 @@
   <string name="profile_invalid_input">No valid profile data found.</string>
 
   <!-- alert category -->
-  <string name="close">Close</string>
   <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
   <string name="connect">Connect</string>
-  <string name="remove_profile">Remove this profile "%s"?</string>
 
   <!-- menu category -->
   <string name="profiles">Profiles</string>
@@ -137,7 +132,6 @@
 
   <!-- acl -->
   <string name="custom_rules">Custom rules</string>
-  <string name="action_selection">Selection…</string>
   <string name="action_add_rule">Add rule(s)…</string>
   <string name="acl_rule_templates_generic">Subnet or Hostname PCRE pattern</string>
   <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
