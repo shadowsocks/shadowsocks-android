@@ -59,10 +59,9 @@ val URLConnection.responseLength: Long
 
 inline fun <reified T> Context.systemService() = ContextCompat.getSystemService(this, T::class.java)!!
 
-fun ContentResolver.openBitmap(uri: Uri): Bitmap? {
-    return if (Build.VERSION.SDK_INT >= 28) ImageDecoder.decodeBitmap(ImageDecoder.createSource(this, uri))
-    else BitmapFactory.decodeStream(openInputStream(uri))
-}
+fun ContentResolver.openBitmap(uri: Uri) =
+        if (Build.VERSION.SDK_INT >= 28) ImageDecoder.decodeBitmap(ImageDecoder.createSource(this, uri))
+        else BitmapFactory.decodeStream(openInputStream(uri))
 
 val PackageInfo.signaturesCompat get() =
     if (Build.VERSION.SDK_INT >= 28) signingInfo.apkContentsSigners else @Suppress("DEPRECATION") signatures

@@ -126,14 +126,14 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     @TargetApi(28)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
-            setUnderlyingNetworks(arrayOf(network))
+            underlyingNetwork = network
         }
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities?) {
             // it's a good idea to refresh capabilities
-            setUnderlyingNetworks(arrayOf(network))
+            underlyingNetwork = network
         }
         override fun onLost(network: Network) {
-            setUnderlyingNetworks(null)
+            underlyingNetwork = null
         }
     }
     private var listeningForDefaultNetwork = false
