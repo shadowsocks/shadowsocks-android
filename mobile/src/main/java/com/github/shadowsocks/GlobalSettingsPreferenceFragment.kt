@@ -31,9 +31,9 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.TcpFastOpen
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompatDividers
+import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 
-class GlobalSettingsPreferenceFragment : PreferenceFragmentCompatDividers() {
+class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()

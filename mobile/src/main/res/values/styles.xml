@@ -14,6 +14,15 @@
         <item name="material_drawer_header_selection_text">@color/drawer_header_selection_text</item>
     </style>
     <style name="Theme.Design.DayNight.BottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog"/>
+
+    <!-- https://github.com/Gericop/Android-Support-Preference-V7-Fix/issues/111 -->
+    <style name="Preference.SimpleMenuPreference">
+        <item name="android:layout">@layout/preference_simplemenu</item>
+        <item name="allowDividerAbove">false</item>
+        <item name="allowDividerBelow">true</item>
+        <item name="iconSpaceReserved">@bool/config_materialPreferenceIconSpaceReserved</item>
+        <item name="pref_popupStyle">@style/Preference.SimpleMenuPreference.Popup</item>
+    </style>
     <style name="StyledScrollerTextAppearance" parent="@android:style/TextAppearance">
         <item name="android:textSize">24sp</item>
         <item name="android:textStyle">bold</item>
