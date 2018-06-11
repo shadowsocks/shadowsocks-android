@@ -1,10 +1,15 @@
 package com.github.shadowsocks.utils
 
 import android.content.BroadcastReceiver
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
 import android.support.annotation.AttrRes
 import android.support.v4.app.Fragment
@@ -53,6 +58,11 @@ val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
 inline fun <reified T> Context.systemService() = ContextCompat.getSystemService(this, T::class.java)!!
+
+fun ContentResolver.openBitmap(uri: Uri): Bitmap? {
+    return if (Build.VERSION.SDK_INT >= 28) ImageDecoder.decodeBitmap(ImageDecoder.createSource(this, uri))
+    else BitmapFactory.decodeStream(openInputStream(uri))
+}
 
 val PackageInfo.signaturesCompat get() =
     if (Build.VERSION.SDK_INT >= 28) signingInfo.apkContentsSigners else @Suppress("DEPRECATION") signatures

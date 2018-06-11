@@ -23,7 +23,6 @@ package com.github.shadowsocks
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ShortcutManager
-import android.graphics.BitmapFactory
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import android.os.Build
@@ -38,6 +37,7 @@ import android.widget.Toast
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.utils.openBitmap
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.utils.systemService
 import com.google.android.gms.common.GoogleApiAvailability
@@ -138,10 +138,9 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
                 var list = listOfNotNull(data?.data)
                 val clipData = data?.clipData
                 if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
-                val resolver = contentResolver
                 for (uri in list) try {
                     val barcodes = detector.detect(Frame.Builder()
-                            .setBitmap(BitmapFactory.decodeStream(resolver.openInputStream(uri))).build())
+                            .setBitmap(contentResolver.openBitmap(uri)).build())
                     for (i in 0 until barcodes.size()) Profile.findAll(barcodes.valueAt(i).rawValue).forEach {
                         ProfileManager.createProfile(it)
                         success = true
