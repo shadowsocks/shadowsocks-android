@@ -5,7 +5,7 @@ apply from: 'gradle-mvn-push.gradle'
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
-    compileSdkVersion rootProject.sdkVersion
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion

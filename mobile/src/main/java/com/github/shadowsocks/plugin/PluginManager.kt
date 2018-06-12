@@ -32,6 +32,7 @@ import android.util.Base64
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.utils.Commandline
+import com.github.shadowsocks.utils.signaturesCompat
 import eu.chainfire.libsuperuser.Shell
 import java.io.File
 import java.io.FileNotFoundException
@@ -47,7 +48,7 @@ object PluginManager {
      * public key yet since it will also automatically trust packages signed by the same signatures, e.g. debug keys.
      */
     val trustedSignatures by lazy {
-        app.info.signatures.toSet() +
+        app.info.signaturesCompat.toSet() +
                 Signature(Base64.decode(  // @Mygod
                 """
                     |MIIDWzCCAkOgAwIBAgIEUzfv8DANBgkqhkiG9w0BAQsFADBdMQswCQYDVQQGEwJD

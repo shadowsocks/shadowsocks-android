@@ -5,15 +5,19 @@
                       android:persistent="false"
                       android:summary="@string/auto_connect_summary"
                       android:title="@string/auto_connect"/>
-    <!-- Direct Boot Aware alone doesn't do anything without auto connect -->
-    <SwitchPreference android:key="directBootAware"
-                      android:summary="@string/direct_boot_aware_summary"
-                      android:title="@string/direct_boot_aware"/>
-    <SwitchPreference android:key="tcp_fastopen"
-                      android:summary="@string/tcp_fastopen_summary"
-                      android:title="TCP Fast Open"/>
+    <SwitchPreference
+        android:key="directBootAware"
+        android:icon="@drawable/ic_action_lock"
+        android:summary="@string/direct_boot_aware_summary"
+        android:title="@string/direct_boot_aware"/>
+    <SwitchPreference
+        android:key="tcp_fastopen"
+        android:icon="@drawable/ic_action_offline_bolt"
+        android:summary="@string/tcp_fastopen_summary"
+        android:title="TCP Fast Open"/>
     <SimpleMenuPreference
         android:key="nightMode"
+        android:icon="@drawable/ic_image_brightness_3"
         android:entries="@array/night_modes"
         android:entryValues="@array/night_mode_values"
         android:defaultValue="system"
@@ -36,6 +40,7 @@
             android:title="@string/port_proxy"/>
         <AutoSummaryEditTextPreference
             android:key="portLocalDns"
+            android:icon="@drawable/ic_action_dns"
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"

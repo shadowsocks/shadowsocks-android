@@ -22,7 +22,6 @@ package com.github.shadowsocks
 
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
@@ -33,6 +32,7 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.systemService
 
 class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface {
     companion object {
@@ -48,8 +48,7 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
             finish()
             return
         }
-        val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-        if (km.inKeyguardRestrictedInputMode()) {
+        if (systemService<KeyguardManager>().isKeyguardLocked) {
             receiver = broadcastReceiver { _, _ -> connection.connect() }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
         } else connection.connect()

@@ -45,6 +45,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.systemService
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -308,7 +309,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private var txTotal: Long = 0L
     private var rxTotal: Long = 0L
 
-    private val clipboard by lazy { requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    private val clipboard by lazy { requireContext().systemService<ClipboardManager>() }
 
     private fun startConfig(profile: Profile) {
         profile.serialize()

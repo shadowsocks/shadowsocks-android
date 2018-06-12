@@ -22,14 +22,12 @@ package com.github.shadowsocks.bg
 
 import android.annotation.TargetApi
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.*
 import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
-import android.support.v4.os.BuildCompat
 import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
@@ -40,6 +38,7 @@ import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.utils.systemService
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
@@ -123,7 +122,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             field = value
         }
 
-    private val connectivity by lazy { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    private val connectivity by lazy { systemService<ConnectivityManager>() }
     @TargetApi(28)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -230,7 +229,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         this.conn = conn
         val fd = conn.fd
 
-        if (BuildCompat.isAtLeastP()) {
+        if (Build.VERSION.SDK_INT >= 28) {
             // we want REQUEST here instead of LISTEN
             connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
             listeningForDefaultNetwork = true

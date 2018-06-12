@@ -27,7 +27,6 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -49,10 +48,7 @@ import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.resolveResourceId
-import com.github.shadowsocks.utils.thread
+import com.github.shadowsocks.utils.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
@@ -140,7 +136,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     private lateinit var loadingView: View
     private val appsLoading = AtomicBoolean()
     private val handler = Handler()
-    private val clipboard by lazy { getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
+    private val clipboard by lazy { systemService<ClipboardManager>() }
 
     private fun initProxiedApps(str: String = DataStore.individual) {
         proxiedApps = str.split('\n').toHashSet()

@@ -78,8 +78,9 @@ class App : Application() {
             .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
     }
 
-    fun getPackageInfo(packageName: String) =
-            packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)!!
+    fun getPackageInfo(packageName: String) = packageManager.getPackageInfo(packageName,
+            if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
+            else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
     fun startService() {
         val intent = Intent(this, BaseService.serviceClass.java)

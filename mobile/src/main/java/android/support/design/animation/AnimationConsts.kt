@@ -18,23 +18,10 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.plugin
+package android.support.design.animation
 
-import android.content.pm.ResolveInfo
-import android.graphics.drawable.Drawable
-import android.os.Bundle
-import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.utils.signaturesCompat
+import android.animation.TimeInterpolator
 
-abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin() {
-    protected abstract val metaData: Bundle
-
-    override val id: String by lazy { metaData.getString(PluginContract.METADATA_KEY_ID) }
-    override val label: CharSequence by lazy { resolveInfo.loadLabel(app.packageManager) }
-    override val icon: Drawable by lazy { resolveInfo.loadIcon(app.packageManager) }
-    override val defaultConfig: String by lazy { metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
-    override val packageName: String get() = resolveInfo.resolvePackageName
-    override val trusted by lazy {
-        app.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)
-    }
+object AnimationConsts {
+    val FAST_OUT_SLOW_IN_INTERPOLATOR: TimeInterpolator get() = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
 }
