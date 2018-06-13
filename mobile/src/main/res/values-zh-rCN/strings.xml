@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+<string name="app_name">"影梭"</string>
 <string name="quick_toggle">"开关"</string>
 
 <!-- misc -->
