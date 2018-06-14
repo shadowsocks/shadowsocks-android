@@ -27,7 +27,7 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.migration.RecreateSchemaMigration
 import com.github.shadowsocks.utils.Key
 
-@Database(entities = [(KeyValuePair::class)], version = 3)
+@Database(entities = [KeyValuePair::class], version = 3)
 abstract class PublicDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
