@@ -20,7 +20,7 @@
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s\nReceived: \t%4$s\t↓\t%2$s</string>
   <string name="speed">%s/s</string>
   <string name="connection_test_testing">Testing…</string>
-  <string name="connection_test_available">Success: %dms latency</string>
+  <string name="connection_test_available">Success: handshake takes %dms </string>
   <string name="connection_test_error">Fail to detect internet connection: %s</string>
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
