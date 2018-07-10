@@ -72,7 +72,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-vision:15.0.2"
     implementation "com.google.firebase:firebase-config:16.0.0"
     implementation 'com.google.firebase:firebase-core:16.0.0'
-    implementation 'com.mikepenz:materialdrawer:6.0.7'
+    implementation 'com.mikepenz:materialdrawer:6.0.8'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
