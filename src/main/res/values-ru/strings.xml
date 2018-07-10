@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">SSRR</string>
   <string name="quick_toggle">Подключение</string>
 
   <!-- global/misc category -->
@@ -12,12 +11,6 @@
   <string name="nat_summary">Использовать режим NAT вместо VPN. Требует ROOT прав.</string>
   <string name="stat">Сетевая Активность</string>
   <string name="stat_summary">Отправлено: \t\t\t\t\t%3$s\t↑\t%1$s/s\nПолучено: \t%4$s\t↓\t%2$s/s</string>
-  <string name="stat_profiles">\n%1$s↑\t%2$s↓\t%3$sms\t%4$s</string>
-  <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
-  <plurals name="bytes">
-    <item quantity="one">байт</item>
-    <item quantity="other">байт</item>
-  </plurals>
   <string name="connection_test_pending">Проверить подключение</string>
   <string name="connection_test_testing">Проверка…</string>
   <string name="connection_test_available">Успешно: %dms задержка</string>
@@ -37,13 +30,13 @@
   <string name="sitekey">Пароль</string>
   <string name="sitekey_summary">Пароль удалённого сервера</string>
   <string name="protocol">Протокол</string>
-  <string name="protocol_summary">Вы можете настроить пересмотренный протокол Magic (ShadowsocksRR характеристика)</string>
+  <string name="protocol_summary">Вы можете настроить пересмотренный протокол Magic (SSR характеристика)</string>
   <string name="protocol_param">Настройки протокола</string>
-  <string name="protocol_param_summary">Вы можете настроить параметры пересмотренного протокола панели ввода Волшебные(ShadowsocksRR характеристика)</string>
+  <string name="protocol_param_summary">Вы можете настроить параметры пересмотренного протокола панели ввода Волшебные(SSR характеристика)</string>
   <string name="obfs">путано</string>
-  <string name="obfs_summary">Вы можете настроить ревизию волшебную запутанным способом (ShadowsocksRR характеристика) настройки панели</string>
+  <string name="obfs_summary">Вы можете настроить ревизию волшебную запутанным способом (SSR характеристика) настройки панели</string>
   <string name="obfs_param">запутанные параметры</string>
-  <string name="obfs_param_summary">Вы можете настроить входные Волшебное редакция панели параметров путанице (ShadowsocksRR характеристика)</string>
+  <string name="obfs_param_summary">Вы можете настроить входные Волшебное редакция панели параметров путанице (SSR характеристика)</string>
   <string name="enc_method">Метод Шифрования</string>
 
   <!-- feature category -->
@@ -64,8 +57,7 @@
     <item>Обход LAN</item>
     <item>Обходной Китай</item>
     <item>Обход LAN и Китай</item>
-    <item>Список GFW</item>    
-    <item>Китай Список</item>
+    <item>Список GFW</item>
     <item>Пользовательские ACL файла</item>
   </string-array>
   <string name="acl_file">ACL File URL</string>
@@ -81,7 +73,7 @@
   <string name="bypass_apps">В обход прокси</string>
   <string name="bypass_apps_summary">Включите эту опцию для работы выбранных приложений в обход прокси</string>
   <string name="auto_connect">Авто Подключение</string>
-  <string name="auto_connect_summary">Запускать ShadowsocksRR при включении</string>
+  <string name="auto_connect_summary">Запускать Shadowsocks при включении</string>
   <string name="tcp_fastopen_summary">Переключение требует наличия ROOT прав</string>
   <string name="tcp_fastopen_summary_unsupported">Неподдерживаемая версия ядра: %s &lt; 3.7.1</string>
   <string name="udp_dns">Проброс UDP</string>
@@ -92,7 +84,7 @@
   <string name="china_dns_summary">Общие используется для разрешения доменных имен DNS , например, 223.5.5.5:53</string>
 
   <!-- notification category -->
-  <string name="forward_success">ShadowsocksRR запущен.</string>
+  <string name="forward_success">Shadowsocks запущен.</string>
   <string name="invalid_server">Неправильное имя сервера</string>
   <string name="service_failed">Ошибка при подключении к удалённому серверу</string>
   <string name="method_unsafe">ВНИМАНИЕ:В настоящее время метод шифрования является небезопасным</string>
@@ -124,7 +116,7 @@
   <string name="ignore_battery_optimization">Request ignore battery optimizations</string>
   <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">О приложении</string>
-  <string name="about_title">ShadowsocksRR %s</string>
+  <string name="about_title">Shadowsocks R %s</string>
   <string name="share">Поделиться</string>
   <string name="share_message">Сканировать QR код или использовать Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Сканировать QR код</string>
@@ -136,6 +128,7 @@
   <string name="flush_dnscache_no_root">Очистка кэша DNS не работает без налиичя ROOT прав</string>
   <string name="flushing">Очистка</string>
   <string name="add_profile">Добавить Профиль</string>
+
   <string name="action_apply_all">Применить настройки для всех профилей</string>
   <string name="action_export">Экспортировать в буфер обмена</string>
   <string name="action_import">Импортировать из буфера обмена</string>
@@ -149,7 +142,7 @@
   <string name="profile_manager_dialog_content">&#8226; Нажмите для выбора профиля;\n&#8226; Сдвиньте влево/вправо или нажмите влево
     чтобы удалить;\n&#8226; Подержите чтобы изменить порядок профилей.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Добавить этот Профиль ShadowsocksRR?</string>
+  <string name="add_profile_dialog">Добавить этот Профиль SSR?</string>
   <string name="add_profile_methods_scan_qr_code">Сканировать QR код</string>
   <string name="add_profile_methods_manual_settings">Настройка вручную</string>
   <string name="add_profile_nfc_hint_title">Использовать Android Beam (NFC) для добавления профиля</string>
@@ -176,7 +169,7 @@
   <string name="frontproxy_type">Тип</string>
   <string name="frontproxy_set">фронт полномочие</string>
 
-  <string name="add_profile_methods_ssr_sub">Добавить / обновить подписку на ShadowsocksRR</string>
+  <string name="add_profile_methods_ssr_sub">Добавить / обновить подписку на SSR</string>
   <string name="ssrsub_autoupdate_enable">Автоматическое обновление</string>
   <string name="ssrsub_add">Добавить URL</string>
   <string name="ssrsub_ok">Ок и обновление</string>
@@ -193,6 +186,7 @@
   <string name="ssrsub_remove_tip">Вы хотите, чтобы удалить его, или даже хотите удалить группу с тем же именем и узлом подписки это?</string>
   <string name="ssrsub_remove_tip_direct">удалять</string>
   <string name="ssrsub_remove_tip_delete">Удаляется вместе с узлом</string>
+
 
   <string name="scan_qrcode_install_title">Сканирование подсказки кода</string>
   <string name="scan_qrcode_install_text">Кажется, вы не установили сканер в соответствии с ZXing стандартами, нажмите кнопку «ОК» приведет вас в магазин приложений, где вы установили загрузку, или вы можете нажать кнопку «Загрузить», чтобы загрузить APK установлен непосредственно.</string>

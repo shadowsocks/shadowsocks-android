@@ -14,7 +14,7 @@
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s/s\nReceived: \t%4$s\t↓\t%2$s/s</string>
   <string name="stat_profiles">\n%1$s↑\t%2$s↓\t%3$sms\t%4$s</string>
   <string name="traffic_summary">%1$s/s↑\t%2$s/s↓</string>
-  <plurals name="bytes">
+  <plurals name="bytes" translatable="false">
     <item quantity="one">Byte</item>
     <item quantity="other">Bytes</item>
   </plurals>
@@ -57,7 +57,8 @@
   <string name="dns_proxy">DNS Proxy</string>
   <string name="dns_proxy_summary">Redirect DNS queries to remote</string>
   <string name="auto_set_gfwlist">CHN Route</string>
-  <string name="auto_set_gfwlist_summary">Bypass all sites located in China</string>
+  <string name="auto_set_gfwlist_summary">Bypass all sites located in China
+  </string>
   <string name="route_list">Route</string>
   <string-array name="route_entry">
     <item>All</item>
@@ -81,7 +82,7 @@
   <string name="bypass_apps">Bypass Mode</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
-  <string name="auto_connect_summary">Enable ShadowsocksRR on startup</string>
+  <string name="auto_connect_summary">Enable ShadowsocksR on startup</string>
   <string name="tcp_fastopen_summary">Toggling requires ROOT permission</string>
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="udp_dns">UDP Forwarding</string>
@@ -92,7 +93,7 @@
   <string name="china_dns_summary">The DNS server you want to use to resolve normal domain,e.g. 223.5.5.5:53</string>
 
   <!-- notification category -->
-  <string name="forward_success">ShadowsocksRR started.</string>
+  <string name="forward_success">ShadowsocksR started.</string>
   <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="method_unsafe">WARNING: The current encryption method is unsafe</string>
@@ -124,7 +125,7 @@
   <string name="ignore_battery_optimization">Request ignore battery optimizations</string>
   <string name="ignore_battery_optimization_summary">Click to request trigger Ignore the battery optimization, to avoid background hiccups caused by hibernation when off screen, will increase the battery consumption, may not be triggered properly on some devices.</string>
   <string name="about">About</string>
-  <string name="about_title">ShadowsocksRR %s</string>
+  <string name="about_title">ShadowsocksR %s</string>
   <string name="share">Share</string>
   <string name="share_message">Scan QR code or use Android Beam (NFC)</string>
   <string name="share_message_without_nfc">Scan QR code</string>
@@ -149,7 +150,7 @@
   <string name="profile_manager_dialog_content">&#8226; Tap to select a profile;\n&#8226; Swipe left/right or press left
     to remove;\n&#8226; Long press to reorder profiles.</string>
   <string name="gotcha">Gotcha!</string>
-  <string name="add_profile_dialog">Add this ShadowsocksRR profile?</string>
+  <string name="add_profile_dialog">Add this SSR profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
   <string name="add_profile_nfc_hint_title">Use Android Beam (NFC) to add a profile</string>
@@ -176,7 +177,8 @@
   <string name="frontproxy_type">Type</string>
   <string name="frontproxy_set">FrontProxy</string>
 
-  <string name="add_profile_methods_ssr_sub">Add/Update ShadowsocksRR Subscription</string>
+
+  <string name="add_profile_methods_ssr_sub">Add/Update SSR Subscription</string>
   <string name="ssrsub_autoupdate_enable">Auto Update</string>
   <string name="ssrsub_add">Add URL</string>
   <string name="ssrsub_ok">Save and Update</string>
@@ -194,8 +196,9 @@
   <string name="ssrsub_remove_tip_direct">Delete the URL only</string>
   <string name="ssrsub_remove_tip_delete">Delete the nodes too</string>
 
+
   <string name="scan_qrcode_install_title">Scanner installation</string>
-  <string name="scan_qrcode_install_text">It seems that \'Zxing Scanner\' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>
+  <string name="scan_qrcode_install_text">It seems that \'zxing scanner\' is not currently installed. You may click the \'ok\' button below to install it from Play Store, or \'Install Manually\' to manually download the apk and installed it.</string>
   <string name="scan_qrcode_direct_download_text">Install Manually</string>
 
   <!-- tasker -->
