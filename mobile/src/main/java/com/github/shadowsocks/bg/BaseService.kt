@@ -398,17 +398,11 @@ object BaseService {
                     // Clean up
                     killProcesses()
 
-                    if (!profile.host.isNumericAddress())
-                    {
-                        val resolveThread = thread() {
-                            profile.host = InetAddress.getByName(profile.host).hostAddress ?: throw UnknownHostException()
-                        }
-                        resolveThread.join(10 * 1000)
-                    }
-
-                    if (!profile.host.isNumericAddress())
-                    {
-                        throw UnknownHostException()
+                    if (!profile.host.isNumericAddress()) {
+                        thread("BaseService-resolve") {
+                            profile.host = InetAddress.getByName(profile.host).hostAddress ?: ""
+                        }.join(10 * 1000)
+                        if (!profile.host.isNumericAddress()) throw UnknownHostException()
                     }
 
                     startNativeProcesses()
