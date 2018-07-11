@@ -35,6 +35,7 @@ import android.os.SystemClock
 import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
@@ -71,7 +72,7 @@ import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawer.OnDrawerItemClickListener,
-        OnPreferenceDataStoreChangeListener {
+        DrawerLayout.DrawerListener, OnPreferenceDataStoreChangeListener {
     companion object {
         private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
@@ -92,6 +93,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     private lateinit var fab: ServiceButton
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
+    private var drawerItemSelectedChanged = false
 
     private var testCount = 0
     private lateinit var statusText: TextView
@@ -254,6 +256,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 .withActionBarDrawerToggle(true)
                 .withSavedInstance(savedInstanceState)
                 .build()
+        drawer.drawerLayout.addDrawerListener(this)
 
         if (savedInstanceState == null) displayFragment(ProfilesFragment())
         previousSelectedDrawer = drawer.currentSelection
@@ -341,9 +344,26 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     override fun onItemClick(view: View?, position: Int, drawerItem: IDrawerItem<*, *>): Boolean {
         val id = drawerItem.identifier
-        if (id == previousSelectedDrawer) drawer.closeDrawer() else {
+        if (id != previousSelectedDrawer) {
             previousSelectedDrawer = id
-            when (id) {
+            drawerItemSelectedChanged = true
+        }
+        drawer.closeDrawer()
+        return true
+    }
+
+    override fun onDrawerStateChanged(newState: Int) {
+
+    }
+
+    override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+
+    }
+
+    override fun onDrawerClosed(drawerView: View) {
+        if (drawerItemSelectedChanged) {
+            drawerItemSelectedChanged = false
+            when (previousSelectedDrawer) {
                 DRAWER_PROFILES -> displayFragment(ProfilesFragment())
                 DRAWER_GLOBAL_SETTINGS -> displayFragment(GlobalSettingsFragment())
                 DRAWER_ABOUT -> {
@@ -352,10 +372,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 }
                 DRAWER_FAQ -> launchUrl(getString(R.string.faq_url))
                 DRAWER_CUSTOM_RULES -> displayFragment(CustomRulesFragment())
-                else -> return false
             }
         }
-        return true
+    }
+
+    override fun onDrawerOpened(drawerView: View) {
+
     }
 
     override fun onResume() {
@@ -370,10 +392,17 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
     override fun onBackPressed() {
         if (drawer.isDrawerOpen) drawer.closeDrawer() else {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
-            if (!currentFragment.onBackPressed())
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder)
+            if (currentFragment != null && currentFragment is ToolbarFragment && !currentFragment.onBackPressed()) {
                 if (currentFragment is ProfilesFragment) super.onBackPressed()
-                else drawer.setSelection(DRAWER_PROFILES)
+                else {
+                    drawer.setSelection(DRAWER_PROFILES)
+                    displayFragment(ProfilesFragment())
+                }
+            } else {
+                drawer.setSelection(DRAWER_PROFILES)
+                displayFragment(ProfilesFragment())
+            }
         }
     }
 
