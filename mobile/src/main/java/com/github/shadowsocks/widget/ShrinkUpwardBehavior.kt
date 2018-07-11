@@ -34,7 +34,7 @@ import com.github.shadowsocks.utils.systemService
 /**
  * Full credits go to: https://stackoverflow.com/a/35904421/2245107
  */
-class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Behavior<View>(context, attrs) {
+class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet?) : CoordinatorLayout.Behavior<View>(context, attrs) {
     private val accessibility = context.systemService<AccessibilityManager>()
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean =
