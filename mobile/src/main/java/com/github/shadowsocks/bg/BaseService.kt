@@ -34,7 +34,7 @@ import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.R
 import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.acl.AclSyncJob
+import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.database.Profile
@@ -407,7 +407,7 @@ object BaseService {
 
                     startNativeProcesses()
 
-                    if (profile.route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncJob.schedule(profile.route)
+                    if (profile.route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(profile.route)
 
                     data.changeState(CONNECTED)
                 } catch (_: UnknownHostException) {
