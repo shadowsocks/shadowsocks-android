@@ -117,7 +117,6 @@ class App : Application() {
         super.onCreate()
         app = this
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
                 BottomSheetPreferenceDialogFragment::class.java)
 

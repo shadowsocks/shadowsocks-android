@@ -10,7 +10,7 @@ buildscript {
         compileSdkVersion = 28
         buildToolsVersion = '28.0.1'
         supportLibraryVersion = '28.0.0-alpha3'
-        takisoftFixVersion = '27.1.1.1'
+        takisoftFixVersion = '27.1.1.2'
         roomVersion = '1.1.1'
         junitVersion = '4.12'
         androidTestVersion = '1.0.2'
@@ -23,7 +23,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.3'
+        classpath 'com.android.tools.build:gradle:3.2.0-beta03'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
         classpath 'com.google.gms:google-services:4.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"

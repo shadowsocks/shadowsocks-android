@@ -23,11 +23,8 @@ install:
     - unzip -q tools.zip
     - popd
     - touch $HOME/.android/repositories.cfg
-    - yes | sdkmanager
-        "build-tools;28.0.1"
-        ndk-bundle
-        "platforms;android-28"
-      >/dev/null
+    - yes | sdkmanager --licenses > /dev/null
+    - sdkmanager ndk-bundle > /dev/null
 
 script:
     - ./gradlew assembleDebug check
