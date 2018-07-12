@@ -38,12 +38,8 @@ import android.os.UserManager
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
-import android.widget.Toast
-import com.evernote.android.job.JobConstants
-import com.evernote.android.job.JobManager
-import com.evernote.android.job.JobManagerCreateException
+import androidx.work.WorkManager
 import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.acl.AclSyncJob
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -122,8 +118,6 @@ class App : Application() {
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
             deviceContext.moveDatabaseFrom(this, Key.DB_PUBLIC)
-            deviceContext.moveDatabaseFrom(this, JobConstants.DATABASE_NAME)
-            deviceContext.moveSharedPreferencesFrom(this, JobConstants.PREF_FILE_NAME)
             val old = Acl.getFile(Acl.CUSTOM_RULES, this)
             if (old.canRead()) {
                 Acl.getFile(Acl.CUSTOM_RULES).writeText(old.readText())
@@ -136,12 +130,7 @@ class App : Application() {
         remoteConfig.fetch().addOnCompleteListener {
             if (it.isSuccessful) remoteConfig.activateFetched() else Log.e(TAG, "Failed to fetch config")
         }
-        try {
-            JobManager.create(deviceContext).addJobCreator(AclSyncJob)
-        } catch (e: JobManagerCreateException) {
-            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-            app.track(e)
-        }
+        WorkManager.initialize(deviceContext, androidx.work.Configuration.Builder().build())
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&

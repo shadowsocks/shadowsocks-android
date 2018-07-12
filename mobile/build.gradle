@@ -61,12 +61,12 @@ android {
 dependencies {
     implementation project(':core')
     implementation "android.arch.persistence.room:runtime:$roomVersion"
+    implementation "android.arch.work:work-runtime-ktx:$workVersion"
     implementation "com.android.support:customtabs:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
     implementation "com.android.support:support-v4:$supportLibraryVersion"
     implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
-    implementation 'com.evernote:android-job:1.2.6'
     implementation "com.google.android.gms:play-services-ads:15.0.1"
     implementation "com.google.android.gms:play-services-analytics:16.0.0"
     implementation "com.google.android.gms:play-services-vision:15.0.2"
@@ -83,6 +83,7 @@ dependencies {
     kapt "android.arch.persistence.room:compiler:$roomVersion"
     testImplementation "android.arch.persistence.room:testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "android.arch.work:work-testing:$workVersion"
     androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
 }

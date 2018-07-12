@@ -12,6 +12,7 @@ buildscript {
         supportLibraryVersion = '28.0.0-alpha3'
         takisoftFixVersion = '27.1.1.2'
         roomVersion = '1.1.1'
+        workVersion = '1.0.0-alpha04'
         junitVersion = '4.12'
         androidTestVersion = '1.0.2'
         androidEspressoVersion = '3.0.2'
