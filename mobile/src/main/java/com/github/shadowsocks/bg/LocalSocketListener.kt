@@ -23,7 +23,6 @@ package com.github.shadowsocks.bg
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.utils.printLog
 import java.io.File
 import java.io.IOException

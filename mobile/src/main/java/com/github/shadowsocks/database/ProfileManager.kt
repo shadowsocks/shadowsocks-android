@@ -34,8 +34,6 @@ import java.sql.SQLException
  * to ensure we are in a consistent state.
  */
 object ProfileManager {
-    private const val TAG = "ProfileManager"
-
     @Throws(SQLException::class)
     fun createProfile(p: Profile? = null): Profile {
         val profile = p ?: Profile()

@@ -35,7 +35,6 @@ import android.util.SparseArray
 import android.view.MenuItem
 import android.widget.Toast
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.openBitmap

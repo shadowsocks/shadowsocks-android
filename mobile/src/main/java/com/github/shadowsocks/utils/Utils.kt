@@ -16,7 +16,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.util.SortedList
 import android.util.TypedValue
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
 import java.net.URLConnection
