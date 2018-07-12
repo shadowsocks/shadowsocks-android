@@ -30,6 +30,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.utils.Commandline
 import com.github.shadowsocks.utils.signaturesCompat
@@ -143,7 +144,8 @@ object PluginManager {
             initNativeFast(cr, options, uri)
         } catch (t: Throwable) {
             t.printStackTrace()
-            Log.w("PluginManager", "Initializing native plugin fast mode failed. Falling back to slow mode.")
+            Crashlytics.log(Log.WARN, "PluginManager",
+                    "Initializing native plugin fast mode failed. Falling back to slow mode.")
             initNativeSlow(cr, options, uri)
         }
     }

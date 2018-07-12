@@ -45,10 +45,7 @@ import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.utils.Subnet
-import com.github.shadowsocks.utils.asIterable
-import com.github.shadowsocks.utils.resolveResourceId
-import com.github.shadowsocks.utils.systemService
+import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
 import java.net.MalformedURLException
@@ -443,7 +440,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             } catch (exc: Exception) {
                 Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
                         Snackbar.LENGTH_LONG).show()
-                app.track(exc)
+                printLog(exc)
             }
             true
         }

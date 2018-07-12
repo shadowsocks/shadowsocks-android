@@ -3,6 +3,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
@@ -66,6 +67,7 @@ dependencies {
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
     implementation "com.android.support:support-v4:$supportLibraryVersion"
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.4'
     implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
     implementation "com.google.android.gms:play-services-ads:15.0.1"
     implementation "com.google.android.gms:play-services-analytics:16.0.0"

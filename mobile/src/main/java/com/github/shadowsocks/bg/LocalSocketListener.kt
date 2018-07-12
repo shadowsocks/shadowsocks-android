@@ -23,14 +23,14 @@ package com.github.shadowsocks.bg
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
-import android.util.Log
 import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.utils.printLog
 import java.io.File
 import java.io.IOException
 
 abstract class LocalSocketListener(protected val tag: String) : Thread(tag) {
     init {
-        setUncaughtExceptionHandler(app::track)
+        setUncaughtExceptionHandler { _, t -> printLog(t) }
     }
 
     protected abstract val socketFile: File
@@ -48,15 +48,14 @@ abstract class LocalSocketListener(protected val tag: String) : Thread(tag) {
                 localSocket.bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
                 LocalServerSocket(localSocket.fileDescriptor)
             } catch (e: IOException) {
-                Log.e(tag, "unable to bind", e)
+                printLog(e)
                 return
             }
             while (running) {
                 try {
                     serverSocket.accept()
                 } catch (e: IOException) {
-                    Log.e(tag, "Error when accept socket", e)
-                    app.track(e)
+                    printLog(e)
                     null
                 }?.use(this::accept)
             }

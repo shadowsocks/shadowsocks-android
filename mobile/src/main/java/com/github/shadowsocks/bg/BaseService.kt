@@ -31,6 +31,7 @@ import android.os.RemoteCallbackList
 import android.support.v4.os.UserManagerCompat
 import android.util.Base64
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.R
 import com.github.shadowsocks.acl.Acl
@@ -119,8 +120,7 @@ object BaseService {
                                             if (bandwidthListeners.contains(item.asBinder()))
                                                 item.trafficUpdated(profile.id, txRate, rxRate, txTotal, rxTotal)
                                         } catch (e: Exception) {
-                                            e.printStackTrace()
-                                            app.track(e)
+                                            printLog(e)
                                         }
                                         callbacks.finishBroadcast()
                                     }
@@ -164,8 +164,7 @@ object BaseService {
                                 val item = callbacks.getBroadcastItem(i)
                                 if (bandwidthListeners.contains(item.asBinder())) item.trafficPersisted(profile.id)
                             } catch (e: Exception) {
-                                e.printStackTrace()
-                                app.track(e)
+                                printLog(e)
                             }
                         }
                         callbacks.finishBroadcast()
@@ -219,8 +218,7 @@ object BaseService {
                 for (i in 0 until n) try {
                     callbacks.getBroadcastItem(i).stateChanged(s, binder.profileName, msg)
                 } catch (e: Exception) {
-                    e.printStackTrace()
-                    app.track(e)
+                    printLog(e)
                 }
                 callbacks.finishBroadcast()
             }
@@ -248,7 +246,7 @@ object BaseService {
                     stopRunner(false)
                     startRunner()
                 }
-                else -> Log.w(tag, "Illegal state when invoking use: $s")
+                else -> Crashlytics.log(Log.WARN, tag, "Illegal state when invoking use: $s")
             }
         }
 
@@ -416,7 +414,7 @@ object BaseService {
                     stopRunner(true, getString(R.string.reboot_required))
                 } catch (exc: Throwable) {
                     stopRunner(true, "${getString(R.string.service_failed)}: ${exc.message}")
-                    app.track(exc)
+                    printLog(exc)
                 }
             }
             return Service.START_NOT_STICKY

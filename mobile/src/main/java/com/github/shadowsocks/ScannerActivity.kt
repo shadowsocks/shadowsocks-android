@@ -34,10 +34,12 @@ import android.util.Log
 import android.util.SparseArray
 import android.view.MenuItem
 import android.widget.Toast
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.openBitmap
+import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.utils.systemService
 import com.google.android.gms.common.GoogleApiAvailability
@@ -111,9 +113,7 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
     }
     override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
     override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) { }
-    override fun onRetrievedFailed(reason: String?) {
-        Log.w(TAG, reason)
-    }
+    override fun onRetrievedFailed(reason: String?) = Crashlytics.log(Log.WARN, TAG, reason)
     override fun onPermissionRequestDenied() {
         Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
         startImport()
@@ -146,7 +146,7 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
                         success = true
                     }
                 } catch (e: Exception) {
-                    app.track(e)
+                    printLog(e)
                 }
                 Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
                         Toast.LENGTH_SHORT).show()
