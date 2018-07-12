@@ -22,6 +22,7 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.app.PendingIntent
+import android.app.UiModeManager
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -57,6 +58,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
+import com.github.shadowsocks.utils.systemService
 import com.github.shadowsocks.utils.thread
 import com.github.shadowsocks.widget.ServiceButton
 import com.mikepenz.materialdrawer.Drawer
@@ -290,6 +292,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
+        if (savedInstanceState != null
+                && DataStore.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                && AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -328,7 +335,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 connection.connect()
             }
             Key.nightMode -> {
-                AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
+                val mode = DataStore.nightMode
+                AppCompatDelegate.setDefaultNightMode(when (mode) {
+                    AppCompatDelegate.getDefaultNightMode() -> return
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> systemService<UiModeManager>().nightMode
+                    else -> mode
+                })
                 recreate()
             }
         }
