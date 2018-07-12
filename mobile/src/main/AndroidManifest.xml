@@ -34,8 +34,6 @@
 
         <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
                    android:value="true" />
-        <meta-data android:name="com.google.android.gms.version"
-                   android:value="@integer/google_play_services_version"/>
         <meta-data android:name="com.google.android.backup.api_key"
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
         <meta-data android:name="firebase_crashlytics_collection_enabled"
