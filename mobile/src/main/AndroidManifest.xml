@@ -166,24 +166,5 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
         </receiver>
-
-        <!-- android-job components -->
-        <service android:name="com.evernote.android.job.v21.PlatformJobService"
-                 android:process=":bg"
-                 android:directBootAware="true"/>
-        <service android:name="com.evernote.android.job.v14.PlatformAlarmService"
-                 tools:node="remove"/>
-        <service android:name="com.evernote.android.job.v14.PlatformAlarmServiceExact"
-                 tools:node="remove"/>
-        <service android:name="com.evernote.android.job.gcm.PlatformGcmService"
-                 tools:node="remove"/>
-        <service android:name="com.evernote.android.job.JobRescheduleService"
-                 android:process=":bg"
-                 android:directBootAware="true"/>
-        <receiver android:name="com.evernote.android.job.v14.PlatformAlarmReceiver"
-                  tools:node="remove"/>
-        <receiver android:name="com.evernote.android.job.JobBootReceiver"
-                  android:process=":bg"
-                  android:directBootAware="true"/>
     </application>
 </manifest>

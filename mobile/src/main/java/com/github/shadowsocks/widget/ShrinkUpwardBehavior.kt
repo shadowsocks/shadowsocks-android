@@ -47,7 +47,7 @@ class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet?) : Coordinator
     }
 
     /**
-     * Based on BaseTransientBottomBar.animateViewOut (support lib 27.0.2).
+     * Based on: https://android.googlesource.com/platform/frameworks/support.git/+/fa0f82f/design/src/android/support/design/widget/BaseTransientBottomBar.java#558
      */
     override fun onDependentViewRemoved(parent: CoordinatorLayout, child: View, dependency: View) {
         if (accessibility.isEnabled) child.layoutParams.height = parent.height else {
