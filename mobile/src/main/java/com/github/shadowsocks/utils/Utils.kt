@@ -11,8 +11,6 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.support.annotation.AttrRes
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.SortedList
 import android.util.TypedValue
@@ -20,12 +18,6 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
 import java.net.URLConnection
-
-private val fieldChildFragmentManager by lazy {
-    val field = Fragment::class.java.getDeclaredField("mChildFragmentManager")
-    field.isAccessible = true
-    field
-}
 
 fun String.isNumericAddress() = JniHelper.parseNumericAddress(this) != null
 fun String.parseNumericAddress(): InetAddress? {
@@ -64,13 +56,6 @@ fun ContentResolver.openBitmap(uri: Uri) =
 
 val PackageInfo.signaturesCompat get() =
     if (Build.VERSION.SDK_INT >= 28) signingInfo.apkContentsSigners else @Suppress("DEPRECATION") signatures
-
-/**
- * Based on: https://stackoverflow.com/a/15656428/2245107
- */
-var Fragment.childFragManager: FragmentManager?
-    get() = childFragmentManager
-    set(value) = fieldChildFragmentManager.set(this, value)
 
 /**
  * Based on: https://stackoverflow.com/a/26348729/2245107

@@ -50,11 +50,11 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
-import java.net.*
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.reflect.KClass
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -427,7 +427,7 @@ object BaseService {
     internal fun register(instance: Interface) = instances.put(instance, Data(instance))
 
     val usingVpnMode: Boolean get() = DataStore.serviceMode == Key.modeVpn
-    val serviceClass: KClass<out Any> get() = when (DataStore.serviceMode) {
+    val serviceClass get() = when (DataStore.serviceMode) {
         Key.modeProxy -> ProxyService::class
         Key.modeVpn -> VpnService::class
         Key.modeTransproxy -> TransproxyService::class
