@@ -48,10 +48,8 @@ import com.github.shadowsocks.preference.BottomSheetPreferenceDialogFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.IconListPreference
 import com.github.shadowsocks.utils.*
-import com.google.android.gms.analytics.GoogleAnalytics
-import com.google.android.gms.analytics.HitBuilders
-import com.google.android.gms.analytics.Tracker
 import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 import io.fabric.sdk.android.Fabric
@@ -67,7 +65,7 @@ class App : Application() {
     val handler by lazy { Handler(Looper.getMainLooper()) }
     val deviceContext: Context by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceContext(this) }
     val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
-    private val tracker: Tracker by lazy { GoogleAnalytics.getInstance(deviceContext).newTracker(R.xml.tracker) }
+    val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceContext) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
     val directBootSupported by lazy {
         Build.VERSION.SDK_INT >= 24 && getSystemService(DevicePolicyManager::class.java)
@@ -93,13 +91,6 @@ class App : Application() {
         DataStore.profileId = result.id
         return result
     }
-
-    // send event
-    fun track(category: String, action: String) = tracker.send(HitBuilders.EventBuilder()
-            .setCategory(category)
-            .setAction(action)
-            .setLabel(BuildConfig.VERSION_NAME)
-            .build())
 
     override fun onCreate() {
         super.onCreate()

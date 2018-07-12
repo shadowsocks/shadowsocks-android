@@ -359,7 +359,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 DRAWER_PROFILES -> displayFragment(ProfilesFragment())
                 DRAWER_GLOBAL_SETTINGS -> displayFragment(GlobalSettingsFragment())
                 DRAWER_ABOUT -> {
-                    app.track(TAG, "about")
+                    app.analytics.logEvent("about", Bundle())
                     displayFragment(AboutFragment())
                 }
                 DRAWER_FAQ -> launchUrl(getString(R.string.faq_url))

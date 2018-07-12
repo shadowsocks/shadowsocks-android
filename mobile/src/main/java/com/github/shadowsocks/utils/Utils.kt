@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.support.annotation.AttrRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.SortedList
@@ -81,4 +82,8 @@ fun printLog(t: Throwable) {
     Crashlytics.logException(t)
     t.printStackTrace()
 }
-fun track(thread: Thread, t: Throwable) = printLog(t)
+
+fun Bundle.put(key: String, value: String): Bundle {
+    putString(key, value)
+    return this
+}

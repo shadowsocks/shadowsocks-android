@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.support.v4.os.UserManagerCompat
@@ -45,6 +46,7 @@ import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.plugin.PluginOptions
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
+import com.google.firebase.analytics.FirebaseAnalytics
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -291,7 +293,7 @@ object BaseService {
             val data = data
             data.changeState(STOPPING)
 
-            app.track(tag, "stop")
+            app.analytics.logEvent("stop", Bundle().put(FirebaseAnalytics.Param.METHOD, tag))
 
             killProcesses()
 
@@ -355,7 +357,7 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-            app.track(tag, "start")
+            app.analytics.logEvent("start", Bundle().put(FirebaseAnalytics.Param.METHOD, tag))
 
             data.changeState(CONNECTING)
 
