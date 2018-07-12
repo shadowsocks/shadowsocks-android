@@ -58,6 +58,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
+import com.github.shadowsocks.utils.systemService
 import com.github.shadowsocks.utils.thread
 import com.github.shadowsocks.widget.ServiceButton
 import com.mikepenz.materialdrawer.Drawer
@@ -335,13 +336,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             }
             Key.nightMode -> {
                 val mode = DataStore.nightMode
-                if (mode == AppCompatDelegate.getDefaultNightMode()) return
-                if (mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
-                    val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
-                    AppCompatDelegate.setDefaultNightMode(uiModeManager.nightMode)
-                } else {
-                    AppCompatDelegate.setDefaultNightMode(mode)
-                }
+                AppCompatDelegate.setDefaultNightMode(when (mode) {
+                    AppCompatDelegate.getDefaultNightMode() -> return
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> systemService<UiModeManager>().nightMode
+                    else -> mode
+                })
                 recreate()
             }
         }
