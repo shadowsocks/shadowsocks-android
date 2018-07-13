@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/about_container">
     <include layout="@layout/toolbar_light_dark"/>
-    <WebView android:id="@+id/web_view"
-             android:layout_width="match_parent"
-             android:layout_height="0dp"
-             android:layout_weight="1"/>
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+        <TextView
+            android:id="@+id/tv_about"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:textIsSelectable="true"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:fontFamily="Helvetica|arial|freesans|clean|sans-serif"
+            android:textColor="@color/html_text"
+            android:textColorLink="@color/md_blue_600"
+            android:lineSpacingMultiplier="1.25" />
+    </ScrollView>
 </LinearLayout>
