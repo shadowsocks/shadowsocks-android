@@ -10,11 +10,12 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.support.annotation.AttrRes
 import android.support.v4.content.ContextCompat
 import android.support.v7.util.SortedList
 import android.util.TypedValue
-import com.github.shadowsocks.App.Companion.app
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
 import java.net.URLConnection
@@ -40,7 +41,7 @@ fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = 
 fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = false,
            contextClassLoader: ClassLoader? = null, priority: Int = -1, block: () -> Unit): Thread {
     val thread = kotlin.concurrent.thread(false, isDaemon, contextClassLoader, name, priority, block)
-    thread.setUncaughtExceptionHandler(app::track)
+    thread.setUncaughtExceptionHandler { _, t -> printLog(t) }
     if (start) thread.start()
     return thread
 }
@@ -75,3 +76,13 @@ private class SortedListIterator<out T>(private val list: SortedList<T>) : Itera
     override fun next(): T = if (hasNext()) list[count++] else throw NoSuchElementException()
 }
 fun <T> SortedList<T>.asIterable(): Iterable<T> = SortedListIterable(this)
+
+fun printLog(t: Throwable) {
+    Crashlytics.logException(t)
+    t.printStackTrace()
+}
+
+fun Bundle.put(key: String, value: String): Bundle {
+    putString(key, value)
+    return this
+}

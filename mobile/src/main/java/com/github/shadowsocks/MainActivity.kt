@@ -45,6 +45,7 @@ import android.text.format.Formatter
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.CustomRulesFragment
@@ -138,7 +139,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 if (msg != null) {
                     Snackbar.make(findViewById(R.id.snackbar),
                             getString(R.string.vpn_error).format(Locale.ENGLISH, msg), Snackbar.LENGTH_LONG).show()
-                    Log.e(TAG, "Error to start VPN service: $msg")
                 }
                 statusText.setText(R.string.not_connected)
             }
@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) app.startService() else {
             Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
-            Log.e(TAG, "Failed to start VpnService: $data")
+            Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
         }
     }
 
@@ -359,7 +359,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 DRAWER_PROFILES -> displayFragment(ProfilesFragment())
                 DRAWER_GLOBAL_SETTINGS -> displayFragment(GlobalSettingsFragment())
                 DRAWER_ABOUT -> {
-                    app.track(TAG, "about")
+                    app.analytics.logEvent("about", Bundle())
                     displayFragment(AboutFragment())
                 }
                 DRAWER_FAQ -> launchUrl(getString(R.string.faq_url))

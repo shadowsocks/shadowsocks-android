@@ -21,11 +21,11 @@
 package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
-import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.ProfilesFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.printLog
 import java.io.IOException
 import java.sql.SQLException
 
@@ -34,8 +34,6 @@ import java.sql.SQLException
  * to ensure we are in a consistent state.
  */
 object ProfileManager {
-    private const val TAG = "ProfileManager"
-
     @Throws(SQLException::class)
     fun createProfile(p: Profile? = null): Profile {
         val profile = p ?: Profile()
@@ -67,8 +65,7 @@ object ProfileManager {
         PrivateDatabase.profileDao[id]
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "getProfile", ex)
-        app.track(ex)
+        printLog(ex)
         null
     }
 
@@ -84,8 +81,7 @@ object ProfileManager {
         PrivateDatabase.profileDao.isNotEmpty()
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "isNotEmpty", ex)
-        app.track(ex)
+        printLog(ex)
         false
     }
 
@@ -94,8 +90,7 @@ object ProfileManager {
         PrivateDatabase.profileDao.list()
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "getAllProfiles", ex)
-        app.track(ex)
+        printLog(ex)
         null
     }
 }

@@ -23,6 +23,7 @@ package com.github.shadowsocks.acl
 import android.content.Context
 import android.support.v7.util.SortedList
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
@@ -164,7 +165,7 @@ class Acl {
                 continue
             }
             if (bypass != child.bypass) {
-                Log.w(TAG, "Imported network ACL has a conflicting mode set. " +
+                Crashlytics.log(Log.WARN, TAG, "Imported network ACL has a conflicting mode set. " +
                         "This will probably not work as intended. URL: $url")
                 // rules for the different mode are discarded
                 child.hostnames.clear()
