@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical">
-        <TextView
+        <com.github.shadowsocks.widget.HackyTextView
             android:id="@+id/tv_about"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
