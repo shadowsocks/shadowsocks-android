@@ -40,26 +40,24 @@ class AboutFragment : ToolbarFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
-        val builder = SpannableStringBuilder(HtmlCompat.fromHtml(
-                resources.openRawResource(R.raw.about).bufferedReader().readText(),
-                HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM))
-        builder.apply {
-            for (span in getSpans(0, length, URLSpan::class.java)) {
-                setSpan(object : ClickableSpan() {
-                    override fun onClick(view: View) {
-                        if (span.url.startsWith("mailto:")) {
-                            startActivity(Intent.createChooser(Intent().apply {
-                                action = Intent.ACTION_SENDTO
-                                data = Uri.parse(span.url)
-                            }, getString(R.string.send_email)))
-                        } else (activity as MainActivity).launchUrl(span.url)
-                    }
-                }, getSpanStart(span), getSpanEnd(span), getSpanFlags(span))
-                removeSpan(span)
-            }
-        }
         view.findViewById<TextView>(R.id.tv_about).apply {
-            text = builder
+            text = SpannableStringBuilder(HtmlCompat.fromHtml(
+                    resources.openRawResource(R.raw.about).bufferedReader().readText(),
+                    HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
+                for (span in getSpans(0, length, URLSpan::class.java)) {
+                    setSpan(object : ClickableSpan() {
+                        override fun onClick(view: View) {
+                            if (span.url.startsWith("mailto:")) {
+                                startActivity(Intent.createChooser(Intent().apply {
+                                    action = Intent.ACTION_SENDTO
+                                    data = Uri.parse(span.url)
+                                }, getString(R.string.send_email)))
+                            } else (activity as MainActivity).launchUrl(span.url)
+                        }
+                    }, getSpanStart(span), getSpanEnd(span), getSpanFlags(span))
+                    removeSpan(span)
+                }
+            }
             movementMethod = LinkMovementMethod.getInstance()
         }
     }
