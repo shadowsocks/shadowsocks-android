@@ -21,6 +21,7 @@
 package com.github.shadowsocks.widget
 
 import android.content.Context
+import android.graphics.Rect
 import android.support.v7.widget.AppCompatTextView
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -28,6 +29,13 @@ import com.crashlytics.android.Crashlytics
 
 class HackyTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         AppCompatTextView(context, attrs, defStyleAttr) {
+    override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) = try {
+        super.onFocusChanged(focused, direction, previouslyFocusedRect)
+    } catch (e: IndexOutOfBoundsException) {
+        e.printStackTrace()
+        Crashlytics.logException(e)
+    }
+
     override fun onTouchEvent(event: MotionEvent?) = try {
         super.onTouchEvent(event)
     } catch (e: IndexOutOfBoundsException) {
