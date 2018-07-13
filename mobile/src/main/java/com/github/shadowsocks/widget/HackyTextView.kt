@@ -21,14 +21,13 @@
 package com.github.shadowsocks.widget
 
 import android.content.Context
+import android.support.v7.widget.AppCompatTextView
 import android.util.AttributeSet
 import android.view.MotionEvent
-import android.widget.TextView
 import com.crashlytics.android.Crashlytics
 
-class HackyTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
-                                              defStyleAttr: Int = 0, defStyleRes: Int = 0) :
-        TextView(context, attrs, defStyleAttr, defStyleRes) {
+class HackyTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+        AppCompatTextView(context, attrs, defStyleAttr) {
     override fun onTouchEvent(event: MotionEvent?) = try {
         super.onTouchEvent(event)
     } catch (e: IndexOutOfBoundsException) {
