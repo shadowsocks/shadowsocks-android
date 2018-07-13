@@ -3,7 +3,7 @@
 
   <string name="app_name">Shadowsocks</string>
   <string name="quick_toggle">Toggle</string>
-  <string name="about_url" translatable="false">file:///android_asset/pages/about.html</string>
+  <string name="send_email">Send email</string>
 
   <!-- misc -->
   <string name="advanced">Advanced</string>

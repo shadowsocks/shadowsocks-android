@@ -20,41 +20,45 @@
 
 package com.github.shadowsocks
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
+import android.support.v4.text.HtmlCompat
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.widget.TextView
 
 class AboutFragment : ToolbarFragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        // workaround for weird night mode bug
-        val configuration = resources.configuration
-        val result = inflater.inflate(R.layout.layout_about, container, false)
-        if (resources.configuration !== configuration) requireActivity().recreate()
-        return result
-    }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.layout_about, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
-        val web = view.findViewById<WebView>(R.id.web_view)
-        web.setBackgroundColor(ContextCompat.getColor(requireActivity(), R.color.background))
-        web.loadUrl(getString(R.string.about_url))
-        web.webViewClient = object : WebViewClient() {
-            @Suppress("OverridingDeprecatedMember")
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                (activity as MainActivity).launchUrl(url)
-                return true
+        view.findViewById<TextView>(R.id.tv_about).apply {
+            text = SpannableStringBuilder(HtmlCompat.fromHtml(
+                    resources.openRawResource(R.raw.about).bufferedReader().readText(),
+                    HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
+                for (span in getSpans(0, length, URLSpan::class.java)) {
+                    setSpan(object : ClickableSpan() {
+                        override fun onClick(view: View) {
+                            if (span.url.startsWith("mailto:")) {
+                                startActivity(Intent.createChooser(Intent().apply {
+                                    action = Intent.ACTION_SENDTO
+                                    data = Uri.parse(span.url)
+                                }, getString(R.string.send_email)))
+                            } else (activity as MainActivity).launchUrl(span.url)
+                        }
+                    }, getSpanStart(span), getSpanEnd(span), getSpanFlags(span))
+                    removeSpan(span)
+                }
             }
-
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
-                (activity as MainActivity).launchUrl(request.url)
-                return true
-            }
+            movementMethod = LinkMovementMethod.getInstance()
         }
     }
 }
