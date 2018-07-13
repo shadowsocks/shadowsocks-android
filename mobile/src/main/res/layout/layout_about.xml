@@ -13,12 +13,8 @@
             android:id="@+id/tv_about"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="20dp"
+            android:padding="16dp"
             android:textIsSelectable="true"
-            android:textAppearance="@android:style/TextAppearance.Small"
-            android:fontFamily="Helvetica|arial|freesans|clean|sans-serif"
-            android:textColor="@color/html_text"
-            android:textColorLink="@color/md_blue_600"
-            android:lineSpacingMultiplier="1.25" />
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
     </ScrollView>
 </LinearLayout>
