@@ -15,6 +15,7 @@ buildscript {
         junitVersion = '4.12'
         androidTestVersion = '1.0.2'
         androidEspressoVersion = '3.0.2'
+        conductorPreferenceVersion = '-SNAPSHOT'
     }
 
     repositories {

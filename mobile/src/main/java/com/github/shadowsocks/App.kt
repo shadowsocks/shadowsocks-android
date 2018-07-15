@@ -36,21 +36,23 @@ import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
 import android.support.annotation.RequiresApi
+import android.support.design.widget.BottomSheetDialog
 import android.support.v7.app.AppCompatDelegate
 import android.util.Log
 import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.bg.BaseService
+import com.github.shadowsocks.controllers.BottomSheetPreferenceDialogController
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.preference.BottomSheetPreferenceDialogFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.IconListPreference
 import com.github.shadowsocks.utils.*
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import im.mash.preference.PreferenceController
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
@@ -96,7 +98,7 @@ class App : Application() {
         app = this
         Fabric.with(this, Crashlytics())    // multiple processes needs manual set-up
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-
+        PreferenceController.registerPreferenceFragment(IconListPreference::class.java, BottomSheetPreferenceDialogController::class.java)
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
             deviceContext.moveDatabaseFrom(this, Key.DB_PUBLIC)
             val old = Acl.getFile(Acl.CUSTOM_RULES, this)

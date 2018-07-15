@@ -25,7 +25,7 @@ android {
 
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
-    api 'com.github.onlymash:conductor-preference:1.0.3'
+    api "com.github.onlymash:conductor-preference:$conductorPreferenceVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
