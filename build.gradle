@@ -10,20 +10,18 @@ buildscript {
         compileSdkVersion = 28
         buildToolsVersion = '28.0.1'
         supportLibraryVersion = '28.0.0-alpha3'
-        takisoftFixVersion = '27.1.1.2'
         roomVersion = '1.1.1'
         workVersion = '1.0.0-alpha04'
         junitVersion = '4.12'
         androidTestVersion = '1.0.2'
         androidEspressoVersion = '3.0.2'
+        conductorPreferenceVersion = '-SNAPSHOT'
     }
 
     repositories {
         google()
         jcenter()
-        maven {
-            url 'https://maven.fabric.io/public'
-        }
+        maven { url 'https://maven.fabric.io/public' }
     }
 
     dependencies {
@@ -39,6 +37,8 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://jitpack.io' }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 }
 

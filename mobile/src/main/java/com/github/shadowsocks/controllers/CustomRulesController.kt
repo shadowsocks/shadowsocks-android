@@ -1,24 +1,4 @@
-/*******************************************************************************
- *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
- *                                                                             *
- *  This program is free software: you can redistribute it and/or modify       *
- *  it under the terms of the GNU General Public License as published by       *
- *  the Free Software Foundation, either version 3 of the License, or          *
- *  (at your option) any later version.                                        *
- *                                                                             *
- *  This program is distributed in the hope that it will be useful,            *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
- *  GNU General Public License for more details.                               *
- *                                                                             *
- *  You should have received a copy of the GNU General Public License          *
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.       *
- *                                                                             *
- *******************************************************************************/
-
-package com.github.shadowsocks.acl
+package com.github.shadowsocks.controllers
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -32,7 +12,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
@@ -40,11 +19,12 @@ import android.view.*
 import android.widget.*
 import com.futuremind.recyclerviewfastscroll.FastScroller
 import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
-import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.App
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
-import com.github.shadowsocks.ToolbarFragment
+import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.bg.BaseService
+import com.github.shadowsocks.controllers.base.BaseController
 import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import java.net.IDN
@@ -52,22 +32,20 @@ import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 
-class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, ActionMode.Callback {
+class CustomRulesController : BaseController(), ActionMode.Callback {
     companion object {
+        const val TAG = "CustomRulesController"
         private const val TEMPLATE_REGEX_DOMAIN = "(^|\\.)%s$"
-
-        private const val SELECTED_SUBNETS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_SUBNETS"
-        private const val SELECTED_HOSTNAMES = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
-        private const val SELECTED_URLS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
-
+        private const val SELECTED_SUBNETS = "CustomRulesController.SELECTED_SUBNETS"
+        private const val SELECTED_HOSTNAMES = "CustomRulesController.SELECTED_HOSTNAMES"
+        private const val SELECTED_URLS = "CustomRulesController.SELECTED_URLS"
         // unescaped: (?<=^(\(\^\|\\\.\)|\^\(\.\*\\\.\)\?)).*(?=\$$)
         private val PATTERN_DOMAIN = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
     }
-
     private enum class Template {
         Generic,
         Domain,
-        Url;
+        Url
     }
     private inner class AclRuleDialog(item: Any = "") : TextWatcher, AdapterView.OnItemSelectedListener {
         val builder: AlertDialog.Builder
@@ -78,7 +56,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private lateinit var positive: Button
 
         init {
-            val activity = requireActivity()
+            val activity = activity as MainActivity
             val view = activity.layoutInflater.inflate(R.layout.dialog_acl_rule, null)
             templateSelector = view.findViewById(R.id.template_selector)
             editText = view.findViewById(R.id.content)
@@ -111,14 +89,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     .setNegativeButton(android.R.string.cancel, null)
                     .setView(view)
         }
-
         fun show() {
             dialog = builder.create()
             dialog.show()
             positive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             validate()
         }
-
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
         override fun afterTextChanged(s: Editable) = validate(value = s)
@@ -144,7 +120,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             inputLayout.error = error
             positive.isEnabled = error == null
         }
-
         fun add(): Int? {
             val text = editText.text.toString()
             return when (Template.values()[templateSelector.selectedItemPosition]) {
@@ -163,13 +138,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
         init {
             view.setPaddingRelative(view.paddingStart, view.paddingTop,
-                    Math.max(view.paddingEnd, resources.getDimensionPixelSize(R.dimen.fastscroll__bubble_corner)),
+                    Math.max(view.paddingEnd, resources!!.getDimensionPixelSize(R.dimen.fastscroll__bubble_corner)),
                     view.paddingBottom)
             view.setOnClickListener(this)
             view.setOnLongClickListener(this)
             view.setBackgroundResource(R.drawable.background_selectable)
         }
-
         fun bind(hostname: String) {
             item = hostname
             text.text = hostname
@@ -185,20 +159,19 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             text.text = url.toString()
             itemView.isSelected = selectedItems.contains(url)
         }
-
         override fun onClick(v: View?) {
             if (selectedItems.isNotEmpty()) onLongClick(v) else {
                 val dialog = AclRuleDialog(item)
                 dialog.builder
-                        .setNeutralButton(R.string.delete, { _, _ ->
+                        .setNeutralButton(R.string.delete) { _, _ ->
                             adapter.remove(item)
                             undoManager.remove(Pair(-1, item))
-                        })
-                        .setPositiveButton(android.R.string.ok, { _, _ ->
+                        }
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
                             adapter.remove(item)
                             val index = dialog.add() ?: adapter.add(item)
                             if (index != null) list.post { list.scrollToPosition(index) }
-                        })
+                        }
                 dialog.show()
             }
         }
@@ -209,11 +182,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             return true
         }
     }
-
     private inner class AclRulesAdapter : RecyclerView.Adapter<AclRuleViewHolder>(), SectionTitleProvider {
         private val acl = Acl.customRules
         private var savePending = false
-
         override fun onBindViewHolder(holder: AclRuleViewHolder, i: Int) {
             val j = i - acl.subnets.size()
             if (j < 0) holder.bind(acl.subnets[i]) else {
@@ -235,7 +206,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 } else acl.urls[k].host
             }).firstOrNull()?.toString() ?: " "
         }
-
         private fun apply() {
             if (!savePending) {
                 savePending = true
@@ -336,7 +306,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         fun undo(actions: List<Pair<Int, Any>>) {
             for ((_, item) in actions) add(item)
         }
-
         fun selectAll() {
             selectedItems.clear()
             selectedItems.addAll(acl.subnets.asIterable())
@@ -346,42 +315,58 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             notifyDataSetChanged()
         }
     }
-
     private val isEnabled get() = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED -> app.currentProfile?.route != Acl.CUSTOM_RULES
+        BaseService.CONNECTED -> App.app.currentProfile?.route != Acl.CUSTOM_RULES
         BaseService.STOPPED -> true
         else -> false
     }
-
     private val selectedItems = HashSet<Any>()
     private val adapter by lazy { AclRulesAdapter() }
     private lateinit var list: RecyclerView
     private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<Any>
-    private val clipboard by lazy { requireContext().systemService<ClipboardManager>() }
-
-    private fun onSelectedItemsUpdated() {
-        if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
+    private val clipboard by lazy { activity!!.systemService<ClipboardManager>() }
+    init {
+        setHasOptionsMenu(true)
     }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.layout_custom_rules, container, false)
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        if (savedInstanceState != null) {
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
-                    ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_HOSTNAMES)
-                    ?: arrayOf())
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }
-                    ?: listOf())
-            onSelectedItemsUpdated()
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.custom_rules_menu, menu)
+    }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_manual_settings -> {
+                val dialog = AclRuleDialog()
+                dialog.builder.setPositiveButton(android.R.string.ok) { _, _ -> dialog.add() }
+                dialog.show()
+            }
+            R.id.action_import -> {
+                try {
+                    check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
+                } catch (exc: Exception) {
+                    Snackbar.make(activity!!.findViewById(R.id.snackbar), R.string.action_import_err,
+                            Snackbar.LENGTH_LONG).show()
+                    printLog(exc)
+                }
+            }
+            R.id.action_import_gfwlist -> {
+                val acl = Acl().fromId(Acl.GFWLIST)
+                if (!acl.bypass) acl.subnets.asIterable().forEach { adapter.addSubnet(it) }
+                acl.hostnames.asIterable().forEach { adapter.addHostname(it) }
+                acl.urls.asIterable().forEach { adapter.addURL(it) }
+            }
         }
-        toolbar.setTitle(R.string.custom_rules)
-        toolbar.inflateMenu(R.menu.custom_rules_menu)
-        toolbar.setOnMenuItemClickListener(this)
-        val activity = requireActivity()
+        return super.onOptionsItemSelected(item)
+    }
+    private fun onSelectedItemsUpdated() {
+        if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = (activity as MainActivity).toolbar.startActionModeForChild(this.view, this)
+    }
+    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View =
+            inflater.inflate(R.layout.layout_custom_rules, container, false)
+    override fun onViewBound(view: View) {
+        super.onViewBound(view)
+        val activity = activity as MainActivity
         list = view.findViewById(R.id.list)
         list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
@@ -398,14 +383,20 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }).attachToRecyclerView(list)
     }
 
-    override fun onBackPressed(): Boolean {
-        val mode = mode
-        return if (mode != null) {
-            mode.finish()
-            true
-        } else super.onBackPressed()
+    override fun onAttach(view: View) {
+        (activity as MainActivity).toolbar.setTitle(R.string.custom_rules)
+        super.onAttach(view)
     }
-
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
+                ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
+        selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_HOSTNAMES)
+                ?: arrayOf())
+        selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }
+                ?: listOf())
+        onSelectedItemsUpdated()
+    }
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putStringArray(SELECTED_SUBNETS, selectedItems.filterIsInstance<Subnet>().map(Subnet::toString)
@@ -413,7 +404,11 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         outState.putStringArray(SELECTED_HOSTNAMES, selectedItems.filterIsInstance<String>().toTypedArray())
         outState.putStringArray(SELECTED_URLS, selectedItems.filterIsInstance<URL>().map(URL::toString).toTypedArray())
     }
-
+    override fun onDetach(view: View) {
+        undoManager.flush()
+        mode?.finish()
+        super.onDetach(view)
+    }
     private fun copySelected() {
         val acl = Acl()
         acl.bypass = true
@@ -426,47 +421,13 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
         clipboard.primaryClip = ClipData.newPlainText(null, acl.toString())
     }
-
-    override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_manual_settings -> {
-            val dialog = AclRuleDialog()
-            dialog.builder.setPositiveButton(android.R.string.ok, { _, _ -> dialog.add() })
-            dialog.show()
-            true
-        }
-        R.id.action_import -> {
-            try {
-                check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
-            } catch (exc: Exception) {
-                Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
-                        Snackbar.LENGTH_LONG).show()
-                printLog(exc)
-            }
-            true
-        }
-        R.id.action_import_gfwlist -> {
-            val acl = Acl().fromId(Acl.GFWLIST)
-            if (!acl.bypass) acl.subnets.asIterable().forEach { adapter.addSubnet(it) }
-            acl.hostnames.asIterable().forEach { adapter.addHostname(it) }
-            acl.urls.asIterable().forEach { adapter.addURL(it) }
-            true
-        }
-        else -> false
-    }
-
-    override fun onDetach() {
-        undoManager.flush()
-        mode?.finish()
-        super.onDetach()
-    }
-
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        val activity = requireActivity()
+        val activity = activity as MainActivity
         val window = activity.window
         // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
         // for dark mode, it's roughly 850? (#303030)
         window.statusBarColor = ContextCompat.getColor(activity, when {
-            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES ->
+            resources!!.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES ->
                 R.color.md_black_1000
             Build.VERSION.SDK_INT >= 23 -> {
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
@@ -475,7 +436,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             else -> R.color.material_grey_600
         })
         activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
-        toolbar.touchscreenBlocksFocus = true
+        activity.toolbar.touchscreenBlocksFocus = true
         return true
     }
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
@@ -500,12 +461,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         else -> false
     }
     override fun onDestroyActionMode(mode: ActionMode) {
-        val activity = requireActivity()
+        val activity = activity as MainActivity
         val window = activity.window
         window.statusBarColor = ContextCompat.getColor(activity,
                 activity.theme.resolveResourceId(android.R.attr.statusBarColor))
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-        toolbar.touchscreenBlocksFocus = false
+        activity.toolbar.touchscreenBlocksFocus = false
         selectedItems.clear()
         onSelectedItemsUpdated()
         adapter.notifyDataSetChanged()

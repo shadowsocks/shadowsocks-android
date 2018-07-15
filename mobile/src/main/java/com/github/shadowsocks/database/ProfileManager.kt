@@ -22,7 +22,7 @@ package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.ProfilesFragment
+import com.github.shadowsocks.controllers.ProfilesController
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.printLog
@@ -50,7 +50,7 @@ object ProfileManager {
         }
         profile.userOrder = PrivateDatabase.profileDao.nextOrder() ?: 0
         profile.id = PrivateDatabase.profileDao.create(profile)
-        ProfilesFragment.instance?.profilesAdapter?.add(profile)
+        ProfilesController.instance?.profilesAdapter?.add(profile)
         return profile
     }
 
@@ -72,7 +72,7 @@ object ProfileManager {
     @Throws(SQLException::class)
     fun delProfile(id: Long) {
         check(PrivateDatabase.profileDao.delete(id) == 1)
-        ProfilesFragment.instance?.profilesAdapter?.removeId(id)
+        ProfilesController.instance?.profilesAdapter?.removeId(id)
         if (id == DataStore.profileId && DataStore.directBootAware) DirectBoot.clean()
     }
 

@@ -2,39 +2,44 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <AutoSummaryEditTextPreference
-            android:key="profileName"
-            app:pref_summaryHasText="%s"
-            android:title="@string/profile_name"/>
+    <im.mash.preference.EditTextPreference
+        android:key="profileName"
+        android:title="@string/profile_name"
+        android:summary="%s"
+        app:iconSpaceReserved="true"/>
 
     <PreferenceCategory
-            android:title="@string/proxy_cat">
+        android:title="@string/proxy_cat">
 
-        <AutoSummaryEditTextPreference
-                android:key="proxy"
-                app:pref_summaryHasText="%s"
-                android:singleLine="true"
-                android:title="@string/proxy"/>
-        <AutoSummaryEditTextPreference
-                android:key="remotePortNum"
-                android:inputType="number"
-                android:maxLength="5"
-                app:pref_summaryHasText="%s"
-                android:title="@string/remote_port"/>
-        <AutoSummaryEditTextPreference
-                android:inputType="textPassword"
-                app:pref_summaryPasswordSubstituteLength="0"
-                android:key="sitekey"
-                app:pref_summaryHasText="%s"
-                android:singleLine="true"
-                android:title="@string/sitekey"/>
+        <im.mash.preference.EditTextPreference
+            android:key="proxy"
+            android:singleLine="true"
+            android:title="@string/proxy"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
+        <im.mash.preference.EditTextPreference
+            android:key="remotePortNum"
+            android:inputType="number"
+            android:maxLength="5"
+            android:title="@string/remote_port"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
+        <im.mash.preference.EditTextPreference
+            android:inputType="textPassword"
+            android:password="true"
+            android:key="sitekey"
+            android:singleLine="true"
+            android:title="@string/sitekey"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
         <SimpleMenuPreference
-                android:key="encMethod"
-                android:icon="@drawable/ic_notification_enhanced_encryption"
-                android:entries="@array/enc_method_entry"
-                android:entryValues="@array/enc_method_value"
-                android:summary="%s"
-                android:title="@string/enc_method"/>
+            android:key="encMethod"
+            android:icon="@drawable/ic_notification_enhanced_encryption"
+            android:entries="@array/enc_method_entry"
+            android:entryValues="@array/enc_method_value"
+            android:title="@string/enc_method"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
 
     </PreferenceCategory>
 
@@ -42,48 +47,52 @@
             android:title="@string/feature_cat">
 
         <SimpleMenuPreference
-                android:key="route"
-                android:entries="@array/route_entry"
-                android:entryValues="@array/route_value"
-                android:summary="%s"
-                android:title="@string/route_list"/>
-        <AutoSummaryEditTextPreference
-                android:key="remoteDns"
-                android:icon="@drawable/ic_action_dns"
-                android:title="@string/remote_dns"
-                app:pref_summaryHasText="%s"/>
+            android:key="route"
+            android:entries="@array/route_entry"
+            android:entryValues="@array/route_value"
+            android:title="@string/route_list"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
+        <im.mash.preference.EditTextPreference
+            android:key="remoteDns"
+            android:icon="@drawable/ic_action_dns"
+            android:title="@string/remote_dns"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
         <SwitchPreference
-                android:key="isIpv6"
-                android:icon="@drawable/ic_image_looks_6"
-                android:summary="@string/ipv6_summary"
-                android:title="@string/ipv6"/>
+            android:key="isIpv6"
+            android:icon="@drawable/ic_image_looks_6"
+            android:summary="@string/ipv6_summary"
+            android:title="@string/ipv6"/>
         <SwitchPreference
-                android:key="isProxyApps"
-                android:icon="@drawable/ic_navigation_apps"
-                android:summary="@string/proxied_apps_summary"
-                android:title="@string/proxied_apps"/>
+            android:key="isProxyApps"
+            android:icon="@drawable/ic_navigation_apps"
+            android:summary="@string/proxied_apps_summary"
+            android:title="@string/proxied_apps"/>
         <SwitchPreference
-                android:key="isUdpDns"
-                android:icon="@drawable/ic_action_dns"
-                android:summary="@string/udp_dns_summary"
-                android:title="@string/udp_dns"/>
+            android:key="isUdpDns"
+            android:icon="@drawable/ic_action_dns"
+            android:summary="@string/udp_dns_summary"
+            android:title="@string/udp_dns"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/plugin">
+        android:title="@string/plugin">
 
         <com.github.shadowsocks.preference.IconListPreference
-                android:key="plugin"
-                android:persistent="false"
-                android:summary="%s"
-                android:title="@string/plugin"/>
-        <AutoSummaryEditTextPreference
-                android:key="plugin.configure"
-                android:icon="@drawable/ic_action_settings"
-                android:persistent="false"
-                app:pref_summaryHasText="%s"
-                android:title="@string/plugin_configure"/>
+            android:key="plugin"
+            android:persistent="false"
+            android:title="@string/plugin"
+            app:iconSpaceReserved="true"/>
+
+        <im.mash.preference.EditTextPreference
+            android:key="plugin.configure"
+            android:icon="@drawable/ic_action_settings"
+            android:persistent="false"
+            android:title="@string/plugin_configure"
+            android:summary="%s"
+            app:iconSpaceReserved="true"/>
 
     </PreferenceCategory>
 

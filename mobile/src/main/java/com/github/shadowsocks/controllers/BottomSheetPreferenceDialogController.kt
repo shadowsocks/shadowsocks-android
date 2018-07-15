@@ -1,24 +1,4 @@
-/*******************************************************************************
- *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
- *                                                                             *
- *  This program is free software: you can redistribute it and/or modify       *
- *  it under the terms of the GNU General Public License as published by       *
- *  the Free Software Foundation, either version 3 of the License, or          *
- *  (at your option) any later version.                                        *
- *                                                                             *
- *  This program is distributed in the hope that it will be useful,            *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
- *  GNU General Public License for more details.                               *
- *                                                                             *
- *  You should have received a copy of the GNU General Public License          *
- *  along with this program. If not, see <http://www.gnu.org/licenses/>.       *
- *                                                                             *
- *******************************************************************************/
-
-package com.github.shadowsocks.preference
+package com.github.shadowsocks.controllers
 
 import android.app.Dialog
 import android.content.ActivityNotFoundException
@@ -28,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.support.design.widget.BottomSheetDialog
-import android.support.v7.preference.PreferenceDialogFragmentCompat
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -38,8 +17,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.github.shadowsocks.R
+import com.github.shadowsocks.preference.IconListPreference
+import im.mash.preference.PreferenceDialogController
 
-class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
+class BottomSheetPreferenceDialogController : PreferenceDialogController() {
     private inner class IconListViewHolder(val dialog: BottomSheetDialog, view: View) : RecyclerView.ViewHolder(view),
             View.OnClickListener, View.OnLongClickListener {
         private var index = 0
@@ -53,14 +34,14 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         }
 
         fun bind(i: Int, selected: Boolean = false) {
-            text1.text = preference.entries[i]
-            text2.text = preference.entryValues[i]
+            text1.text = iconListPreference.entries[i]
+            text2.text = iconListPreference.entryValues[i]
             val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
             text1.setTypeface(null, typeface)
             text2.setTypeface(null, typeface)
-            text2.visibility = if (preference.entryValues[i].isNotEmpty() &&
-                    preference.entries[i] != preference.entryValues[i]) View.VISIBLE else View.GONE
-            icon.setImageDrawable(preference.entryIcons?.get(i))
+            text2.visibility = if (iconListPreference.entryValues[i].isNotEmpty() &&
+                    iconListPreference.entries[i] != iconListPreference.entryValues[i]) View.VISIBLE else View.GONE
+            icon.setImageDrawable(iconListPreference.entryIcons?.get(i))
             index = i
         }
 
@@ -70,7 +51,7 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         }
 
         override fun onLongClick(p0: View?): Boolean {
-            val pn = preference.entryPackageNames?.get(index) ?: return false
+            val pn = iconListPreference.entryPackageNames?.get(index) ?: return false
             return try {
                 startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.Builder()
                         .scheme("package")
@@ -85,26 +66,26 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     }
     private inner class IconListAdapter(private val dialog: BottomSheetDialog) :
             RecyclerView.Adapter<IconListViewHolder>() {
-        override fun getItemCount(): Int = preference.entries.size
+        override fun getItemCount(): Int = iconListPreference.entries.size
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = IconListViewHolder(dialog,
                 LayoutInflater.from(parent.context).inflate(R.layout.icon_list_item_2, parent, false))
         override fun onBindViewHolder(holder: IconListViewHolder, position: Int) {
-            if (preference.selectedEntry < 0) holder.bind(position) else when (position) {
-                0 -> holder.bind(preference.selectedEntry, true)
-                in preference.selectedEntry + 1 .. Int.MAX_VALUE -> holder.bind(position)
+            if (iconListPreference.selectedEntry < 0) holder.bind(position) else when (position) {
+                0 -> holder.bind(iconListPreference.selectedEntry, true)
+                in iconListPreference.selectedEntry + 1 .. Int.MAX_VALUE -> holder.bind(position)
                 else -> holder.bind(position - 1)
             }
         }
     }
 
-    private val preference by lazy { getPreference() as IconListPreference }
+    private val iconListPreference by lazy { this.preference as IconListPreference }
     private var clickedIndex = -1
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val activity = requireActivity()
-        val dialog = BottomSheetDialog(activity, theme)
+    override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+        val activity = activity!!
+        val dialog = BottomSheetDialog(activity)
         val recycler = RecyclerView(activity)
-        val padding = resources.getDimensionPixelOffset(R.dimen.bottom_sheet_padding)
+        val padding = resources!!.getDimensionPixelOffset(R.dimen.bottom_sheet_padding)
         recycler.setPadding(0, padding, 0, padding)
         recycler.setHasFixedSize(true)
         recycler.layoutManager = LinearLayoutManager(activity)
@@ -118,9 +99,9 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     }
 
     override fun onDialogClosed(positiveResult: Boolean) {
-        if (clickedIndex >= 0 && clickedIndex != preference.selectedEntry) {
-            val value = preference.entryValues[clickedIndex].toString()
-            if (preference.callChangeListener(value)) preference.value = value
+        if (clickedIndex >= 0 && clickedIndex != iconListPreference.selectedEntry) {
+            val value = iconListPreference.entryValues[clickedIndex].toString()
+            if (iconListPreference.callChangeListener(value)) iconListPreference.value = value
         }
     }
 }
