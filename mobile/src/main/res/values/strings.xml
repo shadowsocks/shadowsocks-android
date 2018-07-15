@@ -25,6 +25,9 @@
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
 
+  <string name="stat_up">▲</string>
+  <string name="stat_down">▼</string>
+
   <!-- proxy category -->
   <string name="profile_name">Profile Name</string>
   <string name="proxy">Server</string>

@@ -26,6 +26,11 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.view.ViewGroup
+import com.bluelinelabs.conductor.Conductor
+import com.bluelinelabs.conductor.Router
+import com.bluelinelabs.conductor.RouterTransaction
+import com.github.shadowsocks.controllers.ProfileConfigController
 import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.preference.DataStore
 
@@ -34,24 +39,28 @@ class ProfileConfigActivity : AppCompatActivity() {
         const val REQUEST_CODE_PLUGIN_HELP = 1
     }
 
-    private val child by lazy { supportFragmentManager.findFragmentById(R.id.content) as ProfileConfigFragment }
+    private lateinit var router: Router
+    private lateinit var container: ViewGroup
+    private lateinit var toolbar: Toolbar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_profile_config)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
         toolbar.setTitle(R.string.profile_config)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
         toolbar.setNavigationOnClickListener { onBackPressed() }
-        toolbar.inflateMenu(R.menu.profile_config_menu)
-        toolbar.setOnMenuItemClickListener(child)
+        container = findViewById(R.id.controller_container)
+        router = Conductor.attachRouter(this, container, savedInstanceState)
+        if (!router.hasRootController()) router.setRoot(RouterTransaction.with(ProfileConfigController()))
     }
 
     override fun onBackPressed() {
         if (DataStore.dirty) AlertDialog.Builder(this)
                 .setTitle(R.string.unsaved_changes_prompt)
-                .setPositiveButton(R.string.yes, { _, _ -> child.saveAndExit() })
-                .setNegativeButton(R.string.no, { _, _ -> finish() })
+                .setPositiveButton(R.string.yes) { _, _ -> (router.getControllerWithTag(ProfileConfigController.TAG) as? ProfileConfigController)?.saveAndExit() }
+                .setNegativeButton(R.string.no) { _, _ -> finish() }
                 .setNeutralButton(android.R.string.cancel, null)
                 .create()
                 .show() else super.onBackPressed()

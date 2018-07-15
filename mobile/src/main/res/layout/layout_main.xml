@@ -14,12 +14,21 @@
         android:layout_height="match_parent"
         app:layout_behavior="com.github.shadowsocks.widget.ShrinkUpwardBehavior">
 
-        <FrameLayout
-            android:id="@+id/fragment_holder"
-            android:background="?android:attr/windowBackground"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_above="@+id/stat"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <include layout="@layout/toolbar_light_dark"/>
+
+            <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
+                android:id="@+id/controller_container"
+                android:background="?android:attr/windowBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/stat"
@@ -78,7 +87,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ellipsize="marquee"
-                    android:text="▲"
+                    android:text="@string/stat_up"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp"
                     app:layout_column="2"/>
@@ -123,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ellipsize="marquee"
-                    android:text="▼"
+                    android:text="@string/stat_down"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp"
                     app:layout_column="2"

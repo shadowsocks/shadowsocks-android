@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res-auto">
-    <SwitchPreference android:key="isAutoConnect"
-                      android:persistent="false"
-                      android:summary="@string/auto_connect_summary"
-                      android:title="@string/auto_connect"/>
+    <SwitchPreference
+        android:key="isAutoConnect"
+        android:persistent="false"
+        android:summary="@string/auto_connect_summary"
+        android:title="@string/auto_connect"
+        app:iconSpaceReserved="true"/>
     <SwitchPreference
         android:key="directBootAware"
         android:icon="@drawable/ic_action_lock"
         android:summary="@string/direct_boot_aware_summary"
-        android:title="@string/direct_boot_aware"/>
+        android:title="@string/direct_boot_aware"
+        app:iconSpaceReserved="true"/>
     <SwitchPreference
         android:key="tcp_fastopen"
         android:icon="@drawable/ic_action_offline_bolt"
         android:summary="@string/tcp_fastopen_summary"
-        android:title="TCP Fast Open"/>
+        android:title="TCP Fast Open"
+        app:iconSpaceReserved="true"/>
     <SimpleMenuPreference
         android:key="nightMode"
         android:icon="@drawable/ic_image_brightness_3"
@@ -22,7 +26,8 @@
         android:entryValues="@array/night_mode_values"
         android:defaultValue="system"
         android:summary="%s"
-        android:title="@string/night_mode"/>
+        android:title="@string/night_mode"
+        app:iconSpaceReserved="true"/>
     <PreferenceCategory
         android:title="@string/advanced">
         <SimpleMenuPreference
@@ -31,25 +36,29 @@
             android:entryValues="@array/service_mode_values"
             android:defaultValue="vpn"
             android:summary="%s"
-            android:title="@string/service_mode"/>
-        <AutoSummaryEditTextPreference
+            android:title="@string/service_mode"
+            app:iconSpaceReserved="true"/>
+        <im.mash.preference.EditTextPreference
             android:key="portProxy"
             android:inputType="number"
             android:maxLength="5"
-            app:pref_summaryHasText="%s"
-            android:title="@string/port_proxy"/>
-        <AutoSummaryEditTextPreference
+            android:summary="%s"
+            android:title="@string/port_proxy"
+            app:iconSpaceReserved="true"/>
+        <im.mash.preference.EditTextPreference
             android:key="portLocalDns"
             android:icon="@drawable/ic_action_dns"
             android:inputType="number"
             android:maxLength="5"
-            app:pref_summaryHasText="%s"
-            android:title="@string/port_local_dns"/>
-        <AutoSummaryEditTextPreference
+            android:summary="%s"
+            android:title="@string/port_local_dns"
+            app:iconSpaceReserved="true"/>
+        <im.mash.preference.EditTextPreference
             android:key="portTransproxy"
             android:inputType="number"
             android:maxLength="5"
-            app:pref_summaryHasText="%s"
-            android:title="@string/port_transproxy"/>
+            android:summary="%s"
+            android:title="@string/port_transproxy"
+            app:iconSpaceReserved="true"/>
     </PreferenceCategory>
 </PreferenceScreen>

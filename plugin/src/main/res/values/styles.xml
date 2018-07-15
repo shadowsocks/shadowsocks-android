@@ -7,8 +7,8 @@
         <item name="colorButtonNormal">@color/material_accent_200</item>
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material.Fix</item>
-        <item name="preferenceCategory_marginBottom">8dp</item>
+        <item name="preferenceTheme">@style/Theme.PreferenceTheme</item>
+        <!--<item name="preferenceCategory_marginBottom">8dp</item>-->
         <item name="windowActionModeOverlay">true</item>
     </style>
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.Dialog">
@@ -23,4 +23,8 @@
         <item name="windowNoTitle">true</item>
     </style>
     <style name="ThemeOverlay.AppCompat.DayNight" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="Theme.PreferenceTheme" parent="@style/PreferenceThemeOverlay.Material">
+        <item name="simpleMenuPreferenceStyle">@style/Preference.SimpleMenuPreference</item>
+        <item name="switchPreferenceStyle">@style/Preference.SwitchPreferenceCompat</item>
+    </style>
 </resources>

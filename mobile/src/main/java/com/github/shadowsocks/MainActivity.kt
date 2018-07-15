@@ -41,18 +41,29 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
 import android.support.v7.content.res.AppCompatResources
 import android.support.v7.preference.PreferenceDataStore
+import android.support.v7.widget.Toolbar
 import android.text.format.Formatter
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
+import com.bluelinelabs.conductor.Conductor
+import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.Router
+import com.bluelinelabs.conductor.RouterTransaction
+import com.bluelinelabs.conductor.changehandler.HorizontalChangeHandler
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
+import com.github.shadowsocks.controllers.AboutController
+import com.github.shadowsocks.controllers.CustomRulesController
+import com.github.shadowsocks.controllers.GlobalSettingsController
+import com.github.shadowsocks.controllers.ProfilesController
+import com.github.shadowsocks.controllers.base.BaseController
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
@@ -75,6 +86,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawer.OnDrawerItemClickListener,
         OnPreferenceDataStoreChangeListener {
+
     companion object {
         private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
@@ -92,9 +104,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     // UI
+    internal lateinit var toolbar: Toolbar
+    private lateinit var container: ViewGroup
     private lateinit var fab: ServiceButton
     internal lateinit var drawer: Drawer
     private var previousSelectedDrawer: Long = 0    // it's actually lateinit
+
+    private lateinit var router: Router
 
     private var testCount = 0
     private lateinit var statusText: TextView
@@ -124,7 +140,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 app.handler.post { updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal) }
             }
             override fun trafficPersisted(profileId: Long) {
-                app.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
+                app.handler.post { ProfilesController.instance?.onTrafficPersisted(profileId) }
             }
         }
     }
@@ -148,7 +164,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
             updateTraffic(-1, 0, 0, 0, 0)
             testCount += 1  // suppress previous test messages
         }
-        ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
+        ProfilesController.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
     }
     fun updateTraffic(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
@@ -156,9 +172,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         rxText.text = Formatter.formatFileSize(this, rxTotal)
         txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
         rxRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, rxRate))
-        val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
-        if (state != BaseService.STOPPING)
-            child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+        if (router.hasRootController()) {
+            val child =  router.backstack[0].controller()
+            if (state != BaseService.STOPPING && child is ProfilesController && !child.isBeingDestroyed && !child.isDestroyed)
+                child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+        }
     }
 
     /**
@@ -218,8 +236,15 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        container = findViewById(R.id.controller_container)
+        router = Conductor.attachRouter(this, container, savedInstanceState)
         drawer = DrawerBuilder()
                 .withActivity(this)
+                .withToolbar(toolbar)
+                .withActionBarDrawerToggle(true)
+                .withActionBarDrawerToggleAnimated(true)
                 .withTranslucentStatusBar(true)
                 .withHeader(R.layout.layout_header)
                 .addDrawerItems(
@@ -257,7 +282,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 .withSavedInstance(savedInstanceState)
                 .build()
 
-        if (savedInstanceState == null) displayFragment(ProfilesFragment())
+        if (!router.hasRootController()) displayController(ProfilesController())
+        else if (router.backstack[0].controller() is GlobalSettingsController) displayController(GlobalSettingsController())
+
         previousSelectedDrawer = drawer.currentSelection
         statusText = findViewById(R.id.status)
         txText = findViewById(R.id.tx)
@@ -297,6 +324,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 && AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
+
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -321,7 +349,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
         AlertDialog.Builder(this)
                 .setTitle(R.string.add_profile_dialog)
-                .setPositiveButton(R.string.yes, { _, _ -> profiles.forEach { ProfileManager.createProfile(it) } })
+                .setPositiveButton(R.string.yes) { _, _ -> profiles.forEach { ProfileManager.createProfile(it) } }
                 .setNegativeButton(R.string.no, null)
                 .setMessage(profiles.joinToString("\n"))
                 .create()
@@ -346,9 +374,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
     }
 
-    private fun displayFragment(fragment: ToolbarFragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
-        drawer.closeDrawer()
+    private fun displayController(controller: Controller) {
+        router.setRoot(RouterTransaction.with(controller)
+                .pushChangeHandler(HorizontalChangeHandler())
+                .popChangeHandler(HorizontalChangeHandler()))
     }
 
     override fun onItemClick(view: View?, position: Int, drawerItem: IDrawerItem<*, *>): Boolean {
@@ -356,18 +385,18 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         if (id == previousSelectedDrawer) drawer.closeDrawer() else {
             previousSelectedDrawer = id
             when (id) {
-                DRAWER_PROFILES -> displayFragment(ProfilesFragment())
-                DRAWER_GLOBAL_SETTINGS -> displayFragment(GlobalSettingsFragment())
+                DRAWER_PROFILES -> displayController(ProfilesController())
+                DRAWER_GLOBAL_SETTINGS -> displayController(GlobalSettingsController())
                 DRAWER_ABOUT -> {
                     app.analytics.logEvent("about", Bundle())
-                    displayFragment(AboutFragment())
+                    displayController(AboutController())
                 }
                 DRAWER_FAQ -> launchUrl(getString(R.string.faq_url))
-                DRAWER_CUSTOM_RULES -> displayFragment(CustomRulesFragment())
+                DRAWER_CUSTOM_RULES -> displayController(CustomRulesController())
                 else -> return false
             }
         }
-        return true
+        return false
     }
 
     override fun onResume() {
@@ -381,11 +410,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
     }
 
     override fun onBackPressed() {
-        if (drawer.isDrawerOpen) drawer.closeDrawer() else {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
-            if (!currentFragment.onBackPressed())
-                if (currentFragment is ProfilesFragment) super.onBackPressed()
-                else drawer.setSelection(DRAWER_PROFILES)
+        if (drawer.isDrawerOpen)
+            drawer.closeDrawer()
+        else if (router.backstack.last().controller() !is ProfilesController) {
+            drawer.setSelection(DRAWER_PROFILES)
+            displayController(ProfilesController())
+        }
+        else if (!router.handleBack()) {
+            super.onBackPressed()
         }
     }
 

@@ -51,7 +51,6 @@ import com.github.shadowsocks.utils.*
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
@@ -97,8 +96,6 @@ class App : Application() {
         app = this
         Fabric.with(this, Crashlytics())    // multiple processes needs manual set-up
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-        PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
-                BottomSheetPreferenceDialogFragment::class.java)
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
             deviceContext.moveDatabaseFrom(this, Key.DB_PUBLIC)

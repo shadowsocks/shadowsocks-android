@@ -75,12 +75,14 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.mikepenz:materialdrawer:6.0.8'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-    implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
     implementation 'net.glxn.qrgen:android:2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
+    implementation 'com.bluelinelabs:conductor:2.1.4'
+    implementation 'com.bluelinelabs:conductor-archlifecycle:0.1.1'
+    implementation 'com.github.onlymash:conductor-preference:1.0.3'
     kapt "android.arch.persistence.room:compiler:$roomVersion"
     testImplementation "android.arch.persistence.room:testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
