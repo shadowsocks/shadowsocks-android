@@ -10,10 +10,10 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 6
-        versionName "0.1.1"
+        versionCode 7
+        versionName "0.2.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -24,12 +24,14 @@ android {
 }
 
 dependencies {
-    api "com.android.support:preference-v14:$supportLibraryVersion"
-    api "com.takisoft.fix:preference-v7:$takisoftFixVersion"
+    api "androidx.core:core-ktx:$androidxVersion"
+    api "androidx.preference:preference:$androidxVersion"
+    api "com.google.android.material:material:$androidxVersion"
+    api 'com.takisoft.preferencex:preferencex:1.0.0-alpha1'
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
 }
 repositories {
     mavenCentral()

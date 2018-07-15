@@ -29,7 +29,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteCallbackList
-import android.support.v4.os.UserManagerCompat
+import androidx.core.os.UserManagerCompat
 import android.util.Base64
 import android.util.Log
 import com.crashlytics.android.Crashlytics

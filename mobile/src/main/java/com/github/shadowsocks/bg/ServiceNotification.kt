@@ -29,15 +29,15 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.PowerManager
-import android.support.v4.app.NotificationCompat
-import android.support.v4.content.ContextCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import android.text.format.Formatter
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
-import com.github.shadowsocks.utils.systemService
+import androidx.core.content.getSystemService
 import java.util.*
 
 /**
@@ -48,10 +48,8 @@ import java.util.*
  */
 class ServiceNotification(private val service: BaseService.Interface, profileName: String,
                           channel: String, private val visible: Boolean = false) {
-    private val keyGuard = (service as Context).systemService<KeyguardManager>()
-    private val nm by lazy {
-        (service as Context).getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    }
+    private val keyGuard = (service as Context).getSystemService<KeyguardManager>()!!
+    private val nm by lazy { (service as Context).getSystemService<NotificationManager>()!! }
     private val callback by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) { }   // ignore
@@ -84,8 +82,8 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         service as Context
         if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
                 service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0))
-        val power = service.systemService<PowerManager>()
-        update(if (power.isInteractive) Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
+        update(if (service.getSystemService<PowerManager>()?.isInteractive != false)
+            Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
         val screenFilter = IntentFilter()
         screenFilter.addAction(Intent.ACTION_SCREEN_ON)
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF)

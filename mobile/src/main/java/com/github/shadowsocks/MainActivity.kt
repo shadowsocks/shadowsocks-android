@@ -27,24 +27,24 @@ import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.net.VpnService
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.os.SystemClock
-import android.support.customtabs.CustomTabsIntent
-import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.content.res.AppCompatResources
-import android.support.v7.preference.PreferenceDataStore
 import android.text.format.Formatter
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
+import androidx.core.net.toUri
+import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
@@ -59,9 +59,9 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
-import com.github.shadowsocks.utils.systemService
 import com.github.shadowsocks.utils.thread
 import com.github.shadowsocks.widget.ServiceButton
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.materialdrawer.Drawer
 import com.mikepenz.materialdrawer.DrawerBuilder
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem
@@ -108,10 +108,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
                 .build()
     }
-    fun launchUrl(uri: Uri) = try {
-        customTabsIntent.launchUrl(this, uri)
+    fun launchUrl(uri: String) = try {
+        customTabsIntent.launchUrl(this, uri.toUri())
     } catch (_: ActivityNotFoundException) { }  // ignore
-    fun launchUrl(uri: String) = launchUrl(Uri.parse(uri))
 
     // service
     var state = BaseService.IDLE
@@ -321,7 +320,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
         }
         AlertDialog.Builder(this)
                 .setTitle(R.string.add_profile_dialog)
-                .setPositiveButton(R.string.yes, { _, _ -> profiles.forEach { ProfileManager.createProfile(it) } })
+                .setPositiveButton(R.string.yes) { _, _ -> profiles.forEach { ProfileManager.createProfile(it) } }
                 .setNegativeButton(R.string.no, null)
                 .setMessage(profiles.joinToString("\n"))
                 .create()
@@ -338,7 +337,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, Drawe
                 val mode = DataStore.nightMode
                 AppCompatDelegate.setDefaultNightMode(when (mode) {
                     AppCompatDelegate.getDefaultNightMode() -> return
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> systemService<UiModeManager>().nightMode
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> getSystemService<UiModeManager>()!!.nightMode
                     else -> mode
                 })
                 recreate()

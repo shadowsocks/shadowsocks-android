@@ -22,7 +22,7 @@ package com.github.shadowsocks.preference
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.support.v7.preference.ListPreference
+import androidx.preference.ListPreference
 import android.util.AttributeSet
 
 class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {

@@ -38,7 +38,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.systemService
+import androidx.core.content.getSystemService
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
@@ -111,7 +111,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             field = value
         }
 
-    private val connectivity by lazy { systemService<ConnectivityManager>() }
+    private val connectivity by lazy { getSystemService<ConnectivityManager>()!! }
     @TargetApi(28)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {

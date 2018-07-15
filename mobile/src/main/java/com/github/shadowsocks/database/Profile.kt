@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks.database
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
@@ -93,7 +93,7 @@ class Profile : Serializable {
         }.filterNotNull()
     }
 
-    @android.arch.persistence.room.Dao
+    @androidx.room.Dao
     interface Dao {
         @Query("SELECT * FROM `Profile` WHERE `id` = :id")
         operator fun get(id: Long): Profile?

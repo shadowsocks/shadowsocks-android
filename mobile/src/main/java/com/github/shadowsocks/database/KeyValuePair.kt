@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks.database
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 
@@ -37,7 +37,7 @@ class KeyValuePair() {
         const val TYPE_STRING_SET = 6
     }
 
-    @android.arch.persistence.room.Dao
+    @androidx.room.Dao
     interface Dao {
         @Query("SELECT * FROM `KeyValuePair` WHERE `key` = :key")
         operator fun get(key: String): KeyValuePair?
