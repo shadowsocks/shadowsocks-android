@@ -40,6 +40,7 @@ class ProfileConfigController : PreferenceController(), Preference.OnPreferenceC
 
     companion object {
         const val TAG = "ProfileConfigController"
+        var instance: ProfileConfigController? = null
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
     }
 
@@ -59,6 +60,7 @@ class ProfileConfigController : PreferenceController(), Preference.OnPreferenceC
         val activity = activity as ProfileConfigActivity
         profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
         addPreferencesFromResource(R.xml.pref_profile)
+        instance = this
         if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService(UserManager::class.java).isDemoUser) {
             findPreference(Key.host)?.summary = "shadowsocks.example.org"
             findPreference(Key.remotePort)?.summary = "1337"
@@ -197,6 +199,7 @@ class ProfileConfigController : PreferenceController(), Preference.OnPreferenceC
     override fun onDestroy() {
         DataStore.privateStore.unregisterChangeListener(this)
         app.unregisterReceiver(receiver)
+        instance = null
         super.onDestroy()
     }
     override fun onCreateItemDecoration(): DividerDecoration {
