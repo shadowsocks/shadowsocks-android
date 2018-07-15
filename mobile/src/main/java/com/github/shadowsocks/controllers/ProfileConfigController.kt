@@ -1,5 +1,6 @@
 package com.github.shadowsocks.controllers
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Intent
@@ -14,7 +15,6 @@ import android.support.v7.preference.SwitchPreference
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.github.shadowsocks.App.Companion.app
@@ -40,6 +40,7 @@ class ProfileConfigController : PreferenceController(), Preference.OnPreferenceC
 
     companion object {
         const val TAG = "ProfileConfigController"
+        @SuppressLint("StaticFieldLeak")
         var instance: ProfileConfigController? = null
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
     }

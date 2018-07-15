@@ -80,7 +80,7 @@ dependencies {
     implementation 'net.glxn.qrgen:android:2.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
-    implementation 'com.bluelinelabs:conductor:2.1.4'
+    implementation 'com.bluelinelabs:conductor:2.1.5-SNAPSHOT'
     implementation 'com.bluelinelabs:conductor-archlifecycle:0.1.1'
     implementation 'com.github.onlymash:conductor-preference:1.0.3'
     kapt "android.arch.persistence.room:compiler:$roomVersion"

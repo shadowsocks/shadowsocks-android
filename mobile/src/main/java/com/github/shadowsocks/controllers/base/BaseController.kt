@@ -1,18 +1,13 @@
 package com.github.shadowsocks.controllers.base
 
-import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.archlifecycle.LifecycleController
 import com.github.shadowsocks.R
 
-abstract class BaseController : Controller {
-
-    constructor()
-
-    constructor(args: Bundle) : super(args)
+abstract class BaseController : LifecycleController() {
 
     abstract fun inflateView(inflater: LayoutInflater, container: ViewGroup): View
 
