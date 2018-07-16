@@ -46,6 +46,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
@@ -148,9 +149,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         rxText.text = Formatter.formatFileSize(this, rxTotal)
         txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
         rxRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, rxRate))
-        val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
-        if (state != BaseService.STOPPING)
-            child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+        val child = supportFragmentManager.findFragmentById(R.id.fragment_holder)
+        if (child is ToolbarFragment && state != BaseService.STOPPING)
+            child.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
     }
 
     /**
@@ -305,7 +306,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         }
     }
 
-    private fun displayFragment(fragment: ToolbarFragment) {
+    private fun displayFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
         drawer.closeDrawers()
     }
@@ -314,7 +315,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         if (item.isChecked) drawer.closeDrawers() else {
             when (item.itemId) {
                 R.id.profiles -> displayFragment(ProfilesFragment())
-                R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
+                R.id.globalSettings -> displayFragment(GlobalSettingsPreferenceFragment())
                 R.id.about -> {
                     app.analytics.logEvent("about", Bundle())
                     displayFragment(AboutFragment())
@@ -343,10 +344,17 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     override fun onBackPressed() {
         if (drawer.isDrawerOpen(Gravity.START)) drawer.closeDrawers() else {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
-            if (!currentFragment.onBackPressed())
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder)
+            if (currentFragment is GlobalSettingsPreferenceFragment) {
+                navigation.setCheckedItem(R.id.profiles)
+                displayFragment(ProfilesFragment())
+            }
+            else if (currentFragment is ToolbarFragment && !currentFragment.onBackPressed())
                 if (currentFragment is ProfilesFragment) super.onBackPressed()
-                else navigation.menu.findItem(R.id.profiles).isChecked = true
+                else {
+                    navigation.setCheckedItem(R.id.profiles)
+                    displayFragment(ProfilesFragment())
+                }
         }
     }
 

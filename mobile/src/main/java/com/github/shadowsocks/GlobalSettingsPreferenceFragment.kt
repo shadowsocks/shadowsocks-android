@@ -22,6 +22,12 @@ package com.github.shadowsocks
 
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.appcompat.widget.Toolbar
 import com.google.android.material.snackbar.Snackbar
 import androidx.preference.SwitchPreference
 import androidx.preference.Preference
@@ -34,6 +40,22 @@ import com.github.shadowsocks.utils.TcpFastOpen
 import com.takisoft.preferencex.PreferenceFragmentCompat
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
+    private lateinit var toolbar: Toolbar
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        toolbar = inflater.inflate(R.layout.toolbar_light_dark, container, false) as Toolbar
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val child = (view as LinearLayout).getChildAt(0)
+        view.removeAllViews()
+        view.orientation = LinearLayout.VERTICAL
+        view.addView(toolbar, 0)
+        view.addView(child, 1)
+        super.onViewCreated(view, savedInstanceState)
+        toolbar.setTitle(R.string.settings)
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
+        toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(Gravity.START) }
+    }
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         addPreferencesFromResource(R.xml.pref_global)
