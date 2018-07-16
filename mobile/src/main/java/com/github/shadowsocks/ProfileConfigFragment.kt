@@ -34,6 +34,7 @@ import androidx.preference.PreferenceDataStore
 import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
 import androidx.core.content.getSystemService
+import androidx.core.os.bundleOf
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -117,12 +118,9 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
         pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
     }
 
-    private fun showPluginEditor() {
-        val bundle = Bundle()
-        bundle.putString("key", Key.pluginConfigure)
-        bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)
-        displayPreferenceDialog(PluginConfigurationDialogFragment(), Key.pluginConfigure, bundle)
-    }
+    private fun showPluginEditor() = displayPreferenceDialog(PluginConfigurationDialogFragment(), Key.pluginConfigure,
+            bundleOf(Pair("key", Key.pluginConfigure),
+                    Pair(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)))
 
     fun saveAndExit() {
         val profile = ProfileManager.getProfile(profileId) ?: Profile()

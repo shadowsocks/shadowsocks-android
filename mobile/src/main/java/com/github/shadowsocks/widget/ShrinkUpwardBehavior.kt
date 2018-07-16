@@ -56,9 +56,8 @@ class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet?) : Coordinator
             animator.setIntValues(start, parent.height)
             animator.interpolator = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
             animator.duration = SnackbarConsts.ANIMATION_DURATION
-            @Suppress("NAME_SHADOWING")
-            animator.addUpdateListener { animator ->
-                child.layoutParams.height = animator.animatedValue as Int
+            animator.addUpdateListener {
+                child.layoutParams.height = it.animatedValue as Int
                 child.requestLayout()
             }
             animator.start()

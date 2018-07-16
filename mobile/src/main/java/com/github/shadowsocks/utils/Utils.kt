@@ -10,11 +10,9 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
-import androidx.annotation.AttrRes
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.SortedList
 import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.recyclerview.widget.SortedList
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
@@ -78,9 +76,4 @@ fun <T> SortedList<T>.asIterable(): Iterable<T> = SortedListIterable(this)
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)
     t.printStackTrace()
-}
-
-fun Bundle.put(key: String, value: String): Bundle {
-    putString(key, value)
-    return this
 }

@@ -63,7 +63,7 @@
         android:layout_marginLeft="16dp"
         >
 
-        <TextView
+        <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,7 +77,7 @@
             android:textColor="?android:attr/textColorSecondary"
             tools:text="@string/profile_plugin"/>
 
-        <TextView
+        <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@+id/traffic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

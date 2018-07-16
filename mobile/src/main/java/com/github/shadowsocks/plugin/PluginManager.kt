@@ -27,9 +27,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.net.Uri
-import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.utils.Commandline
@@ -151,10 +151,8 @@ object PluginManager {
     }
 
     private fun initNativeFast(cr: ContentResolver, options: PluginOptions, uri: Uri): String {
-        val out = Bundle()
-        out.putString(PluginContract.EXTRA_OPTIONS, options.id)
-        val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null, out)
-                .getString(PluginContract.EXTRA_ENTRY)
+        val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null,
+                bundleOf(Pair(PluginContract.EXTRA_OPTIONS, options.id))).getString(PluginContract.EXTRA_ENTRY)
         check(File(result).canExecute())
         return result
     }

@@ -24,6 +24,7 @@ import androidx.room.*
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import androidx.core.net.toUri
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
@@ -43,7 +44,7 @@ class Profile : Serializable {
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
         fun findAll(data: CharSequence?) = pattern.findAll(data ?: "").map {
-            val uri = Uri.parse(it.value)
+            val uri = it.value.toUri()
             try {
                 if (uri.userInfo == null) {
                     val match = legacyPattern.matchEntire(String(Base64.decode(uri.host, Base64.NO_PADDING)))

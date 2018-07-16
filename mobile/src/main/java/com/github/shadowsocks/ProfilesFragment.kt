@@ -38,6 +38,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.getSystemService
+import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.*
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
@@ -79,9 +80,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     class QRCodeDialog() : DialogFragment() {
 
         constructor(url: String) : this() {
-            val bundle = Bundle()
-            bundle.putString(KEY_URL, url)
-            arguments = bundle
+            arguments = bundleOf(Pair(KEY_URL, url))
         }
 
         private val url get() = arguments!!.getString(KEY_URL)
@@ -152,20 +151,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 rx += rxTotal
             }
             text1.text = item.formattedName
-            val t2 = ArrayList<String>()
-            if (!item.name.isNullOrEmpty()) t2 += item.formattedAddress
-            val id = PluginConfiguration(item.plugin ?: "").selected
-            if (id.isNotEmpty()) t2 += app.getString(R.string.profile_plugin, id)
-            if (t2.isEmpty()) text2.visibility = View.GONE else {
-                text2.visibility = View.VISIBLE
-                text2.text = t2.joinToString("\n")
-            }
+            text2.text = ArrayList<String>().apply {
+                if (!item.name.isNullOrEmpty()) this += item.formattedAddress
+                val id = PluginConfiguration(item.plugin ?: "").selected
+                if (id.isNotEmpty()) this += app.getString(R.string.profile_plugin, id)
+            }.joinToString("\n")
             val context = requireContext()
-            if (tx <= 0 && rx <= 0) traffic.visibility = View.GONE else {
-                traffic.visibility = View.VISIBLE
-                traffic.text = getString(R.string.traffic,
-                        Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
-            }
+            traffic.text = if (tx <= 0 && rx <= 0) null else getString(R.string.traffic,
+                    Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
 
             if (item.id == DataStore.profileId) {
                 itemView.isSelected = true
@@ -196,7 +189,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     adView.loadAd(adBuilder.build())
                     this.adView = adView
                 } else adView.visibility = View.VISIBLE
-            } else if (adView != null) adView.visibility = View.GONE
+            } else adView?.visibility = View.GONE
         }
 
         override fun onClick(v: View?) {
@@ -236,7 +229,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.layout_profile, parent, false))
         override fun getItemCount(): Int = profiles.size
-        override fun getItemId(position: Int): Long = profiles[position].id.toLong()
+        override fun getItemId(position: Int): Long = profiles[position].id
 
         fun add(item: Profile) {
             undoManager.flush()

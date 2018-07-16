@@ -37,6 +37,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import com.github.shadowsocks.R
 
 class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
@@ -58,8 +59,8 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
             val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
             text1.setTypeface(null, typeface)
             text2.setTypeface(null, typeface)
-            text2.visibility = if (preference.entryValues[i].isNotEmpty() &&
-                    preference.entries[i] != preference.entryValues[i]) View.VISIBLE else View.GONE
+            text2.isVisible = preference.entryValues[i].isNotEmpty() &&
+                    preference.entries[i] != preference.entryValues[i]
             icon.setImageDrawable(preference.entryIcons?.get(i))
             index = i
         }
