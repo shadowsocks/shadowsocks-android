@@ -368,7 +368,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         toolbar.setOnMenuItemClickListener(this)
         val activity = requireActivity()
         list = view.findViewById(R.id.list)
-        list.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
         undoManager = UndoSnackbarManager(activity.findViewById(R.id.snackbar), adapter::undo)

@@ -200,7 +200,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         initProxiedApps()
         loadingView = findViewById(R.id.loading)
         appListView = findViewById(R.id.list)
-        appListView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         appListView.itemAnimator = DefaultItemAnimator()
         appListView.adapter = AppsAdapter()
 

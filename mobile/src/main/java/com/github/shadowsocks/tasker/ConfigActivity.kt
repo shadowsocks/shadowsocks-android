@@ -101,7 +101,7 @@ class ConfigActivity : AppCompatActivity() {
         switch = findViewById(R.id.serviceSwitch)
         switch.isChecked = taskerOption.switchOn
         val profilesList = findViewById<RecyclerView>(R.id.list)
-        val lm = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = lm
         profilesList.itemAnimator = DefaultItemAnimator()
         profilesList.adapter = profilesAdapter

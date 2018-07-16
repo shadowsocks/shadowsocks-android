@@ -320,7 +320,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         if (!ProfileManager.isNotEmpty()) DataStore.profileId = ProfileManager.createProfile().id
         val profilesList = view.findViewById<RecyclerView>(R.id.list)
-        val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = layoutManager
         profilesList.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
         layoutManager.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.profileId })
