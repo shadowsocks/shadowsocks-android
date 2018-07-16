@@ -68,8 +68,8 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
     fun init() {
         icon = entryIcon
     }
-    override fun onSetInitialValue(restoreValue: Boolean, defaultValue: Any?) {
-        super.onSetInitialValue(restoreValue, defaultValue)
+    override fun onSetInitialValue(defaultValue: Any?) {
+        super.onSetInitialValue(defaultValue)
         init()
     }
 }
