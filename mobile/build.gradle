@@ -71,7 +71,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-ads:15.0.1'
     implementation 'com.google.firebase:firebase-config:16.0.0'
     implementation 'com.google.firebase:firebase-core:16.0.0'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.0.0-alpha1'
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
