@@ -10,11 +10,9 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
-import android.support.annotation.AttrRes
-import android.support.v4.content.ContextCompat
-import android.support.v7.util.SortedList
 import android.util.TypedValue
+import androidx.annotation.AttrRes
+import androidx.recyclerview.widget.SortedList
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
@@ -49,8 +47,6 @@ fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = fals
 val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
-inline fun <reified T> Context.systemService() = ContextCompat.getSystemService(this, T::class.java)!!
-
 fun ContentResolver.openBitmap(uri: Uri) =
         if (Build.VERSION.SDK_INT >= 28) ImageDecoder.decodeBitmap(ImageDecoder.createSource(this, uri))
         else BitmapFactory.decodeStream(openInputStream(uri))
@@ -80,9 +76,4 @@ fun <T> SortedList<T>.asIterable(): Iterable<T> = SortedListIterable(this)
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)
     t.printStackTrace()
-}
-
-fun Bundle.put(key: String, value: String): Bundle {
-    putString(key, value)
-    return this
 }

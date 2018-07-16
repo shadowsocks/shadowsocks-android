@@ -1,28 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Shadowsocks.App">
-        <item name="bottomSheetDialogTheme">@style/Theme.Design.DayNight.BottomSheetDialog</item>
-        <!-- MaterialDrawer specific values -->
-        <item name="material_drawer_background">@color/drawer_background</item>
-        <item name="material_drawer_primary_text">@color/drawer_primary_text</item>
-        <item name="material_drawer_primary_icon">@color/drawer_primary_icon</item>
-        <item name="material_drawer_secondary_text">@color/drawer_secondary_text</item>
-        <item name="material_drawer_hint_text">@color/drawer_hint_text</item>
-        <item name="material_drawer_divider">@color/drawer_divider</item>
-        <item name="material_drawer_selected">@color/drawer_selected</item>
-        <item name="material_drawer_selected_text">@color/drawer_selected_text</item>
-        <item name="material_drawer_header_selection_text">@color/drawer_header_selection_text</item>
-    </style>
-    <style name="Theme.Design.DayNight.BottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog"/>
-
-    <!-- https://github.com/Gericop/Android-Support-Preference-V7-Fix/issues/111 -->
-    <style name="Preference.SimpleMenuPreference">
-        <item name="android:layout">@layout/preference_simplemenu</item>
-        <item name="allowDividerAbove">false</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="iconSpaceReserved">@bool/config_materialPreferenceIconSpaceReserved</item>
-        <item name="pref_popupStyle">@style/Preference.SimpleMenuPreference.Popup</item>
-    </style>
     <style name="StyledScrollerTextAppearance" parent="@android:style/TextAppearance">
         <item name="android:textSize">24sp</item>
         <item name="android:textStyle">bold</item>

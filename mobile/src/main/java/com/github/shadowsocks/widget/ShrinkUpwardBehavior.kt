@@ -22,20 +22,20 @@ package com.github.shadowsocks.widget
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.support.design.animation.AnimationConsts
-import android.support.design.widget.CoordinatorLayout
-import android.support.design.widget.Snackbar
-import android.support.design.widget.SnackbarConsts
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.SnackbarConsts
 import android.util.AttributeSet
 import android.view.View
 import android.view.accessibility.AccessibilityManager
-import com.github.shadowsocks.utils.systemService
+import androidx.core.content.getSystemService
+import com.google.android.material.animation.AnimationUtils
 
 /**
  * Full credits go to: https://stackoverflow.com/a/35904421/2245107
  */
 class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet?) : CoordinatorLayout.Behavior<View>(context, attrs) {
-    private val accessibility = context.systemService<AccessibilityManager>()
+    private val accessibility = context.getSystemService<AccessibilityManager>()!!
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: View, dependency: View): Boolean =
             dependency is Snackbar.SnackbarLayout
@@ -54,11 +54,10 @@ class ShrinkUpwardBehavior(context: Context, attrs: AttributeSet?) : Coordinator
             val animator = ValueAnimator()
             val start = child.height
             animator.setIntValues(start, parent.height)
-            animator.interpolator = AnimationConsts.FAST_OUT_SLOW_IN_INTERPOLATOR
+            animator.interpolator = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
             animator.duration = SnackbarConsts.ANIMATION_DURATION
-            @Suppress("NAME_SHADOWING")
-            animator.addUpdateListener { animator ->
-                child.layoutParams.height = animator.animatedValue as Int
+            animator.addUpdateListener {
+                child.layoutParams.height = it.animatedValue as Int
                 child.requestLayout()
             }
             animator.start()

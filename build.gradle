@@ -9,13 +9,12 @@ buildscript {
         sdkVersion = 28
         compileSdkVersion = 28
         buildToolsVersion = '28.0.1'
-        supportLibraryVersion = '28.0.0-alpha3'
-        takisoftFixVersion = '27.1.1.2'
+        androidxVersion = '1.0.0-beta01'
         roomVersion = '1.1.1'
         workVersion = '1.0.0-alpha04'
         junitVersion = '4.12'
-        androidTestVersion = '1.0.2'
-        androidEspressoVersion = '3.0.2'
+        androidTestVersion = '1.1.0-alpha3'
+        androidEspressoVersion = '3.1.0-alpha3'
     }
 
     repositories {
@@ -29,7 +28,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0-beta03'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
-        classpath 'com.google.gms:google-services:4.0.1'
+        classpath 'com.google.gms:google-services:4.0.2'
         classpath 'io.fabric.tools:gradle:1.25.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }

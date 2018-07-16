@@ -18,7 +18,7 @@
     <!-- android:start not available until API 23 -->
     <item android:left="8dp">
         <shape android:shape="rectangle">
-            <solid android:color="@color/background" />
+            <solid android:color="?android:colorBackground" />
         </shape>
     </item>
     <item android:drawable="?android:attr/selectableItemBackground"/>

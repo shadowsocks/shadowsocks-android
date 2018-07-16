@@ -33,18 +33,17 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.Snackbar
-import android.support.v4.app.TaskStackBuilder
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import com.google.android.material.snackbar.Snackbar
+import androidx.core.app.TaskStackBuilder
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
 import android.view.*
 import android.widget.ImageView
 import android.widget.Switch
-import com.futuremind.recyclerviewfastscroll.FastScroller
-import com.futuremind.recyclerviewfastscroll.SectionTitleProvider
+import androidx.core.content.getSystemService
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
@@ -113,7 +112,7 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         }
     }
 
-    private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>(), SectionTitleProvider {
+    private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>() {
         private var apps = listOf<ProxiedApp>()
 
         fun reload() {
@@ -125,18 +124,16 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder =
                 AppViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.layout_apps_item, parent, false))
         override fun getItemCount(): Int = apps.size
-        override fun getSectionTitle(position: Int): String = apps[position].name.substring(0, 1)
     }
 
     private lateinit var proxiedApps: HashSet<String>
     private lateinit var toolbar: Toolbar
     private lateinit var bypassSwitch: Switch
     private lateinit var appListView: RecyclerView
-    private lateinit var fastScroller: FastScroller
     private lateinit var loadingView: View
     private val appsLoading = AtomicBoolean()
     private val handler = Handler()
-    private val clipboard by lazy { systemService<ClipboardManager>() }
+    private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
 
     private fun initProxiedApps(str: String = DataStore.individual) {
         proxiedApps = str.split('\n').toHashSet()
@@ -147,7 +144,6 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
     private fun loadAppsAsync() {
         if (!appsLoading.compareAndSet(false, true)) return
         appListView.visibility = View.GONE
-        fastScroller.visibility = View.GONE
         loadingView.visibility = View.VISIBLE
         thread("AppManager-loader") {
             val adapter = appListView.adapter as AppsAdapter
@@ -161,9 +157,6 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                 appListView.alpha = 0F
                 appListView.visibility = View.VISIBLE
                 appListView.animate().alpha(1F).duration = shortAnimTime.toLong()
-                fastScroller.alpha = 0F
-                fastScroller.visibility = View.VISIBLE
-                fastScroller.animate().alpha(1F).duration = shortAnimTime.toLong()
                 loadingView.animate().alpha(0F).setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator) {
                         loadingView.visibility = View.GONE
@@ -207,11 +200,9 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         initProxiedApps()
         loadingView = findViewById(R.id.loading)
         appListView = findViewById(R.id.list)
-        appListView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         appListView.itemAnimator = DefaultItemAnimator()
         appListView.adapter = AppsAdapter()
-        fastScroller = findViewById(R.id.fastscroller)
-        fastScroller.setRecyclerView(appListView)
 
         instance = this
         loadAppsAsync()

@@ -26,15 +26,15 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import androidx.core.content.getSystemService
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.broadcastReceiver
-import com.github.shadowsocks.utils.systemService
 
 class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface {
     companion object {
@@ -50,7 +50,7 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
             finish()
             return
         }
-        if (systemService<KeyguardManager>().isKeyguardLocked) {
+        if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
             receiver = broadcastReceiver { _, _ -> connection.connect() }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
         } else connection.connect()

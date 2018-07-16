@@ -21,7 +21,7 @@
 package com.github.shadowsocks.acl
 
 import android.content.Context
-import android.support.v7.util.SortedList
+import androidx.recyclerview.widget.SortedList
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app

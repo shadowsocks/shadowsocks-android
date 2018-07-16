@@ -26,13 +26,15 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.UserManager
-import android.support.design.widget.Snackbar
-import android.support.v14.preference.SwitchPreference
-import android.support.v7.app.AlertDialog
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceDataStore
-import android.support.v7.widget.Toolbar
+import com.google.android.material.snackbar.Snackbar
+import androidx.preference.SwitchPreference
+import androidx.appcompat.app.AlertDialog
+import androidx.preference.Preference
+import androidx.preference.PreferenceDataStore
+import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
+import androidx.core.content.getSystemService
+import androidx.core.os.bundleOf
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -47,8 +49,8 @@ import com.github.shadowsocks.preference.PluginConfigurationDialogFragment
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.takisoft.fix.support.v7.preference.EditTextPreference
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
+import com.takisoft.preferencex.EditTextPreference
+import com.takisoft.preferencex.PreferenceFragmentCompat
 
 class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClickListener,
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
@@ -68,7 +70,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
         val activity = requireActivity()
         profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
         addPreferencesFromResource(R.xml.pref_profile)
-        if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService(UserManager::class.java).isDemoUser) {
+        if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService<UserManager>()?.isDemoUser == true) {
             findPreference(Key.host).summary = "shadowsocks.example.org"
             findPreference(Key.remotePort).summary = "1337"
             findPreference(Key.password).summary = "\u2022".repeat(32)
@@ -116,12 +118,9 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
         pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
     }
 
-    private fun showPluginEditor() {
-        val bundle = Bundle()
-        bundle.putString("key", Key.pluginConfigure)
-        bundle.putString(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)
-        displayPreferenceDialog(PluginConfigurationDialogFragment(), Key.pluginConfigure, bundle)
-    }
+    private fun showPluginEditor() = displayPreferenceDialog(PluginConfigurationDialogFragment(), Key.pluginConfigure,
+            bundleOf(Pair("key", Key.pluginConfigure),
+                    Pair(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)))
 
     fun saveAndExit() {
         val profile = ProfileManager.getProfile(profileId) ?: Profile()
@@ -182,10 +181,10 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
             val activity = requireActivity()
             AlertDialog.Builder(activity)
                     .setTitle(R.string.delete_confirm_prompt)
-                    .setPositiveButton(R.string.yes, { _, _ ->
+                    .setPositiveButton(R.string.yes) { _, _ ->
                         ProfileManager.delProfile(profileId)
                         activity.finish()
-                    })
+                    }
                     .setNegativeButton(R.string.no, null)
                     .create()
                     .show()

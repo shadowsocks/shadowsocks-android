@@ -27,16 +27,17 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.support.design.widget.BottomSheetDialog
-import android.support.v7.preference.PreferenceDialogFragmentCompat
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import androidx.preference.PreferenceDialogFragmentCompat
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import com.github.shadowsocks.R
 
 class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
@@ -58,8 +59,8 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
             val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
             text1.setTypeface(null, typeface)
             text2.setTypeface(null, typeface)
-            text2.visibility = if (preference.entryValues[i].isNotEmpty() &&
-                    preference.entries[i] != preference.entryValues[i]) View.VISIBLE else View.GONE
+            text2.isVisible = preference.entryValues[i].isNotEmpty() &&
+                    preference.entries[i] != preference.entryValues[i]
             icon.setImageDrawable(preference.entryIcons?.get(i))
             index = i
         }

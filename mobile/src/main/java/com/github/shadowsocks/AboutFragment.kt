@@ -21,9 +21,7 @@
 package com.github.shadowsocks
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.support.v4.text.HtmlCompat
 import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
@@ -32,6 +30,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.net.toUri
+import androidx.core.text.HtmlCompat
+import androidx.core.text.parseAsHtml
 
 class AboutFragment : ToolbarFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -41,16 +42,15 @@ class AboutFragment : ToolbarFragment() {
         super.onViewCreated(view, savedInstanceState)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
         view.findViewById<TextView>(R.id.tv_about).apply {
-            text = SpannableStringBuilder(HtmlCompat.fromHtml(
-                    resources.openRawResource(R.raw.about).bufferedReader().readText(),
-                    HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
+            text = SpannableStringBuilder(resources.openRawResource(R.raw.about).bufferedReader().readText()
+                    .parseAsHtml(HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
                 for (span in getSpans(0, length, URLSpan::class.java)) {
                     setSpan(object : ClickableSpan() {
                         override fun onClick(view: View) {
                             if (span.url.startsWith("mailto:")) {
                                 startActivity(Intent.createChooser(Intent().apply {
                                     action = Intent.ACTION_SENDTO
-                                    data = Uri.parse(span.url)
+                                    data = span.url.toUri()
                                 }, getString(R.string.send_email)))
                             } else (activity as MainActivity).launchUrl(span.url)
                         }

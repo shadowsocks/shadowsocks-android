@@ -29,15 +29,17 @@ import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.app.DialogFragment
-import android.support.v7.widget.*
-import android.support.v7.widget.helper.ItemTouchHelper
+import com.google.android.material.snackbar.Snackbar
+import androidx.fragment.app.DialogFragment
+import androidx.appcompat.widget.*
 import android.text.format.Formatter
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.getSystemService
+import androidx.core.os.bundleOf
+import androidx.recyclerview.widget.*
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -45,7 +47,6 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.systemService
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -79,9 +80,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     class QRCodeDialog() : DialogFragment() {
 
         constructor(url: String) : this() {
-            val bundle = Bundle()
-            bundle.putString(KEY_URL, url)
-            arguments = bundle
+            arguments = bundleOf(Pair(KEY_URL, url))
         }
 
         private val url get() = arguments!!.getString(KEY_URL)
@@ -152,20 +151,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 rx += rxTotal
             }
             text1.text = item.formattedName
-            val t2 = ArrayList<String>()
-            if (!item.name.isNullOrEmpty()) t2 += item.formattedAddress
-            val id = PluginConfiguration(item.plugin ?: "").selected
-            if (id.isNotEmpty()) t2 += app.getString(R.string.profile_plugin, id)
-            if (t2.isEmpty()) text2.visibility = View.GONE else {
-                text2.visibility = View.VISIBLE
-                text2.text = t2.joinToString("\n")
-            }
+            text2.text = ArrayList<String>().apply {
+                if (!item.name.isNullOrEmpty()) this += item.formattedAddress
+                val id = PluginConfiguration(item.plugin ?: "").selected
+                if (id.isNotEmpty()) this += app.getString(R.string.profile_plugin, id)
+            }.joinToString("\n")
             val context = requireContext()
-            if (tx <= 0 && rx <= 0) traffic.visibility = View.GONE else {
-                traffic.visibility = View.VISIBLE
-                traffic.text = getString(R.string.traffic,
-                        Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
-            }
+            traffic.text = if (tx <= 0 && rx <= 0) null else getString(R.string.traffic,
+                    Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
 
             if (item.id == DataStore.profileId) {
                 itemView.isSelected = true
@@ -196,7 +189,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     adView.loadAd(adBuilder.build())
                     this.adView = adView
                 } else adView.visibility = View.VISIBLE
-            } else if (adView != null) adView.visibility = View.GONE
+            } else adView?.visibility = View.GONE
         }
 
         override fun onClick(v: View?) {
@@ -236,7 +229,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.layout_profile, parent, false))
         override fun getItemCount(): Int = profiles.size
-        override fun getItemId(position: Int): Long = profiles[position].id.toLong()
+        override fun getItemId(position: Int): Long = profiles[position].id
 
         fun add(item: Profile) {
             undoManager.flush()
@@ -309,7 +302,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private var txTotal: Long = 0L
     private var rxTotal: Long = 0L
 
-    private val clipboard by lazy { requireContext().systemService<ClipboardManager>() }
+    private val clipboard by lazy { requireContext().getSystemService<ClipboardManager>()!! }
 
     private fun startConfig(profile: Profile) {
         profile.serialize()
@@ -327,7 +320,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         if (!ProfileManager.isNotEmpty()) DataStore.profileId = ProfileManager.createProfile().id
         val profilesList = view.findViewById<RecyclerView>(R.id.list)
-        val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = layoutManager
         profilesList.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
         layoutManager.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.profileId })

@@ -18,10 +18,8 @@
  *                                                                             *
  *******************************************************************************/
 
-package android.support.design.animation
+package com.google.android.material.snackbar
 
-import android.animation.TimeInterpolator
-
-object AnimationConsts {
-    val FAST_OUT_SLOW_IN_INTERPOLATOR: TimeInterpolator get() = AnimationUtils.FAST_OUT_SLOW_IN_INTERPOLATOR
+object SnackbarConsts {
+    const val ANIMATION_DURATION = BaseTransientBottomBar.ANIMATION_DURATION.toLong()
 }

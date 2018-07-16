@@ -22,11 +22,11 @@ package com.github.shadowsocks.widget
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.support.annotation.DrawableRes
-import android.support.design.widget.FloatingActionButton
-import android.support.graphics.drawable.Animatable2Compat
-import android.support.graphics.drawable.AnimatedVectorDrawableCompat
-import android.support.v7.widget.TooltipCompat
+import androidx.annotation.DrawableRes
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
+import androidx.appcompat.widget.TooltipCompat
 import android.util.AttributeSet
 import android.view.View
 import com.github.shadowsocks.R

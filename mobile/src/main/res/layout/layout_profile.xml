@@ -33,7 +33,7 @@
             android:textStyle="bold"
             tools:text="@string/profile_name"/>
 
-        <android.support.v7.widget.AppCompatImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/share"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
             android:padding="12dp"
             app:srcCompat="@drawable/ic_social_share"/>
 
-        <android.support.v7.widget.AppCompatImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
         android:layout_marginLeft="16dp"
         >
 
-        <TextView
+        <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -77,7 +77,7 @@
             android:textColor="?android:attr/textColorSecondary"
             tools:text="@string/profile_plugin"/>
 
-        <TextView
+        <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@+id/traffic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

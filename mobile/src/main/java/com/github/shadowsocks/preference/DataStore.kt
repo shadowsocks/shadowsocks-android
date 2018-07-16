@@ -21,7 +21,7 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
-import android.support.v7.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
@@ -52,37 +52,17 @@ object DataStore {
         }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
-    private var nightModeString: String
-        get() = publicStore.getString(Key.nightMode) ?: Key.nightModeSystem
-        set(value) = publicStore.putString(Key.nightMode, value)
     @AppCompatDelegate.NightMode
-    val nightMode: Int get() = when (nightModeString) {
+    val nightMode get() = when (publicStore.getString(Key.nightMode)) {
         Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
         Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
         Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
         else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
-    var serviceMode: String
-        get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
-        set(value) = publicStore.putString(Key.serviceMode, value)
-    var portProxy: Int
-        get() = getLocalPort(Key.portProxy, 1080)
-        set(value) = publicStore.putString(Key.portProxy, value.toString())
-    var portLocalDns: Int
-        get() = getLocalPort(Key.portLocalDns, 5450)
-        set(value) = publicStore.putString(Key.portLocalDns, value.toString())
-    var portTransproxy: Int
-        get() = getLocalPort(Key.portTransproxy, 8200)
-        set(value) = publicStore.putString(Key.portTransproxy, value.toString())
-
-    fun initGlobal() {
-        // temporary workaround for support lib bug
-        if (publicStore.getString(Key.nightMode) == null) nightModeString = nightModeString
-        if (publicStore.getString(Key.serviceMode) == null) serviceMode = serviceMode
-        if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
-        if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
-        if (publicStore.getString(Key.portTransproxy) == null) portTransproxy = portTransproxy
-    }
+    val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
+    val portProxy get() = getLocalPort(Key.portProxy, 1080)
+    val portLocalDns get() = getLocalPort(Key.portLocalDns, 5450)
+    val portTransproxy get() = getLocalPort(Key.portTransproxy, 8200)
 
     var proxyApps: Boolean
         get() = privateStore.getBoolean(Key.proxyApps) ?: false

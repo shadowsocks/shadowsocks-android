@@ -26,12 +26,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
-import android.os.Bundle
 import android.os.IBinder
 import android.os.RemoteCallbackList
-import android.support.v4.os.UserManagerCompat
 import android.util.Base64
 import android.util.Log
+import androidx.core.os.UserManagerCompat
+import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.R
@@ -293,7 +293,7 @@ object BaseService {
             val data = data
             data.changeState(STOPPING)
 
-            app.analytics.logEvent("stop", Bundle().put(FirebaseAnalytics.Param.METHOD, tag))
+            app.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
 
             killProcesses()
 
@@ -357,7 +357,7 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-            app.analytics.logEvent("start", Bundle().put(FirebaseAnalytics.Param.METHOD, tag))
+            app.analytics.logEvent("start", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
 
             data.changeState(CONNECTING)
 

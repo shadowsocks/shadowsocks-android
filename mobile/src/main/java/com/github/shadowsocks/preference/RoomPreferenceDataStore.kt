@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks.preference
 
-import android.support.v7.preference.PreferenceDataStore
+import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.database.KeyValuePair
 import java.util.HashSet
 

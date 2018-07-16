@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks.plugin
 
-import android.support.v7.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate
 
 /**
  * The contract between the plugin provider and host. Contains definitions for the supported actions, extras, etc.

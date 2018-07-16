@@ -35,9 +35,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
-import android.support.annotation.RequiresApi
-import android.support.v7.app.AppCompatDelegate
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatDelegate
 import android.util.Log
+import androidx.core.content.getSystemService
 import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
@@ -51,7 +52,7 @@ import com.github.shadowsocks.utils.*
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat
+import com.takisoft.preferencex.PreferenceFragmentCompat
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
@@ -68,8 +69,8 @@ class App : Application() {
     val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceContext) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
     val directBootSupported by lazy {
-        Build.VERSION.SDK_INT >= 24 && getSystemService(DevicePolicyManager::class.java)
-            .storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
+        Build.VERSION.SDK_INT >= 24 && getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
+                DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
     }
 
     fun getPackageInfo(packageName: String) = packageManager.getPackageInfo(packageName,
@@ -121,7 +122,7 @@ class App : Application() {
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
-                (getSystemService(Context.USER_SERVICE) as UserManager).isUserUnlocked) DirectBoot.flushTrafficStats()
+                getSystemService<UserManager>()?.isUserUnlocked == true) DirectBoot.flushTrafficStats()
         TcpFastOpen.enabledAsync(DataStore.publicStore.getBoolean(Key.tfo, TcpFastOpen.sendEnabled))
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != info.lastUpdateTime) {
             val assetManager = assets
@@ -146,7 +147,7 @@ class App : Application() {
 
     private fun updateNotificationChannels() {
         if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {
-            val nm = getSystemService(NotificationManager::class.java)
+            val nm = getSystemService<NotificationManager>()!!
             nm.createNotificationChannels(listOf(
                     NotificationChannel("service-vpn", getText(R.string.service_vpn),
                             NotificationManager.IMPORTANCE_LOW),
