@@ -451,7 +451,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         // for dark mode, it's roughly 850? (#303030)
         window.statusBarColor = ContextCompat.getColor(activity, when {
             resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES ->
-                R.color.md_black_1000
+                android.R.color.black
             Build.VERSION.SDK_INT >= 23 -> {
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 R.color.material_grey_300

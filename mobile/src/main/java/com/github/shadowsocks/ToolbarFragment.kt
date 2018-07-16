@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.os.Bundle
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import androidx.appcompat.widget.Toolbar
 import android.view.View
@@ -34,8 +35,8 @@ open class ToolbarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar = view.findViewById(R.id.toolbar)
-        val activity = activity as MainActivity
-        activity.drawer.setToolbar(activity, toolbar, true)
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
+        toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(Gravity.START) }
     }
 
     open fun onTrafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
