@@ -345,9 +345,16 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onBackPressed() {
         if (drawer.isDrawerOpen(Gravity.START)) drawer.closeDrawers() else {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder)
-            if (currentFragment is ToolbarFragment && !currentFragment.onBackPressed())
+            if (currentFragment is GlobalSettingsPreferenceFragment) {
+                navigation.setCheckedItem(R.id.profiles)
+                displayFragment(ProfilesFragment())
+            }
+            else if (currentFragment is ToolbarFragment && !currentFragment.onBackPressed())
                 if (currentFragment is ProfilesFragment) super.onBackPressed()
-                else navigation.menu.findItem(R.id.profiles).isChecked = true
+                else {
+                    navigation.setCheckedItem(R.id.profiles)
+                    displayFragment(ProfilesFragment())
+                }
         }
     }
 
