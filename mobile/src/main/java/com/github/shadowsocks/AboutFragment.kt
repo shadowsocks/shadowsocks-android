@@ -20,15 +20,19 @@
 
 package com.github.shadowsocks
 
-import android.annotation.TargetApi
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.URLSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.widget.TextView
+import androidx.core.net.toUri
+import androidx.core.text.HtmlCompat
+import androidx.core.text.parseAsHtml
 
 class AboutFragment : ToolbarFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -37,20 +41,24 @@ class AboutFragment : ToolbarFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
-        val web = view.findViewById<WebView>(R.id.web_view)
-        web.loadUrl("file:///android_asset/pages/about.html")
-        web.webViewClient = object : WebViewClient() {
-            @Suppress("OverridingDeprecatedMember")
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                (activity as MainActivity).launchUrl(url)
-                return true
+        view.findViewById<TextView>(R.id.tv_about).apply {
+            text = SpannableStringBuilder(resources.openRawResource(R.raw.about).bufferedReader().readText()
+                    .parseAsHtml(HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
+                for (span in getSpans(0, length, URLSpan::class.java)) {
+                    setSpan(object : ClickableSpan() {
+                        override fun onClick(view: View) {
+                            if (span.url.startsWith("mailto:")) {
+                                startActivity(Intent.createChooser(Intent().apply {
+                                    action = Intent.ACTION_SENDTO
+                                    data = span.url.toUri()
+                                }, getString(R.string.send_email)))
+                            } else (activity as MainActivity).launchUrl(span.url)
+                        }
+                    }, getSpanStart(span), getSpanEnd(span), getSpanFlags(span))
+                    removeSpan(span)
+                }
             }
-
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
-                (activity as MainActivity).launchUrl(request.url)
-                return true
-            }
+            movementMethod = LinkMovementMethod.getInstance()
         }
     }
 }

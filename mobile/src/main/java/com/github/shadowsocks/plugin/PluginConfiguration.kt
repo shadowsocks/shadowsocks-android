@@ -21,6 +21,7 @@
 package com.github.shadowsocks.plugin
 
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.Commandline
 import java.util.*
 
@@ -43,7 +44,7 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
                     }
                 }
             } catch (exc: Exception) {
-                Log.w("PluginConfiguration", exc.message)
+                Crashlytics.log(Log.WARN, "PluginConfiguration", exc.message)
             }
             opt
         } else PluginOptions(line)

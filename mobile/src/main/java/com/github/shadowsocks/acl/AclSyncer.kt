@@ -18,9 +18,36 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.evernote.android.job
+package com.github.shadowsocks.acl
 
-object JobConstants {
-    const val DATABASE_NAME = JobStorage.DATABASE_NAME
-    const val PREF_FILE_NAME = JobStorage.PREF_FILE_NAME
+import androidx.work.*
+import java.io.IOException
+import java.net.URL
+import java.util.concurrent.TimeUnit
+
+class AclSyncer : Worker() {
+    companion object {
+        fun schedule(route: String) = WorkManager.getInstance()!!.enqueue(OneTimeWorkRequestBuilder<AclSyncer>()
+                .addTag(route)
+                .setConstraints(Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.UNMETERED)
+                        .setRequiresCharging(true)
+                        .build())
+                .setInitialDelay(10, TimeUnit.SECONDS)
+                .build())
+    }
+
+    override fun doWork(): Result = try {
+        val route = tags.asIterable().single()!!
+        val acl = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openStream().bufferedReader()
+                .use { it.readText() }
+        Acl.getFile(route).printWriter().use { it.write(acl) }
+        Result.SUCCESS
+    } catch (e: IOException) {
+        e.printStackTrace()
+        Result.RETRY
+    } catch (e: Exception) {    // unknown failures, probably shouldn't retry
+        e.printStackTrace()
+        Result.FAILURE
+    }
 }

@@ -3,7 +3,9 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 def getCurrentFlavor() {
     String task = getGradle().getStartParameter().getTaskRequests().toString()
@@ -16,16 +18,21 @@ def getCurrentFlavor() {
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
-    compileSdkVersion rootProject.sdkVersion
+    compileSdkVersion rootProject.compileSdkVersion
     defaultConfig {
         applicationId "com.github.shadowsocks"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 4050700
-        versionName "4.5.7"
+        versionCode 4060100
+        versionName "4.6.1"
         testApplicationId "com.github.shadowsocks.test"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
     buildTypes {
         debug {
@@ -54,28 +61,28 @@ android {
 
 dependencies {
     implementation project(':core')
-    implementation "com.android.support:customtabs:$supportLibraryVersion"
-    implementation "com.android.support:design:$supportLibraryVersion"
-    implementation "com.android.support:gridlayout-v7:$supportLibraryVersion"
-    implementation 'com.futuremind.recyclerfastscroll:fastscroll:0.2.5'
-    implementation 'com.evernote:android-job:1.2.5'
-    implementation "com.google.android.gms:play-services-ads:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-analytics:$playServicesVersion"
-    implementation "com.google.android.gms:play-services-vision:$playServicesVersion"
-    implementation "com.google.firebase:firebase-config:$playServicesVersion"
-    implementation 'com.j256.ormlite:ormlite-android:5.1'
-    implementation 'com.mikepenz:materialdrawer:6.0.7'
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-    implementation "com.takisoft.fix:preference-v7-simplemenu:$takisoftFixVersion"
+    implementation "android.arch.work:work-runtime-ktx:$workVersion"
+    implementation "androidx.browser:browser:$androidxVersion"
+    implementation "androidx.gridlayout:gridlayout:$androidxVersion"
+    implementation 'androidx.room:room-runtime:2.0.0-beta01'
+    implementation "com.google.android.material:material:$androidxVersion"
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.4'
+    implementation 'com.google.android.gms:play-services-vision:15.0.2'
+    implementation 'com.google.firebase:firebase-ads:15.0.1'
+    implementation 'com.google.firebase:firebase-config:16.0.0'
+    implementation 'com.google.firebase:firebase-core:16.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.0.0-alpha1'
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
-    implementation 'dnsjava:dnsjava:2.1.8'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
     implementation 'net.glxn.qrgen:android:2.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
+    kapt 'androidx.room:room-compiler:2.0.0-beta01'
+    testImplementation 'androidx.room:room-testing:2.0.0-beta01'
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+    androidTestImplementation "android.arch.work:work-testing:$workVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
 }
 repositories {
     mavenCentral()

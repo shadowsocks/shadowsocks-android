@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks.preference
 
-import android.support.v7.preference.PreferenceDataStore
+import androidx.preference.PreferenceDataStore
 
 interface OnPreferenceDataStoreChangeListener {
     fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?)

@@ -80,6 +80,8 @@ If the plugin doesn't provide a configuration activity, it's highly recommended 
 * MUST be able to receive data URI `plugin://com.github.shadowsocks/$PLUGIN_ID`;
 * CAN parse string extra `com.github.shadowsocks.plugin.EXTRA_OPTIONS` and display some more
   relevant information;
+* SHOULD parse `@NightMode` int extra `com.github.shadowsocks.plugin.EXTRA_NIGHT_MODE` and act
+  accordingly;
 * SHOULD either:
   - Be invisible and return help message with CharSequence extra
     `com.github.shadowsocks.plugin.EXTRA_HELP_MESSAGE` in the data intent with `RESULT_OK`; (in this

@@ -4,7 +4,8 @@
               android:layout_height="wrap_content"
               android:background="?android:attr/selectableItemBackground"
               android:paddingStart="12dp"
-              android:paddingEnd="12dp">
+              android:paddingEnd="12dp"
+              android:focusable="true">
     <ImageView android:id="@android:id/icon"
                android:layout_width="52dp"
                android:layout_height="52dp"/>
@@ -17,7 +18,6 @@
                   android:layout_gravity="center_vertical">
         <TextView android:id="@android:id/text1"
                   android:textAppearance="?android:attr/textAppearance"
-                  android:textColor="@android:color/primary_text_light"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:maxLines="2"

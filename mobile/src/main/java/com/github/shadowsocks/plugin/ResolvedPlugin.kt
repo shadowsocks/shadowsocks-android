@@ -24,6 +24,7 @@ import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.utils.signaturesCompat
 
 abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin() {
     protected abstract val metaData: Bundle
@@ -34,6 +35,6 @@ abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin()
     override val defaultConfig: String by lazy { metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
     override val packageName: String get() = resolveInfo.resolvePackageName
     override val trusted by lazy {
-        app.getPackageInfo(packageName).signatures.any(PluginManager.trustedSignatures::contains)
+        app.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)
     }
 }

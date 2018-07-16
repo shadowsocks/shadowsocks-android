@@ -23,8 +23,8 @@ package com.github.shadowsocks.bg
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.BuildConfig
 import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.utils.Commandline
 import com.github.shadowsocks.utils.thread
@@ -62,7 +62,7 @@ class GuardedProcessPool {
             try {
                 var callback: (() -> Unit)? = null
                 while (guardThreads.get() === host) {
-                    if (BuildConfig.DEBUG) Log.d(TAG, "start process: " + Commandline.toString(cmd))
+                    Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
                     val startTime = SystemClock.elapsedRealtime()
 
                     process = ProcessBuilder(cmd)
@@ -79,11 +79,11 @@ class GuardedProcessPool {
                     process.waitFor()
 
                     if (SystemClock.elapsedRealtime() - startTime < 1000) {
-                        Log.w(TAG, "process exit too fast, stop guard: $cmdName")
+                        Crashlytics.log(Log.WARN, TAG, "process exit too fast, stop guard: $cmdName")
                     }
                 }
             } catch (_: InterruptedException) {
-                if (BuildConfig.DEBUG) Log.d(TAG, "thread interrupt, destroy process: $cmdName")
+                Crashlytics.log(Log.DEBUG, TAG, "thread interrupt, destroy process: $cmdName")
             } catch (e: IOException) {
                 pushException(e)
             } finally {

@@ -23,11 +23,11 @@ package com.github.shadowsocks.tasker
 import android.app.Activity
 import android.content.res.Resources
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -101,7 +101,7 @@ class ConfigActivity : AppCompatActivity() {
         switch = findViewById(R.id.serviceSwitch)
         switch.isChecked = taskerOption.switchOn
         val profilesList = findViewById<RecyclerView>(R.id.list)
-        val lm = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = lm
         profilesList.itemAnimator = DefaultItemAnimator()
         profilesList.adapter = profilesAdapter

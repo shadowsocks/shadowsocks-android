@@ -27,11 +27,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.net.Uri
-import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import androidx.core.os.bundleOf
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.utils.Commandline
+import com.github.shadowsocks.utils.signaturesCompat
 import eu.chainfire.libsuperuser.Shell
 import java.io.File
 import java.io.FileNotFoundException
@@ -47,7 +49,7 @@ object PluginManager {
      * public key yet since it will also automatically trust packages signed by the same signatures, e.g. debug keys.
      */
     val trustedSignatures by lazy {
-        app.info.signatures.toSet() +
+        app.info.signaturesCompat.toSet() +
                 Signature(Base64.decode(  // @Mygod
                 """
                     |MIIDWzCCAkOgAwIBAgIEUzfv8DANBgkqhkiG9w0BAQsFADBdMQswCQYDVQQGEwJD
@@ -142,16 +144,15 @@ object PluginManager {
             initNativeFast(cr, options, uri)
         } catch (t: Throwable) {
             t.printStackTrace()
-            Log.w("PluginManager", "Initializing native plugin fast mode failed. Falling back to slow mode.")
+            Crashlytics.log(Log.WARN, "PluginManager",
+                    "Initializing native plugin fast mode failed. Falling back to slow mode.")
             initNativeSlow(cr, options, uri)
         }
     }
 
     private fun initNativeFast(cr: ContentResolver, options: PluginOptions, uri: Uri): String {
-        val out = Bundle()
-        out.putString(PluginContract.EXTRA_OPTIONS, options.id)
-        val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null, out)
-                .getString(PluginContract.EXTRA_ENTRY)
+        val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null,
+                bundleOf(Pair(PluginContract.EXTRA_OPTIONS, options.id))).getString(PluginContract.EXTRA_ENTRY)
         check(File(result).canExecute())
         return result
     }

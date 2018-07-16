@@ -21,25 +21,27 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ShortcutManager
-import android.graphics.BitmapFactory
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.TaskStackBuilder
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import androidx.core.app.TaskStackBuilder
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import android.util.Log
 import android.util.SparseArray
 import android.view.MenuItem
 import android.widget.Toast
-import com.github.shadowsocks.App.Companion.app
+import androidx.core.content.getSystemService
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.utils.openBitmap
+import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.resolveResourceId
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture
 import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic
 import com.google.android.gms.vision.Frame
@@ -52,7 +54,10 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
         private const val TAG = "ScannerActivity"
         private const val REQUEST_IMPORT = 2
         private const val REQUEST_IMPORT_OR_FINISH = 3
+        private const val REQUEST_GOOGLE_API = 4
     }
+
+    private lateinit var detector: BarcodeDetector
 
     private fun navigateUp() {
         val intent = parentActivityIntent
@@ -63,12 +68,29 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT >= 25) getSystemService(ShortcutManager::class.java).reportShortcutUsed("scan")
+        detector = BarcodeDetector.Builder(this)
+                .setBarcodeFormats(Barcode.QR_CODE)
+                .build()
+        if (!detector.isOperational) {
+            val availability = GoogleApiAvailability.getInstance()
+            val dialog = availability.getErrorDialog(this, availability.isGooglePlayServicesAvailable(this),
+                    REQUEST_GOOGLE_API)
+            if (dialog == null) {
+                Toast.makeText(this, R.string.common_google_play_services_notification_ticker, Toast.LENGTH_SHORT)
+                        .show()
+                finish()
+            } else {
+                dialog.setOnDismissListener { finish() }
+                dialog.show()
+            }
+            return
+        }
+        if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed("scan")
         if (try {
-                    (getSystemService(Context.CAMERA_SERVICE) as CameraManager).cameraIdList.isEmpty()
+                    getSystemService<CameraManager>()?.cameraIdList?.isEmpty()
                 } catch (_: CameraAccessException) {
                     true
-                }) {
+                } != false) {
             startImport()
             return
         }
@@ -79,7 +101,9 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
         toolbar.setNavigationOnClickListener { navigateUp() }
         toolbar.inflateMenu(R.menu.scanner_menu)
         toolbar.setOnMenuItemClickListener(this)
-        (supportFragmentManager.findFragmentById(R.id.barcode) as BarcodeCapture).setRetrieval(this)
+        val capture = supportFragmentManager.findFragmentById(R.id.barcode) as BarcodeCapture
+        capture.setCustomDetector(detector)
+        capture.setRetrieval(this)
     }
 
     override fun onRetrieved(barcode: Barcode) = runOnUiThread {
@@ -88,9 +112,7 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
     }
     override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
     override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) { }
-    override fun onRetrievedFailed(reason: String?) {
-        Log.w(TAG, reason)
-    }
+    override fun onRetrievedFailed(reason: String?) = Crashlytics.log(Log.WARN, TAG, reason)
     override fun onPermissionRequestDenied() {
         Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
         startImport()
@@ -112,25 +134,19 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
         when (requestCode) {
             REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
                 var success = false
-                val detector = BarcodeDetector.Builder(this)
-                        .setBarcodeFormats(Barcode.QR_CODE)
-                        .build()
-                if (detector.isOperational) {
-                    var list = listOfNotNull(data?.data)
-                    val clipData = data?.clipData
-                    if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
-                    val resolver = contentResolver
-                    for (uri in list) try {
-                        val barcodes = detector.detect(Frame.Builder()
-                                .setBitmap(BitmapFactory.decodeStream(resolver.openInputStream(uri))).build())
-                        for (i in 0 until barcodes.size()) Profile.findAll(barcodes.valueAt(i).rawValue).forEach {
-                            ProfileManager.createProfile(it)
-                            success = true
-                        }
-                    } catch (e: Exception) {
-                        app.track(e)
+                var list = listOfNotNull(data?.data)
+                val clipData = data?.clipData
+                if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
+                for (uri in list) try {
+                    val barcodes = detector.detect(Frame.Builder()
+                            .setBitmap(contentResolver.openBitmap(uri)).build())
+                    for (i in 0 until barcodes.size()) Profile.findAll(barcodes.valueAt(i).rawValue).forEach {
+                        ProfileManager.createProfile(it)
+                        success = true
                     }
-                } else Log.w(TAG, "Google vision isn't operational.")
+                } catch (e: Exception) {
+                    printLog(e)
+                }
                 Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
                         Toast.LENGTH_SHORT).show()
                 navigateUp()

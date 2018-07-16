@@ -22,15 +22,12 @@ package com.github.shadowsocks.bg
 
 import android.annotation.TargetApi
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.*
 import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
-import android.support.v4.os.BuildCompat
-import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.MainActivity
@@ -40,6 +37,8 @@ import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.utils.printLog
+import androidx.core.content.getSystemService
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
@@ -50,7 +49,7 @@ import android.net.VpnService as BaseVpnService
 class VpnService : BaseVpnService(), LocalDnsService.Interface {
     companion object {
         private const val VPN_MTU = 1500
-        private const val PRIVATE_VLAN = "26.26.26.%s"
+        private const val PRIVATE_VLAN = "172.19.0.%s"
         private const val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
 
         private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
@@ -75,32 +74,21 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         override val socketFile: File = File(app.deviceContext.filesDir, "protect_path")
 
         override fun accept(socket: LocalSocket) {
-            var success = false
             try {
                 socket.inputStream.read()
                 val fd = socket.ancillaryFileDescriptors!!.single()!!
                 val fdInt = getInt.invoke(fd) as Int
-                try {
-                    val network = underlyingNetwork
-                    success = if (network != null && Build.VERSION.SDK_INT >= 23) {
-                        network.bindSocket(fd)
-                        true
-                    } else protect(fdInt)
-                } catch (e: Exception) {
-                    Log.e(tag, "Error when protect socket", e)
-                    app.track(e)
-                } finally {
-                    JniHelper.close(fdInt) // Trick to close file decriptor
-                }
-            } catch (e: Exception) {
-                Log.e(tag, "Error when receiving ancillary fd", e)
-                app.track(e)
-            }
-            try {
-                socket.outputStream.write(if (success) 0 else 1)
+                socket.outputStream.write(if (try {
+                            val network = underlyingNetwork
+                            if (network != null && Build.VERSION.SDK_INT >= 23) {
+                                network.bindSocket(fd)
+                                true
+                            } else protect(fdInt)
+                        } finally {
+                            JniHelper.close(fdInt) // Trick to close file decriptor
+                        }) 0 else 1)
             } catch (e: IOException) {
-                Log.e(tag, "Error when returning result in protect", e)
-                app.track(e)
+                printLog(e)
             }
         }
     }
@@ -123,7 +111,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             field = value
         }
 
-    private val connectivity by lazy { getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager }
+    private val connectivity by lazy { getSystemService<ConnectivityManager>()!! }
     @TargetApi(28)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
@@ -208,7 +196,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             if (profile.bypass) builder.addDisallowedApplication(it)
                             else builder.addAllowedApplication(it)
                         } catch (ex: PackageManager.NameNotFoundException) {
-                            Log.e(tag, "Invalid package name", ex)
+                            printLog(ex)
                         }
                     }
             if (!profile.bypass) builder.addAllowedApplication(me)
@@ -230,7 +218,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         this.conn = conn
         val fd = conn.fd
 
-        if (BuildCompat.isAtLeastP()) {
+        if (Build.VERSION.SDK_INT >= 28) {
             // we want REQUEST here instead of LISTEN
             connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
             listeningForDefaultNetwork = true

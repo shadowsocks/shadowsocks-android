@@ -21,6 +21,7 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
+import androidx.appcompat.app.AppCompatDelegate
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
@@ -29,9 +30,9 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
 
 object DataStore {
-    val publicStore = OrmLitePreferenceDataStore(PublicDatabase.kvPairDao)
+    val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     // privateStore will only be used as temp storage for ProfileConfigFragment
-    val privateStore = OrmLitePreferenceDataStore(PrivateDatabase.kvPairDao)
+    val privateStore = RoomPreferenceDataStore(PrivateDatabase.kvPairDao)
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
     private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
@@ -43,34 +44,25 @@ object DataStore {
         } else parsePort(publicStore.getString(key), default + userIndex)
     }
 
-    var profileId: Int
-        get() = publicStore.getInt(Key.id) ?: 0
+    var profileId: Long
+        get() = publicStore.getLong(Key.id) ?: 0
         set(value) {
-            publicStore.putInt(Key.id, value)
+            publicStore.putLong(Key.id, value)
             if (DataStore.directBootAware) DirectBoot.update()
         }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
-    var serviceMode: String
-        get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
-        set(value) = publicStore.putString(Key.serviceMode, value)
-    var portProxy: Int
-        get() = getLocalPort(Key.portProxy, 1080)
-        set(value) = publicStore.putString(Key.portProxy, value.toString())
-    var portLocalDns: Int
-        get() = getLocalPort(Key.portLocalDns, 5450)
-        set(value) = publicStore.putString(Key.portLocalDns, value.toString())
-    var portTransproxy: Int
-        get() = getLocalPort(Key.portTransproxy, 8200)
-        set(value) = publicStore.putString(Key.portTransproxy, value.toString())
-
-    fun initGlobal() {
-        // temporary workaround for support lib bug
-        if (publicStore.getString(Key.serviceMode) == null) serviceMode = serviceMode
-        if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
-        if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
-        if (publicStore.getString(Key.portTransproxy) == null) portTransproxy = portTransproxy
+    @AppCompatDelegate.NightMode
+    val nightMode get() = when (publicStore.getString(Key.nightMode)) {
+        Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
+        Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
+        Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
+        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
+    val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
+    val portProxy get() = getLocalPort(Key.portProxy, 1080)
+    val portLocalDns get() = getLocalPort(Key.portLocalDns, 5450)
+    val portTransproxy get() = getLocalPort(Key.portTransproxy, 8200)
 
     var proxyApps: Boolean
         get() = privateStore.getBoolean(Key.proxyApps) ?: false

@@ -22,13 +22,15 @@ package com.github.shadowsocks
 
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import androidx.core.content.getSystemService
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
@@ -48,8 +50,7 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
             finish()
             return
         }
-        val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-        if (km.inKeyguardRestrictedInputMode()) {
+        if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
             receiver = broadcastReceiver { _, _ -> connection.connect() }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
         } else connection.connect()
@@ -62,7 +63,10 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == RESULT_OK) app.startService() else Log.e(TAG, "Failed to start VpnService")
+        if (resultCode == RESULT_OK) app.startService() else {
+            Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
+            Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+        }
         finish()
     }
 

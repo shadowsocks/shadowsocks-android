@@ -1,25 +1,22 @@
 package com.github.shadowsocks.utils
 
 import android.content.BroadcastReceiver
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.res.Resources
+import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
-import android.support.annotation.AttrRes
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v7.util.SortedList
 import android.util.TypedValue
-import com.github.shadowsocks.App.Companion.app
+import androidx.annotation.AttrRes
+import androidx.recyclerview.widget.SortedList
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
 import java.net.URLConnection
-
-private val fieldChildFragmentManager by lazy {
-    val field = Fragment::class.java.getDeclaredField("mChildFragmentManager")
-    field.isAccessible = true
-    field
-}
 
 fun String.isNumericAddress() = JniHelper.parseNumericAddress(this) != null
 fun String.parseNumericAddress(): InetAddress? {
@@ -42,7 +39,7 @@ fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = 
 fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = false,
            contextClassLoader: ClassLoader? = null, priority: Int = -1, block: () -> Unit): Thread {
     val thread = kotlin.concurrent.thread(false, isDaemon, contextClassLoader, name, priority, block)
-    thread.setUncaughtExceptionHandler(app::track)
+    thread.setUncaughtExceptionHandler { _, t -> printLog(t) }
     if (start) thread.start()
     return thread
 }
@@ -50,12 +47,12 @@ fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = fals
 val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
-/**
- * Based on: https://stackoverflow.com/a/15656428/2245107
- */
-var Fragment.childFragManager: FragmentManager?
-    get() = childFragmentManager
-    set(value) = fieldChildFragmentManager.set(this, value)
+fun ContentResolver.openBitmap(uri: Uri) =
+        if (Build.VERSION.SDK_INT >= 28) ImageDecoder.decodeBitmap(ImageDecoder.createSource(this, uri))
+        else BitmapFactory.decodeStream(openInputStream(uri))
+
+val PackageInfo.signaturesCompat get() =
+    if (Build.VERSION.SDK_INT >= 28) signingInfo.apkContentsSigners else @Suppress("DEPRECATION") signatures
 
 /**
  * Based on: https://stackoverflow.com/a/26348729/2245107
@@ -75,3 +72,8 @@ private class SortedListIterator<out T>(private val list: SortedList<T>) : Itera
     override fun next(): T = if (hasNext()) list[count++] else throw NoSuchElementException()
 }
 fun <T> SortedList<T>.asIterable(): Iterable<T> = SortedListIterable(this)
+
+fun printLog(t: Throwable) {
+    Crashlytics.logException(t)
+    t.printStackTrace()
+}

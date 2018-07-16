@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
-    compileSdkVersion rootProject.sdkVersion
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
@@ -12,7 +12,7 @@ android {
         versionCode 1
         versionName "1.0.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
             ndkBuild {
@@ -65,6 +65,6 @@ tasks.whenTaskAdded { task ->
 dependencies {
     api project(':plugin')
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
 }

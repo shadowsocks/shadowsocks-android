@@ -1,3 +1,5 @@
+* 0.2.0:
+  * Refactor to AndroidX.
 * 0.1.1:
   * Rewritten in Kotlin;
   * Fix assert not working;

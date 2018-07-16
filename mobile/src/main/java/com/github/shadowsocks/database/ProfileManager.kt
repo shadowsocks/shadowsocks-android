@@ -21,11 +21,11 @@
 package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
-import android.util.Log
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.ProfilesFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.printLog
 import java.io.IOException
 import java.sql.SQLException
 
@@ -34,8 +34,6 @@ import java.sql.SQLException
  * to ensure we are in a consistent state.
  */
 object ProfileManager {
-    private const val TAG = "ProfileManager"
-
     @Throws(SQLException::class)
     fun createProfile(p: Profile? = null): Profile {
         val profile = p ?: Profile()
@@ -50,10 +48,8 @@ object ProfileManager {
             profile.individual = oldProfile.individual
             profile.udpdns = oldProfile.udpdns
         }
-        val last = PrivateDatabase.profileDao.queryRaw(PrivateDatabase.profileDao.queryBuilder()
-                .selectRaw("MAX(userOrder)").prepareStatementString()).firstResult
-        if (last != null && last.size == 1 && last[0] != null) profile.userOrder = last[0].toLong() + 1
-        PrivateDatabase.profileDao.createOrUpdate(profile)
+        profile.userOrder = PrivateDatabase.profileDao.nextOrder() ?: 0
+        profile.id = PrivateDatabase.profileDao.create(profile)
         ProfilesFragment.instance?.profilesAdapter?.add(profile)
         return profile
     }
@@ -62,42 +58,39 @@ object ProfileManager {
      * Note: It's caller's responsibility to update DirectBoot profile if necessary.
      */
     @Throws(SQLException::class)
-    fun updateProfile(profile: Profile) = PrivateDatabase.profileDao.update(profile)
+    fun updateProfile(profile: Profile) = check(PrivateDatabase.profileDao.update(profile) == 1)
 
     @Throws(IOException::class)
-    fun getProfile(id: Int): Profile? = try {
-        PrivateDatabase.profileDao.queryForId(id)
+    fun getProfile(id: Long): Profile? = try {
+        PrivateDatabase.profileDao[id]
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "getProfile", ex)
-        app.track(ex)
+        printLog(ex)
         null
     }
 
     @Throws(SQLException::class)
-    fun delProfile(id: Int) {
-        PrivateDatabase.profileDao.deleteById(id)
+    fun delProfile(id: Long) {
+        check(PrivateDatabase.profileDao.delete(id) == 1)
         ProfilesFragment.instance?.profilesAdapter?.removeId(id)
         if (id == DataStore.profileId && DataStore.directBootAware) DirectBoot.clean()
     }
 
     @Throws(IOException::class)
-    fun getFirstProfile(): Profile? = try {
-        PrivateDatabase.profileDao.query(PrivateDatabase.profileDao.queryBuilder().limit(1L).prepare()).singleOrNull()
+    fun isNotEmpty(): Boolean = try {
+        PrivateDatabase.profileDao.isNotEmpty()
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "getFirstProfile", ex)
-        app.track(ex)
-        null
+        printLog(ex)
+        false
     }
 
     @Throws(IOException::class)
     fun getAllProfiles(): List<Profile>? = try {
-        PrivateDatabase.profileDao.query(PrivateDatabase.profileDao.queryBuilder().orderBy("userOrder", true).prepare())
+        PrivateDatabase.profileDao.list()
     } catch (ex: SQLException) {
         if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
-        Log.e(TAG, "getAllProfiles", ex)
-        app.track(ex)
+        printLog(ex)
         null
     }
 }
