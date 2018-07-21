@@ -72,7 +72,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-config:16.0.0'
     implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
-    implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.0.0-alpha1'
+    implementation "com.takisoft.preferencex:preferencex-simplemenu:$preferencexVersion"
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
     implementation 'net.glxn.qrgen:android:2.0'
