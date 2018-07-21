@@ -64,9 +64,9 @@ class App : Application() {
     }
 
     val handler by lazy { Handler(Looper.getMainLooper()) }
-    val deviceContext: Context by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceContext(this) }
+    val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) this else DeviceStorageApp(this) }
     val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
-    val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceContext) }
+    val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }
     val info: PackageInfo by lazy { getPackageInfo(packageName) }
     val directBootSupported by lazy {
         Build.VERSION.SDK_INT >= 24 && getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
@@ -96,13 +96,12 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         app = this
-        Fabric.with(this, Crashlytics())    // multiple processes needs manual set-up
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
                 BottomSheetPreferenceDialogFragment::class.java)
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
-            deviceContext.moveDatabaseFrom(this, Key.DB_PUBLIC)
+            deviceStorage.moveDatabaseFrom(this, Key.DB_PUBLIC)
             val old = Acl.getFile(Acl.CUSTOM_RULES, this)
             if (old.canRead()) {
                 Acl.getFile(Acl.CUSTOM_RULES).writeText(old.readText())
@@ -110,7 +109,8 @@ class App : Application() {
             }
         }
 
-        FirebaseApp.initializeApp(deviceContext)
+        Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
+        FirebaseApp.initializeApp(deviceStorage)
         remoteConfig.setDefaults(R.xml.default_configs)
         remoteConfig.fetch().addOnCompleteListener {
             if (it.isSuccessful) remoteConfig.activateFetched() else {
@@ -118,7 +118,7 @@ class App : Application() {
                 Crashlytics.logException(it.exception)
             }
         }
-        WorkManager.initialize(deviceContext, androidx.work.Configuration.Builder().build())
+        WorkManager.initialize(deviceStorage, androidx.work.Configuration.Builder().build())
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
@@ -129,7 +129,7 @@ class App : Application() {
             for (dir in arrayOf("acl", "overture"))
                 try {
                     for (file in assetManager.list(dir)) assetManager.open("$dir/$file").use { input ->
-                        File(deviceContext.filesDir, file).outputStream().use { output -> input.copyTo(output) }
+                        File(deviceStorage.filesDir, file).outputStream().use { output -> input.copyTo(output) }
                     }
                 } catch (e: IOException) {
                     printLog(e)

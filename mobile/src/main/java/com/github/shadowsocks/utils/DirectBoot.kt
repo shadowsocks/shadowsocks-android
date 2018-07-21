@@ -17,7 +17,7 @@ import java.io.ObjectOutputStream
 
 @TargetApi(24)
 object DirectBoot : BroadcastReceiver() {
-    private val file = File(app.deviceContext.noBackupFilesDir, "directBootProfile")
+    private val file = File(app.deviceStorage.noBackupFilesDir, "directBootProfile")
     private var registered = false
 
     fun getDeviceProfile(): Profile? = try {
@@ -26,7 +26,7 @@ object DirectBoot : BroadcastReceiver() {
 
     fun clean() {
         file.delete()
-        File(app.deviceContext.noBackupFilesDir, BaseService.CONFIG_FILE).delete()
+        File(app.deviceStorage.noBackupFilesDir, BaseService.CONFIG_FILE).delete()
     }
 
     /**

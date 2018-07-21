@@ -82,7 +82,7 @@ object LocalDnsService {
                             // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
                             .put("OnlyPrimaryDNS", true)
                 }
-                File(app.deviceContext.filesDir, file).writeText(config.toString())
+                File(app.deviceStorage.filesDir, file).writeText(config.toString())
                 return file
             }
 

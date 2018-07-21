@@ -71,7 +71,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
-        override val socketFile: File = File(app.deviceContext.filesDir, "protect_path")
+        override val socketFile: File = File(app.deviceStorage.filesDir, "protect_path")
 
         override fun accept(socket: LocalSocket) {
             try {
@@ -250,7 +250,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             var tries = 0
             while (tries < 10) {
                 Thread.sleep(30L shl tries)
-                if (JniHelper.sendFd(fd, File(app.deviceContext.filesDir, "sock_path").absolutePath) != -1) return true
+                if (JniHelper.sendFd(fd, File(app.deviceStorage.filesDir, "sock_path").absolutePath) != -1) return true
                 tries += 1
             }
         }

@@ -31,7 +31,7 @@ import com.github.shadowsocks.utils.Key
 abstract class PublicDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
-            Room.databaseBuilder(app.deviceContext, PublicDatabase::class.java, Key.DB_PUBLIC)
+            Room.databaseBuilder(app.deviceStorage, PublicDatabase::class.java, Key.DB_PUBLIC)
                     .allowMainThreadQueries()
                     .addMigrations(
                             Migration3

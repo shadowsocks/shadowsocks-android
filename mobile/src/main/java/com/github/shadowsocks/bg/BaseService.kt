@@ -201,7 +201,7 @@ object BaseService {
             }
             // sensitive Shadowsocks config is stored in
             val file = File(if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
-                app.deviceContext.noBackupFilesDir  // only API 24+ will be in locked state
+                app.deviceStorage.noBackupFilesDir  // only API 24+ will be in locked state
             }, CONFIG_FILE)
             shadowsocksConfigFile = file
             file.writeText(config.toString())
