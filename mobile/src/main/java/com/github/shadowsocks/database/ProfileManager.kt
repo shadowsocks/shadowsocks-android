@@ -63,8 +63,9 @@ object ProfileManager {
     @Throws(IOException::class)
     fun getProfile(id: Long): Profile? = try {
         PrivateDatabase.profileDao[id]
+    } catch (ex: SQLiteCantOpenDatabaseException) {
+        throw IOException(ex)
     } catch (ex: SQLException) {
-        if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
         printLog(ex)
         null
     }
@@ -79,8 +80,9 @@ object ProfileManager {
     @Throws(IOException::class)
     fun isNotEmpty(): Boolean = try {
         PrivateDatabase.profileDao.isNotEmpty()
+    } catch (ex: SQLiteCantOpenDatabaseException) {
+        throw IOException(ex)
     } catch (ex: SQLException) {
-        if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
         printLog(ex)
         false
     }
@@ -88,8 +90,9 @@ object ProfileManager {
     @Throws(IOException::class)
     fun getAllProfiles(): List<Profile>? = try {
         PrivateDatabase.profileDao.list()
+    } catch (ex: SQLiteCantOpenDatabaseException) {
+        throw IOException(ex)
     } catch (ex: SQLException) {
-        if (ex.cause is SQLiteCantOpenDatabaseException) throw IOException(ex)
         printLog(ex)
         null
     }

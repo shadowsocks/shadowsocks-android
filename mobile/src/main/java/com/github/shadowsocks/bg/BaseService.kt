@@ -415,8 +415,8 @@ object BaseService {
                 } catch (_: VpnService.NullConnectionException) {
                     stopRunner(true, getString(R.string.reboot_required))
                 } catch (exc: Throwable) {
-                    stopRunner(true, "${getString(R.string.service_failed)}: ${exc.message}")
                     printLog(exc)
+                    stopRunner(true, "${getString(R.string.service_failed)}: ${exc.message}")
                 }
             }
             return Service.START_NOT_STICKY
