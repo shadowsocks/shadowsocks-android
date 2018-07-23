@@ -45,12 +45,13 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.*
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.bg.BaseService
@@ -72,8 +73,7 @@ import java.net.Proxy
 import java.net.URL
 import java.util.*
 
-class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPreferenceDataStoreChangeListener,
-        NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPreferenceDataStoreChangeListener {
     companion object {
         private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
@@ -88,6 +88,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     private lateinit var fab: ServiceButton
     internal lateinit var drawer: DrawerLayout
     private lateinit var navigation: NavigationView
+    private lateinit var navController: NavController
 
     private var testCount = 0
     private lateinit var statusText: TextView
@@ -148,9 +149,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         rxText.text = Formatter.formatFileSize(this, rxTotal)
         txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
         rxRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, rxRate))
-        val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
+
         if (state != BaseService.STOPPING)
-            child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+            ProfilesFragment.instance?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
     }
 
     /**
@@ -210,14 +211,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
+        navController = Navigation.findNavController(this, R.id.main_nav_fragment)
         drawer = findViewById(R.id.drawer)
         navigation = findViewById(R.id.navigation)
-        navigation.setNavigationItemSelectedListener(this)
-        if (savedInstanceState == null) {
-            navigation.menu.findItem(R.id.profiles).isChecked = true
-            displayFragment(ProfilesFragment())
-        }
-
+        setupWithNavController()
         statusText = findViewById(R.id.status)
         txText = findViewById(R.id.tx)
         txRateText = findViewById(R.id.txRate)
@@ -305,30 +302,48 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         }
     }
 
-    private fun displayFragment(fragment: ToolbarFragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
-        drawer.closeDrawers()
+    private fun setupWithNavController() {
+        navigation.setNavigationItemSelectedListener { item ->
+            if (item.itemId == R.id.faq) {
+                drawer.closeDrawers()
+                launchUrl(getString(R.string.faq_url))
+                return@setNavigationItemSelectedListener true
+            }
+            val handled = onNavDestinationSelected(item, navController, true)
+            if (handled) {
+                val parent = navigation.parent
+                (parent as? DrawerLayout)?.closeDrawer(navigation)
+            }
+            return@setNavigationItemSelectedListener handled
+        }
+        navController.addOnNavigatedListener { _, destination ->
+            val menu = navigation.menu
+            for (index in 0 until menu.size()) {
+                val item = menu.getItem(index)
+                item.isChecked = matchDestination(destination, item.itemId)
+            }
+        }
     }
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        if (item.isChecked) drawer.closeDrawers() else {
-            when (item.itemId) {
-                R.id.profiles -> displayFragment(ProfilesFragment())
-                R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
-                R.id.about -> {
-                    app.analytics.logEvent("about", Bundle())
-                    displayFragment(AboutFragment())
-                }
-                R.id.faq -> {
-                    launchUrl(getString(R.string.faq_url))
-                    return true
-                }
-                R.id.customRules -> displayFragment(CustomRulesFragment())
-                else -> return false
-            }
-            item.isChecked = true
+    private fun matchDestination(destination: NavDestination, destId: Int): Boolean {
+        var currentDestination = destination
+        while (currentDestination.id != destId && currentDestination.parent != null) {
+            currentDestination = currentDestination.parent!!
         }
-        return true
+        return currentDestination.id == destId
+    }
+
+    private fun onNavDestinationSelected(item: MenuItem, navController: NavController, popUp: Boolean): Boolean {
+        val builder = NavOptions.Builder()
+                .setLaunchSingleTop(true)
+        if (popUp) builder.setPopUpTo(findStartDestination(navController.graph)!!.id, false)
+        val options = builder.build()
+        return try {
+            navController.navigate(item.itemId, null, options)
+            true
+        } catch (e: IllegalArgumentException) {
+            false
+        }
     }
 
     override fun onResume() {
@@ -341,15 +356,27 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         connection.listeningForBandwidth = true
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        return if (navController.currentDestination == findStartDestination(navController.graph)) {
+            drawer.openDrawer(GravityCompat.START)
+            true
+        } else navController.navigateUp()
+    }
+
+    private fun findStartDestination(graph: NavGraph): NavDestination? {
+        var startDestination: NavDestination = graph
+        while (startDestination is NavGraph) {
+            val parent = startDestination
+            startDestination = parent.findNode(parent.startDestination)
+        }
+        return startDestination
+    }
+
     override fun onBackPressed() {
-        if (drawer.isDrawerOpen(Gravity.START)) drawer.closeDrawers() else {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
-            if (!currentFragment.onBackPressed()) {
-                if (currentFragment is ProfilesFragment) super.onBackPressed() else {
-                    navigation.menu.findItem(R.id.profiles).isChecked = true
-                    displayFragment(ProfilesFragment())
-                }
-            }
+        if (drawer.isDrawerOpen(Gravity.START)) drawer.closeDrawers()
+        else {
+            navigation.setCheckedItem(R.id.profiles)
+            super.onBackPressed()
         }
     }
 

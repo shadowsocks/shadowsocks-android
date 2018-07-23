@@ -16,14 +16,17 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="?android:attr/windowBackground"
             app:layout_behavior="com.github.shadowsocks.widget.ShrinkUpwardBehavior">
 
-            <FrameLayout
-                android:id="@+id/fragment_holder"
-                android:background="?android:attr/windowBackground"
-                android:layout_above="@+id/stat"
+            <fragment
+                android:id="@+id/main_nav_fragment"
+                android:name="androidx.navigation.fragment.NavHostFragment"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_above="@+id/stat"
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/nav_main"/>
 
             <LinearLayout
                 android:id="@+id/stat"
