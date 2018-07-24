@@ -45,7 +45,6 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
-import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.*
 import androidx.preference.PreferenceDataStore
@@ -310,10 +309,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
                 return@setNavigationItemSelectedListener true
             }
             val handled = onNavDestinationSelected(item, navController, true)
-            if (handled) {
-                val parent = navigation.parent
-                (parent as? DrawerLayout)?.closeDrawer(navigation)
-            }
+            if (handled) drawer.closeDrawer(navigation)
             return@setNavigationItemSelectedListener handled
         }
         navController.addOnNavigatedListener { _, destination ->
@@ -334,14 +330,16 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
 
     private fun onNavDestinationSelected(item: MenuItem, navController: NavController, popUp: Boolean): Boolean {
-        val builder = NavOptions.Builder()
-                .setLaunchSingleTop(true)
-        if (popUp) builder.setPopUpTo(findStartDestination(navController.graph)!!.id, false)
+        val builder = NavOptions.Builder().setLaunchSingleTop(true)
+        val id = findStartDestination(navController.graph)?.id
+        if (popUp && id != null) builder.setPopUpTo(id, false)
         val options = builder.build()
         return try {
             navController.navigate(item.itemId, null, options)
             true
         } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+            Crashlytics.logException(e)
             false
         }
     }
@@ -358,7 +356,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     override fun onSupportNavigateUp(): Boolean {
         return if (navController.currentDestination == findStartDestination(navController.graph)) {
-            drawer.openDrawer(GravityCompat.START)
+            drawer.openDrawer(navigation)
             true
         } else navController.navigateUp()
     }
