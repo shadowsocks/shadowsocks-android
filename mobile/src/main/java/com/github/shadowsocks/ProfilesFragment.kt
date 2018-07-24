@@ -232,14 +232,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         override fun getItemId(position: Int): Long = profiles[position].id
 
         fun add(item: Profile) {
-            undoManager.flush()
+            undoManager?.flush()
             val pos = itemCount
             profiles += item
             notifyItemInserted(pos)
         }
 
         fun move(from: Int, to: Int) {
-            undoManager.flush()
+            undoManager?.flush()
             val first = profiles[from]
             var previousOrder = first.userOrder
             val (step, range) = if (from < to) Pair(1, from until to) else Pair(-1, to + 1 downTo from)
@@ -297,7 +297,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private var selectedItem: ProfileViewHolder? = null
 
     val profilesAdapter by lazy { ProfilesAdapter() }
-    private lateinit var undoManager: UndoSnackbarManager<Profile>
+    private var undoManager: UndoSnackbarManager<Profile>? = null
     private var bandwidthProfile = 0L
     private var txTotal: Long = 0L
     private var rxTotal: Long = 0L
@@ -342,7 +342,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val index = viewHolder.adapterPosition
                 profilesAdapter.remove(index)
-                undoManager.remove(Pair(index, (viewHolder as ProfileViewHolder).item))
+                undoManager!!.remove(Pair(index, (viewHolder as ProfileViewHolder).item))
             }
             override fun onMove(recyclerView: RecyclerView,
                                 viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
@@ -416,7 +416,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     override fun onDetach() {
-        undoManager.flush()
+        undoManager?.flush()
         super.onDetach()
     }
 

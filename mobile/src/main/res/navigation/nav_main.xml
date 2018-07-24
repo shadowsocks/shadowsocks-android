@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/profiles">
+
+    <fragment
+        android:id="@+id/profiles"
+        android:name="com.github.shadowsocks.ProfilesFragment"
+        android:label="@string/profiles"
+        tools:layout="@layout/layout_list" />
+
+    <fragment
+        android:id="@+id/customRules"
+        android:name="com.github.shadowsocks.acl.CustomRulesFragment"
+        android:label="@string/custom_rules"
+        tools:layout="@layout/layout_custom_rules" />
+
+    <fragment
+        android:id="@+id/globalSettings"
+        android:name="com.github.shadowsocks.GlobalSettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/layout_global_settings" />
+
+    <fragment
+        android:id="@+id/about"
+        android:name="com.github.shadowsocks.AboutFragment"
+        android:label="@string/about"
+        tools:layout="@layout/layout_about" />
+
+</navigation>
