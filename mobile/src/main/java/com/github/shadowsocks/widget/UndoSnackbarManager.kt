@@ -20,9 +20,9 @@
 
 package com.github.shadowsocks.widget
 
-import com.google.android.material.snackbar.Snackbar
 import android.view.View
 import com.github.shadowsocks.R
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * @param view The view to find a parent from.
@@ -52,10 +52,10 @@ class UndoSnackbarManager<in T>(private val view: View, private val undo: (List<
         val snackbar = Snackbar
                 .make(view, view.resources.getQuantityString(R.plurals.removed, count, count), Snackbar.LENGTH_LONG)
                 .addCallback(removedCallback)
-                .setAction(R.string.undo, {
+                .setAction(R.string.undo) {
                     undo(recycleBin.reversed())
                     recycleBin.clear()
-                })
+                }
         snackbar.show()
         last = snackbar
     }

@@ -415,9 +415,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         profilesAdapter.deepRefreshId(profileId)
     }
 
-    override fun onDetach() {
+    override fun onDestroyView() {
         undoManager.flush()
-        super.onDetach()
+        super.onDestroyView()
     }
 
     override fun onDestroy() {
