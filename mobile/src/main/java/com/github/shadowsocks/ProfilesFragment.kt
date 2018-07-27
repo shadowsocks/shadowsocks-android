@@ -394,7 +394,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_manual_settings -> {
-                startConfig(ProfileManager.createProfile(Profile().also { app.currentProfile?.copyFeatureSettingsTo(it) }))
+                startConfig(ProfileManager.createProfile(
+                        Profile().also { app.currentProfile?.copyFeatureSettingsTo(it) }))
                 true
             }
             R.id.action_export_clipboard -> {
