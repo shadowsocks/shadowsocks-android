@@ -431,7 +431,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                         ProfileManager.createProfile(it)
                         success = true
                     }
-                } catch (e: IOException) {
+                } catch (e: Exception) {
                     printLog(e)
                 }
                 activity.snackbar().setText(if (success) R.string.action_import_msg else R.string.action_import_err)
