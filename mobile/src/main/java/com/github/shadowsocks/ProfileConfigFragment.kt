@@ -26,15 +26,14 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.UserManager
-import com.google.android.material.snackbar.Snackbar
-import androidx.preference.SwitchPreference
-import androidx.appcompat.app.AlertDialog
-import androidx.preference.Preference
-import androidx.preference.PreferenceDataStore
-import androidx.appcompat.widget.Toolbar
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
+import androidx.preference.Preference
+import androidx.preference.PreferenceDataStore
+import androidx.preference.SwitchPreference
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -95,7 +94,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
             pluginConfigure.isEnabled = newValue.isNotEmpty()
             pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
             if (PluginManager.fetchPlugins()[newValue]?.trusted == false)
-                Snackbar.make(view!!, R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
+                (activity as MainActivity).snackbar().setText(R.string.plugin_untrusted).show()
             true
         }
         pluginConfigure.onPreferenceChangeListener = this
@@ -145,7 +144,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
         DataStore.dirty = true
         true
     } catch (exc: IllegalArgumentException) {
-        Snackbar.make(view!!, exc.localizedMessage, Snackbar.LENGTH_LONG).show()
+        (activity as MainActivity).snackbar(exc.localizedMessage).show()
         false
     }
 

@@ -95,6 +95,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
+    val snackbar by lazy { findViewById<View>(R.id.snackbar) }
+    fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG)
 
     private val customTabsIntent by lazy {
         CustomTabsIntent.Builder()
@@ -128,10 +130,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             BaseService.CONNECTED -> statusText.setText(R.string.vpn_connected)
             BaseService.STOPPING -> statusText.setText(R.string.stopping)
             else -> {
-                if (msg != null) {
-                    Snackbar.make(findViewById(R.id.snackbar),
-                            getString(R.string.vpn_error).format(Locale.ENGLISH, msg), Snackbar.LENGTH_LONG).show()
-                }
+                if (msg != null) snackbar(getString(R.string.vpn_error).format(Locale.ENGLISH, msg)).show()
                 statusText.setText(R.string.not_connected)
             }
         }
@@ -183,7 +182,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         if (testCount == id) app.handler.post {
             if (success) statusText.text = result else {
                 statusText.setText(R.string.connection_test_fail)
-                Snackbar.make(findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+                snackbar(result).show()
             }
         }
     }
@@ -202,7 +201,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) app.startService() else {
-            Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
+            snackbar().setText(R.string.vpn_permission_denied).show()
             Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
         }
     }
@@ -275,7 +274,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         if (sharedStr.isNullOrEmpty()) return
         val profiles = Profile.findAll(sharedStr).toList()
         if (profiles.isEmpty()) {
-            Snackbar.make(findViewById(R.id.snackbar), R.string.profile_invalid_input, Snackbar.LENGTH_LONG).show()
+            snackbar().setText(R.string.profile_invalid_input).show()
             return
         }
         AlertDialog.Builder(this)

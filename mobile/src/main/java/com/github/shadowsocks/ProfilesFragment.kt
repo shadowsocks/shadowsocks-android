@@ -29,16 +29,17 @@ import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.fragment.app.DialogFragment
-import androidx.appcompat.widget.*
 import android.text.format.Formatter
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.widget.Toolbar
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.*
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
@@ -329,7 +330,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         profilesList.itemAnimator = animator
         profilesList.adapter = profilesAdapter
         instance = this
-        undoManager = UndoSnackbarManager(requireActivity().findViewById(R.id.snackbar),
+        undoManager = UndoSnackbarManager((activity as MainActivity).snackbar,
                 profilesAdapter::undo, profilesAdapter::commit)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         ItemTouchHelper.START or ItemTouchHelper.END) {
@@ -367,15 +368,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     val profiles = Profile.findAll(clipboard.primaryClip!!.getItemAt(0).text).toList()
                     if (profiles.isNotEmpty()) {
                         profiles.forEach { ProfileManager.createProfile(it) }
-                        Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_msg,
-                                Snackbar.LENGTH_LONG).show()
+                        (activity as MainActivity).snackbar().setText(R.string.action_import_msg).show()
                         return true
                     }
                 } catch (exc: Exception) {
                     exc.printStackTrace()
                 }
-                Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
-                        Snackbar.LENGTH_LONG).show()
+                (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
                 true
             }
             R.id.action_manual_settings -> {
@@ -384,10 +383,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_export -> {
                 val profiles = ProfileManager.getAllProfiles()
-                Snackbar.make(requireActivity().findViewById(R.id.snackbar), if (profiles != null) {
+                (activity as MainActivity).snackbar().setText(if (profiles != null) {
                     clipboard.primaryClip = ClipData.newPlainText(null, profiles.joinToString("\n"))
                     R.string.action_export_msg
-                } else R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                } else R.string.action_export_err).show()
                 true
             }
             else -> false

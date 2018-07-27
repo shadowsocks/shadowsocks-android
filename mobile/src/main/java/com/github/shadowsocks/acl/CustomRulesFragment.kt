@@ -25,27 +25,29 @@ import android.content.ClipboardManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputLayout
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AlertDialog
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.Subnet
+import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.UndoSnackbarManager
+import com.google.android.material.textfield.TextInputLayout
 import java.net.IDN
 import java.net.MalformedURLException
 import java.net.URL
@@ -366,12 +368,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         toolbar.setTitle(R.string.custom_rules)
         toolbar.inflateMenu(R.menu.custom_rules_menu)
         toolbar.setOnMenuItemClickListener(this)
-        val activity = requireActivity()
+        val activity = activity as MainActivity
         list = view.findViewById(R.id.list)
         list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
-        undoManager = UndoSnackbarManager(activity.findViewById(R.id.snackbar), adapter::undo)
+        undoManager = UndoSnackbarManager(activity.snackbar, adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
@@ -422,8 +424,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             try {
                 check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
             } catch (exc: Exception) {
-                Snackbar.make(requireActivity().findViewById(R.id.snackbar), R.string.action_import_err,
-                        Snackbar.LENGTH_LONG).show()
+                (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
                 printLog(exc)
             }
             true

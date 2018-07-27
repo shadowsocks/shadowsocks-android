@@ -22,9 +22,8 @@ package com.github.shadowsocks
 
 import android.os.Build
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.preference.SwitchPreference
 import androidx.preference.Preference
+import androidx.preference.SwitchPreference
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
@@ -54,8 +53,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         tfo.isChecked = TcpFastOpen.sendEnabled
         tfo.setOnPreferenceChangeListener { _, value ->
             val result = TcpFastOpen.enabled(value as Boolean)
-            if (result != null && result != "Success.")
-                Snackbar.make(requireActivity().findViewById(R.id.snackbar), result, Snackbar.LENGTH_LONG).show()
+            if (result != null && result != "Success.") (activity as MainActivity).snackbar(result).show()
             value == TcpFastOpen.sendEnabled
         }
         if (!TcpFastOpen.supported) {

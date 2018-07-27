@@ -26,9 +26,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
@@ -64,7 +64,7 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == RESULT_OK) app.startService() else {
-            Snackbar.make(findViewById(R.id.snackbar), R.string.vpn_permission_denied, Snackbar.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.vpn_permission_denied, Toast.LENGTH_LONG).show()
             Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
         }
         finish()
