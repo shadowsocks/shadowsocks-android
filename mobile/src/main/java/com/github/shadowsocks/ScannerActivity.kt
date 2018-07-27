@@ -35,9 +35,12 @@ import android.util.SparseArray
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.content.getSystemService
+import androidx.core.util.forEach
 import com.crashlytics.android.Crashlytics
+import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.openBitmap
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.resolveResourceId
@@ -107,7 +110,7 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
     }
 
     override fun onRetrieved(barcode: Barcode) = runOnUiThread {
-        Profile.findAll(barcode.rawValue).forEach { ProfileManager.createProfile(it) }
+        Profile.findAllUrls(barcode.rawValue, app.currentProfile).forEach { ProfileManager.createProfile(it) }
         navigateUp()
     }
     override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
@@ -119,31 +122,31 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
     }
 
     override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
-        R.id.action_import -> {
+        R.id.action_import_clipboard -> {
             startImport(true)
             true
         }
         else -> false
     }
 
-    private fun startImport(manual: Boolean = false) = startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT)
-            .addCategory(Intent.CATEGORY_OPENABLE)
-            .setType("image/*")
-            .putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true), if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
+    private fun startImport(manual: Boolean = false) = startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+        addCategory(Intent.CATEGORY_OPENABLE)
+        type = "image/*"
+        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+    }, if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
+                val feature = app.currentProfile
                 var success = false
-                var list = listOfNotNull(data?.data)
-                val clipData = data?.clipData
-                if (clipData != null) list += (0 until clipData.itemCount).map { clipData.getItemAt(it).uri }
-                for (uri in list) try {
-                    val barcodes = detector.detect(Frame.Builder()
-                            .setBitmap(contentResolver.openBitmap(uri)).build())
-                    for (i in 0 until barcodes.size()) Profile.findAll(barcodes.valueAt(i).rawValue).forEach {
-                        ProfileManager.createProfile(it)
-                        success = true
-                    }
+                for (uri in data!!.datas) try {
+                    detector.detect(Frame.Builder().setBitmap(contentResolver.openBitmap(uri)).build())
+                            .forEach { _, barcode ->
+                                Profile.findAllUrls(barcode.rawValue, feature).forEach {
+                                    ProfileManager.createProfile(it)
+                                    success = true
+                                }
+                            }
                 } catch (e: Exception) {
                     printLog(e)
                 }

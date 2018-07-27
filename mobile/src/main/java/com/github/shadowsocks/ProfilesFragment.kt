@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -48,11 +49,15 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.datas
+import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import net.glxn.qrgen.android.QRCode
+import org.json.JSONArray
+import java.io.IOException
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -62,6 +67,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         var instance: ProfilesFragment? = null
 
         private const val KEY_URL = "com.github.shadowsocks.QRCodeDialog.KEY_URL"
+        private const val REQUEST_IMPORT_PROFILES = 1
+        private const val REQUEST_EXPORT_PROFILES = 2
     }
 
     /**
@@ -210,7 +217,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                         .commitAllowingStateLoss()
                 true
             }
-            R.id.action_export -> {
+            R.id.action_export_clipboard -> {
                 clipboard.primaryClip = ClipData.newPlainText(null, this.item.toString())
                 true
             }
@@ -363,9 +370,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 startActivity(Intent(context, ScannerActivity::class.java))
                 true
             }
-            R.id.action_import -> {
+            R.id.action_import_clipboard -> {
                 try {
-                    val profiles = Profile.findAll(clipboard.primaryClip!!.getItemAt(0).text).toList()
+                    val profiles = Profile.findAllUrls(clipboard.primaryClip!!.getItemAt(0).text, app.currentProfile)
+                            .toList()
                     if (profiles.isNotEmpty()) {
                         profiles.forEach { ProfileManager.createProfile(it) }
                         (activity as MainActivity).snackbar().setText(R.string.action_import_msg).show()
@@ -377,11 +385,19 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
                 true
             }
-            R.id.action_manual_settings -> {
-                startConfig(ProfileManager.createProfile())
+            R.id.action_import_file -> {
+                startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/json"
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                }, REQUEST_IMPORT_PROFILES)
                 true
             }
-            R.id.action_export -> {
+            R.id.action_manual_settings -> {
+                startConfig(ProfileManager.createProfile(Profile().also { app.currentProfile?.copyFeatureSettingsTo(it) }))
+                true
+            }
+            R.id.action_export_clipboard -> {
                 val profiles = ProfileManager.getAllProfiles()
                 (activity as MainActivity).snackbar().setText(if (profiles != null) {
                     clipboard.primaryClip = ClipData.newPlainText(null, profiles.joinToString("\n"))
@@ -389,7 +405,49 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 } else R.string.action_export_err).show()
                 true
             }
+            R.id.action_export_file -> {
+                startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/json"
+                    putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
+                }, REQUEST_EXPORT_PROFILES)
+                true
+            }
             else -> false
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_OK) super.onActivityResult(requestCode, resultCode, data)
+        else when (requestCode) {
+            REQUEST_IMPORT_PROFILES -> {
+                val feature = app.currentProfile
+                var success = false
+                val activity = activity as MainActivity
+                for (uri in data!!.datas) try {
+                    Profile.parseJson(activity.contentResolver.openInputStream(uri).bufferedReader().readText(),
+                            feature).forEach {
+                        ProfileManager.createProfile(it)
+                        success = true
+                    }
+                } catch (e: IOException) {
+                    printLog(e)
+                }
+                activity.snackbar().setText(if (success) R.string.action_import_msg else R.string.action_import_err)
+                        .show()
+            }
+            REQUEST_EXPORT_PROFILES -> {
+                val profiles = ProfileManager.getAllProfiles()
+                if (profiles != null) try {
+                    requireContext().contentResolver.openOutputStream(data!!.data).bufferedWriter().use {
+                        it.write(JSONArray(profiles.map { it.toJson() }.toTypedArray()).toString(2))
+                    }
+                } catch (e: Exception) {
+                    printLog(e)
+                    (activity as MainActivity).snackbar(e.localizedMessage).show()
+                }
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 

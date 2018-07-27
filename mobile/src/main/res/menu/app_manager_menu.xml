@@ -7,14 +7,14 @@
           android:numericShortcut="1"
           app:showAsAction="never"/>
     <item
-        android:id="@+id/action_export"
+        android:id="@+id/action_export_clipboard"
         android:alphabeticShortcut="e"
         android:icon="?attr/actionModeCopyDrawable"
         android:numericShortcut="2"
         android:title="@string/action_export"
         app:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/action_import"
+        android:id="@+id/action_import_clipboard"
         android:alphabeticShortcut="i"
         android:icon="?attr/actionModePasteDrawable"
         android:numericShortcut="3"

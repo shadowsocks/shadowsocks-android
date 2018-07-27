@@ -21,7 +21,6 @@
 package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.ProfilesFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
@@ -35,19 +34,8 @@ import java.sql.SQLException
  */
 object ProfileManager {
     @Throws(SQLException::class)
-    fun createProfile(p: Profile? = null): Profile {
-        val profile = p ?: Profile()
+    fun createProfile(profile: Profile = Profile()): Profile {
         profile.id = 0
-        val oldProfile = app.currentProfile
-        if (oldProfile != null) {
-            // Copy Feature Settings from old profile
-            profile.route = oldProfile.route
-            profile.ipv6 = oldProfile.ipv6
-            profile.proxyApps = oldProfile.proxyApps
-            profile.bypass = oldProfile.bypass
-            profile.individual = oldProfile.individual
-            profile.udpdns = oldProfile.udpdns
-        }
         profile.userOrder = PrivateDatabase.profileDao.nextOrder() ?: 0
         profile.id = PrivateDatabase.profileDao.create(profile)
         ProfilesFragment.instance?.profilesAdapter?.add(profile)

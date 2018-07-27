@@ -50,7 +50,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
@@ -186,11 +185,7 @@ object BaseService {
         internal var shadowsocksConfigFile: File? = null
         internal fun buildShadowsocksConfig(): File {
             val profile = profile!!
-            val config = JSONObject()
-                    .put("server", profile.host)
-                    .put("server_port", profile.remotePort)
-                    .put("password", profile.password)
-                    .put("method", profile.method)
+            val config = profile.toJson(true)
             val pluginPath = pluginPath
             if (pluginPath != null) {
                 val pluginCmd = arrayListOf(pluginPath)
@@ -200,12 +195,12 @@ object BaseService {
                         .put("plugin_opts", plugin.toString())
             }
             // sensitive Shadowsocks config is stored in
-            val file = File(if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
+            return File(if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
                 app.deviceStorage.noBackupFilesDir  // only API 24+ will be in locked state
-            }, CONFIG_FILE)
-            shadowsocksConfigFile = file
-            file.writeText(config.toString())
-            return file
+            }, CONFIG_FILE).apply {
+                shadowsocksConfigFile = this
+                writeText(config.toString())
+            }
         }
 
         val aclFile: File? get() {
