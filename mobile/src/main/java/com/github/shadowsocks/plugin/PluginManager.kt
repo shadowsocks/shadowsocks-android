@@ -33,6 +33,7 @@ import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.utils.Commandline
+import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.signaturesCompat
 import eu.chainfire.libsuperuser.Shell
 import java.io.File
@@ -107,7 +108,7 @@ object PluginManager {
     private fun buildUri(id: String) = Uri.Builder()
             .scheme(PluginContract.SCHEME)
             .authority(PluginContract.AUTHORITY)
-            .path('/' + id)
+            .path("/$id")
             .build()
     fun buildIntent(id: String, action: String): Intent = Intent(action, buildUri(id))
 
@@ -121,14 +122,13 @@ object PluginManager {
             val path = initNative(options)
             if (path != null) return path
         } catch (t: Throwable) {
-            t.printStackTrace()
-            if (throwable == null) throwable = t
+            if (throwable == null) throwable = t else printLog(t)
         }
 
         // add other plugin types here
 
-        throw if (throwable != null) throwable else
-            FileNotFoundException(app.getString(com.github.shadowsocks.R.string.plugin_unknown, options.id))
+        throw throwable
+                ?: FileNotFoundException(app.getString(com.github.shadowsocks.R.string.plugin_unknown, options.id))
     }
 
     private fun initNative(options: PluginOptions): String? {
@@ -143,9 +143,9 @@ object PluginManager {
         return try {
             initNativeFast(cr, options, uri)
         } catch (t: Throwable) {
-            t.printStackTrace()
             Crashlytics.log(Log.WARN, "PluginManager",
                     "Initializing native plugin fast mode failed. Falling back to slow mode.")
+            printLog(t)
             initNativeSlow(cr, options, uri)
         }
     }

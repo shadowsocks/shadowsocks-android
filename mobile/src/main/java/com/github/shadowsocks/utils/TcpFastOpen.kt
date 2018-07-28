@@ -30,9 +30,9 @@ object TcpFastOpen {
     val supported by lazy {
         val match = """^(\d+)\.(\d+)\.(\d+)""".toRegex().find(System.getProperty("os.version"))
         if (match == null) false else when (match.groupValues[1].toInt()) {
-            in Int.MIN_VALUE .. 2 -> false
+            in Int.MIN_VALUE..2 -> false
             3 -> when (match.groupValues[2].toInt()) {
-                in Int.MIN_VALUE .. 6 -> false
+                in Int.MIN_VALUE..6 -> false
                 7 -> match.groupValues[3].toInt() >= 1
                 else -> true
             }

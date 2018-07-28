@@ -47,10 +47,6 @@ import com.github.shadowsocks.plugin.PluginOptions
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
 import com.google.firebase.analytics.FirebaseAnalytics
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.net.InetAddress
@@ -58,6 +54,10 @@ import java.net.UnknownHostException
 import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.TimeUnit
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -334,7 +334,8 @@ object BaseService {
             val profile = app.currentProfile
             this as Context
             if (profile == null) {
-                data.notification = createNotification("")  // gracefully shutdown: https://stackoverflow.com/questions/47337857/context-startforegroundservice-did-not-then-call-service-startforeground-eve
+                // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
+                data.notification = createNotification("")
                 stopRunner(true, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }

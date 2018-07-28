@@ -28,6 +28,7 @@ import android.net.*
 import android.os.Build
 import android.os.IBinder
 import android.os.ParcelFileDescriptor
+import androidx.core.content.getSystemService
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.MainActivity
@@ -38,7 +39,6 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
-import androidx.core.content.getSystemService
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException

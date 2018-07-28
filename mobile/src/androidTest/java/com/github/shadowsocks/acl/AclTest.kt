@@ -34,6 +34,6 @@ class AclTest {
 
     @Test
     fun parse() {
-        Assert.assertEquals(INPUT1, Acl().fromReader(INPUT1.reader()).toString());
+        Assert.assertEquals(INPUT1, Acl().fromReader(INPUT1.reader()).toString())
     }
 }

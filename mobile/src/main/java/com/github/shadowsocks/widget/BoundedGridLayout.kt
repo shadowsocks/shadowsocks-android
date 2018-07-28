@@ -21,8 +21,8 @@
 package com.github.shadowsocks.widget
 
 import android.content.Context
-import androidx.gridlayout.widget.GridLayout
 import android.util.AttributeSet
+import androidx.gridlayout.widget.GridLayout
 import com.github.shadowsocks.R
 
 /**

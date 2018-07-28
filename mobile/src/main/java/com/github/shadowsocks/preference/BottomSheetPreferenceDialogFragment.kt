@@ -27,18 +27,18 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import androidx.preference.PreferenceDialogFragmentCompat
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.preference.PreferenceDialogFragmentCompat
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.R
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     private inner class IconListViewHolder(val dialog: BottomSheetDialog, view: View) : RecyclerView.ViewHolder(view),
@@ -82,7 +82,6 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
                 false
             }
         }
-
     }
     private inner class IconListAdapter(private val dialog: BottomSheetDialog) :
             RecyclerView.Adapter<IconListViewHolder>() {
@@ -92,7 +91,7 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         override fun onBindViewHolder(holder: IconListViewHolder, position: Int) {
             if (preference.selectedEntry < 0) holder.bind(position) else when (position) {
                 0 -> holder.bind(preference.selectedEntry, true)
-                in preference.selectedEntry + 1 .. Int.MAX_VALUE -> holder.bind(position)
+                in preference.selectedEntry + 1..Int.MAX_VALUE -> holder.bind(position)
                 else -> holder.bind(position - 1)
             }
         }

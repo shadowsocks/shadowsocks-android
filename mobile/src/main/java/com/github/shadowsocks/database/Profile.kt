@@ -20,11 +20,11 @@
 
 package com.github.shadowsocks.database
 
-import androidx.room.*
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.core.net.toUri
+import androidx.room.*
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key

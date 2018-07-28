@@ -24,10 +24,10 @@ import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.parseNumericAddress
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.net.Inet6Address
+import org.json.JSONArray
+import org.json.JSONObject
 
 object LocalDnsService {
     interface Interface : BaseService.Interface {

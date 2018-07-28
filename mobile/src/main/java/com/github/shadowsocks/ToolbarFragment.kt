@@ -22,9 +22,9 @@ package com.github.shadowsocks
 
 import android.os.Bundle
 import android.view.Gravity
-import androidx.fragment.app.Fragment
-import androidx.appcompat.widget.Toolbar
 import android.view.View
+import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
 
 /**
  * @author Mygod
