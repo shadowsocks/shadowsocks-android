@@ -11,11 +11,11 @@ buildscript {
         buildToolsVersion = '28.0.1'
         androidxVersion = '1.0.0-beta01'
         roomVersion = '1.1.1'
-        workVersion = '1.0.0-alpha04'
+        workVersion = '1.0.0-alpha05'
         preferencexVersion = '1.0.0-alpha2'
         junitVersion = '4.12'
-        androidTestVersion = '1.1.0-alpha3'
-        androidEspressoVersion = '3.1.0-alpha3'
+        androidTestVersion = '1.1.0-alpha4'
+        androidEspressoVersion = '3.1.0-alpha4'
     }
 
     repositories {
