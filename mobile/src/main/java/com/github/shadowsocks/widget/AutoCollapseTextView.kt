@@ -22,9 +22,9 @@ package com.github.shadowsocks.widget
 
 import android.content.Context
 import android.graphics.Rect
-import androidx.appcompat.widget.AppCompatTextView
 import android.util.AttributeSet
 import android.view.MotionEvent
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isGone
 import com.crashlytics.android.Crashlytics
 

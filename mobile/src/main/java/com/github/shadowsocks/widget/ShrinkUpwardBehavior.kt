@@ -22,14 +22,14 @@ package com.github.shadowsocks.widget
 
 import android.animation.ValueAnimator
 import android.content.Context
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.SnackbarConsts
 import android.util.AttributeSet
 import android.view.View
 import android.view.accessibility.AccessibilityManager
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.getSystemService
 import com.google.android.material.animation.AnimationUtils
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.snackbar.SnackbarConsts
 
 /**
  * Full credits go to: https://stackoverflow.com/a/35904421/2245107

@@ -22,15 +22,15 @@ package com.github.shadowsocks.widget
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import androidx.annotation.DrawableRes
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat
-import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import androidx.appcompat.widget.TooltipCompat
 import android.util.AttributeSet
 import android.view.View
+import androidx.annotation.DrawableRes
+import androidx.appcompat.widget.TooltipCompat
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 
 class ServiceButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :

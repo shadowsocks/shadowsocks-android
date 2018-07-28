@@ -21,8 +21,8 @@
 package com.github.shadowsocks.acl
 
 import android.content.Context
-import androidx.recyclerview.widget.SortedList
 import android.util.Log
+import androidx.recyclerview.widget.SortedList
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.preference.DataStore
@@ -46,7 +46,7 @@ class Acl {
 
         val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
-        fun getFile(id: String, context: Context = app.deviceStorage) = File(context.filesDir, id + ".acl")
+        fun getFile(id: String, context: Context = app.deviceStorage) = File(context.filesDir, "$id.acl")
 
         var customRules: Acl
             get() {
@@ -122,7 +122,7 @@ class Acl {
             for (line in it) {
                 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                 val blocks = (line as java.lang.String).split("#", 2)
-                val url = networkAclParser.matchEntire(blocks.getOrElse(1, {""}))?.groupValues?.getOrNull(1)
+                val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
                 if (url != null) urls.add(URL(url))
                 val input = blocks[0].trim()
                 when (input) {

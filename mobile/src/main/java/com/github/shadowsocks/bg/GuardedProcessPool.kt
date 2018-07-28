@@ -35,9 +35,8 @@ import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.atomic.AtomicReference
 
 class GuardedProcessPool {
-    companion object {
+    companion object Dummy : IOException("Oopsie the developer has made a no-no") {
         private const val TAG = "GuardedProcessPool"
-        private val dummy = IOException()
     }
 
     private inner class Guard(private val cmd: List<String>, private val onRestartCallback: (() -> Unit)?) {
@@ -53,7 +52,7 @@ class GuardedProcessPool {
                 }
         private fun pushException(ioException: IOException?) {
             if (pushed) return
-            excQueue.put(ioException ?: dummy)
+            excQueue.put(ioException ?: Dummy)
             pushed = true
         }
 
@@ -115,7 +114,7 @@ class GuardedProcessPool {
             })
         }
         val ioException = guard.excQueue.take()
-        if (ioException !== dummy) throw ioException
+        if (ioException !== Dummy) throw ioException
         return this
     }
 

@@ -171,7 +171,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
                 onPreferenceChange(null, options)
             }
             PluginContract.RESULT_FALLBACK -> showPluginEditor()
-
         } else super.onActivityResult(requestCode, resultCode, data)
     }
 

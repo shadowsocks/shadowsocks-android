@@ -22,8 +22,8 @@ package com.github.shadowsocks.preference
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import androidx.preference.ListPreference
 import android.util.AttributeSet
+import androidx.preference.ListPreference
 
 class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
     var entryIcons: Array<Drawable?>? = null

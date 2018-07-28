@@ -251,9 +251,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
-        if (savedInstanceState != null
-                && DataStore.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                && AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
+        if (savedInstanceState != null &&
+                DataStore.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
     }

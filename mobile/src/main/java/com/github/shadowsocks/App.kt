@@ -35,9 +35,9 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
-import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics

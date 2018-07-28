@@ -329,7 +329,8 @@ object BaseService {
             val profile = app.currentProfile
             this as Context
             if (profile == null) {
-                data.notification = createNotification("")  // gracefully shutdown: https://stackoverflow.com/questions/47337857/context-startforegroundservice-did-not-then-call-service-startforeground-eve
+                // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
+                data.notification = createNotification("")
                 stopRunner(true, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }

@@ -41,7 +41,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
     private val addressLength get() = address.address.size shl 3
 
     init {
-        if (prefixSize < 0 || prefixSize > addressLength) throw IllegalArgumentException()
+        if (prefixSize < 0 || prefixSize > addressLength) throw IllegalArgumentException("prefixSize: $prefixSize")
     }
 
     override fun toString(): String =

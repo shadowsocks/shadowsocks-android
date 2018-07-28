@@ -20,9 +20,9 @@
 
 package com.github.shadowsocks.preference
 
-import androidx.appcompat.app.AlertDialog
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import com.github.shadowsocks.ProfileConfigActivity
 import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.plugin.PluginManager
