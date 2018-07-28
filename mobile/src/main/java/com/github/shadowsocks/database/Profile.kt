@@ -38,7 +38,6 @@ import java.io.Serializable
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.*
-import kotlin.collections.ArrayList
 
 @Entity
 class Profile : Serializable {
@@ -146,7 +145,7 @@ class Profile : Serializable {
                 }
             }
         }
-        fun parseJson(json: String, feature: Profile? = null) : List<Profile> =
+        fun parseJson(json: String, feature: Profile? = null): List<Profile> =
                 JsonParser(feature).apply { process(JSONTokener(json).nextValue()) }
     }
 
@@ -198,7 +197,7 @@ class Profile : Serializable {
 
     val formattedAddress get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
     val formattedName get() = if (name.isNullOrEmpty()) formattedAddress else name!!
-    
+
     fun copyFeatureSettingsTo(profile: Profile) {
         profile.route = route
         profile.ipv6 = ipv6
