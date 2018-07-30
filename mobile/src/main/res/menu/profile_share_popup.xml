@@ -4,7 +4,7 @@
           android:title="@string/share_qr_nfc"
           android:alphabeticShortcut="q"
           android:numericShortcut="1"/>
-    <item android:id="@+id/action_export"
+    <item android:id="@+id/action_export_clipboard"
           android:title="@string/action_export"
           android:alphabeticShortcut="e"
           android:numericShortcut="2"/>

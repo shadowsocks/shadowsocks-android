@@ -223,13 +223,13 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
                 } else Snackbar.make(appListView, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
                 return true
             }
-            R.id.action_export -> {
+            R.id.action_export_clipboard -> {
                 clipboard.primaryClip = ClipData.newPlainText(Key.individual,
                         "${DataStore.bypass}\n${DataStore.individual}")
                 Snackbar.make(appListView, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
                 return true
             }
-            R.id.action_import -> {
+            R.id.action_import_clipboard -> {
                 val proxiedAppString = clipboard.primaryClip?.getItemAt(0)?.text?.toString()
                 if (!proxiedAppString.isNullOrEmpty()) {
                     val i = proxiedAppString!!.indexOf('\n')

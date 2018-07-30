@@ -11,7 +11,7 @@
                   android:title="@string/add_profile_methods_manual_settings"
                   android:alphabeticShortcut="m"
                   android:numericShortcut="1"/>
-            <item android:id="@+id/action_import"
+            <item android:id="@+id/action_import_clipboard"
                   android:title="@string/action_import"
                   android:alphabeticShortcut="i"
                   android:numericShortcut="2"/>

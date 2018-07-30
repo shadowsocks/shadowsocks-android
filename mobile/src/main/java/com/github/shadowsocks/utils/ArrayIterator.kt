@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2018 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2018 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,19 +18,34 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.database
+package com.github.shadowsocks.utils
 
-import androidx.core.net.toUri
-import org.junit.Assert
-import org.junit.Test
+import android.content.ClipData
+import androidx.recyclerview.widget.SortedList
+import org.json.JSONArray
 
-class ProfileTest {
-    @Test
-    fun parsing() {
-        val results = Profile.findAllUrls("garble ss://YmYtY2ZiOnRlc3RAMTkyLjE2OC4xMDAuMTo4ODg4#example-server garble")
-                .toList()
-        Assert.assertEquals(1, results.size)
-        Assert.assertEquals("ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888#example-server".toUri(),
-                results.single().toUri())
-    }
+private sealed class ArrayIterator<out T> : Iterator<T> {
+    abstract val size: Int
+    abstract operator fun get(index: Int): T
+    private var count = 0
+    override fun hasNext() = count < size
+    override fun next(): T = if (hasNext()) this[count++] else throw NoSuchElementException()
 }
+
+private class ClipDataIterator(private val data: ClipData) : ArrayIterator<ClipData.Item>() {
+    override val size get() = data.itemCount
+    override fun get(index: Int) = data.getItemAt(index)
+}
+fun ClipData.asIterable() = Iterable { ClipDataIterator(this) }
+
+private class JSONArrayIterator(private val arr: JSONArray) : ArrayIterator<Any>() {
+    override val size get() = arr.length()
+    override fun get(index: Int) = arr.get(index)
+}
+fun JSONArray.asIterable() = Iterable { JSONArrayIterator(this) }
+
+private class SortedListIterator<out T>(private val list: SortedList<T>) : ArrayIterator<T>() {
+    override val size get() = list.size()
+    override fun get(index: Int) = list[index]
+}
+fun <T> SortedList<T>.asIterable() = Iterable { SortedListIterator(this) }

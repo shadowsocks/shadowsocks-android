@@ -12,7 +12,6 @@ import android.net.Uri
 import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
-import androidx.recyclerview.widget.SortedList
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
@@ -63,15 +62,7 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
     return typedValue.resourceId
 }
 
-private class SortedListIterable<out T>(private val list: SortedList<T>) : Iterable<T> {
-    override fun iterator(): Iterator<T> = SortedListIterator(list)
-}
-private class SortedListIterator<out T>(private val list: SortedList<T>) : Iterator<T> {
-    private var count = 0
-    override fun hasNext() = count < list.size()
-    override fun next(): T = if (hasNext()) list[count++] else throw NoSuchElementException()
-}
-fun <T> SortedList<T>.asIterable(): Iterable<T> = SortedListIterable(this)
+val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.map { it.uri }?.filterNotNull() ?: emptyList())
 
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)

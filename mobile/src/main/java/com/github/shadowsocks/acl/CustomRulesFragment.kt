@@ -420,7 +420,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             dialog.show()
             true
         }
-        R.id.action_import -> {
+        R.id.action_import_clipboard -> {
             try {
                 check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
             } catch (exc: Exception) {

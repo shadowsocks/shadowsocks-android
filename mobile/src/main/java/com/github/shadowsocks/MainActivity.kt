@@ -200,7 +200,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) app.startService() else {
+        if (requestCode != REQUEST_CONNECT) super.onActivityResult(requestCode, resultCode, data)
+        else if (resultCode == Activity.RESULT_OK) app.startService() else {
             snackbar().setText(R.string.vpn_permission_denied).show()
             Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
         }
@@ -272,7 +273,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             else -> null
         }
         if (sharedStr.isNullOrEmpty()) return
-        val profiles = Profile.findAll(sharedStr).toList()
+        val profiles = Profile.findAllUrls(sharedStr, app.currentProfile).toList()
         if (profiles.isEmpty()) {
             snackbar().setText(R.string.profile_invalid_input).show()
             return
