@@ -28,5 +28,31 @@ If applicable, add screenshots to help explain your problem.
  - Version: [e.g. version code "v3.0.0" or commit ID "a073f85"]
  - Last version that did not exhibit the issue: [not applicable]
 
+**Configuration**
+Put an `x` inside the [ ] that applies.
+
+* [ ] IPv4 server address
+* [ ] IPv6 server address
+* [ ] Client IPv4 availability
+* [ ] Client IPv6 availability
+* Encrypt method:
+* Route
+  * [ ] All
+  * [ ] Bypass LAN
+  * [ ] Bypass China
+  * [ ] Bypass LAN & China
+  * [ ] GFW List
+  * [ ] China List
+  * [ ] Custom rules
+* [ ] IPv6 route
+* [ ] Apps VPN mode
+  * [ ] Bypass mode
+* Remote DNS: 8.8.8.8
+* [ ] DNS Forwarding
+* Plugin configuration (if applicable):
+* [ ] Auto Connect
+* [ ] TCP Fast Open
+* If you're not using VPN mode, please supply more details here:
+
 **Additional context**
 Add any other context about the problem here.

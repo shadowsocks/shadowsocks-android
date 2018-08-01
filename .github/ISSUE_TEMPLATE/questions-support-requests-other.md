@@ -1,6 +1,6 @@
 ---
 name: Questions/Support requests/Other
-about: You should probably use the forum.
+about: You should probably use the forum
 
 ---
 
