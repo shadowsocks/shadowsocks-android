@@ -1,4 +1,4 @@
-Please read FAQ then answer these questions before submitting your issue. Thanks!
+Please check contributing guidelines before posting your issue. Thanks!
 
 ### Environment
 

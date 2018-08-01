@@ -1,4 +1,6 @@
-Please check [FAQ](.github/faq.md) before submitting new issues.
+# Submitting Issues
 
-And just in case you don't know,
-[don't ask questions on issues](https://medium.com/@methane/why-you-must-not-ask-questions-on-github-issues-51d741d83fde).
+* Questions and general discussions should go to [Discourse forum](https://discourse.shadowsocks.org/c/implementations/shadowsocks-android);
+* Search for your issue here and at the forum and check [FAQ](https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md) before submitting new issues;
+* Always provide information asked in the template unless you know what you're doing;
+* Logcat would also be helpful.
