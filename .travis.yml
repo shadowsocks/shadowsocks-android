@@ -15,6 +15,7 @@ cache:
     directories:
         - $HOME/.gradle/caches/
         - $HOME/.gradle/wrapper/
+        - $HOME/.android/build-cache/
 
 install:
     - pushd $ANDROID_HOME
