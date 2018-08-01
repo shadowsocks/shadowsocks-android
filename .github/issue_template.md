@@ -1,4 +1,8 @@
-Please check contributing guidelines before posting your issue. Thanks!
+# DO NOT POST SUPPORT REQUESTS OR GENERAL QUESTIONS IN THIS ISSUE TRACKER
+
+Please use the forum at https://discourse.shadowsocks.org/c/implementations/shadowsocks-android instead.
+
+Otherwise, read contributing guidelines before removing everything above and including this line, or your issue may be closed.
 
 ### Environment
 
