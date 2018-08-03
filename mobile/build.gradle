@@ -64,7 +64,7 @@ dependencies {
     implementation "android.arch.work:work-runtime-ktx:$workVersion"
     implementation "androidx.browser:browser:$androidxVersion"
     implementation "androidx.gridlayout:gridlayout:$androidxVersion"
-    implementation 'androidx.room:room-runtime:2.0.0-beta01'
+    implementation "androidx.room:room-runtime:$roomVersion"
     implementation "com.google.android.material:material:$androidxVersion"
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.4'
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
@@ -77,8 +77,8 @@ dependencies {
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
     implementation 'net.glxn.qrgen:android:2.0'
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
-    kapt 'androidx.room:room-compiler:2.0.0-beta01'
-    testImplementation 'androidx.room:room-testing:2.0.0-beta01'
+    kapt "androidx.room:room-compiler:$roomVersion"
+    testImplementation "androidx.room:room-testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "android.arch.work:work-testing:$workVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
