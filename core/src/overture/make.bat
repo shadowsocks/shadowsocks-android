@@ -82,11 +82,10 @@ IF EXIST "%TARGET%\armeabi-v7a\liboverture.so" (
 )
 
 IF %BUILD% == 1 (
-	ECHO "Get dependences for overture"
-	go.exe get -u github.com\tools\godep
-
 	PUSHD %GOPATH%\src\github.com\shadowsocks\overture\main
-	godep.exe restore
+
+	ECHO "Get dependences for overture"
+	go.exe get -v github.com/shadowsocks/overture/main
 
 	ECHO "Cross compile overture for arm"
 	IF NOT EXIST "%TARGET%\armeabi-v7a\liboverture.so" (

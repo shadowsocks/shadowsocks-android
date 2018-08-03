@@ -59,11 +59,10 @@ export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 if [ ! -f "$TARGET/armeabi-v7a/liboverture.so" ] || [ ! -f "$TARGET/arm64-v8a/liboverture.so" ] ||
    [ ! -f "$TARGET/x86/liboverture.so" ]; then
 
-    echo "Get dependences for overture"
-    go get -u github.com/tools/godep
-
     pushd $GOPATH/src/github.com/shadowsocks/overture/main
-    godep restore
+
+    echo "Get dependences for overture"
+    go get -v github.com/shadowsocks/overture/main
 
     echo "Cross compile overture for arm"
     if [ ! -f "$TARGET/armeabi-v7a/liboverture.so" ]; then
