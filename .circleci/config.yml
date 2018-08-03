@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      - image: mygodstudio/shadowsocks-android:circleci
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init --recursive
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}
+      - restore_cache:
+          key: go-full-{{ checksum "~/code/.git/modules/core/src/overture/go/HEAD" }}
+      - run:
+          name: Run Build and Tests
+          command: ./gradlew assembleDebug check
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.android/build-cache
+          key: jars-{{ checksum "build.gradle" }}
+      - save_cache:
+          paths:
+            - ~/code/core/src/overture/go
+          key: go-full-{{ checksum "~/code/.git/modules/core/src/overture/go/HEAD" }}
+      - store_artifacts:
+          path: mobile/build/outputs/apk
+          destination: apk
+      - store_artifacts:
+          path: mobile/build/reports
+          destination: reports
