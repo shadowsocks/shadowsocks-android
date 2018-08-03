@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: mygodstudio/shadowsocks-android:circleci
+      - image: shadowsocks/shadowsocks-android:circleci
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
