@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
 
 class AclSyncer : Worker() {
     companion object {
-        fun schedule(route: String) = WorkManager.getInstance()!!.enqueue(OneTimeWorkRequestBuilder<AclSyncer>()
+        fun schedule(route: String) = WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<AclSyncer>()
                 .addTag(route)
                 .setConstraints(Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.UNMETERED)
