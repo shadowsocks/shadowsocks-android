@@ -73,7 +73,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation "com.takisoft.preferencex:preferencex-simplemenu:$preferencexVersion"
-    implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.2'
+    implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.4'
     implementation 'eu.chainfire:libsuperuser:1.0.0.201704021214'
     implementation 'net.glxn.qrgen:android:2.0'
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
