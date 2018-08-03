@@ -34,7 +34,6 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.text.format.Formatter
 import android.util.Log
-import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -45,6 +44,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
@@ -342,7 +342,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
 
     override fun onBackPressed() {
-        if (drawer.isDrawerOpen(Gravity.START)) drawer.closeDrawers() else {
+        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawers() else {
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
             if (!currentFragment.onBackPressed()) {
                 if (currentFragment is ProfilesFragment) super.onBackPressed() else {

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
-    <issue id="InvalidPackage">
-        <ignore regexp="ormlite-core" />
-    </issue>
+    <!-- Check is buggy: https://issuetracker.google.com/issues/112159117 -->
+    <issue id="AppCompatResource" severity="ignore" />
     <issue id="ImpliedQuantity" severity="warning" />
     <issue id="ExtraTranslation" severity="warning" />
     <issue id="MissingDefaultResource" severity="warning" />
