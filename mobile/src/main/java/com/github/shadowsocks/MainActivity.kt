@@ -31,12 +31,9 @@ import android.net.VpnService
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Bundle
-import android.os.SystemClock
-import android.text.format.Formatter
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -49,7 +46,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.App.Companion.app
-import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -60,16 +56,10 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.responseLength
-import com.github.shadowsocks.utils.thread
 import com.github.shadowsocks.widget.ServiceButton
+import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.InetSocketAddress
-import java.net.Proxy
-import java.net.URL
 import java.util.*
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPreferenceDataStoreChangeListener,
@@ -86,15 +76,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     // UI
     private lateinit var fab: ServiceButton
+    private lateinit var stats: StatsBar
     internal lateinit var drawer: DrawerLayout
     private lateinit var navigation: NavigationView
 
-    private var testCount = 0
-    private lateinit var statusText: TextView
-    private lateinit var txText: TextView
-    private lateinit var rxText: TextView
-    private lateinit var txRateText: TextView
-    private lateinit var rxRateText: TextView
     val snackbar by lazy { findViewById<View>(R.id.snackbar) }
     fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG)
 
@@ -115,7 +100,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
                 app.handler.post { changeState(state, msg, true) }
             }
             override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-                app.handler.post { updateTraffic(profileId, txRate, rxRate, txTotal, rxTotal) }
+                app.handler.post {
+                    stats.updateTraffic(txRate, rxRate, txTotal, rxTotal)
+                    val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
+                    if (state != BaseService.STOPPING)
+                        child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+                }
             }
             override fun trafficPersisted(profileId: Long) {
                 app.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
@@ -123,68 +113,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         }
     }
 
-    fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
+    private fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
         fab.changeState(state, animate)
-        when (state) {
-            BaseService.CONNECTING -> statusText.setText(R.string.connecting)
-            BaseService.CONNECTED -> statusText.setText(R.string.vpn_connected)
-            BaseService.STOPPING -> statusText.setText(R.string.stopping)
-            else -> {
-                if (msg != null) snackbar(getString(R.string.vpn_error).format(Locale.ENGLISH, msg)).show()
-                statusText.setText(R.string.not_connected)
-            }
-        }
+        stats.changeState(state)
+        if (msg != null) snackbar(getString(R.string.vpn_error).format(Locale.ENGLISH, msg)).show()
         this.state = state
-        if (state != BaseService.CONNECTED) {
-            updateTraffic(-1, 0, 0, 0, 0)
-            testCount += 1  // suppress previous test messages
-        }
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
-    }
-    fun updateTraffic(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-        txText.text = Formatter.formatFileSize(this, txTotal)
-        rxText.text = Formatter.formatFileSize(this, rxTotal)
-        txRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, txRate))
-        rxRateText.text = getString(R.string.speed, Formatter.formatFileSize(this, rxRate))
-        val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
-        if (state != BaseService.STOPPING)
-            child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
-    }
-
-    /**
-     * Based on: https://android.googlesource.com/platform/frameworks/base/+/97bfd27/services/core/java/com/android/server/connectivity/NetworkMonitor.java#879
-     */
-    private fun testConnection(id: Int) {
-        val url = URL("https", when (app.currentProfile!!.route) {
-            Acl.CHINALIST -> "www.qualcomm.cn"
-            else -> "www.google.com"
-        }, "/generate_204")
-        val conn = (if (BaseService.usingVpnMode) url.openConnection() else
-            url.openConnection(Proxy(Proxy.Type.SOCKS,
-                    InetSocketAddress("127.0.0.1", DataStore.portProxy))))
-                as HttpURLConnection
-        conn.setRequestProperty("Connection", "close")
-        conn.instanceFollowRedirects = false
-        conn.useCaches = false
-        val (success, result) = try {
-            val start = SystemClock.elapsedRealtime()
-            val code = conn.responseCode
-            val elapsed = SystemClock.elapsedRealtime() - start
-            if (code == 204 || code == 200 && conn.responseLength == 0L)
-                Pair(true, getString(R.string.connection_test_available, elapsed))
-            else throw IOException(getString(R.string.connection_test_error_status_code, code))
-        } catch (e: IOException) {
-            Pair(false, getString(R.string.connection_test_error, e.message))
-        } finally {
-            conn.disconnect()
-        }
-        if (testCount == id) app.handler.post {
-            if (success) statusText.text = result else {
-                statusText.setText(R.string.connection_test_fail)
-                snackbar(result).show()
-            }
-        }
     }
 
     override val listenForDeath: Boolean get() = true
@@ -210,26 +145,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
+        stats = findViewById(R.id.stats)
+        stats.setOnClickListener { if (state == BaseService.CONNECTED) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
         navigation = findViewById(R.id.navigation)
         navigation.setNavigationItemSelectedListener(this)
         if (savedInstanceState == null) {
             navigation.menu.findItem(R.id.profiles).isChecked = true
             displayFragment(ProfilesFragment())
-        }
-
-        statusText = findViewById(R.id.status)
-        txText = findViewById(R.id.tx)
-        txRateText = findViewById(R.id.txRate)
-        rxText = findViewById(R.id.rx)
-        rxRateText = findViewById(R.id.rxRate)
-        findViewById<View>(R.id.stat).setOnClickListener {
-            if (state == BaseService.CONNECTED) {
-                ++testCount
-                statusText.setText(R.string.connection_test_testing)
-                val id = testCount  // it would change by other code
-                thread("ConnectionTest") { testConnection(id) }
-            }
         }
 
         fab = findViewById(R.id.fab)
