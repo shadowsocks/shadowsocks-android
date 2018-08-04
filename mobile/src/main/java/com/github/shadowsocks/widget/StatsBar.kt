@@ -91,7 +91,6 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         rxRateText.text = context.getString(R.string.speed, Formatter.formatFileSize(context, rxRate))
     }
 
-
     /**
      * Based on: https://android.googlesource.com/platform/frameworks/base/+/b19a838/services/core/java/com/android/server/connectivity/NetworkMonitor.java#1071
      */
