@@ -63,9 +63,7 @@ dependencies {
     implementation project(':core')
     implementation "android.arch.work:work-runtime-ktx:$workVersion"
     implementation "androidx.browser:browser:$androidxVersion"
-    implementation "androidx.gridlayout:gridlayout:$androidxVersion"
     implementation "androidx.room:room-runtime:$roomVersion"
-    implementation "com.google.android.material:material:$androidxVersion"
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.4'
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
     implementation 'com.google.firebase:firebase-ads:15.0.1'

@@ -126,8 +126,6 @@
   <string name="profile_default">Use the current profile</string>
 
   <!-- status -->
-  <string name="sent">Sent:</string>
-  <string name="received">Received:</string>
   <string name="connecting">Connecting…</string>
   <string name="vpn_connected">Connected, tap to check connection</string>
   <string name="not_connected">Not connected</string>
