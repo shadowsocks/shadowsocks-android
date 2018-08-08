@@ -189,7 +189,7 @@ object BaseService {
             val pluginPath = pluginPath
             if (pluginPath != null) {
                 val pluginCmd = arrayListOf(pluginPath)
-                if (TcpFastOpen.sendEnabled) pluginCmd.add("--fast-open")
+                if (DataStore.tcpFastOpen) pluginCmd.add("--fast-open")
                 config
                         .put("plugin", Commandline.toString(service.buildAdditionalArguments(pluginCmd)))
                         .put("plugin_opts", plugin.toString())
@@ -268,7 +268,7 @@ object BaseService {
 
             if (profile.udpdns) cmd += "-D"
 
-            if (TcpFastOpen.sendEnabled) cmd += "--fast-open"
+            if (DataStore.tcpFastOpen) cmd += "--fast-open"
 
             data.processes.start(cmd)
         }

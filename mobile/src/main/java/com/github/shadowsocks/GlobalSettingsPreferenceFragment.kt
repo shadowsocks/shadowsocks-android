@@ -50,11 +50,13 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         } else canToggleLocked.parent!!.removePreference(canToggleLocked)
 
         val tfo = findPreference(Key.tfo) as SwitchPreference
-        tfo.isChecked = TcpFastOpen.sendEnabled
+        tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
-            val result = TcpFastOpen.enabled(value as Boolean)
-            if (result != null && result != "Success.") (activity as MainActivity).snackbar(result).show()
-            value == TcpFastOpen.sendEnabled
+            if (value as Boolean) {
+                val result = TcpFastOpen.enabled(true)
+                if (result != null && result != "Success.") (activity as MainActivity).snackbar(result).show()
+                TcpFastOpen.sendEnabled
+            } else true
         }
         if (!TcpFastOpen.supported) {
             tfo.isEnabled = false

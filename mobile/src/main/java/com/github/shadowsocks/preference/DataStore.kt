@@ -27,6 +27,7 @@ import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.TcpFastOpen
 import com.github.shadowsocks.utils.parsePort
 
 object DataStore {
@@ -52,6 +53,7 @@ object DataStore {
         }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
+    val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
     @AppCompatDelegate.NightMode
     val nightMode get() = when (publicStore.getString(Key.nightMode)) {
         Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
