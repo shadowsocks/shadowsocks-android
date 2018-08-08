@@ -8,14 +8,12 @@
     android:layout_height="match_parent">
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/snackbar"
-        android:background="@color/color_primary_dark"
         android:clipChildren="false"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <FrameLayout
             android:id="@+id/fragment_holder"
-            android:background="?android:attr/windowBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
@@ -24,6 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:elevation="6dp"
+            app:layout_dodgeInsetEdges="top"
             app:layout_anchor="@id/stats"
             app:backgroundTint="@color/background_service"
             app:fabSize="normal"
@@ -37,7 +36,6 @@
             android:layout_gravity="bottom"
             app:backgroundTint="@color/background_stat"
             app:contentInsetStart="0dp"
-            app:layout_dodgeInsetEdges="bottom"
             app:layout_scrollFlags="enterAlways|scroll"
             app:hideOnScroll="true">
 

@@ -336,8 +336,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         profilesList.itemAnimator = animator
         profilesList.adapter = profilesAdapter
         instance = this
-        undoManager = UndoSnackbarManager((activity as MainActivity).snackbar,
-                profilesAdapter::undo, profilesAdapter::commit)
+        undoManager = UndoSnackbarManager(activity as MainActivity, profilesAdapter::undo, profilesAdapter::commit)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
