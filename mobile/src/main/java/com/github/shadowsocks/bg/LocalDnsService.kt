@@ -36,60 +36,57 @@ object LocalDnsService {
             val data = data
             val profile = data.profile!!
 
-            fun makeDns(name: String, address: String, timeout: Int, edns: Boolean = true): JSONObject {
-                val dns = JSONObject()
-                .put("Name", name)
-                .put("Address", when (address.parseNumericAddress()) {
+            fun makeDns(name: String, address: String, timeout: Int, edns: Boolean = true) = JSONObject().apply {
+                put("Name", name)
+                put("Address", when (address.parseNumericAddress()) {
                     is Inet6Address -> "[$address]"
                     else -> address
                 })
-                .put("Timeout", timeout)
-                .put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
-                if (edns) dns
-                .put("Protocol", "tcp")
-                .put("Socks5Address", "127.0.0.1:" + DataStore.portProxy)
-                else dns.put("Protocol", "udp")
-
-                return dns
+                put("Timeout", timeout)
+                put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
+                put("Protocol", if (edns) {
+                    put("Socks5Address", "127.0.0.1:" + DataStore.portProxy)
+                    "tcp"
+                } else "udp")
             }
 
-            fun buildOvertureConfig(file: String): String {
-                val config = JSONObject()
-                        .put("BindAddress", "127.0.0.1:" + DataStore.portLocalDns)
-                        .put("RedirectIPv6Record", true)
-                        .put("DomainBase64Decode", false)
-                        .put("HostsFile", "hosts")
-                        .put("MinimumTTL", 120)
-                        .put("CacheSize", 4096)
-                val remoteDns = JSONArray(profile.remoteDns.split(",")
-                        .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 12) })
-                val localDns = JSONArray(arrayOf(
-                        makeDns("Primary-1", "208.67.222.222:443", 9, false),
-                        makeDns("Primary-2", "119.29.29.29:53", 9, false),
-                        makeDns("Primary-3", "114.114.114.114:53", 9, false)
-                ))
-
-                when (profile.route) {
-                    Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> config
-                            .put("PrimaryDNS", localDns)
-                            .put("AlternativeDNS", remoteDns)
-                            .put("IPNetworkFile", "china_ip_list.txt")
-                    Acl.CHINALIST -> config
-                            .put("PrimaryDNS", localDns)
-                            .put("AlternativeDNS", remoteDns)
-                    else -> config
-                            .put("PrimaryDNS", remoteDns)
+            fun buildOvertureConfig(file: String) = file.also {
+                File(app.deviceStorage.filesDir, it).writeText(JSONObject().run {
+                    put("BindAddress", "127.0.0.1:" + DataStore.portLocalDns)
+                    put("RedirectIPv6Record", true)
+                    put("DomainBase64Decode", false)
+                    put("HostsFile", "hosts")
+                    put("MinimumTTL", 120)
+                    put("CacheSize", 4096)
+                    val remoteDns = JSONArray(profile.remoteDns.split(",")
+                            .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 12) })
+                    val localDns = JSONArray(arrayOf(
+                            makeDns("Primary-1", "208.67.222.222:443", 9, false),
+                            makeDns("Primary-2", "119.29.29.29:53", 9, false),
+                            makeDns("Primary-3", "114.114.114.114:53", 9, false)))
+                    when (profile.route) {
+                        Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
+                            put("PrimaryDNS", localDns)
+                            put("AlternativeDNS", remoteDns)
+                            put("IPNetworkFile", "china_ip_list.txt")
+                        }
+                        Acl.CHINALIST -> {
+                            put("PrimaryDNS", localDns)
+                            put("AlternativeDNS", remoteDns)
+                        }
+                        else -> {
+                            put("PrimaryDNS", remoteDns)
                             // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
-                            .put("OnlyPrimaryDNS", true)
-                }
-                File(app.deviceStorage.filesDir, file).writeText(config.toString())
-                return file
+                            put("OnlyPrimaryDNS", true)
+                        }
+                    }
+                    toString()
+                })
             }
 
             if (!profile.udpdns) data.processes.start(buildAdditionalArguments(arrayListOf(
                     File(app.applicationInfo.nativeLibraryDir, Executable.OVERTURE).absolutePath,
-                    "-c", buildOvertureConfig("overture.conf")
-            )))
+                    "-c", buildOvertureConfig("overture.conf"))))
         }
     }
 }

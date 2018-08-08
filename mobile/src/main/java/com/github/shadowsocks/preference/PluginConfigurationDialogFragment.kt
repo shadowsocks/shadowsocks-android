@@ -38,7 +38,7 @@ class PluginConfigurationDialogFragment : EditTextPreferenceDialogFragmentCompat
 
     override fun onPrepareDialogBuilder(builder: AlertDialog.Builder) {
         super.onPrepareDialogBuilder(builder)
-        val intent = PluginManager.buildIntent(arguments!!.getString(PLUGIN_ID_FRAGMENT_TAG),
+        val intent = PluginManager.buildIntent(arguments?.getString(PLUGIN_ID_FRAGMENT_TAG)!!,
                 PluginContract.ACTION_HELP)
         val activity = requireActivity()
         if (intent.resolveActivity(activity.packageManager) != null) builder.setNeutralButton("?") { _, _ ->

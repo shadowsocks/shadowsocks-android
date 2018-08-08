@@ -62,7 +62,7 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
     return typedValue.resourceId
 }
 
-val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.map { it.uri }?.filterNotNull() ?: emptyList())
+val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNull { it.uri } ?: emptyList())
 
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)

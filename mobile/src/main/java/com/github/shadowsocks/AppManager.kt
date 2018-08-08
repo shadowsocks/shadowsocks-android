@@ -174,8 +174,8 @@ class AppManager : AppCompatActivity(), Toolbar.OnMenuItemClickListener {
         toolbar.setNavigationIcon(theme.resolveResourceId(R.attr.homeAsUpIndicator))
         toolbar.setNavigationOnClickListener {
             val intent = parentActivityIntent
-            if (shouldUpRecreateTask(intent) || isTaskRoot)
-                TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities() else finish()
+            if (intent == null || !shouldUpRecreateTask(intent) && !isTaskRoot) finish() else
+                TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
         }
         toolbar.inflateMenu(R.menu.app_manager_menu)
         toolbar.setOnMenuItemClickListener(this)

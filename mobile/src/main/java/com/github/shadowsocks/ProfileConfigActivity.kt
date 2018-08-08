@@ -50,8 +50,8 @@ class ProfileConfigActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (DataStore.dirty) AlertDialog.Builder(this)
                 .setTitle(R.string.unsaved_changes_prompt)
-                .setPositiveButton(R.string.yes, { _, _ -> child.saveAndExit() })
-                .setNegativeButton(R.string.no, { _, _ -> finish() })
+                .setPositiveButton(R.string.yes) { _, _ -> child.saveAndExit() }
+                .setNegativeButton(R.string.no) { _, _ -> finish() }
                 .setNeutralButton(android.R.string.cancel, null)
                 .create()
                 .show() else super.onBackPressed()

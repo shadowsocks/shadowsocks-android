@@ -142,10 +142,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != REQUEST_CONNECT) super.onActivityResult(requestCode, resultCode, data)
-        else if (resultCode == Activity.RESULT_OK) app.startService() else {
-            snackbar().setText(R.string.vpn_permission_denied).show()
-            Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+        when {
+            requestCode != REQUEST_CONNECT -> super.onActivityResult(requestCode, resultCode, data)
+            resultCode == Activity.RESULT_OK -> app.startService()
+            else -> {
+                snackbar().setText(R.string.vpn_permission_denied).show()
+                Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+            }
         }
     }
 
@@ -194,7 +197,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
     private fun handleShareIntent(intent: Intent) {
         val sharedStr = when (intent.action) {
-            Intent.ACTION_VIEW -> intent.data.toString()
+            Intent.ACTION_VIEW -> intent.data?.toString()
             NfcAdapter.ACTION_NDEF_DISCOVERED -> {
                 val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
                 if (rawMsgs != null && rawMsgs.isNotEmpty()) String((rawMsgs[0] as NdefMessage).records[0].payload)

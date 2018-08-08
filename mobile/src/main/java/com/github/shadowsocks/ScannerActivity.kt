@@ -64,9 +64,8 @@ class ScannerActivity : AppCompatActivity(), Toolbar.OnMenuItemClickListener, Ba
 
     private fun navigateUp() {
         val intent = parentActivityIntent
-        if (shouldUpRecreateTask(intent) || isTaskRoot)
+        if (intent == null || !shouldUpRecreateTask(intent) && !isTaskRoot) finish() else
             TaskStackBuilder.create(this).addNextIntentWithParentStack(intent).startActivities()
-        else finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

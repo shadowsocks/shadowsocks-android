@@ -84,7 +84,7 @@ abstract class NativePluginProvider : ContentProvider() {
         return openFile(uri)
     }
 
-    override fun call(method: String?, arg: String?, extras: Bundle?): Bundle? = when (method) {
+    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? = when (method) {
         PluginContract.METHOD_GET_EXECUTABLE -> bundleOf(Pair(PluginContract.EXTRA_ENTRY, getExecutable()))
         else -> super.call(method, arg, extras)
     }

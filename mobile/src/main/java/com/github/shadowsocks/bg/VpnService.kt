@@ -26,7 +26,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.*
 import android.os.Build
-import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.App.Companion.app
@@ -127,7 +126,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
     private var listeningForDefaultNetwork = false
 
-    override fun onBind(intent: Intent): IBinder? = when (intent.action) {
+    override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
         else -> super<LocalDnsService.Interface>.onBind(intent)
     }

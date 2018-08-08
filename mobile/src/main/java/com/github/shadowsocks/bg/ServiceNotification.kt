@@ -91,7 +91,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         service.registerReceiver(lockReceiver, screenFilter)
     }
 
-    private fun update(action: String, forceShow: Boolean = false) {
+    private fun update(action: String?, forceShow: Boolean = false) {
         if (forceShow || service.data.state == BaseService.CONNECTED) when (action) {
             Intent.ACTION_SCREEN_OFF -> {
                 setVisible(false, forceShow)

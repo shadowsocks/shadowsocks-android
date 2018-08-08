@@ -165,9 +165,9 @@ object Commandline {
             result.add(current.toString())
         }
         if (state == inQuote || state == inDoubleQuote) {
-            throw IllegalArgumentException("unbalanced quotes in " + toProcess)
+            throw IllegalArgumentException("unbalanced quotes in $toProcess")
         }
-        if (lastTokenIsSlash) throw IllegalArgumentException("escape character following nothing in " + toProcess)
+        if (lastTokenIsSlash) throw IllegalArgumentException("escape character following nothing in $toProcess")
         return result.toTypedArray()
     }
 }

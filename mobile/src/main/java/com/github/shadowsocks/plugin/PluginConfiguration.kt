@@ -38,9 +38,9 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
                 while (iterator.hasNext()) {
                     val option = iterator.next()
                     when {
-                        option == "--nocomp" -> opt.put("nocomp", null)
-                        option.startsWith("--") -> opt.put(option.substring(2), iterator.next())
-                        else -> throw IllegalArgumentException("Unknown kcptun parameter: " + option)
+                        option == "--nocomp" -> opt["nocomp"] = null
+                        option.startsWith("--") -> opt[option.substring(2)] = iterator.next()
+                        else -> throw IllegalArgumentException("Unknown kcptun parameter: $option")
                     }
                 }
             } catch (exc: Exception) {

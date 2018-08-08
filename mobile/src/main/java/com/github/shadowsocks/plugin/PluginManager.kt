@@ -152,7 +152,7 @@ object PluginManager {
 
     private fun initNativeFast(cr: ContentResolver, options: PluginOptions, uri: Uri): String {
         val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null,
-                bundleOf(Pair(PluginContract.EXTRA_OPTIONS, options.id))).getString(PluginContract.EXTRA_ENTRY)
+                bundleOf(Pair(PluginContract.EXTRA_OPTIONS, options.id)))!!.getString(PluginContract.EXTRA_ENTRY)!!
         check(File(result).canExecute())
         return result
     }
@@ -173,7 +173,7 @@ object PluginManager {
                 val path = cursor.getString(0)
                 val file = File(pluginDir, path)
                 check(file.absolutePath.startsWith(pluginDirPath))
-                cr.openInputStream(uri.buildUpon().path(path).build()).use { inStream ->
+                cr.openInputStream(uri.buildUpon().path(path).build())!!.use { inStream ->
                     file.outputStream().use { outStream -> inStream.copyTo(outStream) }
                 }
                 list += Commandline.toString(arrayOf("chmod", cursor.getString(1), file.absolutePath))

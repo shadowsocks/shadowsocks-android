@@ -38,7 +38,7 @@ class PluginOptions : HashMap<String, String?> {
         @Suppress("NAME_SHADOWING")
         var parseId = parseId
         if (options.isNullOrEmpty()) return
-        val tokenizer = StringTokenizer(options + ';', "\\=;", true)
+        val tokenizer = StringTokenizer("$options;", "\\=;", true)
         val current = StringBuilder()
         var key: String? = null
         while (tokenizer.hasMoreTokens()) {
