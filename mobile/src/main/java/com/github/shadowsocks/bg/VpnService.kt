@@ -51,6 +51,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         private const val PRIVATE_VLAN = "172.19.0.%s"
         private const val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
 
+        /**
+         * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
+         */
         private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
 
         /**
