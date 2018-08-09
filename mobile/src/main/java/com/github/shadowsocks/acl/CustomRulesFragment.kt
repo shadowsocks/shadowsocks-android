@@ -127,23 +127,26 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = validate(position)
 
         private fun validate(template: Int = templateSelector.selectedItemPosition, value: Editable = editText.text) {
-            val error = when (Template.values()[template]) {
-                Template.Generic -> if (value.isEmpty()) "" else null
+            var message = ""
+            positive.isEnabled = when (Template.values()[template]) {
+                Template.Generic -> value.isNotEmpty()
                 Template.Domain -> try {
                     IDN.toASCII(value.toString(), IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
-                    null
+                    true
                 } catch (e: IllegalArgumentException) {
-                    e.cause?.message ?: e.message
+                    message = e.cause?.localizedMessage ?: e.localizedMessage
+                    false
                 }
                 Template.Url -> try {
-                    URL(value.toString())
-                    null
+                    val url = URL(value.toString())
+                    if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
+                    true
                 } catch (e: MalformedURLException) {
-                    e.message
+                    message = e.localizedMessage
+                    false
                 }
             }
-            inputLayout.error = error
-            positive.isEnabled = error == null
+            inputLayout.error = message
         }
 
         fun add(): Int? {

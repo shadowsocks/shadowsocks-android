@@ -137,6 +137,7 @@
   <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
   <string name="acl_rule_online_config">URL to online config</string>
   <string name="edit_rule">Edit rule</string>
+  <string name="cleartext_http_warning">Cleartext HTTP traffic is insecure</string>
 
   <!-- plugin -->
   <string name="plugin">Plugin</string>

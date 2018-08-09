@@ -156,7 +156,8 @@ class Acl {
             val child = Acl()
             try {
                 child.fromReader(url.openStream().bufferedReader(), bypass).flatten(depth - 1)
-            } catch (_: IOException) {
+            } catch (e: IOException) {
+                e.printStackTrace()
                 continue
             }
             if (bypass != child.bypass) {
