@@ -228,10 +228,10 @@ class Profile : Serializable {
         put("password", password)
         put("method", method)
         if (compat) return@apply
-        PluginConfiguration(plugin ?: "").selectedOptions.apply {
-            if (id.isNotEmpty()) {
-                put("plugin", id)
-                put("plugin_opts", toString())
+        PluginConfiguration(plugin ?: "").selectedOptions.also {
+            if (it.id.isNotEmpty()) {
+                put("plugin", it.id)
+                put("plugin_opts", it.toString())
             }
         }
         put("remarks", name)
