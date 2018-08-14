@@ -164,5 +164,36 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
         </receiver>
+
+        <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
+        <provider android:name="androidx.work.impl.WorkManagerInitializer"
+                  tools:node="remove"/>
+        <service android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
+                 android:process=":bg"
+                 android:directBootAware="true"/>
+        <service android:name="androidx.work.impl.background.systemjob.SystemJobService"
+                 android:process=":bg"
+                 android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
+        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
+                  android:process=":bg"
+                  android:directBootAware="true"/>
     </application>
 </manifest>

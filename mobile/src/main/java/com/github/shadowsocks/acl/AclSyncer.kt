@@ -27,18 +27,21 @@ import java.util.concurrent.TimeUnit
 
 class AclSyncer : Worker() {
     companion object {
-        fun schedule(route: String) = WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<AclSyncer>()
-                .addTag(route)
-                .setConstraints(Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.UNMETERED)
-                        .setRequiresCharging(true)
-                        .build())
-                .setInitialDelay(10, TimeUnit.SECONDS)
-                .build())
+        private const val KEY_ROUTE = "route"
+
+        fun schedule(route: String) = WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<AclSyncer>().run {
+            setInputData(Data.Builder().putString(KEY_ROUTE, route).build())
+            setConstraints(Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.UNMETERED)
+                    .setRequiresCharging(true)
+                    .build())
+            setInitialDelay(10, TimeUnit.SECONDS)
+            build()
+        })
     }
 
     override fun doWork(): Result = try {
-        val route = tags.asIterable().single()!!
+        val route = inputData.getString(KEY_ROUTE)!!
         val acl = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openStream().bufferedReader()
                 .use { it.readText() }
         Acl.getFile(route).printWriter().use { it.write(acl) }
