@@ -35,6 +35,7 @@ import com.takisoft.preferencex.PreferenceFragmentCompat
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.publicStore
+        DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
         val boot = findPreference(Key.isAutoConnect) as SwitchPreference
         boot.setOnPreferenceChangeListener { _, value ->
