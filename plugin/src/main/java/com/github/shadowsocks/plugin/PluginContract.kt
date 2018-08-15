@@ -79,6 +79,7 @@ object PluginContract {
      * Constant Value: "com.github.shadowsocks.plugin.EXTRA_NIGHT_MODE"
      */
     @AppCompatDelegate.NightMode
+    @Deprecated("On Android 9.0+, this will always return system as AOSP has support for night mode since 9.0.")
     const val EXTRA_NIGHT_MODE = "com.github.shadowsocks.plugin.EXTRA_NIGHT_MODE"
 
     /**
