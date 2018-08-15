@@ -30,6 +30,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.TcpFastOpen
+import com.github.shadowsocks.utils.remove
 import com.takisoft.preferencex.PreferenceFragmentCompat
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -48,7 +49,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         if (Build.VERSION.SDK_INT >= 24) canToggleLocked.setOnPreferenceChangeListener { _, newValue ->
             if (app.directBootSupported && newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
             true
-        } else canToggleLocked.parent!!.removePreference(canToggleLocked)
+        } else canToggleLocked.remove()
 
         val tfo = findPreference(Key.tfo) as SwitchPreference
         tfo.isChecked = DataStore.tcpFastOpen
@@ -63,6 +64,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             tfo.isEnabled = false
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
+        if (Build.VERSION.SDK_INT >= 28) findPreference(Key.nightMode).remove()
 
         val serviceMode = findPreference(Key.serviceMode)
         val portProxy = findPreference(Key.portProxy)

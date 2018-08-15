@@ -30,6 +30,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -184,7 +185,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
-        if (savedInstanceState != null &&
+        if (Build.VERSION.SDK_INT < 28 && savedInstanceState != null &&
                 DataStore.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
                 AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
@@ -226,7 +227,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
                 connection.disconnect()
                 connection.connect()
             }
-            Key.nightMode -> {
+            Key.nightMode -> if (Build.VERSION.SDK_INT < 28) {
                 val mode = DataStore.nightMode
                 AppCompatDelegate.setDefaultNightMode(when (mode) {
                     AppCompatDelegate.getDefaultNightMode() -> return

@@ -21,6 +21,7 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
+import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.PrivateDatabase
@@ -55,7 +56,7 @@ object DataStore {
     val directBootAware: Boolean get() = app.directBootSupported && canToggleLocked
     val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
     @AppCompatDelegate.NightMode
-    val nightMode get() = when (publicStore.getString(Key.nightMode)) {
+    val nightMode get() = when (if (Build.VERSION.SDK_INT < 28) publicStore.getString(Key.nightMode) else null) {
         Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
         Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
         Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
