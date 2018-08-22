@@ -23,9 +23,10 @@ package com.github.shadowsocks
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.preference.DataStore
 
@@ -39,13 +40,18 @@ class ProfileConfigActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_profile_config)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setTitle(R.string.profile_config)
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-        toolbar.setNavigationOnClickListener { onBackPressed() }
-        toolbar.inflateMenu(R.menu.profile_config_menu)
-        toolbar.setOnMenuItemClickListener(child)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar!!.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_navigation_close)
+        }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.profile_config_menu, menu)
+        return true
+    }
+    override fun onOptionsItemSelected(item: MenuItem?) = child.onOptionsItemSelected(item)
 
     override fun onBackPressed() {
         if (DataStore.dirty) AlertDialog.Builder(this)

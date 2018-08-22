@@ -32,6 +32,8 @@ import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyCharacterMap
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
@@ -285,6 +287,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             }
         }
     }
+
+    override fun onKeyShortcut(keyCode: Int, event: KeyEvent?) =
+            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment).toolbar.menu.let {
+                it.setQwertyMode(KeyCharacterMap.load(event?.deviceId ?: KeyCharacterMap.VIRTUAL_KEYBOARD).keyboardType
+                        != KeyCharacterMap.NUMERIC)
+                it.performShortcut(keyCode, event, 0)
+            }
 
     override fun onStop() {
         connection.listeningForBandwidth = false

@@ -30,7 +30,7 @@ import androidx.fragment.app.Fragment
  * @author Mygod
  */
 open class ToolbarFragment : Fragment() {
-    protected lateinit var toolbar: Toolbar
+    lateinit var toolbar: Toolbar
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

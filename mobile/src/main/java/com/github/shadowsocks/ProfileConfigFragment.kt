@@ -28,7 +28,6 @@ import android.os.Bundle
 import android.os.UserManager
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.preference.Preference
@@ -51,7 +50,7 @@ import com.github.shadowsocks.utils.Key
 import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 
-class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClickListener,
+class ProfileConfigFragment : PreferenceFragmentCompat(),
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
@@ -174,7 +173,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), Toolbar.OnMenuItemClic
         } else super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onMenuItemClick(item: MenuItem) = when (item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
         R.id.action_delete -> {
             val activity = requireActivity()
             AlertDialog.Builder(activity)
