@@ -11,7 +11,7 @@
         android:showAsAction="always"/>
     <item
         android:id="@+id/action_cut"
-        android:alphabeticShortcut="t"
+        android:alphabeticShortcut="x"
         android:icon="?attr/actionModeCutDrawable"
         android:numericShortcut="2"
         android:title="@android:string/cut"
