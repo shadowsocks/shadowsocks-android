@@ -61,6 +61,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     private lateinit var stats: Preference
     private lateinit var controlImport: Preference
     private lateinit var serviceMode: Preference
+    private lateinit var shareOverLan: Preference
     private lateinit var portProxy: Preference
     private lateinit var portLocalDns: Preference
     private lateinit var portTransproxy: Preference
@@ -114,11 +115,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         if (state == BaseService.STOPPED) {
             controlImport.isEnabled = true
             serviceMode.isEnabled = true
+            shareOverLan.isEnabled = true
             portProxy.isEnabled = true
             onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
         } else {
             controlImport.isEnabled = false
             serviceMode.isEnabled = false
+            shareOverLan.isEnabled = false
             portProxy.isEnabled = false
             portLocalDns.isEnabled = false
             portTransproxy.isEnabled = false
@@ -168,6 +171,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         }
 
         serviceMode = findPreference(Key.serviceMode)
+        shareOverLan = findPreference(Key.shareOverLan)
         portProxy = findPreference(Key.portProxy)
         portLocalDns = findPreference(Key.portLocalDns)
         portTransproxy = findPreference(Key.portTransproxy)

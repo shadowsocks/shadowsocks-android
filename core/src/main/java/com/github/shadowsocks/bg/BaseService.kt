@@ -256,7 +256,7 @@ object BaseService {
             val cmd = buildAdditionalArguments(arrayListOf(
                     File((this as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                     "-u",
-                    "-b", "127.0.0.1",
+                    "-b", DataStore.listenAddress,
                     "-l", DataStore.portProxy.toString(),
                     "-t", "600",
                     "-c", data.buildShadowsocksConfig().absolutePath))

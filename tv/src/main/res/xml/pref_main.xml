@@ -40,6 +40,9 @@
             android:defaultValue="vpn"
             android:summary="%s"
             android:title="@string/service_mode"/>
+        <SwitchPreference
+            android:key="shareOverLan"
+            android:title="@string/share_over_lan"/>
         <com.takisoft.preferencex.AutoSummaryEditTextPreference
             android:key="portProxy"
             android:inputType="number"
