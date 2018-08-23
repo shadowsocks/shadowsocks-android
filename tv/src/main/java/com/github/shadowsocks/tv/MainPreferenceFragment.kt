@@ -22,6 +22,7 @@ package com.github.shadowsocks.tv
 
 import android.app.Activity
 import android.app.backup.BackupManager
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
@@ -238,7 +239,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
             true
         }
         Key.controlImport -> {
-            startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+            startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/json"
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
@@ -246,7 +247,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
             true
         }
         Key.controlExport -> {
-            startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/json"
                 putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
@@ -254,6 +255,18 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
             true
         }
         else -> super.onPreferenceTreeClick(preference)
+    }
+
+    private fun startFilesForResult(intent: Intent?, requestCode: Int) {
+        try {
+            startActivityForResult(intent, requestCode)
+        } catch (e: ActivityNotFoundException) {
+            Crashlytics.logException(e)
+            Toast.makeText(activity, R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
+        } catch (e: SecurityException) {
+            Crashlytics.logException(e)
+            Toast.makeText(activity, R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

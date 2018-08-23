@@ -5,10 +5,10 @@ jobs:
     docker:
       - image: shadowsocks/shadowsocks-android:circleci
     environment:
-      JVM_OPTS: -Xmx3.5g
+      JVM_OPTS: -Xmx5g
+    resource_class: medium+
     steps:
       - checkout
-      - run: git submodule sync
       - run: git submodule update --init --recursive
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
@@ -16,7 +16,7 @@ jobs:
           key: go-full-{{ checksum "~/code/.git/modules/core/src/overture/go/HEAD" }}
       - run:
           name: Run Build and Tests
-          command: ./gradlew goBuild assembleDebug check
+          command: ./gradlew assembleDebug check
       - save_cache:
           paths:
             - ~/.gradle
