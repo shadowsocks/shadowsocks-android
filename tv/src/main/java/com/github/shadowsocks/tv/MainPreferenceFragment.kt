@@ -192,6 +192,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     private fun populateProfiles() {
         ProfileManager.ensureNotEmpty()
         val profiles = ProfileManager.getAllProfiles()!!
+        fab.value = null
         fab.entries = profiles.map { it.formattedName }.toTypedArray()
         fab.entryValues = profiles.map { it.id.toString() }.toTypedArray()
     }
