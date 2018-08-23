@@ -16,7 +16,7 @@ jobs:
           key: go-full-{{ checksum "~/code/.git/modules/core/src/overture/go/HEAD" }}
       - run:
           name: Run Build and Tests
-          command: ./gradlew assembleDebug check
+          command: ./gradlew goBuild assembleDebug check
       - save_cache:
           paths:
             - ~/.gradle
