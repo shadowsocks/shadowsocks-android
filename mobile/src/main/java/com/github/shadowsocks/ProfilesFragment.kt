@@ -22,10 +22,7 @@ package com.github.shadowsocks
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
@@ -42,6 +39,7 @@ import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.*
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -383,7 +381,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_import_file -> {
-                startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+                startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/json"
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
@@ -404,7 +402,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_file -> {
-                startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/json"
                     putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
@@ -412,6 +410,18 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             else -> false
+        }
+    }
+
+    private fun startFilesForResult(intent: Intent?, requestCode: Int) {
+        try {
+            startActivityForResult(intent, requestCode)
+        } catch (e: ActivityNotFoundException) {
+            Crashlytics.logException(e)
+            (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
+        } catch (e: SecurityException) {
+            Crashlytics.logException(e)
+            (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
         }
     }
 

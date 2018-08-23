@@ -77,6 +77,7 @@
   <!-- alert category -->
   <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
+  <string name="file_manager_missing">Please install a file manager like MiXplorer</string>
   <string name="connect">Connect</string>
 
   <!-- menu category -->
