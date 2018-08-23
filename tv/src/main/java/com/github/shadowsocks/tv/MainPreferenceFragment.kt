@@ -61,6 +61,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     private lateinit var stats: Preference
     private lateinit var controlImport: Preference
     private lateinit var serviceMode: Preference
+    private lateinit var tfo: SwitchPreference
     private lateinit var shareOverLan: Preference
     private lateinit var portProxy: Preference
     private lateinit var portLocalDns: Preference
@@ -114,12 +115,14 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         this.state = state
         if (state == BaseService.STOPPED) {
             controlImport.isEnabled = true
+            tfo.isEnabled = true
             serviceMode.isEnabled = true
             shareOverLan.isEnabled = true
             portProxy.isEnabled = true
             onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
         } else {
             controlImport.isEnabled = false
+            tfo.isEnabled = false
             serviceMode.isEnabled = false
             shareOverLan.isEnabled = false
             portProxy.isEnabled = false
@@ -156,7 +159,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         }
         boot.isChecked = BootReceiver.enabled
 
-        val tfo = findPreference(Key.tfo) as SwitchPreference
+        tfo = findPreference(Key.tfo) as SwitchPreference
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean) {
