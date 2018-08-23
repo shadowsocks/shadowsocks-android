@@ -36,7 +36,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.util.forEach
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.datas
@@ -97,7 +96,7 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     }
 
     override fun onRetrieved(barcode: Barcode) = runOnUiThread {
-        Profile.findAllUrls(barcode.rawValue, app.currentProfile).forEach { ProfileManager.createProfile(it) }
+        Profile.findAllUrls(barcode.rawValue, Core.currentProfile).forEach { ProfileManager.createProfile(it) }
         onSupportNavigateUp()
     }
     override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
@@ -128,7 +127,7 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
-                val feature = app.currentProfile
+                val feature = Core.currentProfile
                 var success = false
                 for (uri in data!!.datas) try {
                     detector.detect(Frame.Builder().setBitmap(contentResolver.openBitmap(uri)).build())

@@ -29,7 +29,6 @@ import androidx.core.content.getSystemService
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 
@@ -52,8 +51,8 @@ class QuickToggleShortcut : Activity(), ShadowsocksConnection.Interface {
 
     override fun onServiceConnected(service: IShadowsocksService) {
         when (service.state) {
-            BaseService.STOPPED -> app.startService()
-            BaseService.CONNECTED -> app.stopService()
+            BaseService.STOPPED -> Core.startService()
+            BaseService.CONNECTED -> Core.stopService()
         }
         finish()
     }

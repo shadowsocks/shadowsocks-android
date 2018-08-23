@@ -1,5 +1,6 @@
 * 0.2.0:
-  * Refactor to AndroidX.
+  * Refactor to AndroidX;
+  * No longer depends on preference libraries.
 * 0.1.1:
   * Rewritten in Kotlin;
   * Fix assert not working;

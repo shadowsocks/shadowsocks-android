@@ -37,7 +37,7 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.Core
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
@@ -338,7 +338,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     }
 
     private val isEnabled get() = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED -> app.currentProfile?.route != Acl.CUSTOM_RULES
+        BaseService.CONNECTED -> Core.currentProfile?.route != Acl.CUSTOM_RULES
         BaseService.STOPPED -> true
         else -> false
     }
