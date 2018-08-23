@@ -25,9 +25,7 @@ android {
 
 dependencies {
     api "androidx.core:core-ktx:$androidxVersion"
-    api "androidx.preference:preference:$androidxVersion"
     api "com.google.android.material:material:$androidxVersion"
-    api "com.takisoft.preferencex:preferencex:$preferencexVersion"
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"

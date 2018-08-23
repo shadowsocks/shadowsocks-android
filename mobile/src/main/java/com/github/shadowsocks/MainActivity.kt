@@ -24,7 +24,6 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.nfc.NdefMessage
@@ -46,7 +45,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.App.Companion.app
 import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
@@ -61,7 +59,6 @@ import com.github.shadowsocks.widget.ServiceButton
 import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
-import java.util.*
 import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPreferenceDataStoreChangeListener,
@@ -69,9 +66,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     companion object {
         private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
-
-        fun pendingIntent(context: Context) = PendingIntent.getActivity(context, 0,
-                Intent(context, MainActivity::class.java).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0)
 
         var stateListener: ((Int) -> Unit)? = null
     }
@@ -103,10 +97,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-                app.handler.post { changeState(state, msg, true) }
+                Core.handler.post { changeState(state, msg, true) }
             }
             override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-                app.handler.post {
+                Core.handler.post {
                     stats.updateTraffic(txRate, rxRate, txTotal, rxTotal)
                     val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
                     if (state != BaseService.STOPPING)
@@ -114,7 +108,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
                 }
             }
             override fun trafficPersisted(profileId: Long) {
-                app.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
+                Core.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
             }
         }
     }
@@ -122,7 +116,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     private fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
         fab.changeState(state, animate)
         stats.changeState(state)
-        if (msg != null) snackbar(getString(R.string.vpn_error).format(Locale.ENGLISH, msg)).show()
+        if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
         this.state = state
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
@@ -133,7 +127,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
         super.binderDied()
-        app.handler.post {
+        Core.handler.post {
             connection.disconnect()
             Executable.killAll()
             connection.connect()
@@ -143,7 +137,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when {
             requestCode != REQUEST_CONNECT -> super.onActivityResult(requestCode, resultCode, data)
-            resultCode == Activity.RESULT_OK -> app.startService()
+            resultCode == Activity.RESULT_OK -> Core.startService()
             else -> {
                 snackbar().setText(R.string.vpn_permission_denied).show()
                 Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
@@ -167,18 +161,18 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         fab = findViewById(R.id.fab)
         fab.setOnClickListener {
             when {
-                state == BaseService.CONNECTED -> app.stopService()
+                state == BaseService.CONNECTED -> Core.stopService()
                 BaseService.usingVpnMode -> {
                     val intent = VpnService.prepare(this)
                     if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
                     else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
                 }
-                else -> app.startService()
+                else -> Core.startService()
             }
         }
 
         changeState(BaseService.IDLE)   // reset everything to init state
-        app.handler.post { connection.connect() }
+        Core.handler.post { connection.connect() }
         DataStore.publicStore.registerChangeListener(this)
 
         val intent = this.intent
@@ -200,7 +194,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             else -> null
         }
         if (sharedStr.isNullOrEmpty()) return
-        val profiles = Profile.findAllUrls(sharedStr, app.currentProfile).toList()
+        val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile).toList()
         if (profiles.isEmpty()) {
             snackbar().setText(R.string.profile_invalid_input).show()
             return
@@ -216,7 +210,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
         when (key) {
-            Key.serviceMode -> app.handler.post {
+            Key.serviceMode -> Core.handler.post {
                 connection.disconnect()
                 connection.connect()
             }
@@ -234,7 +228,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
                 R.id.profiles -> displayFragment(ProfilesFragment())
                 R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
                 R.id.about -> {
-                    app.analytics.logEvent("about", Bundle())
+                    Core.analytics.logEvent("about", Bundle())
                     displayFragment(AboutFragment())
                 }
                 R.id.faq -> {
@@ -251,7 +245,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     override fun onResume() {
         super.onResume()
-        app.remoteConfig.fetch()
+        Core.remoteConfig.fetch()
     }
 
     override fun onStart() {
@@ -288,6 +282,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect()
         BackupManager(this).dataChanged()
-        app.handler.removeCallbacksAndMessages(null)
+        Core.handler.removeCallbacksAndMessages(null)
     }
 }

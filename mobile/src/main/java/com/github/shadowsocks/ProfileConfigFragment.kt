@@ -33,7 +33,7 @@ import androidx.core.os.bundleOf
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.SwitchPreference
-import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
@@ -98,7 +98,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         }
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
-        receiver = app.listenForPackageChanges(false) { initPlugins() }
+        receiver = Core.listenForPackageChanges(false) { initPlugins() }
         DataStore.privateStore.registerChangeListener(this)
     }
 
