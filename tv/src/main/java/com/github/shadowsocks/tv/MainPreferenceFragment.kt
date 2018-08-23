@@ -86,12 +86,10 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg)
             override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-                Core.handler.post {
-                    stats.summary = getString(R.string.stat_summary,
-                            getString(R.string.speed, Formatter.formatFileSize(activity, txRate)),
-                            getString(R.string.speed, Formatter.formatFileSize(activity, rxRate)),
-                            Formatter.formatFileSize(activity, txTotal), Formatter.formatFileSize(activity, rxTotal))
-                }
+                stats.summary = getString(R.string.stat_summary,
+                        getString(R.string.speed, Formatter.formatFileSize(activity, txRate)),
+                        getString(R.string.speed, Formatter.formatFileSize(activity, rxRate)),
+                        Formatter.formatFileSize(activity, txTotal), Formatter.formatFileSize(activity, rxTotal))
             }
             override fun trafficPersisted(profileId: Long) { }
         }
