@@ -59,6 +59,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
 
     private lateinit var fab: ListPreference
     private lateinit var stats: Preference
+    private lateinit var controlImport: Preference
     private lateinit var serviceMode: Preference
     private lateinit var portProxy: Preference
     private lateinit var portLocalDns: Preference
@@ -113,10 +114,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         if (msg != null) Toast.makeText(activity, getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
         if (state == BaseService.STOPPED) {
+            controlImport.isEnabled = true
             serviceMode.isEnabled = true
             portProxy.isEnabled = true
             onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
         } else {
+            controlImport.isEnabled = false
             serviceMode.isEnabled = false
             portProxy.isEnabled = false
             portLocalDns.isEnabled = false
@@ -143,6 +146,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         fab = findPreference(Key.id) as ListPreference
         populateProfiles()
         stats = findPreference(Key.controlStats)
+        controlImport = findPreference(Key.controlImport)
 
         val boot = findPreference(Key.isAutoConnect) as SwitchPreference
         boot.setOnPreferenceChangeListener { _, value ->
