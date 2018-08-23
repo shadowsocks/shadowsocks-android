@@ -23,8 +23,8 @@ android {
         applicationId "com.github.shadowsocks.tv"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 100
-        versionName "1.0"
+        versionCode 4060210
+        versionName "4.6.2"
         testApplicationId "com.github.shadowsocks.tv.test"
         resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
     }
