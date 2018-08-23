@@ -228,7 +228,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN.format(Locale.ENGLISH, "2"),
                 "--netif-netmask", "255.255.255.0",
-                "--socks-server-addr", "127.0.0.1:${DataStore.portProxy}",
+                "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
                 "--tunfd", fd.toString(),
                 "--tunmtu", VPN_MTU.toString(),
                 "--sock-path", "sock_path",

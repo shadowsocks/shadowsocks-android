@@ -57,7 +57,6 @@ dependencies {
     implementation project(':core')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "androidx.leanback:leanback-preference:$androidxVersion"
-    implementation 'com.github.bumptech.glide:glide:3.8.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

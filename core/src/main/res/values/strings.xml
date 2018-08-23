@@ -11,6 +11,7 @@
   <string name="service_mode_proxy">Proxy only</string>
   <string name="service_mode_vpn">VPN</string>
   <string name="service_mode_transproxy">Transproxy</string>
+  <string name="share_over_lan">Share over LAN</string>
   <string name="port_proxy">SOCKS5 proxy port</string>
   <string name="port_local_dns">Local DNS port</string>
   <string name="port_transproxy">Transproxy port</string>

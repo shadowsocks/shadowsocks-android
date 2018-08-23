@@ -63,6 +63,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
     val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
     val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
+    val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, false)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())

@@ -42,7 +42,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
     private fun startDNSTunnel() {
         data.processes.start(listOf(File(applicationInfo.nativeLibraryDir, Executable.SS_TUNNEL).absolutePath,
                 "-t", "10",
-                "-b", "127.0.0.1",
+                "-b", DataStore.listenAddress,
                 "-u",
                 "-l", DataStore.portLocalDns.toString(),            // ss-tunnel listens on the same port as overture
                 "-L", data.profile!!.remoteDns.split(",").first().trim() + ":53",
@@ -58,7 +58,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
  redirector = iptables;
 }
 redsocks {
- local_ip = 127.0.0.1;
+ local_ip = ${DataStore.listenAddress};
  local_port = ${DataStore.portTransproxy};
  ip = 127.0.0.1;
  port = ${DataStore.portProxy};
