@@ -265,12 +265,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
                 for (uri in data!!.datas) try {
                     Profile.parseJson(activity.contentResolver.openInputStream(uri)!!.bufferedReader().readText(),
                             feature).forEach {
-                        ProfileManager.createProfile(it)
                         // if two profiles has the same address, treat them as the same profile and copy stats over
                         profiles?.get(it.formattedAddress)?.apply {
                             it.tx = tx
                             it.rx = rx
                         }
+                        ProfileManager.createProfile(it)
                     }
                 } catch (e: Exception) {
                     printLog(e)
