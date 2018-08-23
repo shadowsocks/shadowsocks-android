@@ -13,6 +13,7 @@
     <application
         android:name=".App"
         android:theme="@style/Theme.Shadowsocks.TV"
+        tools:ignore="MissingTvBanner"
         tools:replace="theme">
         <activity
             android:name=".MainActivity"

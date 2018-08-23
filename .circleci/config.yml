@@ -33,5 +33,14 @@ jobs:
           path: tv/build/outputs/apk
           destination: apk/tv
       - store_artifacts:
+          path: core/build/reports
+          destination: reports/core
+      - store_artifacts:
           path: mobile/build/reports
-          destination: reports
+          destination: reports/mobile
+      - store_artifacts:
+          path: plugin/build/reports
+          destination: reports/plugin
+      - store_artifacts:
+          path: tv/build/reports
+          destination: reports/tv
