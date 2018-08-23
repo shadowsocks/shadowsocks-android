@@ -40,7 +40,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
-    private val tester = HttpsTest(statusText::setText) { (context as MainActivity).snackbar(it).show() }
+    private val tester by lazy { HttpsTest(statusText::setText) { (context as MainActivity).snackbar(it).show() } }
 
     override fun getBehavior() = object : Behavior() {
         val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
