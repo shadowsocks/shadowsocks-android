@@ -79,6 +79,7 @@ class GuardedProcessPool {
 
                     if (SystemClock.elapsedRealtime() - startTime < 1000) {
                         Crashlytics.log(Log.WARN, TAG, "process exit too fast, stop guard: $cmdName")
+                        break
                     }
                 }
             } catch (_: InterruptedException) {
