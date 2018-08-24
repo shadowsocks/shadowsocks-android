@@ -87,7 +87,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         private set
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
         object : IShadowsocksServiceCallback.Stub() {
-            override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg)
+            override fun stateChanged(state: Int, profileName: String?, msg: String?) {
+                Core.handler.post { changeState(state, msg) }
+            }
             override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
                 stats.summary = getString(R.string.stat_summary,
                         getString(R.string.speed, Formatter.formatFileSize(activity, txRate)),
