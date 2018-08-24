@@ -395,6 +395,7 @@ object BaseService {
                     // Clean up
                     killProcesses()
 
+                    // it's hard to resolve DNS on a specific interface so we'll do it here
                     if (!profile.host.isNumericAddress()) {
                         thread("BaseService-resolve") {
                             profile.host = InetAddress.getByName(profile.host).hostAddress ?: ""
