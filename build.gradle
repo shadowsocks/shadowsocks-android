@@ -11,7 +11,7 @@ buildscript {
         buildToolsVersion = '28.0.2'
         androidxVersion = '1.0.0-rc01'
         roomVersion = '2.0.0-rc01'
-        workVersion = '1.0.0-alpha06'
+        workVersion = '1.0.0-alpha07'
         preferencexVersion = '1.0.0-alpha2'
         junitVersion = '4.12'
         androidTestVersion = '1.1.0-alpha4'
@@ -27,7 +27,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.0-beta05'
+        classpath 'com.android.tools.build:gradle:3.2.0-rc02'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
         classpath 'com.google.gms:google-services:4.1.0'
         classpath 'io.fabric.tools:gradle:1.25.4'
