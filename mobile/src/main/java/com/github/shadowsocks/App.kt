@@ -136,7 +136,6 @@ class App : Application() {
                 }
             DataStore.publicStore.putLong(Key.assetUpdateTime, info.lastUpdateTime)
         }
-        if (Build.VERSION.SDK_INT < 28) AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
         updateNotificationChannels()
     }
 

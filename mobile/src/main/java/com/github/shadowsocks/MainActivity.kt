@@ -22,7 +22,6 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.app.PendingIntent
-import android.app.UiModeManager
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -30,18 +29,15 @@ import android.content.Intent
 import android.net.VpnService
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.updateLayoutParams
@@ -185,11 +181,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
-        if (Build.VERSION.SDK_INT < 28 && savedInstanceState != null &&
-                DataStore.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -226,15 +217,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             Key.serviceMode -> app.handler.post {
                 connection.disconnect()
                 connection.connect()
-            }
-            Key.nightMode -> if (Build.VERSION.SDK_INT < 28) {
-                val mode = DataStore.nightMode
-                AppCompatDelegate.setDefaultNightMode(when (mode) {
-                    AppCompatDelegate.getDefaultNightMode() -> return
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> getSystemService<UiModeManager>()!!.nightMode
-                    else -> mode
-                })
-                recreate()
             }
         }
     }

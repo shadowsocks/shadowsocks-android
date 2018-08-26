@@ -64,7 +64,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             tfo.isEnabled = false
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
-        if (Build.VERSION.SDK_INT >= 28) findPreference(Key.nightMode).remove()
 
         val serviceMode = findPreference(Key.serviceMode)
         val portProxy = findPreference(Key.portProxy)
