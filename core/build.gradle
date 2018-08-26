@@ -73,7 +73,7 @@ dependencies {
     api "android.arch.work:work-runtime-ktx:$workVersion"
     api "androidx.preference:preference:$androidxVersion"
     api "androidx.room:room-runtime:$roomVersion"
-    api 'com.crashlytics.sdk.android:crashlytics:2.9.4'
+    api 'com.crashlytics.sdk.android:crashlytics:2.9.5'
     api 'com.google.firebase:firebase-config:16.0.0'
     api 'com.google.firebase:firebase-core:16.0.0'
     api 'com.squareup.okhttp3:okhttp:3.11.0'
