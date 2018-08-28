@@ -62,4 +62,9 @@
             app:pref_summaryHasText="%s"
             android:title="@string/port_transproxy"/>
     </PreferenceCategory>
+    <Preference android:title="@string/about" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://raw.githubusercontent.com/shadowsocks/shadowsocks-android/master/LICENSE" />
+    </Preference>
 </PreferenceScreen>
