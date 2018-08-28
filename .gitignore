@@ -17,8 +17,5 @@ core/src/overture/src/github.com/Sirupsen
 core/src/overture/src/github.com/miekg
 core/src/overture/src/golang.org
 
-# work in progress
-tv/
-
 # release apks
 *.apk

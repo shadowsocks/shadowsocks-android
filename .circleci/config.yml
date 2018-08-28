@@ -5,10 +5,10 @@ jobs:
     docker:
       - image: shadowsocks/shadowsocks-android:circleci
     environment:
-      JVM_OPTS: -Xmx3200m
+      JVM_OPTS: -Xmx5g
+    resource_class: medium+
     steps:
       - checkout
-      - run: git submodule sync
       - run: git submodule update --init --recursive
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
@@ -28,7 +28,19 @@ jobs:
           key: go-full-{{ checksum "~/code/.git/modules/core/src/overture/go/HEAD" }}
       - store_artifacts:
           path: mobile/build/outputs/apk
-          destination: apk
+          destination: apk/mobile
+      - store_artifacts:
+          path: tv/build/outputs/apk
+          destination: apk/tv
+      - store_artifacts:
+          path: core/build/reports
+          destination: reports/core
       - store_artifacts:
           path: mobile/build/reports
-          destination: reports
+          destination: reports/mobile
+      - store_artifacts:
+          path: plugin/build/reports
+          destination: reports/plugin
+      - store_artifacts:
+          path: tv/build/reports
+          destination: reports/tv

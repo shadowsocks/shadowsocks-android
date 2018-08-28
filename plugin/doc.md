@@ -231,3 +231,7 @@ Plugin app must include this in their application tag: (which should be automati
 <meta-data android:name="com.github.shadowsocks.plugin.version"
            android:value="0.0.2"/>
 ```
+
+# Android TV
+
+Android TV client does not invoke configuration activities. Therefore your plugins should automatically work with them.

@@ -26,7 +26,7 @@ import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService as BaseTileService
 import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
-import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.Core
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksConnection
 import com.github.shadowsocks.aidl.IShadowsocksService
@@ -88,8 +88,8 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     private fun toggle() {
         val service = connection.service ?: return
         when (service.state) {
-            BaseService.STOPPED -> app.startService()
-            BaseService.CONNECTED -> app.stopService()
+            BaseService.STOPPED -> Core.startService()
+            BaseService.CONNECTED -> Core.stopService()
         }
     }
 }

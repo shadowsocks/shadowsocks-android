@@ -42,7 +42,7 @@ import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
@@ -59,7 +59,7 @@ class AppManager : AppCompatActivity() {
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: List<PackageInfo>? = null
         private fun getApps(pm: PackageManager) = synchronized(AppManager) {
-            if (receiver == null) receiver = app.listenForPackageChanges {
+            if (receiver == null) receiver = Core.listenForPackageChanges {
                 synchronized(AppManager) {
                     receiver = null
                     cachedApps = null
