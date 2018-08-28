@@ -62,4 +62,8 @@
             app:pref_summaryHasText="%s"
             android:title="@string/port_transproxy"/>
     </PreferenceCategory>
+
+    <Preference android:title="@string/about"
+        android:summary="shadowsocks.org/android"/>
+
 </PreferenceScreen>
