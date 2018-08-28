@@ -25,16 +25,14 @@
         <item>@string/acl_rule_online_config</item>
     </string-array>
 
-    <string-array name="night_modes">
-        <item>@string/night_mode_system</item>
-        <item>@string/night_mode_auto</item>
-        <item>@string/night_mode_off</item>
-        <item>@string/night_mode_on</item>
+    <string-array name="service_modes">
+        <item>@string/service_mode_proxy</item>
+        <item>@string/service_mode_vpn</item>
+        <item>@string/service_mode_transproxy</item>
     </string-array>
-    <string-array name="night_mode_values" translatable="false">
-        <item>system</item>
-        <item>auto</item>
-        <item>off</item>
-        <item>on</item>
+    <string-array name="service_mode_values" translatable="false">
+        <item>proxy</item>
+        <item>vpn</item>
+        <item>transproxy</item>
     </string-array>
 </resources>

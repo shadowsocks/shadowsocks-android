@@ -156,8 +156,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
             if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else
                 startActivityForResult(intent
-                        .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.selectedOptions.toString())
-                        .putExtra(PluginContract.EXTRA_NIGHT_MODE, DataStore.nightMode),
+                        .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.selectedOptions.toString()),
                         REQUEST_CODE_PLUGIN_CONFIGURE)
         } else super.onDisplayPreferenceDialog(preference)
     }

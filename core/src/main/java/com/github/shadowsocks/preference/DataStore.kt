@@ -62,13 +62,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
     val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
-    @AppCompatDelegate.NightMode
-    val nightMode get() = when (publicStore.getString(Key.nightMode)) {
-        Key.nightModeAuto -> AppCompatDelegate.MODE_NIGHT_AUTO
-        Key.nightModeOff -> AppCompatDelegate.MODE_NIGHT_NO
-        Key.nightModeOn -> AppCompatDelegate.MODE_NIGHT_YES
-        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-    }
     val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
     val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, false)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int

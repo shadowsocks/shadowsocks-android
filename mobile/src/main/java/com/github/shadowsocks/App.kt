@@ -35,7 +35,6 @@ class App : Application() {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         PreferenceFragmentCompat.registerPreferenceFragment(IconListPreference::class.java,
                 BottomSheetPreferenceDialogFragment::class.java)
-        AppCompatDelegate.setDefaultNightMode(DataStore.nightMode)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

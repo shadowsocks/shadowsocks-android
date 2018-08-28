@@ -21,7 +21,7 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.app.UiModeManager
+import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -36,11 +36,9 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.updateLayoutParams
@@ -179,11 +177,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
         val intent = this.intent
         if (intent != null) handleShareIntent(intent)
-        if (savedInstanceState != null &&
-                DataStore.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
-                AppCompatDelegate.getDefaultNightMode() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -220,15 +213,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             Key.serviceMode -> Core.handler.post {
                 connection.disconnect()
                 connection.connect()
-            }
-            Key.nightMode -> {
-                val mode = DataStore.nightMode
-                AppCompatDelegate.setDefaultNightMode(when (mode) {
-                    AppCompatDelegate.getDefaultNightMode() -> return
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> getSystemService<UiModeManager>()!!.nightMode
-                    else -> mode
-                })
-                recreate()
             }
         }
     }

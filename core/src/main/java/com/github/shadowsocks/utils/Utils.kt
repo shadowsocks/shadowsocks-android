@@ -32,6 +32,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.TypedValue
 import androidx.annotation.AttrRes
+import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
@@ -88,3 +89,5 @@ fun printLog(t: Throwable) {
     Crashlytics.logException(t)
     t.printStackTrace()
 }
+
+fun Preference.remove() = parent!!.removePreference(this)
