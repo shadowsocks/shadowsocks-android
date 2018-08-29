@@ -44,17 +44,7 @@ if [ ! -f "$ANDROID_X86_CC" ]; then
         --api $MIN_API --install-dir $ANDROID_X86_TOOLCHAIN
 fi
 
-if [ ! -f "$DIR/go/bin/go" ]; then
-    echo "Build the custom go"
-
-    pushd $DIR/go/src
-    try ./make.bash
-    popd
-fi
-
-export GOROOT=$DIR/go
 export GOPATH=$DIR
-export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 
 if [ ! -f "$TARGET/armeabi-v7a/liboverture.so" ] || [ ! -f "$TARGET/arm64-v8a/liboverture.so" ] ||
    [ ! -f "$TARGET/x86/liboverture.so" ]; then
