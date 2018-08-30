@@ -40,13 +40,15 @@ class TransproxyService : Service(), LocalDnsService.Interface {
             super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
 
     private fun startDNSTunnel() {
-        data.processes.start(listOf(File(applicationInfo.nativeLibraryDir, Executable.SS_TUNNEL).absolutePath,
+        val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.SS_TUNNEL).absolutePath,
                 "-t", "10",
                 "-b", DataStore.listenAddress,
                 "-u",
                 "-l", DataStore.portLocalDns.toString(),            // ss-tunnel listens on the same port as overture
                 "-L", data.profile!!.remoteDns.split(",").first().trim() + ":53",
-                "-c", data.shadowsocksConfigFile!!.absolutePath))   // config is already built by BaseService.Interface
+                "-c", data.shadowsocksConfigFile!!.absolutePath)    // config is already built by BaseService.Interface
+        if (DataStore.tcpFastOpen) cmd += "--fast-open"
+        data.processes.start(cmd)
     }
 
     private fun startRedsocksDaemon() {
