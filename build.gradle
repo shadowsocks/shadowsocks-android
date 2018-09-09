@@ -9,7 +9,7 @@ buildscript {
         sdkVersion = 28
         compileSdkVersion = 28
         buildToolsVersion = '28.0.2'
-        androidxVersion = '1.0.0-rc01'
+        androidxVersion = '1.0.0-rc02'
         roomVersion = '2.0.0-rc01'
         workVersion = '1.0.0-alpha08'
         preferencexVersion = '1.0.0-alpha2'
