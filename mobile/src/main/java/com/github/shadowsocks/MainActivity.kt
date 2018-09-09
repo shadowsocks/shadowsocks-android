@@ -21,7 +21,6 @@
 package com.github.shadowsocks
 
 import android.app.Activity
-import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -33,7 +32,6 @@ import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.MenuItem
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
@@ -76,7 +74,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     internal lateinit var drawer: DrawerLayout
     private lateinit var navigation: NavigationView
 
-    val snackbar by lazy { findViewById<View>(R.id.snackbar) }
+    val snackbar by lazy { findViewById<CoordinatorLayout>(R.id.snackbar) }
     fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
         view.updateLayoutParams<CoordinatorLayout.LayoutParams> {
             bottomMargin += snackbar.measuredHeight - fab.top - fab.translationY.roundToInt()

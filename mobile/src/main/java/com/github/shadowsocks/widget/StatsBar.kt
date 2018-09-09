@@ -41,8 +41,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
     private val tester by lazy { HttpsTest(statusText::setText) { (context as MainActivity).snackbar(it).show() } }
-
-    override fun getBehavior() = object : Behavior() {
+    private val behavior = object : Behavior() {
         val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
         override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
                                     dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int, type: Int) {
@@ -50,7 +49,9 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
             super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (Math.abs(dy) >= threshold) dy else 0,
                     dxUnconsumed, 0, type)
         }
+        public override fun slideUp(child: BottomAppBar) = super.slideUp(child)
     }
+    override fun getBehavior() = behavior
 
     override fun setOnClickListener(l: OnClickListener?) {
         statusText = findViewById(R.id.status)
@@ -71,7 +72,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         if (state != BaseService.CONNECTED) {
             updateTraffic(0, 0, 0, 0)
             tester.invalidate()
-        }
+        } else behavior.slideUp(this)
     }
 
     fun updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
