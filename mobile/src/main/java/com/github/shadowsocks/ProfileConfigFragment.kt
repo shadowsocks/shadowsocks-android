@@ -30,6 +30,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
+import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.SwitchPreference
@@ -152,13 +153,17 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference) {
-        if (preference.key == Key.pluginConfigure) {
-            val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
-            if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else
-                startActivityForResult(intent
-                        .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.selectedOptions.toString()),
-                        REQUEST_CODE_PLUGIN_CONFIGURE)
-        } else super.onDisplayPreferenceDialog(preference)
+        when (preference.key) {
+            Key.password -> displayPreferenceDialog(EditTextPreferenceDialogFragmentCompat(), preference.key)
+            Key.pluginConfigure -> {
+                val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
+                if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else
+                    startActivityForResult(intent
+                            .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.selectedOptions.toString()),
+                            REQUEST_CODE_PLUGIN_CONFIGURE)
+            }
+            else -> super.onDisplayPreferenceDialog(preference)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
