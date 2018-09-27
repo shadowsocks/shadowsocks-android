@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<lint>
-    <!-- Check is buggy: https://issuetracker.google.com/issues/112159117 -->
-    <issue id="AppCompatResource" severity="ignore" />
-</lint>
