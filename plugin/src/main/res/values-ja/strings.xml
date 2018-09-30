@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="proxy_cat">"サーバー設定"</string>
+<string name="feature_cat">"機能設定"</string>
+<string name="unsaved_changes_prompt">"変更は保存されておりません、保存しますか？"</string>
+<string name="yes">"はい"</string>
+<string name="no">"いいえ"</string>
+<string name="apply">"適応"</string>
+</resources>

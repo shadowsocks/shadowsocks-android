@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="proxy_cat">Server Settings</string>
+    <string name="feature_cat">Feature Settings</string>
+    <string name="unsaved_changes_prompt">Changes not saved. Do you want to save?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="apply">Apply</string>
+</resources>

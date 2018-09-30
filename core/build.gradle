@@ -1,0 +1,88 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+android {
+    buildToolsVersion rootProject.buildToolsVersion
+    compileSdkVersion rootProject.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.sdkVersion
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+                arguments "-j${Runtime.runtime.availableProcessors()}"
+            }
+        }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
+    }
+}
+
+task goBuild(type: Exec) {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        executable "cmd.exe"
+        args "/c", file("src/overture/make.bat").absolutePath , minSdkVersion
+    } else {
+        executable "sh"
+        args "-c", "src/overture/make.bash " + minSdkVersion
+    }
+}
+
+task goClean(type: Exec) {
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        executable "cmd.exe"
+        args "/c", file("src/overture/clean.bat").absolutePath
+    } else {
+        executable "sh"
+        args "-c", "src/overture/clean.bash"
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'generateJsonModelDebug' || task.name == 'generateJsonModelRelease')) {
+        task.dependsOn(goBuild)
+    }
+}
+
+dependencies {
+    api project(':plugin')
+    api "android.arch.work:work-runtime-ktx:$workVersion"
+    api "androidx.preference:preference:$androidxVersion"
+    api "androidx.room:room-runtime:$roomVersion"
+    api 'com.crashlytics.sdk.android:crashlytics:2.9.5'
+    api 'com.google.firebase:firebase-config:16.0.0'
+    api 'com.google.firebase:firebase-core:16.0.0'
+    api 'com.squareup.okhttp3:okhttp:3.11.0'
+    api "com.takisoft.preferencex:preferencex:$preferencexVersion"
+    api 'eu.chainfire:libsuperuser:1.0.0.201704021214'
+    kapt "androidx.room:room-compiler:$roomVersion"
+    testImplementation "androidx.room:room-testing:$roomVersion"
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "android.arch.work:work-testing:$workVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
+}

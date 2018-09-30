@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <selector android:enterFadeDuration="@android:integer/config_mediumAnimTime"
+                  android:exitFadeDuration="@android:integer/config_mediumAnimTime">
+            <item android:state_selected="true">
+                <color android:color="@color/background_selected"/>
+            </item>
+        </selector>
+    </item>
+    <item android:drawable="?android:attr/selectableItemBackground"/>
+</layer-list>

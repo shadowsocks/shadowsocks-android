@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:duplicateParentState="false">
+  <include layout="@layout/toolbar_light_dark"/>
+  <LinearLayout android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:elevation="1dp"
+                android:background="?android:colorBackground"
+                android:orientation="vertical"
+                tools:ignore="RtlSymmetry">
+
+    <Switch
+        android:id="@+id/onSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:paddingBottom="12dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="72dp"
+        android:paddingTop="12dp"
+        android:text="@string/on"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="18sp"/>
+
+    <Switch
+        android:id="@+id/bypassSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:paddingBottom="12dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="72dp"
+        android:paddingTop="12dp"
+        android:text="@string/bypass_apps"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="18sp"
+        android:tooltipText="@string/bypass_apps_summary"/>
+  </LinearLayout>
+  <androidx.coordinatorlayout.widget.CoordinatorLayout
+      android:id="@+id/snackbar"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1">
+    <ProgressBar android:id="@+id/loading"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="center" />
+    <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/list"
+            app:fastScrollEnabled="true"
+            app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb"
+            app:fastScrollHorizontalTrackDrawable="@drawable/fastscroll_line"
+            app:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb"
+            app:fastScrollVerticalTrackDrawable="@drawable/fastscroll_line"
+            tools:listitem="@layout/layout_apps_item"/>
+  </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

@@ -1,0 +1,70 @@
+import com.android.build.OutputFile
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+def getCurrentFlavor() {
+    String task = getGradle().getStartParameter().getTaskRequests().toString()
+    Matcher matcher = Pattern.compile("(assemble|generate)\\w*(Release|Debug)").matcher(task)
+    if (matcher.find()) return matcher.group(2).toLowerCase() else {
+        println "Warning: No match found for $task"
+        return "debug"
+    }
+}
+
+android {
+    buildToolsVersion rootProject.buildToolsVersion
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+        applicationId "com.github.shadowsocks.tv"
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.sdkVersion
+        versionCode 4060210
+        versionName "4.6.2"
+        testApplicationId "com.github.shadowsocks.tv.test"
+        resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
+    }
+    buildTypes {
+        debug {
+            multiDexEnabled true
+            pseudoLocalesEnabled true
+        }
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions.checkReleaseBuilds false
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a', 'x86'
+            universalApk true
+        }
+    }
+    sourceSets.main.jniLibs.srcDirs +=
+            new File(project(':core').buildDir, "intermediates/bundles/${getCurrentFlavor()}/jni")
+    sourceSets.main.jniLibs.srcDirs += new File(project(':core').projectDir, "src/overture/bin")
+}
+
+dependencies {
+    implementation project(':core')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.leanback:leanback-preference:$androidxVersion"
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+ext.abiCodes = ['armeabi-v7a': 1, 'arm64-v8a': 2, x86: 3]
+if (getCurrentFlavor() == 'release') android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        def offset = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+        if (offset != null) output.versionCodeOverride = variant.versionCode + offset
+    }
+}

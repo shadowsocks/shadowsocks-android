@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/material_grey_100"/>
+    <foreground>
+        <!-- 44dp icon scaled to 52dp in 72dp, padding = (1-52/44*24/72)/2 -->
+        <inset
+            android:drawable="@drawable/ic_qu_shadowsocks_foreground"
+            android:inset="30.303%"/>
+    </foreground>
+</adaptive-icon>

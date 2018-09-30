@@ -1,0 +1,47 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+apply plugin: 'com.github.ben-manes.versions'
+
+buildscript {
+    ext {
+        kotlinVersion = '1.2.71'
+        minSdkVersion = 21
+        sdkVersion = 28
+        compileSdkVersion = 28
+        buildToolsVersion = '28.0.3'
+        androidxVersion = '1.0.0'
+        roomVersion = '2.0.0-rc01'
+        workVersion = '1.0.0-alpha09'
+        preferencexVersion = '1.0.0'
+        junitVersion = '4.12'
+        androidTestVersion = '1.1.0-alpha4'
+        androidEspressoVersion = '3.1.0-alpha4'
+    }
+
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url 'https://maven.fabric.io/public'
+        }
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.2.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
+        classpath 'com.google.gms:google-services:4.1.0'
+        classpath 'io.fabric.tools:gradle:1.26.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

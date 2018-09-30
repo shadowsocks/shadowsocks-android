@@ -1,0 +1,42 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      - image: shadowsocks/shadowsocks-android:circleci
+    environment:
+      JVM_OPTS: -Xmx3.5g
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}
+      - run:
+          name: Run Build
+          command: ./gradlew assembleDebug
+      - run:
+          name: Run Tests
+          command: ./gradlew check
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.android/build-cache
+          key: jars-{{ checksum "build.gradle" }}
+      - store_artifacts:
+          path: mobile/build/outputs/apk
+          destination: apk/mobile
+      - store_artifacts:
+          path: tv/build/outputs/apk
+          destination: apk/tv
+      - store_artifacts:
+          path: core/build/reports
+          destination: reports/core
+      - store_artifacts:
+          path: mobile/build/reports
+          destination: reports/mobile
+      - store_artifacts:
+          path: plugin/build/reports
+          destination: reports/plugin
+      - store_artifacts:
+          path: tv/build/reports
+          destination: reports/tv
