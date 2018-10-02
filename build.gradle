@@ -10,7 +10,7 @@ buildscript {
         compileSdkVersion = 28
         buildToolsVersion = '28.0.3'
         androidxVersion = '1.0.0'
-        roomVersion = '2.0.0-rc01'
+        roomVersion = '2.0.0'
         workVersion = '1.0.0-alpha09'
         preferencexVersion = '1.0.0'
         junitVersion = '4.12'
@@ -30,7 +30,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.2.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
         classpath 'com.google.gms:google-services:4.1.0'
-        classpath 'io.fabric.tools:gradle:1.26.0'
+        classpath 'io.fabric.tools:gradle:1.26.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
