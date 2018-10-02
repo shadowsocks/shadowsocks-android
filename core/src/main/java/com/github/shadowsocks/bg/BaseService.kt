@@ -28,6 +28,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
+import android.os.SystemClock
 import android.util.Base64
 import android.util.Log
 import androidx.core.os.UserManagerCompat
@@ -81,7 +82,6 @@ object BaseService {
         @Volatile var pluginPath: String? = null
         val processes = GuardedProcessPool()
 
-        var timer: Timer? = null
         var trafficMonitorThread: TrafficMonitorThread? = null
 
         val callbacks = RemoteCallbackList<IShadowsocksServiceCallback>()
@@ -103,34 +103,34 @@ object BaseService {
             override fun registerCallback(cb: IShadowsocksServiceCallback) {
                 callbacks.register(cb)
             }
-            override fun startListeningForBandwidth(cb: IShadowsocksServiceCallback) {
-                if (bandwidthListeners.add(cb.asBinder())) {
-                    if (timer == null) {
-                        val t = Timer(true)
-                        t.schedule(object : TimerTask() {
-                            override fun run() {
-                                val profile = profile ?: return
-                                if (state == CONNECTED && TrafficMonitor.updateRate()) Core.handler.post {
-                                    if (bandwidthListeners.isNotEmpty()) {
-                                        val txRate = TrafficMonitor.txRate
-                                        val rxRate = TrafficMonitor.rxRate
-                                        val txTotal = TrafficMonitor.txTotal
-                                        val rxTotal = TrafficMonitor.rxTotal
-                                        val n = callbacks.beginBroadcast()
-                                        for (i in 0 until n) try {
-                                            val item = callbacks.getBroadcastItem(i)
-                                            if (bandwidthListeners.contains(item.asBinder()))
-                                                item.trafficUpdated(profile.id, txRate, rxRate, txTotal, rxTotal)
-                                        } catch (e: Exception) {
-                                            printLog(e)
-                                        }
-                                        callbacks.finishBroadcast()
-                                    }
-                                }
-                            }
-                        }, 1000, 1000)
-                        timer = t
+
+            private fun registerTimeout() =
+                    Core.handler.postAtTime(this::onTimeout, this, SystemClock.uptimeMillis() + 1000)
+            private fun onTimeout() {
+                val profile = profile
+                if (profile != null && state == CONNECTED && TrafficMonitor.updateRate() &&
+                        bandwidthListeners.isNotEmpty()) {
+                    val txRate = TrafficMonitor.txRate
+                    val rxRate = TrafficMonitor.rxRate
+                    val txTotal = TrafficMonitor.txTotal
+                    val rxTotal = TrafficMonitor.rxTotal
+                    val n = callbacks.beginBroadcast()
+                    for (i in 0 until n) try {
+                        val item = callbacks.getBroadcastItem(i)
+                        if (bandwidthListeners.contains(item.asBinder()))
+                            item.trafficUpdated(profile.id, txRate, rxRate, txTotal, rxTotal)
+                    } catch (e: Exception) {
+                        printLog(e)
                     }
+                    callbacks.finishBroadcast()
+                }
+                registerTimeout()
+            }
+
+            override fun startListeningForBandwidth(cb: IShadowsocksServiceCallback) {
+                val wasEmpty = bandwidthListeners.isEmpty()
+                if (bandwidthListeners.add(cb.asBinder())) {
+                    if (wasEmpty) registerTimeout()
                     TrafficMonitor.updateRate()
                     if (state == CONNECTED) cb.trafficUpdated(profile!!.id,
                             TrafficMonitor.txRate, TrafficMonitor.rxRate,
@@ -140,8 +140,7 @@ object BaseService {
 
             override fun stopListeningForBandwidth(cb: IShadowsocksServiceCallback) {
                 if (bandwidthListeners.remove(cb.asBinder()) && bandwidthListeners.isEmpty()) {
-                    timer!!.cancel()
-                    timer = null
+                    Core.handler.removeCallbacksAndMessages(this)
                 }
             }
 
