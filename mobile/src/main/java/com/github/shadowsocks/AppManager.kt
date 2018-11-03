@@ -230,7 +230,7 @@ class AppManager : AppCompatActivity() {
             R.id.action_import_clipboard -> {
                 val proxiedAppString = clipboard.primaryClip?.getItemAt(0)?.text?.toString()
                 if (!proxiedAppString.isNullOrEmpty()) {
-                    val i = proxiedAppString!!.indexOf('\n')
+                    val i = proxiedAppString.indexOf('\n')
                     try {
                         val (enabled, apps) = if (i < 0) Pair(proxiedAppString, "") else
                             Pair(proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))

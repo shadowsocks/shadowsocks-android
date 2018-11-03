@@ -50,7 +50,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
                           channel: String, private val visible: Boolean = false) {
     private val keyGuard = (service as Context).getSystemService<KeyguardManager>()!!
     private val nm by lazy { (service as Context).getSystemService<NotificationManager>()!! }
-    private val callback by lazy {
+    private val callback: IShadowsocksServiceCallback by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) { }   // ignore
             override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
