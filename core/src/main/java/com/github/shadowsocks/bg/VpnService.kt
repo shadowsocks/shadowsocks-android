@@ -27,6 +27,8 @@ import android.content.pm.PackageManager
 import android.net.*
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.system.ErrnoException
+import android.system.Os
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.JniHelper
@@ -78,15 +80,18 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             try {
                 socket.inputStream.read()
                 val fd = socket.ancillaryFileDescriptors!!.single()!!
-                val fdInt = getInt.invoke(fd) as Int
                 socket.outputStream.write(if (try {
                             val network = underlyingNetwork
                             if (network != null && Build.VERSION.SDK_INT >= 23) {
                                 network.bindSocket(fd)
                                 true
-                            } else protect(fdInt)
+                            } else protect(getInt.invoke(fd) as Int)
                         } finally {
-                            JniHelper.close(fdInt) // Trick to close file decriptor
+                            try {
+                                Os.close(fd)
+                            } catch (e: ErrnoException) {
+                                printLog(e)
+                            }
                         }) 0 else 1)
             } catch (e: IOException) {
                 printLog(e)

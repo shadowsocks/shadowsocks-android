@@ -68,10 +68,6 @@ JNIEXPORT jobject JNICALL
     return env->GetObjectField(process, ProcessImpl_exitValueMutex);
 }
 
-JNIEXPORT void JNICALL Java_com_github_shadowsocks_JniHelper_close(JNIEnv *env, jobject thiz, jint fd) {
-    close(fd);
-}
-
 JNIEXPORT jint JNICALL
         Java_com_github_shadowsocks_JniHelper_sendFd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;

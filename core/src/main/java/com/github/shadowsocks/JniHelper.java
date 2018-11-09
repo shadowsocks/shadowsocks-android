@@ -70,7 +70,6 @@ public class JniHelper {
     private static native Integer getExitValue(Process process);
     private static native Object getExitValueMutex(Process process);
     public static native int sendFd(int fd, @NonNull String path);
-    public static native void close(int fd);
     @Nullable
     public static native byte[] parseNumericAddress(@NonNull String str);
 }
