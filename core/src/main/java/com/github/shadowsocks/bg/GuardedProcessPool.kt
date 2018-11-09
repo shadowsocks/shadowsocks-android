@@ -70,7 +70,7 @@ class GuardedProcessPool {
 
                     process = ProcessBuilder(cmd)
                             .redirectErrorStream(true)
-                            .directory(Core.deviceStorage.filesDir)
+                            .directory(Core.deviceStorage.noBackupFilesDir)
                             .start()
 
                     streamLogger(process.inputStream, Log::i)
