@@ -148,7 +148,7 @@ class Acl {
     }
 
     fun fromId(id: String): Acl = try {
-        fromReader(Acl.getFile(id).bufferedReader())
+        fromReader(getFile(id).bufferedReader())
     } catch (_: IOException) { this }
 
     fun flatten(depth: Int): Acl {
