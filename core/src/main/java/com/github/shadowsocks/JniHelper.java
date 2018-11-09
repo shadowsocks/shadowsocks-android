@@ -48,27 +48,6 @@ public class JniHelper {
         System.loadLibrary("jni-helper");
     }
 
-    @Deprecated // Use Process.destroy() since API 24
-    public static void sigtermCompat(@NonNull Process process) throws Exception {
-        if (Build.VERSION.SDK_INT >= 24) throw new UnsupportedOperationException("Never call this method in OpenJDK!");
-        int errno = sigterm(process);
-        if (errno != 0) throw new ErrnoException("kill", errno);
-    }
-
-    @Deprecated // only implemented for before API 24
-    public static boolean waitForCompat(@NonNull Process process, long millis) throws Exception {
-        if (Build.VERSION.SDK_INT >= 24) throw new UnsupportedOperationException("Never call this method in OpenJDK!");
-        final Object mutex = getExitValueMutex(process);
-        synchronized (mutex) {
-            if (getExitValue(process) == null) mutex.wait(millis);
-            return getExitValue(process) != null;
-        }
-    }
-
-    public static native int sigkill(int pid);
-    private static native int sigterm(Process process);
-    private static native Integer getExitValue(Process process);
-    private static native Object getExitValueMutex(Process process);
     public static native int sendFd(int fd, @NonNull String path);
     @Nullable
     public static native byte[] parseNumericAddress(@NonNull String str);

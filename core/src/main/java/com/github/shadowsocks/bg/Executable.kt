@@ -20,11 +20,12 @@
 
 package com.github.shadowsocks.bg
 
+import android.system.ErrnoException
+import android.system.Os
 import android.text.TextUtils
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core.app
-import com.github.shadowsocks.JniHelper
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -44,11 +45,13 @@ object Executable {
             } catch (ignore: FileNotFoundException) {
                 continue
             }.split(Character.MIN_VALUE, limit = 2).first())
-            if (exe.parent == app.applicationInfo.nativeLibraryDir && EXECUTABLES.contains(exe.name)) {
-                val errno = JniHelper.sigkill(process.name.toInt())
-                if (errno != 0) {
-                    Crashlytics.log(Log.WARN, "kill",
-                            "SIGKILL ${exe.absolutePath} (${process.name}) failed with $errno")
+            if (exe.parent == app.applicationInfo.nativeLibraryDir && EXECUTABLES.contains(exe.name)) try {
+                Os.kill(process.name.toInt(), 9)    // SIGKILL
+            } catch (e: ErrnoException) {
+                if (e.errno != 3) {                 // ESRCH
+                    e.printStackTrace()
+                    Crashlytics.log(Log.WARN, "kill", "SIGKILL ${exe.absolutePath} (${process.name}) failed")
+                    Crashlytics.logException(e)
                 }
             }
         }
