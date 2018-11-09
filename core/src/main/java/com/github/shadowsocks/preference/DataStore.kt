@@ -21,7 +21,6 @@
 package com.github.shadowsocks.preference
 
 import android.os.Binder
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.PrivateDatabase

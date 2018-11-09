@@ -62,7 +62,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private const val SELECTED_URLS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
 
         // unescaped: (?<=^(\(\^\|\\\.\)|\^\(\.\*\\\.\)\?)).*(?=\$$)
-        private val PATTERN_DOMAIN = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
+        private val domainPattern = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
     }
 
     private enum class Template {
@@ -86,7 +86,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             inputLayout = view.findViewById(R.id.content_layout)
             when (item) {
                 is String -> {
-                    val match = PATTERN_DOMAIN.find(item)
+                    val match = domainPattern.find(item)
                     if (match != null) {
                         templateSelector.setSelection(Template.Domain.ordinal)
                         editText.setText(IDN.toUnicode(match.value.replace("\\.", "."),
