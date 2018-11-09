@@ -38,17 +38,17 @@
 
 package com.github.shadowsocks;
 
-import android.os.Build;
+import android.system.ErrnoException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.system.ErrnoException;
 
 public class JniHelper {
     static {
         System.loadLibrary("jni-helper");
     }
 
-    public static native int sendFd(int fd, @NonNull String path);
+    public static native void sendFd(int fd, @NonNull String path) throws ErrnoException;
     @Nullable
     public static native byte[] parseNumericAddress(@NonNull String str);
 }
