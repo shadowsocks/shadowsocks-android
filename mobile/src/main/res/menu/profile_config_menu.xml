@@ -5,12 +5,10 @@
           android:title="@string/delete"
           android:icon="@drawable/ic_action_delete"
           android:alphabeticShortcut="d"
-          android:numericShortcut="1"
           app:showAsAction="always"/>
     <item android:id="@+id/action_apply"
           android:title="@string/apply"
           android:icon="@drawable/ic_action_done"
           android:alphabeticShortcut="s"
-          android:numericShortcut="2"
           app:showAsAction="always"/>
 </menu>
