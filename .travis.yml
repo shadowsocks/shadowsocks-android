@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+    - docker
+
+before_install:
+    - docker pull shadowsocks/shadowsocks-android:circleci
+    - chmod -R a+wrx .
+
+script:
+    - docker run --rm -v ${PWD}:/build shadowsocks/shadowsocks-android:circleci bash -c "cd /build; ./gradlew assembleDebug check"
