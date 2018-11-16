@@ -1,5 +1,8 @@
 sudo: required
 
+addons:
+    artifacts: true
+
 services:
     - docker
 
