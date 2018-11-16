@@ -6,7 +6,7 @@ jobs:
       - image: shadowsocks/shadowsocks-android:circleci
     environment:
       JVM_OPTS: -Xmx3.5g
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process" -Dandroid.enableAapt2=false
+      GRADLE_OPTS: --max-workers=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process"
     steps:
       - checkout
       - run: git submodule update --init --recursive
