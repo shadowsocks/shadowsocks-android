@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks.bg
 
-import android.util.Log
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
@@ -98,7 +97,6 @@ object LocalDnsService {
                             put("OnlyPrimaryDNS", true)
                         }
                     }
-                    Log.e("tast===>","json:====> "+toString());
                     toString()
                 })
             }
