@@ -6,6 +6,7 @@
 <string name="profile">"配置文件"</string>
 <string name="profile_summary">"新建或切换到其他配置文件"</string>
 <string name="remote_dns">"远程 DNS"</string>
+<string name="private_dns">私人 DNS over-tls</string>
 <string name="stat_summary">"上传: \t%3$s\t↑\t%1$s
 下载: \t%4$s\t↓\t%2$s"</string>
 <string name="connection_test_pending">"检查网络连接"</string>

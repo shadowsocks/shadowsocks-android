@@ -5,6 +5,8 @@
 <!-- misc -->
 <string name="profile">"پروفایل"</string>
 <string name="connection_test_testing">"در حال آزمایش…"</string>
+<string name="remote_dns">"DNS از راه دور"</string>
+<string name="private_dns">"DNS خصوصی"</string>
 
 <!-- proxy category -->
 <string name="profile_name">"نام پروفایل"</string>

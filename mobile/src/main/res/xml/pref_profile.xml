@@ -53,6 +53,11 @@
                 android:icon="@drawable/ic_action_dns"
                 android:title="@string/remote_dns"
                 app:pref_summaryHasText="%s"/>
+        <AutoSummaryEditTextPreference
+            android:key="privateDns"
+            android:icon="@drawable/ic_action_dns"
+            android:title="@string/private_dns"
+            app:pref_summaryHasText="%s"/>
         <SwitchPreference
                 android:key="isIpv6"
                 android:icon="@drawable/ic_image_looks_6"

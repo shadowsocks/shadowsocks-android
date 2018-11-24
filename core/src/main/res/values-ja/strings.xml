@@ -6,6 +6,7 @@
 <string name="profile">"プロファイル"</string>
 <string name="profile_summary">"新規作成または既存ファイルを開く"</string>
 <string name="remote_dns">"リモートDNS"</string>
+<string name="private_dns">"プライベートDNS"</string>
 <string name="stat_summary">"送信済み: \t%3$s\t↑\t%1$s/s
 受信済み: \t%4$s\t↓\t%2$s/s"</string>
 <string name="connection_test_pending">"接続状況確認"</string>

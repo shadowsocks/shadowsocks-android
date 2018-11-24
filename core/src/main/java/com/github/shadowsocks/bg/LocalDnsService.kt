@@ -20,15 +20,16 @@
 
 package com.github.shadowsocks.bg
 
+import android.util.Log
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.parseNumericAddress
-import java.io.File
-import java.net.Inet6Address
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
+import java.net.Inet6Address
 
 object LocalDnsService {
     interface Interface : BaseService.Interface {
@@ -51,6 +52,17 @@ object LocalDnsService {
                 } else "udp")
             }
 
+            fun makeDnsTls(name: String, address: String,timeout: Int) = JSONObject().apply {
+                put("Name", name)
+                put("Address", when (address.parseNumericAddress()) {
+                    is Inet6Address -> "[$address]"
+                    else -> address
+                })
+                put("Timeout", timeout)
+                put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
+                put("Protocol", "tcp-tls")
+            }
+
             fun buildOvertureConfig(file: String) = file.also {
                 File(Core.deviceStorage.noBackupFilesDir, it).writeText(JSONObject().run {
                     put("BindAddress", "${DataStore.listenAddress}:${DataStore.portLocalDns}")
@@ -61,10 +73,15 @@ object LocalDnsService {
                     put("CacheSize", 4096)
                     val remoteDns = JSONArray(profile.remoteDns.split(",")
                             .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 12) })
-                    val localDns = JSONArray(arrayOf(
-                            makeDns("Primary-1", "208.67.222.222:443", 9, false),
-                            makeDns("Primary-2", "119.29.29.29:53", 9, false),
-                            makeDns("Primary-3", "114.114.114.114:53", 9, false)))
+                    val localDns :JSONArray
+                            if (profile.privateDns.isNullOrEmpty()){
+                                localDns =JSONArray(arrayOf(
+                                        makeDns("Primary-1", "208.67.222.222:443", 9, false),
+                                        makeDns("Primary-2", "119.29.29.29:53", 9, false),
+                                        makeDns("Primary-3", "114.114.114.114:53", 9, false)))
+                            }else{
+                                localDns=JSONArray(profile.privateDns!!.split(",").mapIndexed { i, dns -> makeDnsTls("Safe-$i", dns.trim(), 9) })
+                            }
                     when (profile.route) {
                         Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                             put("PrimaryDNS", localDns)
@@ -81,6 +98,7 @@ object LocalDnsService {
                             put("OnlyPrimaryDNS", true)
                         }
                     }
+                    Log.e("tast===>","json:====> "+toString());
                     toString()
                 })
             }
@@ -88,6 +106,7 @@ object LocalDnsService {
             if (!profile.udpdns) data.processes.start(buildAdditionalArguments(arrayListOf(
                     File(app.applicationInfo.nativeLibraryDir, Executable.OVERTURE).absolutePath,
                     "-c", buildOvertureConfig("overture.conf"))))
+
         }
     }
 }

@@ -49,6 +49,7 @@ import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import kotlin.jvm.java
 
 class ProfileConfigFragment : PreferenceFragmentCompat(),
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
@@ -75,6 +76,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         }
         val serviceMode = DataStore.serviceMode
         findPreference(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
+        findPreference(Key.privateDns).isEnabled = serviceMode != Key.modeProxy
         isProxyApps = findPreference(Key.proxyApps) as SwitchPreference
         isProxyApps.isEnabled = serviceMode == Key.modeVpn
         isProxyApps.setOnPreferenceClickListener {

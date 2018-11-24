@@ -27,6 +27,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.migration.RecreateSchemaMigration
 import com.github.shadowsocks.utils.Key
+import kotlin.jvm.java
 
 @Database(entities = [Profile::class, KeyValuePair::class], version = 26)
 abstract class PrivateDatabase : RoomDatabase() {
@@ -48,8 +49,8 @@ abstract class PrivateDatabase : RoomDatabase() {
     abstract fun keyValuePairDao(): KeyValuePair.Dao
 
     private object Migration26 : RecreateSchemaMigration(25, 26, "Profile",
-            "(`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `host` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `password` TEXT NOT NULL, `method` TEXT NOT NULL, `route` TEXT NOT NULL, `remoteDns` TEXT NOT NULL, `proxyApps` INTEGER NOT NULL, `bypass` INTEGER NOT NULL, `udpdns` INTEGER NOT NULL, `ipv6` INTEGER NOT NULL, `individual` TEXT NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `plugin` TEXT)",
-            "`id`, `name`, `host`, `remotePort`, `password`, `method`, `route`, `remoteDns`, `proxyApps`, `bypass`, `udpdns`, `ipv6`, `individual`, `tx`, `rx`, `userOrder`, `plugin`") {
+            "(`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `host` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `password` TEXT NOT NULL, `method` TEXT NOT NULL, `route` TEXT NOT NULL, `remoteDns` TEXT NOT NULL,`privateDns` TEXT NOT NULL, `proxyApps` INTEGER NOT NULL, `bypass` INTEGER NOT NULL, `udpdns` INTEGER NOT NULL, `ipv6` INTEGER NOT NULL, `individual` TEXT NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `plugin` TEXT)",
+            "`id`, `name`, `host`, `remotePort`, `password`, `method`, `route`, `remoteDns`,`privateDns`, `proxyApps`, `bypass`, `udpdns`, `ipv6`, `individual`, `tx`, `rx`, `userOrder`, `plugin`") {
         override fun migrate(database: SupportSQLiteDatabase) {
             super.migrate(database)
             PublicDatabase.Migration3.migrate(database)

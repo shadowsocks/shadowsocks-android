@@ -6,6 +6,7 @@
 <string name="profile">"Профиль"</string>
 <string name="profile_summary">"Переключить на другой профиль или добавить новые"</string>
 <string name="remote_dns">"Удалённый DNS"</string>
+<string name="private_dns">"частный DNS"</string>
 <string name="stat_summary">"Отправлено: \t%3$s\t↑\t%1$s
 Получено: \t\t\t%4$s\t↓\t%2$s"</string>
 <plurals name="bytes">
