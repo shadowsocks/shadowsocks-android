@@ -23,6 +23,7 @@
                 android:title="@string/remote_port"/>
         <AutoSummaryEditTextPreference
                 android:inputType="textPassword"
+                android:typeface="monospace"
                 app:pref_summaryPasswordSubstituteLength="0"
                 android:key="sitekey"
                 app:pref_summaryHasText="%s"

@@ -23,7 +23,7 @@ package com.github.shadowsocks.tasker
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.github.shadowsocks.App.Companion.app
+import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.ProfileManager
 
 class ActionListener : BroadcastReceiver() {
@@ -31,12 +31,12 @@ class ActionListener : BroadcastReceiver() {
         val settings = Settings.fromIntent(intent)
         var changed = false
         if (ProfileManager.getProfile(settings.profileId) != null) {
-            app.switchProfile(settings.profileId)
+            Core.switchProfile(settings.profileId)
             changed = true
         }
         if (settings.switchOn) {
-            app.startService()
-            if (changed) app.reloadService()
-        } else app.stopService()
+            Core.startService()
+            if (changed) Core.reloadService()
+        } else Core.stopService()
     }
 }

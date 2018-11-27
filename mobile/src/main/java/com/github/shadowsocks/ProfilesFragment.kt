@@ -22,10 +22,7 @@ package com.github.shadowsocks
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.nfc.NdefMessage
 import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
@@ -42,7 +39,7 @@ import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.*
-import com.github.shadowsocks.App.Companion.app
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -61,7 +58,7 @@ import org.json.JSONArray
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
         /**
-         * used for callback from ProfileManager and stateChanged from MainActivity
+         * used for callback from stateChanged from MainActivity
          */
         var instance: ProfilesFragment? = null
 
@@ -160,7 +157,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             text2.text = ArrayList<String>().apply {
                 if (!item.name.isNullOrEmpty()) this += item.formattedAddress
                 val id = PluginConfiguration(item.plugin ?: "").selected
-                if (id.isNotEmpty()) this += app.getString(R.string.profile_plugin, id)
+                if (id.isNotEmpty()) this += getString(R.string.profile_plugin, id)
             }.joinToString("\n")
             val context = requireContext()
             traffic.text = if (tx <= 0 && rx <= 0) null else getString(R.string.traffic,
@@ -202,10 +199,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             if (isEnabled) {
                 val activity = activity as MainActivity
                 val old = DataStore.profileId
-                app.switchProfile(item.id)
+                Core.switchProfile(item.id)
                 profilesAdapter.refreshId(old)
                 itemView.isSelected = true
-                if (activity.state == BaseService.CONNECTED) app.reloadService()
+                if (activity.state == BaseService.CONNECTED) Core.reloadService()
             }
         }
 
@@ -223,7 +220,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
     }
 
-    inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
+    inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>(), ProfileManager.Listener {
         internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
         private val updated = HashSet<Profile>()
 
@@ -237,10 +234,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         override fun getItemCount(): Int = profiles.size
         override fun getItemId(position: Int): Long = profiles[position].id
 
-        fun add(item: Profile) {
+        override fun onAdd(profile: Profile) {
             undoManager.flush()
             val pos = itemCount
-            profiles += item
+            profiles += profile
             notifyItemInserted(pos)
         }
 
@@ -291,12 +288,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             profiles[index] = ProfileManager.getProfile(id)!!
             notifyItemChanged(index)
         }
-        fun removeId(id: Long) {
-            val index = profiles.indexOfFirst { it.id == id }
+        override fun onRemove(profileId: Long) {
+            val index = profiles.indexOfFirst { it.id == profileId }
             if (index < 0) return
             profiles.removeAt(index)
             notifyItemRemoved(index)
-            if (id == DataStore.profileId) DataStore.profileId = 0  // switch to null profile
+            if (profileId == DataStore.profileId) DataStore.profileId = 0   // switch to null profile
         }
     }
 
@@ -324,7 +321,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         toolbar.inflateMenu(R.menu.profile_manager_menu)
         toolbar.setOnMenuItemClickListener(this)
 
-        if (!ProfileManager.isNotEmpty()) DataStore.profileId = ProfileManager.createProfile().id
+        ProfileManager.ensureNotEmpty()
         val profilesList = view.findViewById<RecyclerView>(R.id.list)
         val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = layoutManager
@@ -335,6 +332,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         profilesList.itemAnimator = animator
         profilesList.adapter = profilesAdapter
         instance = this
+        ProfileManager.listener = profilesAdapter
         undoManager = UndoSnackbarManager(activity as MainActivity, profilesAdapter::undo, profilesAdapter::commit)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         ItemTouchHelper.START or ItemTouchHelper.END) {
@@ -369,7 +367,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_import_clipboard -> {
                 try {
-                    val profiles = Profile.findAllUrls(clipboard.primaryClip!!.getItemAt(0).text, app.currentProfile)
+                    val profiles = Profile.findAllUrls(clipboard.primaryClip!!.getItemAt(0).text, Core.currentProfile)
                             .toList()
                     if (profiles.isNotEmpty()) {
                         profiles.forEach { ProfileManager.createProfile(it) }
@@ -383,7 +381,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_import_file -> {
-                startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+                startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/json"
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
@@ -392,7 +390,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_manual_settings -> {
                 startConfig(ProfileManager.createProfile(
-                        Profile().also { app.currentProfile?.copyFeatureSettingsTo(it) }))
+                        Profile().also { Core.currentProfile?.copyFeatureSettingsTo(it) }))
                 true
             }
             R.id.action_export_clipboard -> {
@@ -404,7 +402,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_file -> {
-                startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/json"
                     putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
@@ -415,11 +413,23 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
     }
 
+    private fun startFilesForResult(intent: Intent?, requestCode: Int) {
+        try {
+            startActivityForResult(intent, requestCode)
+        } catch (e: ActivityNotFoundException) {
+            Crashlytics.logException(e)
+            (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
+        } catch (e: SecurityException) {
+            Crashlytics.logException(e)
+            (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode != Activity.RESULT_OK) super.onActivityResult(requestCode, resultCode, data)
         else when (requestCode) {
             REQUEST_IMPORT_PROFILES -> {
-                val feature = app.currentProfile
+                val feature = Core.currentProfile
                 var success = false
                 val activity = activity as MainActivity
                 for (uri in data!!.datas) try {
@@ -477,6 +487,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
     override fun onDestroy() {
         instance = null
+        ProfileManager.listener = null
         super.onDestroy()
     }
 }

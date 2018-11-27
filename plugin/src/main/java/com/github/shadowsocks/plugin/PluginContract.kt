@@ -20,8 +20,6 @@
 
 package com.github.shadowsocks.plugin
 
-import androidx.appcompat.app.AppCompatDelegate
-
 /**
  * The contract between the plugin provider and host. Contains definitions for the supported actions, extras, etc.
  *
@@ -73,13 +71,6 @@ object PluginContract {
      * Constant Value: "com.github.shadowsocks.plugin.EXTRA_HELP_MESSAGE"
     </host_name> */
     const val EXTRA_HELP_MESSAGE = "com.github.shadowsocks.plugin.EXTRA_HELP_MESSAGE"
-    /**
-     * The lookup key for an @NightMode int that suggests a night mode that is being used in the main app.
-     *
-     * Constant Value: "com.github.shadowsocks.plugin.EXTRA_NIGHT_MODE"
-     */
-    @AppCompatDelegate.NightMode
-    const val EXTRA_NIGHT_MODE = "com.github.shadowsocks.plugin.EXTRA_NIGHT_MODE"
 
     /**
      * The metadata key to retrieve plugin id. Required for plugins.

@@ -60,15 +60,12 @@ IF "%ERRORLEVEL%" == 1 (
     EXIT 1
 )
 
-IF NOT EXIST %DIR%\go\bin\go.exe (
-    ECHO "Build the custom go"
-
-    PUSHD %DIR%\go\src
-    CALL make.bat
-    POPD
+WHERE go.exe
+IF NOT EXIST %GOROOT% (
+    ECHO "GOROOT not found"
+    EXIT 1
 )
 
-SET GOROOT=%DIR%\go
 SET GOPATH=%DIR%
 SET PATH=%GOROOT%\bin;%GOPATH%\bin;%PATH%
 
