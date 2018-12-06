@@ -7,7 +7,8 @@
 <string name="profile">"設定檔"</string>
 <string name="profile_summary">"切換至其他設定檔或新增新設定檔"</string>
 <string name="remote_dns">"遠程 DNS"</string>
-<string name="private_dns">私人 DNS</string>
+<string name="local_dns">"本地 DNS"</string>
+<string name="private_dns">"私人 DNS"</string>
 <string name="stat_summary">"傳送: \t%3$s\t↑\t%1$s/s
 接收: \t%4$s\t↓\t%2$s/s"</string>
 <plurals name="bytes">

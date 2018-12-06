@@ -76,6 +76,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         }
         val serviceMode = DataStore.serviceMode
         findPreference(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
+        findPreference(Key.localDns).isEnabled = serviceMode != Key.modeProxy
         findPreference(Key.privateDns).isEnabled = serviceMode != Key.modeProxy
         isProxyApps = findPreference(Key.proxyApps) as SwitchPreference
         isProxyApps.isEnabled = serviceMode == Key.modeVpn

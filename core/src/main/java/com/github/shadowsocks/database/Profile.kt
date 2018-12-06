@@ -124,7 +124,8 @@ class Profile : Serializable {
                     name = json.optString("remarks")
                     route = json.optString("route", route)
                     remoteDns = json.optString("remote_dns", remoteDns)
-                    privateDns = json.optString("safe_dns", privateDns)
+                    localDns = json.optString("local_dns", localDns)
+                    privateDns = json.optString("private_dns", privateDns)
                     ipv6 = json.optBoolean("ipv6", ipv6)
                     json.optJSONObject("proxy_apps")?.also {
                         proxyApps = it.optBoolean("enabled", proxyApps)
@@ -186,6 +187,7 @@ class Profile : Serializable {
     var method: String = "aes-256-cfb"
     var route: String = "all"
     var remoteDns: String = "8.8.8.8"
+    var localDns: String? = "114.114.114.114:53"
     var privateDns: String? = ""
     var proxyApps: Boolean = false
     var bypass: Boolean = false
@@ -242,7 +244,8 @@ class Profile : Serializable {
         put("remarks", name)
         put("route", route)
         put("remote_dns", remoteDns)
-        put("safe_dns", privateDns)
+        put("local_dns", localDns)
+        put("private_dns", privateDns)
         put("ipv6", ipv6)
         put("proxy_apps", JSONObject().apply {
             put("enabled", proxyApps)
@@ -262,6 +265,7 @@ class Profile : Serializable {
         DataStore.privateStore.putString(Key.password, password)
         DataStore.privateStore.putString(Key.route, route)
         DataStore.privateStore.putString(Key.remoteDns, remoteDns)
+        DataStore.privateStore.putString(Key.localDns, localDns)
         DataStore.privateStore.putString(Key.privateDns, privateDns)
         DataStore.privateStore.putString(Key.method, method)
         DataStore.proxyApps = proxyApps
@@ -281,6 +285,7 @@ class Profile : Serializable {
         method = DataStore.privateStore.getString(Key.method) ?: ""
         route = DataStore.privateStore.getString(Key.route) ?: ""
         remoteDns = DataStore.privateStore.getString(Key.remoteDns) ?: ""
+        localDns = DataStore.privateStore.getString(Key.localDns) ?: ""
         privateDns = DataStore.privateStore.getString(Key.privateDns) ?: ""
         proxyApps = DataStore.proxyApps
         bypass = DataStore.bypass

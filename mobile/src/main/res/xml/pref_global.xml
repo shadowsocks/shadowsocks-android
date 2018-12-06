@@ -32,7 +32,7 @@
             android:title="@string/port_proxy"/>
         <AutoSummaryEditTextPreference
             android:key="portLocalDns"
-            android:icon="@drawable/ic_action_dns"
+            android:icon="@drawable/ic_action_dns_local"
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"

@@ -6,7 +6,8 @@
 <string name="profile">"프로필"</string>
 <string name="profile_summary">"다른 프로필로 전환하거나 새 프로필 추가"</string>
 <string name="remote_dns">"원격 DNS"</string>
-<string name="private_dns">"은밀한 DNS"</string>
+<string name="local_dns">"로컬 DNS"</string>
+<string name="private_dns">"개인 DNS"</string>
 <string name="stat_summary">"송신: \t%3$s\t↑\t%1$s/s
 수신: \t%4$s\t↓\t%2$s/s"</string>
 <plurals name="bytes">

@@ -73,22 +73,28 @@ object LocalDnsService {
                     val remoteDns = JSONArray(profile.remoteDns.split(",")
                             .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 12) })
                     val localDns :JSONArray
-                            if (profile.privateDns.isNullOrEmpty()){
-                                localDns =JSONArray(arrayOf(
+                            if (!profile.localDns.isNullOrEmpty()) {
+                                localDns = JSONArray(profile.localDns!!.split(",").mapIndexed { i, dns -> makeDns("Primary-$i", dns.trim(), 9,false) })
+                            }else{
+                                localDns = JSONArray(arrayOf(
                                         makeDns("Primary-1", "208.67.222.222:443", 9, false),
                                         makeDns("Primary-2", "119.29.29.29:53", 9, false),
                                         makeDns("Primary-3", "114.114.114.114:53", 9, false)))
-                            }else{
-                                localDns=JSONArray(profile.privateDns!!.split(",").mapIndexed { i, dns -> makeDnsTls("Safe-$i", dns.trim(), 9) })
                             }
+                    val privateDns: JSONArray?;
+                    if (!profile.privateDns.isNullOrEmpty()){
+                        privateDns = JSONArray(profile.privateDns!!.split(",").mapIndexed { i, dns -> makeDnsTls("private-$i", dns.trim(), 9) })
+                    }else{
+                        privateDns = null;
+                    }
                     when (profile.route) {
                         Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
-                            put("PrimaryDNS", localDns)
+                            put("PrimaryDNS", privateDns?:localDns)
                             put("AlternativeDNS", remoteDns)
                             put("IPNetworkFile", "china_ip_list.txt")
                         }
                         Acl.CHINALIST -> {
-                            put("PrimaryDNS", localDns)
+                            put("PrimaryDNS", privateDns?:localDns)
                             put("AlternativeDNS", remoteDns)
                         }
                         else -> {

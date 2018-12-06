@@ -6,6 +6,7 @@
 <string name="profile">"Profil"</string>
 <string name="profile_summary">"Passer à un autre profil ou ajouter de nouveaux profils"</string>
 <string name="remote_dns">"DNS Distant"</string>
+<string name="local_dns">"DNS locaux"</string>
 <string name="private_dns">"DNS privé"</string>
 
 <string name="stat_summary">"Envoyé : \t%3$s\t↑\t%1$s
