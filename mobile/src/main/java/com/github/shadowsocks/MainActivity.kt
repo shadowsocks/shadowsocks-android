@@ -39,6 +39,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
@@ -56,6 +57,7 @@ import com.github.shadowsocks.widget.ServiceButton
 import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
@@ -74,7 +76,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     val snackbar by lazy { findViewById<CoordinatorLayout>(R.id.snackbar) }
     fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
-        view.translationY += fab.top + fab.translationY - snackbar.measuredHeight
+        view.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+            bottomMargin += snackbar.measuredHeight - fab.top - fab.translationY.roundToInt()
+        }
     }
 
     private val customTabsIntent by lazy {
