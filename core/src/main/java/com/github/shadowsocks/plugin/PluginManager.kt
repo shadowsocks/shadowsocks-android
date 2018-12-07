@@ -163,7 +163,7 @@ object PluginManager {
         var initialized = false
         fun entryNotFound(): Nothing = throw IndexOutOfBoundsException("Plugin entry binary not found")
         val list = ArrayList<String>()
-        val pluginDir = File(Core.deviceStorage.filesDir, "plugin")
+        val pluginDir = File(Core.deviceStorage.noBackupFilesDir, "plugin")
         (cr.query(uri, arrayOf(PluginContract.COLUMN_PATH, PluginContract.COLUMN_MODE), null, null, null)
                 ?: return null).use { cursor ->
             if (!cursor.moveToFirst()) entryNotFound()

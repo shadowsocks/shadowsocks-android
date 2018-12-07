@@ -46,7 +46,7 @@ class Acl {
 
         val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
-        fun getFile(id: String, context: Context = Core.deviceStorage) = File(context.filesDir, "$id.acl")
+        fun getFile(id: String, context: Context = Core.deviceStorage) = File(context.noBackupFilesDir, "$id.acl")
 
         var customRules: Acl
             get() {
@@ -148,7 +148,7 @@ class Acl {
     }
 
     fun fromId(id: String): Acl = try {
-        fromReader(Acl.getFile(id).bufferedReader())
+        fromReader(getFile(id).bufferedReader())
     } catch (_: IOException) { this }
 
     fun flatten(depth: Int): Acl {

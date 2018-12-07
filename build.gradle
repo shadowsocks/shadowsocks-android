@@ -4,14 +4,13 @@ apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     ext {
-        kotlinVersion = '1.3.0'
+        kotlinVersion = '1.3.10'
         minSdkVersion = 21
         sdkVersion = 28
         compileSdkVersion = 28
         buildToolsVersion = '28.0.3'
-        androidxVersion = '1.0.0'
         roomVersion = '2.0.0'
-        workVersion = '1.0.0-alpha10'
+        workVersion = '1.0.0-alpha11'
         preferencexVersion = '1.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.1.0'

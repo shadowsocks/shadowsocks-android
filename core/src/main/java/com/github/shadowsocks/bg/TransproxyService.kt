@@ -52,7 +52,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
     }
 
     private fun startRedsocksDaemon() {
-        File(Core.deviceStorage.filesDir, "redsocks.conf").writeText("""base {
+        File(Core.deviceStorage.noBackupFilesDir, "redsocks.conf").writeText("""base {
  log_debug = off;
  log_info = off;
  log = stderr;

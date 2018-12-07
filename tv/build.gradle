@@ -56,7 +56,7 @@ android {
 dependencies {
     implementation project(':core')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.leanback:leanback-preference:$androidxVersion"
+    implementation "androidx.leanback:leanback-preference:1.0.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

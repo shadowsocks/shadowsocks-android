@@ -27,6 +27,8 @@ import android.content.pm.PackageManager
 import android.net.*
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.system.ErrnoException
+import android.system.Os
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.JniHelper
@@ -72,21 +74,24 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
-        override val socketFile: File = File(Core.deviceStorage.filesDir, "protect_path")
+        override val socketFile: File = File(Core.deviceStorage.noBackupFilesDir, "protect_path")
 
         override fun accept(socket: LocalSocket) {
             try {
                 socket.inputStream.read()
                 val fd = socket.ancillaryFileDescriptors!!.single()!!
-                val fdInt = getInt.invoke(fd) as Int
                 socket.outputStream.write(if (try {
                             val network = underlyingNetwork
                             if (network != null && Build.VERSION.SDK_INT >= 23) {
                                 network.bindSocket(fd)
                                 true
-                            } else protect(fdInt)
+                            } else protect(getInt.invoke(fd) as Int)
                         } finally {
-                            JniHelper.close(fdInt) // Trick to close file decriptor
+                            try {
+                                Os.close(fd)
+                            } catch (e: ErrnoException) {
+                                printLog(e)
+                            }
                         }) 0 else 1)
             } catch (e: IOException) {
                 printLog(e)
@@ -164,8 +169,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
         super.startNativeProcesses()
 
-        val fd = startVpn()
-        if (!sendFd(fd)) throw IOException("sendFd failed")
+        sendFd(startVpn())
     }
 
     override fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> {
@@ -242,19 +246,27 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             cmd += "--dnsgw"
             cmd += "127.0.0.1:${DataStore.portLocalDns}"
         }
-        data.processes.start(cmd) { sendFd(fd) }
+        data.processes.start(cmd) {
+            try {
+                sendFd(fd)
+            } catch (e: ErrnoException) {
+                stopRunner(true, e.message)
+            }
+        }
         return fd
     }
 
-    private fun sendFd(fd: Int): Boolean {
-        if (fd != -1) {
-            var tries = 0
-            while (tries < 10) {
-                Thread.sleep(30L shl tries)
-                if (JniHelper.sendFd(fd, File(Core.deviceStorage.filesDir, "sock_path").absolutePath) != -1) return true
-                tries += 1
-            }
+    private fun sendFd(fd: Int) {
+        if (fd == -1) throw IOException("Invalid fd (-1)")
+        var tries = 0
+        val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
+        while (true) try {
+            Thread.sleep(30L shl tries)
+            JniHelper.sendFd(fd, path)
+            return
+        } catch (e: ErrnoException) {
+            if (tries >= 10) throw e
+            tries += 1
         }
-        return false
     }
 }

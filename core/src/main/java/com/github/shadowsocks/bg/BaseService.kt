@@ -20,18 +20,14 @@
 
 package com.github.shadowsocks.bg
 
-import android.annotation.TargetApi
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
-import android.os.IBinder
-import android.os.RemoteCallbackList
-import android.os.SystemClock
+import android.os.*
 import android.util.Base64
 import android.util.Log
-import androidx.core.os.UserManagerCompat
+import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
@@ -195,9 +191,8 @@ object BaseService {
                         .put("plugin_opts", plugin.toString())
             }
             // sensitive Shadowsocks config is stored in
-            return File(if (UserManagerCompat.isUserUnlocked(app)) app.filesDir else @TargetApi(24) {
-                Core.deviceStorage.noBackupFilesDir // only API 24+ will be in locked state
-            }, CONFIG_FILE).apply {
+            return File((if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()?.isUserUnlocked != true)
+                app else Core.deviceStorage).noBackupFilesDir, CONFIG_FILE).apply {
                 shadowsocksConfigFile = this
                 writeText(config.toString())
             }

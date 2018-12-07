@@ -294,6 +294,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
                     }
                 } catch (e: Exception) {
                     printLog(e)
+                    Toast.makeText(activity, e.localizedMessage, Toast.LENGTH_SHORT).show()
                 }
                 populateProfiles()
             }

@@ -4,7 +4,6 @@
     <item
         android:alphabeticShortcut="n"
         android:icon="@drawable/ic_action_note_add"
-        android:numericShortcut="1"
         android:title="@string/add_profile"
         app:showAsAction="always">
         <menu>
@@ -28,7 +27,6 @@
         android:alphabeticShortcut="s"
         android:icon="@drawable/ic_file_file_upload"
         android:title="@string/action_export_more"
-        android:numericShortcut="2"
         app:showAsAction="always">
         <menu>
             <item

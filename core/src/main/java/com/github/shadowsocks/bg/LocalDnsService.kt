@@ -52,7 +52,7 @@ object LocalDnsService {
             }
 
             fun buildOvertureConfig(file: String) = file.also {
-                File(Core.deviceStorage.filesDir, it).writeText(JSONObject().run {
+                File(Core.deviceStorage.noBackupFilesDir, it).writeText(JSONObject().run {
                     put("BindAddress", "${DataStore.listenAddress}:${DataStore.portLocalDns}")
                     put("RedirectIPv6Record", true)
                     put("DomainBase64Decode", false)

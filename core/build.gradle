@@ -71,14 +71,14 @@ tasks.whenTaskAdded { task ->
 dependencies {
     api project(':plugin')
     api "android.arch.work:work-runtime-ktx:$workVersion"
-    api "androidx.preference:preference:$androidxVersion"
+    api "androidx.preference:preference:1.0.0"
     api "androidx.room:room-runtime:$roomVersion"
-    api 'com.crashlytics.sdk.android:crashlytics:2.9.5'
+    api 'com.crashlytics.sdk.android:crashlytics:2.9.6'
     api 'com.google.firebase:firebase-config:16.0.0'
     api 'com.google.firebase:firebase-core:16.0.0'
-    api 'com.squareup.okhttp3:okhttp:3.11.0'
+    api 'com.squareup.okhttp3:okhttp:3.12.0'
     api "com.takisoft.preferencex:preferencex:$preferencexVersion"
-    api 'eu.chainfire:libsuperuser:1.0.0.201704021214'
+    api 'eu.chainfire:libsuperuser:1.0.0.201811281328'
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "androidx.room:room-testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"

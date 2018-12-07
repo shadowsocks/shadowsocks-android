@@ -116,7 +116,7 @@ object Core {
             for (dir in arrayOf("acl", "overture"))
                 try {
                     for (file in assetManager.list(dir)!!) assetManager.open("$dir/$file").use { input ->
-                        File(deviceStorage.filesDir, file).outputStream().use { output -> input.copyTo(output) }
+                        File(deviceStorage.noBackupFilesDir, file).outputStream().use { output -> input.copyTo(output) }
                     }
                 } catch (e: IOException) {
                     printLog(e)

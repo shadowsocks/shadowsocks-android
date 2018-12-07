@@ -4,7 +4,6 @@
     <item android:title="@string/action_add_rule"
           android:icon="@drawable/ic_av_playlist_add"
           android:alphabeticShortcut="n"
-          android:numericShortcut="1"
           app:showAsAction="always">
         <menu>
             <item android:id="@+id/action_manual_settings"

@@ -55,7 +55,7 @@ android {
 
 dependencies {
     implementation project(':core')
-    implementation "androidx.browser:browser:$androidxVersion"
+    implementation "androidx.browser:browser:1.0.0"
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
     implementation 'com.google.firebase:firebase-ads:15.0.1'
     implementation "com.takisoft.preferencex:preferencex-simplemenu:$preferencexVersion"
