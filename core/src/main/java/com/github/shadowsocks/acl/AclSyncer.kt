@@ -46,12 +46,12 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : Worker(conte
         val acl = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openStream().bufferedReader()
                 .use { it.readText() }
         Acl.getFile(route).printWriter().use { it.write(acl) }
-        Result.SUCCESS
+        Result.success()
     } catch (e: IOException) {
         e.printStackTrace()
-        Result.RETRY
+        Result.retry()
     } catch (e: Exception) {    // unknown failures, probably shouldn't retry
         e.printStackTrace()
-        Result.FAILURE
+        Result.failure()
     }
 }
