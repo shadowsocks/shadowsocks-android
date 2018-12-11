@@ -26,6 +26,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
+import android.os.DeadObjectException
 import android.text.format.Formatter
 import android.util.Log
 import android.widget.Toast
@@ -135,7 +136,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     }
 
     override val listenForDeath: Boolean get() = true
-    override fun onServiceConnected(service: IShadowsocksService) = changeState(service.state)
+    override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
+        service.state
+    } catch (_: DeadObjectException) {
+        BaseService.IDLE
+    })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
         super.binderDied()

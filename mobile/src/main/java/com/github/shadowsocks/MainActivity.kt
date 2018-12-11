@@ -28,6 +28,7 @@ import android.net.VpnService
 import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.os.DeadObjectException
 import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -117,7 +118,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
 
     override val listenForDeath: Boolean get() = true
-    override fun onServiceConnected(service: IShadowsocksService) = changeState(service.state)
+    override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
+        service.state
+    } catch (_: DeadObjectException) {
+        BaseService.IDLE
+    })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun binderDied() {
         super.binderDied()
