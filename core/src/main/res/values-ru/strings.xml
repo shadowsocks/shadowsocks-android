@@ -1,22 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 <string name="quick_toggle">"Подключение"</string>
-
-<!-- misc -->
-<string name="profile">"Профиль"</string>
-<string name="profile_summary">"Переключить на другой профиль или добавить новые"</string>
 <string name="remote_dns">"Удалённый DNS"</string>
 <string name="stat_summary">"Отправлено: \t%3$s\t↑\t%1$s
 Получено: \t\t\t%4$s\t↓\t%2$s"</string>
-<plurals name="bytes">
-<item quantity="one">"байт"</item>
-<item quantity="few">"байта"</item>
-<item quantity="many">"байт"</item>
-<item quantity="other">"байт"</item>
-</plurals>
-<string name="connection_test_pending">"Проверить соединение"</string>
 <string name="connection_test_testing">"Проверка…"</string>
-<string name="connection_test_available">"Успешно: задержка %d мс"</string>
 <string name="connection_test_error">"Сбой проверки интернет-соединения: %s"</string>
 <string name="connection_test_fail">"Интернет недоступен"</string>
 <string name="connection_test_error_status_code">"Код ошибки: #%d"</string>
@@ -40,6 +28,8 @@
 <string name="bypass_apps_summary">"Включите эту опцию для работы выбранных приложений в обход прокси"</string>
 <string name="auto_connect">"Авто-подключение"</string>
 <string name="auto_connect_summary">"Запускать Shadowsocks при включении"</string>
+
+<!-- Fuzzy -->
 <string name="tcp_fastopen_summary">"Переключение требует наличия ROOT прав"</string>
 <string name="tcp_fastopen_summary_unsupported">"Неподдерживаемая версия ядра: %s &lt; 3.7.1"</string>
 <string name="udp_dns">"Перенаправление DNS"</string>
@@ -55,11 +45,9 @@
 <string name="profile_invalid_input">"Не найдено действительных данных профиля."</string>
 
 <!-- alert category -->
-<string name="close">"Закрыть"</string>
 <string name="profile_empty">"Пожалуйста, выберите профиль"</string>
 <string name="proxy_empty">"Прокси/Пароль не должны быть пустыми"</string>
 <string name="connect">"Подключить"</string>
-<string name="remove_profile">"Удалить этот профиль %s?"</string>
 
 <!-- menu category -->
 <string name="profiles">"Профили"</string>
@@ -104,13 +92,14 @@
 <!-- status -->
 <string name="sent">"Отправлено:"</string>
 <string name="received">"Получено:"</string>
+
+<!-- status -->
 <string name="connecting">"Соединение…"</string>
 <string name="vpn_connected">"Подключено, нажмите для проверки соединения"</string>
 <string name="not_connected">"Не подключено"</string>
 
 <!-- acl -->
 <string name="custom_rules">"Пользовательские правила"</string>
-<string name="action_selection">"Выделение…"</string>
 <string name="action_add_rule">"Добавить правило…"</string>
 <string name="edit_rule">"Редактировать правило"</string>
 <string name="route_entry_all">"Все"</string>
@@ -133,6 +122,8 @@
 <!-- notification category -->
 <string name="service_vpn">"Служба VPN"</string>
 <string name="add_profile_methods_manual_settings">"Ручные настройки"</string>
+
+<!-- misc -->
 <string name="advanced">"Дополнительно"</string>
 <string name="service_mode">"Режим"</string>
 <string name="service_mode_proxy">"Только прокси"</string>
@@ -145,7 +136,20 @@
 <string name="vpn_permission_denied">"Нет разрешения на создание VPN соединения"</string>
 <string name="auto_connect_summary_v24">"Включить Shadowsocks во время запуска. Лучше использовать режим постоянной VPN."</string>
 <string name="speed">"%s/с"</string>
-<string name="direct_boot_aware_summary">"данные выбранного профиля будут хуже защищены"</string>
+<string name="direct_boot_aware">"Разрешить переключение на экране блокировки"</string>
+<string name="direct_boot_aware_summary">"Данные в выбранном профиле будут хуже защищены"</string>
 <string name="acl_rule_online_config">"URL конфигурации"</string>
-<string name="action_import_file">"Импортировать из файла..."</string>
+<string name="action_import_file">"Импортировать из файла…"</string>
+<string name="night_mode">"Ночной режим"</string>
+<string name="night_mode_system">"Как в системе"</string>
+<string name="night_mode_auto">"Авто"</string>
+<string name="night_mode_on">"Вкл"</string>
+<string name="night_mode_off">"Выкл"</string>
+<string name="send_email">"Отправить письмо"</string>
+<string name="action_export_more">"Экспорт…"</string>
+<string name="action_export_file">"Экспорт в файл…"</string>
+<string name="cleartext_http_warning">"Текстовый трафик HTTP не защищён"</string>
+<string name="share_over_lan">"Поделиться через LAN"</string>
+<string name="connection_test_pending">"Проверить подключение"</string>
+<string name="file_manager_missing">"Установите файловый менеджер"</string>
 </resources>
