@@ -26,7 +26,7 @@ android {
         versionCode 4060210
         versionName "4.6.2"
         testApplicationId "com.github.shadowsocks.tv.test"
-        resConfigs "fa", "fr", "ja", "ko", "ru", "zh-rCN", "zh-rTW"
+        resConfigs "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"
     }
     buildTypes {
         debug {
