@@ -34,6 +34,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.TimeUnit
 
 class GuardedProcessPool {
     companion object Dummy : IOException("Oopsie the developer has made a no-no") {
@@ -108,7 +109,16 @@ class GuardedProcessPool {
                             }
                         }
                     }
-                    process.destroy()
+
+                    process.destroy() // kill the process
+
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        val isKilled = process.waitFor(1L, TimeUnit.SECONDS) // wait for 1 second
+                        if (!isKilled) {
+                            process.destroyForcibly() // Force to kill the process if it's still alive
+                        }
+                    }
+
                     process.waitFor()   // ensure the process is destroyed
                 }
                 pushException(null)
