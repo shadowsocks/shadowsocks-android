@@ -169,7 +169,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
         super.startNativeProcesses()
 
-        sendFd(startVpn())
+        val fd = startVpn()
+
+        sendFd(fd)
     }
 
     override fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> {
@@ -246,13 +248,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             cmd += "--dnsgw"
             cmd += "127.0.0.1:${DataStore.portLocalDns}"
         }
-        data.processes.start(cmd) {
-            try {
-                sendFd(fd)
-            } catch (e: ErrnoException) {
-                stopRunner(true, e.message)
-            }
-        }
+        data.processes.start(cmd)
+
         return fd
     }
 
@@ -261,11 +258,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         var tries = 0
         val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
         while (true) try {
-            Thread.sleep(30L shl tries)
+            Thread.sleep(500L shl tries)
             JniHelper.sendFd(fd, path)
             return
         } catch (e: ErrnoException) {
-            if (tries >= 10) throw e
+            if (tries >= 3) throw e
             tries += 1
         }
     }
