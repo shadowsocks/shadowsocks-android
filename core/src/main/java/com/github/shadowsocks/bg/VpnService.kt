@@ -261,11 +261,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         var tries = 0
         val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
         while (true) try {
-            Thread.sleep(30L shl tries)
+            Thread.sleep(50L shl tries)
             JniHelper.sendFd(fd, path)
             return
         } catch (e: ErrnoException) {
-            if (tries >= 10) throw e
+            if (tries > 5) throw e
             tries += 1
         }
     }

@@ -24,7 +24,8 @@ static void throwException(JNIEnv* env, jclass exceptionClass, jmethodID ctor2, 
 
 static void throwErrnoException(JNIEnv* env, const char* functionName) {
     int error = errno;
-    static jclass ErrnoException = env->FindClass("android/system/ErrnoException");
+    static jclass ErrnoException = static_cast<jclass>(env->NewGlobalRef(
+            env->FindClass("android/system/ErrnoException")));
     static jmethodID ctor2 = env->GetMethodID(ErrnoException, "<init>", "(Ljava/lang/String;I)V");
     throwException(env, ErrnoException, ctor2, functionName, error);
 }
