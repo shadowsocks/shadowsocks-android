@@ -48,19 +48,7 @@ public class JniHelper {
         System.loadLibrary("jni-helper");
     }
 
-    public static void sendFd(int fd, @NonNull String path) throws ErrnoException {
-        int[] ret = sendFdInternal(fd, path);
-        if (ret != null) {
-            if (ret[0] == -1)
-                throw new ErrnoException("socket", ret[1]);
-            else if (ret[0] == -2)
-                throw new ErrnoException("connect", ret[1]);
-            else if (ret[0] == -3)
-                throw new ErrnoException("ancil_send_fd", ret[1]);
-        }
-    }
-
-    public static native int[] sendFdInternal(int fd, @NonNull String path) throws ErrnoException;
+    public static native void sendFd(int fd, @NonNull String path) throws ErrnoException;
     @Nullable
     public static native byte[] parseNumericAddress(@NonNull String str);
 }

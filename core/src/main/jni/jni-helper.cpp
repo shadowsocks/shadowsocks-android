@@ -10,26 +10,35 @@
 
 using namespace std;
 
-// return -1 for socket error
-// return -2 for connect error
-// return -3 for ancil_send_fd error
+// Based on: https://android.googlesource.com/platform/libcore/+/564c7e8/luni/src/main/native/libcore_io_Linux.cpp#256
+static void throwException(JNIEnv* env, jclass exceptionClass, jmethodID ctor2, const char* functionName, int error) {
+    jstring detailMessage = env->NewStringUTF(functionName);
+    if (detailMessage == NULL) {
+        // Not really much we can do here. We're probably dead in the water,
+        // but let's try to stumble on...
+        env->ExceptionClear();
+    }
+    env->Throw(reinterpret_cast<jthrowable>(env->NewObject(exceptionClass, ctor2, detailMessage, error)));
+    env->DeleteLocalRef(detailMessage);
+}
+
+static void throwErrnoException(JNIEnv* env, const char* functionName) {
+    int error = errno;
+    static jclass ErrnoException = env->FindClass("android/system/ErrnoException");
+    static jmethodID ctor2 = env->GetMethodID(ErrnoException, "<init>", "(Ljava/lang/String;I)V");
+    throwException(env, ErrnoException, ctor2, functionName, error);
+}
+
 #pragma clang diagnostic ignored "-Wunused-parameter"
 extern "C" {
-JNIEXPORT jintArray JNICALL
-Java_com_github_shadowsocks_JniHelper_sendFdInternal(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
+JNIEXPORT void JNICALL
+        Java_com_github_shadowsocks_JniHelper_sendFd(JNIEnv *env, jobject thiz, jint tun_fd, jstring path) {
     int fd;
     struct sockaddr_un addr;
     const char *sock_str = env->GetStringUTFChars(path, 0);
-    jint info[2] = {0};
-
-    jintArray ret = env->NewIntArray(2);
-    if (ret == nullptr) {
-        goto quit3;
-    }
 
     if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        info[0] = -1;
-        info[1] = errno;
+        throwErrnoException(env, "socket");
         goto quit2;
     }
 
@@ -38,23 +47,17 @@ Java_com_github_shadowsocks_JniHelper_sendFdInternal(JNIEnv *env, jobject thiz, 
     strncpy(addr.sun_path, sock_str, sizeof(addr.sun_path)-1);
 
     if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        info[0] = -2;
-        info[1] = errno;
+        throwErrnoException(env, "connect");
         goto quit;
     }
 
-    if (ancil_send_fd(fd, tun_fd)) {
-        info[0] = -3;
-        info[1] = errno;
-    }
+    if (ancil_send_fd(fd, tun_fd)) throwErrnoException(env, "ancil_send_fd");
 
 quit:
     close(fd);
 quit2:
     env->ReleaseStringUTFChars(path, sock_str);
-    env->SetIntArrayRegion(ret, 0, 2, info);
-quit3:
-    return ret;
+    return;
 }
 
 JNIEXPORT jbyteArray JNICALL
