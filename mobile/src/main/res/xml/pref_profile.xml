@@ -20,6 +20,7 @@
                 android:inputType="number"
                 android:maxLength="5"
                 app:pref_summaryHasText="%s"
+                android:singleLine="true"
                 android:title="@string/remote_port"/>
         <AutoSummaryEditTextPreference
                 android:inputType="textPassword"

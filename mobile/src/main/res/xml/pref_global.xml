@@ -29,6 +29,7 @@
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"
+            android:singleLine="true"
             android:title="@string/port_proxy"/>
         <AutoSummaryEditTextPreference
             android:key="portLocalDns"
@@ -36,12 +37,14 @@
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"
+            android:singleLine="true"
             android:title="@string/port_local_dns"/>
         <AutoSummaryEditTextPreference
             android:key="portTransproxy"
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"
+            android:singleLine="true"
             android:title="@string/port_transproxy"/>
     </PreferenceCategory>
 </PreferenceScreen>

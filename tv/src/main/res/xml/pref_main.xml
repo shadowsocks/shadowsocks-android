@@ -48,18 +48,21 @@
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"
+            android:singleLine="true"
             android:title="@string/port_proxy"/>
         <com.takisoft.preferencex.AutoSummaryEditTextPreference
             android:key="portLocalDns"
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"
+            android:singleLine="true"
             android:title="@string/port_local_dns"/>
         <com.takisoft.preferencex.AutoSummaryEditTextPreference
             android:key="portTransproxy"
             android:inputType="number"
             android:maxLength="5"
             app:pref_summaryHasText="%s"
+            android:singleLine="true"
             android:title="@string/port_transproxy"/>
     </PreferenceCategory>
 
