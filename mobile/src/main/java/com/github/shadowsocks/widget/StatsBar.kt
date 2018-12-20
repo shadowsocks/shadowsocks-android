@@ -49,7 +49,6 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
             super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (Math.abs(dy) >= threshold) dy else 0,
                     dxUnconsumed, 0, type)
         }
-        public override fun slideUp(child: BottomAppBar) = super.slideUp(child)
     }
     override fun getBehavior() = behavior
 
