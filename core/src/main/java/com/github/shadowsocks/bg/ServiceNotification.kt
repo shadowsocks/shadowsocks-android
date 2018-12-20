@@ -75,7 +75,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             .setContentTitle(profileName)
             .setContentIntent(Core.configureIntent(service))
             .setSmallIcon(R.drawable.ic_service_active)
-    private val style = NotificationCompat.BigTextStyle(builder)
+    private val style = NotificationCompat.BigTextStyle(builder).bigText("")
     private var isVisible = true
 
     init {
