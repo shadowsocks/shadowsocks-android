@@ -4,7 +4,7 @@
           tools:ignore="MissingLeanbackSupport">
 
     <uses-permission android:name="android.permission.NFC" />
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.touchscreen"
                   android:required="false"/>
@@ -101,5 +101,9 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
         </receiver>
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-9097031975646651~3330146721"/>
     </application>
 </manifest>
