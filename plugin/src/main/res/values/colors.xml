@@ -18,7 +18,8 @@
   <color name="material_primary_900">@color/material_blue_grey_900</color>
   <color name="material_accent_200">@color/material_green_a700</color>
 
-  <color name="color_primary">@color/material_blue_grey_500</color>
-  <color name="color_primary_dark">@color/material_blue_grey_700</color>
+  <color name="color_primary">@color/material_primary_500</color>
+  <color name="color_primary_dark">@color/material_primary_700</color>
+  <color name="color_primary_text">@color/material_primary_500</color>
   
 </resources>
