@@ -47,6 +47,7 @@ import com.github.shadowsocks.preference.PluginConfigurationDialogFragment
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+import com.google.android.material.snackbar.Snackbar
 import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
 
@@ -92,8 +93,9 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             DataStore.dirty = true
             pluginConfigure.isEnabled = newValue.isNotEmpty()
             pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
-            if (PluginManager.fetchPlugins()[newValue]?.trusted == false)
-                (activity as MainActivity).snackbar().setText(R.string.plugin_untrusted).show()
+            if (PluginManager.fetchPlugins()[newValue]?.trusted == false) {
+                Snackbar.make(view!!, R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
+            }
             true
         }
         pluginConfigure.onPreferenceChangeListener = this
