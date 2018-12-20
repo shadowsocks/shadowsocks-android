@@ -25,6 +25,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.os.RemoteException
 import com.github.shadowsocks.aidl.IShadowsocksService
@@ -68,8 +69,9 @@ class ShadowsocksConnection(private val instance: Interface) : ServiceConnection
         set(value) {
             val service = service
             if (listeningForBandwidth != value && service != null && instance.serviceCallback != null)
-                if (value) service.startListeningForBandwidth(instance.serviceCallback)
-                else service.stopListeningForBandwidth(instance.serviceCallback)
+                if (value) service.startListeningForBandwidth(instance.serviceCallback) else try {
+                    service.stopListeningForBandwidth(instance.serviceCallback)
+                } catch (_: DeadObjectException) { }
             field = value
         }
     var service: IShadowsocksService? = null
