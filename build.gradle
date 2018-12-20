@@ -10,7 +10,7 @@ buildscript {
         compileSdkVersion = 28
         buildToolsVersion = '28.0.3'
         roomVersion = '2.0.0'
-        workVersion = '1.0.0-alpha12'
+        workVersion = '1.0.0-beta01'
         preferencexVersion = '1.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.1.1'
