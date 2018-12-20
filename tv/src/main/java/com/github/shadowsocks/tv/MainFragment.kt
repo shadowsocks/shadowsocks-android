@@ -20,7 +20,11 @@
 
 package com.github.shadowsocks.tv
 
+import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.view.updateLayoutParams
 import androidx.leanback.preference.LeanbackPreferenceDialogFragment
 import androidx.leanback.preference.LeanbackSettingsFragment
 import androidx.preference.*
@@ -54,5 +58,12 @@ class MainFragment : LeanbackSettingsFragment() {
             return true
         }
         return super.onPreferenceDisplayDialog(caller, pref)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.findViewById<View>(R.id.settings_preference_fragment_container).updateLayoutParams {
+            width = ViewGroup.LayoutParams.MATCH_PARENT
+        }
     }
 }
