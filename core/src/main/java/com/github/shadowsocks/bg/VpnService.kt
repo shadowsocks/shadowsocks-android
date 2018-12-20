@@ -246,9 +246,13 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             cmd += "--dnsgw"
             cmd += "127.0.0.1:${DataStore.portLocalDns}"
         }
-
-        data.processes.start(cmd)
-
+        data.processes.start(cmd) {
+            try {
+                sendFd(fd)
+            } catch (e: ErrnoException) {
+                stopRunner(true, e.message)
+            }
+        }
         return fd
     }
 
