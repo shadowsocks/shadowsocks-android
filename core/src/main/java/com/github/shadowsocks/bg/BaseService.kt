@@ -191,7 +191,7 @@ object BaseService {
                         .put("plugin_opts", plugin.toString())
             }
             // sensitive Shadowsocks config is stored in
-            return File((if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()?.isUserUnlocked != true)
+            return File((if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()?.isUserUnlocked != false)
                 app else Core.deviceStorage).noBackupFilesDir, CONFIG_FILE).apply {
                 shadowsocksConfigFile = this
                 writeText(config.toString())
