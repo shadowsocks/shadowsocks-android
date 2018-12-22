@@ -28,8 +28,6 @@
                    android:value="true" />
         <meta-data android:name="com.google.android.backup.api_key"
                    android:value="AEdPqrEAAAAI_zVxZthz2HDuz9toTvkYvL0L5GA-OjeUIfBeXg"/>
-        <meta-data android:name="firebase_crashlytics_collection_enabled"
-                   android:value="false"/>
 
         <service
             android:name="com.github.shadowsocks.bg.VpnService"
@@ -74,6 +72,8 @@
             </intent-filter>
         </receiver>
 
+        <provider android:name="com.crashlytics.android.CrashlyticsInitProvider"
+                  tools:remove="node"/>
         <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
         <provider android:name="androidx.work.impl.WorkManagerInitializer"
                   tools:node="remove"/>
