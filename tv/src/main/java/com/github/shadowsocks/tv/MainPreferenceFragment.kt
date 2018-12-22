@@ -187,6 +187,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         portLocalDns = findPreference(Key.portLocalDns)
         portTransproxy = findPreference(Key.portTransproxy)
         serviceMode.onPreferenceChangeListener = onServiceModeChange
+        findPreference(Key.about).setOnPreferenceClickListener {
+            Toast.makeText(activity, "shadowsocks.org/android", Toast.LENGTH_SHORT).show()
+            true
+        }
+
         changeState(BaseService.IDLE)   // reset everything to init state
         connection.connect()
         DataStore.publicStore.registerChangeListener(this)
