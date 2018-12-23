@@ -40,8 +40,10 @@ class GuardedProcessPool {
     companion object Dummy : IOException("Oopsie the developer has made a no-no") {
         private const val TAG = "GuardedProcessPool"
         private val ProcessImpl by lazy { Class.forName("java.lang.ProcessManager\$ProcessImpl") }
-        private val pid by lazy { ProcessImpl.getField("pid").apply { isAccessible = true } }
-        private val exitValueMutex by lazy { ProcessImpl.getField("exitValueMutex").apply { isAccessible = true } }
+        private val pid by lazy { ProcessImpl.getDeclaredField("pid").apply { isAccessible = true } }
+        private val exitValueMutex by lazy {
+            ProcessImpl.getDeclaredField("exitValueMutex").apply { isAccessible = true }
+        }
     }
 
     private inner class Guard(private val cmd: List<String>, private val onRestartCallback: (() -> Unit)?) {
