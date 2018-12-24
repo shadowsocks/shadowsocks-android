@@ -73,7 +73,7 @@
         </receiver>
 
         <provider android:name="com.crashlytics.android.CrashlyticsInitProvider"
-                  tools:remove="node"/>
+                  tools:node="remove"/>
         <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
         <provider android:name="androidx.work.impl.WorkManagerInitializer"
                   tools:node="remove"/>
