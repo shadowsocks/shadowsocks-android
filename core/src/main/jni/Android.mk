@@ -28,6 +28,7 @@ SODIUM_SOURCE := \
 	crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c \
 	crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c \
 	crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c \
+	crypto_core/ed25519/ref10/ed25519_ref10.c \
 	crypto_core/hchacha20/core_hchacha20.c \
 	crypto_core/salsa/ref/core_salsa_ref.c \
 	crypto_generichash/blake2b/ref/blake2b-compress-ref.c \
