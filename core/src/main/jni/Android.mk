@@ -25,9 +25,9 @@ BUILD_SHARED_EXECUTABLE := $(LOCAL_PATH)/build-shared-executable.mk
 include $(CLEAR_VARS)
 
 SODIUM_SOURCE := \
+	crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c \
 	crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c \
 	crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c \
-	crypto_core/curve25519/ref10/curve25519_ref10.c \
 	crypto_core/hchacha20/core_hchacha20.c \
 	crypto_core/salsa/ref/core_salsa_ref.c \
 	crypto_generichash/blake2b/ref/blake2b-compress-ref.c \
@@ -197,7 +197,7 @@ CORK_SOURCE := $(cli_src) $(core_src) $(ds_src) $(posix_src) $(pthreads_src)
 
 LOCAL_MODULE := libcork
 LOCAL_CFLAGS += -I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
-				-DCORK_API=CORK_LOCAL
+				-DCORK_API=CORK_LOCAL -Ofast
 
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/src/libcork/,$(CORK_SOURCE))
 
