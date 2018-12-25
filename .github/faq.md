@@ -56,12 +56,6 @@ More details: https://kb.adguard.com/en/android/solving-problems/battery
 
 Allow this app to consume background data in app settings.
 
-### Why Camera permission is required on devices below Android 6.0?
-
-To scan the QR code through the integrated QR scanner.
-
-By the way, upgrade your Android system already.
-
 ### How to use Transproxy mode?
 
 1. Install [AFWall+](https://github.com/ukanth/afwall);

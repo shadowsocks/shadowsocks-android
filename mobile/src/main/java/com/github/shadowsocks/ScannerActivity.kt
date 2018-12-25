@@ -25,6 +25,7 @@ import android.content.Intent
 import android.content.pm.ShortcutManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -59,6 +60,11 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
 
     private lateinit var detector: BarcodeDetector
 
+    private fun fallback() {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark")))
+        finish()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         detector = BarcodeDetector.Builder(this)
@@ -71,9 +77,9 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
             if (dialog == null) {
                 Toast.makeText(this, R.string.common_google_play_services_notification_ticker, Toast.LENGTH_SHORT)
                         .show()
-                finish()
+                fallback()
             } else {
-                dialog.setOnDismissListener { finish() }
+                dialog.setOnDismissListener { fallback() }
                 dialog.show()
             }
             return
