@@ -14,16 +14,8 @@ core/src/overture/bin
 core/src/overture/pkg
 
 core/src/overture/src/github.com/Sirupsen
-core/src/overture/src/github.com/mattn
 core/src/overture/src/github.com/miekg
-core/src/overture/src/github.com/shawn1m
-core/src/overture/src/github.com/tools
 core/src/overture/src/golang.org
-core/src/overture/src/gopkg.in
-
-# work in progress
-tv/
-things/
 
 # release apks
 *.apk

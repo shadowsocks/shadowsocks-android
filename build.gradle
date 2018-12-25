@@ -4,27 +4,32 @@ apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     ext {
-        kotlinVersion = '1.2.31'
+        kotlinVersion = '1.3.11'
         minSdkVersion = 21
-        sdkVersion = 27
-        buildToolsVersion = '27.0.3'
-        supportLibraryVersion = '27.1.0'
-        takisoftFixVersion = '27.1.0.0'
-        playServicesVersion = '12.0.1'
+        sdkVersion = 28
+        compileSdkVersion = 28
+        buildToolsVersion = '28.0.3'
+        roomVersion = '2.0.0'
+        workVersion = '1.0.0-beta01'
+        preferencexVersion = '1.0.0'
         junitVersion = '4.12'
-        androidTestVersion = '1.0.1'
-        androidEspressoVersion = '3.0.1'
+        androidTestVersion = '1.1.1'
+        androidEspressoVersion = '3.1.1'
     }
 
     repositories {
         google()
         jcenter()
+        maven {
+            url 'https://maven.fabric.io/public'
+        }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
-        classpath 'com.google.gms:google-services:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
+        classpath 'com.google.gms:google-services:4.2.0'
+        classpath 'io.fabric.tools:gradle:1.27.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }

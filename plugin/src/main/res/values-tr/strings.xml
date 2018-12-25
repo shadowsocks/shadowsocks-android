@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="proxy_cat">"Sunucu Ayarları"</string>
+<string name="feature_cat">"Özellik Ayarları"</string>
+<string name="unsaved_changes_prompt">"Değişiklikler kaydedilmedi. Kaydetmek ister misiniz?"</string>
+<string name="yes">"Evet"</string>
+<string name="no">"Hayır"</string>
+<string name="apply">"Uygula"</string>
+</resources>

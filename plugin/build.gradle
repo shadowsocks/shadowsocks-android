@@ -5,15 +5,15 @@ apply from: 'gradle-mvn-push.gradle'
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
-    compileSdkVersion rootProject.sdkVersion
+    compileSdkVersion rootProject.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 5
-        versionName "0.1.0"
+        versionCode 7
+        versionName "0.2.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -24,12 +24,12 @@ android {
 }
 
 dependencies {
-    api "com.android.support:preference-v14:$supportLibraryVersion"
-    api "com.takisoft.fix:preference-v7:$takisoftFixVersion"
-    api "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlinVersion"
+    api "androidx.core:core-ktx:1.0.1"
+    api "com.google.android.material:material:1.1.0-alpha02"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$androidEspressoVersion"
+    androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
 }
 repositories {
     mavenCentral()

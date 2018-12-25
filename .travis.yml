@@ -1,33 +1,14 @@
-language: android
+sudo: required
 
-jdk:
-  - oraclejdk8
+addons:
+    artifacts: true
 
-env:
-    global:
-        - GOROOT_BOOTSTRAP=$GOROOT
+services:
+    - docker
 
-before_cache:
-    - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-    - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-    directories:
-        - $HOME/.gradle/caches/
-        - $HOME/.gradle/wrapper/
-
-install:
-    - pushd $ANDROID_HOME
-    - rm -rf tools
-    - wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O tools.zip
-    - unzip -q tools.zip
-    - popd
-    - touch $HOME/.android/repositories.cfg
-    - yes | sdkmanager
-        "build-tools;27.0.3"
-        ndk-bundle
-        "platforms;android-27"
-      >/dev/null
+before_install:
+    - docker pull shadowsocks/shadowsocks-android:circleci
+    - chmod -R a+wrx .
 
 script:
-    - ./gradlew assembleDebug check
+    - docker run --rm -v ${PWD}:/build shadowsocks/shadowsocks-android:circleci bash -c "cd /build; ./gradlew assembleDebug check"

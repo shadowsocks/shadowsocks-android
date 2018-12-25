@@ -27,6 +27,7 @@ import android.database.MatrixCursor
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import androidx.core.os.bundleOf
 
 /**
  * Base class for a native plugin provider. A native plugin provider offers read-only access to files that are required
@@ -83,12 +84,8 @@ abstract class NativePluginProvider : ContentProvider() {
         return openFile(uri)
     }
 
-    override fun call(method: String?, arg: String?, extras: Bundle?): Bundle = when (method) {
-        PluginContract.METHOD_GET_EXECUTABLE -> {
-            val out = Bundle()
-            out.putString(PluginContract.EXTRA_ENTRY, getExecutable())
-            out
-        }
+    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? = when (method) {
+        PluginContract.METHOD_GET_EXECUTABLE -> bundleOf(Pair(PluginContract.EXTRA_ENTRY, getExecutable()))
         else -> super.call(method, arg, extras)
     }
 

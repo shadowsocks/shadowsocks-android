@@ -1,4 +1,5 @@
-# https://github.com/arturbosch/detekt/blob/RC6-4/detekt-cli/src/main/resources/default-detekt-config.yml
+# https://github.com/arturbosch/detekt/blob/RC9.2/detekt-cli/src/main/resources/default-detekt-config.yml
+autoCorrect: true
 
 comments:
   active: false
@@ -17,7 +18,7 @@ complexity:
     threshold: 10
     ignoreSingleWhenExpression: false
   LabeledExpression:
-    active: true
+    active: false
   LargeClass:
     active: true
     threshold: 150
@@ -46,12 +47,14 @@ complexity:
     thresholdInInterfaces: 11
     thresholdInObjects: 11
     thresholdInEnums: 11
+    ignoreDeprecated: true
+    ignorePrivate: false
 
 empty-blocks:
   active: true
   EmptyCatchBlock:
     active: true
-    allowedExceptionNameRegex: "^(_|ignore|expected).*"
+    allowedExceptionNameRegex: "^(_|(ignore|expected).*)"
   EmptyClassBlock:
     active: true
   EmptyDefaultConstructor:
@@ -117,6 +120,7 @@ exceptions:
      - IndexOutOfBoundsException
      - RuntimeException
      - Throwable
+    allowedExceptionNameRegex: "^(_|(ignore|expected).*)"
   TooGenericExceptionThrown:
     active: true
     exceptionNames:
@@ -125,11 +129,99 @@ exceptions:
      - Throwable
      - RuntimeException
 
+formatting:
+  active: true
+  android: true
+  autoCorrect: true
+  ChainWrapping:
+    active: true
+    autoCorrect: true
+  CommentSpacing:
+    active: false
+  Filename:
+    active: true
+  FinalNewline:
+    active: true
+    autoCorrect: true
+  ImportOrdering:
+    active: false
+  Indentation:
+    active: true
+    autoCorrect: true
+    indentSize: 4
+    continuationIndentSize: 4
+  MaximumLineLength:
+    active: false
+  ModifierOrdering:
+    active: true
+    autoCorrect: true
+  NoBlankLineBeforeRbrace:
+    active: true
+    autoCorrect: true
+  NoConsecutiveBlankLines:
+    active: true
+    autoCorrect: true
+  NoEmptyClassBody:
+    active: true
+    autoCorrect: true
+  NoItParamInMultilineLambda:
+    active: true
+  NoLineBreakAfterElse:
+    active: true
+    autoCorrect: true
+  NoLineBreakBeforeAssignment:
+    active: true
+    autoCorrect: true
+  NoMultipleSpaces:
+    active: false
+  NoSemicolons:
+    active: true
+    autoCorrect: true
+  NoTrailingSpaces:
+    active: true
+    autoCorrect: true
+  NoUnitReturn:
+    active: true
+    autoCorrect: true
+  NoUnusedImports:
+    active: true
+    autoCorrect: true
+  NoWildcardImports:
+    active: false
+  ParameterListWrapping:
+    active: false
+  SpacingAroundColon:
+    active: true
+    autoCorrect: true
+  SpacingAroundComma:
+    active: true
+    autoCorrect: true
+  SpacingAroundCurly:
+    active: true
+    autoCorrect: true
+  SpacingAroundKeyword:
+    active: true
+    autoCorrect: true
+  SpacingAroundOperators:
+    active: true
+    autoCorrect: true
+  SpacingAroundRangeOperator:
+    active: true
+    autoCorrect: true
+  StringTemplate:
+    active: true
+    autoCorrect: true
+
 naming:
   active: true
   ClassNaming:
     active: true
     classPattern: '[A-Z$][a-zA-Z0-9$]*'
+  ConstructorParameterNaming:
+    active: true
+    parameterPattern: '[a-z][A-Za-z0-9]*'
+    privateParameterPattern: '[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
   EnumNaming:
     active: true
     enumEntryPattern: '^[A-Z][_a-zA-Z0-9]*'
@@ -146,21 +238,28 @@ naming:
     active: true
     functionPattern: '^([a-z$][a-zA-Z$0-9]*)|(`.*`)$'
     excludeClassPattern: '$^'
+    ignoreOverridden: true
+  FunctionParameterNaming:
+    active: true
+    parameterPattern: '[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
   MatchingDeclarationName:
     active: true
   MemberNameEqualsClassName:
     active: false
   ObjectPropertyNaming:
     active: true
+    constantPattern: '[A-Za-z][_A-Za-z0-9]*'
     propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '(_)?[A-Za-z][A-Za-z0-9]*'
   PackageNaming:
     active: true
     packagePattern: '^[a-z]+(\.[a-z][a-z0-9]*)*$'
   TopLevelPropertyNaming:
     active: true
     constantPattern: '[A-Z][_A-Z0-9]*'
-    propertyPattern: '[a-z][A-Za-z\d]*'
-    privatePropertyPattern: '(_)?[a-z][A-Za-z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '(_)?[A-Za-z][A-Za-z0-9]*'
   VariableMaxLength:
     active: true
     maximumVariableNameLength: 64
@@ -171,6 +270,7 @@ naming:
     variablePattern: '[a-z][A-Za-z0-9]*'
     privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
+    ignoreOverridden: true
 
 performance:
   active: true
@@ -223,12 +323,15 @@ style:
     active: true
   ExpressionBodySyntax:
     active: true
+    includeLineWrapping: false
   ForbiddenComment:
     active: true
     values: 'TODO:,FIXME:,STOPSHIP:'
   ForbiddenImport:
     active: true
     imports: ''
+  ForbiddenVoid:
+    active: true
   FunctionOnlyReturningConstant:
     active: true
     ignoreOverridableFunction: true
@@ -238,11 +341,14 @@ style:
     maxJumpCount: 1
   MagicNumber:
     active: false
+  MandatoryBracesIfStatements:
+    active: false
   MaxLineLength:
     active: true
     maxLineLength: 120
-    excludePackageStatements: false
-    excludeImportStatements: false
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: true
   MayBeConst:
     active: true
   ModifierOrder:
@@ -259,6 +365,8 @@ style:
     active: true
   OptionalWhenBraces:
     active: true
+  PreferToOverPairSyntax:
+    active: false
   ProtectedMemberInFinalClass:
     active: true
   RedundantVisibilityModifierRule:
@@ -278,7 +386,10 @@ style:
     active: true
   UnnecessaryAbstractClass:
     active: true
+    excludeAnnotatedClasses: "dagger.Module"
   UnnecessaryInheritance:
+    active: true
+  UnnecessaryLet:
     active: true
   UnnecessaryParentheses:
     active: true
@@ -288,9 +399,12 @@ style:
     active: true
   UnusedPrivateMember:
     active: true
+    allowedNames: "(_|ignored|expected|serialVersionUID)"
   UseDataClass:
     active: false
   UtilityClassWithPublicConstructor:
     active: true
+  VarCouldBeVal:
+    active: false
   WildcardImport:
     active: false

@@ -22,8 +22,8 @@ package com.github.shadowsocks.preference
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.support.v7.preference.ListPreference
 import android.util.AttributeSet
+import androidx.preference.ListPreference
 
 class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
     var entryIcons: Array<Drawable?>? = null
@@ -68,8 +68,8 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
     fun init() {
         icon = entryIcon
     }
-    override fun onSetInitialValue(restoreValue: Boolean, defaultValue: Any?) {
-        super.onSetInitialValue(restoreValue, defaultValue)
+    override fun onSetInitialValue(defaultValue: Any?) {
+        super.onSetInitialValue(defaultValue)
         init()
     }
 }

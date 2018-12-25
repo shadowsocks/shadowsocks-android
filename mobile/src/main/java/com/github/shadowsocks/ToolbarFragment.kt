@@ -21,24 +21,25 @@
 package com.github.shadowsocks
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.Toolbar
 import android.view.View
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.fragment.app.Fragment
 
 /**
  * @author Mygod
  */
 open class ToolbarFragment : Fragment() {
-    protected lateinit var toolbar: Toolbar
+    lateinit var toolbar: Toolbar
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar = view.findViewById(R.id.toolbar)
-        val activity = activity as MainActivity
-        activity.drawer.setToolbar(activity, toolbar, true)
+        toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
+        toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(GravityCompat.START) }
     }
 
-    open fun onTrafficUpdated(profileId: Int, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
+    open fun onTrafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
 
     open fun onBackPressed(): Boolean = false
 }

@@ -20,13 +20,13 @@
 
 package com.github.shadowsocks.preference
 
-import android.support.v7.app.AlertDialog
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import com.github.shadowsocks.ProfileConfigActivity
 import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.plugin.PluginManager
-import com.takisoft.fix.support.v7.preference.EditTextPreferenceDialogFragmentCompat
+import com.takisoft.preferencex.EditTextPreferenceDialogFragmentCompat
 
 class PluginConfigurationDialogFragment : EditTextPreferenceDialogFragmentCompat() {
     companion object {
@@ -38,13 +38,13 @@ class PluginConfigurationDialogFragment : EditTextPreferenceDialogFragmentCompat
 
     override fun onPrepareDialogBuilder(builder: AlertDialog.Builder) {
         super.onPrepareDialogBuilder(builder)
-        val intent = PluginManager.buildIntent(arguments!!.getString(PLUGIN_ID_FRAGMENT_TAG),
+        val intent = PluginManager.buildIntent(arguments?.getString(PLUGIN_ID_FRAGMENT_TAG)!!,
                 PluginContract.ACTION_HELP)
         val activity = requireActivity()
-        if (intent.resolveActivity(activity.packageManager) != null) builder.setNeutralButton("?", { _, _ ->
+        if (intent.resolveActivity(activity.packageManager) != null) builder.setNeutralButton("?") { _, _ ->
             activity.startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.text.toString()),
                     ProfileConfigActivity.REQUEST_CODE_PLUGIN_HELP)
-        })
+        }
     }
 
     override fun onBindDialogView(view: View) {

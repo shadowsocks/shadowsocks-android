@@ -26,7 +26,7 @@ The exclamation mark in the Wi-Fi/cellular icon appears because the system fails
 
 1. Some ROM has broken VPNService implementation, especially for IPv6;
 2. Some ROM has aggressive (or called broken) background service killing policy;
-3. Some ROM like [Flyme](https://github.com/shadowsocks/shadowsocks-android/issues/1589) has **very** broken direct boot support;
+3. Some ROM like [Flyme](https://github.com/shadowsocks/shadowsocks-android/issues/1821) is basically broken **in every way possible**;
 4. If you have Xposed framework and/or battery saver apps, it's likely that this app wouldn't work well with these either.
 
 * Fixes for MIUI: [#772](https://github.com/shadowsocks/shadowsocks-android/issues/772)
@@ -36,6 +36,7 @@ The exclamation mark in the Wi-Fi/cellular icon appears because the system fails
 * Samsung and/or Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
 * Another Samsung: [#1712](https://github.com/shadowsocks/shadowsocks-android/issues/1712)
 * Don't install this app on SD card because of permission issues: [#1124 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
+* `INTERACT_ACROSS_USERS` permission missing: [#1184](https://github.com/shadowsocks/shadowsocks-android/issues/1184)
 
 ### How to pause Shadowsocks service?
 
@@ -54,12 +55,6 @@ More details: https://kb.adguard.com/en/android/solving-problems/battery
 ### It works fine under Wi-Fi but can't connect through cellular data?
 
 Allow this app to consume background data in app settings.
-
-### Why Camera permission is required on devices below Android 6.0?
-
-To scan the QR code through the integrated QR scanner.
-
-By the way, upgrade your Android system already.
 
 ### How to use Transproxy mode?
 

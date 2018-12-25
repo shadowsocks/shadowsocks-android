@@ -6,28 +6,24 @@
         android:id="@+id/action_select_all"
         android:alphabeticShortcut="a"
         android:icon="?attr/actionModeSelectAllDrawable"
-        android:numericShortcut="1"
         android:title="@android:string/selectAll"
         android:showAsAction="always"/>
     <item
         android:id="@+id/action_cut"
-        android:alphabeticShortcut="t"
+        android:alphabeticShortcut="x"
         android:icon="?attr/actionModeCutDrawable"
-        android:numericShortcut="2"
         android:title="@android:string/cut"
         android:showAsAction="always"/>
     <item
         android:id="@+id/action_copy"
         android:alphabeticShortcut="c"
         android:icon="?attr/actionModeCopyDrawable"
-        android:numericShortcut="3"
         android:title="@android:string/copy"
         android:showAsAction="always"/>
     <item
         android:id="@+id/action_delete"
         android:alphabeticShortcut="d"
         android:icon="@drawable/ic_action_delete"
-        android:numericShortcut="4"
         android:title="@string/delete"
         android:showAsAction="always"/>
 </menu>
