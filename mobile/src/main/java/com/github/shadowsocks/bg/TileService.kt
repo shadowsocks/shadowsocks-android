@@ -39,6 +39,7 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
     private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
     private val keyguard by lazy { getSystemService<KeyguardManager>()!! }
+    private var tapPending = false
 
     override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
         @RequiresApi(24)
@@ -69,16 +70,21 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
         }
     }
 
-    override fun onServiceConnected(service: IShadowsocksService) =
-            serviceCallback.stateChanged(service.state, service.profileName, null)
+    override fun onServiceConnected(service: IShadowsocksService) {
+        serviceCallback.stateChanged(service.state, service.profileName, null)
+        if (tapPending) {
+            tapPending = false
+            onClick()
+        }
+    }
 
     override fun onStartListening() {
         super.onStartListening()
         connection.connect()
     }
     override fun onStopListening() {
-        super.onStopListening()
         connection.disconnect()
+        super.onStopListening()
     }
 
     override fun onClick() {
@@ -86,8 +92,8 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     }
 
     private fun toggle() {
-        val service = connection.service ?: return
-        when (service.state) {
+        val service = connection.service
+        if (service == null) tapPending = true else when (service.state) {
             BaseService.STOPPED -> Core.startService()
             BaseService.CONNECTED -> Core.stopService()
         }
