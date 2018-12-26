@@ -15,7 +15,7 @@ RUN curl --silent --show-error --location --fail --retry 3 --output /tmp/${ndk_v
 ENV ANDROID_NDK_HOME ${android_ndk_home}
 
 RUN \
-	wget -O /tmp/go.tgz "https://golang.org/dl/go${go_version}.linux-amd64.tar.gz"; \
-	sudo tar -C /usr/local -xzf /tmp/go.tgz; \
+    curl --silent --show-error --location --fail --retry 3 --output /tmp/go${go_version}.zip "https://golang.org/dl/go${go_version}.linux-amd64.tar.gz" && \
+	sudo tar -C /usr/local -xzf /tmp/go${go_version}.tgz; \
 	rm /tmp/go.tgz
 ENV PATH /usr/local/go/bin:$PATH
