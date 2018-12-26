@@ -18,7 +18,7 @@ android {
 
         externalNativeBuild {
             ndkBuild {
-                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86'
+                abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
                 arguments "-j${Runtime.runtime.availableProcessors()}"
             }
         }

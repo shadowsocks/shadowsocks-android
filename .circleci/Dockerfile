@@ -1,3 +1,4 @@
+ARG ndk_version=android-ndk-r19-beta2
 FROM circleci/android:api-28-ndk
 
 RUN \

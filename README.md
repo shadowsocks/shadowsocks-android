@@ -15,7 +15,7 @@ A [shadowsocks](http://shadowsocks.org) client for Android, written in Kotlin.
 * JDK 1.8
 * Go 1.11+
 * Android SDK
-  - Android NDK r16+
+  - Android NDK r19+
 
 ### BUILD
 
