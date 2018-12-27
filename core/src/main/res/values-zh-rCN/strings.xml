@@ -31,8 +31,8 @@
 <string name="auto_connect_summary">"允许 Shadowsocks 随系统启动"</string>
 <string name="tcp_fastopen_summary">"切换可能需要 ROOT 权限"</string>
 <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本: %s &lt; 3.7.1"</string>
-<string name="udp_dns">"DNS 转发"</string>
-<string name="udp_dns_summary">"转发所有 DNS 请求到远程服务器"</string>
+<string name="udp_dns">"UDP 转发"</string>
+<string name="udp_dns_summary">"转发所有 UDP 请求到远程服务器"</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>
