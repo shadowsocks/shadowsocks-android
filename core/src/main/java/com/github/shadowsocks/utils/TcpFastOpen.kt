@@ -20,10 +20,12 @@
 
 package com.github.shadowsocks.utils
 
-import eu.chainfire.libsuperuser.Shell
 import java.io.File
+import java.io.IOException
 
 object TcpFastOpen {
+    private const val PATH = "/proc/sys/net/ipv4/tcp_fastopen"
+
     /**
      * Is kernel version >= 3.7.1.
      */
@@ -41,16 +43,19 @@ object TcpFastOpen {
     }
 
     val sendEnabled: Boolean get() {
-        val file = File("/proc/sys/net/ipv4/tcp_fastopen")
+        val file = File(PATH)
         // File.readText doesn't work since this special file will return length 0
         return file.canRead() && file.bufferedReader().use { it.readText() }.trim().toInt() and 1 > 0
     }
 
-    fun enabled(value: Boolean): String? = if (sendEnabled == value) null else Shell.run("su", arrayOf(
-            "if echo " + (if (value) 3 else 0) + " > /proc/sys/net/ipv4/tcp_fastopen; then",
-            "  echo Success.",
-            "else",
-            "  echo Failed.",
-            "fi"), null, true)?.joinToString("\n")
-    fun enabledAsync(value: Boolean) = thread("TcpFastOpen") { enabled(value) }.join(1000)
+    fun enabled(): String? {
+        return try {
+            val process = ProcessBuilder("su", "-c", "echo 3 > $PATH")
+                    .redirectErrorStream(true).start()
+            process.inputStream.bufferedReader().readText()
+        } catch (e: IOException) {
+            e.localizedMessage
+        }
+    }
+    fun enabledAsync() = thread("TcpFastOpen") { enabled() }.join(1000)
 }

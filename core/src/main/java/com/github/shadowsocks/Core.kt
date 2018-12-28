@@ -110,7 +110,7 @@ object Core {
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
                 app.getSystemService<UserManager>()?.isUserUnlocked == true) DirectBoot.flushTrafficStats()
-        if (DataStore.tcpFastOpen) TcpFastOpen.enabledAsync(true)
+        if (DataStore.tcpFastOpen && !TcpFastOpen.sendEnabled) TcpFastOpen.enabledAsync()
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != packageInfo.lastUpdateTime) {
             val assetManager = app.assets
             for (dir in arrayOf("acl", "overture"))

@@ -78,7 +78,6 @@ dependencies {
     api 'com.google.firebase:firebase-core:16.0.6'
     api 'com.squareup.okhttp3:okhttp:3.12.1'
     api "com.takisoft.preferencex:preferencex:$preferencexVersion"
-    api 'eu.chainfire:libsuperuser:1.0.0.201811281328'
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "androidx.room:room-testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"

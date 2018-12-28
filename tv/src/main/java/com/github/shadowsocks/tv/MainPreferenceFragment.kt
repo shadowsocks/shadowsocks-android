@@ -170,10 +170,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         tfo = findPreference(Key.tfo) as SwitchPreference
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
-            if (value as Boolean) {
-                val result = TcpFastOpen.enabled(true)
-                if (result != null && result != "Success.") Toast.makeText(activity, result, Toast.LENGTH_LONG).show()
-                TcpFastOpen.sendEnabled
+            if (value as Boolean && !TcpFastOpen.sendEnabled) {
+                val result = TcpFastOpen.enabled()?.trim()
+                if (TcpFastOpen.sendEnabled) true else {
+                    Toast.makeText(activity, if (result.isNullOrEmpty())
+                        getText(R.string.tcp_fastopen_failure) else result, Toast.LENGTH_SHORT).show()
+                    false
+                }
             } else true
         }
         if (!TcpFastOpen.supported) {
