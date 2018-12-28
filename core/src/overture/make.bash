@@ -5,7 +5,7 @@ function try () {
 }
 
 [ -z "$ANDROID_NDK_HOME" ] && ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+TOOLCHAIN=$(find $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/* -maxdepth 1 -type d -print -quit)/bin
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 MIN_API=$1
