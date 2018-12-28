@@ -95,13 +95,13 @@ exceptions:
   PrintStackTrace:
     active: false
   RethrowCaughtException:
-    active: true
+    active: false
   ReturnFromFinally:
     active: true
   SwallowedException:
     active: true
   ThrowingExceptionFromFinally:
-    active: true
+    active: false
   ThrowingExceptionInMain:
     active: true
   ThrowingExceptionsWithoutMessageOrCause:
@@ -317,8 +317,7 @@ style:
   CollapsibleIfStatements:
     active: true
   DataClassContainsFunctions:
-    active: true
-    conversionFunctionPrefix: 'to'
+    active: false
   EqualsNullCall:
     active: true
   ExpressionBodySyntax:
