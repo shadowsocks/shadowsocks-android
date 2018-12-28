@@ -48,14 +48,13 @@ object TcpFastOpen {
         return file.canRead() && file.bufferedReader().use { it.readText() }.trim().toInt() and 1 > 0
     }
 
-    fun enabled(): String? {
+    fun enable(): String? {
         return try {
-            val process = ProcessBuilder("su", "-c", "echo 3 > $PATH")
-                    .redirectErrorStream(true).start()
-            process.inputStream.bufferedReader().readText()
+            ProcessBuilder("su", "-c", "echo 3 > $PATH").redirectErrorStream(true).start()
+                    .inputStream.bufferedReader().readText()
         } catch (e: IOException) {
             e.localizedMessage
         }
     }
-    fun enabledAsync() = thread("TcpFastOpen") { enabled() }.join(1000)
+    fun enableAsync() = thread("TcpFastOpen") { enable() }.join(1000)
 }

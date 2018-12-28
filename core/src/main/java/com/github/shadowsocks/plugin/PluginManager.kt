@@ -179,7 +179,7 @@ object PluginManager {
                 Os.chmod(file.absolutePath, when (cursor.getType(1)) {
                     Cursor.FIELD_TYPE_INTEGER -> cursor.getInt(1)
                     Cursor.FIELD_TYPE_STRING -> cursor.getString(1).toInt(8)
-                    else -> throw IllegalArgumentException()
+                    else -> throw IllegalArgumentException("File mode should be of type int")
                 })
                 if (path == options.id) initialized = true
             } while (cursor.moveToNext())

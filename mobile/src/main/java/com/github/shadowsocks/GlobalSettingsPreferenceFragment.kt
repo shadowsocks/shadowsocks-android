@@ -55,7 +55,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
-                val result = TcpFastOpen.enabled()?.trim()
+                val result = TcpFastOpen.enable()?.trim()
                 if (TcpFastOpen.sendEnabled) true else {
                     (activity as MainActivity).snackbar(
                             if (result.isNullOrEmpty()) getText(R.string.tcp_fastopen_failure) else result).show()
