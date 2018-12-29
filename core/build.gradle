@@ -12,7 +12,7 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
         versionCode rootProject.versionCode
-        versionName versionCode.versionName
+        versionName rootProject.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

@@ -24,7 +24,7 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
         versionCode rootProject.versionCode
-        versionName versionCode.versionName
+        versionName rootProject.versionName
         testApplicationId "com.github.shadowsocks.tv.test"
         resConfigs "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"
     }
