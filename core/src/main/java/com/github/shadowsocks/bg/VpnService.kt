@@ -43,6 +43,7 @@ import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
 import java.lang.reflect.Method
+import java.net.SocketException
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
@@ -83,7 +84,12 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 socket.outputStream.write(if (try {
                             val network = underlyingNetwork
                             if (network != null && Build.VERSION.SDK_INT >= 23) {
-                                network.bindSocket(fd)
+                                try {
+                                    network.bindSocket(fd)
+                                } catch (e: SocketException) {
+                                    // silently ignore ENONET (Machine is not on the network)
+                                    if ((e.cause as? ErrnoException)?.errno == 64) e.printStackTrace() else throw e
+                                }
                                 true
                             } else protect(getInt.invoke(fd) as Int)
                         } finally {
