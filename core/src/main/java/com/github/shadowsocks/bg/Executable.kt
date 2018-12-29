@@ -22,6 +22,7 @@ package com.github.shadowsocks.bg
 
 import android.system.ErrnoException
 import android.system.Os
+import android.system.OsConstants
 import android.text.TextUtils
 import android.util.Log
 import com.crashlytics.android.Crashlytics
@@ -46,9 +47,9 @@ object Executable {
                 continue
             }.split(Character.MIN_VALUE, limit = 2).first())
             if (exe.parent == app.applicationInfo.nativeLibraryDir && EXECUTABLES.contains(exe.name)) try {
-                Os.kill(process.name.toInt(), 9)    // SIGKILL
+                Os.kill(process.name.toInt(), OsConstants.SIGKILL)
             } catch (e: ErrnoException) {
-                if (e.errno != 3) {                 // ESRCH
+                if (e.errno != OsConstants.ESRCH) {
                     e.printStackTrace()
                     Crashlytics.log(Log.WARN, "kill", "SIGKILL ${exe.absolutePath} (${process.name}) failed")
                     Crashlytics.logException(e)
