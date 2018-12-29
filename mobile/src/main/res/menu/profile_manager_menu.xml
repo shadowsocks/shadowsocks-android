@@ -20,7 +20,9 @@
                 android:title="@string/action_import_file"/>
             <item
                 android:id="@+id/action_manual_settings"
-                android:title="@string/add_profile_methods_manual_settings"/>
+                android:title="@string/add_profile_methods_manual_settings"
+                android:alphabeticShortcut="n"
+                app:alphabeticModifiers="CTRL|SHIFT"/>
         </menu>
     </item>
     <item
@@ -35,7 +37,9 @@
                 android:title="@string/action_export"/>
             <item
                 android:id="@+id/action_export_file"
-                android:title="@string/action_export_file"/>
+                android:title="@string/action_export_file"
+                android:alphabeticShortcut="s"
+                app:alphabeticModifiers="CTRL|SHIFT"/>
         </menu>
     </item>
 </menu>

@@ -4,6 +4,7 @@
     <item android:id="@+id/action_apply_all"
           android:title="@string/action_apply_all"
           android:alphabeticShortcut="a"
+          app:alphabeticModifiers="CTRL|SHIFT"
           app:showAsAction="never"/>
     <item
         android:id="@+id/action_export_clipboard"

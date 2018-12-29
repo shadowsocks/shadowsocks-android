@@ -166,6 +166,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private val text = view.findViewById<TextView>(android.R.id.text1)
 
         init {
+            view.isFocusable = true
             view.setOnClickListener(this)
             view.setOnLongClickListener(this)
             view.setBackgroundResource(R.drawable.background_selectable)

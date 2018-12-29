@@ -7,7 +7,9 @@
           app:showAsAction="always">
         <menu>
             <item android:id="@+id/action_manual_settings"
-                  android:title="@string/add_profile_methods_manual_settings"/>
+                  android:title="@string/add_profile_methods_manual_settings"
+                  android:alphabeticShortcut="n"
+                  app:alphabeticModifiers="CTRL|SHIFT"/>
             <item android:id="@+id/action_import_clipboard"
                   android:title="@string/action_import"
                   android:alphabeticShortcut="v"/>
