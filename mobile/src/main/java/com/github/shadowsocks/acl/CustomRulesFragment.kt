@@ -429,7 +429,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
             } catch (exc: Exception) {
                 (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
-                printLog(exc)
+                exc.printStackTrace()
             }
             true
         }
