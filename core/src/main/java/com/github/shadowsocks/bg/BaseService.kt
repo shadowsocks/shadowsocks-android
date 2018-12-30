@@ -366,7 +366,7 @@ object BaseService {
                                 .add("sig", String(Base64.encode(mdg.digest(), 0)))
                                 .build()
                         val request = Request.Builder()
-                                .url(Core.remoteConfig.getString("proxy_url"))
+                                .url(RemoteConfig.proxyUrl)
                                 .post(requestBody)
                                 .build()
 
@@ -405,6 +405,7 @@ object BaseService {
                     startNativeProcesses()
 
                     if (profile.route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(profile.route)
+                    RemoteConfig.fetch()
 
                     data.changeState(CONNECTED)
                 } catch (_: UnknownHostException) {
@@ -421,7 +422,10 @@ object BaseService {
     }
 
     private val instances = WeakHashMap<Interface, Data>()
-    internal fun register(instance: Interface) = instances.put(instance, Data(instance))
+    internal fun register(instance: Interface) {
+        instances[instance] = Data(instance)
+        RemoteConfig.fetch()
+    }
 
     val usingVpnMode: Boolean get() = DataStore.serviceMode == Key.modeVpn
     val serviceClass get() = when (DataStore.serviceMode) {

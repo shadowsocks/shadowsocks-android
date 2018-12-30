@@ -242,11 +242,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         return true
     }
 
-    override fun onResume() {
-        super.onResume()
-        Core.remoteConfig.fetch()
-    }
-
     override fun onStart() {
         super.onStart()
         connection.listeningForBandwidth = true

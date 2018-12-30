@@ -64,7 +64,6 @@ object Core {
     val handler by lazy { Handler(Looper.getMainLooper()) }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
-    val remoteConfig: FirebaseRemoteConfig by lazy { FirebaseRemoteConfig.getInstance() }
     val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }
     val directBootSupported by lazy {
         Build.VERSION.SDK_INT >= 24 && app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
@@ -97,14 +96,6 @@ object Core {
         }
 
         Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
-        FirebaseApp.initializeApp(deviceStorage)
-        remoteConfig.setDefaults(R.xml.default_configs)
-        remoteConfig.fetch().addOnCompleteListener {
-            if (it.isSuccessful) remoteConfig.activateFetched() else {
-                Log.e(TAG, "Failed to fetch config")
-                Crashlytics.logException(it.exception)
-            }
-        }
         WorkManager.initialize(deviceStorage, androidx.work.Configuration.Builder().build())
 
         // handle data restored/crash
