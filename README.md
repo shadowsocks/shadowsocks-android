@@ -6,8 +6,13 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1a21d48d466644cdbcb57a1889abea5b)](https://www.codacy.com/app/shadowsocks/shadowsocks-android?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shadowsocks/shadowsocks-android&amp;utm_campaign=Badge_Grade)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A [shadowsocks](http://shadowsocks.org) client for Android, written in Kotlin.  
+A [shadowsocks](http://shadowsocks.org) client written in Kotlin.  
 <a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
+for Android & Chrome OS  
+<!--
+<a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks.tv"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
+for Android TV
+-->
 
 
 ### PREREQUISITES
