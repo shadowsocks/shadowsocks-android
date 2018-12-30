@@ -41,6 +41,10 @@ import java.io.File
 import java.io.FileNotFoundException
 
 object PluginManager {
+    class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin) {
+        override fun getLocalizedMessage() = app.getString(com.github.shadowsocks.core.R.string.plugin_unknown, plugin)
+    }
+
     /**
      * Trusted signatures by the app. Third-party fork should add their public key to their fork if the developer wishes
      * to publish or has published plugins for this app. You can obtain your public key by executing:
@@ -128,8 +132,7 @@ object PluginManager {
 
         // add other plugin types here
 
-        throw throwable
-                ?: FileNotFoundException(app.getString(com.github.shadowsocks.core.R.string.plugin_unknown, options.id))
+        throw throwable ?: PluginNotFoundException(options.id)
     }
 
     private fun initNative(options: PluginOptions): String? {

@@ -410,11 +410,11 @@ object BaseService {
                     data.changeState(CONNECTED)
                 } catch (_: UnknownHostException) {
                     stopRunner(true, getString(R.string.invalid_server))
-                } catch (_: VpnService.NullConnectionException) {
-                    stopRunner(true, getString(R.string.reboot_required))
                 } catch (exc: Throwable) {
-                    printLog(exc)
-                    stopRunner(true, "${getString(R.string.service_failed)}: ${exc.message}")
+                    if (exc !is PluginManager.PluginNotFoundException && exc !is VpnService.NullConnectionException) {
+                        printLog(exc)
+                    }
+                    stopRunner(true, "${getString(R.string.service_failed)}: ${exc.localizedMessage}")
                 }
             }
             return Service.START_NOT_STICKY
