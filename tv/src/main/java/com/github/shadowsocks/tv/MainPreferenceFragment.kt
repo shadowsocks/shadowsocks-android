@@ -275,13 +275,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     private fun startFilesForResult(intent: Intent?, requestCode: Int) {
         try {
             startActivityForResult(intent, requestCode)
-        } catch (e: ActivityNotFoundException) {
-            Crashlytics.logException(e)
-            Toast.makeText(activity, R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
-        } catch (e: SecurityException) {
-            Crashlytics.logException(e)
-            Toast.makeText(activity, R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
-        }
+            return
+        } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
+        Toast.makeText(activity, R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

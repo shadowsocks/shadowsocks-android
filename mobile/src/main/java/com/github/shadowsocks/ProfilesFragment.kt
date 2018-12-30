@@ -39,7 +39,6 @@ import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.*
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -416,13 +415,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private fun startFilesForResult(intent: Intent?, requestCode: Int) {
         try {
             startActivityForResult(intent, requestCode)
-        } catch (e: ActivityNotFoundException) {
-            Crashlytics.logException(e)
-            (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
-        } catch (e: SecurityException) {
-            Crashlytics.logException(e)
-            (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
-        }
+            return
+        } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
+        (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

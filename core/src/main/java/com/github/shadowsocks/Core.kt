@@ -35,10 +35,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.UserManager
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
@@ -50,7 +50,6 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
 import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import io.fabric.sdk.android.Fabric
 import java.io.File
 import java.io.IOException
@@ -96,7 +95,8 @@ object Core {
         }
 
         Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
-        WorkManager.initialize(deviceStorage, androidx.work.Configuration.Builder().build())
+        FirebaseApp.initializeApp(deviceStorage)
+        WorkManager.initialize(deviceStorage, Configuration.Builder().build())
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&

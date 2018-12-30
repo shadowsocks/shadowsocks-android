@@ -85,7 +85,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     }
     fun launchUrl(uri: String) = try {
         customTabsIntent.launchUrl(this, uri.toUri())
-    } catch (_: ActivityNotFoundException) { }  // ignore
+    } catch (_: ActivityNotFoundException) {
+        snackbar(uri).show()
+    }
 
     // service
     var state = BaseService.IDLE
