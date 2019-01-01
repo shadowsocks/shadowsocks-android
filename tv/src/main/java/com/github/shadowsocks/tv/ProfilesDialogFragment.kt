@@ -60,7 +60,7 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragment() {
             if (index == RecyclerView.NO_POSITION) return
             Core.switchProfile(profiles[index].id)
             (targetFragment as MainPreferenceFragment).startService()
-            fragmentManager.popBackStack()
+            fragmentManager?.popBackStack()
             notifyDataSetChanged()
         }
 

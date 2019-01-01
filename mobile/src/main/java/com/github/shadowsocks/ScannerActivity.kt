@@ -21,6 +21,7 @@
 package com.github.shadowsocks
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ShortcutManager
 import android.hardware.camera2.CameraAccessException
@@ -61,7 +62,9 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     private lateinit var detector: BarcodeDetector
 
     private fun fallback() {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark")))
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark")))
+        } catch (_: ActivityNotFoundException) { }
         finish()
     }
 
