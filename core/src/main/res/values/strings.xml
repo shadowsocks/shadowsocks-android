@@ -6,7 +6,6 @@
   <string name="send_email">Send email</string>
 
   <!-- misc -->
-  <string name="advanced">Advanced</string>
   <string name="service_mode">Service mode</string>
   <string name="service_mode_proxy">Proxy only</string>
   <string name="service_mode_vpn">VPN</string>
