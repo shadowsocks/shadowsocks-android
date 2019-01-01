@@ -30,6 +30,7 @@ object TcpFastOpen {
      * Is kernel version >= 3.7.1.
      */
     val supported by lazy {
+        if (File(PATH).canRead()) return@lazy true
         val match = """^(\d+)\.(\d+)\.(\d+)""".toRegex().find(System.getProperty("os.version") ?: "")
         if (match == null) false else when (match.groupValues[1].toInt()) {
             in Int.MIN_VALUE..2 -> false
@@ -45,7 +46,8 @@ object TcpFastOpen {
     val sendEnabled: Boolean get() {
         val file = File(PATH)
         // File.readText doesn't work since this special file will return length 0
-        return file.canRead() && file.bufferedReader().use { it.readText() }.trim().toInt() and 1 > 0
+        // on Android containers like Chrome OS, this file does not exist so we simply judge by the kernel version
+        return if (file.canRead()) file.bufferedReader().use { it.readText() }.trim().toInt() and 1 > 0 else supported
     }
 
     fun enable(): String? {
