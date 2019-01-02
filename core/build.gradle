@@ -80,7 +80,9 @@ dependencies {
     api 'com.google.firebase:firebase-core:16.0.6'
     api 'com.squareup.okhttp3:okhttp:3.12.1'
     api "com.takisoft.preferencex:preferencex:$preferencexVersion"
+    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
+    testImplementation "androidx.arch.core:core-testing:$lifecycleVersion"
     testImplementation "androidx.room:room-testing:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "android.arch.work:work-testing:$workVersion"
