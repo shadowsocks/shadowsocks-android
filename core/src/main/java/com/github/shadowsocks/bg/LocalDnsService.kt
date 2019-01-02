@@ -70,6 +70,7 @@ object LocalDnsService {
                             put("PrimaryDNS", localDns)
                             put("AlternativeDNS", remoteDns)
                             put("IPNetworkFile", "china_ip_list.txt")
+                            put("DomainFile", "dns.acl")
                         }
                         Acl.CHINALIST -> {
                             put("PrimaryDNS", localDns)
