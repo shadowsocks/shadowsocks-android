@@ -71,6 +71,8 @@ tasks.whenTaskAdded { task ->
 dependencies {
     api project(':plugin')
     api "android.arch.work:work-runtime-ktx:$workVersion"
+    api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     api "androidx.preference:preference:1.0.0"
     api "androidx.room:room-runtime:$roomVersion"
     api 'com.crashlytics.sdk.android:crashlytics:2.9.8'

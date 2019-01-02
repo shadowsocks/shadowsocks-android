@@ -9,6 +9,7 @@ buildscript {
         sdkVersion = 28
         compileSdkVersion = 28
         buildToolsVersion = '28.0.3'
+        lifecycleVersion = '2.0.0'
         roomVersion = '2.0.0'
         workVersion = '1.0.0-beta01'
         preferencexVersion = '1.0.0'

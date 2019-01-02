@@ -30,7 +30,11 @@ import android.os.DeadObjectException
 import android.text.format.Formatter
 import android.util.Log
 import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
 import androidx.leanback.preference.LeanbackPreferenceFragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.get
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
@@ -79,9 +83,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         portTransproxy.isEnabled = enabledTransproxy
         true
     }
-    private val tester by lazy {
-        HttpsTest(stats::setTitle) { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }
-    }
+    private lateinit var tester: HttpsTest
 
     // service
     var state = BaseService.IDLE
@@ -111,10 +113,14 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         })
         stats.setTitle(R.string.connection_test_pending)
         stats.isVisible = state == BaseService.CONNECTED
+        val owner = activity as FragmentActivity    // TODO: change to this when refactored to androidx
         if (state != BaseService.CONNECTED) {
             serviceCallback.trafficUpdated(0, 0, 0, 0, 0)
-            tester.invalidate()
-        }
+            tester.status.removeObservers(owner)
+            if (state != BaseService.IDLE) tester.invalidate()
+        } else tester.status.observe(owner, Observer {
+            it.retrieve(stats::setTitle) { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }
+        })
         if (msg != null) Toast.makeText(activity, getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
         if (state == BaseService.STOPPED) {
@@ -198,6 +204,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         changeState(BaseService.IDLE)   // reset everything to init state
         connection.connect()
         DataStore.publicStore.registerChangeListener(this)
+        tester = ViewModelProviders.of(activity as FragmentActivity).get()
     }
 
     override fun onStart() {
