@@ -9,10 +9,8 @@
 
 <a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
 for Android & Chrome OS  
-<!--
 <a href="https://play.google.com/store/apps/details?id=com.github.shadowsocks.tv"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="48"></a>
 for Android TV
--->
 
 
 ### PREREQUISITES
