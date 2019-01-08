@@ -28,7 +28,7 @@ MKDIR %TARGET%\armeabi-v7a>nul 2>nul
 MKDIR %TARGET%\x86>nul 2>nul 
 MKDIR %TARGET%\arm64-v8a>nul 2>nul 
 
-SET CC=%ANDROID_ARM_TOOLCHAIN%\bin\arm-linux-androideabi-gcc.exe
+SET CC=%ANDROID_ARM_TOOLCHAIN%\bin\arm-linux-androideabi-gcc.cmd
 
 IF NOT EXIST %ANDROID_ARM_CC% (
 	ECHO "Make standalone toolchain for ARM arch"
