@@ -46,7 +46,7 @@ object LocalDnsService {
                 put("Timeout", timeout)
                 put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
                 put("Protocol", if (edns) {
-                    put("Socks5Address", "127.0.0.1:" + DataStore.portProxy)
+                    put("Socks5Address", "127.0.0.1:${DataStore.portProxy}")
                     "tcp"
                 } else "udp")
             }
