@@ -119,14 +119,14 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
     private var underlyingNetwork: Network? = null
-        @TargetApi(28)
+        @TargetApi(24)
         set(value) {
             setUnderlyingNetworks(if (value == null) null else arrayOf(value))
             field = value
         }
 
     private val connectivity by lazy { getSystemService<ConnectivityManager>()!! }
-    @TargetApi(28)
+    @TargetApi(24)
     private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             underlyingNetwork = network
@@ -231,7 +231,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         this.conn = conn
         val fd = conn.fd
 
-        if (Build.VERSION.SDK_INT >= 28) {
+        if (Build.VERSION.SDK_INT >= 24) {
             // we want REQUEST here instead of LISTEN
             connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
             listeningForDefaultNetwork = true
