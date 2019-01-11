@@ -395,9 +395,7 @@ object BaseService {
                             // A WAR fix for Huawei devices that UnknownHostException cannot be caught correctly
                             try {
                                 profile.host = InetAddress.getByName(profile.host).hostAddress ?: ""
-                            } catch (_: UnknownHostException) {
-                                profile.host = "";
-                            }
+                            } catch (_: UnknownHostException) { }
                         }.join(10 * 1000)
                         if (!profile.host.isNumericAddress()) throw UnknownHostException()
                     }
