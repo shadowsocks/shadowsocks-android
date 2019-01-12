@@ -105,6 +105,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         if (publicStore.getString(Key.portTransproxy) == null) portTransproxy = portTransproxy
     }
 
+    var editingId: Long?
+        get() = privateStore.getLong(Key.id)
+        set(value) = privateStore.putLong(Key.id, value)
     var proxyApps: Boolean
         get() = privateStore.getBoolean(Key.proxyApps) ?: false
         set(value) = privateStore.putBoolean(Key.proxyApps, value)
@@ -117,6 +120,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var plugin: String
         get() = privateStore.getString(Key.plugin) ?: ""
         set(value) = privateStore.putString(Key.plugin, value)
+    var udpFallback: Long?
+        get() = privateStore.getLong(Key.udpFallback)
+        set(value) = privateStore.putLong(Key.udpFallback, value)
     var dirty: Boolean
         get() = privateStore.getBoolean(Key.dirty) ?: false
         set(value) = privateStore.putBoolean(Key.dirty, value)

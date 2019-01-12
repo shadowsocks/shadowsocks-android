@@ -63,6 +63,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     private lateinit var pluginConfigure: EditTextPreference
     private lateinit var pluginConfiguration: PluginConfiguration
     private lateinit var receiver: BroadcastReceiver
+    private lateinit var udpFallback: Preference
 
     override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
@@ -101,6 +102,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
         receiver = Core.listenForPackageChanges(false) { initPlugins() }
+        udpFallback = findPreference(Key.udpFallback)
         DataStore.privateStore.registerChangeListener(this)
     }
 
@@ -128,13 +130,16 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         profile.deserialize()
         ProfileManager.updateProfile(profile)
         ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profileId)
-        if (DataStore.profileId == profileId && DataStore.directBootAware) DirectBoot.update()
+        if (profileId in Core.activeProfileIds && DataStore.directBootAware) DirectBoot.update()
         requireActivity().finish()
     }
 
     override fun onResume() {
         super.onResume()
         isProxyApps.isChecked = DataStore.proxyApps // fetch proxyApps updated by AppManager
+        val fallbackProfile = DataStore.udpFallback?.let { ProfileManager.getProfile(it) }
+        if (fallbackProfile == null) udpFallback.setSummary(R.string.plugin_disabled)
+        else udpFallback.summary = fallbackProfile.formattedName
     }
 
     override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean = try {

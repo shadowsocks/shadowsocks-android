@@ -59,6 +59,7 @@
   <string name="tcp_fastopen_failure">Toggle failed</string>
   <string name="udp_dns">DNS Forwarding</string>
   <string name="udp_dns_summary">Forward all DNS requests to remote</string>
+  <string name="udp_fallback">UDP Fallback</string>
 
   <!-- notification category -->
   <string name="service_vpn">VPN Service</string>

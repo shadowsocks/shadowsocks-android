@@ -21,6 +21,7 @@
 package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
+import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.printLog
@@ -63,11 +64,14 @@ object ProfileManager {
         null
     }
 
+    @Throws(IOException::class)
+    fun expand(profile: Profile): Pair<Profile, Profile?> = Pair(profile, profile.udpFallback?.let { getProfile(it) })
+
     @Throws(SQLException::class)
     fun delProfile(id: Long) {
         check(PrivateDatabase.profileDao.delete(id) == 1)
         listener?.onRemove(id)
-        if (id == DataStore.profileId && DataStore.directBootAware) DirectBoot.clean()
+        if (id in Core.activeProfileIds && DataStore.directBootAware) DirectBoot.clean()
     }
 
     @Throws(SQLException::class)

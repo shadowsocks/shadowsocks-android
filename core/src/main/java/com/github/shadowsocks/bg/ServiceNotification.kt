@@ -35,10 +35,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
-import java.util.*
 
 /**
  * Android < 8 VPN:     always invisible because of VPN notification/icon
@@ -53,13 +53,15 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
     private val callback: IShadowsocksServiceCallback by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) { }   // ignore
-            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+            override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+                if (profileId != 0L) return
                 service as Context
-                val txr = service.getString(R.string.speed, Formatter.formatFileSize(service, txRate))
-                val rxr = service.getString(R.string.speed, Formatter.formatFileSize(service, rxRate))
+                val txr = service.getString(R.string.speed, Formatter.formatFileSize(service, stats.txRate))
+                val rxr = service.getString(R.string.speed, Formatter.formatFileSize(service, stats.rxRate))
                 builder.setContentText("$txr↑\t$rxr↓")
                 style.bigText(service.getString(R.string.stat_summary, txr, rxr,
-                        Formatter.formatFileSize(service, txTotal), Formatter.formatFileSize(service, rxTotal)))
+                        Formatter.formatFileSize(service, stats.txTotal),
+                        Formatter.formatFileSize(service, stats.rxTotal)))
                 show()
             }
             override fun trafficPersisted(profileId: Long) { }

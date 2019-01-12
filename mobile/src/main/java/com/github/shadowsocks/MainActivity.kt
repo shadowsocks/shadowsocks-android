@@ -46,6 +46,7 @@ import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
 import com.github.shadowsocks.database.Profile
@@ -96,12 +97,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             override fun stateChanged(state: Int, profileName: String?, msg: String?) {
                 Core.handler.post { changeState(state, msg, true) }
             }
-            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
+            override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
                 Core.handler.post {
-                    stats.updateTraffic(txRate, rxRate, txTotal, rxTotal)
-                    val child = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment?
-                    if (state != BaseService.STOPPING)
-                        child?.onTrafficUpdated(profileId, txRate, rxRate, txTotal, rxTotal)
+                    if (profileId == 0L) this@MainActivity.stats.updateTraffic(
+                            stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
+                    if (state != BaseService.STOPPING) {
+                        (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
+                                ?.onTrafficUpdated(profileId, stats)
+                    }
                 }
             }
             override fun trafficPersisted(profileId: Long) {
@@ -195,7 +198,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
             else -> null
         }
         if (sharedStr.isNullOrEmpty()) return
-        val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile).toList()
+        val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile?.first).toList()
         if (profiles.isEmpty()) {
             snackbar().setText(R.string.profile_invalid_input).show()
             return
