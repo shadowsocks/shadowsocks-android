@@ -81,14 +81,10 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         false
     }
     /**
-     * We hardcode bogus IP address 100.115.92.2 in Chrome OS as this IP may not be available when the device is not
-     * connected to any network.
+     * Binding bogus IP address 100.115.92.2 in Chrome OS directly does not seem to work reliably. It might be due to
+     * the IP may not be available when the device is not connected to any network.
      */
-    val listenAddress get() = when {
-        publicStore.getBoolean(Key.shareOverLan, false) -> "0.0.0.0"
-        hasArc0 -> "100.115.92.2"
-        else -> "127.0.0.1"
-    }
+    val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, hasArc0)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
