@@ -177,10 +177,16 @@ class Acl {
     override fun toString(): String {
         val result = StringBuilder()
         result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
-        val bypassList = (if (bypass) bypassHostnames.asIterable().asSequence() else
-            subnets.asIterable().asSequence().map(Subnet::toString) + proxyHostnames.asIterable().asSequence()).toList()
-        val proxyList = (if (bypass) subnets.asIterable().asSequence().map(Subnet::toString) +
-                proxyHostnames.asIterable().asSequence() else bypassHostnames.asIterable().asSequence()).toList()
+        val bypassList = (if (bypass) {
+            bypassHostnames.asIterable().asSequence()
+        } else {
+            subnets.asIterable().asSequence().map(Subnet::toString) + bypassHostnames.asIterable().asSequence()
+        }).toList()
+        val proxyList = (if (bypass) {
+            subnets.asIterable().asSequence().map(Subnet::toString) + proxyHostnames.asIterable().asSequence()
+        } else {
+            proxyHostnames.asIterable().asSequence()
+        }).toList()
         if (bypassList.isNotEmpty()) {
             result.append("[bypass_list]\n")
             result.append(bypassList.joinToString("\n"))
