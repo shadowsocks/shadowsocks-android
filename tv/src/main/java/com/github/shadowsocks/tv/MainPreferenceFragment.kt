@@ -201,10 +201,10 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
             true
         }
 
+        tester = ViewModelProviders.of(activity as FragmentActivity).get()
         changeState(BaseService.IDLE)   // reset everything to init state
         connection.connect()
         DataStore.publicStore.registerChangeListener(this)
-        tester = ViewModelProviders.of(activity as FragmentActivity).get()
     }
 
     override fun onStart() {
