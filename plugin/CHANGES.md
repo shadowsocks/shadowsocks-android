@@ -1,4 +1,5 @@
 * 1.0.0:
+  * BREAKING CHANGE: Plugins developed using this version and forward require shadowsocks-android 4.6.5 or higher.
   * `PathProvider` now takes `Int` instead of `String` for file modes;
   * Refactor to AndroidX;
   * No longer depends on preference libraries.
