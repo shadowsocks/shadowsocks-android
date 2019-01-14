@@ -149,7 +149,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         DataStore.plugin = pluginConfiguration.toString()
         DataStore.dirty = true
         true
-    } catch (exc: IllegalArgumentException) {
+    } catch (exc: RuntimeException) {
         (activity as MainActivity).snackbar(exc.localizedMessage).show()
         false
     }

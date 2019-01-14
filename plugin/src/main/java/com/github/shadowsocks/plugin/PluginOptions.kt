@@ -38,6 +38,7 @@ class PluginOptions : HashMap<String, String?> {
         @Suppress("NAME_SHADOWING")
         var parseId = parseId
         if (options.isNullOrEmpty()) return
+        check(options.all { !it.isISOControl() }) { "No control characters allowed." }
         val tokenizer = StringTokenizer("$options;", "\\=;", true)
         val current = StringBuilder()
         var key: String? = null

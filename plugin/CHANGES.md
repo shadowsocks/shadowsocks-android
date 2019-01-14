@@ -1,4 +1,6 @@
 * 1.1.0:
+  * Having control characters in plugin options is no longer allowed.
+    If this breaks your plugin, you are doing it wrong.
   * New helper method: `PluginOptions.putWithDefault`.
 * 1.0.0:
   * `PathProvider` now takes `Int` instead of `String` for file modes;
