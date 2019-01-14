@@ -1,4 +1,5 @@
 * 1.1.0:
+  * New helper method: `PluginOptions.putWithDefault`.
 * 1.0.0:
   * `PathProvider` now takes `Int` instead of `String` for file modes;
   * Refactor to AndroidX;

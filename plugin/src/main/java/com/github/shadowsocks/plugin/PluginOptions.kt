@@ -68,6 +68,14 @@ class PluginOptions : HashMap<String, String?> {
         this.id = id
     }
 
+    /**
+     * Put but if value is null or default, the entry is deleted.
+     *
+     * @return Old value before put.
+     */
+    fun putWithDefault(key: String, value: String?, default: String? = null) =
+            if (value == null || value == default) remove(key) else put(key, value)
+
     private fun append(result: StringBuilder, str: String) = (0 until str.length)
             .map { str[it] }
             .forEach {
