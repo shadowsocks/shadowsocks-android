@@ -80,7 +80,7 @@ class HttpsTest : ViewModel() {
         status.value = Status.Testing
         val id = testCount  // it would change by other code
         thread("ConnectionTest") {
-            val url = URL("https", when (Core.currentProfile!!.route) {
+            val url = URL("https", when (Core.currentProfile!!.first.route) {
                 Acl.CHINALIST -> "www.qualcomm.cn"
                 else -> "www.google.com"
             }, "/generate_204")

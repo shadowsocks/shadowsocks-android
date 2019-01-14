@@ -86,6 +86,13 @@
                 android:persistent="false"
                 app:pref_summaryHasText="%s"
                 android:title="@string/plugin_configure"/>
+        <Preference
+                android:key="udpFallback"
+                android:title="@string/udp_fallback"
+                android:summary="@string/plugin_disabled">
+            <intent android:targetPackage="com.github.shadowsocks"
+                    android:targetClass="com.github.shadowsocks.UdpFallbackProfileActivity"/>
+        </Preference>
 
     </PreferenceCategory>
 

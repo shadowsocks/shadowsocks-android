@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,27 +18,32 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.bg
+package com.github.shadowsocks.database
 
-import android.net.LocalSocket
-import com.github.shadowsocks.Core
-import com.github.shadowsocks.utils.printLog
-import java.io.File
+import androidx.room.testing.MigrationTestHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 import java.io.IOException
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 
-class TrafficMonitorThread : LocalSocketListener("TrafficMonitorThread") {
-    override val socketFile = File(Core.deviceStorage.noBackupFilesDir, "stat_path")
+@RunWith(AndroidJUnit4::class)
+class MigrationTest {
+    companion object {
+        private const val TEST_DB = "migration-test"
+    }
 
-    override fun accept(socket: LocalSocket) {
-        try {
-            val buffer = ByteArray(16)
-            if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
-            val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
-            TrafficMonitor.update(stat.getLong(0), stat.getLong(8))
-        } catch (e: IOException) {
-            printLog(e)
-        }
+    @get:Rule
+    val privateDatabase = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(),
+            PrivateDatabase::class.java.canonicalName, FrameworkSQLiteOpenHelperFactory())
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate27() {
+        val db = privateDatabase.createDatabase(TEST_DB, 26)
+        db.close()
+        privateDatabase.runMigrationsAndValidate(TEST_DB, 27, true, PrivateDatabase.Migration27)
     }
 }

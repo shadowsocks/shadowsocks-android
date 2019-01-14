@@ -31,6 +31,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.ShadowsocksConnection
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.preference.DataStore
 
 @RequiresApi(24)
@@ -65,7 +66,7 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
                 tile.label = label ?: getString(R.string.app_name)
                 tile.updateTile()
             }
-            override fun trafficUpdated(profileId: Long, txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) { }
+            override fun trafficUpdated(profileId: Long, stats: TrafficStats) { }
             override fun trafficPersisted(profileId: Long) { }
         }
     }

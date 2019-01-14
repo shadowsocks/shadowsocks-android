@@ -69,8 +69,13 @@ object Core {
                 DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
     }
 
-    val currentProfile: Profile? get() =
-        if (DataStore.directBootAware) DirectBoot.getDeviceProfile() else ProfileManager.getProfile(DataStore.profileId)
+    val activeProfileIds get() = ProfileManager.getProfile(DataStore.profileId).let {
+        if (it == null) emptyList() else listOfNotNull(it.id, it.udpFallback)
+    }
+    val currentProfile: Pair<Profile, Profile?>? get() {
+        if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply { return this }
+        return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
+    }
 
     fun switchProfile(id: Long): Profile {
         val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()

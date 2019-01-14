@@ -20,68 +20,72 @@
 
 package com.github.shadowsocks.bg
 
+import android.net.LocalSocket
 import android.os.SystemClock
+import com.github.shadowsocks.aidl.TrafficStats
+import com.github.shadowsocks.utils.printLog
+import java.io.File
+import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
-object TrafficMonitor {
-    // Bytes per second
-    var txRate = 0L
-    var rxRate = 0L
+class TrafficMonitor(statFile: File) : AutoCloseable {
+    private val thread = object : LocalSocketListener("TrafficMonitor") {
+        override val socketFile = statFile
 
-    // Bytes for the current session
-    var txTotal = 0L
-    var rxTotal = 0L
+        override fun accept(socket: LocalSocket) {
+            try {
+                val buffer = ByteArray(16)
+                if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
+                val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
+                val tx = stat.getLong(0)
+                val rx = stat.getLong(8)
+                if (current.txTotal != tx) {
+                    current.txTotal = tx
+                    dirty = true
+                }
+                if (current.rxTotal != rx) {
+                    current.rxTotal = rx
+                    dirty = true
+                }
+            } catch (e: IOException) {
+                printLog(e)
+            }
+        }
+    }.apply { start() }
 
-    // Bytes for the last query
-    private var txLast = 0L
-    private var rxLast = 0L
+    val current = TrafficStats()
+    var out = TrafficStats()
     private var timestampLast = 0L
     @Volatile
-    private var dirty = true
+    private var dirty = false
 
-    fun updateRate(): Boolean {
+    fun requestUpdate(): Pair<TrafficStats, Boolean> {
         val now = SystemClock.elapsedRealtime()
         val delta = now - timestampLast
         timestampLast = now
         var updated = false
-        if (delta != 0L)
+        if (delta != 0L) {
             if (dirty) {
-                txRate = (txTotal - txLast) * 1000 / delta
-                rxRate = (rxTotal - rxLast) * 1000 / delta
-                txLast = txTotal
-                rxLast = rxTotal
+                out = current.copy().apply {
+                    txRate = (txTotal - out.txTotal) * 1000 / delta
+                    rxRate = (rxTotal - out.rxTotal) * 1000 / delta
+                }
                 dirty = false
                 updated = true
             } else {
-                if (txRate != 0L) {
-                    txRate = 0
+                if (out.txRate != 0L) {
+                    out.txRate = 0
                     updated = true
                 }
-                if (rxRate != 0L) {
-                    rxRate = 0
+                if (out.rxRate != 0L) {
+                    out.rxRate = 0
                     updated = true
                 }
             }
-        return updated
+        }
+        return Pair(out, updated)
     }
 
-    fun update(tx: Long, rx: Long) {
-        if (txTotal != tx) {
-            txTotal = tx
-            dirty = true
-        }
-        if (rxTotal != rx) {
-            rxTotal = rx
-            dirty = true
-        }
-    }
-
-    fun reset() {
-        txRate = 0
-        rxRate = 0
-        txTotal = 0
-        rxTotal = 0
-        txLast = 0
-        rxLast = 0
-        dirty = true
-    }
+    override fun close() = thread.stopThread()
 }

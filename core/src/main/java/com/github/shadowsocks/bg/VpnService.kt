@@ -186,7 +186,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     private fun startVpn(): Int {
-        val profile = data.profile!!
+        val profile = data.proxy!!.profile
         val builder = Builder()
                 .setConfigureIntent(Core.configureIntent(this))
                 .setSession(profile.formattedName)

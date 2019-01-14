@@ -59,6 +59,13 @@
             android:launchMode="singleTask"/>
 
         <activity
+            android:name=".UdpFallbackProfileActivity"
+            android:label="@string/udp_fallback"
+            android:parentActivityName=".ProfileConfigActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"/>
+
+        <activity
             android:name=".ScannerActivity"
             android:label="@string/add_profile_methods_scan_qr_code"
             android:parentActivityName=".MainActivity"

@@ -21,24 +21,28 @@ object DirectBoot : BroadcastReceiver() {
     private val file = File(Core.deviceStorage.noBackupFilesDir, "directBootProfile")
     private var registered = false
 
-    fun getDeviceProfile(): Profile? = try {
-        ObjectInputStream(file.inputStream()).use { it.readObject() as Profile }
+    fun getDeviceProfile(): Pair<Profile, Profile?>? = try {
+        ObjectInputStream(file.inputStream()).use { it.readObject() as? Pair<Profile, Profile?> }
     } catch (_: IOException) { null }
 
     fun clean() {
         file.delete()
         File(Core.deviceStorage.noBackupFilesDir, BaseService.CONFIG_FILE).delete()
+        File(Core.deviceStorage.noBackupFilesDir, BaseService.CONFIG_FILE_UDP).delete()
     }
 
     /**
      * app.currentProfile will call this.
      */
     fun update(profile: Profile? = ProfileManager.getProfile(DataStore.profileId)) =
-            if (profile == null) clean() else ObjectOutputStream(file.outputStream()).use { it.writeObject(profile) }
+            if (profile == null) clean()
+            else ObjectOutputStream(file.outputStream()).use { it.writeObject(ProfileManager.expand(profile)) }
 
     fun flushTrafficStats() {
-        val profile = getDeviceProfile()
-        if (profile?.dirty == true) ProfileManager.updateProfile(profile)
+        getDeviceProfile()?.also { (profile, fallback) ->
+            if (profile.dirty) ProfileManager.updateProfile(profile)
+            if (fallback?.dirty == true) ProfileManager.updateProfile(fallback)
+        }
         update()
     }
 

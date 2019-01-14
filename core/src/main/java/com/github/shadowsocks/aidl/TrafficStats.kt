@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,29 +18,35 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.aidl
 
-import android.os.Bundle
-import android.view.View
-import androidx.appcompat.widget.Toolbar
-import androidx.core.view.GravityCompat
-import androidx.fragment.app.Fragment
-import com.github.shadowsocks.aidl.TrafficStats
+import android.os.Parcel
+import android.os.Parcelable
 
-/**
- * @author Mygod
- */
-open class ToolbarFragment : Fragment() {
-    lateinit var toolbar: Toolbar
+data class TrafficStats(
+        // Bytes per second
+        var txRate: Long = 0L,
+        var rxRate: Long = 0L,
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        toolbar = view.findViewById(R.id.toolbar)
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
-        toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(GravityCompat.START) }
+        // Bytes for the current session
+        var txTotal: Long = 0L,
+        var rxTotal: Long = 0L
+): Parcelable {
+    operator fun plus(other: TrafficStats) = TrafficStats(
+            txRate + other.txRate, rxRate + other.rxRate,
+            txTotal + other.txTotal, rxTotal + other.rxTotal)
+
+    constructor(parcel: Parcel) : this(parcel.readLong(), parcel.readLong(), parcel.readLong(), parcel.readLong())
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeLong(txRate)
+        parcel.writeLong(rxRate)
+        parcel.writeLong(txTotal)
+        parcel.writeLong(rxTotal)
     }
+    override fun describeContents() = 0
 
-    open fun onTrafficUpdated(profileId: Long, stats: TrafficStats) { }
-
-    open fun onBackPressed(): Boolean = false
+    companion object CREATOR : Parcelable.Creator<TrafficStats> {
+        override fun createFromParcel(parcel: Parcel) = TrafficStats(parcel)
+        override fun newArray(size: Int): Array<TrafficStats?> = arrayOfNulls(size)
+    }
 }

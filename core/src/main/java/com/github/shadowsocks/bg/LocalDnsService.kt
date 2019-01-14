@@ -35,7 +35,7 @@ object LocalDnsService {
         override fun startNativeProcesses() {
             super.startNativeProcesses()
             val data = data
-            val profile = data.profile!!
+            val profile = data.proxy!!.profile
 
             fun makeDns(name: String, address: String, timeout: Int, edns: Boolean = true) = JSONObject().apply {
                 put("Name", name)
