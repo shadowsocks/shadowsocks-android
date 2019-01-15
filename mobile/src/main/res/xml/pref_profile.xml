@@ -84,6 +84,7 @@
                 android:key="plugin.configure"
                 android:icon="@drawable/ic_action_settings"
                 android:persistent="false"
+                android:singleLine="true"
                 app:pref_summaryHasText="%s"
                 android:title="@string/plugin_configure"/>
         <Preference
