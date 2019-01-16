@@ -106,14 +106,12 @@ afterEvaluate { project ->
     android.libraryVariants.all { variant ->
         def javadocTask = task("generate${variant.name.capitalize()}Javadoc", type: Javadoc) {
             description "Generates Javadoc for $variant.name."
-            source = variant.javaCompiler.source
-            ext.androidJar = project.files(android.getBootClasspath().join(File.pathSeparator))
-            classpath = files(variant.javaCompiler.classpath.files) + files(ext.androidJar)
+            source = android.sourceSets.main.java.srcDirs
+            classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+            exclude '**/*.kt'
             exclude '**/BuildConfig.java'
             exclude '**/R.java'
         }
-
-        javadocTask.dependsOn variant.javaCompiler
 
         def jarJavadocTask = task("jar${variant.name.capitalize()}Javadoc", type: Jar) {
             description "Generate Javadoc Jar for $variant.name"
@@ -127,10 +125,9 @@ afterEvaluate { project ->
         def jarSourceTask = task("jar${variant.name.capitalize()}Sources", type: Jar) {
             description "Generates Java Sources for $variant.name."
             classifier = 'sources'
-            from variant.javaCompiler.source
+            from android.sourceSets.main.java.srcDirs
         }
 
-        jarSourceTask.dependsOn variant.javaCompiler
         artifacts.add('archives', jarSourceTask)
     }
 }
