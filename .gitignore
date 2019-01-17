@@ -9,13 +9,5 @@ release/
 .idea/
 *.iml
 
-core/src/overture/.deps
-core/src/overture/bin
-core/src/overture/pkg
-
-core/src/overture/src/github.com/Sirupsen
-core/src/overture/src/github.com/miekg
-core/src/overture/src/golang.org
-
 # release apks
 *.apk

@@ -29,12 +29,6 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-    }
-
     externalNativeBuild {
         ndkBuild {
             path 'src/main/jni/Android.mk'
@@ -48,23 +42,12 @@ android {
 
 task goBuild(type: Exec) {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        executable "cmd.exe"
-        args "/c", file("src/overture/make.bat").absolutePath , minSdkVersion
+        println "Warning: Building on Windows is not supported"
     } else {
-        executable "sh"
-        args "-c", "src/overture/make.bash " + minSdkVersion
+        executable "/bin/bash"
+        args "go-build.bash", minSdkVersion
         environment "ANDROID_HOME", android.sdkDirectory
         environment "ANDROID_NDK_HOME", android.ndkDirectory
-    }
-}
-
-task goClean(type: Exec) {
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        executable "cmd.exe"
-        args "/c", file("src/overture/clean.bat").absolutePath
-    } else {
-        executable "sh"
-        args "-c", "src/overture/clean.bash"
     }
 }
 
