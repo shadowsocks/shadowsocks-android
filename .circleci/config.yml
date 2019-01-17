@@ -10,7 +10,6 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: pushd core/src/overture; ./make.bash 21; popd
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
       - run:

@@ -23,8 +23,6 @@ for Android TV
 ### BUILD
 
 You can check whether the latest commit builds under UNIX environment by checking Travis status.
-Building on Windows is also possible since [#1570](https://github.com/shadowsocks/shadowsocks-android/pull/1570),
-but probably painful. Further contributions regarding building on Windows are also welcome.
 
 * Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
 * Build it using Android Studio or gradle script
