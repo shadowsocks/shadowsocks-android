@@ -327,7 +327,7 @@ LOCAL_SRC_FILES:= jni-helper.cpp
 
 LOCAL_LDLIBS := -ldl -llog
 
-LOCAL_STATIC_LIBRARIES := cpufeatures libancillary
+LOCAL_STATIC_LIBRARIES := libancillary
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -477,7 +477,3 @@ libpcre_src_files := \
 LOCAL_SRC_FILES := $(addprefix pcre/, $(libpcre_src_files)) $(LOCAL_PATH)/patch/pcre/pcre_chartables.c
 
 include $(BUILD_STATIC_LIBRARY)
-
-# Import cpufeatures
-$(call import-module,android/cpufeatures)
-
