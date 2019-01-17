@@ -55,7 +55,7 @@ abstract class LocalSocketListener(protected val tag: String) : Thread(tag) {
                     serverSocket.accept()
                 } catch (e: IOException) {
                     printLog(e)
-                    null
+                    continue
                 }?.use(this::accept)
             }
         }

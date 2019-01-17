@@ -312,24 +312,6 @@ LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
-## jni-helper
-########################################################
-
-include $(CLEAR_VARS)
-
-LOCAL_MODULE:= jni-helper
-
-LOCAL_CFLAGS := -std=c++17
-
-LOCAL_C_INCLUDES:= $(LOCAL_PATH)/libancillary
-
-LOCAL_SRC_FILES:= jni-helper.cpp
-
-LOCAL_STATIC_LIBRARIES := libancillary
-
-include $(BUILD_SHARED_LIBRARY)
-
-########################################################
 ## tun2socks
 ########################################################
 

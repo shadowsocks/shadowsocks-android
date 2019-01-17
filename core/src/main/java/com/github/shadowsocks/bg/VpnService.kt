@@ -31,7 +31,6 @@ import android.system.ErrnoException
 import android.system.Os
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.JniHelper
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
@@ -185,7 +184,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         return cmd
     }
 
-    private fun startVpn(): Int {
+    private fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
                 .setConfigureIntent(Core.configureIntent(this))
@@ -256,23 +255,26 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         }
         data.processes.start(cmd, onRestartCallback = {
             try {
-                sendFd(fd)
+                sendFd(conn.fileDescriptor)
             } catch (e: ErrnoException) {
                 stopRunner(true, e.message)
             }
         })
-        return fd
+        return conn.fileDescriptor
     }
 
-    private fun sendFd(fd: Int) {
-        if (fd == -1) throw IOException("Invalid fd (-1)")
+    private fun sendFd(fd: FileDescriptor) {
         var tries = 0
         val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
         while (true) try {
             Thread.sleep(50L shl tries)
-            JniHelper.sendFd(fd, path)
+            LocalSocket().use { localSocket ->
+                localSocket.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
+                localSocket.setFileDescriptorsForSend(arrayOf(fd))
+                localSocket.outputStream.write(42)
+            }
             return
-        } catch (e: ErrnoException) {
+        } catch (e: IOException) {
             if (tries > 5) throw e
             tries += 1
         }

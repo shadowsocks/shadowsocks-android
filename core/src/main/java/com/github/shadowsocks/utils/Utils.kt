@@ -30,19 +30,20 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
+import android.system.Os
+import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.JniHelper
 import java.net.InetAddress
 import java.net.URLConnection
 
-fun String.isNumericAddress() = JniHelper.parseNumericAddress(this) != null
-fun String.parseNumericAddress(): InetAddress? {
-    val addr = JniHelper.parseNumericAddress(this)
-    return if (addr == null) null else InetAddress.getByAddress(this, addr)
-}
+/**
+ * A slightly more performant variant of InetAddress.parseNumericAddress.
+ */
+fun String?.parseNumericAddress(): InetAddress? =
+        Os.inet_pton(OsConstants.AF_INET, this) ?: Os.inet_pton(OsConstants.AF_INET6, this)
 
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     val value = str?.toIntOrNull() ?: default

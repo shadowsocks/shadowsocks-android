@@ -80,14 +80,14 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10))
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (!profile.host.isNumericAddress()) {
+        if (profile.host.parseNumericAddress() == null) {
             thread("ProxyInstance-resolve") {
                 // A WAR fix for Huawei devices that UnknownHostException cannot be caught correctly
                 try {
                     profile.host = InetAddress.getByName(profile.host).hostAddress ?: ""
                 } catch (_: UnknownHostException) { }
             }.join(10 * 1000)
-            if (!profile.host.isNumericAddress()) throw UnknownHostException()
+            if (profile.host.parseNumericAddress() == null) throw UnknownHostException()
         }
     }
 
