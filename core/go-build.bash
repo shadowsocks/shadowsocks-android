@@ -16,7 +16,7 @@ CLANG_ARCHS=(armv7a-linux-androideabi aarch64-linux-android i686-linux-android x
 STRIP_ARCHS=(arm-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android)
 for i in "${!ABIS[@]}"; do
     ABI="${ABIS[$i]}"
-    if [[ -f "${OUT_DIR}/${ABI}/${BIN}" ]]; then continue; fi
+    [[ -f "${OUT_DIR}/${ABI}/${BIN}" ]] && continue
     echo "Build ${BIN} ${ABI}"
     mkdir -p ${OUT_DIR}/${ABI} \
     && env \
