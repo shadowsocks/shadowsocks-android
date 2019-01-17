@@ -24,7 +24,7 @@ static void throwException(JNIEnv* env, jclass exceptionClass, jmethodID ctor2, 
 
 static void throwErrnoException(JNIEnv* env, const char* functionName) {
     int error = errno;
-    static auto ErrnoException = static_cast<jclass>(env->NewGlobalRef(
+    static auto ErrnoException = reinterpret_cast<jclass>(env->NewGlobalRef(
             env->FindClass("android/system/ErrnoException")));
     static jmethodID ctor2 = env->GetMethodID(ErrnoException, "<init>", "(Ljava/lang/String;I)V");
     throwException(env, ErrnoException, ctor2, functionName, error);
@@ -34,29 +34,16 @@ static void throwErrnoException(JNIEnv* env, const char* functionName) {
 extern "C" {
 JNIEXPORT void JNICALL
         Java_com_github_shadowsocks_JniHelper_sendFd(JNIEnv *env, jclass type, jint tun_fd, jstring path) {
-    int fd;
-    struct sockaddr_un addr;
     const char *sock_str = env->GetStringUTFChars(path, nullptr);
-
-    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    if (int fd = socket(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0); fd == -1) {
         throwErrnoException(env, "socket");
-        goto quit2;
+    } else {
+        sockaddr_un addr { .sun_family = AF_UNIX };
+        strncpy(addr.sun_path, sock_str, sizeof(addr.sun_path) - 1);
+        if (connect(fd, (sockaddr*) &addr, sizeof(addr)) == -1) throwErrnoException(env, "connect");
+        else if (ancil_send_fd(fd, tun_fd)) throwErrnoException(env, "ancil_send_fd");
+        close(fd);
     }
-
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, sock_str, sizeof(addr.sun_path)-1);
-
-    if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        throwErrnoException(env, "connect");
-        goto quit;
-    }
-
-    if (ancil_send_fd(fd, tun_fd)) throwErrnoException(env, "ancil_send_fd");
-
-quit:
-    close(fd);
-quit2:
     env->ReleaseStringUTFChars(path, sock_str);
 }
 

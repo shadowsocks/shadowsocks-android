@@ -319,13 +319,11 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE:= jni-helper
 
-LOCAL_CFLAGS := -std=c++11
+LOCAL_CFLAGS := -std=c++17
 
 LOCAL_C_INCLUDES:= $(LOCAL_PATH)/libancillary
 
 LOCAL_SRC_FILES:= jni-helper.cpp
-
-LOCAL_LDLIBS := -ldl -llog
 
 LOCAL_STATIC_LIBRARIES := libancillary
 
