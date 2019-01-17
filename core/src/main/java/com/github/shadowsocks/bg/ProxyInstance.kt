@@ -100,13 +100,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         this.configFile = configFile
         val config = profile.toJson()
-        if (pluginPath != null) {
-            val pluginCmd = arrayListOf(pluginPath!!)
-            if (DataStore.tcpFastOpen) pluginCmd.add("--fast-open")
-            config
-                    .put("plugin", Commandline.toString(service.buildAdditionalArguments(pluginCmd)))
-                    .put("plugin_opts", plugin.toString())
-        }
+        if (pluginPath != null) config.put("plugin", pluginPath).put("plugin_opts", plugin.toString())
         configFile.writeText(config.toString())
 
         val cmd = service.buildAdditionalArguments(arrayListOf(
