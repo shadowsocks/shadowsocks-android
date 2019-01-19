@@ -31,7 +31,7 @@ data class TrafficStats(
         // Bytes for the current session
         var txTotal: Long = 0L,
         var rxTotal: Long = 0L
-): Parcelable {
+) : Parcelable {
     operator fun plus(other: TrafficStats) = TrafficStats(
             txRate + other.txRate, rxRate + other.rxRate,
             txTotal + other.txTotal, rxTotal + other.rxTotal)

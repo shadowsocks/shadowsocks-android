@@ -165,7 +165,7 @@ formatting:
     active: true
     autoCorrect: true
   NoItParamInMultilineLambda:
-    active: true
+    active: false
   NoLineBreakAfterElse:
     active: true
     autoCorrect: true

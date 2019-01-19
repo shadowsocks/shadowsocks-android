@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit
 /**
  * This class sets up environment for ss-local.
  */
-class ProxyInstance(val profile: Profile, private val route: String = profile.route): AutoCloseable {
+class ProxyInstance(val profile: Profile, private val route: String = profile.route) : AutoCloseable {
     var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
