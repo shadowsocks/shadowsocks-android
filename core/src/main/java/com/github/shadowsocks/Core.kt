@@ -42,6 +42,7 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
+import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
@@ -140,7 +141,7 @@ object Core {
             if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
             else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
-    fun startService() = ContextCompat.startForegroundService(app, Intent(app, BaseService.serviceClass.java))
+    fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
     fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
     fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
 

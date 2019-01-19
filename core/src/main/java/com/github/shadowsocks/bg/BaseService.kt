@@ -59,7 +59,7 @@ object BaseService {
     const val CONFIG_FILE = "shadowsocks.conf"
     const val CONFIG_FILE_UDP = "shadowsocks-udp.conf"
 
-    class Data internal constructor(private val service: Interface) {
+    class Data internal constructor(private val service: Interface): AutoCloseable {
         @Volatile var state = STOPPED
         val processes = GuardedProcessPool()
         @Volatile var proxy: ProxyInstance? = null
@@ -160,6 +160,8 @@ object BaseService {
             }
             state = s
         }
+
+        override fun close() = callbacks.kill()
     }
     interface Interface {
         val tag: String
@@ -317,19 +319,15 @@ object BaseService {
             }
             return Service.START_NOT_STICKY
         }
+
+        fun onDestroy() {
+            data.close()
+        }
     }
 
     private val instances = WeakHashMap<Interface, Data>()
     internal fun register(instance: Interface) {
         instances[instance] = Data(instance)
         RemoteConfig.fetch()
-    }
-
-    val usingVpnMode: Boolean get() = DataStore.serviceMode == Key.modeVpn
-    val serviceClass get() = when (DataStore.serviceMode) {
-        Key.modeProxy -> ProxyService::class
-        Key.modeVpn -> VpnService::class
-        Key.modeTransproxy -> TransproxyService::class
-        else -> throw UnknownError()
     }
 }

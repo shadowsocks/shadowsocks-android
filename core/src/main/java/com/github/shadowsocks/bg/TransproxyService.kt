@@ -77,4 +77,9 @@ redsocks {
         super.startNativeProcesses()
         if (data.proxy!!.profile.udpdns) startDNSTunnel()
     }
+
+    override fun onDestroy() {
+        super<Service>.onDestroy()
+        super<LocalDnsService.Interface>.onDestroy()
+    }
 }

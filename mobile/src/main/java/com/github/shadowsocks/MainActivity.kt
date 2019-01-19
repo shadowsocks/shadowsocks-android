@@ -45,7 +45,7 @@ import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
-import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
@@ -92,23 +92,17 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     // service
     var state = BaseService.IDLE
-    override val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
-        override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-            Core.handler.post { changeState(state, msg, true) }
+    override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg, true)
+    override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+        if (profileId == 0L) this@MainActivity.stats.updateTraffic(
+                stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
+        if (state != BaseService.STOPPING) {
+            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
+                    ?.onTrafficUpdated(profileId, stats)
         }
-        override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-            Core.handler.post {
-                if (profileId == 0L) this@MainActivity.stats.updateTraffic(
-                        stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
-                if (state != BaseService.STOPPING) {
-                    (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
-                            ?.onTrafficUpdated(profileId, stats)
-                }
-            }
-        }
-        override fun trafficPersisted(profileId: Long) {
-            Core.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
-        }
+    }
+    override fun trafficPersisted(profileId: Long) {
+        ProfilesFragment.instance?.onTrafficPersisted(profileId)
     }
 
     private fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
@@ -122,7 +116,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     private fun toggle() = when {
         state == BaseService.CONNECTED -> Core.stopService()
-        BaseService.usingVpnMode -> {
+        DataStore.serviceMode == Key.modeVpn -> {
             val intent = VpnService.prepare(this)
             if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
             else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
@@ -130,7 +124,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         else -> Core.startService()
     }
 
-    private val connection = ShadowsocksConnection(this, true)
+    private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         service.state
     } catch (_: DeadObjectException) {
@@ -141,7 +135,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         Core.handler.post {
             connection.disconnect(this)
             Executable.killAll()
-            connection.connect(this)
+            connection.connect(this, this)
         }
     }
 
@@ -173,7 +167,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         fab.setOnClickListener { toggle() }
 
         changeState(BaseService.IDLE)   // reset everything to init state
-        Core.handler.post { connection.connect(this) }
+        Core.handler.post { connection.connect(this, this) }
         DataStore.publicStore.registerChangeListener(this)
 
         val intent = this.intent
@@ -213,7 +207,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         when (key) {
             Key.serviceMode -> Core.handler.post {
                 connection.disconnect(this)
-                connection.connect(this)
+                connection.connect(this, this)
             }
         }
     }

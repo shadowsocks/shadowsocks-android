@@ -6,8 +6,8 @@ interface IShadowsocksService {
   int getState();
   String getProfileName();
 
-  oneway void registerCallback(IShadowsocksServiceCallback cb);
-  oneway void startListeningForBandwidth(IShadowsocksServiceCallback cb);
-  oneway void stopListeningForBandwidth(IShadowsocksServiceCallback cb);
-  oneway void unregisterCallback(IShadowsocksServiceCallback cb);
+  void registerCallback(in IShadowsocksServiceCallback cb);
+  void startListeningForBandwidth(in IShadowsocksServiceCallback cb);
+  oneway void stopListeningForBandwidth(in IShadowsocksServiceCallback cb);
+  oneway void unregisterCallback(in IShadowsocksServiceCallback cb);
 }

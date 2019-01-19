@@ -31,33 +31,32 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.aidl.IShadowsocksService
-import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.broadcastReceiver
 
-class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Callback {
+class VpnRequestActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "VpnRequestActivity"
         private const val REQUEST_CONNECT = 1
     }
 
-    private val connection = ShadowsocksConnection(this)
     private var receiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!BaseService.usingVpnMode) {
+        if (DataStore.serviceMode != Key.modeVpn) {
             finish()
             return
         }
         if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
-            receiver = broadcastReceiver { _, _ -> connection.connect(this) }
+            receiver = broadcastReceiver { _, _ -> request() }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
-        } else connection.connect(this)
+        } else request()
     }
 
-    override fun onServiceConnected(service: IShadowsocksService) {
+    private fun request() {
         val intent = VpnService.prepare(this)
         if (intent == null) onActivityResult(REQUEST_CONNECT, RESULT_OK, null)
         else startActivityForResult(intent, REQUEST_CONNECT)
@@ -73,7 +72,6 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Callback {
 
     override fun onDestroy() {
         super.onDestroy()
-        connection.disconnect(this)
         if (receiver != null) unregisterReceiver(receiver)
     }
 }

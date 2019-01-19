@@ -35,6 +35,7 @@ import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
@@ -160,7 +161,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (BaseService.usingVpnMode)
+        if (DataStore.serviceMode == Key.modeVpn)
             if (BaseVpnService.prepare(this) != null)
                 startActivity(Intent(this, VpnRequestActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -278,5 +279,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             if (tries > 5) throw e
             tries += 1
         }
+    }
+
+    override fun onDestroy() {
+        super<BaseVpnService>.onDestroy()
+        super<LocalDnsService.Interface>.onDestroy()
     }
 }

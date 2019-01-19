@@ -42,9 +42,8 @@ import androidx.preference.SwitchPreference
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.ShadowsocksConnection
 import com.github.shadowsocks.aidl.IShadowsocksService
-import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
+import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
@@ -89,18 +88,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     // service
     var state = BaseService.IDLE
         private set
-    override val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
-        override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-            Core.handler.post { changeState(state, msg) }
-        }
-        override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-            if (profileId == 0L) this@MainPreferenceFragment.stats.summary = getString(R.string.stat_summary,
-                    getString(R.string.speed, Formatter.formatFileSize(activity, stats.txRate)),
-                    getString(R.string.speed, Formatter.formatFileSize(activity, stats.rxRate)),
-                    Formatter.formatFileSize(activity, stats.txTotal),
-                    Formatter.formatFileSize(activity, stats.rxTotal))
-        }
-        override fun trafficPersisted(profileId: Long) { }
+    override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg)
+    override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+        if (profileId == 0L) this@MainPreferenceFragment.stats.summary = getString(R.string.stat_summary,
+                getString(R.string.speed, Formatter.formatFileSize(activity, stats.txRate)),
+                getString(R.string.speed, Formatter.formatFileSize(activity, stats.rxRate)),
+                Formatter.formatFileSize(activity, stats.txTotal),
+                Formatter.formatFileSize(activity, stats.rxTotal))
     }
 
     private fun changeState(state: Int, msg: String? = null) {
@@ -115,7 +109,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         stats.isVisible = state == BaseService.CONNECTED
         val owner = activity as FragmentActivity    // TODO: change to this when refactored to androidx
         if (state != BaseService.CONNECTED) {
-            serviceCallback.trafficUpdated(0, TrafficStats())
+            trafficUpdated(0, TrafficStats())
             tester.status.removeObservers(owner)
             if (state != BaseService.IDLE) tester.invalidate()
         } else tester.status.observe(owner, Observer {
@@ -141,7 +135,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         }
     }
 
-    private val connection = ShadowsocksConnection(this, true)
+    private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         service.state
     } catch (_: DeadObjectException) {
@@ -152,7 +146,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         Core.handler.post {
             connection.disconnect(activity)
             Executable.killAll()
-            connection.connect(activity)
+            connection.connect(activity, this)
         }
     }
 
@@ -202,7 +196,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
 
         tester = ViewModelProviders.of(activity as FragmentActivity).get()
         changeState(BaseService.IDLE)   // reset everything to init state
-        connection.connect(activity)
+        connection.connect(activity, this)
         DataStore.publicStore.registerChangeListener(this)
     }
 
@@ -227,7 +221,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     fun startService() {
         when {
             state != BaseService.STOPPED -> return
-            BaseService.usingVpnMode -> {
+            DataStore.serviceMode == Key.modeVpn -> {
                 val intent = VpnService.prepare(activity)
                 if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
                 else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
@@ -240,7 +234,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         when (key) {
             Key.serviceMode -> Core.handler.post {
                 connection.disconnect(activity)
-                connection.connect(activity)
+                connection.connect(activity, this)
             }
         }
     }
