@@ -11,7 +11,7 @@ buildscript {
         buildToolsVersion = '28.0.3'
         lifecycleVersion = '2.0.0'
         roomVersion = '2.0.0'
-        workVersion = '1.0.0-beta01'
+        workVersion = '1.0.0-beta02'
         preferencexVersion = '1.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.1.1'
