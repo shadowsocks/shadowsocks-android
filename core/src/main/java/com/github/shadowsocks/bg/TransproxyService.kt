@@ -27,10 +27,7 @@ import com.github.shadowsocks.preference.DataStore
 import java.io.File
 
 class TransproxyService : Service(), LocalDnsService.Interface {
-    init {
-        BaseService.register(this)
-    }
-
+    override val data = BaseService.Data(this)
     override val tag: String get() = "ShadowsocksTransproxyService"
     override fun createNotification(profileName: String): ServiceNotification =
             ServiceNotification(this, profileName, "service-transproxy", true)
@@ -79,7 +76,7 @@ redsocks {
     }
 
     override fun onDestroy() {
-        super<Service>.onDestroy()
-        super<LocalDnsService.Interface>.onDestroy()
+        super.onDestroy()
+        data.binder.close()
     }
 }

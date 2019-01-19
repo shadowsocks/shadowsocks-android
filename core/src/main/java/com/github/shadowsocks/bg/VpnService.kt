@@ -108,10 +108,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         override fun getLocalizedMessage() = getString(R.string.reboot_required)
     }
 
-    init {
-        BaseService.register(this)
-    }
-
+    override val data = BaseService.Data(this)
     override val tag: String get() = "ShadowsocksVpnService"
     override fun createNotification(profileName: String): ServiceNotification =
             ServiceNotification(this, profileName, "service-vpn")
@@ -282,7 +279,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onDestroy() {
-        super<BaseVpnService>.onDestroy()
-        super<LocalDnsService.Interface>.onDestroy()
+        super.onDestroy()
+        data.binder.close()
     }
 }
