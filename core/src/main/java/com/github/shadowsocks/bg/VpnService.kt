@@ -39,6 +39,7 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
+import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
@@ -74,34 +75,30 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 .build()
     }
 
+    class CloseableFd(val fd: FileDescriptor) : Closeable {
+        override fun close() = Os.close(fd)
+    }
+
     private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
         override val socketFile: File = File(Core.deviceStorage.noBackupFilesDir, "protect_path")
 
-        override fun accept(socket: LocalSocket) {
-            try {
-                socket.inputStream.read()
-                val fd = socket.ancillaryFileDescriptors!!.single()!!
-                socket.outputStream.write(if (try {
-                            val network = underlyingNetwork
-                            if (network != null && Build.VERSION.SDK_INT >= 23) {
-                                try {
-                                    network.bindSocket(fd)
-                                } catch (e: SocketException) {
-                                    // silently ignore ENONET (Machine is not on the network)
-                                    if ((e.cause as? ErrnoException)?.errno == 64) e.printStackTrace() else throw e
-                                }
+        override fun accept(socket: LocalSocket) = try {
+            socket.inputStream.read()
+            val fd = socket.ancillaryFileDescriptors!!.single()!!
+            CloseableFd(fd).use {
+                socket.outputStream.write(if (underlyingNetwork.let { network ->
+                            if (network != null && Build.VERSION.SDK_INT >= 23) try {
+                                network.bindSocket(fd)
                                 true
+                            } catch (e: IOException) {
+                                // suppress ENONET (Machine is not on the network)
+                                if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
+                                false
                             } else protect(getInt.invoke(fd) as Int)
-                        } finally {
-                            try {
-                                Os.close(fd)
-                            } catch (e: ErrnoException) {
-                                printLog(e)
-                            }
                         }) 0 else 1)
-            } catch (e: IOException) {
-                printLog(e)
             }
+        } catch (e: IOException) {
+            printLog(e)
         }
     }
     inner class NullConnectionException : NullPointerException() {
