@@ -35,13 +35,14 @@ import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.preference.DataStore
 
 @RequiresApi(24)
-class TileService : BaseTileService(), ShadowsocksConnection.Interface {
+class TileService : BaseTileService(), ShadowsocksConnection.Callback {
     private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle) }
     private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
     private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
     private val keyguard by lazy { getSystemService<KeyguardManager>()!! }
     private var tapPending = false
 
+    private val connection = ShadowsocksConnection(this)
     override val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
             val tile = qsTile ?: return
@@ -78,10 +79,10 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
 
     override fun onStartListening() {
         super.onStartListening()
-        connection.connect()
+        connection.connect(this)
     }
     override fun onStopListening() {
-        connection.disconnect()
+        connection.disconnect(this)
         super.onStopListening()
     }
 

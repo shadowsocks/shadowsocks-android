@@ -59,7 +59,7 @@ import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPreferenceDataStoreChangeListener,
+class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
     companion object {
         private const val TAG = "ShadowsocksMainActivity"
@@ -130,19 +130,18 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         else -> Core.startService()
     }
 
-    override val listenForDeath: Boolean get() = true
+    private val connection = ShadowsocksConnection(this, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         service.state
     } catch (_: DeadObjectException) {
         BaseService.IDLE
     })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
-    override fun binderDied() {
-        super.binderDied()
+    override fun onBinderDied() {
         Core.handler.post {
-            connection.disconnect()
+            connection.disconnect(this)
             Executable.killAll()
-            connection.connect()
+            connection.connect(this)
         }
     }
 
@@ -174,7 +173,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
         fab.setOnClickListener { toggle() }
 
         changeState(BaseService.IDLE)   // reset everything to init state
-        Core.handler.post { connection.connect() }
+        Core.handler.post { connection.connect(this) }
         DataStore.publicStore.registerChangeListener(this)
 
         val intent = this.intent
@@ -213,8 +212,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
         when (key) {
             Key.serviceMode -> Core.handler.post {
-                connection.disconnect()
-                connection.connect()
+                connection.disconnect(this)
+                connection.connect(this)
             }
         }
     }
@@ -285,7 +284,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
     override fun onDestroy() {
         super.onDestroy()
         DataStore.publicStore.unregisterChangeListener(this)
-        connection.disconnect()
+        connection.disconnect(this)
         BackupManager(this).dataChanged()
         Core.handler.removeCallbacksAndMessages(null)
     }

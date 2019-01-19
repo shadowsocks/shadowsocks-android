@@ -55,7 +55,7 @@ import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.*
 import org.json.JSONArray
 
-class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnection.Interface,
+class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnection.Callback,
         OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CONNECT = 1
@@ -141,19 +141,18 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         }
     }
 
-    override val listenForDeath: Boolean get() = true
+    private val connection = ShadowsocksConnection(this, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         service.state
     } catch (_: DeadObjectException) {
         BaseService.IDLE
     })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
-    override fun binderDied() {
-        super.binderDied()
+    override fun onBinderDied() {
         Core.handler.post {
-            connection.disconnect()
+            connection.disconnect(activity)
             Executable.killAll()
-            connection.connect()
+            connection.connect(activity)
         }
     }
 
@@ -203,7 +202,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
 
         tester = ViewModelProviders.of(activity as FragmentActivity).get()
         changeState(BaseService.IDLE)   // reset everything to init state
-        connection.connect()
+        connection.connect(activity)
         DataStore.publicStore.registerChangeListener(this)
     }
 
@@ -240,8 +239,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
         when (key) {
             Key.serviceMode -> Core.handler.post {
-                connection.disconnect()
-                connection.connect()
+                connection.disconnect(activity)
+                connection.connect(activity)
             }
         }
     }
@@ -334,7 +333,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     override fun onDestroy() {
         super.onDestroy()
         DataStore.publicStore.unregisterChangeListener(this)
-        connection.disconnect()
+        connection.disconnect(activity)
         BackupManager(activity).dataChanged()
     }
 }

@@ -32,7 +32,9 @@ import androidx.core.graphics.drawable.IconCompat
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.bg.BaseService
 
-class QuickToggleShortcut : Activity(), ShadowsocksConnection.Interface {
+class QuickToggleShortcut : Activity(), ShadowsocksConnection.Callback {
+    private val connection = ShadowsocksConnection(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (intent.action == Intent.ACTION_CREATE_SHORTCUT) {
@@ -44,7 +46,7 @@ class QuickToggleShortcut : Activity(), ShadowsocksConnection.Interface {
                             .build()))
             finish()
         } else {
-            connection.connect()
+            connection.connect(this)
             if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed("toggle")
         }
     }
@@ -58,7 +60,7 @@ class QuickToggleShortcut : Activity(), ShadowsocksConnection.Interface {
     }
 
     override fun onDestroy() {
-        connection.disconnect()
+        connection.disconnect(this)
         super.onDestroy()
     }
 }

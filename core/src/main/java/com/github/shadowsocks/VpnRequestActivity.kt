@@ -36,12 +36,13 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.utils.broadcastReceiver
 
-class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface {
+class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Callback {
     companion object {
         private const val TAG = "VpnRequestActivity"
         private const val REQUEST_CONNECT = 1
     }
 
+    private val connection = ShadowsocksConnection(this)
     private var receiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,9 +52,9 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
             return
         }
         if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
-            receiver = broadcastReceiver { _, _ -> connection.connect() }
+            receiver = broadcastReceiver { _, _ -> connection.connect(this) }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
-        } else connection.connect()
+        } else connection.connect(this)
     }
 
     override fun onServiceConnected(service: IShadowsocksService) {
@@ -72,7 +73,7 @@ class VpnRequestActivity : AppCompatActivity(), ShadowsocksConnection.Interface 
 
     override fun onDestroy() {
         super.onDestroy()
-        connection.disconnect()
+        connection.disconnect(this)
         if (receiver != null) unregisterReceiver(receiver)
     }
 }
