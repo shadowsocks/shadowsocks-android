@@ -42,33 +42,30 @@ class TileService : BaseTileService(), ShadowsocksConnection.Interface {
     private val keyguard by lazy { getSystemService<KeyguardManager>()!! }
     private var tapPending = false
 
-    override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
-        @RequiresApi(24)
-        object : IShadowsocksServiceCallback.Stub() {
-            override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-                val tile = qsTile ?: return
-                var label: String? = null
-                when (state) {
-                    BaseService.STOPPED -> {
-                        tile.icon = iconIdle
-                        tile.state = Tile.STATE_INACTIVE
-                    }
-                    BaseService.CONNECTED -> {
-                        tile.icon = iconConnected
-                        if (!keyguard.isDeviceLocked) label = profileName
-                        tile.state = Tile.STATE_ACTIVE
-                    }
-                    else -> {
-                        tile.icon = iconBusy
-                        tile.state = Tile.STATE_UNAVAILABLE
-                    }
+    override val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
+        override fun stateChanged(state: Int, profileName: String?, msg: String?) {
+            val tile = qsTile ?: return
+            var label: String? = null
+            when (state) {
+                BaseService.STOPPED -> {
+                    tile.icon = iconIdle
+                    tile.state = Tile.STATE_INACTIVE
                 }
-                tile.label = label ?: getString(R.string.app_name)
-                tile.updateTile()
+                BaseService.CONNECTED -> {
+                    tile.icon = iconConnected
+                    if (!keyguard.isDeviceLocked) label = profileName
+                    tile.state = Tile.STATE_ACTIVE
+                }
+                else -> {
+                    tile.icon = iconBusy
+                    tile.state = Tile.STATE_UNAVAILABLE
+                }
             }
-            override fun trafficUpdated(profileId: Long, stats: TrafficStats) { }
-            override fun trafficPersisted(profileId: Long) { }
+            tile.label = label ?: getString(R.string.app_name)
+            tile.updateTile()
         }
+        override fun trafficUpdated(profileId: Long, stats: TrafficStats) { }
+        override fun trafficPersisted(profileId: Long) { }
     }
 
     override fun onServiceConnected(service: IShadowsocksService) {

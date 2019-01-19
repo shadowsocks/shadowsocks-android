@@ -89,20 +89,18 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     // service
     var state = BaseService.IDLE
         private set
-    override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
-        object : IShadowsocksServiceCallback.Stub() {
-            override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-                Core.handler.post { changeState(state, msg) }
-            }
-            override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-                if (profileId == 0L) this@MainPreferenceFragment.stats.summary = getString(R.string.stat_summary,
-                        getString(R.string.speed, Formatter.formatFileSize(activity, stats.txRate)),
-                        getString(R.string.speed, Formatter.formatFileSize(activity, stats.rxRate)),
-                        Formatter.formatFileSize(activity, stats.txTotal),
-                        Formatter.formatFileSize(activity, stats.rxTotal))
-            }
-            override fun trafficPersisted(profileId: Long) { }
+    override val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
+        override fun stateChanged(state: Int, profileName: String?, msg: String?) {
+            Core.handler.post { changeState(state, msg) }
         }
+        override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+            if (profileId == 0L) this@MainPreferenceFragment.stats.summary = getString(R.string.stat_summary,
+                    getString(R.string.speed, Formatter.formatFileSize(activity, stats.txRate)),
+                    getString(R.string.speed, Formatter.formatFileSize(activity, stats.rxRate)),
+                    Formatter.formatFileSize(activity, stats.txTotal),
+                    Formatter.formatFileSize(activity, stats.rxTotal))
+        }
+        override fun trafficPersisted(profileId: Long) { }
     }
 
     private fun changeState(state: Int, msg: String? = null) {

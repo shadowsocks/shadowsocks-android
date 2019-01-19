@@ -92,24 +92,22 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Interface, OnPre
 
     // service
     var state = BaseService.IDLE
-    override val serviceCallback: IShadowsocksServiceCallback.Stub by lazy {
-        object : IShadowsocksServiceCallback.Stub() {
-            override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-                Core.handler.post { changeState(state, msg, true) }
-            }
-            override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-                Core.handler.post {
-                    if (profileId == 0L) this@MainActivity.stats.updateTraffic(
-                            stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
-                    if (state != BaseService.STOPPING) {
-                        (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
-                                ?.onTrafficUpdated(profileId, stats)
-                    }
+    override val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
+        override fun stateChanged(state: Int, profileName: String?, msg: String?) {
+            Core.handler.post { changeState(state, msg, true) }
+        }
+        override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
+            Core.handler.post {
+                if (profileId == 0L) this@MainActivity.stats.updateTraffic(
+                        stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
+                if (state != BaseService.STOPPING) {
+                    (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
+                            ?.onTrafficUpdated(profileId, stats)
                 }
             }
-            override fun trafficPersisted(profileId: Long) {
-                Core.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
-            }
+        }
+        override fun trafficPersisted(profileId: Long) {
+            Core.handler.post { ProfilesFragment.instance?.onTrafficPersisted(profileId) }
         }
     }
 
