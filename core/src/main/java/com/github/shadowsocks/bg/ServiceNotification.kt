@@ -86,11 +86,11 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
                 service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0))
         update(if (service.getSystemService<PowerManager>()?.isInteractive != false)
             Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
-        val screenFilter = IntentFilter()
-        screenFilter.addAction(Intent.ACTION_SCREEN_ON)
-        screenFilter.addAction(Intent.ACTION_SCREEN_OFF)
-        if (visible && Build.VERSION.SDK_INT < 26) screenFilter.addAction(Intent.ACTION_USER_PRESENT)
-        service.registerReceiver(lockReceiver, screenFilter)
+        service.registerReceiver(lockReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_SCREEN_OFF)
+            if (visible && Build.VERSION.SDK_INT < 26) addAction(Intent.ACTION_USER_PRESENT)
+        })
     }
 
     private fun update(action: String?, forceShow: Boolean = false) {

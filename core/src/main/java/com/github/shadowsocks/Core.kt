@@ -43,7 +43,6 @@ import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
-import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -145,18 +144,19 @@ object Core {
     fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
     fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
 
-    fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit): BroadcastReceiver {
-        val filter = IntentFilter(Intent.ACTION_PACKAGE_ADDED)
-        filter.addAction(Intent.ACTION_PACKAGE_REMOVED)
-        filter.addDataScheme("package")
-        val result = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
-                callback()
-                if (onetime) app.unregisterReceiver(this)
-            }
+    fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
+        init {
+            app.registerReceiver(this, IntentFilter().apply {
+                addAction(Intent.ACTION_PACKAGE_ADDED)
+                addAction(Intent.ACTION_PACKAGE_REMOVED)
+                addDataScheme("package")
+            })
         }
-        app.registerReceiver(result, filter)
-        return result
+
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
+            callback()
+            if (onetime) app.unregisterReceiver(this)
+        }
     }
 }

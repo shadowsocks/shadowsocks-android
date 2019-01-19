@@ -36,8 +36,10 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.plugin.PluginManager
-import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.thread
 import com.google.firebase.analytics.FirebaseAnalytics
 import java.io.File
 import java.net.UnknownHostException
@@ -280,12 +282,11 @@ object BaseService {
             if (fallback != null) data.udpFallback = ProxyInstance(fallback, profile.route)
 
             if (!data.closeReceiverRegistered) {
-                // register close receiver
-                val filter = IntentFilter()
-                filter.addAction(Action.RELOAD)
-                filter.addAction(Intent.ACTION_SHUTDOWN)
-                filter.addAction(Action.CLOSE)
-                registerReceiver(data.closeReceiver, filter)
+                registerReceiver(data.closeReceiver, IntentFilter().apply {
+                    addAction(Action.RELOAD)
+                    addAction(Intent.ACTION_SHUTDOWN)
+                    addAction(Action.CLOSE)
+                })
                 data.closeReceiverRegistered = true
             }
 
