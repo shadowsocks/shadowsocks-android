@@ -290,10 +290,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
                 if (resultCode != Activity.RESULT_OK) return
                 val profiles = ProfileManager.getAllProfiles()?.associateBy { it.formattedAddress }
                 val feature = profiles?.values?.singleOrNull { it.id == DataStore.profileId }
-                ProfileManager.clear()
+                val lazyClear = lazy { ProfileManager.clear() }
                 for (uri in data!!.datas) try {
                     Profile.parseJson(activity.contentResolver.openInputStream(uri)!!.bufferedReader().readText(),
                             feature) {
+                        lazyClear.value
                         // if two profiles has the same address, treat them as the same profile and copy stats over
                         profiles?.get(it.formattedAddress)?.apply {
                             it.tx = tx
