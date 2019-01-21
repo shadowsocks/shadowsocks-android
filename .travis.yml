@@ -7,7 +7,7 @@ services:
     - docker
 
 before_install:
-    - docker pull shadowsocks/shadowsocks-android:circleci
+    - docker pull shadowsocks/android-ndk-go
     - chmod -R a+wrx .
 
 script:

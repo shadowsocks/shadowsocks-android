@@ -44,7 +44,6 @@ import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
 import java.lang.reflect.Method
-import java.net.SocketException
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
