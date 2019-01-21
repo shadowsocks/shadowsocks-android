@@ -150,7 +150,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         DataStore.dirty = true
         true
     } catch (exc: RuntimeException) {
-        (activity as MainActivity).snackbar(exc.localizedMessage).show()
+        Snackbar.make(view!!, exc.localizedMessage, Snackbar.LENGTH_LONG).show()
         false
     }
 
