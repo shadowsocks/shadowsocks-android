@@ -1,4 +1,4 @@
-FROM circleci/android:api-28
+FROM circleci/android:api-28-alpha
 
 # NDK see also: https://github.com/CircleCI-Public/circleci-dockerfiles/blob/cb8bda793023d3e919ea5553e2f2c04b71f53c49/android/images/api-28-ndk/Dockerfile#L181
 
