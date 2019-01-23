@@ -139,9 +139,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         else -> super<LocalDnsService.Interface>.onBind(intent)
     }
 
-    override fun onRevoke() = stopRunner(true)
+    override fun onRevoke() = stopRunner()
 
-    override fun killProcesses() {
+    override suspend fun killProcesses() {
         if (listeningForDefaultNetwork) {
             connectivity.unregisterNetworkCallback(defaultNetworkCallback)
             listeningForDefaultNetwork = false
@@ -159,16 +159,16 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 startActivity(Intent(this, VpnRequestActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
-        stopRunner(true)
+        stopRunner()
         return Service.START_NOT_STICKY
     }
 
-    override fun startNativeProcesses() {
+    override suspend fun startProcesses() {
         val worker = ProtectWorker()
         worker.start()
         this.worker = worker
 
-        super.startNativeProcesses()
+        super.startProcesses()
 
         sendFd(startVpn())
     }
@@ -178,7 +178,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         return cmd
     }
 
-    private fun startVpn(): FileDescriptor {
+    private suspend fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
                 .setConfigureIntent(Core.configureIntent(this))
@@ -247,11 +247,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             cmd += "--dnsgw"
             cmd += "127.0.0.1:${DataStore.portLocalDns}"
         }
-        data.processes.start(cmd, onRestartCallback = {
+        data.processes!!.start(cmd, onRestartCallback = {
             try {
                 sendFd(conn.fileDescriptor)
             } catch (e: ErrnoException) {
-                stopRunner(true, e.message)
+                stopRunner(false, e.message)
             }
         })
         return conn.fileDescriptor

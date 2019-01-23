@@ -62,13 +62,15 @@ dependencies {
     api "android.arch.work:work-runtime-ktx:$workVersion"
     api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    api "androidx.preference:preference:1.0.0"
+    api 'androidx.preference:preference:1.0.0'
     api "androidx.room:room-runtime:$roomVersion"
     api 'com.crashlytics.sdk.android:crashlytics:2.9.8'
     api 'com.google.firebase:firebase-config:16.1.3'
     api 'com.google.firebase:firebase-core:16.0.6'
     api 'com.squareup.okhttp3:okhttp:3.12.1'
     api "com.takisoft.preferencex:preferencex:$preferencexVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "androidx.arch.core:core-testing:$lifecycleVersion"

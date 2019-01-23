@@ -39,8 +39,8 @@ import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.thread
 import com.google.firebase.analytics.FirebaseAnalytics
+import kotlinx.coroutines.*
 import java.io.File
 import java.net.UnknownHostException
 import java.util.*
@@ -62,16 +62,16 @@ object BaseService {
     const val CONFIG_FILE_UDP = "shadowsocks-udp.conf"
 
     class Data internal constructor(private val service: Interface) {
-        @Volatile var state = STOPPED
-        val processes = GuardedProcessPool()
-        @Volatile var proxy: ProxyInstance? = null
-        @Volatile var udpFallback: ProxyInstance? = null
+        var state = STOPPED
+        var processes: GuardedProcessPool? = null
+        var proxy: ProxyInstance? = null
+        var udpFallback: ProxyInstance? = null
 
         var notification: ServiceNotification? = null
         val closeReceiver = broadcastReceiver { _, intent ->
             when (intent.action) {
                 Action.RELOAD -> service.forceLoad()
-                else -> service.stopRunner(true)
+                else -> service.stopRunner()
             }
         }
         var closeReceiverRegistered = false
@@ -101,11 +101,12 @@ object BaseService {
         }
 
         private fun broadcast(work: (IShadowsocksServiceCallback) -> Unit) {
-            val n = callbacks.beginBroadcast()
-            for (i in 0 until n) try {
-                work(callbacks.getBroadcastItem(i))
-            } catch (e: Exception) {
-                printLog(e)
+            repeat(callbacks.beginBroadcast()) {
+                try {
+                    work(callbacks.getBroadcastItem(it))
+                } catch (e: Exception) {
+                    printLog(e)
+                }
             }
             callbacks.finishBroadcast()
         }
@@ -193,26 +194,23 @@ object BaseService {
 
         fun forceLoad() {
             val (profile, fallback) = Core.currentProfile
-                    ?: return stopRunner(true, (this as Context).getString(R.string.profile_empty))
+                    ?: return stopRunner(false, (this as Context).getString(R.string.profile_empty))
             if (profile.host.isEmpty() || profile.password.isEmpty() ||
                     fallback != null && (fallback.host.isEmpty() || fallback.password.isEmpty())) {
-                stopRunner(true, (this as Context).getString(R.string.proxy_empty))
+                stopRunner(false, (this as Context).getString(R.string.proxy_empty))
                 return
             }
             val s = data.state
             when (s) {
                 STOPPED -> startRunner()
-                CONNECTED -> {
-                    stopRunner(false)
-                    startRunner()
-                }
+                CONNECTED -> stopRunner(true)
                 else -> Crashlytics.log(Log.WARN, tag, "Illegal state when invoking use: $s")
             }
         }
 
         fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> = cmd
 
-        fun startNativeProcesses() {
+        suspend fun startProcesses() {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
                             ?.isUserUnlocked != false) app else Core.deviceStorage).noBackupFilesDir
             val udpFallback = data.udpFallback
@@ -233,39 +231,45 @@ object BaseService {
             else startService(Intent(this, javaClass))
         }
 
-        fun killProcesses() = data.processes.killAll()
+        suspend fun killProcesses() {
+            data.processes?.run {
+                close()
+                data.processes = null
+            }
+        }
 
-        fun stopRunner(stopService: Boolean, msg: String? = null) {
+        fun stopRunner(restart: Boolean = false, msg: String? = null) {
             // channge the state
-            val data = data
             data.changeState(STOPPING)
+            GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+                Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
 
-            Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
+                killProcesses()
 
-            killProcesses()
+                // clean up recevier
+                this@Interface as Service
+                val data = data
+                if (data.closeReceiverRegistered) {
+                    unregisterReceiver(data.closeReceiver)
+                    data.closeReceiverRegistered = false
+                }
 
-            // clean up recevier
-            this as Service
-            if (data.closeReceiverRegistered) {
-                unregisterReceiver(data.closeReceiver)
-                data.closeReceiverRegistered = false
+                data.notification?.destroy()
+                data.notification = null
+
+                val ids = listOfNotNull(data.proxy, data.udpFallback).map {
+                    it.close()
+                    it.profile.id
+                }
+                data.proxy = null
+                data.binder.trafficPersisted(ids)
+
+                // change the state
+                data.changeState(STOPPED, msg)
+
+                // stop the service if nothing has bound to it
+                if (restart) startRunner() else stopSelf()
             }
-
-            data.notification?.destroy()
-            data.notification = null
-
-            val ids = listOfNotNull(data.proxy, data.udpFallback).map {
-                it.close()
-                it.profile.id
-            }
-            data.proxy = null
-            data.binder.trafficPersisted(ids)
-
-            // change the state
-            data.changeState(STOPPED, msg)
-
-            // stop the service if nothing has bound to it
-            if (stopService) stopSelf()
         }
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -276,7 +280,7 @@ object BaseService {
             if (profilePair == null) {
                 // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
                 data.notification = createNotification("")
-                stopRunner(true, getString(R.string.profile_empty))
+                stopRunner(false, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
             val (profile, fallback) = profilePair
@@ -299,14 +303,14 @@ object BaseService {
 
             data.changeState(CONNECTING)
 
-            thread("$tag-Connecting") {
+            GlobalScope.launch(Dispatchers.Main) {
                 try {
                     proxy.init()
                     data.udpFallback?.init()
-                    // Clean up
-                    killProcesses()
 
-                    startNativeProcesses()
+                    killProcesses()
+                    data.processes = GuardedProcessPool()
+                    startProcesses()
 
                     proxy.scheduleUpdate()
                     data.udpFallback?.scheduleUpdate()
@@ -314,12 +318,12 @@ object BaseService {
 
                     data.changeState(CONNECTED)
                 } catch (_: UnknownHostException) {
-                    stopRunner(true, getString(R.string.invalid_server))
+                    stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {
                     if (exc !is PluginManager.PluginNotFoundException && exc !is VpnService.NullConnectionException) {
                         printLog(exc)
                     }
-                    stopRunner(true, "${getString(R.string.service_failed)}: ${exc.localizedMessage}")
+                    stopRunner(false, "${getString(R.string.service_failed)}: ${exc.localizedMessage}")
                 }
             }
             return Service.START_NOT_STICKY

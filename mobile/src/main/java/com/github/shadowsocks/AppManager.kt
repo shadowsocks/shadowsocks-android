@@ -32,10 +32,10 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
 import android.widget.ImageView
 import android.widget.Switch
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
@@ -47,9 +47,8 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.thread
 import com.google.android.material.snackbar.Snackbar
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.*
 
 class AppManager : AppCompatActivity() {
     companion object {
@@ -58,13 +57,13 @@ class AppManager : AppCompatActivity() {
 
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: List<PackageInfo>? = null
-        private fun getApps(pm: PackageManager) = synchronized(AppManager) {
+        private suspend fun getApps(pm: PackageManager) = synchronized(AppManager) {
             if (receiver == null) receiver = Core.listenForPackageChanges {
                 synchronized(AppManager) {
                     receiver = null
                     cachedApps = null
                 }
-                AppManager.instance?.reloadApps()
+                AppManager.instance?.loadApps()
             }
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
             val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
@@ -72,7 +71,10 @@ class AppManager : AppCompatActivity() {
                             it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
             this.cachedApps = cachedApps
             cachedApps
-        }.map { ProxiedApp(pm, it.applicationInfo, it.packageName) }
+        }.map {
+            yield()
+            ProxiedApp(pm, it.applicationInfo, it.packageName)
+        }
     }
 
     private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
@@ -106,17 +108,15 @@ class AppManager : AppCompatActivity() {
                 proxiedApps.add(item.packageName)
                 check.isChecked = true
             }
-            if (!appsLoading.get()) {
-                DataStore.individual = proxiedApps.joinToString("\n")
-                DataStore.dirty = true
-            }
+            DataStore.individual = proxiedApps.joinToString("\n")
+            DataStore.dirty = true
         }
     }
 
     private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>() {
         private var apps = listOf<ProxiedApp>()
 
-        fun reload() {
+        suspend fun reload() {
             apps = getApps(packageManager)
                     .sortedWith(compareBy({ !proxiedApps.contains(it.packageName) }, { it.name.toString() }))
         }
@@ -132,38 +132,36 @@ class AppManager : AppCompatActivity() {
     private lateinit var bypassSwitch: Switch
     private lateinit var appListView: RecyclerView
     private lateinit var loadingView: View
-    private val appsLoading = AtomicBoolean()
-    private val handler = Handler()
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
+    private var loader: Job? = null
+
+    private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime).toLong() }
+    private fun View.crossFadeFrom(other: View) {
+        clearAnimation()
+        other.clearAnimation()
+        if (visibility == View.VISIBLE && other.visibility == View.GONE) return
+        alpha = 0F
+        visibility = View.VISIBLE
+        animate().alpha(1F).duration = shortAnimTime
+        other.animate().alpha(0F).setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                other.visibility = View.GONE
+            }
+        }).duration = shortAnimTime
+    }
 
     private fun initProxiedApps(str: String = DataStore.individual) {
         proxiedApps = str.split('\n').toHashSet()
     }
-    private fun reloadApps() {
-        if (!appsLoading.compareAndSet(true, false)) loadAppsAsync()
-    }
-    private fun loadAppsAsync() {
-        if (!appsLoading.compareAndSet(false, true)) return
-        appListView.visibility = View.GONE
-        loadingView.visibility = View.VISIBLE
-        thread("AppManager-loader") {
+    @UiThread
+    private fun loadApps() {
+        loader?.cancel()
+        loader = GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+            loadingView.crossFadeFrom(appListView)
             val adapter = appListView.adapter as AppsAdapter
-            do {
-                appsLoading.set(true)
-                adapter.reload()
-            } while (!appsLoading.compareAndSet(true, false))
-            handler.post {
-                adapter.notifyDataSetChanged()
-                val shortAnimTime = resources.getInteger(android.R.integer.config_shortAnimTime)
-                appListView.alpha = 0F
-                appListView.visibility = View.VISIBLE
-                appListView.animate().alpha(1F).duration = shortAnimTime.toLong()
-                loadingView.animate().alpha(0F).setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator) {
-                        loadingView.visibility = View.GONE
-                    }
-                }).duration = shortAnimTime.toLong()
-            }
+            withContext(Dispatchers.IO) { adapter.reload() }
+            adapter.notifyDataSetChanged()
+            appListView.crossFadeFrom(loadingView)
         }
     }
 
@@ -199,7 +197,7 @@ class AppManager : AppCompatActivity() {
         appListView.adapter = AppsAdapter()
 
         instance = this
-        loadAppsAsync()
+        loadApps()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -239,7 +237,7 @@ class AppManager : AppCompatActivity() {
                         DataStore.dirty = true
                         Snackbar.make(appListView, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                         initProxiedApps(apps)
-                        reloadApps()
+                        loadApps()
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
@@ -255,7 +253,7 @@ class AppManager : AppCompatActivity() {
 
     override fun onDestroy() {
         instance = null
-        handler.removeCallbacksAndMessages(null)
+        loader?.cancel()
         super.onDestroy()
     }
 }

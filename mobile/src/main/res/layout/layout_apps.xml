@@ -55,11 +55,13 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/list"
+            android:visibility="gone"
             app:fastScrollEnabled="true"
             app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb"
             app:fastScrollHorizontalTrackDrawable="@drawable/fastscroll_line"
             app:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb"
             app:fastScrollVerticalTrackDrawable="@drawable/fastscroll_line"
-            tools:listitem="@layout/layout_apps_item"/>
+            tools:listitem="@layout/layout_apps_item"
+            tools:visibility="visible"/>
   </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </LinearLayout>

@@ -26,9 +26,9 @@ import androidx.lifecycle.ViewModel
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.InetSocketAddress
@@ -72,41 +72,47 @@ class HttpsTest : ViewModel() {
         }
     }
 
-    private var testCount = 0
+    private var running: Pair<HttpURLConnection, Job>? = null
     val status = MutableLiveData<Status>().apply { value = Status.Idle }
 
     fun testConnection() {
-        ++testCount
+        cancelTest()
         status.value = Status.Testing
-        val id = testCount  // it would change by other code
-        thread("ConnectionTest") {
-            val url = URL("https", when (Core.currentProfile!!.first.route) {
-                Acl.CHINALIST -> "www.qualcomm.cn"
-                else -> "www.google.com"
-            }, "/generate_204")
-            val conn = (if (DataStore.serviceMode == Key.modeVpn) url.openConnection() else
-                url.openConnection(Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", DataStore.portProxy))))
-                    as HttpURLConnection
-            conn.setRequestProperty("Connection", "close")
-            conn.instanceFollowRedirects = false
-            conn.useCaches = false
-            val result = try {
-                val start = SystemClock.elapsedRealtime()
-                val code = conn.responseCode
-                val elapsed = SystemClock.elapsedRealtime() - start
-                if (code == 204 || code == 200 && conn.responseLength == 0L) Status.Success(elapsed)
-                else Status.Error.UnexpectedResponseCode(code)
-            } catch (e: IOException) {
-                Status.Error.IOFailure(e)
-            } finally {
-                conn.disconnect()
+        val url = URL("https", when (Core.currentProfile!!.first.route) {
+            Acl.CHINALIST -> "www.qualcomm.cn"
+            else -> "www.google.com"
+        }, "/generate_204")
+        val conn = (if (DataStore.serviceMode == Key.modeVpn) url.openConnection() else
+            url.openConnection(Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", DataStore.portProxy))))
+                as HttpURLConnection
+        conn.setRequestProperty("Connection", "close")
+        conn.instanceFollowRedirects = false
+        conn.useCaches = false
+        running = conn to GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+            status.value = withContext(Dispatchers.IO) {
+                try {
+                    val start = SystemClock.elapsedRealtime()
+                    val code = conn.responseCode
+                    val elapsed = SystemClock.elapsedRealtime() - start
+                    if (code == 204 || code == 200 && conn.responseLength == 0L) Status.Success(elapsed)
+                    else Status.Error.UnexpectedResponseCode(code)
+                } catch (e: IOException) {
+                    Status.Error.IOFailure(e)
+                } finally {
+                    conn.disconnect()
+                }
             }
-            if (testCount == id) status.postValue(result)
         }
     }
 
+    private fun cancelTest() = running?.let { (conn, job) ->
+        job.cancel()    // ensure job is cancelled before interrupting
+        conn.disconnect()
+        running = null
+    }
+
     fun invalidate() {
-        ++testCount
+        cancelTest()
         status.value = Status.Idle
     }
 }

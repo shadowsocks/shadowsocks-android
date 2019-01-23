@@ -54,17 +54,6 @@ fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = 
     override fun onReceive(context: Context, intent: Intent) = callback(context, intent)
 }
 
-/**
- * Wrapper for kotlin.concurrent.thread that tracks uncaught exceptions.
- */
-fun thread(name: String? = null, start: Boolean = true, isDaemon: Boolean = false,
-           contextClassLoader: ClassLoader? = null, priority: Int = -1, block: () -> Unit): Thread {
-    val thread = kotlin.concurrent.thread(false, isDaemon, contextClassLoader, name, priority, block)
-    thread.setUncaughtExceptionHandler { _, t -> printLog(t) }
-    if (start) thread.start()
-    return thread
-}
-
 val URLConnection.responseLength: Long
     get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
