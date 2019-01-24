@@ -78,10 +78,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         override fun close() = Os.close(fd)
     }
 
-    private inner class ProtectWorker : LocalSocketListener("ShadowsocksVpnThread") {
-        override val socketFile: File = File(Core.deviceStorage.noBackupFilesDir, "protect_path")
-
-        override fun accept(socket: LocalSocket) = try {
+    private inner class ProtectWorker :
+            LocalSocketListener("ShadowsocksVpnThread", File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
+        override fun accept(socket: LocalSocket) {
             socket.inputStream.read()
             val fd = socket.ancillaryFileDescriptors!!.single()!!
             CloseableFd(fd).use {
@@ -96,8 +95,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             } else protect(getInt.invoke(fd) as Int)
                         }) 0 else 1)
             }
-        } catch (e: IOException) {
-            printLog(e)
         }
     }
     inner class NullConnectionException : NullPointerException() {
@@ -146,7 +143,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             connectivity.unregisterNetworkCallback(defaultNetworkCallback)
             listeningForDefaultNetwork = false
         }
-        worker?.stopThread()
+        worker?.close()
         worker = null
         super.killProcesses()
         conn?.close()
@@ -164,9 +161,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override suspend fun startProcesses() {
-        val worker = ProtectWorker()
-        worker.start()
-        this.worker = worker
+        worker = ProtectWorker().apply { start() }
 
         super.startProcesses()
 

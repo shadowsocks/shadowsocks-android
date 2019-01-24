@@ -23,33 +23,26 @@ package com.github.shadowsocks.bg
 import android.net.LocalSocket
 import android.os.SystemClock
 import com.github.shadowsocks.aidl.TrafficStats
-import com.github.shadowsocks.utils.printLog
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class TrafficMonitor(statFile: File) : AutoCloseable {
-    private val thread = object : LocalSocketListener("TrafficMonitor") {
-        override val socketFile = statFile
-
+    private val thread = object : LocalSocketListener("TrafficMonitor", statFile) {
         override fun accept(socket: LocalSocket) {
-            try {
-                val buffer = ByteArray(16)
-                if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
-                val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
-                val tx = stat.getLong(0)
-                val rx = stat.getLong(8)
-                if (current.txTotal != tx) {
-                    current.txTotal = tx
-                    dirty = true
-                }
-                if (current.rxTotal != rx) {
-                    current.rxTotal = rx
-                    dirty = true
-                }
-            } catch (e: IOException) {
-                printLog(e)
+            val buffer = ByteArray(16)
+            if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
+            val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
+            val tx = stat.getLong(0)
+            val rx = stat.getLong(8)
+            if (current.txTotal != tx) {
+                current.txTotal = tx
+                dirty = true
+            }
+            if (current.rxTotal != rx) {
+                current.rxTotal = rx
+                dirty = true
             }
         }
     }.apply { start() }
@@ -57,7 +50,6 @@ class TrafficMonitor(statFile: File) : AutoCloseable {
     val current = TrafficStats()
     var out = TrafficStats()
     private var timestampLast = 0L
-    @Volatile
     private var dirty = false
 
     fun requestUpdate(): Pair<TrafficStats, Boolean> {
@@ -87,5 +79,5 @@ class TrafficMonitor(statFile: File) : AutoCloseable {
         return Pair(out, updated)
     }
 
-    override fun close() = thread.stopThread()
+    override fun close() = thread.close()
 }
