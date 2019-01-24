@@ -32,8 +32,8 @@ import org.json.JSONObject
 
 object LocalDnsService {
     interface Interface : BaseService.Interface {
-        override fun startNativeProcesses() {
-            super.startNativeProcesses()
+        override suspend fun startProcesses() {
+            super.startProcesses()
             val data = data
             val profile = data.proxy!!.profile
 
@@ -86,7 +86,7 @@ object LocalDnsService {
                 })
             }
 
-            if (!profile.udpdns) data.processes.start(buildAdditionalArguments(arrayListOf(
+            if (!profile.udpdns) data.processes!!.start(buildAdditionalArguments(arrayListOf(
                     File(app.applicationInfo.nativeLibraryDir, Executable.OVERTURE).absolutePath,
                     "-c", buildOvertureConfig("overture.conf"))))
         }

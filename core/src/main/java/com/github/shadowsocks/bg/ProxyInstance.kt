@@ -30,16 +30,18 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.utils.signaturesCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.security.MessageDigest
-import java.util.concurrent.TimeUnit
 
 /**
  * This class sets up environment for ss-local.
@@ -50,25 +52,26 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
     val pluginPath by lazy { PluginManager.init(plugin) }
 
-    fun init() {
+    suspend fun init() {
         if (profile.host == "198.199.101.152") {
-            val client = OkHttpClient.Builder()
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .build()
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
-            val requestBody = FormBody.Builder()
-                    .add("sig", String(Base64.encode(mdg.digest(), 0)))
-                    .build()
-            val request = Request.Builder()
-                    .url(RemoteConfig.proxyUrl)
-                    .post(requestBody)
-                    .build()
+            val conn = RemoteConfig.proxyUrl.openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
 
-            val proxies = client.newCall(request).execute()
-                    .body()!!.string().split('|').toMutableList()
+            val proxies = try {
+                withTimeout(30_000) {
+                    withContext(Dispatchers.IO) {
+                        conn.outputStream.bufferedWriter().use {
+                            it.write("sig=" + String(Base64.encode(mdg.digest(), Base64.DEFAULT)))
+                        }
+                        conn.inputStream.bufferedReader().readText()
+                    }
+                }
+            } finally {
+                conn.disconnect()
+            }.split('|').toMutableList()
             proxies.shuffle()
             val proxy = proxies.first().split(':')
             profile.host = proxy[0].trim()
@@ -80,22 +83,16 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10))
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (profile.host.parseNumericAddress() == null) {
-            thread("ProxyInstance-resolve") {
-                // A WAR fix for Huawei devices that UnknownHostException cannot be caught correctly
-                try {
-                    profile.host = InetAddress.getByName(profile.host).hostAddress ?: ""
-                } catch (_: UnknownHostException) { }
-            }.join(10 * 1000)
-            if (profile.host.parseNumericAddress() == null) throw UnknownHostException()
-        }
+        if (profile.host.parseNumericAddress() == null) profile.host = withTimeout(10_000) {
+            withContext(Dispatchers.IO) { InetAddress.getByName(profile.host).hostAddress }
+        } ?: throw UnknownHostException()
     }
 
     /**
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    suspend fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
         trafficMonitor = TrafficMonitor(stat)
 
         this.configFile = configFile
@@ -122,7 +119,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         if (DataStore.tcpFastOpen) cmd += "--fast-open"
 
-        service.data.processes.start(cmd)
+        service.data.processes!!.start(cmd)
     }
 
     fun scheduleUpdate() {

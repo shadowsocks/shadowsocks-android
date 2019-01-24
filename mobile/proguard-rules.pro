@@ -22,5 +22,3 @@
 #-renamesourcefileattribute SourceFile
 
 -dontwarn com.google.android.gms.internal.**
--dontwarn okhttp3.**
--dontwarn okio.**

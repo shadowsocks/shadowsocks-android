@@ -27,6 +27,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
 import android.os.DeadObjectException
+import android.os.Handler
 import android.text.format.Formatter
 import android.util.Log
 import android.widget.Toast
@@ -135,7 +136,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         }
     }
 
-    private val connection = ShadowsocksConnection(true)
+    private val handler = Handler()
+    private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         service.state
     } catch (_: DeadObjectException) {
@@ -143,11 +145,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun onBinderDied() {
-        Core.handler.post {
-            connection.disconnect(activity)
-            Executable.killAll()
-            connection.connect(activity, this)
-        }
+        connection.disconnect(activity)
+        Executable.killAll()
+        connection.connect(activity, this)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -232,7 +232,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
         when (key) {
-            Key.serviceMode -> Core.handler.post {
+            Key.serviceMode -> handler.post {
                 connection.disconnect(activity)
                 connection.connect(activity, this)
             }
