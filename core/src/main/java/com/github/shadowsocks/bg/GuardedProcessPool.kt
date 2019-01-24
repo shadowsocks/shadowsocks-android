@@ -48,7 +48,6 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
 
     private inner class Guard(private val cmd: List<String>) {
         private val abortChannel = Channel<Unit>()
-        private var startTime: Long = -1
         private lateinit var process: Process
 
         private fun streamLogger(input: InputStream, logger: (String) -> Unit) = try {
@@ -56,7 +55,6 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
         } catch (_: IOException) { }    // ignore
 
         fun start() {
-            startTime = SystemClock.elapsedRealtime()
             process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
         }
 
@@ -64,7 +62,7 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
             if (!abortChannel.isClosedForSend) abortChannel.send(Unit)
         }
 
-        suspend fun looper(onRestartCallback: (() -> Unit)?) {
+        suspend fun looper(onRestartCallback: (suspend () -> Unit)?) {
             var running = true
             val cmdName = File(cmd.first()).nameWithoutExtension
             val exitChannel = Channel<Int>()
@@ -72,11 +70,11 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
                 while (true) {
                     thread(name = "stderr-$cmdName") { streamLogger(process.errorStream) { Log.e(cmdName, it) } }
                     thread(name = "stdout-$cmdName") {
-                        runBlocking {
-                            streamLogger(process.inputStream) { Log.i(cmdName, it) }
-                            exitChannel.send(process.waitFor()) // this thread also acts as a daemon thread for waitFor
-                        }
+                        streamLogger(process.inputStream) { Log.i(cmdName, it) }
+                        // this thread also acts as a daemon thread for waitFor
+                        runBlocking { exitChannel.send(process.waitFor()) }
                     }
+                    val startTime = SystemClock.elapsedRealtime()
                     if (select {
                                 abortChannel.onReceive { true } // prefer abort to save work
                                 exitChannel.onReceive { false }
@@ -118,7 +116,7 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
     private val guards = ArrayList<Guard>()
 
     @MainThread
-    suspend fun start(cmd: List<String>, onRestartCallback: (() -> Unit)? = null) {
+    suspend fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
         Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
         val guard = Guard(cmd)
         guard.start()

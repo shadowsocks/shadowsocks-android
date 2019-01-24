@@ -267,11 +267,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         return conn.fileDescriptor
     }
 
-    private fun sendFd(fd: FileDescriptor) {
+    private suspend fun sendFd(fd: FileDescriptor) {
         var tries = 0
         val path = File(Core.deviceStorage.noBackupFilesDir, "sock_path").absolutePath
         while (true) try {
-            Thread.sleep(50L shl tries)
+            delay(50L shl tries)
             LocalSocket().use { localSocket ->
                 localSocket.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
                 localSocket.setFileDescriptorsForSend(arrayOf(fd))
