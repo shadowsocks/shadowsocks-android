@@ -238,7 +238,7 @@ class Profile : Serializable {
         val builder = Uri.Builder()
                 .scheme("ss")
                 .encodedAuthority("%s@%s:%d".format(Locale.ENGLISH,
-                        Base64.encodeToString("%s:%s".format(Locale.ENGLISH, method, password).toByteArray(),
+                        Base64.encodeToString("$method:$password".toByteArray(),
                                 Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE),
                         if (host.contains(':')) "[$host]" else host, remotePort))
         val configuration = PluginConfiguration(plugin ?: "")

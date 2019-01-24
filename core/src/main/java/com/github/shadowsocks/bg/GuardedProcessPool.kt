@@ -92,22 +92,22 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
                 abortChannel.close()
-                if (!running) return            // process already exited, nothing to be done
-                if (Build.VERSION.SDK_INT < 24) {
-                    try {
-                        Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
-                    } catch (e: ErrnoException) {
-                        if (e.errno != OsConstants.ESRCH) throw e
-                    }
-                    if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return
-                }
-                process.destroy()               // kill the process
-                if (Build.VERSION.SDK_INT >= 26) {
-                    if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return
-                    process.destroyForcibly()   // Force to kill the process if it's still alive
-                }
-                exitChannel.receive()
             }
+            if (!running) return            // process already exited, nothing to be done
+            if (Build.VERSION.SDK_INT < 24) {
+                try {
+                    Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
+                } catch (e: ErrnoException) {
+                    if (e.errno != OsConstants.ESRCH) throw e
+                }
+                if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return
+            }
+            process.destroy()               // kill the process
+            if (Build.VERSION.SDK_INT >= 26) {
+                if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return
+                process.destroyForcibly()   // Force to kill the process if it's still alive
+            }
+            exitChannel.receive()
         }
     }
 
