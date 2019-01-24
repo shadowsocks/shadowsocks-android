@@ -25,9 +25,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.DeadObjectException
+import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.bg.ProxyService
 import com.github.shadowsocks.bg.TransproxyService
 import com.github.shadowsocks.bg.VpnService
@@ -38,7 +38,8 @@ import com.github.shadowsocks.utils.Key
 /**
  * This object should be compact as it will not get GC-ed.
  */
-class ShadowsocksConnection(private var listenForDeath: Boolean = false) : ServiceConnection, IBinder.DeathRecipient {
+class ShadowsocksConnection(private val handler: Handler = Handler(), private var listenForDeath: Boolean = false) :
+        ServiceConnection, IBinder.DeathRecipient {
     companion object {
         val serviceClass get() = when (DataStore.serviceMode) {
             Key.modeProxy -> ProxyService::class
@@ -66,13 +67,13 @@ class ShadowsocksConnection(private var listenForDeath: Boolean = false) : Servi
     private var callback: Callback? = null
     private val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-            Core.handler.post { callback!!.stateChanged(state, profileName, msg) }
+            handler.post { callback!!.stateChanged(state, profileName, msg) }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-            Core.handler.post { callback!!.trafficUpdated(profileId, stats) }
+            handler.post { callback!!.trafficUpdated(profileId, stats) }
         }
         override fun trafficPersisted(profileId: Long) {
-            Core.handler.post { callback!!.trafficPersisted(profileId) }
+            handler.post { callback!!.trafficPersisted(profileId) }
         }
     }
     private var binder: IBinder? = null
@@ -110,7 +111,7 @@ class ShadowsocksConnection(private var listenForDeath: Boolean = false) : Servi
 
     override fun binderDied() {
         service = null
-        callback!!.onBinderDied()
+        handler.post(callback!!::onBinderDied)
     }
 
     private fun unregisterCallback() {

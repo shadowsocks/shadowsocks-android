@@ -29,6 +29,7 @@ import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.os.DeadObjectException
+import android.os.Handler
 import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -124,7 +125,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         else -> Core.startService()
     }
 
-    private val connection = ShadowsocksConnection(true)
+    private val handler = Handler()
+    private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         service.state
     } catch (_: DeadObjectException) {
@@ -132,11 +134,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun onBinderDied() {
-        Core.handler.post {
-            connection.disconnect(this)
-            Executable.killAll()
-            connection.connect(this, this)
-        }
+        connection.disconnect(this)
+        Executable.killAll()
+        connection.connect(this, this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         fab.setOnClickListener { toggle() }
 
         changeState(BaseService.IDLE)   // reset everything to init state
-        Core.handler.post { connection.connect(this, this) }
+        connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
 
         val intent = this.intent
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
         when (key) {
-            Key.serviceMode -> Core.handler.post {
+            Key.serviceMode -> handler.post {
                 connection.disconnect(this)
                 connection.connect(this, this)
             }
@@ -280,6 +280,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect(this)
         BackupManager(this).dataChanged()
-        Core.handler.removeCallbacksAndMessages(null)
+        handler.removeCallbacksAndMessages(null)
     }
 }

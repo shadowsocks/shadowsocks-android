@@ -92,6 +92,7 @@ object BaseService {
     class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), AutoCloseable {
         val callbacks = RemoteCallbackList<IShadowsocksServiceCallback>()
         private val bandwidthListeners = HashSet<IBinder>() // the binder is the real identifier
+        private val handler = Handler()
 
         override fun getState(): Int = data!!.state
         override fun getProfileName(): String = data!!.proxy?.profile?.name ?: "Idle"
@@ -111,8 +112,7 @@ object BaseService {
             callbacks.finishBroadcast()
         }
 
-        private fun registerTimeout() =
-                Core.handler.postAtTime(this::onTimeout, this, SystemClock.uptimeMillis() + 1000)
+        private fun registerTimeout() = handler.postDelayed(this::onTimeout, 1000)
         private fun onTimeout() {
             val proxies = listOfNotNull(data!!.proxy, data!!.udpFallback)
             val stats = proxies
@@ -158,7 +158,7 @@ object BaseService {
 
         override fun stopListeningForBandwidth(cb: IShadowsocksServiceCallback) {
             if (bandwidthListeners.remove(cb.asBinder()) && bandwidthListeners.isEmpty()) {
-                Core.handler.removeCallbacksAndMessages(this)
+                handler.removeCallbacksAndMessages(null)
             }
         }
 
@@ -180,7 +180,7 @@ object BaseService {
 
         override fun close() {
             callbacks.kill()
-            Core.handler.removeCallbacksAndMessages(this)
+            handler.removeCallbacksAndMessages(null)
             data = null
         }
     }
