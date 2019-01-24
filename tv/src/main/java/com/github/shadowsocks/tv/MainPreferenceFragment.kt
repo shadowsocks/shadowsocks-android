@@ -159,12 +159,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         stats = findPreference(Key.controlStats)
         controlImport = findPreference(Key.controlImport)
 
-        val boot = findPreference(Key.isAutoConnect) as SwitchPreference
-        boot.setOnPreferenceChangeListener { _, value ->
-            BootReceiver.enabled = value as Boolean
-            true
+        (findPreference(Key.isAutoConnect) as SwitchPreference).apply {
+            setOnPreferenceChangeListener { _, value ->
+                BootReceiver.enabled = value as Boolean
+                true
+            }
+            isChecked = BootReceiver.enabled
         }
-        boot.isChecked = BootReceiver.enabled
 
         tfo = findPreference(Key.tfo) as SwitchPreference
         tfo.isChecked = DataStore.tcpFastOpen
@@ -189,9 +190,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         portLocalDns = findPreference(Key.portLocalDns)
         portTransproxy = findPreference(Key.portTransproxy)
         serviceMode.onPreferenceChangeListener = onServiceModeChange
-        findPreference(Key.about).setOnPreferenceClickListener {
-            Toast.makeText(activity, "shadowsocks.org/android", Toast.LENGTH_SHORT).show()
-            true
+        findPreference(Key.about).apply {
+            summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
+            setOnPreferenceClickListener {
+                Toast.makeText(activity, "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
+                true
+            }
         }
 
         tester = ViewModelProviders.of(activity as FragmentActivity).get()

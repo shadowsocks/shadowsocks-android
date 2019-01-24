@@ -67,7 +67,6 @@
 
     <Preference
         android:key="about"
-        android:title="@string/about"
-        android:summary="shadowsocks.org/android"/>
+        android:title="@string/about"/>
 
 </PreferenceScreen>
