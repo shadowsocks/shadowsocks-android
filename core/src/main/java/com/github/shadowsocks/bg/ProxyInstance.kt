@@ -36,11 +36,9 @@ import com.github.shadowsocks.utils.signaturesCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.File
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.security.MessageDigest
@@ -56,19 +54,23 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
     suspend fun init() {
         if (profile.host == "198.199.101.152") {
-            val client = OkHttpClient.Builder().build()
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
-            val requestBody = FormBody.Builder()
-                    .add("sig", String(Base64.encode(mdg.digest(), 0)))
-                    .build()
-            val request = Request.Builder()
-                    .url(RemoteConfig.proxyUrl)
-                    .post(requestBody)
-                    .build()
+            val conn = RemoteConfig.proxyUrl.openConnection() as HttpURLConnection
+            conn.requestMethod = "POST"
+            conn.doOutput = true
 
-            val proxies = withTimeout(30_000) {
-                withContext(Dispatchers.IO) { client.newCall(request).execute().body()!!.string() }
+            val proxies = try {
+                withTimeout(30_000) {
+                    withContext(Dispatchers.IO) {
+                        conn.outputStream.bufferedWriter().use {
+                            it.write("sig=" + String(Base64.encode(mdg.digest(), Base64.DEFAULT)))
+                        }
+                        conn.inputStream.bufferedReader().readText()
+                    }
+                }
+            } finally {
+                conn.disconnect()
             }.split('|').toMutableList()
             proxies.shuffle()
             val proxy = proxies.first().split(':')

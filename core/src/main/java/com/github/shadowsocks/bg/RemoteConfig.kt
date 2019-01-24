@@ -25,11 +25,12 @@ import androidx.core.os.bundleOf
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.core.R
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import java.net.URL
 
 object RemoteConfig {
     private val config = FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) }
 
-    val proxyUrl get() = config.getString("proxy_url")
+    val proxyUrl get() = URL(config.getString("proxy_url"))
 
     fun fetch() = config.fetch().addOnCompleteListener {
         if (it.isSuccessful) config.activateFetched() else {
