@@ -11,4 +11,4 @@ before_install:
     - chmod -R a+wrx .
 
 script:
-    - docker run --rm -v ${PWD}:/build shadowsocks/shadowsocks-android:circleci bash -c "cd /build; ./gradlew assembleDebug check"
+    - docker run --rm -v ${PWD}:/build shadowsocks/android-ndk-go bash -c "cd /build; ./gradlew assembleDebug check"
