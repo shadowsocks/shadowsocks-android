@@ -45,7 +45,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
     final override fun run() = localSocket.use {
         while (running) {
             try {
-                serverSocket.accept().use { accept(it) }
+                accept(serverSocket.accept())
             } catch (e: IOException) {
                 if (running) printLog(e)
                 continue
