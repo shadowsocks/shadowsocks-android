@@ -23,6 +23,7 @@ package com.github.shadowsocks.bg
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
+import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import com.github.shadowsocks.utils.printLog
@@ -56,7 +57,11 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
     override fun close() {
         running = false
         // see also: https://issuetracker.google.com/issues/36945762#comment15
-        Os.shutdown(localSocket.fileDescriptor, OsConstants.SHUT_RDWR)
+        try {
+            Os.shutdown(localSocket.fileDescriptor, OsConstants.SHUT_RDWR)
+        } catch (e: ErrnoException) {
+            if (e.errno != OsConstants.EBADF) throw e   // suppress fd already closed
+        }
         join()
     }
 }

@@ -77,6 +77,7 @@ object BaseService {
         var closeReceiverRegistered = false
 
         val binder = Binder(this)
+        var connectingJob: Job? = null
 
         fun changeState(s: Int, msg: String? = null) {
             if (state == s && msg == null) return
@@ -239,6 +240,7 @@ object BaseService {
         }
 
         fun stopRunner(restart: Boolean = false, msg: String? = null) {
+            if (data.state == STOPPING) return
             // channge the state
             data.changeState(STOPPING)
             GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
@@ -302,14 +304,17 @@ object BaseService {
             Core.analytics.logEvent("start", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
 
             data.changeState(CONNECTING)
-
-            GlobalScope.launch(Dispatchers.Main) {
+            data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
                 try {
                     proxy.init()
                     data.udpFallback?.init()
 
                     killProcesses()
-                    data.processes = GuardedProcessPool()
+                    data.processes = GuardedProcessPool {
+                        printLog(it)
+                        data.connectingJob?.apply { runBlocking { cancelAndJoin() } }
+                        stopRunner(false, it.localizedMessage)
+                    }
                     startProcesses()
 
                     proxy.scheduleUpdate()
@@ -324,6 +329,8 @@ object BaseService {
                         printLog(exc)
                     }
                     stopRunner(false, "${getString(R.string.service_failed)}: ${exc.localizedMessage}")
+                } finally {
+                    data.connectingJob = null
                 }
             }
             return Service.START_NOT_STICKY

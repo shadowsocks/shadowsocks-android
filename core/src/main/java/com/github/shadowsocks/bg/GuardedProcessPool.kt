@@ -38,7 +38,7 @@ import java.io.IOException
 import java.io.InputStream
 import kotlin.concurrent.thread
 
-class GuardedProcessPool : CoroutineScope {
+class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : CoroutineScope {
     companion object {
         private const val TAG = "GuardedProcessPool"
         private val pid by lazy {
@@ -47,14 +47,12 @@ class GuardedProcessPool : CoroutineScope {
     }
 
     private inner class Guard(private val cmd: List<String>) {
-        val abortChannel = Channel<Unit>()
-        private val exitChannel = Channel<Int>()
-        private val cmdName = File(cmd.first()).nameWithoutExtension
+        private val abortChannel = Channel<Unit>()
         private var startTime: Long = -1
         private lateinit var process: Process
 
-        private fun streamLogger(input: InputStream, logger: (String, String) -> Int) = try {
-            input.bufferedReader().forEachLine { logger(TAG, it) }
+        private fun streamLogger(input: InputStream, logger: (String) -> Unit) = try {
+            input.bufferedReader().forEachLine(logger)
         } catch (_: IOException) { }    // ignore
 
         fun start() {
@@ -62,14 +60,20 @@ class GuardedProcessPool : CoroutineScope {
             process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
         }
 
+        suspend fun abort() {
+            if (!abortChannel.isClosedForSend) abortChannel.send(Unit)
+        }
+
         suspend fun looper(onRestartCallback: (() -> Unit)?) {
             var running = true
+            val cmdName = File(cmd.first()).nameWithoutExtension
+            val exitChannel = Channel<Int>()
             try {
                 while (true) {
-                    thread(name = "stderr-$cmdName") { streamLogger(process.errorStream, Log::e) }
+                    thread(name = "stderr-$cmdName") { streamLogger(process.errorStream) { Log.e(cmdName, it) } }
                     thread(name = "stdout-$cmdName") {
                         runBlocking {
-                            streamLogger(process.inputStream, Log::i)
+                            streamLogger(process.inputStream) { Log.i(cmdName, it) }
                             exitChannel.send(process.waitFor()) // this thread also acts as a daemon thread for waitFor
                         }
                     }
@@ -78,30 +82,31 @@ class GuardedProcessPool : CoroutineScope {
                                 exitChannel.onReceive { false }
                             }) break
                     running = false
-                    if (SystemClock.elapsedRealtime() - startTime < 1000) {
-                        Crashlytics.log(Log.WARN, TAG, "process exit too fast, stop guard: $cmdName")
-                        break
-                    }
+                    if (SystemClock.elapsedRealtime() - startTime < 1000) throw IOException("$cmdName exits too fast")
                     Crashlytics.log(Log.DEBUG, TAG, "restart process: " + Commandline.toString(cmd))
                     start()
                     running = true
                     onRestartCallback?.invoke()
                 }
+            } catch (e: IOException) {
+                Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
+                // calling callback without closing channel first will cause deadlock, therefore we defer it
+                GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
-                if (!running) return    // process already exited, nothing to be done
+                abortChannel.close()
+                if (!running) return            // process already exited, nothing to be done
                 if (Build.VERSION.SDK_INT < 24) {
-                    val pid = pid.get(process) as Int
                     try {
-                        Os.kill(pid, OsConstants.SIGTERM)
+                        Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
                     } catch (e: ErrnoException) {
                         if (e.errno != OsConstants.ESRCH) throw e
                     }
                     if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return
                 }
-                process.destroy() // kill the process
+                process.destroy()               // kill the process
                 if (Build.VERSION.SDK_INT >= 26) {
                     if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return
-                    process.destroyForcibly() // Force to kill the process if it's still alive
+                    process.destroyForcibly()   // Force to kill the process if it's still alive
                 }
                 exitChannel.receive()
             }
@@ -123,7 +128,7 @@ class GuardedProcessPool : CoroutineScope {
 
     @MainThread
     suspend fun close() {
-        guards.forEach { it.abortChannel.send(Unit) }
-        supervisor.children.forEach { it.join() }
+        guards.forEach { it.abort() }
+        supervisor.children.forEach { it.join() }   // we can't cancel the supervisor as we need it to do clean up
     }
 }
