@@ -22,11 +22,12 @@ package com.github.shadowsocks.acl
 
 import android.content.Context
 import androidx.work.*
+import kotlinx.coroutines.Dispatchers
 import java.io.IOException
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
-class AclSyncer(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
     companion object {
         private const val KEY_ROUTE = "route"
 
@@ -41,7 +42,9 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : Worker(conte
         })
     }
 
-    override fun doWork(): Result = try {
+    override val coroutineContext get() = Dispatchers.IO
+
+    override suspend fun doWork(): Result = try {
         val route = inputData.getString(KEY_ROUTE)!!
         val acl = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openStream().bufferedReader()
                 .use { it.readText() }
@@ -50,8 +53,5 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : Worker(conte
     } catch (e: IOException) {
         e.printStackTrace()
         Result.retry()
-    } catch (e: Exception) {    // unknown failures, probably shouldn't retry
-        e.printStackTrace()
-        Result.failure()
     }
 }
