@@ -58,7 +58,6 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
          * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
          */
         private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
-
     }
 
     class CloseableFd(val fd: FileDescriptor) : Closeable {
