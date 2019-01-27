@@ -69,7 +69,7 @@ object LocalDnsService {
                         Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                             put("PrimaryDNS", localDns)
                             put("AlternativeDNS", remoteDns)
-                            put("IPNetworkFile", JSONObject(mapOf("Alternative" to "china_ip_list.txt")))
+                            put("IPNetworkFile", JSONObject(mapOf("Primary" to "china_ip_list.txt")))
                             put("AclFile", "domain_exceptions.acl")
                         }
                         Acl.CHINALIST -> {
