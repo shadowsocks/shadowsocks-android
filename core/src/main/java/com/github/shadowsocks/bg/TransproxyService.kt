@@ -36,7 +36,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
             super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
 
-    private suspend fun startDNSTunnel() {
+    private fun startDNSTunnel() {
         val proxy = data.proxy!!
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.SS_TUNNEL).absolutePath,
                 "-t", "10",
@@ -50,7 +50,7 @@ class TransproxyService : Service(), LocalDnsService.Interface {
         data.processes!!.start(cmd)
     }
 
-    private suspend fun startRedsocksDaemon() {
+    private fun startRedsocksDaemon() {
         File(Core.deviceStorage.noBackupFilesDir, "redsocks.conf").writeText("""base {
  log_debug = off;
  log_info = off;
