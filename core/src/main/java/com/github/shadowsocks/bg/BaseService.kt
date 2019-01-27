@@ -310,11 +310,11 @@ object BaseService {
             data.changeState(CONNECTING)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
                 try {
+                    killProcesses()
                     preInit()
                     proxy.init(this@Interface::resolver)
                     data.udpFallback?.init(this@Interface::resolver)
 
-                    killProcesses()
                     data.processes = GuardedProcessPool {
                         printLog(it)
                         data.connectingJob?.apply { runBlocking { cancelAndJoin() } }
