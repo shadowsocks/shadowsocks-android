@@ -42,7 +42,8 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
     /**
      * Inherited class do not need to close input/output streams as they will be closed automatically.
      */
-    protected abstract fun accept(socket: LocalSocket)
+    protected open fun accept(socket: LocalSocket) = socket.use { acceptInternal(socket) }
+    protected abstract fun acceptInternal(socket: LocalSocket)
     final override fun run() = localSocket.use {
         while (running) {
             try {

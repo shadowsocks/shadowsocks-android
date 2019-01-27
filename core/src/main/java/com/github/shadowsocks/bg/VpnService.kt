@@ -34,14 +34,14 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.ConcurrentLocalSocketListener
 import com.github.shadowsocks.net.DefaultNetworkListener
-import com.github.shadowsocks.net.LocalSocketListener
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
 import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
@@ -66,39 +66,26 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         override fun close() = Os.close(fd)
     }
 
-    private inner class ProtectWorker :
-            LocalSocketListener("ShadowsocksVpnThread", File(Core.deviceStorage.noBackupFilesDir, "protect_path")),
-            CoroutineScope {
-        private val job = SupervisorJob()
-        override val coroutineContext get() = Dispatchers.IO + job + CoroutineExceptionHandler { _, t -> printLog(t) }
-
-        override fun accept(socket: LocalSocket) {
-            launch {
-                socket.use {
-                    socket.inputStream.read()
-                    val fd = socket.ancillaryFileDescriptors!!.single()!!
-                    CloseableFd(fd).use {
-                        socket.outputStream.write(if (underlyingNetwork.let { network ->
-                                    if (network != null && Build.VERSION.SDK_INT >= 23) try {
-                                        network.bindSocket(fd)
-                                        true
-                                    } catch (e: IOException) {
-                                        // suppress ENONET (Machine is not on the network)
-                                        if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
-                                        false
-                                    } else protect(getInt.invoke(fd) as Int)
-                                }) 0 else 1)
-                    }
-                }
+    private inner class ProtectWorker : ConcurrentLocalSocketListener("ShadowsocksVpnThread",
+            File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
+        override fun acceptInternal(socket: LocalSocket) {
+            socket.inputStream.read()
+            val fd = socket.ancillaryFileDescriptors!!.single()!!
+            CloseableFd(fd).use {
+                socket.outputStream.write(if (underlyingNetwork.let { network ->
+                            if (network != null && Build.VERSION.SDK_INT >= 23) try {
+                                network.bindSocket(fd)
+                                true
+                            } catch (e: IOException) {
+                                // suppress ENONET (Machine is not on the network)
+                                if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
+                                false
+                            } else protect(getInt.invoke(fd) as Int)
+                        }) 0 else 1)
             }
         }
-
-        suspend fun shutdown() {
-            job.cancel()
-            close()
-            job.join()
-        }
     }
+
     inner class NullConnectionException : NullPointerException() {
         override fun getLocalizedMessage() = getString(R.string.reboot_required)
     }
