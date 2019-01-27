@@ -42,7 +42,7 @@ import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.utils.Subnet
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.UndoSnackbarManager

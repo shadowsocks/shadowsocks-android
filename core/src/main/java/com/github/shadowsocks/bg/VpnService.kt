@@ -34,9 +34,11 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.DefaultNetworkListener
+import com.github.shadowsocks.net.LocalSocketListener
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*

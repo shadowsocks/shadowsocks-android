@@ -28,7 +28,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.TcpFastOpen
+import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.remove
 import com.takisoft.preferencex.PreferenceFragmentCompat
 

@@ -18,7 +18,7 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.bg
+package com.github.shadowsocks.net
 
 import android.net.LocalServerSocket
 import android.net.LocalSocket

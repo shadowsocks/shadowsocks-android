@@ -25,8 +25,8 @@ import android.util.Log
 import androidx.recyclerview.widget.SortedList
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.asIterable
 import java.io.File
 import java.io.IOException

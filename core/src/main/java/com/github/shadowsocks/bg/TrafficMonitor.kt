@@ -23,6 +23,7 @@ package com.github.shadowsocks.bg
 import android.net.LocalSocket
 import android.os.SystemClock
 import com.github.shadowsocks.aidl.TrafficStats
+import com.github.shadowsocks.net.LocalSocketListener
 import java.io.File
 import java.io.IOException
 import java.nio.ByteBuffer

@@ -1,8 +1,8 @@
-package com.github.shadowsocks.utils
+package com.github.shadowsocks.net
 
-import java.net.InetAddress
 import org.junit.Assert
 import org.junit.Test
+import java.net.InetAddress
 
 class SubnetTest {
     @Test

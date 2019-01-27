@@ -18,7 +18,7 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.bg
+package com.github.shadowsocks.net
 
 import android.annotation.TargetApi
 import android.net.ConnectivityManager
