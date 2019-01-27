@@ -116,7 +116,7 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
     private val guards = ArrayList<Guard>()
 
     @MainThread
-    suspend fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
+    fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
         Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
         val guard = Guard(cmd)
         guard.start()

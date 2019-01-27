@@ -42,6 +42,7 @@ import com.github.shadowsocks.utils.printLog
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
+import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
 
@@ -274,6 +275,9 @@ object BaseService {
             }
         }
 
+        suspend fun preInit() { }
+        suspend fun resolver(host: String) = InetAddress.getByName(host)
+
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data
             if (data.state != STOPPED) return Service.START_NOT_STICKY
@@ -306,8 +310,9 @@ object BaseService {
             data.changeState(CONNECTING)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    proxy.init()
-                    data.udpFallback?.init()
+                    preInit()
+                    proxy.init(this@Interface::resolver)
+                    data.udpFallback?.init(this@Interface::resolver)
 
                     killProcesses()
                     data.processes = GuardedProcessPool {
