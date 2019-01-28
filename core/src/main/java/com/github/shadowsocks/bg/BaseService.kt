@@ -276,7 +276,7 @@ object BaseService {
         }
 
         suspend fun preInit() { }
-        suspend fun resolver(host: String) = InetAddress.getByName(host)
+        suspend fun resolver(host: String) = InetAddress.getAllByName(host)
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data

@@ -35,6 +35,7 @@ abstract class ConcurrentLocalSocketListener(name: String, socketFile: File) : L
     }
 
     suspend fun shutdown() {
+        running = false
         job.cancel()
         close()
         job.join()

@@ -32,10 +32,7 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
 import kotlinx.coroutines.*
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.InetSocketAddress
-import java.net.Proxy
-import java.net.URL
+import java.net.*
 
 /**
  * Based on: https://android.googlesource.com/platform/frameworks/base/+/b19a838/services/core/java/com/android/server/connectivity/NetworkMonitor.java#1071
@@ -84,9 +81,9 @@ class HttpsTest : ViewModel() {
             Acl.CHINALIST -> "www.qualcomm.cn"
             else -> "www.google.com"
         }, "/generate_204")
-        val conn = (if (DataStore.serviceMode == Key.modeVpn) url.openConnection() else
-            url.openConnection(Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", DataStore.portProxy))))
-                as HttpURLConnection
+        val conn = (if (DataStore.serviceMode != Key.modeVpn) {
+            url.openConnection(DataStore.proxy)
+        } else url.openConnection()) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false

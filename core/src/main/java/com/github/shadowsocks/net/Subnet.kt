@@ -45,6 +45,21 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
         if (prefixSize < 0 || prefixSize > addressLength) throw IllegalArgumentException("prefixSize: $prefixSize")
     }
 
+    fun matches(other: InetAddress): Boolean {
+        if (address.javaClass != other.javaClass) return false
+        // TODO optimize?
+        val a = address.address
+        val b = other.address
+        var i = 0
+        while (i * 8 < prefixSize && i * 8 + 8 <= prefixSize) {
+            if (a[i] != b[i]) return false
+            ++i
+        }
+        if (i * 8 == prefixSize) return true
+        val mask = 256 - (1 shl (i * 8 + 8 - prefixSize))
+        return (a[i].toInt() and mask) == (b[i].toInt() and mask)
+    }
+
     override fun toString(): String =
             if (prefixSize == addressLength) address.hostAddress else address.hostAddress + '/' + prefixSize
 

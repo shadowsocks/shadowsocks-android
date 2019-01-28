@@ -29,8 +29,7 @@ import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.parsePort
-import java.net.NetworkInterface
-import java.net.SocketException
+import java.net.*
 
 object DataStore : OnPreferenceDataStoreChangeListener {
     val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
@@ -88,6 +87,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
+    val proxy get() = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", portProxy))
     var portLocalDns: Int
         get() = getLocalPort(Key.portLocalDns, 5450)
         set(value) = publicStore.putString(Key.portLocalDns, value.toString())
