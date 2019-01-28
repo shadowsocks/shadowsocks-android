@@ -29,7 +29,10 @@ import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.parsePort
-import java.net.*
+import java.net.InetSocketAddress
+import java.net.NetworkInterface
+import java.net.Proxy
+import java.net.SocketException
 
 object DataStore : OnPreferenceDataStoreChangeListener {
     val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)

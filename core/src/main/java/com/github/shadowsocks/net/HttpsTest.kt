@@ -32,7 +32,8 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.responseLength
 import kotlinx.coroutines.*
 import java.io.IOException
-import java.net.*
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Based on: https://android.googlesource.com/platform/frameworks/base/+/b19a838/services/core/java/com/android/server/connectivity/NetworkMonitor.java#1071
