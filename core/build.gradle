@@ -40,23 +40,6 @@ android {
     }
 }
 
-task goBuild(type: Exec) {
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        println "Warning: Building on Windows is not supported"
-    } else {
-        executable "/bin/bash"
-        args "go-build.bash", minSdkVersion
-        environment "ANDROID_HOME", android.sdkDirectory
-        environment "ANDROID_NDK_HOME", android.ndkDirectory
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if ((task.name == 'generateJsonModelDebug' || task.name == 'generateJsonModelRelease')) {
-        task.dependsOn(goBuild)
-    }
-}
-
 dependencies {
     api project(':plugin')
     api "android.arch.work:work-runtime-ktx:$workVersion"
