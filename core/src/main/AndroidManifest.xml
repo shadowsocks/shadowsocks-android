@@ -9,8 +9,6 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <!-- This permission is only used on Android 6.0 due to bug: https://stackoverflow.com/a/33509180/2245107 -->
-    <uses-permission-sdk-23 android:name="android.permission.WRITE_SETTINGS"/>
 
     <uses-feature android:name="android.software.leanback"
                   android:required="false"/>

@@ -35,6 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.runBlocking
+import java.net.UnknownHostException
 
 object DefaultNetworkListener : CoroutineScope {
     override val coroutineContext get() = Dispatchers.Default
@@ -83,7 +84,9 @@ object DefaultNetworkListener : CoroutineScope {
     }
 
     suspend fun start(key: Any, listener: (Network?) -> Unit) = networkActor.send(NetworkMessage.Start(key, listener))
-    suspend fun get() = NetworkMessage.Get().run {
+    suspend fun get() = if (fallback) @TargetApi(23) {
+        connectivity.activeNetwork ?: throw UnknownHostException()  // failed to listen, return current if available
+    } else NetworkMessage.Get().run {
         networkActor.send(this)
         response.await()
     }
@@ -99,6 +102,7 @@ object DefaultNetworkListener : CoroutineScope {
         override fun onLost(network: Network) = runBlocking { networkActor.send(NetworkMessage.Lost(network)) }
     }
 
+    private var fallback = false
     private val connectivity = app.getSystemService<ConnectivityManager>()!!
     private val defaultNetworkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -118,13 +122,13 @@ object DefaultNetworkListener : CoroutineScope {
         if (Build.VERSION.SDK_INT in 24..27) @TargetApi(24) {
             connectivity.registerDefaultNetworkCallback(Callback)
         } else try {
+            fallback = false
             // we want REQUEST here instead of LISTEN
             connectivity.requestNetwork(defaultNetworkRequest, Callback)
         } catch (e: SecurityException) {
             // known bug: https://stackoverflow.com/a/33509180/2245107
             if (Build.VERSION.SDK_INT != 23) Crashlytics.logException(e)
-            Toast.makeText(app, e.localizedMessage, Toast.LENGTH_SHORT).show()
-            connectivity.registerNetworkCallback(defaultNetworkRequest, Callback)
+            fallback = true
         }
     }
     private fun unregisterDefaultNetworkListener() = connectivity.unregisterNetworkCallback(Callback)
