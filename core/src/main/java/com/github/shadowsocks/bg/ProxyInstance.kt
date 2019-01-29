@@ -52,7 +52,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
     val pluginPath by lazy { PluginManager.init(plugin) }
 
-    suspend fun init() {
+    suspend fun init(resolver: suspend (String) -> InetAddress) {
         if (profile.host == "198.199.101.152") {
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
@@ -84,7 +84,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) profile.host = withTimeout(10_000) {
-            withContext(Dispatchers.IO) { InetAddress.getByName(profile.host).hostAddress }
+            withContext(Dispatchers.IO) { resolver(profile.host).hostAddress }
         } ?: throw UnknownHostException()
     }
 
@@ -92,7 +92,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    suspend fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
         trafficMonitor = TrafficMonitor(stat)
 
         this.configFile = configFile

@@ -49,8 +49,8 @@ private val parseNumericAddress by lazy {
  *
  * Bug: https://issuetracker.google.com/issues/123456213
  */
-fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this) ?:
-        Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
+fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
+        ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
 
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     val value = str?.toIntOrNull() ?: default

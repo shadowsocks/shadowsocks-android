@@ -20,26 +20,28 @@
 
 package com.github.shadowsocks.bg
 
-import android.annotation.TargetApi
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.*
+import android.net.LocalSocket
+import android.net.LocalSocketAddress
+import android.net.Network
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
-import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.ConcurrentLocalSocketListener
+import com.github.shadowsocks.net.DefaultNetworkListener
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.Subnet
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
 import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
@@ -58,60 +60,32 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
          * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
          */
         private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
-
-        /**
-         * Unfortunately registerDefaultNetworkCallback is going to return VPN interface since Android P DP1:
-         * https://android.googlesource.com/platform/frameworks/base/+/dda156ab0c5d66ad82bdcf76cda07cbc0a9c8a2e
-         *
-         * This makes doing a requestNetwork with REQUEST necessary so that we don't get ALL possible networks that
-         * satisfies default network capabilities but only THE default network. Unfortunately we need to have
-         * android.permission.CHANGE_NETWORK_STATE to be able to call requestNetwork.
-         *
-         * Source: https://android.googlesource.com/platform/frameworks/base/+/2df4c7d/services/core/java/com/android/server/ConnectivityService.java#887
-         */
-        private val defaultNetworkRequest = NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                .build()
     }
 
     class CloseableFd(val fd: FileDescriptor) : Closeable {
         override fun close() = Os.close(fd)
     }
 
-    private inner class ProtectWorker :
-            LocalSocketListener("ShadowsocksVpnThread", File(Core.deviceStorage.noBackupFilesDir, "protect_path")),
-            CoroutineScope {
-        private val job = SupervisorJob()
-        override val coroutineContext get() = Dispatchers.IO + job + CoroutineExceptionHandler { _, t -> printLog(t) }
-
-        override fun accept(socket: LocalSocket) {
-            launch {
-                socket.use {
-                    socket.inputStream.read()
-                    val fd = socket.ancillaryFileDescriptors!!.single()!!
-                    CloseableFd(fd).use {
-                        socket.outputStream.write(if (underlyingNetwork.let { network ->
-                                    if (network != null && Build.VERSION.SDK_INT >= 23) try {
-                                        network.bindSocket(fd)
-                                        true
-                                    } catch (e: IOException) {
-                                        // suppress ENONET (Machine is not on the network)
-                                        if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
-                                        false
-                                    } else protect(getInt.invoke(fd) as Int)
-                                }) 0 else 1)
-                    }
-                }
+    private inner class ProtectWorker : ConcurrentLocalSocketListener("ShadowsocksVpnThread",
+            File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
+        override fun acceptInternal(socket: LocalSocket) {
+            socket.inputStream.read()
+            val fd = socket.ancillaryFileDescriptors!!.single()!!
+            CloseableFd(fd).use {
+                socket.outputStream.write(if (underlyingNetwork.let { network ->
+                            if (network != null && Build.VERSION.SDK_INT >= 23) try {
+                                network.bindSocket(fd)
+                                true
+                            } catch (e: IOException) {
+                                // suppress ENONET (Machine is not on the network)
+                                if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
+                                false
+                            } else protect(getInt.invoke(fd) as Int)
+                        }) 0 else 1)
             }
         }
-
-        suspend fun shutdown() {
-            job.cancel()
-            close()
-            job.join()
-        }
     }
+
     inner class NullConnectionException : NullPointerException() {
         override fun getLocalizedMessage() = getString(R.string.reboot_required)
     }
@@ -123,28 +97,13 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
+    private var active = false
     private var underlyingNetwork: Network? = null
-        @TargetApi(24)
         set(value) {
-            setUnderlyingNetworks(if (value == null) null else arrayOf(value))
             field = value
+            if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
         }
-
-    private val connectivity by lazy { getSystemService<ConnectivityManager>()!! }
-    @TargetApi(24)
-    private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
-        override fun onAvailable(network: Network) {
-            underlyingNetwork = network
-        }
-        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities?) {
-            // it's a good idea to refresh capabilities
-            underlyingNetwork = network
-        }
-        override fun onLost(network: Network) {
-            underlyingNetwork = null
-        }
-    }
-    private var listeningForDefaultNetwork = false
+    private val underlyingNetworks = underlyingNetwork?.let { arrayOf(it) }
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
@@ -154,10 +113,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override fun onRevoke() = stopRunner()
 
     override suspend fun killProcesses() {
-        if (listeningForDefaultNetwork) {
-            connectivity.unregisterNetworkCallback(defaultNetworkCallback)
-            listeningForDefaultNetwork = false
-        }
+        active = false
+        DefaultNetworkListener.stop(this)
         worker?.shutdown()
         worker = null
         super.killProcesses()
@@ -174,6 +131,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         stopRunner()
         return Service.START_NOT_STICKY
     }
+
+    override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
+    override suspend fun resolver(host: String) = DefaultNetworkListener.get().getByName(host)
 
     override suspend fun startProcesses() {
         worker = ProtectWorker().apply { start() }
@@ -230,15 +190,12 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             }
         }
 
+        active = true   // possible race condition here?
+        if (Build.VERSION.SDK_INT >= 22) builder.setUnderlyingNetworks(underlyingNetworks)
+
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn
         val fd = conn.fd
-
-        if (Build.VERSION.SDK_INT >= 24) {
-            // we want REQUEST here instead of LISTEN
-            connectivity.requestNetwork(defaultNetworkRequest, defaultNetworkCallback)
-            listeningForDefaultNetwork = true
-        }
 
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN.format(Locale.ENGLISH, "2"),

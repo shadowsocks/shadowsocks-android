@@ -27,7 +27,7 @@ import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.TcpFastOpen
+import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.parsePort
 import java.net.NetworkInterface
 import java.net.SocketException

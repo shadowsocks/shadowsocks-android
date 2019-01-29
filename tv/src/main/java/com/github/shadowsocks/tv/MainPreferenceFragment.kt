@@ -50,6 +50,8 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.Executable
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.net.HttpsTest
+import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.*

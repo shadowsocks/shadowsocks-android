@@ -42,7 +42,7 @@ import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.utils.Subnet
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.UndoSnackbarManager
@@ -51,6 +51,7 @@ import java.net.IDN
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
+import java.util.regex.PatternSyntaxException
 
 class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, ActionMode.Callback {
     companion object {
@@ -128,7 +129,15 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private fun validate(template: Int = templateSelector.selectedItemPosition, value: Editable = editText.text) {
             var message = ""
             positive.isEnabled = when (Template.values()[template]) {
-                Template.Generic -> value.isNotEmpty()
+                Template.Generic -> value.toString().run {
+                    try {
+                        if (Subnet.fromString(this) == null) toPattern()
+                        true
+                    } catch (e: PatternSyntaxException) {
+                        message = e.localizedMessage
+                        false
+                    }
+                }
                 Template.Domain -> try {
                     IDN.toASCII(value.toString(), IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
                     true

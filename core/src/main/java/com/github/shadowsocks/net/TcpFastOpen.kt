@@ -18,50 +18,47 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.bg
+package com.github.shadowsocks.net
 
-import android.net.LocalServerSocket
-import android.net.LocalSocket
-import android.net.LocalSocketAddress
-import android.system.ErrnoException
-import android.system.Os
-import android.system.OsConstants
-import com.github.shadowsocks.utils.printLog
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.io.IOException
 
-abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name), AutoCloseable {
-    private val localSocket = LocalSocket().apply {
-        socketFile.delete() // It's a must-have to close and reuse previous local socket.
-        bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
-    }
-    private val serverSocket = LocalServerSocket(localSocket.fileDescriptor)
-    @Volatile
-    private var running = true
+object TcpFastOpen {
+    private const val PATH = "/proc/sys/net/ipv4/tcp_fastopen"
 
     /**
-     * Inherited class do not need to close input/output streams as they will be closed automatically.
+     * Is kernel version >= 3.7.1.
      */
-    protected abstract fun accept(socket: LocalSocket)
-    final override fun run() = localSocket.use {
-        while (running) {
-            try {
-                accept(serverSocket.accept())
-            } catch (e: IOException) {
-                if (running) printLog(e)
-                continue
+    val supported by lazy {
+        if (File(PATH).canRead()) return@lazy true
+        val match = """^(\d+)\.(\d+)\.(\d+)""".toRegex().find(System.getProperty("os.version") ?: "")
+        if (match == null) false else when (match.groupValues[1].toInt()) {
+            in Int.MIN_VALUE..2 -> false
+            3 -> when (match.groupValues[2].toInt()) {
+                in Int.MIN_VALUE..6 -> false
+                7 -> match.groupValues[3].toInt() >= 1
+                else -> true
             }
+            else -> true
         }
     }
 
-    override fun close() {
-        running = false
-        // see also: https://issuetracker.google.com/issues/36945762#comment15
-        try {
-            Os.shutdown(localSocket.fileDescriptor, OsConstants.SHUT_RDWR)
-        } catch (e: ErrnoException) {
-            if (e.errno != OsConstants.EBADF) throw e   // suppress fd already closed
-        }
-        join()
+    val sendEnabled: Boolean get() {
+        val file = File(PATH)
+        // File.readText doesn't work since this special file will return length 0
+        // on Android containers like Chrome OS, this file does not exist so we simply judge by the kernel version
+        return if (file.canRead()) file.bufferedReader().use { it.readText() }.trim().toInt() and 1 > 0 else supported
     }
+
+    fun enable(): String? {
+        return try {
+            ProcessBuilder("su", "-c", "echo 3 > $PATH").redirectErrorStream(true).start()
+                    .inputStream.bufferedReader().readText()
+        } catch (e: IOException) {
+            e.localizedMessage
+        }
+    }
+    fun enableTimeout() = runBlocking { withTimeoutOrNull(1000) { enable() } }
 }

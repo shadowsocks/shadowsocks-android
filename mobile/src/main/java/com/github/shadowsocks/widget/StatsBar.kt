@@ -33,7 +33,7 @@ import androidx.lifecycle.get
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.utils.HttpsTest
+import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,

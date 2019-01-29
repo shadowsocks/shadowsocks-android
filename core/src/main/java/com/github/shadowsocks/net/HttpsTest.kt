@@ -18,7 +18,7 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.utils
+package com.github.shadowsocks.net
 
 import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
@@ -28,6 +28,8 @@ import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.responseLength
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection

@@ -18,8 +18,9 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.utils
+package com.github.shadowsocks.net
 
+import com.github.shadowsocks.utils.parseNumericAddress
 import java.net.InetAddress
 import java.util.*
 
