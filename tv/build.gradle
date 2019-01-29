@@ -25,7 +25,6 @@ android {
         targetSdkVersion rootProject.sdkVersion
         versionCode rootProject.versionCode
         versionName rootProject.versionName
-        testApplicationId "com.github.shadowsocks.tv.test"
         resConfigs "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"
     }
     buildTypes {

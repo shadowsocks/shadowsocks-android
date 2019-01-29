@@ -1,18 +1,33 @@
+/*******************************************************************************
+ *                                                                             *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *                                                                             *
+ *  This program is free software: you can redistribute it and/or modify       *
+ *  it under the terms of the GNU General Public License as published by       *
+ *  the Free Software Foundation, either version 3 of the License, or          *
+ *  (at your option) any later version.                                        *
+ *                                                                             *
+ *  This program is distributed in the hope that it will be useful,            *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ *  GNU General Public License for more details.                               *
+ *                                                                             *
+ *  You should have received a copy of the GNU General Public License          *
+ *  along with this program. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                             *
+ *******************************************************************************/
+
 package com.github.shadowsocks.net
 
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.shutdown
 import kotlinx.coroutines.*
-import net.sourceforge.jsocks.Socks5DatagramSocket
-import net.sourceforge.jsocks.Socks5Proxy
 import org.xbill.DNS.*
-import java.io.Closeable
-import java.io.FileDescriptor
-import java.io.IOException
+import java.io.*
 import java.net.*
 import java.nio.ByteBuffer
 import java.util.*
@@ -47,14 +62,12 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
          * so we suppose Android apps should not care about TTL either.
          */
         private const val TTL = 120L
-        private const val UDP_PACKET_SIZE = 1500
-
+        private const val UDP_PACKET_SIZE = 512
     }
     private val socket = DatagramSocket(DataStore.portLocalDns, DataStore.listenAddress.parseNumericAddress())
     private val DatagramSocket.fileDescriptor get() = ParcelFileDescriptor.fromDatagramSocket(this).fileDescriptor
     override val fileDescriptor get() = socket.fileDescriptor
-    private val tcpProxy = DataStore.proxy
-    private val udpProxy = Socks5Proxy("127.0.0.1", DataStore.portProxy)
+    private val proxy = DataStore.proxy
 
     private val activeFds = Collections.newSetFromMap(ConcurrentHashMap<FileDescriptor, Boolean>())
     private val job = SupervisorJob()
@@ -65,7 +78,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             val packet = DatagramPacket(ByteArray(UDP_PACKET_SIZE), 0, UDP_PACKET_SIZE)
             try {
                 socket.receive(packet)
-                launch(start = CoroutineStart.UNDISPATCHED) {
+                launch {
                     resolve(packet) // this method should also put the reply in the packet
                     socket.send(packet)
                 }
@@ -73,69 +86,81 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 e.printStackTrace()
             }
         }
+        socket.close()
     }
 
     private suspend fun <T> io(block: suspend CoroutineScope.() -> T) =
             withTimeout(TIMEOUT) { withContext(Dispatchers.IO, block) }
 
     private suspend fun resolve(packet: DatagramPacket) {
-        if (forwardOnly) return forward(packet)
         val request = try {
             Message(ByteBuffer.wrap(packet.data, packet.offset, packet.length))
-        } catch (e: IOException) {
+        } catch (e: IOException) {  // we cannot parse the message, do not attempt to handle it at all
             printLog(e)
             return forward(packet)
         }
-        if (request.header.opcode != Opcode.QUERY || request.header.rcode != Rcode.NOERROR) return forward(packet)
-        val question = request.question
-        if (question?.type != Type.A) return forward(packet)
-        val host = question.name.toString(true)
-        if (remoteDomainMatcher?.containsMatchIn(host) == true) return forward(packet)
-        val localResults = try {
-            io { localResolver(host) }
-        } catch (_: TimeoutCancellationException) {
+        try {
+            if (forwardOnly || request.header.opcode != Opcode.QUERY) return forward(packet)
+            val question = request.question
+            if (question?.type != Type.A) return forward(packet)
+            val host = question.name.toString(true)
+            if (remoteDomainMatcher?.containsMatchIn(host) == true) return forward(packet)
+            val localResults = try {
+                io { localResolver(host) }
+            } catch (_: TimeoutCancellationException) {
+                return forward(packet)
+            } catch (_: UnknownHostException) {
+                return forward(packet)
+            }
+            if (localResults.isEmpty()) return forward(packet)
+            if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
+                val response = Message(request.header.id)
+                response.header.setFlag(Flags.QR.toInt())   // this is a response
+                if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
+                response.header.setFlag(Flags.RA.toInt())   // recursion available
+                response.addRecord(request.question, Section.QUESTION)
+                for (address in localResults) response.addRecord(when (address) {
+                    is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
+                    is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
+                    else -> throw IllegalStateException("Unsupported address $address")
+                }, Section.ANSWER)
+                val wire = response.toWire()
+                return packet.setData(wire, 0, wire.size)
+            }
             return forward(packet)
-        } catch (_: UnknownHostException) {
-            return forward(packet)
-        }
-        if (localResults.isEmpty()) return forward(packet)
-        if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
-            Log.d("DNS", "$host (local) -> $localResults")
+        } catch (e: IOException) {
+            printLog(e)
             val response = Message(request.header.id)
-            response.header.setFlag(Flags.QR.toInt())   // this is a response
+            response.header.rcode = Rcode.SERVFAIL
+            response.header.setFlag(Flags.QR.toInt())
             if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
-            response.header.setFlag(Flags.RA.toInt())   // recursion available
             response.addRecord(request.question, Section.QUESTION)
-            for (address in localResults) response.addRecord(when (address) {
-                is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
-                is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
-                else -> throw IllegalStateException("Unsupported address $address")
-            }, Section.ANSWER)
             val wire = response.toWire()
             return packet.setData(wire, 0, wire.size)
         }
-        return forward(packet)
     }
 
-    private suspend fun forward(packet: DatagramPacket) = if (tcp) Socket(tcpProxy).useFd {
-        it.connect(InetSocketAddress(remoteDns, 53), 53)
-        it.getOutputStream().apply {
+    private suspend fun forward(packet: DatagramPacket) = if (tcp) Socket(proxy).useFd {
+        it.connect(InetSocketAddress(remoteDns, 53))
+        DataOutputStream(it.getOutputStream()).apply {
+            writeShort(packet.length)
             write(packet.data, packet.offset, packet.length)
             flush()
         }
-        val read = it.getInputStream().read(packet.data, 0, UDP_PACKET_SIZE)
-        packet.length = if (read < 0) 0 else read
-    } else Socks5DatagramSocket(udpProxy, 0, null).useFd {
+        DataInputStream(it.getInputStream()).apply {
+            packet.length = readUnsignedShort()
+            readFully(packet.data, packet.offset, packet.length)
+        }
+    } else Socks5DatagramSocket(proxy).useFd {
         val address = packet.address    // we are reusing the packet, save it first
+        val port = packet.port
         packet.address = remoteDns
         packet.port = 53
-        packet.toString()
-        Log.d("DNS", "Sending $packet")
         it.send(packet)
-        Log.d("DNS", "Receiving $packet")
+        packet.length = UDP_PACKET_SIZE
         it.receive(packet)
-        Log.d("DNS", "Finished $packet")
         packet.address = address
+        packet.port = port
     }
 
     private suspend fun <T : Closeable> T.useFd(block: (T) -> Unit) {
