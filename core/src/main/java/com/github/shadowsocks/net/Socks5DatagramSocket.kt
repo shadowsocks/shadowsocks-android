@@ -31,8 +31,8 @@ class Socks5DatagramSocket(proxy: Proxy) : DatagramSocket() {
     override fun send(dp: DatagramPacket) {
         val data = ByteBuffer.allocate(6 + dp.address.address.size + dp.length).apply {
             // header
-            put(Socks5Message.SOCKS_VERSION.toByte())
-            putShort(0)
+            putShort(0) // reserved
+            put(0)      // fragment number
             put(when (dp.address) {
                 is Inet4Address -> Socks5Message.SOCKS_ATYP_IPV4
                 is Inet6Address -> Socks5Message.SOCKS_ATYP_IPV6
