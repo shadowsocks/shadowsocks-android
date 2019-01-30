@@ -31,7 +31,7 @@ You can check whether the latest commit builds under UNIX environment by checkin
 ```bash
 mkdir build
 sudo chown 3434:3434 build
-docker run --rm -v ${PWD}/build:/build circleci/android:api-28 bash -c "cd /build; git clone https://github.com/shadowsocks/shadowsocks-android; cd shadowsocks-android; git submodule update --init --recursive; ./gradlew assembleDebug"
+docker run --rm -v ${PWD}/build:/build circleci/android:api-28-ndk bash -c "cd /build; git clone https://github.com/shadowsocks/shadowsocks-android; cd shadowsocks-android; git submodule update --init --recursive; ./gradlew assembleDebug"
 ```
 
 ### [TRANSLATE](https://discourse.shadowsocks.org/t/poeditor-translation-main-thread/30)
