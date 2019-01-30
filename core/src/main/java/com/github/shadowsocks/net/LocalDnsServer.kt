@@ -72,7 +72,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         configureBlocking(false)
         socket().bind(listen)
         monitor.register(this, SelectionKey.OP_READ) {
-            val buffer = ByteBuffer.allocate(UDP_PACKET_SIZE)
+            val buffer = ByteBuffer.allocateDirect(UDP_PACKET_SIZE)
             val source = receive(buffer)!!
             buffer.flip()
             launch {

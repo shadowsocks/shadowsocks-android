@@ -49,7 +49,7 @@ class Socks5Endpoint(host: String, port: Int) {
 
     fun tcpWrap(message: ByteBuffer): ByteBuffer {
         check(message.remaining() < 65536) { "TCP message too large" }
-        return ByteBuffer.allocate(8 + dest.size + message.remaining()).apply {
+        return ByteBuffer.allocateDirect(8 + dest.size + message.remaining()).apply {
             put(Socks5Message.SOCKS_VERSION.toByte())
             put(1)  // nmethods
             put(0)  // no authentication required
@@ -64,7 +64,7 @@ class Socks5Endpoint(host: String, port: Int) {
             flip()
         }
     }
-    fun tcpReceiveBuffer(size: Int) = ByteBuffer.allocate(headerReserved + 4 + size)
+    fun tcpReceiveBuffer(size: Int) = ByteBuffer.allocateDirect(headerReserved + 4 + size)
     suspend fun tcpUnwrap(buffer: ByteBuffer, reader: (ByteBuffer) -> Int, wait: suspend () -> Unit) {
         suspend fun readBytes(till: Int) {
             if (buffer.position() >= till) return
@@ -98,7 +98,7 @@ class Socks5Endpoint(host: String, port: Int) {
         buffer.reset()
     }
 
-    fun udpWrap(packet: ByteBuffer) = ByteBuffer.allocate(3 + dest.size + packet.remaining()).apply {
+    fun udpWrap(packet: ByteBuffer) = ByteBuffer.allocateDirect(3 + dest.size + packet.remaining()).apply {
         // header
         putShort(0) // reserved
         put(0)      // fragment number
@@ -107,7 +107,7 @@ class Socks5Endpoint(host: String, port: Int) {
         put(packet)
         flip()
     }
-    fun udpReceiveBuffer(size: Int) = ByteBuffer.allocate(headerReserved + size)
+    fun udpReceiveBuffer(size: Int) = ByteBuffer.allocateDirect(headerReserved + size)
     fun udpUnwrap(packet: ByteBuffer) {
         packet.position(3)
         packet.position(6 + when (packet.get()) {
