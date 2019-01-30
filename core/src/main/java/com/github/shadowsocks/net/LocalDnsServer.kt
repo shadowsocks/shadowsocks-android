@@ -135,7 +135,6 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 it.connect(proxy)
                 val wrapped = remoteDns.tcpWrap(packet)
                 while (!it.finishConnect()) monitor.wait(it, SelectionKey.OP_CONNECT)
-                // monitor.waitWhile(it, SelectionKey.OP_WRITE) { it.write(wrapped) >= 0 && wrapped.hasRemaining() }
                 while (it.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(it, SelectionKey.OP_WRITE)
                 remoteDns.tcpUnwrap(UDP_PACKET_SIZE, it::read) { monitor.wait(it, SelectionKey.OP_READ) }
             } else DatagramChannel.open().use {

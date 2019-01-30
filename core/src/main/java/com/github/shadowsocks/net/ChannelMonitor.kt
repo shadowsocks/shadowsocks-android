@@ -62,18 +62,8 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
 
     suspend fun wait(channel: SelectableChannel, ops: Int) = suspendCoroutine<Unit> { continuation ->
         register(channel, ops) {
-            it.interestOps(0)
+            it.interestOps(0)   // stop listening
             continuation.resume(Unit)
-        }
-    }
-
-    suspend fun waitWhile(channel: SelectableChannel, ops: Int, condition: () -> Boolean) {
-        if (condition()) suspendCoroutine<Unit> { continuation ->
-            register(channel, ops) {
-                if (condition()) return@register
-                it.interestOps(0)
-                continuation.resume(Unit)
-            }
         }
     }
 
