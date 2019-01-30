@@ -24,8 +24,10 @@ import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.LocalDnsServer
+import com.github.shadowsocks.net.Socks5Endpoint
 import com.github.shadowsocks.net.Subnet
-import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.preference.DataStore
+import java.net.InetSocketAddress
 import java.util.*
 
 object LocalDnsService {
@@ -44,7 +46,8 @@ object LocalDnsService {
             val data = data
             val profile = data.proxy!!.profile
             if (!profile.udpdns) servers[this] = LocalDnsServer(this::resolver,
-                    profile.remoteDns.split(",").first().parseNumericAddress()!!).apply {
+                    Socks5Endpoint(profile.remoteDns.split(",").first(), 53),
+                    DataStore.proxyAddress).apply {
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                         remoteDomainMatcher = googleApisTester
@@ -53,7 +56,7 @@ object LocalDnsService {
                     Acl.CHINALIST -> { }
                     else -> forwardOnly = true
                 }
-                start()
+                start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
             }
         }
 

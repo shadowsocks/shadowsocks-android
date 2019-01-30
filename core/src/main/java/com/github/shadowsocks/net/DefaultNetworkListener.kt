@@ -26,7 +26,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
-import android.widget.Toast
 import androidx.core.content.getSystemService
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core.app

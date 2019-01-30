@@ -90,7 +90,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
-    val proxy get() = Proxy(Proxy.Type.SOCKS, InetSocketAddress("127.0.0.1", portProxy))
+    val proxyAddress get() = InetSocketAddress("127.0.0.1", portProxy)
     var portLocalDns: Int
         get() = getLocalPort(Key.portLocalDns, 5450)
         set(value) = publicStore.putString(Key.portLocalDns, value.toString())

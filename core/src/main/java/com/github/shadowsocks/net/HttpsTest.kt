@@ -33,6 +33,7 @@ import com.github.shadowsocks.utils.responseLength
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.Proxy
 import java.net.URL
 
 /**
@@ -83,7 +84,7 @@ class HttpsTest : ViewModel() {
             else -> "www.google.com"
         }, "/generate_204")
         val conn = (if (DataStore.serviceMode != Key.modeVpn) {
-            url.openConnection(DataStore.proxy)
+            url.openConnection(Proxy(Proxy.Type.SOCKS, DataStore.proxyAddress))
         } else url.openConnection()) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false

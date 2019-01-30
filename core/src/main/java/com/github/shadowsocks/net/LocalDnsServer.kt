@@ -20,18 +20,16 @@
 
 package com.github.shadowsocks.net
 
-import android.os.ParcelFileDescriptor
-import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.parseNumericAddress
+import android.util.Log
 import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.shutdown
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
-import java.io.*
+import java.io.IOException
 import java.net.*
 import java.nio.ByteBuffer
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
+import java.nio.channels.DatagramChannel
+import java.nio.channels.SelectionKey
+import java.nio.channels.SocketChannel
 
 /**
  * A simple DNS conditional forwarder.
@@ -43,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap
  *   https://github.com/shadowsocks/overture/tree/874f22613c334a3b78e40155a55479b7b69fee04
  */
 class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAddress>,
-                     private val remoteDns: InetAddress) : SocketListener("LocalDnsServer"), CoroutineScope {
+                     private val remoteDns: Socks5Endpoint, private val proxy: SocketAddress) : CoroutineScope {
     /**
      * Forward all requests to remote and ignore localResolver.
      */
@@ -64,37 +62,28 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
     }
-    private val socket = DatagramSocket(DataStore.portLocalDns, DataStore.listenAddress.parseNumericAddress())
-    private val DatagramSocket.fileDescriptor get() = ParcelFileDescriptor.fromDatagramSocket(this).fileDescriptor
-    override val fileDescriptor get() = socket.fileDescriptor
-    private val proxy = DataStore.proxy
+    private val monitor = ChannelMonitor()
 
-    private val activeFds = Collections.newSetFromMap(ConcurrentHashMap<FileDescriptor, Boolean>())
     private val job = SupervisorJob()
-    override val coroutineContext get() = Dispatchers.Default + job + CoroutineExceptionHandler { _, t -> printLog(t) }
+    override val coroutineContext = Dispatchers.Default + job + CoroutineExceptionHandler { _, t -> printLog(t) }
 
-    override fun run() {
-        while (running) {
-            val packet = DatagramPacket(ByteArray(UDP_PACKET_SIZE), 0, UDP_PACKET_SIZE)
-            try {
-                socket.receive(packet)
-                launch {
-                    resolve(packet) // this method should also put the reply in the packet
-                    socket.send(packet)
-                }
-            } catch (e: RuntimeException) {
-                e.printStackTrace()
+    fun start(listen: SocketAddress) = DatagramChannel.open().apply {
+        configureBlocking(false)
+        socket().bind(listen)
+        monitor.register(this, SelectionKey.OP_READ) {
+            val buffer = ByteBuffer.allocate(UDP_PACKET_SIZE)
+            val source = receive(buffer)!!
+            buffer.flip()
+            launch {
+                val reply = resolve(buffer)
+                while (send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
             }
         }
-        socket.close()
     }
 
-    private suspend fun <T> io(block: suspend CoroutineScope.() -> T) =
-            withTimeout(TIMEOUT) { withContext(Dispatchers.IO, block) }
-
-    private suspend fun resolve(packet: DatagramPacket) {
+    private suspend fun resolve(packet: ByteBuffer): ByteBuffer {
         val request = try {
-            Message(ByteBuffer.wrap(packet.data, packet.offset, packet.length))
+            Message(packet)
         } catch (e: IOException) {  // we cannot parse the message, do not attempt to handle it at all
             printLog(e)
             return forward(packet)
@@ -106,7 +95,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             val host = question.name.toString(true)
             if (remoteDomainMatcher?.containsMatchIn(host) == true) return forward(packet)
             val localResults = try {
-                io { localResolver(host) }
+                withTimeout(TIMEOUT) { withContext(Dispatchers.IO) { localResolver(host) } }
             } catch (_: TimeoutCancellationException) {
                 return forward(packet)
             } catch (_: UnknownHostException) {
@@ -124,8 +113,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
                     else -> throw IllegalStateException("Unsupported address $address")
                 }, Section.ANSWER)
-                val wire = response.toWire()
-                return packet.setData(wire, 0, wire.size)
+                return ByteBuffer.wrap(response.toWire())
             }
             return forward(packet)
         } catch (e: IOException) {
@@ -135,54 +123,38 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             response.header.setFlag(Flags.QR.toInt())
             if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
             response.addRecord(request.question, Section.QUESTION)
-            val wire = response.toWire()
-            return packet.setData(wire, 0, wire.size)
+            return ByteBuffer.wrap(response.toWire())
         }
     }
 
-    private suspend fun forward(packet: DatagramPacket) = if (tcp) Socket(proxy).useFd {
-        it.connect(InetSocketAddress(remoteDns, 53))
-        DataOutputStream(it.getOutputStream()).apply {
-            writeShort(packet.length)
-            write(packet.data, packet.offset, packet.length)
-            flush()
-        }
-        DataInputStream(it.getInputStream()).apply {
-            packet.length = readUnsignedShort()
-            readFully(packet.data, packet.offset, packet.length)
-        }
-    } else Socks5DatagramSocket(proxy).useFd {
-        val address = packet.address    // we are reusing the packet, save it first
-        val port = packet.port
-        packet.address = remoteDns
-        packet.port = 53
-        it.send(packet)
-        packet.length = UDP_PACKET_SIZE
-        it.receive(packet)
-        packet.address = address
-        packet.port = port
-    }
-
-    private suspend fun <T : Closeable> T.useFd(block: (T) -> Unit) {
-        val fd = when (this) {
-            is Socket -> ParcelFileDescriptor.fromSocket(this).fileDescriptor
-            is DatagramSocket -> fileDescriptor
-            else -> throw IllegalStateException("Unsupported type $javaClass for obtaining FileDescriptor")
-        }
-        try {
-            activeFds += fd
-            io { use(block) }
-        } finally {
-            fd.shutdown()
-            activeFds -= fd
+    private suspend fun forward(packet: ByteBuffer): ByteBuffer {
+        packet.position(0)  // the packet might have been parsed, reset to beginning
+        return withTimeout(TIMEOUT) {
+            if (tcp) SocketChannel.open().use {
+                it.configureBlocking(false)
+                it.connect(proxy)
+                val wrapped = remoteDns.tcpWrap(packet)
+                while (!it.finishConnect()) monitor.wait(it, SelectionKey.OP_CONNECT)
+                // monitor.waitWhile(it, SelectionKey.OP_WRITE) { it.write(wrapped) >= 0 && wrapped.hasRemaining() }
+                while (it.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(it, SelectionKey.OP_WRITE)
+                remoteDns.tcpUnwrap(UDP_PACKET_SIZE, it::read) { monitor.wait(it, SelectionKey.OP_READ) }
+            } else DatagramChannel.open().use {
+                it.configureBlocking(false)
+                monitor.wait(it, SelectionKey.OP_WRITE)
+                check(it.send(remoteDns.udpWrap(packet), proxy) > 0)
+                monitor.wait(it, SelectionKey.OP_READ)
+                val result = remoteDns.udpReceiveBuffer(UDP_PACKET_SIZE)
+                check(it.receive(result) == proxy)
+                result.limit(result.position())
+                remoteDns.udpUnwrap(result)
+                result
+            }.also { Log.d("forward", "completed $it") }
         }
     }
 
     suspend fun shutdown() {
-        running = false
         job.cancel()
-        close()
-        activeFds.forEach { it.shutdown() }
+        monitor.close()
         job.join()
     }
 }
