@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class TrafficMonitor(statFile: File) : AutoCloseable {
-    private val thread = object : LocalSocketListener("TrafficMonitor", statFile) {
+    private val thread = object : LocalSocketListener("TrafficMonitor-" + statFile.name, statFile) {
         override fun acceptInternal(socket: LocalSocket) {
             val buffer = ByteArray(16)
             if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
