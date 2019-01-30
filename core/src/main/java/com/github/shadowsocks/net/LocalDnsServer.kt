@@ -65,7 +65,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
 
     private val monitor = ChannelMonitor()
 
-    private val job = SupervisorJob()
+    private val job = Job()
     override val coroutineContext = Dispatchers.Default + job + CoroutineExceptionHandler { _, t -> printLog(t) }
 
     fun start(listen: SocketAddress) = DatagramChannel.open().apply {
@@ -77,7 +77,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             buffer.flip()
             launch {
                 val reply = resolve(buffer)
-                while (job.isActive && send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
+                while (isActive && send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
             }
         }
     }
@@ -131,21 +131,25 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     private suspend fun forward(packet: ByteBuffer): ByteBuffer {
         packet.position(0)  // the packet might have been parsed, reset to beginning
         return withTimeout(TIMEOUT) {
-            if (tcp) SocketChannel.open().use {
-                it.configureBlocking(false)
-                it.connect(proxy)
+            if (tcp) SocketChannel.open().use { channel ->
+                channel.configureBlocking(false)
+                channel.connect(proxy)
                 val wrapped = remoteDns.tcpWrap(packet)
-                while (job.isActive && !it.finishConnect()) monitor.wait(it, SelectionKey.OP_CONNECT)
-                while (job.isActive && it.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(it, SelectionKey.OP_WRITE)
-                remoteDns.tcpUnwrap(UDP_PACKET_SIZE, it::read) { monitor.wait(it, SelectionKey.OP_READ) }
-            } else DatagramChannel.open().use {
-                it.configureBlocking(false)
-                monitor.wait(it, SelectionKey.OP_WRITE)
-                check(it.send(remoteDns.udpWrap(packet), proxy) > 0)
-                monitor.wait(it, SelectionKey.OP_READ)
+                while (isActive && !channel.finishConnect()) monitor.wait(channel, SelectionKey.OP_CONNECT)
+                while (isActive && channel.write(wrapped) >= 0 && wrapped.hasRemaining()) {
+                    monitor.wait(channel, SelectionKey.OP_WRITE)
+                }
+                val result = remoteDns.tcpReceiveBuffer(UDP_PACKET_SIZE)
+                remoteDns.tcpUnwrap(result, channel::read) { monitor.wait(channel, SelectionKey.OP_READ) }
+                result
+            } else DatagramChannel.open().use { channel ->
+                channel.configureBlocking(false)
+                monitor.wait(channel, SelectionKey.OP_WRITE)
+                check(channel.send(remoteDns.udpWrap(packet), proxy) > 0)
+                monitor.wait(channel, SelectionKey.OP_READ)
                 val result = remoteDns.udpReceiveBuffer(UDP_PACKET_SIZE)
-                check(it.receive(result) == proxy)
-                result.limit(result.position())
+                check(channel.receive(result) == proxy)
+                result.flip()
                 remoteDns.udpUnwrap(result)
                 result
             }.also { Log.d("forward", "completed $it") }

@@ -65,42 +65,37 @@ class Socks5Endpoint(host: String, port: Int) {
         }
     }
     fun tcpReceiveBuffer(size: Int) = ByteBuffer.allocate(headerReserved + 4 + size)
-    suspend fun tcpUnwrap(size: Int, reader: (ByteBuffer) -> Int, wait: suspend () -> Unit): ByteBuffer {
-        suspend fun ByteBuffer.readBytes(till: Int) {
-            if (position() >= till) return
-            while (reader(this) >= 0 && position() < till) wait()
-            if (position() < till) throw IOException("EOF")
+    suspend fun tcpUnwrap(buffer: ByteBuffer, reader: (ByteBuffer) -> Int, wait: suspend () -> Unit) {
+        suspend fun readBytes(till: Int) {
+            if (buffer.position() >= till) return
+            while (reader(buffer) >= 0 && buffer.position() < till) wait()
+            if (buffer.position() < till) throw IOException("EOF")
         }
-        suspend fun ByteBuffer.read(index: Int): Byte {
+        suspend fun read(index: Int): Byte {
             readBytes(index + 1)
-            return get(index)
+            return buffer[index]
         }
-        val buffer = tcpReceiveBuffer(size)
-        check(buffer.read(0) == Socks5Message.SOCKS_VERSION.toByte()) { "Unsupported SOCKS version" }
-        if (buffer.read(1) != 0.toByte()) throw IOException("Unsupported authentication ${buffer[1]}")
-        check(buffer.read(2) == Socks5Message.SOCKS_VERSION.toByte()) { "Unsupported SOCKS version" }
-        if (buffer.read(3) != 0.toByte()) throw IOException("SOCKS5 server returned error ${buffer[3]}")
-        val dataOffset = when (buffer.read(5)) {
+        check(read(0) == Socks5Message.SOCKS_VERSION.toByte()) { "Unsupported SOCKS version" }
+        if (read(1) != 0.toByte()) throw IOException("Unsupported authentication ${buffer[1]}")
+        check(read(2) == Socks5Message.SOCKS_VERSION.toByte()) { "Unsupported SOCKS version" }
+        if (read(3) != 0.toByte()) throw IOException("SOCKS5 server returned error ${buffer[3]}")
+        val dataOffset = when (read(5)) {
             Socks5Message.SOCKS_ATYP_IPV4.toByte() -> 4
-            Socks5Message.SOCKS_ATYP_DOMAINNAME.toByte() -> {
-                buffer.readBytes(4)
-                1 + buffer[3]
-            }
+            Socks5Message.SOCKS_ATYP_DOMAINNAME.toByte() -> 1 + read(6)
             Socks5Message.SOCKS_ATYP_IPV6.toByte() -> 16
             else -> throw IllegalStateException("Unsupported address type ${buffer[5]}")
         } + 8
-        buffer.readBytes(dataOffset + 2)
+        readBytes(dataOffset + 2)
         buffer.limit(buffer.position()) // store old position to update mark
         buffer.position(dataOffset)
         val dataLength = buffer.short.toUShort().toInt()
-        check(dataLength <= size) { "Buffer too small to contain the message" }
-        buffer.mark()
         val end = buffer.position() + dataLength
+        check(end <= buffer.capacity()) { "Buffer too small to contain the message" }
+        buffer.mark()
         buffer.position(buffer.limit()) // restore old position
         buffer.limit(end)
-        buffer.readBytes(buffer.limit())
+        readBytes(buffer.limit())
         buffer.reset()
-        return buffer
     }
 
     fun udpWrap(packet: ByteBuffer) = ByteBuffer.allocate(3 + dest.size + packet.remaining()).apply {
