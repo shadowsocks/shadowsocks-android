@@ -59,7 +59,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         /**
          * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
          */
-        private val getInt: Method = FileDescriptor::class.java.getDeclaredMethod("getInt$")
+        private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
     }
 
     class CloseableFd(val fd: FileDescriptor) : Closeable {
@@ -103,7 +103,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             field = value
             if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
         }
-    private val underlyingNetworks = underlyingNetwork?.let { arrayOf(it) }
+    private val underlyingNetworks get() = underlyingNetwork?.let { arrayOf(it) }
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
