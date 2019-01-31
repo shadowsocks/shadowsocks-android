@@ -23,6 +23,7 @@ package com.github.shadowsocks.database
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
+import android.util.LongSparseArray
 import androidx.core.net.toUri
 import androidx.room.*
 import com.github.shadowsocks.plugin.PluginConfiguration
@@ -249,7 +250,7 @@ class Profile : Serializable {
     }
     override fun toString() = toUri().toString()
 
-    fun toJson(profiles: Map<Long, Profile>? = null): JSONObject = JSONObject().apply {
+    fun toJson(profiles: LongSparseArray<Profile>? = null): JSONObject = JSONObject().apply {
         put("server", host)
         put("server_port", remotePort)
         put("password", password)
@@ -274,7 +275,7 @@ class Profile : Serializable {
             }
         })
         put("udpdns", udpdns)
-        val fallback = profiles[udpFallback]
+        val fallback = profiles.get(udpFallback ?: return@apply)
         if (fallback != null && fallback.plugin.isNullOrEmpty()) fallback.toJson().also { put("udp_fallback", it) }
     }
 

@@ -30,6 +30,7 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.text.format.Formatter
 import android.util.Log
+import android.util.LongSparseArray
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.leanback.preference.LeanbackPreferenceFragment
@@ -318,7 +319,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
                 if (resultCode != Activity.RESULT_OK) return
                 val profiles = ProfileManager.getAllProfiles()
                 if (profiles != null) try {
-                    val lookup = profiles.associateBy { it.id }
+                    val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
                     activity.contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
                         it.write(JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray()).toString(2))
                     }
