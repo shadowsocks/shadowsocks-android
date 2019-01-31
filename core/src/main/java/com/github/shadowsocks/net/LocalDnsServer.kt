@@ -25,7 +25,6 @@ import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
 import java.io.IOException
-import java.lang.RuntimeException
 import java.net.*
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
@@ -63,7 +62,6 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
     }
-
     private val monitor = ChannelMonitor()
 
     private val job = SupervisorJob()
@@ -79,8 +77,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             launch {
                 try {
                     val reply = resolve(buffer)
-                    while (isActive && send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
-                } catch (e: RuntimeException) {
+                    while (send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
+                } catch (e: Exception) {
                     printLog(e)
                 }
             }
@@ -144,8 +142,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 channel.configureBlocking(false)
                 channel.connect(proxy)
                 val wrapped = remoteDns.tcpWrap(packet)
-                while (isActive && !channel.finishConnect()) monitor.wait(channel, SelectionKey.OP_CONNECT)
-                while (isActive && channel.write(wrapped) >= 0 && wrapped.hasRemaining()) {
+                while (!channel.finishConnect()) monitor.wait(channel, SelectionKey.OP_CONNECT)
+                while (channel.write(wrapped) >= 0 && wrapped.hasRemaining()) {
                     monitor.wait(channel, SelectionKey.OP_WRITE)
                 }
                 val result = remoteDns.tcpReceiveBuffer(UDP_PACKET_SIZE)
@@ -161,7 +159,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 result.flip()
                 remoteDns.udpUnwrap(result)
                 result
-            }.also { Log.d("forward", "completed $it") }
+            }
         }
     }
 

@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.net
 
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.nio.ByteBuffer
 import java.nio.channels.Pipe
 import java.nio.channels.SelectableChannel
@@ -27,7 +28,6 @@ import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
     private val selector = Selector.open()
@@ -60,10 +60,10 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
         while (registrationPipe.sink().write(junk) == 0);
     }
 
-    suspend fun wait(channel: SelectableChannel, ops: Int) = suspendCoroutine<Unit> { continuation ->
+    suspend fun wait(channel: SelectableChannel, ops: Int) = suspendCancellableCoroutine<Unit> { cont ->
         register(channel, ops) {
             it.interestOps(0)   // stop listening
-            continuation.resume(Unit)
+            cont.resume(Unit)
         }
     }
 
