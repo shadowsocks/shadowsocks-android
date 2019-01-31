@@ -62,6 +62,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
     }
+
     private val monitor = ChannelMonitor()
 
     private val job = SupervisorJob()
@@ -76,7 +77,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             buffer.flip()
             launch {
                 val reply = resolve(buffer)
-                while (send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
+                while (job.isActive && send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
             }
         }
     }
@@ -134,8 +135,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 it.configureBlocking(false)
                 it.connect(proxy)
                 val wrapped = remoteDns.tcpWrap(packet)
-                while (!it.finishConnect()) monitor.wait(it, SelectionKey.OP_CONNECT)
-                while (it.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(it, SelectionKey.OP_WRITE)
+                while (job.isActive && !it.finishConnect()) monitor.wait(it, SelectionKey.OP_CONNECT)
+                while (job.isActive && it.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(it, SelectionKey.OP_WRITE)
                 remoteDns.tcpUnwrap(UDP_PACKET_SIZE, it::read) { monitor.wait(it, SelectionKey.OP_READ) }
             } else DatagramChannel.open().use {
                 it.configureBlocking(false)
