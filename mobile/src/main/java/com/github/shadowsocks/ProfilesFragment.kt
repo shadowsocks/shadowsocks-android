@@ -99,7 +99,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             return image
         }
 
-        override fun onAttach(context: Context?) {
+        override fun onAttach(context: Context) {
             super.onAttach(context)
             val adapter = NfcAdapter.getDefaultAdapter(context)
             adapter?.setNdefPushMessage(NdefMessage(arrayOf(

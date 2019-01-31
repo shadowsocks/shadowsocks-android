@@ -56,7 +56,7 @@ class ProfileConfigActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.profile_config_menu, menu)
         return true
     }
-    override fun onOptionsItemSelected(item: MenuItem?) = child.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem) = child.onOptionsItemSelected(item)
 
     override fun onBackPressed() {
         if (DataStore.dirty) AlertDialog.Builder(this)

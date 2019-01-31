@@ -25,22 +25,40 @@ import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.TextView
-import androidx.leanback.preference.LeanbackListPreferenceDialogFragment
+import androidx.leanback.preference.LeanbackListPreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 
-class ProfilesDialogFragment : LeanbackListPreferenceDialogFragment() {
-    inner class ProfilesAdapter : RecyclerView.Adapter<ViewHolder>(), ViewHolder.OnItemClickListener {
-        private val profiles = ProfileManager.getAllProfiles()!!
+class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
+    private inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+        val widgetView = view.findViewById<CompoundButton>(R.id.button)
+        val titleView = view.findViewById<TextView>(android.R.id.title)
+        init {
+            view.findViewById<ViewGroup>(R.id.container).setOnClickListener(this)
+        }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(LayoutInflater
-                .from(parent.context).inflate(R.layout.leanback_list_preference_item_single_2, parent, false), this)
+        override fun onClick(v: View) {
+            val index = adapterPosition
+            if (index == RecyclerView.NO_POSITION) return
+            Core.switchProfile(adapter.profiles[index].id)
+            (targetFragment as MainPreferenceFragment).startService()
+            fragmentManager?.popBackStack()
+            adapter.notifyDataSetChanged()
+        }
+    }
+    private inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
+        val profiles = ProfileManager.getAllProfiles()!!
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ProfileViewHolder(
+                LayoutInflater.from(parent.context).inflate(R.layout.leanback_list_preference_item_single_2,
+                        parent, false))
+
+        override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
             val profile = profiles[position]
             holder.widgetView.isChecked = profile.id == DataStore.profileId
             holder.titleView.text = profile.formattedName
@@ -54,24 +72,15 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragment() {
         }
 
         override fun getItemCount() = profiles.size
-
-        override fun onItemClick(viewHolder: ViewHolder) {
-            val index = viewHolder.adapterPosition
-            if (index == RecyclerView.NO_POSITION) return
-            Core.switchProfile(profiles[index].id)
-            (targetFragment as MainPreferenceFragment).startService()
-            fragmentManager?.popBackStack()
-            notifyDataSetChanged()
-        }
-
-        val selectedIndex = profiles.indexOfFirst { it.id == DataStore.profileId }
     }
 
-    override fun onCreateAdapter() = ProfilesAdapter()
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    private val adapter = ProfilesAdapter()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return super.onCreateView(inflater, container, savedInstanceState)!!.also {
             val list = it.findViewById<RecyclerView>(android.R.id.list)
-            list.layoutManager!!.scrollToPosition((list.adapter as ProfilesAdapter).selectedIndex)
+            list.adapter = adapter
+            list.layoutManager!!.scrollToPosition(adapter.profiles.indexOfFirst { it.id == DataStore.profileId })
         }
     }
 }
