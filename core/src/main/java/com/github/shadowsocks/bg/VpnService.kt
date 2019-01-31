@@ -46,7 +46,6 @@ import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
-import java.lang.reflect.Method
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
@@ -113,11 +112,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override fun onRevoke() = stopRunner()
 
     override suspend fun killProcesses() {
+        super.killProcesses()
         active = false
         DefaultNetworkListener.stop(this)
         worker?.shutdown()
         worker = null
-        super.killProcesses()
         conn?.close()
         conn = null
     }
