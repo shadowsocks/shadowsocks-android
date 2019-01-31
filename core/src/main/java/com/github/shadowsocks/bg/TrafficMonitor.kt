@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 class TrafficMonitor(statFile: File) : AutoCloseable {
-    private val thread = object : LocalSocketListener("TrafficMonitor", statFile) {
+    private val thread = object : LocalSocketListener("TrafficMonitor-" + statFile.name, statFile) {
         private val buffer = ByteArray(16)
         private val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
         override fun acceptInternal(socket: LocalSocket) {

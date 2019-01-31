@@ -30,9 +30,9 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.text.format.Formatter
 import android.util.Log
+import android.util.LongSparseArray
 import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
-import androidx.leanback.preference.LeanbackPreferenceFragment
+import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.get
@@ -54,10 +54,12 @@ import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.datas
+import com.github.shadowsocks.utils.printLog
 import org.json.JSONArray
 
-class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnection.Callback,
+class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
         OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CONNECT = 1
@@ -93,11 +95,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         private set
     override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-        if (profileId == 0L) this@MainPreferenceFragment.stats.summary = getString(R.string.stat_summary,
-                getString(R.string.speed, Formatter.formatFileSize(activity, stats.txRate)),
-                getString(R.string.speed, Formatter.formatFileSize(activity, stats.rxRate)),
-                Formatter.formatFileSize(activity, stats.txTotal),
-                Formatter.formatFileSize(activity, stats.rxTotal))
+        if (profileId == 0L) requireContext().let { context ->
+            this.stats.summary = getString(R.string.stat_summary,
+                    getString(R.string.speed, Formatter.formatFileSize(context, stats.txRate)),
+                    getString(R.string.speed, Formatter.formatFileSize(context, stats.rxRate)),
+                    Formatter.formatFileSize(context, stats.txTotal),
+                    Formatter.formatFileSize(context, stats.rxTotal))
+        }
     }
 
     private fun changeState(state: Int, msg: String? = null) {
@@ -110,15 +114,14 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         })
         stats.setTitle(R.string.connection_test_pending)
         stats.isVisible = state == BaseService.CONNECTED
-        val owner = activity as FragmentActivity    // TODO: change to this when refactored to androidx
         if (state != BaseService.CONNECTED) {
             trafficUpdated(0, TrafficStats())
-            tester.status.removeObservers(owner)
+            tester.status.removeObservers(this)
             if (state != BaseService.IDLE) tester.invalidate()
-        } else tester.status.observe(owner, Observer {
-            it.retrieve(stats::setTitle) { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }
+        } else tester.status.observe(this, Observer {
+            it.retrieve(stats::setTitle) { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
         })
-        if (msg != null) Toast.makeText(activity, getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
+        if (msg != null) Toast.makeText(requireContext(), getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
         if (state == BaseService.STOPPED) {
             controlImport.isEnabled = true
@@ -147,9 +150,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     })
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun onBinderDied() {
-        connection.disconnect(activity)
+        connection.disconnect(requireContext())
         Executable.killAll()
-        connection.connect(activity, this)
+        connection.connect(requireContext(), this)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -175,7 +178,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
                 val result = TcpFastOpen.enable()?.trim()
                 if (TcpFastOpen.sendEnabled) true else {
-                    Toast.makeText(activity, if (result.isNullOrEmpty())
+                    Toast.makeText(requireContext(), if (result.isNullOrEmpty())
                         getText(R.string.tcp_fastopen_failure) else result, Toast.LENGTH_SHORT).show()
                     false
                 }
@@ -195,14 +198,14 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         findPreference(Key.about).apply {
             summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
             setOnPreferenceClickListener {
-                Toast.makeText(activity, "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
                 true
             }
         }
 
-        tester = ViewModelProviders.of(activity as FragmentActivity).get()
+        tester = ViewModelProviders.of(this).get()
         changeState(BaseService.IDLE)   // reset everything to init state
-        connection.connect(activity, this)
+        connection.connect(requireContext(), this)
         DataStore.publicStore.registerChangeListener(this)
     }
 
@@ -228,7 +231,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
         when {
             state != BaseService.STOPPED -> return
             DataStore.serviceMode == Key.modeVpn -> {
-                val intent = VpnService.prepare(activity)
+                val intent = VpnService.prepare(requireContext())
                 if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
                 else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
             }
@@ -239,8 +242,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
         when (key) {
             Key.serviceMode -> handler.post {
-                connection.disconnect(activity)
-                connection.connect(activity, this)
+                connection.disconnect(requireContext())
+                connection.connect(requireContext(), this)
             }
         }
     }
@@ -283,13 +286,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
             startActivityForResult(intent, requestCode)
             return
         } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
-        Toast.makeText(activity, R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             REQUEST_CONNECT -> if (resultCode == Activity.RESULT_OK) Core.startService() else {
-                Toast.makeText(activity, R.string.vpn_permission_denied, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.vpn_permission_denied, Toast.LENGTH_SHORT).show()
                 Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
             }
             REQUEST_IMPORT_PROFILES -> {
@@ -297,8 +300,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
                 val profiles = ProfileManager.getAllProfiles()?.associateBy { it.formattedAddress }
                 val feature = profiles?.values?.singleOrNull { it.id == DataStore.profileId }
                 val lazyClear = lazy { ProfileManager.clear() }
+                val context = requireContext()
                 for (uri in data!!.datas) try {
-                    Profile.parseJson(activity.contentResolver.openInputStream(uri)!!.bufferedReader().readText(),
+                    Profile.parseJson(context.contentResolver.openInputStream(uri)!!.bufferedReader().readText(),
                             feature) {
                         lazyClear.value
                         // if two profiles has the same address, treat them as the same profile and copy stats over
@@ -310,21 +314,22 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
                     }
                 } catch (e: Exception) {
                     printLog(e)
-                    Toast.makeText(activity, e.localizedMessage, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
                 }
                 populateProfiles()
             }
             REQUEST_EXPORT_PROFILES -> {
                 if (resultCode != Activity.RESULT_OK) return
                 val profiles = ProfileManager.getAllProfiles()
+                val context = requireContext()
                 if (profiles != null) try {
-                    val lookup = profiles.associateBy { it.id }
-                    activity.contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
+                    val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
+                    context.contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
                         it.write(JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray()).toString(2))
                     }
                 } catch (e: Exception) {
                     printLog(e)
-                    Toast.makeText(activity, e.localizedMessage, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
                 }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)
@@ -334,7 +339,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragment(), ShadowsocksConnecti
     override fun onDestroy() {
         super.onDestroy()
         DataStore.publicStore.unregisterChangeListener(this)
-        connection.disconnect(activity)
-        BackupManager(activity).dataChanged()
+        val context = requireContext()
+        connection.disconnect(context)
+        BackupManager(context).dataChanged()
     }
 }

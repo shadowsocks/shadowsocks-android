@@ -179,7 +179,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         } else super.onActivityResult(requestCode, resultCode, data)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_delete -> {
             val activity = requireActivity()
             AlertDialog.Builder(activity)

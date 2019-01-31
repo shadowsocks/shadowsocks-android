@@ -24,21 +24,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.leanback.preference.LeanbackListPreferenceDialogFragment
+import androidx.leanback.preference.LeanbackListPreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Fix: scroll to selected item.
  */
-open class LeanbackSingleListPreferenceDialogFragment : LeanbackListPreferenceDialogFragment() {
+open class LeanbackSingleListPreferenceDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
     companion object {
-        private val mEntryValues = LeanbackListPreferenceDialogFragment::class.java
+        private val mEntryValues = LeanbackListPreferenceDialogFragmentCompat::class.java
                 .getDeclaredField("mEntryValues").apply { isAccessible = true }
-        private val mInitialSelection = LeanbackListPreferenceDialogFragment::class.java
+        private val mInitialSelection = LeanbackListPreferenceDialogFragmentCompat::class.java
                 .getDeclaredField("mInitialSelection").apply { isAccessible = true }
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val selected = mInitialSelection.get(this) as? String
         val index = (mEntryValues.get(this) as? Array<CharSequence?>)?.indexOfFirst { it == selected }
         return super.onCreateView(inflater, container, savedInstanceState)!!.also {
