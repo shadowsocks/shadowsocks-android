@@ -25,6 +25,7 @@ import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
 import java.io.IOException
+import java.lang.RuntimeException
 import java.net.*
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
@@ -65,8 +66,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
 
     private val monitor = ChannelMonitor()
 
-    private val job = Job()
-    override val coroutineContext = Dispatchers.Default + job + CoroutineExceptionHandler { _, t -> printLog(t) }
+    private val job = SupervisorJob()
+    override val coroutineContext = Dispatchers.Default + job
 
     fun start(listen: SocketAddress) = DatagramChannel.open().apply {
         configureBlocking(false)
@@ -76,8 +77,12 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             val source = receive(buffer)!!
             buffer.flip()
             launch {
-                val reply = resolve(buffer)
-                while (isActive && send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
+                try {
+                    val reply = resolve(buffer)
+                    while (isActive && send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
+                } catch (e: RuntimeException) {
+                    printLog(e)
+                }
             }
         }
     }
@@ -98,6 +103,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             val localResults = try {
                 withTimeout(TIMEOUT) { withContext(Dispatchers.IO) { localResolver(host) } }
             } catch (_: TimeoutCancellationException) {
+                Log.w("LocalDnsServer", "Local resolving timed out, falling back to remote resolving")
                 return forward(packet)
             } catch (_: UnknownHostException) {
                 return forward(packet)
