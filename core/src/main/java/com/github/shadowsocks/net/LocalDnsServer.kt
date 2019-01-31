@@ -94,22 +94,24 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             printLog(e)
             return forward(packet)
         }
+        val remote = coroutineScope { async { forward(packet) } }
         try {
-            if (forwardOnly || request.header.opcode != Opcode.QUERY) return forward(packet)
+            if (forwardOnly || request.header.opcode != Opcode.QUERY) return remote.await()
             val question = request.question
-            if (question?.type != Type.A) return forward(packet)
+            if (question?.type != Type.A) return remote.await()
             val host = question.name.toString(true)
-            if (remoteDomainMatcher?.containsMatchIn(host) == true) return forward(packet)
+            if (remoteDomainMatcher?.containsMatchIn(host) == true) return remote.await()
             val localResults = try {
                 withTimeout(TIMEOUT) { withContext(Dispatchers.IO) { localResolver(host) } }
             } catch (_: TimeoutCancellationException) {
                 Log.w("LocalDnsServer", "Local resolving timed out, falling back to remote resolving")
-                return forward(packet)
+                return remote.await()
             } catch (_: UnknownHostException) {
-                return forward(packet)
+                return remote.await()
             }
-            if (localResults.isEmpty()) return forward(packet)
+            if (localResults.isEmpty()) return remote.await()
             if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
+                remote.cancel()
                 val response = Message(request.header.id)
                 response.header.setFlag(Flags.QR.toInt())   // this is a response
                 if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
@@ -122,8 +124,9 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 }, Section.ANSWER)
                 return ByteBuffer.wrap(response.toWire())
             }
-            return forward(packet)
+            return remote.await()
         } catch (e: IOException) {
+            remote.cancel()
             printLog(e)
             val response = Message(request.header.id)
             response.header.rcode = Rcode.SERVFAIL
