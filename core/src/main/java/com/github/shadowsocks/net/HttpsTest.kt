@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.net
 
+import android.os.Build
 import android.os.SystemClock
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -29,12 +30,12 @@ import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.responseLength
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.Proxy
 import java.net.URL
+import java.net.URLConnection
 
 /**
  * Based on: https://android.googlesource.com/platform/frameworks/base/+/b19a838/services/core/java/com/android/server/connectivity/NetworkMonitor.java#1071
@@ -116,4 +117,7 @@ class HttpsTest : ViewModel() {
         cancelTest()
         status.value = Status.Idle
     }
+
+    private val URLConnection.responseLength: Long
+        get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 }

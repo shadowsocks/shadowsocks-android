@@ -39,7 +39,6 @@ import com.github.shadowsocks.net.DefaultNetworkListener
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.delay
 import java.io.Closeable
@@ -52,8 +51,10 @@ import android.net.VpnService as BaseVpnService
 class VpnService : BaseVpnService(), LocalDnsService.Interface {
     companion object {
         private const val VPN_MTU = 1500
-        private const val PRIVATE_VLAN = "172.19.0.%s"
-        private const val PRIVATE_VLAN6 = "fdfe:dcba:9876::%s"
+        private const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
+        private const val PRIVATE_VLAN4_ROUTER = "172.19.0.2"
+        private const val PRIVATE_VLAN6_CLIENT = "fdfe:dcba:9876::1"
+        private const val PRIVATE_VLAN6_ROUTER = "fdfe:dcba:9876::2"
 
         /**
          * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
@@ -136,9 +137,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override suspend fun startProcesses() {
         worker = ProtectWorker().apply { start() }
-
         super.startProcesses()
-
         sendFd(startVpn())
     }
 
@@ -153,12 +152,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 .setConfigureIntent(Core.configureIntent(this))
                 .setSession(profile.formattedName)
                 .setMtu(VPN_MTU)
-                .addAddress(PRIVATE_VLAN.format(Locale.ENGLISH, "1"), 24)
-
-        profile.remoteDns.split(",").forEach { builder.addDnsServer(it.trim()) }
+                .addAddress(PRIVATE_VLAN4_CLIENT, 30)
+                .addDnsServer(PRIVATE_VLAN4_ROUTER)
 
         if (profile.ipv6) {
-            builder.addAddress(PRIVATE_VLAN6.format(Locale.ENGLISH, "1"), 126)
+            builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
             builder.addRoute("::", 0)
         }
 
@@ -179,13 +177,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
         when (profile.route) {
             Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
-            else -> {
-                resources.getStringArray(R.array.bypass_private_route).forEach {
-                    val subnet = Subnet.fromString(it)!!
-                    builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
-                }
-                profile.remoteDns.split(",").mapNotNull { it.trim().parseNumericAddress() }
-                        .forEach { builder.addRoute(it, it.address.size shl 3) }
+            else -> resources.getStringArray(R.array.bypass_private_route).forEach {
+                val subnet = Subnet.fromString(it)!!
+                builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
             }
         }
 
@@ -197,22 +191,19 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         val fd = conn.fd
 
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
-                "--netif-ipaddr", PRIVATE_VLAN.format(Locale.ENGLISH, "2"),
+                "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
                 "--netif-netmask", "255.255.255.0",
                 "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
                 "--tunfd", fd.toString(),
                 "--tunmtu", VPN_MTU.toString(),
                 "--sock-path", "sock_path",
+                "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
                 "--loglevel", "3")
         if (profile.ipv6) {
             cmd += "--netif-ip6addr"
-            cmd += PRIVATE_VLAN6.format(Locale.ENGLISH, "2")
+            cmd += PRIVATE_VLAN6_ROUTER
         }
         cmd += "--enable-udprelay"
-        if (!profile.udpdns) {
-            cmd += "--dnsgw"
-            cmd += "127.0.0.1:${DataStore.portLocalDns}"
-        }
         data.processes!!.start(cmd, onRestartCallback = {
             try {
                 sendFd(conn.fileDescriptor)

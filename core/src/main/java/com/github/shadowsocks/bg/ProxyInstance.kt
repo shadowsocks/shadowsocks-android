@@ -47,7 +47,7 @@ import java.security.MessageDigest
  * This class sets up environment for ss-local.
  */
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) : AutoCloseable {
-    var configFile: File? = null
+    private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
     val pluginPath by lazy { PluginManager.init(plugin) }
@@ -115,7 +115,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }
 
         // for UDP profile, it's only going to operate in UDP relay mode-only so this flag has no effect
-        if (profile.udpdns) cmd += "-D"
+        if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_LAN) cmd += "-D"
 
         if (DataStore.tcpFastOpen) cmd += "--fast-open"
 

@@ -30,17 +30,13 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
-import java.io.FileDescriptor
-import java.io.IOException
 import java.net.InetAddress
-import java.net.URLConnection
 
 private val parseNumericAddress by lazy {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
@@ -55,16 +51,6 @@ private val parseNumericAddress by lazy {
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
 
-fun FileDescriptor.shutdown() {
-    // see also: https://issuetracker.google.com/issues/36945762#comment15
-    if (valid()) try {
-        Os.shutdown(this, OsConstants.SHUT_RDWR)
-    } catch (e: ErrnoException) {
-        // suppress fd inactive or already closed
-        if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw IOException(e)
-    }
-}
-
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     val value = str?.toIntOrNull() ?: default
     return if (value < min || value > 65535) default else value
@@ -73,9 +59,6 @@ fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
 fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = object : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) = callback(context, intent)
 }
-
-val URLConnection.responseLength: Long
-    get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 
 fun ContentResolver.openBitmap(uri: Uri) =
         if (Build.VERSION.SDK_INT >= 28) ImageDecoder.decodeBitmap(ImageDecoder.createSource(this, uri))

@@ -36,20 +36,6 @@ class TransproxyService : Service(), LocalDnsService.Interface {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
             super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
 
-    private fun startDNSTunnel() {
-        val proxy = data.proxy!!
-        val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.SS_TUNNEL).absolutePath,
-                "-t", "10",
-                "-b", DataStore.listenAddress,
-                "-u",
-                "-l", DataStore.portLocalDns.toString(),    // ss-tunnel listens on the same port as overture
-                "-L", proxy.profile.remoteDns.split(",").first().trim() + ":53",
-                // config is already built by BaseService.Interface
-                "-c", (data.udpFallback ?: proxy).configFile!!.absolutePath)
-        if (DataStore.tcpFastOpen) cmd += "--fast-open"
-        data.processes!!.start(cmd)
-    }
-
     private fun startRedsocksDaemon() {
         File(Core.deviceStorage.noBackupFilesDir, "redsocks.conf").writeText("""base {
  log_debug = off;
@@ -73,7 +59,6 @@ redsocks {
     override suspend fun startProcesses() {
         startRedsocksDaemon()
         super.startProcesses()
-        if (data.proxy!!.profile.udpdns) startDNSTunnel()
     }
 
     override fun onDestroy() {

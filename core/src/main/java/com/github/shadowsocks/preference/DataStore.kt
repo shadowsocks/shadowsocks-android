@@ -25,13 +25,12 @@ import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
+import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.parsePort
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
-import java.net.Proxy
 import java.net.SocketException
 
 object DataStore : OnPreferenceDataStoreChangeListener {
