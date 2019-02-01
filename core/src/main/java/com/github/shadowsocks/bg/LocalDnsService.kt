@@ -43,11 +43,11 @@ object LocalDnsService {
     interface Interface : BaseService.Interface {
         override suspend fun startProcesses() {
             super.startProcesses()
-            val data = data
             val profile = data.proxy!!.profile
-            if (!profile.udpdns) servers[this] = LocalDnsServer(this::resolver,
+            servers[this] = LocalDnsServer(this::resolver,
                     Socks5Endpoint(profile.remoteDns.split(",").first(), 53),
                     DataStore.proxyAddress).apply {
+                tcp = !profile.udpdns
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                         remoteDomainMatcher = googleApisTester

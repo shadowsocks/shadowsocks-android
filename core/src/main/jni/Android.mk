@@ -279,39 +279,6 @@ LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
-## shadowsocks-libev tunnel
-########################################################
-
-include $(CLEAR_VARS)
-
-SHADOWSOCKS_SOURCES := tunnel.c \
-	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
-	crypto.c aead.c stream.c base64.c \
-	plugin.c ppbloom.c \
-	android.c
-
-LOCAL_MODULE    := ss-tunnel
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
-LOCAL_CFLAGS    := -Wall -fno-strict-aliasing -DMODULE_TUNNEL \
-					-DUSE_CRYPTO_MBEDTLS -DHAVE_CONFIG_H -DSSTUNNEL_JNI \
-					-DCONNECT_IN_PROGRESS=EINPROGRESS \
-					-I$(LOCAL_PATH)/libancillary \
-					-I$(LOCAL_PATH)/include \
-					-I$(LOCAL_PATH)/libsodium/src/libsodium/include \
-					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/mbedtls/include \
-					-I$(LOCAL_PATH)/libev \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libbloom \
-					-I$(LOCAL_PATH)/include/shadowsocks-libev
-
-LOCAL_STATIC_LIBRARIES := libev libmbedtls libsodium libcork libbloom libancillary
-
-LOCAL_LDLIBS := -llog
-
-include $(BUILD_SHARED_EXECUTABLE)
-
-########################################################
 ## tun2socks
 ########################################################
 

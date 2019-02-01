@@ -203,16 +203,13 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 "--tunfd", fd.toString(),
                 "--tunmtu", VPN_MTU.toString(),
                 "--sock-path", "sock_path",
+                "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
                 "--loglevel", "3")
         if (profile.ipv6) {
             cmd += "--netif-ip6addr"
             cmd += PRIVATE_VLAN6.format(Locale.ENGLISH, "2")
         }
         cmd += "--enable-udprelay"
-        if (!profile.udpdns) {
-            cmd += "--dnsgw"
-            cmd += "127.0.0.1:${DataStore.portLocalDns}"
-        }
         data.processes!!.start(cmd, onRestartCallback = {
             try {
                 sendFd(conn.fileDescriptor)
