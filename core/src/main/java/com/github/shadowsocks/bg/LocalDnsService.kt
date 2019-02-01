@@ -28,6 +28,7 @@ import com.github.shadowsocks.net.Socks5Endpoint
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import java.net.InetSocketAddress
+import java.net.URI
 import java.util.*
 
 object LocalDnsService {
@@ -44,8 +45,9 @@ object LocalDnsService {
         override suspend fun startProcesses() {
             super.startProcesses()
             val profile = data.proxy!!.profile
+            val dns = URI("dns://${profile.remoteDns}")
             servers[this] = LocalDnsServer(this::resolver,
-                    Socks5Endpoint(profile.remoteDns.split(",").first(), 53),
+                    Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
                     DataStore.proxyAddress).apply {
                 tcp = !profile.udpdns
                 when (profile.route) {
