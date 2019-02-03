@@ -31,6 +31,7 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.disconnectFromMain
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.signaturesCompat
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +71,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
                     }
                 }
             } finally {
-                conn.disconnect()
+                conn.disconnectFromMain()
             }.split('|').toMutableList()
             proxies.shuffle()
             val proxy = proxies.first().split(':')

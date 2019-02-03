@@ -30,6 +30,7 @@ import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.disconnectFromMain
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -109,7 +110,7 @@ class HttpsTest : ViewModel() {
 
     private fun cancelTest() = running?.let { (conn, job) ->
         job.cancel()    // ensure job is cancelled before interrupting
-        conn.disconnect()
+        conn.disconnectFromMain()
         running = null
     }
 

@@ -36,6 +36,10 @@ import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.net.HttpURLConnection
 import java.net.InetAddress
 
 private val parseNumericAddress by lazy {
@@ -50,6 +54,10 @@ private val parseNumericAddress by lazy {
  */
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
+
+fun HttpURLConnection.disconnectFromMain() {
+    if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
+}
 
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
     val value = str?.toIntOrNull() ?: default
