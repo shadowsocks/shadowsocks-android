@@ -23,6 +23,7 @@ package com.github.shadowsocks.net
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.nio.channels.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -61,8 +62,10 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
 
     suspend fun wait(channel: SelectableChannel, ops: Int) = suspendCancellableCoroutine<Unit> { cont ->
         register(channel, ops) {
-            if (it.isValid) it.interestOps(0)   // stop listening
-            cont.resume(Unit)
+            if (it.isValid) it.interestOps(0)       // stop listening
+            try {
+                cont.resume(Unit)
+            } catch (_: IllegalStateException) { }  // already resumed by a timeout, maybe should use tryResume?
         }
     }
 
