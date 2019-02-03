@@ -20,12 +20,11 @@
 
 package com.github.shadowsocks.net
 
+import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.IOException
 import java.nio.ByteBuffer
-import java.nio.channels.Pipe
-import java.nio.channels.SelectableChannel
-import java.nio.channels.SelectionKey
-import java.nio.channels.Selector
+import java.nio.channels.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.resume
 
@@ -57,7 +56,7 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
     fun register(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit) {
         pendingRegistrations.add(Triple(channel, ops, block))
         val junk = ByteBuffer.allocateDirect(1)
-        while (registrationPipe.sink().write(junk) == 0);
+        while (running && registrationPipe.sink().write(junk) == 0);
     }
 
     suspend fun wait(channel: SelectableChannel, ops: Int) = suspendCancellableCoroutine<Unit> { cont ->
@@ -69,7 +68,13 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
 
     override fun run() {
         while (running) {
-            if (selector.select() <= 0) continue
+            val num = try {
+                selector.select()
+            } catch (e: IOException) {
+                printLog(e)
+                continue
+            }
+            if (num <= 0) continue
             val iterator = selector.selectedKeys().iterator()
             while (iterator.hasNext()) {
                 val key = iterator.next()
@@ -84,5 +89,6 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
         selector.wakeup()
         join()
         selector.keys().forEach { it.channel().close() }
+        selector.close()
     }
 }
