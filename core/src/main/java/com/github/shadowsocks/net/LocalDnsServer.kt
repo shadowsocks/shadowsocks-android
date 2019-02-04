@@ -162,5 +162,6 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     suspend fun shutdown() {
         job.cancel()
         monitor.close()
+        job.join()
     }
 }
