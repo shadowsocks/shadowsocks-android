@@ -34,9 +34,7 @@ import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.disconnectFromMain
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.signaturesCompat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -85,7 +83,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) profile.host = withTimeout(10_000) {
-            withContext(Dispatchers.IO) { resolver(profile.host).first().hostAddress }
+            GlobalScope.async(Dispatchers.IO) { resolver(profile.host).first().hostAddress }.await()
         } ?: throw UnknownHostException()
     }
 

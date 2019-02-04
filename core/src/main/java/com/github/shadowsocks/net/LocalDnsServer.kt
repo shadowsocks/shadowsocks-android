@@ -96,7 +96,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             val host = question.name.toString(true)
             if (remoteDomainMatcher?.containsMatchIn(host) == true) return remote.await()
             val localResults = try {
-                withTimeout(TIMEOUT) { withContext(Dispatchers.IO) { localResolver(host) } }
+                withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
             } catch (_: TimeoutCancellationException) {
                 Log.w("LocalDnsServer", "Local resolving timed out, falling back to remote resolving")
                 return remote.await()
