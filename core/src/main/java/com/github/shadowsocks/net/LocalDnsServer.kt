@@ -88,46 +88,48 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             printLog(e)
             return forward(packet)
         }
-        val remote = coroutineScope { async { forward(packet) } }
-        try {
-            if (forwardOnly || request.header.opcode != Opcode.QUERY) return remote.await()
-            val question = request.question
-            if (question?.type != Type.A) return remote.await()
-            val host = question.name.toString(true)
-            if (remoteDomainMatcher?.containsMatchIn(host) == true) return remote.await()
-            val localResults = try {
-                withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
-            } catch (_: TimeoutCancellationException) {
-                Log.w("LocalDnsServer", "Local resolving timed out, falling back to remote resolving")
-                return remote.await()
-            } catch (_: UnknownHostException) {
-                return remote.await()
-            }
-            if (localResults.isEmpty()) return remote.await()
-            if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
+        return coroutineScope {
+            val remote = async { forward(packet) }
+            try {
+                if (forwardOnly || request.header.opcode != Opcode.QUERY) return@coroutineScope remote.await()
+                val question = request.question
+                if (question?.type != Type.A) return@coroutineScope remote.await()
+                val host = question.name.toString(true)
+                if (remoteDomainMatcher?.containsMatchIn(host) == true) return@coroutineScope remote.await()
+                val localResults = try {
+                    withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
+                } catch (_: TimeoutCancellationException) {
+                    Log.w("LocalDnsServer", "Local resolving timed out, falling back to remote resolving")
+                    return@coroutineScope remote.await()
+                } catch (_: UnknownHostException) {
+                    return@coroutineScope remote.await()
+                }
+                if (localResults.isEmpty()) return@coroutineScope remote.await()
+                if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
+                    remote.cancel()
+                    val response = Message(request.header.id)
+                    response.header.setFlag(Flags.QR.toInt())   // this is a response
+                    if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
+                    response.header.setFlag(Flags.RA.toInt())   // recursion available
+                    response.addRecord(request.question, Section.QUESTION)
+                    for (address in localResults) response.addRecord(when (address) {
+                        is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
+                        is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
+                        else -> throw IllegalStateException("Unsupported address $address")
+                    }, Section.ANSWER)
+                    return@coroutineScope ByteBuffer.wrap(response.toWire())
+                }
+                return@coroutineScope remote.await()
+            } catch (e: IOException) {
                 remote.cancel()
+                printLog(e)
                 val response = Message(request.header.id)
-                response.header.setFlag(Flags.QR.toInt())   // this is a response
+                response.header.rcode = Rcode.SERVFAIL
+                response.header.setFlag(Flags.QR.toInt())
                 if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
-                response.header.setFlag(Flags.RA.toInt())   // recursion available
                 response.addRecord(request.question, Section.QUESTION)
-                for (address in localResults) response.addRecord(when (address) {
-                    is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
-                    is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
-                    else -> throw IllegalStateException("Unsupported address $address")
-                }, Section.ANSWER)
-                return ByteBuffer.wrap(response.toWire())
+                return@coroutineScope ByteBuffer.wrap(response.toWire())
             }
-            return remote.await()
-        } catch (e: IOException) {
-            remote.cancel()
-            printLog(e)
-            val response = Message(request.header.id)
-            response.header.rcode = Rcode.SERVFAIL
-            response.header.setFlag(Flags.QR.toInt())
-            if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
-            response.addRecord(request.question, Section.QUESTION)
-            return ByteBuffer.wrap(response.toWire())
         }
     }
 
