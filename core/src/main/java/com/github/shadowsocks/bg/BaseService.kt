@@ -265,6 +265,7 @@ object BaseService {
                         it.profile.id
                     }
                     data.proxy = null
+                    data.udpFallback = null
                     data.binder.trafficPersisted(ids)
                 }
 
@@ -294,7 +295,7 @@ object BaseService {
             profile.name = profile.formattedName    // save name for later queries
             val proxy = ProxyInstance(profile)
             data.proxy = proxy
-            if (fallback != null) data.udpFallback = ProxyInstance(fallback, profile.route)
+            data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
 
             if (!data.closeReceiverRegistered) {
                 registerReceiver(data.closeReceiver, IntentFilter().apply {
