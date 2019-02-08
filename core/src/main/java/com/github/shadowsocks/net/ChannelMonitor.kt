@@ -29,8 +29,8 @@ import java.nio.channels.*
 
 class ChannelMonitor : Thread("ChannelMonitor") {
     private data class Registration(val channel: SelectableChannel,
-                               val ops: Int,
-                               val listener: (SelectionKey) -> Unit) {
+                                    val ops: Int,
+                                    val listener: (SelectionKey) -> Unit) {
         val result = CompletableDeferred<SelectionKey>()
     }
 
