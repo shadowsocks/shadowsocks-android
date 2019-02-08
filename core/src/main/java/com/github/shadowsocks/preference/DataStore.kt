@@ -70,7 +70,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
      * An alternative way to detect this interface could be checking MAC address = 00:ff:aa:00:00:55, but there is no
      * reliable way of getting MAC address for now.
      */
-    private val hasArc0 by lazy {
+    val hasArc0 by lazy {
         var retry = 0
         while (retry < 5) {
             try {

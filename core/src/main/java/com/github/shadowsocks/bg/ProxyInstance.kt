@@ -22,6 +22,8 @@ package com.github.shadowsocks.bg
 
 import android.content.Context
 import android.util.Base64
+import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
@@ -82,7 +84,17 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) profile.host = withTimeoutOrNull(10_000) {
-            GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }.await().firstOrNull()
+            var retries = 0
+            while (isActive) try {
+                val io = GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }
+                return@withTimeoutOrNull io.await().firstOrNull()
+            } catch (e: UnknownHostException) {
+                // retries are only needed on Chrome OS where arc0 is brought up/down during VPN changes
+                if (!DataStore.hasArc0) throw e
+                Thread.yield()
+                Crashlytics.log(Log.WARN, "ProxyInstance-resolver", "Retry resolving attempt #${++retries}")
+            }
+            null    // only here for type resolving
         }?.hostAddress ?: throw UnknownHostException()
     }
 
