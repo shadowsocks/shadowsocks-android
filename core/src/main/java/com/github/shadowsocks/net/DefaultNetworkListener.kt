@@ -63,9 +63,10 @@ object DefaultNetworkListener : CoroutineScope {
                 check(listeners.isNotEmpty()) { "Getting network without any listeners is not supported" }
                 if (network == null) pendingRequests += message else message.response.complete(network)
             }
-            is NetworkMessage.Stop -> {
-                if (!listeners.isEmpty() && // was not empty
-                        listeners.remove(message.key) != null && listeners.isEmpty()) unregisterDefaultNetworkListener()
+            is NetworkMessage.Stop -> if (!listeners.isEmpty() && // was not empty
+                    listeners.remove(message.key) != null && listeners.isEmpty()) {
+                network = null
+                unregisterDefaultNetworkListener()
             }
 
             is NetworkMessage.Put -> {
