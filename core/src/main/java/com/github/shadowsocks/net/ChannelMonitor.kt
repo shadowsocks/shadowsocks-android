@@ -21,29 +21,26 @@
 package com.github.shadowsocks.net
 
 import com.github.shadowsocks.utils.printLog
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.*
 
-class ChannelMonitor(private val scope: CoroutineScope) : Thread("ChannelMonitor") {
+class ChannelMonitor : Thread("ChannelMonitor") {
     private data class Registration(val channel: SelectableChannel,
                                val ops: Int,
-                               val listener: suspend (SelectionKey) -> Unit) {
+                               val listener: (SelectionKey) -> Unit) {
         val result = CompletableDeferred<SelectionKey>()
     }
 
     private val selector = Selector.open()
     private val registrationPipe = Pipe.open()
-    private val pendingRegistrations = Channel<Registration>()
+    private val pendingRegistrations = Channel<Registration>(Channel.UNLIMITED)
     @Volatile
     private var running = true
 
-    private fun registerInternal(channel: SelectableChannel, ops: Int, block: suspend (SelectionKey) -> Unit) =
+    private fun registerInternal(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit) =
             channel.register(selector, ops, block)
 
     init {
@@ -52,7 +49,7 @@ class ChannelMonitor(private val scope: CoroutineScope) : Thread("ChannelMonitor
             registerInternal(this, SelectionKey.OP_READ) {
                 val junk = ByteBuffer.allocateDirect(1)
                 while (read(junk) > 0) {
-                    pendingRegistrations.receive().apply {
+                    pendingRegistrations.poll()!!.apply {
                         try {
                             result.complete(registerInternal(channel, ops, listener))
                         } catch (e: ClosedChannelException) {
@@ -66,7 +63,9 @@ class ChannelMonitor(private val scope: CoroutineScope) : Thread("ChannelMonitor
         start()
     }
 
-    suspend fun register(channel: SelectableChannel, ops: Int, block: suspend (SelectionKey) -> Unit): SelectionKey {
+    suspend fun register(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit): SelectionKey {
+        val registration = Registration(channel, ops, block)
+        pendingRegistrations.send(registration)
         ByteBuffer.allocateDirect(1).also { junk ->
             loop@ while (running) when (registrationPipe.sink().write(junk)) {
                 0 -> kotlinx.coroutines.yield()
@@ -75,10 +74,7 @@ class ChannelMonitor(private val scope: CoroutineScope) : Thread("ChannelMonitor
             }
         }
         if (!running) throw ClosedChannelException()
-        return Registration(channel, ops, block).run {
-            pendingRegistrations.send(this)
-            result.await()
-        }
+        return registration.result.await()
     }
 
     suspend fun wait(channel: SelectableChannel, ops: Int) = CompletableDeferred<SelectionKey>().run {
@@ -100,8 +96,9 @@ class ChannelMonitor(private val scope: CoroutineScope) : Thread("ChannelMonitor
             if (num <= 0) continue
             val iterator = selector.selectedKeys().iterator()
             while (iterator.hasNext()) {
-                iterator.next().let { scope.launch { (it.attachment() as suspend (SelectionKey) -> Unit)(it) } }
+                val key = iterator.next()
                 iterator.remove()
+                (key.attachment() as (SelectionKey) -> Unit)(key)
             }
         }
     }
