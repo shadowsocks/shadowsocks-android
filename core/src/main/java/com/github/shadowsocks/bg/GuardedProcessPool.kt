@@ -107,15 +107,14 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
 
     private val job = Job()
     override val coroutineContext get() = Dispatchers.Main + job
-    private val guards = ArrayList<Guard>()
 
     @MainThread
     fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
         Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
-        val guard = Guard(cmd)
-        guard.start()
-        guards += guard
-        launch(start = CoroutineStart.UNDISPATCHED) { guard.looper(onRestartCallback) }
+        Guard(cmd).apply {
+            start() // if start fails, IOException will be thrown directly
+            launch { looper(onRestartCallback) }
+        }
     }
 
     @MainThread
