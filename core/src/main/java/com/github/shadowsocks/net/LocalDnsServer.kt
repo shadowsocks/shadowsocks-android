@@ -67,14 +67,14 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     private val job = SupervisorJob()
     override val coroutineContext = Dispatchers.Default + job + CoroutineExceptionHandler { _, t -> printLog(t) }
 
-    fun start(listen: SocketAddress) = DatagramChannel.open().apply {
+    suspend fun start(listen: SocketAddress) = DatagramChannel.open().apply {
         configureBlocking(false)
         socket().bind(listen)
         monitor.register(this, SelectionKey.OP_READ) {
             val buffer = ByteBuffer.allocateDirect(UDP_PACKET_SIZE)
             val source = receive(buffer)!!
             buffer.flip()
-            launch {
+            this@LocalDnsServer.launch {
                 val reply = resolve(buffer)
                 while (send(reply, source) <= 0) monitor.wait(this@apply, SelectionKey.OP_WRITE)
             }

@@ -21,22 +21,28 @@
 package com.github.shadowsocks.net
 
 import com.github.shadowsocks.utils.printLog
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import java.io.IOException
-import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.nio.channels.*
-import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.coroutines.resume
+import java.util.concurrent.Executors
 
-class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
+class ChannelMonitor {
+    private data class Registration(val channel: SelectableChannel,
+                               val ops: Int,
+                               val listener: suspend (SelectionKey) -> Unit) {
+        val result = CompletableDeferred<SelectionKey>()
+    }
+
+    private val job: Job
     private val selector = Selector.open()
     private val registrationPipe = Pipe.open()
-    private val pendingRegistrations = ConcurrentLinkedQueue<Triple<SelectableChannel, Int, (SelectionKey) -> Unit>>()
+    private val pendingRegistrations = Channel<Registration>()
     @Volatile
     private var running = true
 
-    private fun registerInternal(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit) =
+    private fun registerInternal(channel: SelectableChannel, ops: Int, block: suspend (SelectionKey) -> Unit) =
             channel.register(selector, ops, block)
 
     init {
@@ -45,52 +51,63 @@ class ChannelMonitor : Thread("ChannelMonitor"), AutoCloseable {
             registerInternal(this, SelectionKey.OP_READ) {
                 val junk = ByteBuffer.allocateDirect(1)
                 while (read(junk) > 0) {
-                    val (channel, ops, block) = pendingRegistrations.remove()
-                    registerInternal(channel, ops, block)
+                    pendingRegistrations.receive().apply {
+                        try {
+                            result.complete(registerInternal(channel, ops, listener))
+                        } catch (e: ClosedChannelException) {
+                            result.completeExceptionally(e)
+                        }
+                    }
                     junk.clear()
                 }
             }
         }
-        start()
+        job = GlobalScope.launch(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+            while (running) {
+                val num = try {
+                    selector.select()
+                } catch (e: IOException) {
+                    printLog(e)
+                    continue
+                }
+                if (num <= 0) continue
+                val iterator = selector.selectedKeys().iterator()
+                while (iterator.hasNext()) {
+                    val key = iterator.next()
+                    iterator.remove()
+                    (key.attachment() as suspend (SelectionKey) -> Unit)(key)
+                }
+            }
+        }
     }
 
-    fun register(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit) {
-        pendingRegistrations.add(Triple(channel, ops, block))
-        val junk = ByteBuffer.allocateDirect(1)
-        while (running && registrationPipe.sink().write(junk) == 0);
+    suspend fun register(channel: SelectableChannel, ops: Int, block: suspend (SelectionKey) -> Unit): SelectionKey {
+        ByteBuffer.allocateDirect(1).also { junk ->
+            loop@ while (running) when (registrationPipe.sink().write(junk)) {
+                0 -> yield()
+                1 -> break@loop
+                else -> throw IOException("Failed to register in the channel")
+            }
+        }
+        if (!running) throw ClosedChannelException()
+        return Registration(channel, ops, block).run {
+            pendingRegistrations.send(this)
+            result.await()
+        }
     }
 
-    suspend fun wait(channel: SelectableChannel, ops: Int) = suspendCancellableCoroutine<Unit> { cont ->
+    suspend fun wait(channel: SelectableChannel, ops: Int) = CompletableDeferred<SelectionKey>().run {
         register(channel, ops) {
             if (it.isValid) it.interestOps(0)       // stop listening
-            try {
-                cont.resume(Unit)
-            } catch (_: IllegalStateException) { }  // already resumed by a timeout, maybe should use tryResume?
+            complete(it)
         }
+        await()
     }
 
-    override fun run() {
-        while (running) {
-            val num = try {
-                selector.select()
-            } catch (e: IOException) {
-                printLog(e)
-                continue
-            }
-            if (num <= 0) continue
-            val iterator = selector.selectedKeys().iterator()
-            while (iterator.hasNext()) {
-                val key = iterator.next()
-                iterator.remove()
-                (key.attachment() as (SelectionKey) -> Unit)(key)
-            }
-        }
-    }
-
-    override fun close() {
+    suspend fun close() {
         running = false
         selector.wakeup()
-        join()
+        job.join()
         selector.keys().forEach { it.channel().close() }
         selector.close()
     }
