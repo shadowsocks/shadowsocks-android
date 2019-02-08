@@ -62,7 +62,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
     }
-    private val monitor = ChannelMonitor()
+    private val monitor = ChannelMonitor(this)
 
     private val job = SupervisorJob()
     override val coroutineContext = Dispatchers.Default + job + CoroutineExceptionHandler { _, t -> printLog(t) }
