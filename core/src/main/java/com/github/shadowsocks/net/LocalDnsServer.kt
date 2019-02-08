@@ -61,6 +61,12 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
          */
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
+
+        private fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
+            header.setFlag(Flags.QR.toInt())    // this is a response
+            if (request.header.getFlag(Flags.RD.toInt())) header.setFlag(Flags.RD.toInt())
+            addRecord(request.question, Section.QUESTION)
+        }
     }
     private val monitor = ChannelMonitor()
 
@@ -109,28 +115,21 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 if (localResults.isEmpty()) return@coroutineScope remote.await()
                 if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
                     remote.cancel()
-                    val response = Message(request.header.id)
-                    response.header.setFlag(Flags.QR.toInt())   // this is a response
-                    if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
-                    response.header.setFlag(Flags.RA.toInt())   // recursion available
-                    response.addRecord(request.question, Section.QUESTION)
-                    for (address in localResults) response.addRecord(when (address) {
-                        is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
-                        is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
-                        else -> throw IllegalStateException("Unsupported address $address")
-                    }, Section.ANSWER)
-                    return@coroutineScope ByteBuffer.wrap(response.toWire())
-                }
-                return@coroutineScope remote.await()
+                    ByteBuffer.wrap(prepareDnsResponse(request).apply {
+                        header.setFlag(Flags.RA.toInt())   // recursion available
+                        for (address in localResults) addRecord(when (address) {
+                            is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
+                            is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
+                            else -> throw IllegalStateException("Unsupported address $address")
+                        }, Section.ANSWER)
+                    }.toWire())
+                } else remote.await()
             } catch (e: IOException) {
                 remote.cancel()
                 printLog(e)
-                val response = Message(request.header.id)
-                response.header.rcode = Rcode.SERVFAIL
-                response.header.setFlag(Flags.QR.toInt())
-                if (request.header.getFlag(Flags.RD.toInt())) response.header.setFlag(Flags.RD.toInt())
-                response.addRecord(request.question, Section.QUESTION)
-                return@coroutineScope ByteBuffer.wrap(response.toWire())
+                ByteBuffer.wrap(prepareDnsResponse(request).apply {
+                    header.rcode = Rcode.SERVFAIL
+                }.toWire())
             }
         }
     }
@@ -142,9 +141,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             channel.connect(proxy)
             val wrapped = remoteDns.tcpWrap(packet)
             while (!channel.finishConnect()) monitor.wait(channel, SelectionKey.OP_CONNECT)
-            while (channel.write(wrapped) >= 0 && wrapped.hasRemaining()) {
-                monitor.wait(channel, SelectionKey.OP_WRITE)
-            }
+            while (channel.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(channel, SelectionKey.OP_WRITE)
             val result = remoteDns.tcpReceiveBuffer(UDP_PACKET_SIZE)
             remoteDns.tcpUnwrap(result, channel::read) { monitor.wait(channel, SelectionKey.OP_READ) }
             result
