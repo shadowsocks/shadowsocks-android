@@ -82,9 +82,9 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10))
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (profile.host.parseNumericAddress() == null) profile.host = withTimeout(10_000) {
-            GlobalScope.async(Dispatchers.IO) { resolver(profile.host).first().hostAddress }.await()
-        } ?: throw UnknownHostException()
+        if (profile.host.parseNumericAddress() == null) profile.host = withTimeoutOrNull(10_000) {
+            GlobalScope.async(Dispatchers.IO) { resolver(profile.host) }.await().firstOrNull()
+        }?.hostAddress ?: throw UnknownHostException()
     }
 
     /**
