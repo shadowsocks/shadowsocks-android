@@ -23,31 +23,57 @@ package com.github.shadowsocks.net
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import com.github.shadowsocks.utils.printLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
-abstract class LocalSocketListener(name: String, socketFile: File) : SocketListener(name) {
+abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name) {
     private val localSocket = LocalSocket().apply {
         socketFile.delete() // It's a must-have to close and reuse previous local socket.
         bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
     }
     private val serverSocket = LocalServerSocket(localSocket.fileDescriptor)
-    override val fileDescriptor get() = localSocket.fileDescriptor
+    private val closeChannel = Channel<Unit>(1)
+    @Volatile
+    protected var running = true
 
     /**
      * Inherited class do not need to close input/output streams as they will be closed automatically.
      */
     protected open fun accept(socket: LocalSocket) = socket.use { acceptInternal(socket) }
     protected abstract fun acceptInternal(socket: LocalSocket)
-    final override fun run() = localSocket.use {
-        while (running) {
-            try {
-                accept(serverSocket.accept())
-            } catch (e: IOException) {
-                if (running) printLog(e)
-                continue
+    final override fun run() {
+        localSocket.use {
+            while (running) {
+                try {
+                    accept(serverSocket.accept())
+                } catch (e: IOException) {
+                    if (running) printLog(e)
+                    continue
+                }
             }
         }
+        closeChannel.sendBlocking(Unit)
+    }
+
+    open fun shutdown(scope: CoroutineScope) {
+        running = false
+        localSocket.fileDescriptor.apply {
+            // see also: https://issuetracker.google.com/issues/36945762#comment15
+            if (valid()) try {
+                Os.shutdown(this, OsConstants.SHUT_RDWR)
+            } catch (e: ErrnoException) {
+                // suppress fd inactive or already closed
+                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw IOException(e)
+            }
+        }
+        scope.launch { closeChannel.receive() }
     }
 }

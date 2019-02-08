@@ -45,7 +45,7 @@ import java.security.MessageDigest
 /**
  * This class sets up environment for ss-local.
  */
-class ProxyInstance(val profile: Profile, private val route: String = profile.route) : AutoCloseable {
+class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
@@ -125,9 +125,9 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(route)
     }
 
-    override fun close() {
+    fun shutdown(scope: CoroutineScope) {
         trafficMonitor?.apply {
-            close()
+            thread.shutdown(scope)
             // Make sure update total traffic when stopping the runner
             try {
                 // profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)

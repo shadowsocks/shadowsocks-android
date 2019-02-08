@@ -23,6 +23,7 @@ package com.github.shadowsocks.net
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.sendBlocking
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.*
@@ -37,6 +38,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
     private val selector = Selector.open()
     private val registrationPipe = Pipe.open()
     private val pendingRegistrations = Channel<Registration>(Channel.UNLIMITED)
+    private val closeChannel = Channel<Unit>(1)
     @Volatile
     private var running = true
 
@@ -101,13 +103,14 @@ class ChannelMonitor : Thread("ChannelMonitor") {
                 (key.attachment() as (SelectionKey) -> Unit)(key)
             }
         }
+        closeChannel.sendBlocking(Unit)
     }
 
     fun close(scope: CoroutineScope) {
         running = false
         selector.wakeup()
-        scope.launch(Dispatchers.IO) {  // thread joining is a blocking operation
-            join()
+        scope.launch {
+            closeChannel.receive()
             selector.keys().forEach { it.channel().close() }
             selector.close()
         }

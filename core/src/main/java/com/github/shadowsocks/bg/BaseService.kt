@@ -261,7 +261,7 @@ object BaseService {
                     data.notification = null
 
                     val ids = listOfNotNull(data.proxy, data.udpFallback).map {
-                        it.close()
+                        it.shutdown(this)
                         it.profile.id
                     }
                     data.proxy = null

@@ -29,8 +29,8 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class TrafficMonitor(statFile: File) : AutoCloseable {
-    private val thread = object : LocalSocketListener("TrafficMonitor-" + statFile.name, statFile) {
+class TrafficMonitor(statFile: File) {
+    val thread = object : LocalSocketListener("TrafficMonitor-" + statFile.name, statFile) {
         private val buffer = ByteArray(16)
         private val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
         override fun acceptInternal(socket: LocalSocket) {
@@ -79,6 +79,4 @@ class TrafficMonitor(statFile: File) : AutoCloseable {
         }
         return Pair(out, updated)
     }
-
-    override fun close() = thread.close()
 }
