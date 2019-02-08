@@ -47,6 +47,8 @@ import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
+import java.net.URL
+import java.net.URLConnection
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
@@ -136,6 +138,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
     override suspend fun resolver(host: String) = DefaultNetworkListener.get().getAllByName(host)
+    override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
 
     override suspend fun startProcesses() {
         worker = ProtectWorker().apply { start() }

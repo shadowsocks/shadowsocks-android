@@ -43,6 +43,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
 import java.net.InetAddress
+import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
 
@@ -279,6 +280,7 @@ object BaseService {
 
         suspend fun preInit() { }
         suspend fun resolver(host: String) = InetAddress.getAllByName(host)
+        suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data
@@ -314,8 +316,8 @@ object BaseService {
                 try {
                     Executable.killAll()    // clean up old processes
                     preInit()
-                    proxy.init(this@Interface::resolver)
-                    data.udpFallback?.init(this@Interface::resolver)
+                    proxy.init(this@Interface)
+                    data.udpFallback?.init(this@Interface)
 
                     data.processes = GuardedProcessPool {
                         printLog(it)

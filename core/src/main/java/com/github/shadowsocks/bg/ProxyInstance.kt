@@ -38,7 +38,6 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.InetAddress
 import java.net.UnknownHostException
 import java.security.MessageDigest
 
@@ -51,11 +50,11 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
     val pluginPath by lazy { PluginManager.init(plugin) }
 
-    suspend fun init(resolver: suspend (String) -> Array<InetAddress>) {
+    suspend fun init(service: BaseService.Interface) {
         if (profile.host == "198.199.101.152") {
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
-            val conn = RemoteConfig.proxyUrl.openConnection() as HttpURLConnection
+            val conn = service.openConnection(RemoteConfig.proxyUrl) as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
 
@@ -83,7 +82,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) profile.host = withTimeoutOrNull(10_000) {
-            GlobalScope.async(Dispatchers.IO) { resolver(profile.host) }.await().firstOrNull()
+            GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }.await().firstOrNull()
         }?.hostAddress ?: throw UnknownHostException()
     }
 
