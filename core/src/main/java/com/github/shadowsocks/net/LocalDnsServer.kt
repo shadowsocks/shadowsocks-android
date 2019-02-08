@@ -21,6 +21,7 @@
 package com.github.shadowsocks.net
 
 import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
@@ -54,6 +55,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     var localIpMatcher: List<Subnet> = emptyList()
 
     companion object {
+        private const val TAG = "LocalDnsServer"
         private const val TIMEOUT = 10_000L
         /**
          * TTL returned from localResolver is set to 120. Android API does not provide TTL,
@@ -107,7 +109,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 val localResults = try {
                     withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
                 } catch (_: TimeoutCancellationException) {
-                    Log.w("LocalDnsServer", "Local resolving timed out, falling back to remote resolving")
+                    Crashlytics.log(Log.WARN, TAG, "Local resolving timed out, falling back to remote resolving")
                     return@coroutineScope remote.await()
                 } catch (_: UnknownHostException) {
                     return@coroutineScope remote.await()
@@ -124,9 +126,13 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                         }, Section.ANSWER)
                     }.toWire())
                 } else remote.await()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 remote.cancel()
-                printLog(e)
+                when (e) {
+                    is TimeoutCancellationException -> Crashlytics.log(Log.WARN, TAG, "Remote resolving timed out")
+                    is CancellationException -> { } // ignore
+                    else -> printLog(e)
+                }
                 ByteBuffer.wrap(prepareDnsResponse(request).apply {
                     header.rcode = Rcode.SERVFAIL
                 }.toWire())
