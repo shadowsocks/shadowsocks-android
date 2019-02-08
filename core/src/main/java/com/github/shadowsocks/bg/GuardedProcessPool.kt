@@ -38,7 +38,7 @@ import java.io.IOException
 import java.io.InputStream
 import kotlin.concurrent.thread
 
-class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : CoroutineScope {
+class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : CoroutineScope {
     companion object {
         private const val TAG = "GuardedProcessPool"
         private val pid by lazy {
@@ -59,7 +59,9 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
         }
 
         suspend fun abort() {
-            if (!abortChannel.isClosedForSend) abortChannel.send(Unit)
+            if (abortChannel.isClosedForSend) return
+            abortChannel.send(Unit)
+            abortChannel.close()
         }
 
         suspend fun looper(onRestartCallback: (suspend () -> Unit)?) {
@@ -88,31 +90,32 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
                 }
             } catch (e: IOException) {
                 Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
-                // calling callback without closing channel first will cause deadlock, therefore we defer it
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
                 abortChannel.close()
-            }
-            if (!running) return            // process already exited, nothing to be done
-            if (Build.VERSION.SDK_INT < 24) {
-                try {
-                    Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
-                } catch (e: ErrnoException) {
-                    if (e.errno != OsConstants.ESRCH) throw e
+                if (!running) return                // process already exited, nothing to be done
+                withContext(NonCancellable) {       // clean-up cannot be cancelled
+                    if (Build.VERSION.SDK_INT < 24) {
+                        try {
+                            Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
+                        } catch (e: ErrnoException) {
+                            if (e.errno != OsConstants.ESRCH) throw e
+                        }
+                        if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
+                    }
+                    process.destroy()               // kill the process
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return@withContext
+                        process.destroyForcibly()   // Force to kill the process if it's still alive
+                    }
+                    exitChannel.receive()
                 }
-                if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return
             }
-            process.destroy()               // kill the process
-            if (Build.VERSION.SDK_INT >= 26) {
-                if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return
-                process.destroyForcibly()   // Force to kill the process if it's still alive
-            }
-            exitChannel.receive()
         }
     }
 
-    private val supervisor = SupervisorJob()
-    override val coroutineContext get() = Dispatchers.Main + supervisor
+    private val job = Job()
+    override val coroutineContext get() = Dispatchers.Main + job
     private val guards = ArrayList<Guard>()
 
     @MainThread
@@ -127,6 +130,6 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
     @MainThread
     suspend fun close() {
         guards.forEach { it.abort() }
-        supervisor.children.forEach { it.join() }   // we can't cancel the supervisor as we need it to do clean up
+        job.cancelAndJoin()
     }
 }

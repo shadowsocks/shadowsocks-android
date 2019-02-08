@@ -317,7 +317,7 @@ object BaseService {
 
                     data.processes = GuardedProcessPool {
                         printLog(it)
-                        data.connectingJob?.apply { runBlocking { cancelAndJoin() } }
+                        data.connectingJob?.cancelAndJoin()
                         stopRunner(false, it.localizedMessage)
                     }
                     startProcesses()
@@ -327,6 +327,8 @@ object BaseService {
                     RemoteConfig.fetch()
 
                     data.changeState(CONNECTED)
+                } catch (_: CancellationException) {
+                    // if the job was cancelled, it is canceller's responsibility to call stopRunner
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {

@@ -46,7 +46,7 @@ object LocalDnsService {
             super.startProcesses()
             val profile = data.proxy!!.profile
             val dns = URI("dns://${profile.remoteDns}")
-            servers[this] = LocalDnsServer(this::resolver,
+            LocalDnsServer(this::resolver,
                     Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
                     DataStore.proxyAddress).apply {
                 tcp = !profile.udpdns
@@ -58,8 +58,7 @@ object LocalDnsService {
                     Acl.CHINALIST -> { }
                     else -> forwardOnly = true
                 }
-                start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
-            }
+            }.also { servers[this] = it }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
         }
 
         override suspend fun killProcesses() {
