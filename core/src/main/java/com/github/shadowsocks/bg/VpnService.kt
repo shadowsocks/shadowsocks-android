@@ -40,7 +40,9 @@ import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.printLog
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
@@ -112,11 +114,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override fun onRevoke() = stopRunner()
 
-    override suspend fun killProcesses() {
-        super.killProcesses()
+    override fun killProcesses(scope: CoroutineScope) {
+        super.killProcesses(scope)
         active = false
-        DefaultNetworkListener.stop(this)
-        worker?.shutdown()
+        scope.launch { DefaultNetworkListener.stop(this) }
+        worker?.shutdown(scope)
         worker = null
         conn?.close()
         conn = null

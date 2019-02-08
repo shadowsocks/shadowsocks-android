@@ -104,11 +104,13 @@ class ChannelMonitor {
         await()
     }
 
-    suspend fun close() {
+    fun close(scope: CoroutineScope) {
         running = false
         selector.wakeup()
-        job.join()
-        selector.keys().forEach { it.channel().close() }
-        selector.close()
+        scope.launch {
+            job.join()
+            selector.keys().forEach { it.channel().close() }
+            selector.close()
+        }
     }
 }

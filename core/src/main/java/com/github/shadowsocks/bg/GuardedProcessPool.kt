@@ -32,7 +32,6 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.Commandline
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.selects.select
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -47,7 +46,6 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
     }
 
     private inner class Guard(private val cmd: List<String>) {
-        private val abortChannel = Channel<Unit>()
         private lateinit var process: Process
 
         private fun streamLogger(input: InputStream, logger: (String) -> Unit) = try {
@@ -56,12 +54,6 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
 
         fun start() {
             process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
-        }
-
-        suspend fun abort() {
-            if (abortChannel.isClosedForSend) return
-            abortChannel.send(Unit)
-            abortChannel.close()
         }
 
         suspend fun looper(onRestartCallback: (suspend () -> Unit)?) {
@@ -77,13 +69,13 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                         runBlocking { exitChannel.send(process.waitFor()) }
                     }
                     val startTime = SystemClock.elapsedRealtime()
-                    if (select {
-                                abortChannel.onReceive { true } // prefer abort to save work
-                                exitChannel.onReceive { false }
-                            }) break
+                    val exitCode = exitChannel.receive()
                     running = false
-                    if (SystemClock.elapsedRealtime() - startTime < 1000) throw IOException("$cmdName exits too fast")
-                    Crashlytics.log(Log.DEBUG, TAG, "restart process: " + Commandline.toString(cmd))
+                    if (SystemClock.elapsedRealtime() - startTime < 1000) {
+                        throw IOException("$cmdName exits too fast (exit code: $exitCode)")
+                    }
+                    Crashlytics.log(Log.DEBUG, TAG,
+                            "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
                     running = true
                     onRestartCallback?.invoke()
@@ -92,7 +84,6 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                 Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
-                abortChannel.close()
                 if (!running) return                // process already exited, nothing to be done
                 withContext(NonCancellable) {       // clean-up cannot be cancelled
                     if (Build.VERSION.SDK_INT < 24) {
@@ -128,8 +119,8 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
     }
 
     @MainThread
-    suspend fun close() {
-        guards.forEach { it.abort() }
-        job.cancelAndJoin()
+    fun close(scope: CoroutineScope) {
+        job.cancel()
+        scope.launch { job.join() }
     }
 }

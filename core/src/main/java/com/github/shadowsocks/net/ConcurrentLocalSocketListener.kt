@@ -34,10 +34,10 @@ abstract class ConcurrentLocalSocketListener(name: String, socketFile: File) : L
         launch { super.accept(socket) }
     }
 
-    suspend fun shutdown() {
+    fun shutdown(scope: CoroutineScope) {
         running = false
         job.cancel()
         close()
-        job.join()
+        scope.launch { job.join() }
     }
 }

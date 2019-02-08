@@ -233,9 +233,9 @@ object BaseService {
             else startService(Intent(this, javaClass))
         }
 
-        suspend fun killProcesses() {
+        fun killProcesses(scope: CoroutineScope) {
             data.processes?.run {
-                close()
+                close(scope)
                 data.processes = null
             }
         }
@@ -246,26 +246,27 @@ object BaseService {
             data.changeState(STOPPING)
             GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
                 Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
-
-                killProcesses()
-
-                // clean up recevier
                 this@Interface as Service
-                val data = data
-                if (data.closeReceiverRegistered) {
-                    unregisterReceiver(data.closeReceiver)
-                    data.closeReceiverRegistered = false
-                }
+                // we use a coroutineScope here to allow clean-up in parallel
+                coroutineScope {
+                    killProcesses(this)
+                    // clean up receivers
+                    val data = data
+                    if (data.closeReceiverRegistered) {
+                        unregisterReceiver(data.closeReceiver)
+                        data.closeReceiverRegistered = false
+                    }
 
-                data.notification?.destroy()
-                data.notification = null
+                    data.notification?.destroy()
+                    data.notification = null
 
-                val ids = listOfNotNull(data.proxy, data.udpFallback).map {
-                    it.close()
-                    it.profile.id
+                    val ids = listOfNotNull(data.proxy, data.udpFallback).map {
+                        it.close()
+                        it.profile.id
+                    }
+                    data.proxy = null
+                    data.binder.trafficPersisted(ids)
                 }
-                data.proxy = null
-                data.binder.trafficPersisted(ids)
 
                 // change the state
                 data.changeState(STOPPED, msg)

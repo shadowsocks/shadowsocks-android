@@ -27,6 +27,7 @@ import com.github.shadowsocks.net.LocalDnsServer
 import com.github.shadowsocks.net.Socks5Endpoint
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
+import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
 import java.net.URI
 import java.util.*
@@ -61,9 +62,9 @@ object LocalDnsService {
             }.also { servers[this] = it }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
         }
 
-        override suspend fun killProcesses() {
-            servers.remove(this)?.shutdown()
-            super.killProcesses()
+        override fun killProcesses(scope: CoroutineScope) {
+            servers.remove(this)?.shutdown(scope)
+            super.killProcesses(scope)
         }
     }
 }

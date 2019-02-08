@@ -161,9 +161,9 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         }
     }
 
-    suspend fun shutdown() {
+    fun shutdown(scope: CoroutineScope) {
         job.cancel()
-        monitor.close()
-        job.join()
+        monitor.close(scope)
+        scope.launch { job.join() }
     }
 }
