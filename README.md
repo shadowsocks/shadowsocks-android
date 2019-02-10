@@ -1,6 +1,6 @@
 ## [Shadowsocks](https://shadowsocks.org) for Android
 
-[![Build Status](https://travis-ci.com/shadowsocks/shadowsocks-android.svg)](https://travis-ci.com/shadowsocks/shadowsocks-android)
+[![CircleCI](https://circleci.com/gh/shadowsocks/shadowsocks-android.svg?style=shield)](https://circleci.com/gh/shadowsocks/shadowsocks-android)
 [![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=21)
 [![Releases](https://img.shields.io/github/downloads/shadowsocks/shadowsocks-android/total.svg)](https://github.com/shadowsocks/shadowsocks-android/releases)
 [![Language: Kotlin](https://img.shields.io/github/languages/top/shadowsocks/shadowsocks-android.svg)](https://github.com/shadowsocks/shadowsocks-android/search?l=kotlin)
