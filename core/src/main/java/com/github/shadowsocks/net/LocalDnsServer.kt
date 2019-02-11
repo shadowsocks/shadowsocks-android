@@ -25,6 +25,7 @@ import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
+import java.io.EOFException
 import java.io.IOException
 import java.net.*
 import java.nio.ByteBuffer
@@ -131,6 +132,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 when (e) {
                     is TimeoutCancellationException -> Crashlytics.log(Log.WARN, TAG, "Remote resolving timed out")
                     is CancellationException -> { } // ignore
+                    is EOFException -> Crashlytics.log(Log.WARN, TAG, e.message)
                     else -> printLog(e)
                 }
                 ByteBuffer.wrap(prepareDnsResponse(request).apply {

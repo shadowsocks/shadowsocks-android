@@ -23,6 +23,7 @@ package com.github.shadowsocks.net
 import com.github.shadowsocks.utils.parseNumericAddress
 import net.sourceforge.jsocks.Socks4Message
 import net.sourceforge.jsocks.Socks5Message
+import java.io.EOFException
 import java.io.IOException
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -69,7 +70,7 @@ class Socks5Endpoint(host: String, port: Int) {
         suspend fun readBytes(till: Int) {
             if (buffer.position() >= till) return
             while (reader(buffer) >= 0 && buffer.position() < till) wait()
-            if (buffer.position() < till) throw IOException("EOF")
+            if (buffer.position() < till) throw EOFException("${buffer.position()} < $till")
         }
         suspend fun read(index: Int): Byte {
             readBytes(index + 1)
