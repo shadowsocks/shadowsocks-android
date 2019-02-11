@@ -107,14 +107,13 @@ object Core {
         if (DataStore.tcpFastOpen && !TcpFastOpen.sendEnabled) TcpFastOpen.enableTimeout()
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != packageInfo.lastUpdateTime) {
             val assetManager = app.assets
-            for (dir in arrayOf("acl", "overture"))
-                try {
-                    for (file in assetManager.list(dir)!!) assetManager.open("$dir/$file").use { input ->
-                        File(deviceStorage.noBackupFilesDir, file).outputStream().use { output -> input.copyTo(output) }
-                    }
-                } catch (e: IOException) {
-                    printLog(e)
+            try {
+                for (file in assetManager.list("acl")!!) assetManager.open("acl/$file").use { input ->
+                    File(deviceStorage.noBackupFilesDir, file).outputStream().use { output -> input.copyTo(output) }
                 }
+            } catch (e: IOException) {
+                printLog(e)
+            }
             DataStore.publicStore.putLong(Key.assetUpdateTime, packageInfo.lastUpdateTime)
         }
         updateNotificationChannels()

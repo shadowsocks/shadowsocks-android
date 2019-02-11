@@ -32,13 +32,12 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.Commandline
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.selects.select
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import kotlin.concurrent.thread
 
-class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : CoroutineScope {
+class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : CoroutineScope {
     companion object {
         private const val TAG = "GuardedProcessPool"
         private val pid by lazy {
@@ -47,7 +46,6 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
     }
 
     private inner class Guard(private val cmd: List<String>) {
-        private val abortChannel = Channel<Unit>()
         private lateinit var process: Process
 
         private fun streamLogger(input: InputStream, logger: (String) -> Unit) = try {
@@ -56,10 +54,6 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
 
         fun start() {
             process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
-        }
-
-        suspend fun abort() {
-            if (!abortChannel.isClosedForSend) abortChannel.send(Unit)
         }
 
         suspend fun looper(onRestartCallback: (suspend () -> Unit)?) {
@@ -75,58 +69,56 @@ class GuardedProcessPool(private val onFatal: (IOException) -> Unit) : Coroutine
                         runBlocking { exitChannel.send(process.waitFor()) }
                     }
                     val startTime = SystemClock.elapsedRealtime()
-                    if (select {
-                                abortChannel.onReceive { true } // prefer abort to save work
-                                exitChannel.onReceive { false }
-                            }) break
+                    val exitCode = exitChannel.receive()
                     running = false
-                    if (SystemClock.elapsedRealtime() - startTime < 1000) throw IOException("$cmdName exits too fast")
-                    Crashlytics.log(Log.DEBUG, TAG, "restart process: " + Commandline.toString(cmd))
+                    if (SystemClock.elapsedRealtime() - startTime < 1000) {
+                        throw IOException("$cmdName exits too fast (exit code: $exitCode)")
+                    }
+                    Crashlytics.log(Log.DEBUG, TAG,
+                            "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
                     running = true
                     onRestartCallback?.invoke()
                 }
             } catch (e: IOException) {
                 Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
-                // calling callback without closing channel first will cause deadlock, therefore we defer it
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
-                abortChannel.close()
+                if (running) withContext(NonCancellable) {  // clean-up cannot be cancelled
+                    if (Build.VERSION.SDK_INT < 24) {
+                        try {
+                            Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
+                        } catch (e: ErrnoException) {
+                            if (e.errno != OsConstants.ESRCH) throw e
+                        }
+                        if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
+                    }
+                    process.destroy()                       // kill the process
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return@withContext
+                        process.destroyForcibly()           // Force to kill the process if it's still alive
+                    }
+                    exitChannel.receive()
+                }                                           // otherwise process already exited, nothing to be done
             }
-            if (!running) return            // process already exited, nothing to be done
-            if (Build.VERSION.SDK_INT < 24) {
-                try {
-                    Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
-                } catch (e: ErrnoException) {
-                    if (e.errno != OsConstants.ESRCH) throw e
-                }
-                if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return
-            }
-            process.destroy()               // kill the process
-            if (Build.VERSION.SDK_INT >= 26) {
-                if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return
-                process.destroyForcibly()   // Force to kill the process if it's still alive
-            }
-            exitChannel.receive()
         }
     }
 
-    private val supervisor = SupervisorJob()
-    override val coroutineContext get() = Dispatchers.Main + supervisor
-    private val guards = ArrayList<Guard>()
+    private val job = Job()
+    override val coroutineContext get() = Dispatchers.Main + job
 
     @MainThread
     fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
         Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
-        val guard = Guard(cmd)
-        guard.start()
-        guards += guard
-        launch(start = CoroutineStart.UNDISPATCHED) { guard.looper(onRestartCallback) }
+        Guard(cmd).apply {
+            start() // if start fails, IOException will be thrown directly
+            launch { looper(onRestartCallback) }
+        }
     }
 
     @MainThread
-    suspend fun close() {
-        guards.forEach { it.abort() }
-        supervisor.children.forEach { it.join() }   // we can't cancel the supervisor as we need it to do clean up
+    fun close(scope: CoroutineScope) {
+        job.cancel()
+        scope.launch { job.join() }
     }
 }

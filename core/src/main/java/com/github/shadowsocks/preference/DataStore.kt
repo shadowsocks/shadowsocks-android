@@ -25,10 +25,11 @@ import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
+import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.utils.parsePort
+import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.SocketException
 
@@ -69,7 +70,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
      * An alternative way to detect this interface could be checking MAC address = 00:ff:aa:00:00:55, but there is no
      * reliable way of getting MAC address for now.
      */
-    private val hasArc0 by lazy {
+    val hasArc0 by lazy {
         var retry = 0
         while (retry < 5) {
             try {
@@ -88,6 +89,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
+    val proxyAddress get() = InetSocketAddress("127.0.0.1", portProxy)
     var portLocalDns: Int
         get() = getLocalPort(Key.portLocalDns, 5450)
         set(value) = publicStore.putString(Key.portLocalDns, value.toString())

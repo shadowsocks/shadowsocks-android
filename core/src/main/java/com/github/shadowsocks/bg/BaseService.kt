@@ -43,6 +43,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
 import java.net.InetAddress
+import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
 
@@ -233,9 +234,9 @@ object BaseService {
             else startService(Intent(this, javaClass))
         }
 
-        suspend fun killProcesses() {
+        fun killProcesses(scope: CoroutineScope) {
             data.processes?.run {
-                close()
+                close(scope)
                 data.processes = null
             }
         }
@@ -246,26 +247,28 @@ object BaseService {
             data.changeState(STOPPING)
             GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
                 Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
-
-                killProcesses()
-
-                // clean up recevier
                 this@Interface as Service
-                val data = data
-                if (data.closeReceiverRegistered) {
-                    unregisterReceiver(data.closeReceiver)
-                    data.closeReceiverRegistered = false
-                }
+                // we use a coroutineScope here to allow clean-up in parallel
+                coroutineScope {
+                    killProcesses(this)
+                    // clean up receivers
+                    val data = data
+                    if (data.closeReceiverRegistered) {
+                        unregisterReceiver(data.closeReceiver)
+                        data.closeReceiverRegistered = false
+                    }
 
-                data.notification?.destroy()
-                data.notification = null
+                    data.notification?.destroy()
+                    data.notification = null
 
-                val ids = listOfNotNull(data.proxy, data.udpFallback).map {
-                    it.close()
-                    it.profile.id
+                    val ids = listOfNotNull(data.proxy, data.udpFallback).map {
+                        it.shutdown(this)
+                        it.profile.id
+                    }
+                    data.proxy = null
+                    data.udpFallback = null
+                    data.binder.trafficPersisted(ids)
                 }
-                data.proxy = null
-                data.binder.trafficPersisted(ids)
 
                 // change the state
                 data.changeState(STOPPED, msg)
@@ -276,7 +279,8 @@ object BaseService {
         }
 
         suspend fun preInit() { }
-        suspend fun resolver(host: String) = InetAddress.getByName(host)
+        suspend fun resolver(host: String) = InetAddress.getAllByName(host)
+        suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data
@@ -293,7 +297,7 @@ object BaseService {
             profile.name = profile.formattedName    // save name for later queries
             val proxy = ProxyInstance(profile)
             data.proxy = proxy
-            if (fallback != null) data.udpFallback = ProxyInstance(fallback, profile.route)
+            data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
 
             if (!data.closeReceiverRegistered) {
                 registerReceiver(data.closeReceiver, IntentFilter().apply {
@@ -310,14 +314,14 @@ object BaseService {
             data.changeState(CONNECTING)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
                 try {
-                    killProcesses()
+                    Executable.killAll()    // clean up old processes
                     preInit()
-                    proxy.init(this@Interface::resolver)
-                    data.udpFallback?.init(this@Interface::resolver)
+                    proxy.init(this@Interface)
+                    data.udpFallback?.init(this@Interface)
 
                     data.processes = GuardedProcessPool {
                         printLog(it)
-                        data.connectingJob?.apply { runBlocking { cancelAndJoin() } }
+                        data.connectingJob?.cancelAndJoin()
                         stopRunner(false, it.localizedMessage)
                     }
                     startProcesses()
@@ -327,6 +331,8 @@ object BaseService {
                     RemoteConfig.fetch()
 
                     data.changeState(CONNECTED)
+                } catch (_: CancellationException) {
+                    // if the job was cancelled, it is canceller's responsibility to call stopRunner
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {

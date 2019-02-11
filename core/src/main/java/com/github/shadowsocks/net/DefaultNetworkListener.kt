@@ -26,19 +26,17 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
-import android.widget.Toast
 import androidx.core.content.getSystemService
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core.app
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.runBlocking
 import java.net.UnknownHostException
 
-object DefaultNetworkListener : CoroutineScope {
-    override val coroutineContext get() = Dispatchers.Default
+object DefaultNetworkListener {
     private sealed class NetworkMessage {
         class Start(val key: Any, val listener: (Network?) -> Unit) : NetworkMessage()
         class Get : NetworkMessage() {
@@ -50,13 +48,13 @@ object DefaultNetworkListener : CoroutineScope {
         class Update(val network: Network) : NetworkMessage()
         class Lost(val network: Network) : NetworkMessage()
     }
-    private val networkActor = actor<NetworkMessage> {
+    private val networkActor = GlobalScope.actor<NetworkMessage>(Dispatchers.Unconfined) {
         val listeners = mutableMapOf<Any, (Network?) -> Unit>()
         var network: Network? = null
         val pendingRequests = arrayListOf<NetworkMessage.Get>()
         for (message in channel) when (message) {
             is NetworkMessage.Start -> {
-                if (listeners.isEmpty()) registerDefaultNetworkListener()
+                if (listeners.isEmpty()) register()
                 listeners[message.key] = message.listener
                 if (network != null) message.listener(network)
             }
@@ -64,9 +62,10 @@ object DefaultNetworkListener : CoroutineScope {
                 check(listeners.isNotEmpty()) { "Getting network without any listeners is not supported" }
                 if (network == null) pendingRequests += message else message.response.complete(network)
             }
-            is NetworkMessage.Stop -> {
-                if (!listeners.isEmpty() && // was not empty
-                        listeners.remove(message.key) != null && listeners.isEmpty()) unregisterDefaultNetworkListener()
+            is NetworkMessage.Stop -> if (!listeners.isEmpty() && // was not empty
+                    listeners.remove(message.key) != null && listeners.isEmpty()) {
+                network = null
+                unregister()
             }
 
             is NetworkMessage.Put -> {
@@ -104,10 +103,10 @@ object DefaultNetworkListener : CoroutineScope {
 
     private var fallback = false
     private val connectivity = app.getSystemService<ConnectivityManager>()!!
-    private val defaultNetworkRequest = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-            .build()
+    private val request = NetworkRequest.Builder().apply {
+        addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+    }.build()
     /**
      * Unfortunately registerDefaultNetworkCallback is going to return VPN interface since Android P DP1:
      * https://android.googlesource.com/platform/frameworks/base/+/dda156ab0c5d66ad82bdcf76cda07cbc0a9c8a2e
@@ -118,18 +117,18 @@ object DefaultNetworkListener : CoroutineScope {
      *
      * Source: https://android.googlesource.com/platform/frameworks/base/+/2df4c7d/services/core/java/com/android/server/ConnectivityService.java#887
      */
-    private fun registerDefaultNetworkListener() {
+    private fun register() {
         if (Build.VERSION.SDK_INT in 24..27) @TargetApi(24) {
             connectivity.registerDefaultNetworkCallback(Callback)
         } else try {
             fallback = false
             // we want REQUEST here instead of LISTEN
-            connectivity.requestNetwork(defaultNetworkRequest, Callback)
+            connectivity.requestNetwork(request, Callback)
         } catch (e: SecurityException) {
             // known bug: https://stackoverflow.com/a/33509180/2245107
             if (Build.VERSION.SDK_INT != 23) Crashlytics.logException(e)
             fallback = true
         }
     }
-    private fun unregisterDefaultNetworkListener() = connectivity.unregisterNetworkCallback(Callback)
+    private fun unregister() = connectivity.unregisterNetworkCallback(Callback)
 }

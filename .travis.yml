@@ -7,8 +7,8 @@ services:
     - docker
 
 before_install:
-    - docker pull shadowsocks/android-ndk-go
+    - docker pull circleci/android:api-28-ndk
     - chmod -R a+wrx .
 
 script:
-    - docker run --rm -v ${PWD}:/build shadowsocks/android-ndk-go bash -c "cd /build; ./gradlew assembleDebug check"
+    - docker run --rm -v ${PWD}:/build circleci/android:api-28-ndk bash -c "cd /build; ./gradlew assembleDebug check"

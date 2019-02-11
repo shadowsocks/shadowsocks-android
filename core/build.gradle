@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
@@ -40,23 +38,6 @@ android {
     }
 }
 
-task goBuild(type: Exec) {
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        println "Warning: Building on Windows is not supported"
-    } else {
-        executable "/bin/bash"
-        args "go-build.bash", minSdkVersion
-        environment "ANDROID_HOME", android.sdkDirectory
-        environment "ANDROID_NDK_HOME", android.ndkDirectory
-    }
-}
-
-tasks.whenTaskAdded { task ->
-    if ((task.name == 'generateJsonModelDebug' || task.name == 'generateJsonModelRelease')) {
-        task.dependsOn(goBuild)
-    }
-}
-
 dependencies {
     api project(':plugin')
     api "android.arch.work:work-runtime-ktx:$workVersion"
@@ -66,9 +47,11 @@ dependencies {
     api "androidx.room:room-runtime:$roomVersion"
     api 'com.crashlytics.sdk.android:crashlytics:2.9.8'
     api 'com.google.firebase:firebase-config:16.1.3'
-    api 'com.google.firebase:firebase-core:16.0.6'
+    api 'com.google.firebase:firebase-core:16.0.7'
     api "com.takisoft.preferencex:preferencex:$preferencexVersion"
+    api 'dnsjava:dnsjava:2.1.8'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+    api 'org.connectbot.jsocks:jsocks:1.0.0'
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "androidx.arch.core:core-testing:$lifecycleVersion"

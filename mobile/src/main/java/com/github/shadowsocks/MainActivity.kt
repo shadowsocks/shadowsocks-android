@@ -49,7 +49,6 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.bg.Executable
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
@@ -135,7 +134,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun onBinderDied() {
         connection.disconnect(this)
-        Executable.killAll()
         connection.connect(this, this)
     }
 

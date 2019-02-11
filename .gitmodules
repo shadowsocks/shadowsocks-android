@@ -30,7 +30,3 @@
 [submodule "core/src/main/jni/libev"]
 	path = core/src/main/jni/libev
 	url = https://github.com/shadowsocks/libev.git
-[submodule "core/src/main/jni/overture"]
-	path = core/src/main/jni/overture
-	url = https://github.com/shadowsocks/overture.git
-	branch = shadowsocks

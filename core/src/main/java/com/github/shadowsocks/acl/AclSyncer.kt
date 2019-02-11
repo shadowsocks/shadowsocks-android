@@ -31,15 +31,16 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
     companion object {
         private const val KEY_ROUTE = "route"
 
-        fun schedule(route: String) = WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<AclSyncer>().run {
-            setInputData(Data.Builder().putString(KEY_ROUTE, route).build())
-            setConstraints(Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.UNMETERED)
-                    .setRequiresCharging(true)
-                    .build())
-            setInitialDelay(10, TimeUnit.SECONDS)
-            build()
-        })
+        fun schedule(route: String) = WorkManager.getInstance().enqueueUniqueWork(route, ExistingWorkPolicy.REPLACE,
+                OneTimeWorkRequestBuilder<AclSyncer>().run {
+                    setInputData(Data.Builder().putString(KEY_ROUTE, route).build())
+                    setConstraints(Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.UNMETERED)
+                            .setRequiresCharging(true)
+                            .build())
+                    setInitialDelay(10, TimeUnit.SECONDS)
+                    build()
+                })
     }
 
     override val coroutineContext get() = Dispatchers.IO

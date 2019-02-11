@@ -47,7 +47,6 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.bg.Executable
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.HttpsTest
@@ -151,7 +150,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     override fun onServiceDisconnected() = changeState(BaseService.IDLE)
     override fun onBinderDied() {
         connection.disconnect(requireContext())
-        Executable.killAll()
         connection.connect(requireContext(), this)
     }
 

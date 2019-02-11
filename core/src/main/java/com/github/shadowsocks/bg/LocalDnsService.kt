@@ -20,75 +20,51 @@
 
 package com.github.shadowsocks.bg
 
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
+import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.LocalDnsServer
+import com.github.shadowsocks.net.Socks5Endpoint
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.parseNumericAddress
-import java.io.File
-import java.net.Inet6Address
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.coroutines.CoroutineScope
+import java.net.InetSocketAddress
+import java.net.URI
+import java.util.*
 
 object LocalDnsService {
+    private val googleApisTester =
+            "(^|\\.)googleapis(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}\$".toRegex()
+    private val chinaIpList by lazy {
+        app.resources.openRawResource(R.raw.china_ip_list).bufferedReader()
+                .lineSequence().map(Subnet.Companion::fromString).filterNotNull().toList()
+    }
+
+    private val servers = WeakHashMap<LocalDnsService.Interface, LocalDnsServer>()
+
     interface Interface : BaseService.Interface {
         override suspend fun startProcesses() {
             super.startProcesses()
-            val data = data
             val profile = data.proxy!!.profile
-
-            fun makeDns(name: String, address: String, timeout: Int, edns: Boolean = true) = JSONObject().apply {
-                put("Name", name)
-                put("Address", when (address.parseNumericAddress()) {
-                    is Inet6Address -> "[$address]"
-                    else -> address
-                })
-                put("Timeout", timeout)
-                put("EDNSClientSubnet", JSONObject().put("Policy", "disable"))
-                put("Protocol", if (edns) {
-                    put("Socks5Address", "127.0.0.1:${DataStore.portProxy}")
-                    "tcp"
-                } else "udp")
-            }
-
-            fun buildOvertureConfig(file: String) = file.also {
-                File(Core.deviceStorage.noBackupFilesDir, it).writeText(JSONObject().run {
-                    put("BindAddress", "${DataStore.listenAddress}:${DataStore.portLocalDns}")
-                    put("RedirectIPv6Record", true)
-                    put("DomainBase64Decode", false)
-                    put("HostsFile", "hosts")
-                    put("MinimumTTL", 120)
-                    put("CacheSize", 4096)
-                    val remoteDns = JSONArray(profile.remoteDns.split(",")
-                            .mapIndexed { i, dns -> makeDns("UserDef-$i", dns.trim() + ":53", 12) })
-                    val localDns = JSONArray(arrayOf(
-                            makeDns("Primary-1", "208.67.222.222:443", 9, false),
-                            makeDns("Primary-2", "119.29.29.29:53", 9, false),
-                            makeDns("Primary-3", "114.114.114.114:53", 9, false)))
-                    when (profile.route) {
-                        Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
-                            put("PrimaryDNS", localDns)
-                            put("AlternativeDNS", remoteDns)
-                            put("IPNetworkFile", JSONObject(mapOf("Primary" to "china_ip_list.txt")))
-                            put("AclFile", "domain_exceptions.acl")
-                        }
-                        Acl.CHINALIST -> {
-                            put("PrimaryDNS", localDns)
-                            put("AlternativeDNS", remoteDns)
-                        }
-                        else -> {
-                            put("PrimaryDNS", remoteDns)
-                            // no need to setup AlternativeDNS in Acl.ALL/BYPASS_LAN mode
-                            put("OnlyPrimaryDNS", true)
-                        }
+            val dns = URI("dns://${profile.remoteDns}")
+            LocalDnsServer(this::resolver,
+                    Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
+                    DataStore.proxyAddress).apply {
+                tcp = !profile.udpdns
+                when (profile.route) {
+                    Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
+                        remoteDomainMatcher = googleApisTester
+                        localIpMatcher = chinaIpList
                     }
-                    toString()
-                })
-            }
+                    Acl.CHINALIST -> { }
+                    else -> forwardOnly = true
+                }
+            }.also { servers[this] = it }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
+        }
 
-            if (!profile.udpdns) data.processes!!.start(buildAdditionalArguments(arrayListOf(
-                    File(app.applicationInfo.nativeLibraryDir, Executable.OVERTURE).absolutePath,
-                    "-c", buildOvertureConfig("overture.conf"))))
+        override fun killProcesses(scope: CoroutineScope) {
+            servers.remove(this)?.shutdown(scope)
+            super.killProcesses(scope)
         }
     }
 }
