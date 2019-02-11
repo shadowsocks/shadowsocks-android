@@ -84,8 +84,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                 Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
-                if (!running) return                // process already exited, nothing to be done
-                withContext(NonCancellable) {       // clean-up cannot be cancelled
+                if (running) withContext(NonCancellable) {  // clean-up cannot be cancelled
                     if (Build.VERSION.SDK_INT < 24) {
                         try {
                             Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
@@ -94,13 +93,13 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                         }
                         if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
                     }
-                    process.destroy()               // kill the process
+                    process.destroy()                       // kill the process
                     if (Build.VERSION.SDK_INT >= 26) {
                         if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return@withContext
-                        process.destroyForcibly()   // Force to kill the process if it's still alive
+                        process.destroyForcibly()           // Force to kill the process if it's still alive
                     }
                     exitChannel.receive()
-                }
+                }                                           // otherwise process already exited, nothing to be done
             }
         }
     }
