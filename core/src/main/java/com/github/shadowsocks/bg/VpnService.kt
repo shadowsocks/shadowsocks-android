@@ -48,7 +48,6 @@ import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.URL
-import java.net.URLConnection
 import java.util.*
 import android.net.VpnService as BaseVpnService
 
