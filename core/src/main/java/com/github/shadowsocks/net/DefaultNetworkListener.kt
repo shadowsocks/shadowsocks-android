@@ -55,7 +55,7 @@ object DefaultNetworkListener : CoroutineScope {
         val pendingRequests = arrayListOf<NetworkMessage.Get>()
         for (message in channel) when (message) {
             is NetworkMessage.Start -> {
-                if (listeners.isEmpty()) registerDefaultNetworkListener()
+                if (listeners.isEmpty()) register()
                 listeners[message.key] = message.listener
                 if (network != null) message.listener(network)
             }
@@ -66,7 +66,7 @@ object DefaultNetworkListener : CoroutineScope {
             is NetworkMessage.Stop -> if (!listeners.isEmpty() && // was not empty
                     listeners.remove(message.key) != null && listeners.isEmpty()) {
                 network = null
-                unregisterDefaultNetworkListener()
+                unregister()
             }
 
             is NetworkMessage.Put -> {
@@ -104,10 +104,10 @@ object DefaultNetworkListener : CoroutineScope {
 
     private var fallback = false
     private val connectivity = app.getSystemService<ConnectivityManager>()!!
-    private val defaultNetworkRequest = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-            .build()
+    private val request = NetworkRequest.Builder().apply {
+        addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+    }.build()
     /**
      * Unfortunately registerDefaultNetworkCallback is going to return VPN interface since Android P DP1:
      * https://android.googlesource.com/platform/frameworks/base/+/dda156ab0c5d66ad82bdcf76cda07cbc0a9c8a2e
@@ -118,18 +118,18 @@ object DefaultNetworkListener : CoroutineScope {
      *
      * Source: https://android.googlesource.com/platform/frameworks/base/+/2df4c7d/services/core/java/com/android/server/ConnectivityService.java#887
      */
-    private fun registerDefaultNetworkListener() {
+    private fun register() {
         if (Build.VERSION.SDK_INT in 24..27) @TargetApi(24) {
             connectivity.registerDefaultNetworkCallback(Callback)
         } else try {
             fallback = false
             // we want REQUEST here instead of LISTEN
-            connectivity.requestNetwork(defaultNetworkRequest, Callback)
+            connectivity.requestNetwork(request, Callback)
         } catch (e: SecurityException) {
             // known bug: https://stackoverflow.com/a/33509180/2245107
             if (Build.VERSION.SDK_INT != 23) Crashlytics.logException(e)
             fallback = true
         }
     }
-    private fun unregisterDefaultNetworkListener() = connectivity.unregisterNetworkCallback(Callback)
+    private fun unregister() = connectivity.unregisterNetworkCallback(Callback)
 }
