@@ -94,7 +94,7 @@ object BaseService {
 
     class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), AutoCloseable {
         val callbacks = RemoteCallbackList<IShadowsocksServiceCallback>()
-        private val bandwidthListeners = HashSet<IBinder>() // the binder is the real identifier
+        private val bandwidthListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
         private val handler = Handler()
 
         override fun getState(): Int = data!!.state
@@ -115,7 +115,9 @@ object BaseService {
             callbacks.finishBroadcast()
         }
 
-        private fun registerTimeout() = handler.postDelayed(this::onTimeout, 1000)
+        private fun registerTimeout() {
+            handler.postDelayed(this::onTimeout, bandwidthListeners.values.min() ?: return)
+        }
         private fun onTimeout() {
             val proxies = listOfNotNull(data!!.proxy, data!!.udpFallback)
             val stats = proxies
@@ -134,9 +136,9 @@ object BaseService {
             registerTimeout()
         }
 
-        override fun startListeningForBandwidth(cb: IShadowsocksServiceCallback) {
+        override fun startListeningForBandwidth(cb: IShadowsocksServiceCallback, timeout: Long) {
             val wasEmpty = bandwidthListeners.isEmpty()
-            if (bandwidthListeners.add(cb.asBinder())) {
+            if (bandwidthListeners.put(cb.asBinder(), timeout) == null) {
                 if (wasEmpty) registerTimeout()
                 if (state != CONNECTED) return
                 var sum = TrafficStats()
@@ -160,7 +162,7 @@ object BaseService {
         }
 
         override fun stopListeningForBandwidth(cb: IShadowsocksServiceCallback) {
-            if (bandwidthListeners.remove(cb.asBinder()) && bandwidthListeners.isEmpty()) {
+            if (bandwidthListeners.remove(cb.asBinder()) != null && bandwidthListeners.isEmpty()) {
                 handler.removeCallbacksAndMessages(null)
             }
         }

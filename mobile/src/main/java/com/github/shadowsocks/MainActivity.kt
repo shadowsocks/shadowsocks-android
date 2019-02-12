@@ -238,7 +238,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     override fun onStart() {
         super.onStart()
-        connection.listeningForBandwidth = true
+        connection.bandwidthTimeout = 500
     }
 
     override fun onBackPressed() {
@@ -269,7 +269,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     override fun onStop() {
-        connection.listeningForBandwidth = false
+        connection.bandwidthTimeout = 0
         super.onStop()
     }
 

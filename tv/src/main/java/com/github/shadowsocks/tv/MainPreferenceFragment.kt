@@ -209,7 +209,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
 
     override fun onStart() {
         super.onStart()
-        connection.listeningForBandwidth = true
+        connection.bandwidthTimeout = 500
     }
 
     override fun onResume() {
@@ -247,7 +247,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     }
 
     override fun onStop() {
-        connection.listeningForBandwidth = false
+        connection.bandwidthTimeout = 0
         super.onStop()
     }
 

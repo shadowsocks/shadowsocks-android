@@ -102,7 +102,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             Intent.ACTION_SCREEN_ON -> {
                 setVisible(visible && !keyGuard.isKeyguardLocked, forceShow)
                 service.data.binder.registerCallback(callback)
-                service.data.binder.startListeningForBandwidth(callback)
+                service.data.binder.startListeningForBandwidth(callback, 1000)
                 callbackRegistered = true
             }
             Intent.ACTION_USER_PRESENT -> setVisible(true, forceShow)

@@ -38,7 +38,8 @@ import com.github.shadowsocks.utils.Key
 /**
  * This object should be compact as it will not get GC-ed.
  */
-class ShadowsocksConnection(private val handler: Handler = Handler(), private var listenForDeath: Boolean = false) :
+class ShadowsocksConnection(private val handler: Handler = Handler(),
+                            private var listenForDeath: Boolean = false) :
         ServiceConnection, IBinder.DeathRecipient {
     companion object {
         val serviceClass get() = when (DataStore.serviceMode) {
@@ -78,11 +79,11 @@ class ShadowsocksConnection(private val handler: Handler = Handler(), private va
     }
     private var binder: IBinder? = null
 
-    var listeningForBandwidth = false
+    var bandwidthTimeout = 0L
         set(value) {
             val service = service
-            if (listeningForBandwidth != value && service != null)
-                if (value) service.startListeningForBandwidth(serviceCallback) else try {
+            if (bandwidthTimeout != value && service != null)
+                if (value > 0) service.startListeningForBandwidth(serviceCallback, value) else try {
                     service.stopListeningForBandwidth(serviceCallback)
                 } catch (_: DeadObjectException) { }
             field = value
@@ -97,7 +98,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(), private va
         if (!callbackRegistered) try {
             service.registerCallback(serviceCallback)
             callbackRegistered = true
-            if (listeningForBandwidth) service.startListeningForBandwidth(serviceCallback)
+            if (bandwidthTimeout > 0) service.startListeningForBandwidth(serviceCallback, bandwidthTimeout)
         } catch (_: RemoteException) { }
         callback!!.onServiceConnected(service)
     }
