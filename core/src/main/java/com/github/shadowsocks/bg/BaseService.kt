@@ -93,7 +93,12 @@ object BaseService {
     }
 
     class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), AutoCloseable {
-        val callbacks = RemoteCallbackList<IShadowsocksServiceCallback>()
+        val callbacks = object : RemoteCallbackList<IShadowsocksServiceCallback>() {
+            override fun onCallbackDied(callback: IShadowsocksServiceCallback?, cookie: Any?) {
+                super.onCallbackDied(callback, cookie)
+                stopListeningForBandwidth(callback ?: return)
+            }
+        }
         private val bandwidthListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
         private val handler = Handler()
 
