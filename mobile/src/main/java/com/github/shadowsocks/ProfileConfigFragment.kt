@@ -23,12 +23,9 @@ package com.github.shadowsocks
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.os.UserManager
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
@@ -70,11 +67,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         val activity = requireActivity()
         profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
         addPreferencesFromResource(R.xml.pref_profile)
-        if (Build.VERSION.SDK_INT >= 25 && activity.getSystemService<UserManager>()?.isDemoUser == true) {
-            findPreference(Key.host).summary = "shadowsocks.example.org"
-            findPreference(Key.remotePort).summary = "1337"
-            findPreference(Key.password).summary = "\u2022".repeat(32)
-        }
         val serviceMode = DataStore.serviceMode
         findPreference(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
         isProxyApps = findPreference(Key.proxyApps) as SwitchPreference
