@@ -22,22 +22,24 @@ package com.github.shadowsocks
 
 import android.os.Build
 import android.os.Bundle
+import androidx.preference.EditTextPreference
 import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.net.TcpFastOpen
+import com.github.shadowsocks.preference.PortPreferenceListener
 import com.github.shadowsocks.utils.remove
-import com.takisoft.preferencex.PreferenceFragmentCompat
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
-    override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
-        val boot = findPreference(Key.isAutoConnect) as SwitchPreference
+        val boot = findPreference<SwitchPreference>(Key.isAutoConnect)
         boot.setOnPreferenceChangeListener { _, value ->
             BootReceiver.enabled = value as Boolean
             true
@@ -45,13 +47,13 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         boot.isChecked = BootReceiver.enabled
         if (Build.VERSION.SDK_INT >= 24) boot.setSummary(R.string.auto_connect_summary_v24)
 
-        val canToggleLocked = findPreference(Key.directBootAware)
+        val canToggleLocked = findPreference<Preference>(Key.directBootAware)
         if (Build.VERSION.SDK_INT >= 24) canToggleLocked.setOnPreferenceChangeListener { _, newValue ->
             if (Core.directBootSupported && newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
             true
         } else canToggleLocked.remove()
 
-        val tfo = findPreference(Key.tfo) as SwitchPreference
+        val tfo = findPreference<SwitchPreference>(Key.tfo)
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
@@ -68,10 +70,13 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
-        val serviceMode = findPreference(Key.serviceMode)
-        val portProxy = findPreference(Key.portProxy)
-        val portLocalDns = findPreference(Key.portLocalDns)
-        val portTransproxy = findPreference(Key.portTransproxy)
+        val serviceMode = findPreference<Preference>(Key.serviceMode)
+        val portProxy = findPreference<EditTextPreference>(Key.portProxy)
+        portProxy.onBindEditTextListener = PortPreferenceListener
+        val portLocalDns = findPreference<EditTextPreference>(Key.portLocalDns)
+        portLocalDns.onBindEditTextListener = PortPreferenceListener
+        val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)
+        portTransproxy.onBindEditTextListener = PortPreferenceListener
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
             val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
                 Key.modeProxy -> Pair(false, false)

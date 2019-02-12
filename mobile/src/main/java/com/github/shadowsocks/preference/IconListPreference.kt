@@ -26,6 +26,14 @@ import android.util.AttributeSet
 import androidx.preference.ListPreference
 
 class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
+    companion object FallbackProvider : SummaryProvider<IconListPreference> {
+        override fun provideSummary(preference: IconListPreference?): CharSequence? {
+            val i = preference?.selectedEntry
+            return if (i != null && i < 0) preference.unknownValueSummary?.format(preference.value) else
+                preference?.entry
+        }
+    }
+
     var entryIcons: Array<Drawable?>? = null
     val selectedEntry: Int get() = entryValues.indexOf(value)
     val entryIcon: Drawable? get() = entryIcons?.getOrNull(selectedEntry)
@@ -49,7 +57,6 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
             val listener = listener
             if (listener == null || listener.onPreferenceChange(preference, newValue)) {
                 value = newValue.toString()
-                checkSummary()
                 if (entryIcons != null) icon = entryIcon
                 true
             } else false
@@ -60,13 +67,9 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
 //        a.recycle()
     }
 
-    fun checkSummary() {
-        val unknownValueSummary = unknownValueSummary
-        if (unknownValueSummary != null) summary = if (selectedEntry < 0) unknownValueSummary.format(value) else "%s"
-    }
-
     fun init() {
         icon = entryIcon
+        summaryProvider = FallbackProvider
     }
     override fun onSetInitialValue(defaultValue: Any?) {
         super.onSetInitialValue(defaultValue)

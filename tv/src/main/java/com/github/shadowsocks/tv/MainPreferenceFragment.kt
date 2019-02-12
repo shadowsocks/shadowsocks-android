@@ -36,10 +36,7 @@ import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.get
-import androidx.preference.ListPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceDataStore
-import androidx.preference.SwitchPreference
+import androidx.preference.*
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
@@ -53,6 +50,7 @@ import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
+import com.github.shadowsocks.preference.PortPreferenceListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
@@ -73,9 +71,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var serviceMode: Preference
     private lateinit var tfo: SwitchPreference
     private lateinit var shareOverLan: Preference
-    private lateinit var portProxy: Preference
-    private lateinit var portLocalDns: Preference
-    private lateinit var portTransproxy: Preference
+    private lateinit var portProxy: EditTextPreference
+    private lateinit var portLocalDns: EditTextPreference
+    private lateinit var portTransproxy: EditTextPreference
     private val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
         val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
             Key.modeProxy -> Pair(false, false)
@@ -157,12 +155,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_main)
-        fab = findPreference(Key.id) as ListPreference
+        fab = findPreference(Key.id)
         populateProfiles()
         stats = findPreference(Key.controlStats)
         controlImport = findPreference(Key.controlImport)
 
-        (findPreference(Key.isAutoConnect) as SwitchPreference).apply {
+        findPreference<SwitchPreference>(Key.isAutoConnect).apply {
             setOnPreferenceChangeListener { _, value ->
                 BootReceiver.enabled = value as Boolean
                 true
@@ -170,7 +168,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             isChecked = BootReceiver.enabled
         }
 
-        tfo = findPreference(Key.tfo) as SwitchPreference
+        tfo = findPreference(Key.tfo)
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
@@ -190,10 +188,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         serviceMode = findPreference(Key.serviceMode)
         shareOverLan = findPreference(Key.shareOverLan)
         portProxy = findPreference(Key.portProxy)
+        portProxy.onBindEditTextListener = PortPreferenceListener
         portLocalDns = findPreference(Key.portLocalDns)
+        portLocalDns.onBindEditTextListener = PortPreferenceListener
         portTransproxy = findPreference(Key.portTransproxy)
+        portTransproxy.onBindEditTextListener = PortPreferenceListener
         serviceMode.onPreferenceChangeListener = onServiceModeChange
-        findPreference(Key.about).apply {
+        findPreference<Preference>(Key.about).apply {
             summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
             setOnPreferenceClickListener {
                 Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()

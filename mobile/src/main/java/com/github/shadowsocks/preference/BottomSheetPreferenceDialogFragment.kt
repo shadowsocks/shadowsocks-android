@@ -32,6 +32,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -95,6 +96,10 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
                 else -> holder.bind(position - 1)
             }
         }
+    }
+
+    fun setArg(key: String) {
+        arguments = bundleOf(PreferenceDialogFragmentCompat.ARG_KEY to key)
     }
 
     private val preference by lazy { getPreference() as IconListPreference }
