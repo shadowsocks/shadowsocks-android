@@ -150,12 +150,10 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
 
     override fun onDisplayPreferenceDialog(preference: Preference) {
         when (preference.key) {
-            Key.plugin -> {
-                BottomSheetPreferenceDialogFragment().apply {
-                    setArg(Key.plugin)
-                    setTargetFragment(this@ProfileConfigFragment, 0)
-                }.show(fragmentManager ?: return, Key.plugin)
-            }
+            Key.plugin -> BottomSheetPreferenceDialogFragment().apply {
+                setArg(Key.plugin)
+                setTargetFragment(this@ProfileConfigFragment, 0)
+            }.show(fragmentManager ?: return, Key.plugin)
             Key.pluginConfigure -> {
                 val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
                 if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else {
