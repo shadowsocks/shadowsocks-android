@@ -61,7 +61,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             conn.doOutput = true
 
             val proxies = try {
-                withTimeoutOrNull(30_000) {
+                withTimeoutOrNull(10_000) {
                     withContext(Dispatchers.IO) {
                         conn.outputStream.bufferedWriter().use {
                             it.write("sig=" + Base64.encodeToString(mdg.digest(), Base64.DEFAULT))
