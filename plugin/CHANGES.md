@@ -1,4 +1,5 @@
 * 1.2.0:
+  * New helper class `AlertDialogFragment` for creating `AlertDialog` that persists through configuration changes;
   * Dependency update: `com.google.android.material:material:1.1.0-alpha03`.
 * 1.1.0:
   * Having control characters in plugin options is no longer allowed.

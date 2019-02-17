@@ -23,6 +23,7 @@ package com.github.shadowsocks
 import android.app.Activity
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
+import android.content.DialogInterface
 import android.content.Intent
 import android.net.VpnService
 import android.nfc.NdefMessage
@@ -30,6 +31,7 @@ import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.os.DeadObjectException
 import android.os.Handler
+import android.os.Parcelable
 import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -51,6 +53,8 @@ import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.plugin.AlertDialogFragment
+import com.github.shadowsocks.plugin.Empty
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
@@ -58,6 +62,7 @@ import com.github.shadowsocks.widget.ServiceButton
 import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.parcel.Parcelize
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
@@ -66,6 +71,17 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         private const val REQUEST_CONNECT = 1
 
         var stateListener: ((Int) -> Unit)? = null
+    }
+
+    @Parcelize
+    data class ProfilesArg(val profiles: List<Profile>) : Parcelable
+    class ImportProfilesDialogFragment : AlertDialogFragment<ProfilesArg, Empty>() {
+        override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
+            setTitle(R.string.add_profile_dialog)
+            setPositiveButton(R.string.yes) { _, _ -> arg.profiles.forEach { ProfileManager.createProfile(it) } }
+            setNegativeButton(R.string.no, null)
+            setMessage(arg.profiles.joinToString("\n"))
+        }
     }
 
     // UI
@@ -188,17 +204,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         }
         if (sharedStr.isNullOrEmpty()) return
         val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile?.first).toList()
-        if (profiles.isEmpty()) {
-            snackbar().setText(R.string.profile_invalid_input).show()
-            return
-        }
-        AlertDialog.Builder(this)
-                .setTitle(R.string.add_profile_dialog)
-                .setPositiveButton(R.string.yes) { _, _ -> profiles.forEach { ProfileManager.createProfile(it) } }
-                .setNegativeButton(R.string.no, null)
-                .setMessage(profiles.joinToString("\n"))
-                .create()
-                .show()
+        if (profiles.isEmpty()) snackbar().setText(R.string.profile_invalid_input).show()
+        else ImportProfilesDialogFragment().withArg(ProfilesArg(profiles)).show(supportFragmentManager, null)
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
