@@ -71,6 +71,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         // unescaped: (?<=^(\(\^\|\\\.\)|\^\(\.\*\\\.\)\?)).*(?=\$$)
         private val domainPattern = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
 
+        @Suppress("FunctionName")
         private fun AclItem(item: Any) = when (item) {
             is String -> AclItem(item, false)
             is Subnet -> AclItem(item.toString(), false)
