@@ -1,3 +1,5 @@
+* 1.2.0:
+  * Dependency update: `com.google.android.material:material:1.1.0-alpha03`.
 * 1.1.0:
   * Having control characters in plugin options is no longer allowed.
     If this breaks your plugin, you are doing it wrong.
