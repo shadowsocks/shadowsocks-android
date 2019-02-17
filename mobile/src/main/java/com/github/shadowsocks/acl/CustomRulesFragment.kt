@@ -93,8 +93,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     data class AclEditResult(val edited: AclItem, val replacing: AclItem) : Parcelable
     class AclRuleDialogFragment : AlertDialogFragment<AclItem, AclEditResult>(),
             TextWatcher, AdapterView.OnItemSelectedListener {
-        lateinit var templateSelector: Spinner
-        lateinit var editText: EditText
+        private lateinit var templateSelector: Spinner
+        private lateinit var editText: EditText
         private lateinit var inputLayout: TextInputLayout
         private lateinit var positive: Button
 
