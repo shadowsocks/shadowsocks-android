@@ -5,7 +5,6 @@ jobs:
     docker:
       - image: circleci/android:api-28-ndk
     environment:
-      JVM_OPTS: -Xmx3500m
       GRADLE_OPTS: -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process"
     steps:
       - checkout
