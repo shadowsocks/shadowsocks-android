@@ -263,8 +263,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         Key.controlImport -> {
             startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
-                type = "application/json"
+                type = "application/*"
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
             }, REQUEST_IMPORT_PROFILES)
             true
         }
