@@ -81,7 +81,9 @@ class ChannelMonitor : Thread("ChannelMonitor") {
 
     suspend fun wait(channel: SelectableChannel, ops: Int) = CompletableDeferred<SelectionKey>().run {
         register(channel, ops) {
-            if (it.isValid) it.interestOps(0)       // stop listening
+            if (it.isValid) try {
+                it.interestOps(0)   // stop listening
+            } catch (_: CancelledKeyException) { }
             complete(it)
         }
         await()
