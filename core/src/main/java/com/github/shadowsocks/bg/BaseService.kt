@@ -42,6 +42,7 @@ import com.github.shadowsocks.utils.printLog
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
+import java.net.BindException
 import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
@@ -343,7 +344,9 @@ object BaseService {
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {
-                    if (exc !is PluginManager.PluginNotFoundException && exc !is VpnService.NullConnectionException) {
+                    if (exc !is PluginManager.PluginNotFoundException &&
+                            exc !is BindException &&
+                            exc !is VpnService.NullConnectionException) {
                         printLog(exc)
                     }
                     stopRunner(false, "${getString(R.string.service_failed)}: ${exc.localizedMessage}")
