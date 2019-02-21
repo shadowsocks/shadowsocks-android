@@ -108,14 +108,14 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
 
     override fun onServiceDisconnected(name: ComponentName?) {
         unregisterCallback()
-        callback!!.onServiceDisconnected()
+        callback?.onServiceDisconnected()
         service = null
         binder = null
     }
 
     override fun binderDied() {
         service = null
-        handler.post(callback!!::onBinderDied)
+        callback?.also { handler.post(it::onBinderDied) }
     }
 
     private fun unregisterCallback() {
