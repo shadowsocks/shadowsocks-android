@@ -22,8 +22,10 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.content.BroadcastReceiver
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
@@ -33,10 +35,7 @@ import androidx.preference.SwitchPreference
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.plugin.PluginConfiguration
-import com.github.shadowsocks.plugin.PluginContract
-import com.github.shadowsocks.plugin.PluginManager
-import com.github.shadowsocks.plugin.PluginOptions
+import com.github.shadowsocks.plugin.*
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.IconListPreference
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
@@ -47,11 +46,26 @@ import com.github.shadowsocks.utils.Key
 import com.google.android.material.snackbar.Snackbar
 import com.takisoft.preferencex.EditTextPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import kotlinx.android.parcel.Parcelize
 
 class ProfileConfigFragment : PreferenceFragmentCompat(),
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
+        const val REQUEST_UNSAVED_CHANGES = 2
+    }
+
+    @Parcelize
+    data class ProfileIdArg(val profileId: Long) : Parcelable
+    class DeleteConfirmationDialogFragment : AlertDialogFragment<ProfileIdArg, Empty>() {
+        override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
+            setTitle(R.string.delete_confirm_prompt)
+            setPositiveButton(R.string.yes) { _, _ ->
+                ProfileManager.delProfile(arg.profileId)
+                requireActivity().finish()
+            }
+            setNegativeButton(R.string.no, null)
+        }
     }
 
     private var profileId = -1L
@@ -116,7 +130,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             bundleOf(Pair("key", Key.pluginConfigure),
                     Pair(PluginConfigurationDialogFragment.PLUGIN_ID_FRAGMENT_TAG, pluginConfiguration.selected)))
 
-    fun saveAndExit() {
+    private fun saveAndExit() {
         val profile = ProfileManager.getProfile(profileId) ?: Profile()
         profile.id = profileId
         profile.deserialize()
@@ -161,28 +175,26 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_CODE_PLUGIN_CONFIGURE) when (resultCode) {
-            Activity.RESULT_OK -> {
-                val options = data?.getStringExtra(PluginContract.EXTRA_OPTIONS)
-                pluginConfigure.text = options
-                onPreferenceChange(null, options)
+        when (requestCode) {
+            REQUEST_CODE_PLUGIN_CONFIGURE -> when (resultCode) {
+                Activity.RESULT_OK -> {
+                    val options = data?.getStringExtra(PluginContract.EXTRA_OPTIONS)
+                    pluginConfigure.text = options
+                    onPreferenceChange(null, options)
+                }
+                PluginContract.RESULT_FALLBACK -> showPluginEditor()
             }
-            PluginContract.RESULT_FALLBACK -> showPluginEditor()
-        } else super.onActivityResult(requestCode, resultCode, data)
+            REQUEST_UNSAVED_CHANGES -> when (resultCode) {
+                DialogInterface.BUTTON_POSITIVE -> saveAndExit()
+                DialogInterface.BUTTON_NEGATIVE -> requireActivity().finish()
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_delete -> {
-            val activity = requireActivity()
-            AlertDialog.Builder(activity)
-                    .setTitle(R.string.delete_confirm_prompt)
-                    .setPositiveButton(R.string.yes) { _, _ ->
-                        ProfileManager.delProfile(profileId)
-                        activity.finish()
-                    }
-                    .setNegativeButton(R.string.no, null)
-                    .create()
-                    .show()
+            DeleteConfirmationDialogFragment().withArg(ProfileIdArg(profileId)).show(this)
             true
         }
         R.id.action_apply -> {
