@@ -68,13 +68,16 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     private var callback: Callback? = null
     private val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-            handler.post { callback!!.stateChanged(state, profileName, msg) }
+            val callback = callback ?: return
+            handler.post { callback.stateChanged(state, profileName, msg) }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-            handler.post { callback!!.trafficUpdated(profileId, stats) }
+            val callback = callback ?: return
+            handler.post { callback.trafficUpdated(profileId, stats) }
         }
         override fun trafficPersisted(profileId: Long) {
-            handler.post { callback!!.trafficPersisted(profileId) }
+            val callback = callback ?: return
+            handler.post { callback.trafficPersisted(profileId) }
         }
     }
     private var binder: IBinder? = null
