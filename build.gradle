@@ -13,8 +13,8 @@ buildscript {
         junitVersion = '4.12'
         androidTestVersion = '1.1.1'
         androidEspressoVersion = '3.1.1'
-        versionCode = 4070050
-        versionName = '4.7.0-nightly'
+        versionCode = 4070150
+        versionName = '4.7.1-nightly'
     }
 
     repositories {
