@@ -99,23 +99,23 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             printLog(e)
             return forward(packet)
         }
-        return coroutineScope {
+        return supervisorScope {
             val remote = async { withTimeout(TIMEOUT) { forward(packet) } }
             try {
-                if (forwardOnly || request.header.opcode != Opcode.QUERY) return@coroutineScope remote.await()
+                if (forwardOnly || request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
                 val question = request.question
-                if (question?.type != Type.A) return@coroutineScope remote.await()
+                if (question?.type != Type.A) return@supervisorScope remote.await()
                 val host = question.name.toString(true)
-                if (remoteDomainMatcher?.containsMatchIn(host) == true) return@coroutineScope remote.await()
+                if (remoteDomainMatcher?.containsMatchIn(host) == true) return@supervisorScope remote.await()
                 val localResults = try {
                     withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
                 } catch (_: TimeoutCancellationException) {
                     Crashlytics.log(Log.WARN, TAG, "Local resolving timed out, falling back to remote resolving")
-                    return@coroutineScope remote.await()
+                    return@supervisorScope remote.await()
                 } catch (_: UnknownHostException) {
-                    return@coroutineScope remote.await()
+                    return@supervisorScope remote.await()
                 }
-                if (localResults.isEmpty()) return@coroutineScope remote.await()
+                if (localResults.isEmpty()) return@supervisorScope remote.await()
                 if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
                     remote.cancel()
                     ByteBuffer.wrap(prepareDnsResponse(request).apply {
