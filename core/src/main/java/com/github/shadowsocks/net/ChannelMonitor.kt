@@ -82,7 +82,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
                 else -> throw IOException("Failed to register in the channel")
             }
         }
-        if (!running) throw ClosedChannelException()
+        if (!running) throw CancellationException()
         return registration.result.await()
     }
 
