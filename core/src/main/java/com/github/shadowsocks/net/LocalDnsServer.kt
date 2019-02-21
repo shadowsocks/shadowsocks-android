@@ -68,7 +68,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
             header.setFlag(Flags.QR.toInt())    // this is a response
             if (request.header.getFlag(Flags.RD.toInt())) header.setFlag(Flags.RD.toInt())
-            addRecord(request.question, Section.QUESTION)
+            request.question?.also { addRecord(it, Section.QUESTION) }
         }
     }
     private val monitor = ChannelMonitor()
