@@ -15,7 +15,7 @@
         android:summary="@string/stat_summary"/>
     <Preference
         android:key="control.import"
-        android:title="@string/action_import_file"/>
+        android:title="@string/action_replace_file"/>
     <Preference
         android:key="control.export"
         android:title="@string/action_export_file"/>

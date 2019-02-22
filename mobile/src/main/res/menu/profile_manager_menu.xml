@@ -19,6 +19,11 @@
                 android:alphabeticShortcut="o"
                 android:title="@string/action_import_file"/>
             <item
+                android:id="@+id/action_replace_file"
+                android:alphabeticShortcut="o"
+                android:title="@string/action_replace_file"
+                app:alphabeticModifiers="CTRL|SHIFT"/>
+            <item
                 android:id="@+id/action_manual_settings"
                 android:title="@string/add_profile_methods_manual_settings"
                 android:alphabeticShortcut="n"

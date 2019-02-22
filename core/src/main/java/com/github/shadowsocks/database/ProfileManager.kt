@@ -21,11 +21,14 @@
 package com.github.shadowsocks.database
 
 import android.database.sqlite.SQLiteCantOpenDatabaseException
+import android.util.LongSparseArray
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.printLog
+import org.json.JSONArray
 import java.io.IOException
+import java.io.InputStream
 import java.sql.SQLException
 
 /**
@@ -36,6 +39,7 @@ object ProfileManager {
     interface Listener {
         fun onAdd(profile: Profile)
         fun onRemove(profileId: Long)
+        fun onCleared()
     }
     var listener: Listener? = null
 
@@ -46,6 +50,36 @@ object ProfileManager {
         profile.id = PrivateDatabase.profileDao.create(profile)
         listener?.onAdd(profile)
         return profile
+    }
+
+    fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
+        val profiles = if (replace) getAllProfiles()?.associateBy { it.formattedAddress } else null
+        val feature = if (replace) {
+            profiles?.values?.singleOrNull { it.id == DataStore.profileId }
+        } else Core.currentProfile?.first
+        val lazyClear = lazy { clear() }
+        var result: Exception? = null
+        for (json in jsons) try {
+            Profile.parseJson(json.bufferedReader().readText(), feature) {
+                if (replace) {
+                    lazyClear.value
+                    // if two profiles has the same address, treat them as the same profile and copy stats over
+                    profiles?.get(it.formattedAddress)?.apply {
+                        it.tx = tx
+                        it.rx = rx
+                    }
+                }
+                createProfile(it)
+            }
+        } catch (e: Exception) {
+            if (result == null) result = e else result.addSuppressed(e)
+        }
+        if (result != null) throw result
+    }
+    fun serializeToJson(profiles: List<Profile>? = getAllProfiles()): JSONArray? {
+        if (profiles == null) return null
+        val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
+        return JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray())
     }
 
     /**
@@ -78,6 +112,7 @@ object ProfileManager {
     fun clear() = PrivateDatabase.profileDao.deleteAll().also {
         // listener is not called since this won't be used in mobile submodule
         DirectBoot.clean()
+        listener?.onCleared()
     }
 
     @Throws(IOException::class)

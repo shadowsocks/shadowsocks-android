@@ -30,7 +30,6 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.text.format.Formatter
 import android.util.Log
-import android.util.LongSparseArray
 import android.widget.Toast
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
 import androidx.lifecycle.Observer
@@ -47,7 +46,6 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.net.TcpFastOpen
@@ -57,13 +55,12 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
-import org.json.JSONArray
 
 class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
         OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CONNECT = 1
-        private const val REQUEST_IMPORT_PROFILES = 2
+        private const val REQUEST_REPLACE_PROFILES = 2
         private const val REQUEST_EXPORT_PROFILES = 3
         private const val TAG = "MainPreferenceFragment"
     }
@@ -263,16 +260,14 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
         Key.controlImport -> {
             startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/*"
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                 putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
-            }, REQUEST_IMPORT_PROFILES)
+            }, REQUEST_REPLACE_PROFILES)
             true
         }
         Key.controlExport -> {
             startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/json"
                 putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
             }, REQUEST_EXPORT_PROFILES)
@@ -281,9 +276,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         else -> super.onPreferenceTreeClick(preference)
     }
 
-    private fun startFilesForResult(intent: Intent?, requestCode: Int) {
+    private fun startFilesForResult(intent: Intent, requestCode: Int) {
         try {
-            startActivityForResult(intent, requestCode)
+            startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
             return
         } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
         Toast.makeText(requireContext(), R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
@@ -295,23 +290,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                 Toast.makeText(requireContext(), R.string.vpn_permission_denied, Toast.LENGTH_SHORT).show()
                 Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
             }
-            REQUEST_IMPORT_PROFILES -> {
+            REQUEST_REPLACE_PROFILES -> {
                 if (resultCode != Activity.RESULT_OK) return
-                val profiles = ProfileManager.getAllProfiles()?.associateBy { it.formattedAddress }
-                val feature = profiles?.values?.singleOrNull { it.id == DataStore.profileId }
-                val lazyClear = lazy { ProfileManager.clear() }
                 val context = requireContext()
-                for (uri in data!!.datas) try {
-                    Profile.parseJson(context.contentResolver.openInputStream(uri)!!.bufferedReader().readText(),
-                            feature) {
-                        lazyClear.value
-                        // if two profiles has the same address, treat them as the same profile and copy stats over
-                        profiles?.get(it.formattedAddress)?.apply {
-                            it.tx = tx
-                            it.rx = rx
-                        }
-                        ProfileManager.createProfile(it)
-                    }
+                try {
+                    ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
+                        context.contentResolver.openInputStream(it)
+                    }, true)
                 } catch (e: Exception) {
                     printLog(e)
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
@@ -320,12 +305,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             }
             REQUEST_EXPORT_PROFILES -> {
                 if (resultCode != Activity.RESULT_OK) return
-                val profiles = ProfileManager.getAllProfiles()
+                val profiles = ProfileManager.serializeToJson()
                 val context = requireContext()
                 if (profiles != null) try {
-                    val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
                     context.contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
-                        it.write(JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray()).toString(2))
+                        it.write(profiles.toString(2))
                     }
                 } catch (e: Exception) {
                     printLog(e)
