@@ -183,8 +183,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
                     adView.adSize = AdSize.SMART_BANNER
-                    val padding = context.resources.getDimensionPixelOffset(R.dimen.profile_padding)
-                    adView.setPadding(padding, 0, 0, 0)
 
                     itemView.findViewById<LinearLayout>(R.id.content).addView(adView)
 
