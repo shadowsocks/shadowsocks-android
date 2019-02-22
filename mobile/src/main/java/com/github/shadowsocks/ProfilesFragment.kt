@@ -176,15 +176,15 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             var adView = adView
             if (item.host == "198.199.101.152") {
                 if (adView == null) {
-                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT)
+                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            AdSize.SMART_BANNER.getHeightInPixels(context))
                     params.gravity = Gravity.CENTER_HORIZONTAL
                     adView = AdView(context)
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
-                    adView.adSize = AdSize.FLUID
+                    adView.adSize = AdSize.SMART_BANNER
                     val padding = context.resources.getDimensionPixelOffset(R.dimen.profile_padding)
-                    adView.setPadding(padding, 0, 0, padding)
+                    adView.setPadding(padding, 0, 0, 0)
 
                     itemView.findViewById<LinearLayout>(R.id.content).addView(adView)
 
