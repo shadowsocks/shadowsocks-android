@@ -56,6 +56,7 @@ import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.readableMessage
 import org.json.JSONArray
 
 class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
@@ -313,7 +314,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                     }
                 } catch (e: Exception) {
                     printLog(e)
-                    Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
                 populateProfiles()
             }
@@ -328,7 +329,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                     }
                 } catch (e: Exception) {
                     printLog(e)
-                    Toast.makeText(context, e.localizedMessage, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)

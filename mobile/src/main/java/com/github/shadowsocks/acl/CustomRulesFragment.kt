@@ -48,6 +48,7 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
@@ -146,7 +147,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                         if (Subnet.fromString(this) == null) toPattern()
                         true
                     } catch (e: PatternSyntaxException) {
-                        message = e.localizedMessage
+                        message = e.readableMessage
                         false
                     }
                 }
@@ -154,7 +155,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     IDN.toASCII(value.toString(), IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
                     true
                 } catch (e: IllegalArgumentException) {
-                    message = e.cause?.localizedMessage ?: e.localizedMessage
+                    message = e.cause?.readableMessage ?: e.readableMessage
                     false
                 }
                 Template.Url -> try {
@@ -162,7 +163,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
                     true
                 } catch (e: MalformedURLException) {
-                    message = e.localizedMessage
+                    message = e.readableMessage
                     false
                 }
             }

@@ -49,6 +49,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -452,7 +453,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     }
                 } catch (e: Exception) {
                     printLog(e)
-                    (activity as MainActivity).snackbar(e.localizedMessage).show()
+                    (activity as MainActivity).snackbar(e.readableMessage).show()
                 }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)

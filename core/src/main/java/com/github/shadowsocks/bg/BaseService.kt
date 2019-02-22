@@ -39,6 +39,7 @@ import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.readableMessage
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
@@ -330,7 +331,7 @@ object BaseService {
                     data.processes = GuardedProcessPool {
                         printLog(it)
                         data.connectingJob?.cancelAndJoin()
-                        stopRunner(false, it.localizedMessage)
+                        stopRunner(false, it.readableMessage)
                     }
                     startProcesses()
 
@@ -349,7 +350,7 @@ object BaseService {
                             exc !is VpnService.NullConnectionException) {
                         printLog(exc)
                     }
-                    stopRunner(false, "${getString(R.string.service_failed)}: ${exc.localizedMessage}")
+                    stopRunner(false, "${getString(R.string.service_failed)}: ${exc.readableMessage}")
                 } finally {
                     data.connectingJob = null
                 }
