@@ -190,6 +190,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     // Load Ad
                     val adBuilder = AdRequest.Builder()
                     adBuilder.addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
+                    adBuilder.addTestDevice("7509D18EB8AF82F915874FEF53877A64")
                     adView.loadAd(adBuilder.build())
                     this.adView = adView
                 } else adView.visibility = View.VISIBLE
