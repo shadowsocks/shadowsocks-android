@@ -121,8 +121,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     ByteBuffer.wrap(prepareDnsResponse(request).apply {
                         header.setFlag(Flags.RA.toInt())   // recursion available
                         for (address in localResults) addRecord(when (address) {
-                            is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
-                            is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
+                            is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
+                            is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
                             else -> throw IllegalStateException("Unsupported address $address")
                         }, Section.ANSWER)
                     }.toWire())
