@@ -43,7 +43,7 @@ import kotlinx.android.parcel.Parcelize
 
 class ProfileConfigFragment : PreferenceFragmentCompat(),
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
-    private companion object PasswordSummaryProvider : Preference.SummaryProvider<EditTextPreference> {
+    companion object PasswordSummaryProvider : Preference.SummaryProvider<EditTextPreference> {
         override fun provideSummary(preference: EditTextPreference?) = "\u2022".repeat(preference?.text?.length ?: 0)
 
         private const val REQUEST_CODE_PLUGIN_CONFIGURE = 1
