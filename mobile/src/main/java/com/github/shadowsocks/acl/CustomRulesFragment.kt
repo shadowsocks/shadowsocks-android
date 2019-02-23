@@ -346,11 +346,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
     }
 
-    private val isEnabled get() = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED -> Core.currentProfile?.first?.route != Acl.CUSTOM_RULES
-        BaseService.STOPPED -> true
-        else -> false
-    }
+    private val isEnabled get() = (activity as MainActivity).state == BaseService.State.Stopped ||
+            Core.currentProfile?.first?.route != Acl.CUSTOM_RULES
 
     private val selectedItems = HashSet<Any>()
     private val adapter by lazy { AclRulesAdapter() }

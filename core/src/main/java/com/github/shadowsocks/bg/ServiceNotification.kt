@@ -94,7 +94,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
     }
 
     private fun update(action: String?, forceShow: Boolean = false) {
-        if (forceShow || service.data.state == BaseService.CONNECTED) when (action) {
+        if (forceShow || service.data.state == BaseService.State.Connected) when (action) {
             Intent.ACTION_SCREEN_OFF -> {
                 setVisible(false, forceShow)
                 unregisterCallback()    // unregister callback to save battery

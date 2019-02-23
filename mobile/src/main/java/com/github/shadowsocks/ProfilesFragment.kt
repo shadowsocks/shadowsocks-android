@@ -72,15 +72,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     /**
      * Is ProfilesFragment editable at all.
      */
-    private val isEnabled get() = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED, BaseService.STOPPED -> true
-        else -> false
-    }
-    private fun isProfileEditable(id: Long) = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED -> id !in Core.activeProfileIds
-        BaseService.STOPPED -> true
-        else -> false
-    }
+    private val isEnabled get() = (activity as MainActivity).state.let { it.canStop || it == BaseService.State.Stopped }
+    private fun isProfileEditable(id: Long) =
+            (activity as MainActivity).state == BaseService.State.Stopped || id !in Core.activeProfileIds
 
     @SuppressLint("ValidFragment")
     class QRCodeDialog() : DialogFragment() {
@@ -203,7 +197,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 Core.switchProfile(item.id)
                 profilesAdapter.refreshId(old)
                 itemView.isSelected = true
-                if (activity.state == BaseService.CONNECTED) Core.reloadService()
+                if (activity.state.canStop) Core.reloadService()
             }
         }
 

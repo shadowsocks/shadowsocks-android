@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
 
-        var stateListener: ((Int) -> Unit)? = null
+        var stateListener: ((BaseService.State) -> Unit)? = null
     }
 
     @Parcelize
@@ -107,12 +107,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     // service
-    var state = BaseService.IDLE
-    override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg, true)
+    var state = BaseService.State.Idle
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) = changeState(state, msg, true)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId == 0L) this@MainActivity.stats.updateTraffic(
                 stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
-        if (state != BaseService.STOPPING) {
+        if (state != BaseService.State.Stopping) {
             (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
                     ?.onTrafficUpdated(profileId, stats)
         }
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         ProfilesFragment.instance?.onTrafficPersisted(profileId)
     }
 
-    private fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
+    private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = false) {
         fab.changeState(state, animate)
         stats.changeState(state)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     private fun toggle() = when {
-        state == BaseService.CONNECTED -> Core.stopService()
+        state.canStop -> Core.stopService()
         DataStore.serviceMode == Key.modeVpn -> {
             val intent = VpnService.prepare(this)
             if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
@@ -143,11 +143,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     private val handler = Handler()
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
-        service.state
+        BaseService.State.values()[service.state]
     } catch (_: DeadObjectException) {
-        BaseService.IDLE
+        BaseService.State.Idle
     })
-    override fun onServiceDisconnected() = changeState(BaseService.IDLE)
+    override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
     override fun onBinderDied() {
         connection.disconnect(this)
         connection.connect(this, this)
@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
         stats = findViewById(R.id.stats)
-        stats.setOnClickListener { if (state == BaseService.CONNECTED) stats.testConnection() }
+        stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
         navigation = findViewById(R.id.navigation)
         navigation.setNavigationItemSelectedListener(this)
@@ -180,7 +180,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         fab = findViewById(R.id.fab)
         fab.setOnClickListener { toggle() }
 
-        changeState(BaseService.IDLE)   // reset everything to init state
+        changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
 

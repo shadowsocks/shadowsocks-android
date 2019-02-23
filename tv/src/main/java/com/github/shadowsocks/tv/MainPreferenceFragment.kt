@@ -88,9 +88,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var tester: HttpsTest
 
     // service
-    var state = BaseService.IDLE
+    var state = BaseService.State.Idle
         private set
-    override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg)
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) = changeState(state, msg)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId == 0L) requireContext().let { context ->
             this.stats.summary = getString(R.string.stat_summary,
@@ -101,26 +101,26 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
     }
 
-    private fun changeState(state: Int, msg: String? = null) {
-        fab.isEnabled = state == BaseService.STOPPED || state == BaseService.CONNECTED
+    private fun changeState(state: BaseService.State, msg: String? = null) {
+        fab.isEnabled = state.canStop || state == BaseService.State.Stopped
         fab.setTitle(when (state) {
-            BaseService.CONNECTING -> R.string.connecting
-            BaseService.CONNECTED -> R.string.stop
-            BaseService.STOPPING -> R.string.stopping
+            BaseService.State.Connecting -> R.string.connecting
+            BaseService.State.Connected -> R.string.stop
+            BaseService.State.Stopping -> R.string.stopping
             else -> R.string.connect
         })
         stats.setTitle(R.string.connection_test_pending)
-        stats.isVisible = state == BaseService.CONNECTED
-        if (state != BaseService.CONNECTED) {
+        stats.isVisible = state == BaseService.State.Connected
+        if (state != BaseService.State.Connected) {
             trafficUpdated(0, TrafficStats())
             tester.status.removeObservers(this)
-            if (state != BaseService.IDLE) tester.invalidate()
+            if (state != BaseService.State.Idle) tester.invalidate()
         } else tester.status.observe(this, Observer {
             it.retrieve(stats::setTitle) { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
         })
         if (msg != null) Toast.makeText(requireContext(), getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
-        if (state == BaseService.STOPPED) {
+        if (state == BaseService.State.Stopped) {
             controlImport.isEnabled = true
             tfo.isEnabled = true
             serviceMode.isEnabled = true
@@ -141,11 +141,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private val handler = Handler()
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
-        service.state
+        BaseService.State.values()[service.state]
     } catch (_: DeadObjectException) {
-        BaseService.IDLE
+        BaseService.State.Idle
     })
-    override fun onServiceDisconnected() = changeState(BaseService.IDLE)
+    override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
     override fun onBinderDied() {
         connection.disconnect(requireContext())
         connection.connect(requireContext(), this)
@@ -200,7 +200,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
 
         tester = ViewModelProviders.of(this).get()
-        changeState(BaseService.IDLE)   // reset everything to init state
+        changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(requireContext(), this)
         DataStore.publicStore.registerChangeListener(this)
     }
@@ -225,7 +225,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
 
     fun startService() {
         when {
-            state != BaseService.STOPPED -> return
+            state != BaseService.State.Stopped -> return
             DataStore.serviceMode == Key.modeVpn -> {
                 val intent = VpnService.prepare(requireContext())
                 if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
@@ -251,7 +251,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
 
     override fun onPreferenceTreeClick(preference: Preference?) = when (preference?.key) {
         Key.id -> {
-            if (state == BaseService.CONNECTED) Core.stopService()
+            if (state == BaseService.State.Connected) Core.stopService()
             true
         }
         Key.controlStats -> {

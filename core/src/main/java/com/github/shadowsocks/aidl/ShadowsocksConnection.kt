@@ -28,6 +28,7 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
+import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.ProxyService
 import com.github.shadowsocks.bg.TransproxyService
 import com.github.shadowsocks.bg.VpnService
@@ -51,7 +52,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     }
 
     interface Callback {
-        fun stateChanged(state: Int, profileName: String?, msg: String?)
+        fun stateChanged(state: BaseService.State, profileName: String?, msg: String?)
         fun trafficUpdated(profileId: Long, stats: TrafficStats) { }
         fun trafficPersisted(profileId: Long) { }
 
@@ -69,7 +70,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     private val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
             val callback = callback ?: return
-            handler.post { callback.stateChanged(state, profileName, msg) }
+            handler.post { callback.stateChanged(BaseService.State.values()[state], profileName, msg) }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
             val callback = callback ?: return

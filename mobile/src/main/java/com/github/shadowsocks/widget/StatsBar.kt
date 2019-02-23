@@ -65,15 +65,15 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         super.setOnClickListener(l)
     }
 
-    fun changeState(state: Int) {
+    fun changeState(state: BaseService.State) {
         val activity = context as MainActivity
-        if (state != BaseService.CONNECTED) {
+        if (state != BaseService.State.Connected) {
             updateTraffic(0, 0, 0, 0)
             tester.status.removeObservers(activity)
-            if (state != BaseService.IDLE) tester.invalidate()
+            if (state != BaseService.State.Idle) tester.invalidate()
             statusText.setText(when (state) {
-                BaseService.CONNECTING -> R.string.connecting
-                BaseService.STOPPING -> R.string.stopping
+                BaseService.State.Connecting -> R.string.connecting
+                BaseService.State.Stopping -> R.string.stopping
                 else -> R.string.not_connected
             })
         } else {
