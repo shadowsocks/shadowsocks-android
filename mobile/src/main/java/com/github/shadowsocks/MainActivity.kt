@@ -108,7 +108,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     // service
     var state = BaseService.State.Idle
-    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) = changeState(state, msg, true)
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
+            changeState(state, msg, true)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId == 0L) this@MainActivity.stats.updateTraffic(
                 stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
