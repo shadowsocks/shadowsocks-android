@@ -68,7 +68,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
             header.setFlag(Flags.QR.toInt())    // this is a response
             if (request.header.getFlag(Flags.RD.toInt())) header.setFlag(Flags.RD.toInt())
-            addRecord(request.question, Section.QUESTION)
+            request.question?.also { addRecord(it, Section.QUESTION) }
         }
     }
     private val monitor = ChannelMonitor()
@@ -99,30 +99,30 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             printLog(e)
             return forward(packet)
         }
-        return coroutineScope {
+        return supervisorScope {
             val remote = async { withTimeout(TIMEOUT) { forward(packet) } }
             try {
-                if (forwardOnly || request.header.opcode != Opcode.QUERY) return@coroutineScope remote.await()
+                if (forwardOnly || request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
                 val question = request.question
-                if (question?.type != Type.A) return@coroutineScope remote.await()
+                if (question?.type != Type.A) return@supervisorScope remote.await()
                 val host = question.name.toString(true)
-                if (remoteDomainMatcher?.containsMatchIn(host) == true) return@coroutineScope remote.await()
+                if (remoteDomainMatcher?.containsMatchIn(host) == true) return@supervisorScope remote.await()
                 val localResults = try {
                     withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
                 } catch (_: TimeoutCancellationException) {
                     Crashlytics.log(Log.WARN, TAG, "Local resolving timed out, falling back to remote resolving")
-                    return@coroutineScope remote.await()
+                    return@supervisorScope remote.await()
                 } catch (_: UnknownHostException) {
-                    return@coroutineScope remote.await()
+                    return@supervisorScope remote.await()
                 }
-                if (localResults.isEmpty()) return@coroutineScope remote.await()
+                if (localResults.isEmpty()) return@supervisorScope remote.await()
                 if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
                     remote.cancel()
                     ByteBuffer.wrap(prepareDnsResponse(request).apply {
                         header.setFlag(Flags.RA.toInt())   // recursion available
                         for (address in localResults) addRecord(when (address) {
-                            is Inet4Address -> ARecord(request.question.name, DClass.IN, TTL, address)
-                            is Inet6Address -> AAAARecord(request.question.name, DClass.IN, TTL, address)
+                            is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
+                            is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
                             else -> throw IllegalStateException("Unsupported address $address")
                         }, Section.ANSWER)
                     }.toWire())
@@ -159,7 +159,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             check(channel.send(remoteDns.udpWrap(packet), proxy) > 0)
             monitor.wait(channel, SelectionKey.OP_READ)
             val result = remoteDns.udpReceiveBuffer(UDP_PACKET_SIZE)
-            check(channel.receive(result) == proxy)
+            while (channel.receive(result) != proxy) result.clear()
             result.flip()
             remoteDns.udpUnwrap(result)
             result

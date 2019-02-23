@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.net
 
+import com.github.shadowsocks.utils.readableMessage
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
@@ -57,7 +58,7 @@ object TcpFastOpen {
             ProcessBuilder("su", "-c", "echo 3 > $PATH").redirectErrorStream(true).start()
                     .inputStream.bufferedReader().readText()
         } catch (e: IOException) {
-            e.localizedMessage
+            e.readableMessage
         }
     }
     fun enableTimeout() = runBlocking { withTimeoutOrNull(1000) { enable() } }

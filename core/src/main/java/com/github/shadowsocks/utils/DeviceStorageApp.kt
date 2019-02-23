@@ -36,5 +36,5 @@ class DeviceStorageApp(context: Context) : Application() {
      * Thou shalt not get the REAL underlying application context which would no longer be operating under device
      * protected storage.
      */
-    override fun getApplicationContext(): Context = this
+    override fun getApplicationContext() = this
 }

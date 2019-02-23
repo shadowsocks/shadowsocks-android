@@ -13,7 +13,7 @@
         app:summary="@string/stat_summary"/>
     <Preference
         app:key="control.import"
-        app:title="@string/action_import_file"/>
+        app:title="@string/action_replace_file"/>
     <Preference
         app:key="control.export"
         app:title="@string/action_export_file"/>

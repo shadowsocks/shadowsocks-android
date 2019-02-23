@@ -28,6 +28,7 @@ import android.os.DeadObjectException
 import android.os.Handler
 import android.os.IBinder
 import android.os.RemoteException
+import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.ProxyService
 import com.github.shadowsocks.bg.TransproxyService
 import com.github.shadowsocks.bg.VpnService
@@ -51,7 +52,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     }
 
     interface Callback {
-        fun stateChanged(state: Int, profileName: String?, msg: String?)
+        fun stateChanged(state: BaseService.State, profileName: String?, msg: String?)
         fun trafficUpdated(profileId: Long, stats: TrafficStats) { }
         fun trafficPersisted(profileId: Long) { }
 
@@ -68,13 +69,16 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     private var callback: Callback? = null
     private val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
-            handler.post { callback!!.stateChanged(state, profileName, msg) }
+            val callback = callback ?: return
+            handler.post { callback.stateChanged(BaseService.State.values()[state], profileName, msg) }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-            handler.post { callback!!.trafficUpdated(profileId, stats) }
+            val callback = callback ?: return
+            handler.post { callback.trafficUpdated(profileId, stats) }
         }
         override fun trafficPersisted(profileId: Long) {
-            handler.post { callback!!.trafficPersisted(profileId) }
+            val callback = callback ?: return
+            handler.post { callback.trafficPersisted(profileId) }
         }
     }
     private var binder: IBinder? = null
@@ -105,14 +109,14 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
 
     override fun onServiceDisconnected(name: ComponentName?) {
         unregisterCallback()
-        callback!!.onServiceDisconnected()
+        callback?.onServiceDisconnected()
         service = null
         binder = null
     }
 
     override fun binderDied() {
         service = null
-        handler.post(callback!!::onBinderDied)
+        callback?.also { handler.post(it::onBinderDied) }
     }
 
     private fun unregisterCallback() {

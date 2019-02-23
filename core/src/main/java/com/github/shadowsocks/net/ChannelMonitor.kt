@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.net
 
+import android.os.Build
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -65,23 +66,31 @@ class ChannelMonitor : Thread("ChannelMonitor") {
         start()
     }
 
+    /**
+     * Prevent NetworkOnMainThreadException because people enable strict mode for no reasons.
+     */
+    private suspend fun WritableByteChannel.writeCompat(src: ByteBuffer) =
+            if (Build.VERSION.SDK_INT <= 23) withContext(Dispatchers.Default) { write(src) } else write(src)
+
     suspend fun register(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit): SelectionKey {
         val registration = Registration(channel, ops, block)
         pendingRegistrations.send(registration)
         ByteBuffer.allocateDirect(1).also { junk ->
-            loop@ while (running) when (registrationPipe.sink().write(junk)) {
+            loop@ while (running) when (registrationPipe.sink().writeCompat(junk)) {
                 0 -> kotlinx.coroutines.yield()
                 1 -> break@loop
                 else -> throw IOException("Failed to register in the channel")
             }
         }
-        if (!running) throw ClosedChannelException()
+        if (!running) throw CancellationException()
         return registration.result.await()
     }
 
     suspend fun wait(channel: SelectableChannel, ops: Int) = CompletableDeferred<SelectionKey>().run {
         register(channel, ops) {
-            if (it.isValid) it.interestOps(0)       // stop listening
+            if (it.isValid) try {
+                it.interestOps(0)   // stop listening
+            } catch (_: CancelledKeyException) { }
             complete(it)
         }
         await()

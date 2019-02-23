@@ -61,7 +61,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             conn.doOutput = true
 
             val proxies = try {
-                withTimeoutOrNull(30_000) {
+                withTimeoutOrNull(10_000) {
                     withContext(Dispatchers.IO) {
                         conn.outputStream.bufferedWriter().use {
                             it.write("sig=" + Base64.encodeToString(mdg.digest(), Base64.DEFAULT))
@@ -80,7 +80,9 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             profile.method = proxy[3].trim()
         }
 
-        if (route == Acl.CUSTOM_RULES) Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10))
+        if (route == Acl.CUSTOM_RULES) withContext(Dispatchers.IO) {
+            Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
+        }
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) profile.host = withTimeoutOrNull(10_000) {

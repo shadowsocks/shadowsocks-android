@@ -65,7 +65,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
 
     open fun shutdown(scope: CoroutineScope) {
         running = false
-        localSocket.fileDescriptor.apply {
+        localSocket.fileDescriptor?.apply {
             // see also: https://issuetracker.google.com/issues/36945762#comment15
             if (valid()) try {
                 Os.shutdown(this, OsConstants.SHUT_RDWR)

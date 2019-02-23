@@ -49,12 +49,12 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import net.glxn.qrgen.android.QRCode
-import org.json.JSONArray
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -65,21 +65,16 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         private const val KEY_URL = "com.github.shadowsocks.QRCodeDialog.KEY_URL"
         private const val REQUEST_IMPORT_PROFILES = 1
+        private const val REQUEST_REPLACE_PROFILES = 3
         private const val REQUEST_EXPORT_PROFILES = 2
     }
 
     /**
      * Is ProfilesFragment editable at all.
      */
-    private val isEnabled get() = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED, BaseService.STOPPED -> true
-        else -> false
-    }
-    private fun isProfileEditable(id: Long) = when ((activity as MainActivity).state) {
-        BaseService.CONNECTED -> id !in Core.activeProfileIds
-        BaseService.STOPPED -> true
-        else -> false
-    }
+    private val isEnabled get() = (activity as MainActivity).state.let { it.canStop || it == BaseService.State.Stopped }
+    private fun isProfileEditable(id: Long) =
+            (activity as MainActivity).state == BaseService.State.Stopped || id !in Core.activeProfileIds
 
     @SuppressLint("ValidFragment")
     class QRCodeDialog() : DialogFragment() {
@@ -175,21 +170,20 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             var adView = adView
             if (item.host == "198.199.101.152") {
                 if (adView == null) {
-                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT)
+                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            AdSize.SMART_BANNER.getHeightInPixels(context))
                     params.gravity = Gravity.CENTER_HORIZONTAL
                     adView = AdView(context)
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
-                    adView.adSize = AdSize.FLUID
-                    val padding = context.resources.getDimensionPixelOffset(R.dimen.profile_padding)
-                    adView.setPadding(padding, 0, 0, padding)
+                    adView.adSize = AdSize.SMART_BANNER
 
                     itemView.findViewById<LinearLayout>(R.id.content).addView(adView)
 
                     // Load Ad
                     val adBuilder = AdRequest.Builder()
                     adBuilder.addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
+                    adBuilder.addTestDevice("7509D18EB8AF82F915874FEF53877A64")
                     adView.loadAd(adBuilder.build())
                     this.adView = adView
                 } else adView.visibility = View.VISIBLE
@@ -203,7 +197,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 Core.switchProfile(item.id)
                 profilesAdapter.refreshId(old)
                 itemView.isSelected = true
-                if (activity.state == BaseService.CONNECTED) Core.reloadService()
+                if (activity.state.canStop) Core.reloadService()
             }
         }
 
@@ -296,6 +290,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             notifyItemRemoved(index)
             if (profileId == DataStore.profileId) DataStore.profileId = 0   // switch to null profile
         }
+
+        override fun onCleared() {
+            profiles.clear()
+            notifyDataSetChanged()
+        }
     }
 
     private var selectedItem: ProfileViewHolder? = null
@@ -383,10 +382,18 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_import_file -> {
                 startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/json"
+                    type = "application/*"
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
                 }, REQUEST_IMPORT_PROFILES)
+                true
+            }
+            R.id.action_replace_file -> {
+                startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+                    type = "application/*"
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
+                }, REQUEST_REPLACE_PROFILES)
                 true
             }
             R.id.action_manual_settings -> {
@@ -404,7 +411,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_export_file -> {
                 startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/json"
                     putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
                 }, REQUEST_EXPORT_PROFILES)
@@ -414,9 +420,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
     }
 
-    private fun startFilesForResult(intent: Intent?, requestCode: Int) {
+    private fun startFilesForResult(intent: Intent, requestCode: Int) {
         try {
-            startActivityForResult(intent, requestCode)
+            startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
             return
         } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
         (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
@@ -426,31 +432,34 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         if (resultCode != Activity.RESULT_OK) super.onActivityResult(requestCode, resultCode, data)
         else when (requestCode) {
             REQUEST_IMPORT_PROFILES -> {
-                val feature = Core.currentProfile?.first
-                var success = false
                 val activity = activity as MainActivity
-                for (uri in data!!.datas) try {
-                    Profile.parseJson(activity.contentResolver.openInputStream(uri)!!.bufferedReader().readText(),
-                            feature) {
-                        ProfileManager.createProfile(it)
-                        success = true
-                    }
+                try {
+                    ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
+                        activity.contentResolver.openInputStream(it)
+                    })
                 } catch (e: Exception) {
-                    printLog(e)
+                    activity.snackbar(e.readableMessage).show()
                 }
-                activity.snackbar().setText(if (success) R.string.action_import_msg else R.string.action_import_err)
-                        .show()
+            }
+            REQUEST_REPLACE_PROFILES -> {
+                val activity = activity as MainActivity
+                try {
+                    ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
+                        activity.contentResolver.openInputStream(it)
+                    }, true)
+                } catch (e: Exception) {
+                    activity.snackbar(e.readableMessage).show()
+                }
             }
             REQUEST_EXPORT_PROFILES -> {
-                val profiles = ProfileManager.getAllProfiles()
+                val profiles = ProfileManager.serializeToJson()
                 if (profiles != null) try {
-                    val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
                     requireContext().contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
-                        it.write(JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray()).toString(2))
+                        it.write(profiles.toString(2))
                     }
                 } catch (e: Exception) {
                     printLog(e)
-                    (activity as MainActivity).snackbar(e.localizedMessage).show()
+                    (activity as MainActivity).snackbar(e.readableMessage).show()
                 }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)

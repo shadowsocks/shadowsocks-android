@@ -88,8 +88,8 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             portTransproxy.isEnabled = enabledTransproxy
             true
         }
-        val listener: (Int) -> Unit = {
-            if (it == BaseService.STOPPED) {
+        val listener: (BaseService.State) -> Unit = {
+            if (it == BaseService.State.Stopped) {
                 tfo.isEnabled = true
                 serviceMode.isEnabled = true
                 portProxy.isEnabled = true

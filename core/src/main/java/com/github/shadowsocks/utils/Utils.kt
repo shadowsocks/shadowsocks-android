@@ -42,6 +42,8 @@ import kotlinx.coroutines.launch
 import java.net.HttpURLConnection
 import java.net.InetAddress
 
+val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
+
 private val parseNumericAddress by lazy {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
         isAccessible = true

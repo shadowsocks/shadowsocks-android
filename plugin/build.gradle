@@ -1,7 +1,17 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.vanniktech.maven.publish'
 
-apply from: 'gradle-mvn-push.gradle'
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getRepositoryUsername() {
+    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+}
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+def getRepositoryPassword() {
+    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
+}
 
 android {
     buildToolsVersion rootProject.buildToolsVersion
@@ -10,15 +20,30 @@ android {
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.sdkVersion
-        versionCode 8
-        versionName "1.1.0"
+        versionCode Integer.parseInt(VERSION_CODE)
+        versionName VERSION_NAME
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.testgetRepositoryPassword().runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             minifyEnabled false
+        }
+    }
+}
+
+androidExtensions {
+    experimental = true
+}
+
+mavenPublish {
+    targets {
+        uploadArchives {
+            releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            repositoryUsername = getRepositoryUsername()
+            repositoryPassword = getRepositoryPassword()
         }
     }
 }

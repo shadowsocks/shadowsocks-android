@@ -68,14 +68,14 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         return drawableState
     }
 
-    fun changeState(state: Int, animate: Boolean) {
+    fun changeState(state: BaseService.State, animate: Boolean) {
         when (state) {
-            BaseService.CONNECTING -> changeState(iconConnecting, animate)
-            BaseService.CONNECTED -> changeState(iconConnected, animate)
-            BaseService.STOPPING -> changeState(iconStopping, animate)
+            BaseService.State.Connecting -> changeState(iconConnecting, animate)
+            BaseService.State.Connected -> changeState(iconConnected, animate)
+            BaseService.State.Stopping -> changeState(iconStopping, animate)
             else -> changeState(iconStopped, animate)
         }
-        if (state == BaseService.CONNECTED) {
+        if (state == BaseService.State.Connected) {
             checked = true
             TooltipCompat.setTooltipText(this, context.getString(R.string.stop))
         } else {
@@ -83,7 +83,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
             TooltipCompat.setTooltipText(this, context.getString(R.string.connect))
         }
         refreshDrawableState()
-        isEnabled = state == BaseService.CONNECTED || state == BaseService.STOPPED
+        isEnabled = state.canStop || state == BaseService.State.Stopped
     }
 
     private fun counters(a: AnimatedVectorDrawableCompat, b: AnimatedVectorDrawableCompat): Boolean =
