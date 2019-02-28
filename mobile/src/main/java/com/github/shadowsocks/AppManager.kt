@@ -67,8 +67,13 @@ class AppManager : AppCompatActivity() {
             }
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
             val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                    .filter { it.packageName != app.packageName &&
-                            it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false }
+                    .filter {
+                        when {
+                            it.packageName == app.packageName -> false
+                            it.packageName == "android" -> true
+                            else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false
+                        }
+                    }
             this.cachedApps = cachedApps
             cachedApps
         }.map {
