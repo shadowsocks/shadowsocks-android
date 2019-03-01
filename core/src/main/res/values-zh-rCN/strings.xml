@@ -25,7 +25,10 @@
 <string name="proxied_apps">"分应用 VPN"</string>
 <string name="proxied_apps_summary">"允许部分应用绕过 VPN"</string>
 <string name="on">"启用"</string>
-<string name="bypass_apps">"绕行模式"</string>
+<string name="off">禁用</string>
+<string name="mode">模式</string>
+<string name="bypass_apps">绕行</string>
+<string name="quick_search">快速搜索</string>
 <string name="bypass_apps_summary">"绕过选择的应用"</string>
 <string name="auto_connect">"自动连接"</string>
 <string name="auto_connect_summary">"允许 Shadowsocks 随系统启动"</string>
