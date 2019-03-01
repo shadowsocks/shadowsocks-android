@@ -32,11 +32,10 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
-import android.widget.ImageView
-import android.widget.RadioButton
-import android.widget.Switch
-import android.widget.TextView
+import android.widget.*
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -126,18 +125,47 @@ class AppManager : AppCompatActivity() {
         }
     }
 
-    private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>() {
+    private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>(), Filterable {
         private var apps = listOf<ProxiedApp>()
+        private var filteredApps = apps
 
         suspend fun reload() {
             apps = getApps(packageManager)
                     .sortedWith(compareBy({ !proxiedApps.contains(it.packageName) }, { it.name.toString() }))
+            filteredApps = apps
         }
 
-        override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(apps[position])
+        override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder =
                 AppViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.layout_apps_item, parent, false))
-        override fun getItemCount(): Int = apps.size
+        override fun getItemCount(): Int = filteredApps.size
+
+        override fun getFilter(): Filter {
+            return object: Filter() {
+                override fun performFiltering(constraint: CharSequence): FilterResults {
+                    val filteredApps = if (constraint.isEmpty()) {
+                        apps
+                    } else {
+                        apps.filter {
+                            it.name.contains(constraint, true) ||
+                                    it.packageName.contains(constraint, true) ||
+                                    it.uid.toString().contains(constraint)
+                        }
+                    }
+
+                    return FilterResults().also {
+                        it.count = filteredApps.size
+                        it.values = filteredApps
+                    }
+                }
+
+                override fun publishResults(constraint: CharSequence, results: FilterResults) {
+                    @Suppress("UNCHECKED_CAST")
+                    filteredApps = results.values as List<ProxiedApp>
+                    notifyDataSetChanged()
+                }
+            }
+        }
     }
 
     private lateinit var proxiedApps: HashSet<String>
@@ -145,6 +173,7 @@ class AppManager : AppCompatActivity() {
     private lateinit var bypassSwitch: RadioButton
     private lateinit var appListView: RecyclerView
     private lateinit var loadingView: View
+    private lateinit var editQuery: EditText
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
     private var loader: Job? = null
 
@@ -173,7 +202,14 @@ class AppManager : AppCompatActivity() {
             loadingView.crossFadeFrom(appListView)
             val adapter = appListView.adapter as AppsAdapter
             withContext(Dispatchers.IO) { adapter.reload() }
-            adapter.notifyDataSetChanged()
+
+            val queryText = editQuery.text
+            if (queryText.isEmpty()) {
+                adapter.notifyDataSetChanged()
+            } else {
+                adapter.filter.filter(queryText)
+            }
+
             appListView.crossFadeFrom(loadingView)
         }
     }
@@ -221,7 +257,21 @@ class AppManager : AppCompatActivity() {
         appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         appListView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
         appListView.itemAnimator = DefaultItemAnimator()
-        appListView.adapter = AppsAdapter()
+        val appsAdapter = AppsAdapter()
+        appListView.adapter = appsAdapter
+
+        editQuery = findViewById(R.id.edit_query)
+        editQuery.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+                appsAdapter.filter.filter(s)
+            }
+        })
 
         instance = this
         loadApps()
