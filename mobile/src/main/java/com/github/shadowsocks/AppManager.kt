@@ -50,6 +50,8 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.google.android.material.snackbar.Snackbar
+import com.google.common.collect.Multimap
+import com.google.common.collect.MultimapBuilder
 import kotlinx.coroutines.*
 
 class AppManager : AppCompatActivity() {
@@ -97,7 +99,6 @@ class AppManager : AppCompatActivity() {
         private val tvTitle = view.findViewById<TextView>(R.id.title)
         private val tvDesc = view.findViewById<TextView>(R.id.desc)
         private lateinit var item: ProxiedApp
-        private val proxied get() = proxiedApps.contains(item.packageName)
 
         init {
             view.setOnClickListener(this)
@@ -106,36 +107,62 @@ class AppManager : AppCompatActivity() {
         @SuppressLint("SetTextI18n")
         fun bind(app: ProxiedApp) {
             this.item = app
+
             icon.setImageDrawable(app.icon)
             tvTitle.text = app.name
             tvDesc.text = "${app.uid}(${app.packageName})"
-            check.isChecked = proxied
+            check.isChecked = isProxiedApp(app)
+        }
+
+        fun handlePayload(payloads: List<String>) {
+            if (payloads.contains("switch")) {
+                check.isChecked = isProxiedApp(item)
+            }
         }
 
         override fun onClick(v: View?) {
-            if (proxied) {
-                proxiedApps.remove(item.packageName)
-                check.isChecked = false
+            if (isProxiedApp(item)) {
+                val list = proxiedUidMap.removeAll(item.uid)
+                proxiedApps.removeAll(list)
             } else {
                 proxiedApps.add(item.packageName)
-                check.isChecked = true
+                proxiedUidMap.put(item.uid, item.packageName)
             }
             DataStore.individual = proxiedApps.joinToString("\n")
             DataStore.dirty = true
+
+            appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, "switch")
         }
     }
 
     private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>(), Filterable {
-        private var apps = listOf<ProxiedApp>()
         private var filteredApps = apps
 
         suspend fun reload() {
-            apps = getApps(packageManager)
-                    .sortedWith(compareBy({ !proxiedApps.contains(it.packageName) }, { it.name.toString() }))
+            val list = getApps(packageManager)
+
+            val map = MultimapBuilder.treeKeys().arrayListValues().build<Int, String>()
+            list.filter { app ->
+                app.packageName in proxiedApps
+            }.forEach { app ->
+                map.put(app.uid, app.packageName)
+            }
+            proxiedUidMap = map
+
+            apps = list.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
             filteredApps = apps
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
+        override fun onBindViewHolder(holder: AppViewHolder, position: Int, payloads: List<Any>) {
+            if (payloads.isNotEmpty()) {
+                @Suppress("UNCHECKED_CAST")
+                holder.handlePayload(payloads as List<String>)
+                return
+            }
+
+            onBindViewHolder(holder, position)
+        }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder =
                 AppViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.layout_apps_item, parent, false))
         override fun getItemCount(): Int = filteredApps.size
@@ -169,13 +196,16 @@ class AppManager : AppCompatActivity() {
     }
 
     private lateinit var proxiedApps: HashSet<String>
+    private lateinit var proxiedUidMap: Multimap<Int, String>
     private lateinit var toolbar: Toolbar
     private lateinit var bypassSwitch: RadioButton
     private lateinit var appListView: RecyclerView
     private lateinit var loadingView: View
     private lateinit var editQuery: EditText
+    private lateinit var appsAdapter: AppsAdapter
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
     private var loader: Job? = null
+    private var apps = listOf<ProxiedApp>()
 
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime).toLong() }
     private fun View.crossFadeFrom(other: View) {
@@ -195,6 +225,11 @@ class AppManager : AppCompatActivity() {
     private fun initProxiedApps(str: String = DataStore.individual) {
         proxiedApps = str.split('\n').toHashSet()
     }
+
+    private fun isProxiedApp(app: ProxiedApp): Boolean {
+        return proxiedUidMap.containsKey(app.uid)
+    }
+
     @UiThread
     private fun loadApps() {
         loader?.cancel()
@@ -257,7 +292,7 @@ class AppManager : AppCompatActivity() {
         appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         appListView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
         appListView.itemAnimator = DefaultItemAnimator()
-        val appsAdapter = AppsAdapter()
+        appsAdapter = AppsAdapter()
         appListView.adapter = appsAdapter
 
         editQuery = findViewById(R.id.edit_query)
