@@ -168,7 +168,7 @@ class AppManager : AppCompatActivity() {
         override fun getItemCount(): Int = filteredApps.size
 
         override fun getFilter(): Filter {
-            return object: Filter() {
+            return object : Filter() {
                 override fun performFiltering(constraint: CharSequence): FilterResults {
                     val filteredApps = if (constraint.isEmpty()) {
                         apps
@@ -226,9 +226,7 @@ class AppManager : AppCompatActivity() {
         proxiedApps = str.split('\n').toHashSet()
     }
 
-    private fun isProxiedApp(app: ProxiedApp): Boolean {
-        return proxiedUidMap.containsKey(app.uid)
-    }
+    private fun isProxiedApp(app: ProxiedApp) = proxiedUidMap.containsKey(app.uid)
 
     @UiThread
     private fun loadApps() {
