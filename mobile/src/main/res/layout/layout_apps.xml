@@ -8,40 +8,61 @@
     android:orientation="vertical"
     android:duplicateParentState="false">
   <include layout="@layout/toolbar_light_dark"/>
-  <LinearLayout android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:elevation="1dp"
-                android:background="?android:colorBackground"
-                android:orientation="vertical"
-                tools:ignore="RtlSymmetry">
 
-    <Switch
-        android:id="@+id/onSwitch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:paddingBottom="12dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="72dp"
-        android:paddingTop="12dp"
-        android:text="@string/on"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="18sp"/>
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/linearLayout2"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:background="?android:colorBackground"
+      android:elevation="1dp">
 
-    <Switch
-        android:id="@+id/bypassSwitch"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tv_mode"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:checked="true"
-        android:paddingBottom="12dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="72dp"
-        android:paddingTop="12dp"
-        android:text="@string/bypass_apps"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="18sp"
-        android:tooltipText="@string/bypass_apps_summary"/>
-  </LinearLayout>
+        android:layout_marginStart="16dp"
+        android:text="@string/mode"
+        app:layout_constraintBottom_toBottomOf="@+id/radioGroup"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/radioGroup" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_mode"
+        app:layout_constraintTop_toTopOf="parent">
+
+      <RadioButton
+          android:id="@+id/btn_off"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/off" />
+
+      <RadioButton
+          android:id="@+id/btn_on"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/on" />
+
+      <RadioButton
+          android:id="@+id/btn_bypass"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/bypass_apps"
+          android:tooltipText="@string/bypass_apps_summary" />
+    </RadioGroup>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
   <androidx.coordinatorlayout.widget.CoordinatorLayout
       android:id="@+id/snackbar"
       android:layout_width="match_parent"
