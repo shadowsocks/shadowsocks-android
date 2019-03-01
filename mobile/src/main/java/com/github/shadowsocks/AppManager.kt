@@ -34,12 +34,15 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
 import android.widget.ImageView
+import android.widget.RadioButton
 import android.widget.Switch
+import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.Core.app
@@ -86,11 +89,14 @@ class AppManager : AppCompatActivity() {
                              val packageName: String) {
         val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
         val icon: Drawable get() = appInfo.loadIcon(pm)
+        val uid = appInfo.uid
     }
 
     private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private val icon = view.findViewById<ImageView>(R.id.itemicon)
         private val check = view.findViewById<Switch>(R.id.itemcheck)
+        private val tvTitle = view.findViewById<TextView>(R.id.title)
+        private val tvDesc = view.findViewById<TextView>(R.id.desc)
         private lateinit var item: ProxiedApp
         private val proxied get() = proxiedApps.contains(item.packageName)
 
@@ -98,10 +104,12 @@ class AppManager : AppCompatActivity() {
             view.setOnClickListener(this)
         }
 
+        @SuppressLint("SetTextI18n")
         fun bind(app: ProxiedApp) {
             this.item = app
             icon.setImageDrawable(app.icon)
-            check.text = app.name
+            tvTitle.text = app.name
+            tvDesc.text = "${app.uid}(${app.packageName})"
             check.isChecked = proxied
         }
 
@@ -134,7 +142,7 @@ class AppManager : AppCompatActivity() {
 
     private lateinit var proxiedApps: HashSet<String>
     private lateinit var toolbar: Toolbar
-    private lateinit var bypassSwitch: Switch
+    private lateinit var bypassSwitch: RadioButton
     private lateinit var appListView: RecyclerView
     private lateinit var loadingView: View
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
@@ -181,13 +189,26 @@ class AppManager : AppCompatActivity() {
             DataStore.proxyApps = true
             DataStore.dirty = true
         }
-        findViewById<Switch>(R.id.onSwitch).setOnCheckedChangeListener { _, checked ->
-            DataStore.proxyApps = checked
+
+        val switchListener = { switch: Boolean ->
+            DataStore.proxyApps = switch
             DataStore.dirty = true
-            finish()
+            if (!switch) {
+                finish()
+            }
+        }
+        val btnOn = findViewById<RadioButton>(R.id.btn_on)
+        val btnOff = findViewById<RadioButton>(R.id.btn_off)
+        (if (DataStore.proxyApps) btnOn else btnOff).isChecked = true
+
+        btnOn.setOnCheckedChangeListener { _, b ->
+            if (b) switchListener(true)
+        }
+        btnOff.setOnCheckedChangeListener { _, b ->
+            if (b) switchListener(false)
         }
 
-        bypassSwitch = findViewById(R.id.bypassSwitch)
+        bypassSwitch = findViewById(R.id.btn_bypass)
         bypassSwitch.isChecked = DataStore.bypass
         bypassSwitch.setOnCheckedChangeListener { _, checked ->
             DataStore.bypass = checked
@@ -198,6 +219,7 @@ class AppManager : AppCompatActivity() {
         loadingView = findViewById(R.id.loading)
         appListView = findViewById(R.id.list)
         appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        appListView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
         appListView.itemAnimator = DefaultItemAnimator()
         appListView.adapter = AppsAdapter()
 
