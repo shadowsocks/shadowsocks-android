@@ -157,9 +157,12 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             channel.configureBlocking(false)
             monitor.wait(channel, SelectionKey.OP_WRITE)
             check(channel.send(remoteDns.udpWrap(packet), proxy) > 0)
-            monitor.wait(channel, SelectionKey.OP_READ)
             val result = remoteDns.udpReceiveBuffer(UDP_PACKET_SIZE)
-            while (channel.receive(result) != proxy) result.clear()
+            while (isActive) {
+                monitor.wait(channel, SelectionKey.OP_READ)
+                if (channel.receive(result) == proxy) break
+                result.clear()
+            }
             result.flip()
             remoteDns.udpUnwrap(result)
             result
