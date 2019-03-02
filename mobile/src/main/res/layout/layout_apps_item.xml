@@ -51,7 +51,7 @@
         app:layout_constraintEnd_toEndOf="@+id/title"
         app:layout_constraintStart_toStartOf="@+id/title"
         app:layout_constraintTop_toBottomOf="@+id/title"
-        tools:text="10036(com.package.name)" />
+        tools:text="com.package.name (10000)" />
 
     <Switch
         android:id="@+id/itemcheck"

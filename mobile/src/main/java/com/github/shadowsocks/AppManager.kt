@@ -109,7 +109,7 @@ class AppManager : AppCompatActivity() {
 
             icon.setImageDrawable(app.icon)
             tvTitle.text = app.name
-            tvDesc.text = "${app.uid}(${app.packageName})"
+            tvDesc.text = "${app.packageName} (${app.uid})"
             check.isChecked = isProxiedApp(app)
         }
 
