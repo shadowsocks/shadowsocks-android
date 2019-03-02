@@ -41,7 +41,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.Core.app
@@ -72,9 +71,9 @@ class AppManager : AppCompatActivity() {
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
             val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
                     .filter {
-                        when {
-                            it.packageName == app.packageName -> false
-                            it.packageName == "android" -> true
+                        when (it.packageName) {
+                            app.packageName -> false
+                            "android" -> true
                             else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false
                         }
                     }
@@ -90,7 +89,7 @@ class AppManager : AppCompatActivity() {
                              val packageName: String) {
         val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
         val icon: Drawable get() = appInfo.loadIcon(pm)
-        val uid = appInfo.uid
+        val uid get() = appInfo.uid
     }
 
     private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -288,7 +287,6 @@ class AppManager : AppCompatActivity() {
         loadingView = findViewById(R.id.loading)
         appListView = findViewById(R.id.list)
         appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        appListView.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
         appListView.itemAnimator = DefaultItemAnimator()
         appsAdapter = AppsAdapter()
         appListView.adapter = appsAdapter
