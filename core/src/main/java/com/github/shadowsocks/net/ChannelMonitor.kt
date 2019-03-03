@@ -100,7 +100,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
         while (running) {
             val num = try {
                 selector.select()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 printLog(e)
                 continue
             }
