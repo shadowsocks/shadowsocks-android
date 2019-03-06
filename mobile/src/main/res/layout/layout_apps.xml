@@ -38,26 +38,27 @@
         app:layout_constraintStart_toEndOf="@+id/tv_mode"
         app:layout_constraintTop_toTopOf="parent">
 
-      <RadioButton
+      <androidx.appcompat.widget.AppCompatRadioButton
           android:id="@+id/btn_off"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/off" />
 
-      <RadioButton
+      <androidx.appcompat.widget.AppCompatRadioButton
           android:id="@+id/btn_on"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/on" />
 
-      <RadioButton
+      <androidx.appcompat.widget.AppCompatRadioButton
           android:id="@+id/btn_bypass"
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
           android:text="@string/bypass_apps"
+          tools:checked="true"
           android:tooltipText="@string/bypass_apps_summary" />
     </RadioGroup>
 
