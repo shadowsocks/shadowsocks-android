@@ -7,10 +7,27 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:duplicateParentState="false">
-  <include layout="@layout/toolbar_light_dark"/>
+  <androidx.appcompat.widget.Toolbar
+      android:layout_height="?attr/actionBarSize"
+      android:layout_width="match_parent"
+      android:background="?attr/colorPrimary"
+      android:elevation="4dp"
+      android:touchscreenBlocksFocus="false"
+      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+      app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"
+      android:id="@+id/toolbar">
+
+    <SearchView
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:iconifiedByDefault="false"
+        android:queryHint="@android:string/search_go"/>
+
+  </androidx.appcompat.widget.Toolbar>
 
   <androidx.constraintlayout.widget.ConstraintLayout
-      android:id="@+id/linearLayout2"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
       android:background="?android:colorBackground"
@@ -22,13 +39,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:minWidth="40dp"
-        android:text="@string/mode"
-        app:layout_constraintBottom_toBottomOf="@+id/bypass_group"
+        android:text="@string/proxied_apps_mode"
+        app:layout_constraintBottom_toBottomOf="@+id/bypassGroup"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/bypass_group" />
+        app:layout_constraintTop_toTopOf="@+id/bypassGroup" />
 
     <RadioGroup
-        android:id="@+id/bypass_group"
+        android:id="@+id/bypassGroup"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -61,20 +78,6 @@
           tools:checked="true"
           android:tooltipText="@string/bypass_apps_summary" />
     </RadioGroup>
-
-    <EditText
-        android:id="@+id/edit_query"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="68dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:hint="@string/quick_search"
-        android:inputType="textFilter"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bypass_group" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 
