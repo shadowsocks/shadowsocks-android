@@ -146,28 +146,24 @@ class AppManager : AppCompatActivity() {
                 AppViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.layout_apps_item, parent, false))
         override fun getItemCount(): Int = filteredApps.size
 
-        override fun getFilter(): Filter {
-            return object : Filter() {
-                override fun performFiltering(constraint: CharSequence): FilterResults {
-                    val filteredApps = if (constraint.isEmpty()) apps else apps.filter {
-                        it.name.contains(constraint, true) ||
-                                it.packageName.contains(constraint, true) ||
-                                it.uid.toString().contains(constraint)
-                    }
-
-                    return FilterResults().also {
-                        it.count = filteredApps.size
-                        it.values = filteredApps
-                    }
+        private val filterImpl = object : Filter() {
+            override fun performFiltering(constraint: CharSequence) = FilterResults().apply {
+                val filteredApps = if (constraint.isEmpty()) apps else apps.filter {
+                    it.name.contains(constraint, true) ||
+                            it.packageName.contains(constraint, true) ||
+                            it.uid.toString().contains(constraint)
                 }
+                count = filteredApps.size
+                values = filteredApps
+            }
 
-                override fun publishResults(constraint: CharSequence, results: FilterResults) {
-                    @Suppress("UNCHECKED_CAST")
-                    filteredApps = results.values as List<ProxiedApp>
-                    notifyDataSetChanged()
-                }
+            override fun publishResults(constraint: CharSequence, results: FilterResults) {
+                @Suppress("UNCHECKED_CAST")
+                filteredApps = results.values as List<ProxiedApp>
+                notifyDataSetChanged()
             }
         }
+        override fun getFilter(): Filter = filterImpl
     }
 
     private val proxiedUids = SparseBooleanArray()
@@ -206,14 +202,7 @@ class AppManager : AppCompatActivity() {
             loading.crossFadeFrom(list)
             val adapter = list.adapter as AppsAdapter
             withContext(Dispatchers.IO) { adapter.reload() }
-
-            val queryText = search.query
-            if (queryText.isNullOrEmpty()) {
-                adapter.notifyDataSetChanged()
-            } else {
-                adapter.filter.filter(queryText)
-            }
-
+            adapter.filter.filter(search.query)
             list.crossFadeFrom(loading)
         }
     }
