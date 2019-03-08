@@ -117,6 +117,7 @@ object BaseService {
             repeat(callbacks.beginBroadcast()) {
                 try {
                     work(callbacks.getBroadcastItem(it))
+                } catch (_: DeadObjectException) {
                 } catch (e: Exception) {
                     printLog(e)
                 }
