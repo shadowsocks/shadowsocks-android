@@ -47,8 +47,7 @@
   <string name="proxied_apps_summary">Configure VPN mode for selected apps</string>
   <string name="on">On</string>
   <string name="off">Off</string>
-  <string name="mode">Mode</string>
-  <string name="quick_search">Quick search</string>
+  <string name="proxied_apps_mode">Mode</string>
   <string name="bypass_apps">Bypass</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>

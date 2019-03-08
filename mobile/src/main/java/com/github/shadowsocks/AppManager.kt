@@ -32,13 +32,12 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.*
-import android.widget.*
+import android.widget.Filter
+import android.widget.Filterable
+import android.widget.SearchView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -51,6 +50,8 @@ import com.github.shadowsocks.utils.Key
 import com.google.android.material.snackbar.Snackbar
 import com.google.common.collect.Multimap
 import com.google.common.collect.MultimapBuilder
+import kotlinx.android.synthetic.main.layout_apps.*
+import kotlinx.android.synthetic.main.layout_apps_item.view.*
 import kotlinx.coroutines.*
 
 class AppManager : AppCompatActivity() {
@@ -93,30 +94,22 @@ class AppManager : AppCompatActivity() {
     }
 
     private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
-        private val icon = view.findViewById<ImageView>(R.id.itemicon)
-        private val check = view.findViewById<Switch>(R.id.itemcheck)
-        private val tvTitle = view.findViewById<TextView>(R.id.title)
-        private val tvDesc = view.findViewById<TextView>(R.id.desc)
         private lateinit var item: ProxiedApp
 
         init {
             view.setOnClickListener(this)
         }
 
-        @SuppressLint("SetTextI18n")
         fun bind(app: ProxiedApp) {
-            this.item = app
-
-            icon.setImageDrawable(app.icon)
-            tvTitle.text = app.name
-            tvDesc.text = "${app.packageName} (${app.uid})"
-            check.isChecked = isProxiedApp(app)
+            item = app
+            itemView.itemicon.setImageDrawable(app.icon)
+            itemView.title.text = app.name
+            itemView.desc.text = "${app.packageName} (${app.uid})"
+            itemView.itemcheck.isChecked = isProxiedApp(app)
         }
 
         fun handlePayload(payloads: List<String>) {
-            if (payloads.contains("switch")) {
-                check.isChecked = isProxiedApp(item)
-            }
+            if (payloads.contains("switch")) itemView.itemcheck.isChecked = isProxiedApp(item)
         }
 
         override fun onClick(v: View?) {
@@ -169,14 +162,10 @@ class AppManager : AppCompatActivity() {
         override fun getFilter(): Filter {
             return object : Filter() {
                 override fun performFiltering(constraint: CharSequence): FilterResults {
-                    val filteredApps = if (constraint.isEmpty()) {
-                        apps
-                    } else {
-                        apps.filter {
-                            it.name.contains(constraint, true) ||
-                                    it.packageName.contains(constraint, true) ||
-                                    it.uid.toString().contains(constraint)
-                        }
+                    val filteredApps = if (constraint.isEmpty()) apps else apps.filter {
+                        it.name.contains(constraint, true) ||
+                                it.packageName.contains(constraint, true) ||
+                                it.uid.toString().contains(constraint)
                     }
 
                     return FilterResults().also {
@@ -196,11 +185,6 @@ class AppManager : AppCompatActivity() {
 
     private lateinit var proxiedApps: HashSet<String>
     private lateinit var proxiedUidMap: Multimap<Int, String>
-    private lateinit var toolbar: Toolbar
-    private lateinit var bypassGroup: RadioGroup
-    private lateinit var appListView: RecyclerView
-    private lateinit var loadingView: View
-    private lateinit var editQuery: EditText
     private lateinit var appsAdapter: AppsAdapter
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
     private var loader: Job? = null
@@ -231,25 +215,24 @@ class AppManager : AppCompatActivity() {
     private fun loadApps() {
         loader?.cancel()
         loader = GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
-            loadingView.crossFadeFrom(appListView)
-            val adapter = appListView.adapter as AppsAdapter
+            loading.crossFadeFrom(list)
+            val adapter = list.adapter as AppsAdapter
             withContext(Dispatchers.IO) { adapter.reload() }
 
-            val queryText = editQuery.text
-            if (queryText.isEmpty()) {
+            val queryText = search.query
+            if (queryText.isNullOrEmpty()) {
                 adapter.notifyDataSetChanged()
             } else {
                 adapter.filter.filter(queryText)
             }
 
-            appListView.crossFadeFrom(loadingView)
+            list.crossFadeFrom(loading)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_apps)
-        toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -258,7 +241,6 @@ class AppManager : AppCompatActivity() {
             DataStore.dirty = true
         }
 
-        bypassGroup = findViewById(R.id.bypass_group)
         bypassGroup.check(if (DataStore.bypass) R.id.btn_bypass else R.id.btn_on)
         bypassGroup.setOnCheckedChangeListener { _, checkedId ->
             DataStore.dirty = true
@@ -273,24 +255,14 @@ class AppManager : AppCompatActivity() {
         }
 
         initProxiedApps()
-        loadingView = findViewById(R.id.loading)
-        appListView = findViewById(R.id.list)
-        appListView.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        appListView.itemAnimator = DefaultItemAnimator()
+        list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
+        list.itemAnimator = DefaultItemAnimator()
         appsAdapter = AppsAdapter()
-        appListView.adapter = appsAdapter
+        list.adapter = appsAdapter
 
-        editQuery = findViewById(R.id.edit_query)
-        editQuery.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                appsAdapter.filter.filter(s)
-            }
+        search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?) = false
+            override fun onQueryTextChange(newText: String?) = true.also { appsAdapter.filter.filter(newText) }
         })
 
         instance = this
@@ -312,14 +284,14 @@ class AppManager : AppCompatActivity() {
                         ProfileManager.updateProfile(it)
                     }
                     if (DataStore.directBootAware) DirectBoot.update()
-                    Snackbar.make(appListView, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
-                } else Snackbar.make(appListView, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(list, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
+                } else Snackbar.make(list, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
                 return true
             }
             R.id.action_export_clipboard -> {
                 clipboard.primaryClip = ClipData.newPlainText(Key.individual,
                         "${DataStore.bypass}\n${DataStore.individual}")
-                Snackbar.make(appListView, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(list, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
                 return true
             }
             R.id.action_import_clipboard -> {
@@ -332,13 +304,13 @@ class AppManager : AppCompatActivity() {
                         bypassGroup.check(if (enabled.toBoolean()) R.id.btn_bypass else R.id.btn_on)
                         DataStore.individual = apps
                         DataStore.dirty = true
-                        Snackbar.make(appListView, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                         initProxiedApps(apps)
                         loadApps()
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
-                Snackbar.make(appListView, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
             }
         }
         return false
