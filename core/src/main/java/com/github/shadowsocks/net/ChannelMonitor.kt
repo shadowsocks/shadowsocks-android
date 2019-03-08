@@ -55,7 +55,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
                     pendingRegistrations.poll()!!.apply {
                         try {
                             result.complete(registerInternal(channel, ops, listener))
-                        } catch (e: ClosedChannelException) {
+                        } catch (e: Exception) {
                             result.completeExceptionally(e)
                         }
                     }
