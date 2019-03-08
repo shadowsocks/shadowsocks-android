@@ -58,7 +58,7 @@ class AppManager : AppCompatActivity() {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: AppManager? = null
-        private val SWITCH = "switch";
+        private const val SWITCH = "switch";
 
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: Map<String, PackageInfo>? = null
