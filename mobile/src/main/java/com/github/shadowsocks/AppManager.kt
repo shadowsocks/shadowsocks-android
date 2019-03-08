@@ -58,6 +58,7 @@ class AppManager : AppCompatActivity() {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: AppManager? = null
+        private val SWITCH = "switch";
 
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: Map<String, PackageInfo>? = null
@@ -104,7 +105,7 @@ class AppManager : AppCompatActivity() {
         }
 
         fun handlePayload(payloads: List<String>) {
-            if (payloads.contains("switch")) itemView.itemcheck.isChecked = isProxiedApp(item)
+            if (payloads.contains(AppManager.SWITCH)) itemView.itemcheck.isChecked = isProxiedApp(item)
         }
 
         override fun onClick(v: View?) {
@@ -112,7 +113,7 @@ class AppManager : AppCompatActivity() {
             DataStore.individual = apps.filter { isProxiedApp(it) }.joinToString("\n") { it.packageName }
             DataStore.dirty = true
 
-            appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, "switch")
+            appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, AppManager.SWITCH)
         }
     }
 
@@ -276,7 +277,7 @@ class AppManager : AppCompatActivity() {
                         DataStore.dirty = true
                         Snackbar.make(list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                         initProxiedUids(apps)
-                        appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, "switch")
+                        appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, AppManager.SWITCH)
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
