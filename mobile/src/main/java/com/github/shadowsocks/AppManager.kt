@@ -283,7 +283,7 @@ class AppManager : AppCompatActivity() {
                         DataStore.dirty = true
                         Snackbar.make(list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                         initProxiedUids(apps)
-                        appsAdapter.notifyDataSetChanged()
+                        appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, "switch")
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
