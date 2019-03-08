@@ -164,10 +164,10 @@ class AppManager : AppCompatActivity() {
     }
 
     private val proxiedUids = SparseBooleanArray()
-    private lateinit var appsAdapter: AppsAdapter
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
     private var loader: Job? = null
     private var apps = emptyList<ProxiedApp>()
+    private val appsAdapter = AppsAdapter()
 
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime).toLong() }
     private fun View.crossFadeFrom(other: View) {
@@ -231,7 +231,6 @@ class AppManager : AppCompatActivity() {
         initProxiedUids()
         list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
-        appsAdapter = AppsAdapter()
         list.adapter = appsAdapter
 
         search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
