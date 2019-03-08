@@ -197,7 +197,7 @@ class AppManager : AppCompatActivity() {
     private lateinit var proxiedApps: HashSet<String>
     private lateinit var proxiedUidMap: Multimap<Int, String>
     private lateinit var toolbar: Toolbar
-    private lateinit var bypassSwitch: RadioButton
+    private lateinit var bypassGroup: RadioGroup
     private lateinit var appListView: RecyclerView
     private lateinit var loadingView: View
     private lateinit var editQuery: EditText
@@ -258,29 +258,18 @@ class AppManager : AppCompatActivity() {
             DataStore.dirty = true
         }
 
-        val switchListener = { switch: Boolean ->
-            DataStore.proxyApps = switch
+        bypassGroup = findViewById(R.id.bypass_group)
+        bypassGroup.check(if (DataStore.bypass) R.id.btn_bypass else R.id.btn_on)
+        bypassGroup.setOnCheckedChangeListener { _, checkedId ->
             DataStore.dirty = true
-            if (!switch) {
-                finish()
+            when (checkedId) {
+                R.id.btn_off -> {
+                    DataStore.proxyApps = false
+                    finish()
+                }
+                R.id.btn_on -> DataStore.bypass = false
+                R.id.btn_bypass -> DataStore.bypass = true
             }
-        }
-        val btnOn = findViewById<RadioButton>(R.id.btn_on)
-        val btnOff = findViewById<RadioButton>(R.id.btn_off)
-        (if (DataStore.proxyApps) btnOn else btnOff).isChecked = true
-
-        btnOn.setOnCheckedChangeListener { _, b ->
-            if (b) switchListener(true)
-        }
-        btnOff.setOnCheckedChangeListener { _, b ->
-            if (b) switchListener(false)
-        }
-
-        bypassSwitch = findViewById(R.id.btn_bypass)
-        bypassSwitch.isChecked = DataStore.bypass
-        bypassSwitch.setOnCheckedChangeListener { _, checked ->
-            DataStore.bypass = checked
-            DataStore.dirty = true
         }
 
         initProxiedApps()
@@ -340,7 +329,7 @@ class AppManager : AppCompatActivity() {
                     try {
                         val (enabled, apps) = if (i < 0) Pair(proxiedAppString, "") else
                             Pair(proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
-                        bypassSwitch.isChecked = enabled.toBoolean()
+                        bypassGroup.check(if (enabled.toBoolean()) R.id.btn_bypass else R.id.btn_on)
                         DataStore.individual = apps
                         DataStore.dirty = true
                         Snackbar.make(appListView, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()

@@ -23,12 +23,12 @@
         android:layout_marginStart="16dp"
         android:minWidth="40dp"
         android:text="@string/mode"
-        app:layout_constraintBottom_toBottomOf="@+id/radioGroup"
+        app:layout_constraintBottom_toBottomOf="@+id/bypass_group"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/radioGroup" />
+        app:layout_constraintTop_toTopOf="@+id/bypass_group" />
 
     <RadioGroup
-        android:id="@+id/radioGroup"
+        android:id="@+id/bypass_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -74,7 +74,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+        app:layout_constraintTop_toBottomOf="@+id/bypass_group" />
 
   </androidx.constraintlayout.widget.ConstraintLayout>
 
