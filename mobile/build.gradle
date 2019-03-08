@@ -60,7 +60,6 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.gms:play-services-vision:17.0.2'
     implementation 'com.google.firebase:firebase-ads:17.1.3'
-    implementation 'com.google.guava:guava:27.0.1-android'
     implementation "com.takisoft.preferencex:preferencex-simplemenu:$preferencexVersion"
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.4'
     implementation 'net.glxn.qrgen:android:2.0'
