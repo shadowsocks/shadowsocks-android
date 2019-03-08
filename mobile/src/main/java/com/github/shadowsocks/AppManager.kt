@@ -82,10 +82,6 @@ class AppManager : AppCompatActivity() {
             this.cachedApps = cachedApps
             cachedApps
         }
-        private suspend fun getApps(pm: PackageManager) = getCachedApps(pm).map { (packageName, packageInfo) ->
-            yield()
-            ProxiedApp(pm, packageInfo.applicationInfo, packageName)
-        }
     }
 
     private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
@@ -127,9 +123,10 @@ class AppManager : AppCompatActivity() {
         private var filteredApps = apps
 
         suspend fun reload() {
-            val list = getApps(packageManager)
-            apps = list.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
-            filteredApps = apps
+            apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
+                yield()
+                ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
+            }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
