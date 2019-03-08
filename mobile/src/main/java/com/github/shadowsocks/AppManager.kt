@@ -32,6 +32,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.SparseBooleanArray
 import android.view.*
 import android.widget.Filter
 import android.widget.Filterable
@@ -39,6 +40,7 @@ import android.widget.SearchView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
+import androidx.core.util.set
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -48,8 +50,6 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.google.android.material.snackbar.Snackbar
-import com.google.common.collect.Multimap
-import com.google.common.collect.MultimapBuilder
 import kotlinx.android.synthetic.main.layout_apps.*
 import kotlinx.android.synthetic.main.layout_apps_item.view.*
 import kotlinx.coroutines.*
@@ -60,8 +60,8 @@ class AppManager : AppCompatActivity() {
         private var instance: AppManager? = null
 
         private var receiver: BroadcastReceiver? = null
-        private var cachedApps: List<PackageInfo>? = null
-        private suspend fun getApps(pm: PackageManager) = synchronized(AppManager) {
+        private var cachedApps: Map<String, PackageInfo>? = null
+        private fun getCachedApps(pm: PackageManager) = synchronized(AppManager) {
             if (receiver == null) receiver = Core.listenForPackageChanges {
                 synchronized(AppManager) {
                     receiver = null
@@ -75,14 +75,16 @@ class AppManager : AppCompatActivity() {
                         when (it.packageName) {
                             app.packageName -> false
                             "android" -> true
-                            else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) ?: false
+                            else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
                         }
                     }
+                    .associateBy { it.packageName }
             this.cachedApps = cachedApps
             cachedApps
-        }.map {
+        }
+        private suspend fun getApps(pm: PackageManager) = getCachedApps(pm).map { (packageName, packageInfo) ->
             yield()
-            ProxiedApp(pm, it.applicationInfo, it.packageName)
+            ProxiedApp(pm, packageInfo.applicationInfo, packageName)
         }
     }
 
@@ -113,14 +115,8 @@ class AppManager : AppCompatActivity() {
         }
 
         override fun onClick(v: View?) {
-            if (isProxiedApp(item)) {
-                val list = proxiedUidMap.removeAll(item.uid)
-                proxiedApps.removeAll(list)
-            } else {
-                proxiedApps.add(item.packageName)
-                proxiedUidMap.put(item.uid, item.packageName)
-            }
-            DataStore.individual = proxiedApps.joinToString("\n")
+            if (isProxiedApp(item)) proxiedUids.delete(item.uid) else proxiedUids[item.uid] = true
+            DataStore.individual = apps.filter { isProxiedApp(it) }.joinToString("\n") { it.packageName }
             DataStore.dirty = true
 
             appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, "switch")
@@ -132,15 +128,6 @@ class AppManager : AppCompatActivity() {
 
         suspend fun reload() {
             val list = getApps(packageManager)
-
-            val map = MultimapBuilder.treeKeys().arrayListValues().build<Int, String>()
-            list.filter { app ->
-                app.packageName in proxiedApps
-            }.forEach { app ->
-                map.put(app.uid, app.packageName)
-            }
-            proxiedUidMap = map
-
             apps = list.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
             filteredApps = apps
         }
@@ -183,12 +170,11 @@ class AppManager : AppCompatActivity() {
         }
     }
 
-    private lateinit var proxiedApps: HashSet<String>
-    private lateinit var proxiedUidMap: Multimap<Int, String>
+    private val proxiedUids = SparseBooleanArray()
     private lateinit var appsAdapter: AppsAdapter
     private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
     private var loader: Job? = null
-    private var apps = listOf<ProxiedApp>()
+    private var apps = emptyList<ProxiedApp>()
 
     private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime).toLong() }
     private fun View.crossFadeFrom(other: View) {
@@ -205,11 +191,13 @@ class AppManager : AppCompatActivity() {
         }).duration = shortAnimTime
     }
 
-    private fun initProxiedApps(str: String = DataStore.individual) {
-        proxiedApps = str.split('\n').toHashSet()
+    private fun initProxiedUids(str: String = DataStore.individual) {
+        proxiedUids.clear()
+        val apps = getCachedApps(packageManager)
+        for (line in str.lineSequence()) proxiedUids[(apps[line] ?: continue).applicationInfo.uid] = true
     }
 
-    private fun isProxiedApp(app: ProxiedApp) = proxiedUidMap.containsKey(app.uid)
+    private fun isProxiedApp(app: ProxiedApp) = proxiedUids[app.uid]
 
     @UiThread
     private fun loadApps() {
@@ -254,7 +242,7 @@ class AppManager : AppCompatActivity() {
             }
         }
 
-        initProxiedApps()
+        initProxiedUids()
         list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         appsAdapter = AppsAdapter()
@@ -305,8 +293,8 @@ class AppManager : AppCompatActivity() {
                         DataStore.individual = apps
                         DataStore.dirty = true
                         Snackbar.make(list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
-                        initProxiedApps(apps)
-                        loadApps()
+                        initProxiedUids(apps)
+                        appsAdapter.notifyDataSetChanged()
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
