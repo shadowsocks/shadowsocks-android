@@ -25,7 +25,7 @@ android {
         targetSdkVersion rootProject.sdkVersion
         versionCode rootProject.versionCode
         versionName rootProject.versionName
-        resConfigs "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"
+        resConfigs rootProject.resConfigs
     }
     buildTypes {
         debug {

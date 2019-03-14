@@ -24,6 +24,8 @@
 <string name="proxied_apps">"アプリ別のVPNモードを使用"</string>
 <string name="proxied_apps_summary">"アプリ別のVPNモードを設定"</string>
 <string name="on">"ON"</string>
+
+<!-- Fuzzy -->
 <string name="bypass_apps">"バイパスモード（迂回モード）"</string>
 <string name="bypass_apps_summary">"このモードを選択した場合、指定したアプリのパケットはプロキシを経由しない"</string>
 <string name="auto_connect">"自動接続"</string>
@@ -32,7 +34,11 @@
 <!-- Fuzzy -->
 <string name="tcp_fastopen_summary">"使用するには ROOT 権限が必要"</string>
 <string name="tcp_fastopen_summary_unsupported">"ご利用のカーネルバージョンはサポートしておりません：%s &lt; 3.7.1"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns">"DNS 転送"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns_summary">"DNS プロトコルでリモードサーバーにパケットを転送"</string>
 
 <!-- notification category -->
@@ -122,6 +128,8 @@
 
 <!-- misc -->
 <string name="advanced">"アドバンス"</string>
+
+<!-- misc -->
 <string name="service_mode">"サービスモード"</string>
 <string name="service_mode_proxy">"プロキシのみ"</string>
 <string name="service_mode_transproxy">"トランスプロキシ"</string>
