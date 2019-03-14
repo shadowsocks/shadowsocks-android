@@ -68,11 +68,13 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         return drawableState
     }
 
-    fun changeState(state: BaseService.State, animate: Boolean) {
+    fun changeState(state: BaseService.State, previousState: BaseService.State, animate: Boolean) {
         when (state) {
             BaseService.State.Connecting -> changeState(iconConnecting, animate)
             BaseService.State.Connected -> changeState(iconConnected, animate)
-            BaseService.State.Stopping -> changeState(iconStopping, animate)
+            BaseService.State.Stopping -> {
+                if (previousState == BaseService.State.Connected) changeState(iconStopping, animate)
+            }
             else -> changeState(iconStopped, animate)
         }
         if (state == BaseService.State.Connected) {

@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = false) {
-        fab.changeState(state, animate)
+        fab.changeState(state, this.state, animate)
         stats.changeState(state)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
         this.state = state
