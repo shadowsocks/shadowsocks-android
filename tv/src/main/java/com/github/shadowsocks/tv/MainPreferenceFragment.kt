@@ -153,12 +153,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_main)
-        fab = findPreference(Key.id)
+        fab = findPreference(Key.id)!!
         populateProfiles()
-        stats = findPreference(Key.controlStats)
-        controlImport = findPreference(Key.controlImport)
+        stats = findPreference(Key.controlStats)!!
+        controlImport = findPreference(Key.controlImport)!!
 
-        findPreference<SwitchPreference>(Key.isAutoConnect).apply {
+        findPreference<SwitchPreference>(Key.isAutoConnect)!!.apply {
             setOnPreferenceChangeListener { _, value ->
                 BootReceiver.enabled = value as Boolean
                 true
@@ -166,7 +166,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             isChecked = BootReceiver.enabled
         }
 
-        tfo = findPreference(Key.tfo)
+        tfo = findPreference(Key.tfo)!!
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
@@ -183,16 +183,16 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
-        serviceMode = findPreference(Key.serviceMode)
-        shareOverLan = findPreference(Key.shareOverLan)
-        portProxy = findPreference(Key.portProxy)
+        serviceMode = findPreference(Key.serviceMode)!!
+        shareOverLan = findPreference(Key.shareOverLan)!!
+        portProxy = findPreference(Key.portProxy)!!
         portProxy.onBindEditTextListener = PortPreferenceListener
-        portLocalDns = findPreference(Key.portLocalDns)
+        portLocalDns = findPreference(Key.portLocalDns)!!
         portLocalDns.onBindEditTextListener = PortPreferenceListener
-        portTransproxy = findPreference(Key.portTransproxy)
+        portTransproxy = findPreference(Key.portTransproxy)!!
         portTransproxy.onBindEditTextListener = PortPreferenceListener
         serviceMode.onPreferenceChangeListener = onServiceModeChange
-        findPreference<Preference>(Key.about).apply {
+        findPreference<Preference>(Key.about)!!.apply {
             summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
             setOnPreferenceClickListener {
                 Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
@@ -236,7 +236,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
     }
 
-    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
             Key.serviceMode -> handler.post {
                 connection.disconnect(requireContext())

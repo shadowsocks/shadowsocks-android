@@ -39,7 +39,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
-        val boot = findPreference<SwitchPreference>(Key.isAutoConnect)
+        val boot = findPreference<SwitchPreference>(Key.isAutoConnect)!!
         boot.setOnPreferenceChangeListener { _, value ->
             BootReceiver.enabled = value as Boolean
             true
@@ -47,13 +47,13 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         boot.isChecked = BootReceiver.enabled
         if (Build.VERSION.SDK_INT >= 24) boot.setSummary(R.string.auto_connect_summary_v24)
 
-        val canToggleLocked = findPreference<Preference>(Key.directBootAware)
+        val canToggleLocked = findPreference<Preference>(Key.directBootAware)!!
         if (Build.VERSION.SDK_INT >= 24) canToggleLocked.setOnPreferenceChangeListener { _, newValue ->
             if (Core.directBootSupported && newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
             true
         } else canToggleLocked.remove()
 
-        val tfo = findPreference<SwitchPreference>(Key.tfo)
+        val tfo = findPreference<SwitchPreference>(Key.tfo)!!
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
@@ -70,12 +70,12 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
-        val serviceMode = findPreference<Preference>(Key.serviceMode)
-        val portProxy = findPreference<EditTextPreference>(Key.portProxy)
+        val serviceMode = findPreference<Preference>(Key.serviceMode)!!
+        val portProxy = findPreference<EditTextPreference>(Key.portProxy)!!
         portProxy.onBindEditTextListener = PortPreferenceListener
-        val portLocalDns = findPreference<EditTextPreference>(Key.portLocalDns)
+        val portLocalDns = findPreference<EditTextPreference>(Key.portLocalDns)!!
         portLocalDns.onBindEditTextListener = PortPreferenceListener
-        val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)
+        val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)!!
         portTransproxy.onBindEditTextListener = PortPreferenceListener
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
             val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {

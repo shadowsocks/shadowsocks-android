@@ -76,20 +76,20 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         val activity = requireActivity()
         profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
         addPreferencesFromResource(R.xml.pref_profile)
-        findPreference<EditTextPreference>(Key.remotePort).onBindEditTextListener = PortPreferenceListener
-        findPreference<EditTextPreference>(Key.password).summaryProvider = PasswordSummaryProvider
+        findPreference<EditTextPreference>(Key.remotePort)!!.onBindEditTextListener = PortPreferenceListener
+        findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
         val serviceMode = DataStore.serviceMode
-        findPreference<Preference>(Key.remoteDns).isEnabled = serviceMode != Key.modeProxy
-        isProxyApps = findPreference(Key.proxyApps)
+        findPreference<Preference>(Key.remoteDns)!!.isEnabled = serviceMode != Key.modeProxy
+        isProxyApps = findPreference(Key.proxyApps)!!
         isProxyApps.isEnabled = serviceMode == Key.modeVpn
         isProxyApps.setOnPreferenceClickListener {
             startActivity(Intent(activity, AppManager::class.java))
             isProxyApps.isChecked = true
             false
         }
-        findPreference<Preference>(Key.udpdns).isEnabled = serviceMode != Key.modeProxy
-        plugin = findPreference(Key.plugin)
-        pluginConfigure = findPreference(Key.pluginConfigure)
+        findPreference<Preference>(Key.udpdns)!!.isEnabled = serviceMode != Key.modeProxy
+        plugin = findPreference(Key.plugin)!!
+        pluginConfigure = findPreference(Key.pluginConfigure)!!
         plugin.unknownValueSummary = getString(R.string.plugin_unknown)
         plugin.setOnPreferenceChangeListener { _, newValue ->
             pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, newValue as String)
@@ -105,7 +105,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
         receiver = Core.listenForPackageChanges(false) { initPlugins() }
-        udpFallback = findPreference(Key.udpFallback)
+        udpFallback = findPreference(Key.udpFallback)!!
         DataStore.privateStore.registerChangeListener(this)
     }
 
@@ -159,7 +159,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         false
     }
 
-    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         if (key != Key.proxyApps && findPreference<Preference>(key) != null) DataStore.dirty = true
     }
 
