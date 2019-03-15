@@ -28,12 +28,14 @@ import android.content.pm.PackageInfo
 import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
+import android.net.InetAddresses
 import android.net.Uri
 import android.os.Build
 import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
+import androidx.core.os.BuildCompat
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
@@ -50,12 +52,15 @@ private val parseNumericAddress by lazy {
     }
 }
 /**
- * A slightly more performant variant of InetAddress.parseNumericAddress.
+ * A slightly more performant variant of parseNumericAddress.
  *
  * Bug: https://issuetracker.google.com/issues/123456213
  */
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
-        ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
+        ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let {
+            if (BuildCompat.isAtLeastQ()) InetAddresses.parseNumericAddress(this)
+            else parseNumericAddress.invoke(null, this) as InetAddress
+        }
 
 fun HttpURLConnection.disconnectFromMain() {
     if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
