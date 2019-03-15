@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-                  app:initialExpandedChildrenCount="3">
+                  app:initialExpandedChildrenCount="4">
     <SwitchPreference
         app:key="isAutoConnect"
         app:persistent="false"
@@ -16,6 +16,9 @@
         app:icon="@drawable/ic_action_offline_bolt"
         app:summary="@string/tcp_fastopen_summary"
         app:title="TCP Fast Open"/>
+    <EditTextPreference
+        app:key="hosts"
+        app:title="hosts"/>
 
     <com.takisoft.preferencex.SimpleMenuPreference
         app:key="serviceMode"

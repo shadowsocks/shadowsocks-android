@@ -6,4 +6,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="apply">Apply</string>
+    <string name="browse">Browse…</string>
+    <string name="file_manager_missing">Please install a file manager like MiXplorer</string>
 </resources>

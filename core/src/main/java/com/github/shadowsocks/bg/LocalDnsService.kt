@@ -23,10 +23,12 @@ package com.github.shadowsocks.bg
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.net.LocalDnsServer
 import com.github.shadowsocks.net.Socks5Endpoint
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.Key
 import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
 import java.net.URI
@@ -49,7 +51,8 @@ object LocalDnsService {
             val dns = URI("dns://${profile.remoteDns}")
             LocalDnsServer(this::resolver,
                     Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
-                    DataStore.proxyAddress).apply {
+                    DataStore.proxyAddress,
+                    HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")).apply {
                 tcp = !profile.udpdns
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
