@@ -18,39 +18,19 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.database
+package com.github.shadowsocks.preference
 
-import androidx.room.testing.MigrationTestHelper
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import java.io.IOException
+import android.text.InputFilter
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import androidx.preference.EditTextPreference
 
-@RunWith(AndroidJUnit4::class)
-class MigrationTest {
-    companion object {
-        private const val TEST_DB = "migration-test"
-    }
+object PortPreferenceListener : EditTextPreference.OnBindEditTextListener {
+    private val portLengthFilter = arrayOf(InputFilter.LengthFilter(5))
 
-    @get:Rule
-    val privateDatabase = MigrationTestHelper(InstrumentationRegistry.getInstrumentation(),
-            PrivateDatabase::class.java.canonicalName, FrameworkSQLiteOpenHelperFactory())
-
-    @Test
-    @Throws(IOException::class)
-    fun migrate27() {
-        val db = privateDatabase.createDatabase(TEST_DB, 26)
-        db.close()
-        privateDatabase.runMigrationsAndValidate(TEST_DB, 27, true, PrivateDatabase.Migration27)
-    }
-    @Test
-    @Throws(IOException::class)
-    fun migrate28() {
-        val db = privateDatabase.createDatabase(TEST_DB, 27)
-        db.close()
-        privateDatabase.runMigrationsAndValidate(TEST_DB, 28, true, PrivateDatabase.Migration28)
+    override fun onBindEditText(editText: EditText) {
+        editText.inputType = EditorInfo.TYPE_CLASS_NUMBER
+        editText.filters = portLengthFilter
+        editText.setSingleLine()
     }
 }
