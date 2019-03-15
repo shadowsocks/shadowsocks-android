@@ -47,8 +47,8 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
-import com.github.shadowsocks.preference.PortPreferenceListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
@@ -186,11 +186,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         serviceMode = findPreference(Key.serviceMode)!!
         shareOverLan = findPreference(Key.shareOverLan)!!
         portProxy = findPreference(Key.portProxy)!!
-        portProxy.onBindEditTextListener = PortPreferenceListener
+        portProxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
         portLocalDns = findPreference(Key.portLocalDns)!!
-        portLocalDns.onBindEditTextListener = PortPreferenceListener
+        portLocalDns.onBindEditTextListener = EditTextPreferenceModifiers.Port
         portTransproxy = findPreference(Key.portTransproxy)!!
-        portTransproxy.onBindEditTextListener = PortPreferenceListener
+        portTransproxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
         serviceMode.onPreferenceChangeListener = onServiceModeChange
         findPreference<Preference>(Key.about)!!.apply {
             summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)

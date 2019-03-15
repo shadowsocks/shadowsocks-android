@@ -34,8 +34,8 @@ import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.BrowsableEditTextPreferenceDialogFragment
+import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.HostsSummaryProvider
-import com.github.shadowsocks.preference.PortPreferenceListener
 import com.github.shadowsocks.utils.remove
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -80,14 +80,15 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
+        hosts.onBindEditTextListener = EditTextPreferenceModifiers.Monospace
         hosts.summaryProvider = HostsSummaryProvider
         val serviceMode = findPreference<Preference>(Key.serviceMode)!!
         val portProxy = findPreference<EditTextPreference>(Key.portProxy)!!
-        portProxy.onBindEditTextListener = PortPreferenceListener
+        portProxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
         val portLocalDns = findPreference<EditTextPreference>(Key.portLocalDns)!!
-        portLocalDns.onBindEditTextListener = PortPreferenceListener
+        portLocalDns.onBindEditTextListener = EditTextPreferenceModifiers.Port
         val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)!!
-        portTransproxy.onBindEditTextListener = PortPreferenceListener
+        portTransproxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
             val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
                 Key.modeProxy -> Pair(false, false)
