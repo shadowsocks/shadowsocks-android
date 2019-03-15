@@ -65,6 +65,11 @@
                 android:summary="@string/proxied_apps_summary"
                 android:title="@string/proxied_apps"/>
         <SwitchPreference
+            android:key="metered"
+            android:icon="@drawable/ic_device_data_usage"
+            android:summary="@string/metered_summary"
+            android:title="@string/metered"/>
+        <SwitchPreference
                 android:key="isUdpDns"
                 android:icon="@drawable/ic_action_dns"
                 android:summary="@string/udp_dns_summary"
