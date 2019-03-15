@@ -6,9 +6,8 @@ buildscript {
     ext {
         kotlinVersion = '1.3.21'
         minSdkVersion = 21
-        sdkVersion = 28
-        compileSdkVersion = 28
-        buildToolsVersion = '28.0.3'
+        sdkVersion = 'Q'
+        compileSdkVersion = 'android-Q'
         preferencexVersion = '1.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.1.1'

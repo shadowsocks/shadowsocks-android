@@ -17,6 +17,7 @@
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:backupAgent="com.github.shadowsocks.ConfigBackupHelper"
+        android:extractNativeLibs="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:fullBackupOnly="true"
         android:label="@string/app_name"
