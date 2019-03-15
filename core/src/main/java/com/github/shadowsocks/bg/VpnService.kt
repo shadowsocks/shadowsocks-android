@@ -108,6 +108,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
         }
     private val underlyingNetworks get() =
+        // clearing underlyingNetworks makes Android 9+ consider the network to be metered
         if (Build.VERSION.SDK_INT >= 28 && metered) null else underlyingNetwork?.let { arrayOf(it) }
 
     override fun onBind(intent: Intent) = when (intent.action) {
