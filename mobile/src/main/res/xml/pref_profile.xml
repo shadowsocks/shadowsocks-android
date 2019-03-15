@@ -62,6 +62,11 @@
                 app:icon="@drawable/ic_action_dns"
                 app:summary="@string/udp_dns_summary"
                 app:title="@string/udp_dns"/>
+        <SwitchPreference
+                app:key="metered"
+                app:icon="@drawable/ic_device_data_usage"
+                app:summary="@string/metered_summary"
+                app:title="@string/metered"/>
 
     </PreferenceCategory>
 

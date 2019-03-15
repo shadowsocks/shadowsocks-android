@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.database
 
+import android.annotation.TargetApi
 import android.net.Uri
 import android.os.Parcelable
 import android.util.Base64
@@ -58,6 +59,8 @@ data class Profile(
         var bypass: Boolean = false,
         var udpdns: Boolean = false,
         var ipv6: Boolean = true,
+        @TargetApi(28)
+        var metered: Boolean = false,
         var individual: String = "",
         var tx: Long = 0,
         var rx: Long = 0,
@@ -70,7 +73,7 @@ data class Profile(
 ) : Parcelable, Serializable {
     companion object {
         private const val TAG = "ShadowParser"
-        private const val serialVersionUID = 0L
+        private const val serialVersionUID = 1L
         private val pattern =
                 """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
@@ -156,6 +159,7 @@ data class Profile(
                     if (fallback) return@apply
                     remoteDns = json.optString("remote_dns", remoteDns)
                     ipv6 = json.optBoolean("ipv6", ipv6)
+                    metered = json.optBoolean("metered", metered)
                     json.optJSONObject("proxy_apps")?.also {
                         proxyApps = it.optBoolean("enabled", proxyApps)
                         bypass = it.optBoolean("bypass", bypass)
@@ -232,6 +236,7 @@ data class Profile(
     fun copyFeatureSettingsTo(profile: Profile) {
         profile.route = route
         profile.ipv6 = ipv6
+        profile.metered = metered
         profile.proxyApps = proxyApps
         profile.bypass = bypass
         profile.individual = individual
@@ -269,6 +274,7 @@ data class Profile(
         put("route", route)
         put("remote_dns", remoteDns)
         put("ipv6", ipv6)
+        put("metered", metered)
         put("proxy_apps", JSONObject().apply {
             put("enabled", proxyApps)
             if (proxyApps) {
@@ -295,6 +301,7 @@ data class Profile(
         DataStore.bypass = bypass
         DataStore.privateStore.putBoolean(Key.udpdns, udpdns)
         DataStore.privateStore.putBoolean(Key.ipv6, ipv6)
+        DataStore.privateStore.putBoolean(Key.metered, metered)
         DataStore.individual = individual
         DataStore.plugin = plugin ?: ""
         DataStore.udpFallback = udpFallback
@@ -315,6 +322,7 @@ data class Profile(
         bypass = DataStore.bypass
         udpdns = DataStore.privateStore.getBoolean(Key.udpdns, false)
         ipv6 = DataStore.privateStore.getBoolean(Key.ipv6, false)
+        metered = DataStore.privateStore.getBoolean(Key.metered, false)
         individual = DataStore.individual
         plugin = DataStore.plugin
         udpFallback = DataStore.udpFallback

@@ -24,6 +24,7 @@ import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.MenuItem
@@ -34,10 +35,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.*
 import com.github.shadowsocks.preference.*
-import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.*
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.parcel.Parcelize
 
@@ -80,12 +78,16 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
         val serviceMode = DataStore.serviceMode
         findPreference<Preference>(Key.remoteDns)!!.isEnabled = serviceMode != Key.modeProxy
+        findPreference<Preference>(Key.ipv6)!!.isEnabled = serviceMode == Key.modeVpn
         isProxyApps = findPreference(Key.proxyApps)!!
         isProxyApps.isEnabled = serviceMode == Key.modeVpn
         isProxyApps.setOnPreferenceClickListener {
             startActivity(Intent(activity, AppManager::class.java))
             isProxyApps.isChecked = true
             false
+        }
+        findPreference<Preference>(Key.metered)!!.apply {
+            if (Build.VERSION.SDK_INT >= 28) isEnabled = serviceMode == Key.modeVpn else remove()
         }
         findPreference<Preference>(Key.udpdns)!!.isEnabled = serviceMode != Key.modeProxy
         plugin = findPreference(Key.plugin)!!
