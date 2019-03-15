@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="proxy_cat">"Propiedades del Servidor"</string>
+<string name="yes">"Sí"</string>
+<string name="no">"No"</string>
+<string name="apply">"Aplicar"</string>
+</resources>

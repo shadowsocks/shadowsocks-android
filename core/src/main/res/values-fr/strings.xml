@@ -25,6 +25,8 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
 <string name="proxied_apps">"Mode VPN Apps"</string>
 <string name="proxied_apps_summary">"Configurer le mode VPN pour les applications sélectionnées"</string>
 <string name="on">"Activé"</string>
+
+<!-- Fuzzy -->
 <string name="bypass_apps">"Mode exclusion"</string>
 <string name="bypass_apps_summary">"Activer cette option pour exclure les applications sélectionnées"</string>
 <string name="auto_connect">"Connection auto"</string>
@@ -33,6 +35,8 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
 <!-- Fuzzy -->
 <string name="tcp_fastopen_summary">"Activer nécessite la permission ROOT"</string>
 <string name="tcp_fastopen_summary_unsupported">"Version du noyau non supportée : %s &lt;3.7.1"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns_summary">"Faire suivre toutes les requêtes DNS au serveur distant"</string>
 
 <!-- notification category -->
@@ -116,6 +120,8 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
 
 <!-- misc -->
 <string name="advanced">"Avancé"</string>
+
+<!-- misc -->
 <string name="service_mode">"Mode Service"</string>
 <string name="service_mode_proxy">"Proxy seul"</string>
 <string name="port_proxy">"Port proxy SOCKS5"</string>

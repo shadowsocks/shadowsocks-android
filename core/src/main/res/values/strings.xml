@@ -46,7 +46,9 @@
   <string name="proxied_apps">Apps VPN mode</string>
   <string name="proxied_apps_summary">Configure VPN mode for selected apps</string>
   <string name="on">On</string>
-  <string name="bypass_apps">Bypass Mode</string>
+  <string name="off">Off</string>
+  <string name="proxied_apps_mode">Mode</string>
+  <string name="bypass_apps">Bypass</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
   <string name="auto_connect_summary">Enable Shadowsocks on startup</string>

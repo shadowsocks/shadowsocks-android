@@ -7,41 +7,80 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:duplicateParentState="false">
-  <include layout="@layout/toolbar_light_dark"/>
-  <LinearLayout android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:elevation="1dp"
-                android:background="?android:colorBackground"
-                android:orientation="vertical"
-                tools:ignore="RtlSymmetry">
+  <androidx.appcompat.widget.Toolbar
+      android:layout_height="?attr/actionBarSize"
+      android:layout_width="match_parent"
+      android:background="?attr/colorPrimary"
+      android:elevation="4dp"
+      android:touchscreenBlocksFocus="false"
+      android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+      app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"
+      android:id="@+id/toolbar">
 
-    <Switch
-        android:id="@+id/onSwitch"
+    <SearchView
+        android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checked="true"
-        android:paddingBottom="12dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="72dp"
-        android:paddingTop="12dp"
-        android:text="@string/on"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="18sp"/>
+        android:layout_centerHorizontal="true"
+        android:iconifiedByDefault="false"
+        android:queryHint="@android:string/search_go"/>
 
-    <Switch
-        android:id="@+id/bypassSwitch"
-        android:layout_width="match_parent"
+  </androidx.appcompat.widget.Toolbar>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:background="?android:colorBackground"
+      android:elevation="1dp">
+
+    <TextView
+        android:id="@+id/tv_mode"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:checked="true"
-        android:paddingBottom="12dp"
-        android:paddingEnd="16dp"
-        android:paddingStart="72dp"
-        android:paddingTop="12dp"
-        android:text="@string/bypass_apps"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="18sp"
-        android:tooltipText="@string/bypass_apps_summary"/>
-  </LinearLayout>
+        android:layout_marginStart="16dp"
+        android:minWidth="42dp"
+        android:text="@string/proxied_apps_mode"
+        app:layout_constraintBottom_toBottomOf="@+id/bypassGroup"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/bypassGroup" />
+
+    <RadioGroup
+        android:id="@+id/bypassGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_mode"
+        app:layout_constraintTop_toTopOf="parent">
+
+      <androidx.appcompat.widget.AppCompatRadioButton
+          android:id="@+id/btn_off"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/off" />
+
+      <androidx.appcompat.widget.AppCompatRadioButton
+          android:id="@+id/btn_on"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/on" />
+
+      <androidx.appcompat.widget.AppCompatRadioButton
+          android:id="@+id/btn_bypass"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/bypass_apps"
+          tools:checked="true"
+          android:tooltipText="@string/bypass_apps_summary" />
+    </RadioGroup>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
   <androidx.coordinatorlayout.widget.CoordinatorLayout
       android:id="@+id/snackbar"
       android:layout_width="match_parent"

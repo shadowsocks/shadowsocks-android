@@ -20,11 +20,17 @@
 <string name="proxied_apps">"حالت "</string>
 <string name="proxied_apps_summary">"تنظیم حالت وی‌پی‌ان برای اپلیکیشن‌های انتخاب شده"</string>
 <string name="on">"روشن"</string>
+
+<!-- Fuzzy -->
 <string name="bypass_apps">"حالت صرف‌نظر"</string>
 <string name="bypass_apps_summary">"این اپلیکیشن‌ها از وی‌پی‌ان استفاده نکنند"</string>
 <string name="auto_connect">"وصل‌شدن اتوماتیک"</string>
 <string name="auto_connect_summary">"فعال‌شدن شدوساکس لحظه روشن‌شدن گوشی"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns">"ارسال دی‌ان‌اس"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns_summary">"ارسال کلیه درخواست‌های دی‌ان‌اس به سرور "</string>
 
 <!-- notification category -->
@@ -100,6 +106,8 @@
 
 <!-- misc -->
 <string name="advanced">"پیشرفته"</string>
+
+<!-- misc -->
 <string name="service_mode">"وضعیت سرویس"</string>
 <string name="service_mode_proxy">"فقط پروکسی"</string>
 <string name="service_mode_vpn">"وی‌پی‌ان"</string>

@@ -45,7 +45,7 @@ androidExtensions {
 
 def lifecycleVersion = '2.0.0'
 def roomVersion = '2.0.0'
-def workVersion = '1.0.0-rc02'
+def workVersion = '1.0.0'
 dependencies {
     api project(':plugin')
     api "android.arch.work:work-runtime-ktx:$workVersion"

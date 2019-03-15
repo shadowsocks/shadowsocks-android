@@ -41,7 +41,8 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
     private var tapPending = false
 
     private val connection = ShadowsocksConnection()
-    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) = updateTile(state) { profileName }
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
+            updateTile(state) { profileName }
     override fun onServiceConnected(service: IShadowsocksService) {
         updateTile(BaseService.State.values()[service.state]) { service.profileName }
         if (tapPending) {

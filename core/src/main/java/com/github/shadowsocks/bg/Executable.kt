@@ -27,7 +27,7 @@ import android.text.TextUtils
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import java.io.File
-import java.io.FileNotFoundException
+import java.io.IOException
 
 object Executable {
     const val REDSOCKS = "libredsocks.so"
@@ -40,7 +40,7 @@ object Executable {
         for (process in File("/proc").listFiles { _, name -> TextUtils.isDigitsOnly(name) }) {
             val exe = File(try {
                 File(process, "cmdline").inputStream().bufferedReader().readText()
-            } catch (_: FileNotFoundException) {
+            } catch (_: IOException) {
                 continue
             }.split(Character.MIN_VALUE, limit = 2).first())
             if (EXECUTABLES.contains(exe.name)) try {

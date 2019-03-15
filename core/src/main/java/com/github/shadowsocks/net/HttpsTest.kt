@@ -81,7 +81,7 @@ class HttpsTest : ViewModel() {
     fun testConnection() {
         cancelTest()
         status.value = Status.Testing
-        val url = URL("https", when (Core.currentProfile!!.first.route) {
+        val url = URL("https", when ((Core.currentProfile ?: return).first.route) {
             Acl.CHINALIST -> "www.qualcomm.cn"
             else -> "www.google.com"
         }, "/generate_204")

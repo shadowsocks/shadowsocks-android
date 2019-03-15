@@ -21,6 +21,8 @@
 <string name="proxied_apps">"Uygulamalar VPN modu"</string>
 <string name="proxied_apps_summary">"Seçili uygulamalar için VPN'i yapılandır"</string>
 <string name="on">"Açık"</string>
+
+<!-- Fuzzy -->
 <string name="bypass_apps">"Bypass Modu"</string>
 <string name="bypass_apps_summary">"Seçili uygulamaları bypass etmek için bu seçeneği açın"</string>
 <string name="auto_connect">"Otomatik Bağlan"</string>
@@ -29,7 +31,11 @@
 <!-- Fuzzy -->
 <string name="tcp_fastopen_summary">"Açıp kapamak için ROOT yetkisi gerekiyor"</string>
 <string name="tcp_fastopen_summary_unsupported">"Desteklenmeyen kernel sürümü: %s &lt; 3.7.1"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns">"DNS yönlendirme"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns_summary">"Tüm DNS isteklerini remote'a yönlendir"</string>
 
 <!-- notification category -->
@@ -118,6 +124,8 @@
 
 <!-- misc -->
 <string name="advanced">"Gelişmiş"</string>
+
+<!-- misc -->
 <string name="service_mode">"Servis modu"</string>
 <string name="service_mode_proxy">"Sadece proxy"</string>
 <string name="port_proxy">"SOCKS5 proxy portu"</string>

@@ -68,11 +68,13 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         return drawableState
     }
 
-    fun changeState(state: BaseService.State, animate: Boolean) {
+    fun changeState(state: BaseService.State, previousState: BaseService.State, animate: Boolean) {
         when (state) {
             BaseService.State.Connecting -> changeState(iconConnecting, animate)
             BaseService.State.Connected -> changeState(iconConnected, animate)
-            BaseService.State.Stopping -> changeState(iconStopping, animate)
+            BaseService.State.Stopping -> {
+                changeState(iconStopping, animate && previousState == BaseService.State.Connected)
+            }
             else -> changeState(iconStopped, animate)
         }
         if (state == BaseService.State.Connected) {
@@ -86,13 +88,12 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         isEnabled = state.canStop || state == BaseService.State.Stopped
     }
 
-    private fun counters(a: AnimatedVectorDrawableCompat, b: AnimatedVectorDrawableCompat): Boolean =
-            a == iconStopped && b == iconConnecting ||
-            a == iconConnecting && b == iconStopped ||
-            a == iconConnected && b == iconStopping ||
-            a == iconStopping && b == iconConnected
-
     private fun changeState(icon: AnimatedVectorDrawableCompat, animate: Boolean) {
+        fun counters(a: AnimatedVectorDrawableCompat, b: AnimatedVectorDrawableCompat): Boolean =
+                a == iconStopped && b == iconConnecting ||
+                a == iconConnecting && b == iconStopped ||
+                a == iconConnected && b == iconStopping ||
+                a == iconStopping && b == iconConnected
         if (animate) {
             if (animationQueue.size < 2 || !counters(animationQueue.last, icon)) {
                 animationQueue.add(icon)

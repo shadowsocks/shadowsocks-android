@@ -106,8 +106,8 @@ object BaseService {
         private val bandwidthListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
         private val handler = Handler()
 
-        override fun getState(): Int = data!!.state.ordinal
-        override fun getProfileName(): String = data!!.proxy?.profile?.name ?: "Idle"
+        override fun getState(): Int = (data?.state ?: State.Idle).ordinal
+        override fun getProfileName(): String = data?.proxy?.profile?.name ?: "Idle"
 
         override fun registerCallback(cb: IShadowsocksServiceCallback) {
             callbacks.register(cb)
@@ -117,6 +117,7 @@ object BaseService {
             repeat(callbacks.beginBroadcast()) {
                 try {
                     work(callbacks.getBroadcastItem(it))
+                } catch (_: DeadObjectException) {
                 } catch (e: Exception) {
                     printLog(e)
                 }
@@ -133,7 +134,7 @@ object BaseService {
                     .map { Pair(it.profile.id, it.trafficMonitor?.requestUpdate()) }
                     .filter { it.second != null }
                     .map { Triple(it.first, it.second!!.first, it.second!!.second) }
-            if (stats.any { it.third } && data!!.state == State.Connected && bandwidthListeners.isNotEmpty()) {
+            if (stats.any { it.third } && data?.state == State.Connected && bandwidthListeners.isNotEmpty()) {
                 val sum = stats.fold(TrafficStats()) { a, b -> a + b.second }
                 broadcast { item ->
                     if (bandwidthListeners.contains(item.asBinder())) {
@@ -149,16 +150,17 @@ object BaseService {
             val wasEmpty = bandwidthListeners.isEmpty()
             if (bandwidthListeners.put(cb.asBinder(), timeout) == null) {
                 if (wasEmpty) registerTimeout()
-                if (data!!.state != State.Connected) return
+                if (data?.state != State.Connected) return
                 var sum = TrafficStats()
-                val proxy = data!!.proxy ?: return
+                val data = data
+                val proxy = data?.proxy ?: return
                 proxy.trafficMonitor?.out.also { stats ->
                     cb.trafficUpdated(proxy.profile.id, if (stats == null) sum else {
                         sum += stats
                         stats
                     })
                 }
-                data!!.udpFallback?.also { udpFallback ->
+                data.udpFallback?.also { udpFallback ->
                     udpFallback.trafficMonitor?.out.also { stats ->
                         cb.trafficUpdated(udpFallback.profile.id, if (stats == null) TrafficStats() else {
                             sum += stats
@@ -232,7 +234,7 @@ object BaseService {
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
                     if (udpFallback == null) "-u" else null)
-            check(udpFallback?.pluginPath == null)
+            check(udpFallback?.pluginPath == null) { "UDP fallback cannot have plugins" }
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),

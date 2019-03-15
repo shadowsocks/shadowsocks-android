@@ -55,7 +55,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
                     pendingRegistrations.poll()!!.apply {
                         try {
                             result.complete(registerInternal(channel, ops, listener))
-                        } catch (e: ClosedChannelException) {
+                        } catch (e: Exception) {
                             result.completeExceptionally(e)
                         }
                     }
@@ -100,7 +100,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
         while (running) {
             val num = try {
                 selector.select()
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 printLog(e)
                 continue
             }
