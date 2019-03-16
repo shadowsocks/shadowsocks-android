@@ -5,9 +5,6 @@
         <item name="android:colorButtonNormal">@color/material_accent_200</item>
         <item name="android:colorPrimary">@color/color_primary</item>
         <item name="android:colorPrimaryDark">@color/color_primary_dark</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:backgroundDimEnabled">true</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>
     </style>
 </resources>
