@@ -19,7 +19,7 @@
         app:title="@string/action_export_file"/>
     <PreferenceCategory
         app:title="@string/settings"
-        app:initialExpandedChildrenCount="2">
+        app:initialExpandedChildrenCount="3">
         <SwitchPreference
             app:key="isAutoConnect"
             app:persistent="false"
@@ -29,6 +29,9 @@
             app:key="tcp_fastopen"
             app:summary="@string/tcp_fastopen_summary"
             app:title="TCP Fast Open"/>
+        <EditTextPreference
+            app:key="hosts"
+            app:title="hosts"/>
 
         <ListPreference
             app:key="serviceMode"

@@ -36,6 +36,7 @@ import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.BrowsableEditTextPreferenceDialogFragment
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.HostsSummaryProvider
+import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.remove
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -133,7 +134,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
                     // we read and persist all its content here to avoid content URL permission issues
                     hosts.text = activity.contentResolver.openInputStream(data!!.data!!)!!.bufferedReader().readText()
                 } catch (e: RuntimeException) {
-                    activity.snackbar(e.localizedMessage).show()
+                    activity.snackbar(e.readableMessage).show()
                 }
             }
             else -> super.onActivityResult(requestCode, resultCode, data)

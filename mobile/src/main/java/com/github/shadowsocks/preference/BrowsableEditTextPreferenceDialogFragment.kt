@@ -26,6 +26,7 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.preference.EditTextPreferenceDialogFragmentCompat
+import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.google.android.material.snackbar.Snackbar
 
@@ -37,7 +38,7 @@ class BrowsableEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragme
     override fun onPrepareDialogBuilder(builder: AlertDialog.Builder) {
         super.onPrepareDialogBuilder(builder)
         builder.setNeutralButton(R.string.browse) { _, _ ->
-            val activity = requireActivity()
+            val activity = activity as MainActivity
             try {
                 targetFragment!!.startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
@@ -45,8 +46,7 @@ class BrowsableEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragme
                 }, targetRequestCode)
                 return@setNeutralButton
             } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
-            Snackbar.make(activity.findViewById<View>(R.id.content),
-                    R.string.file_manager_missing, Snackbar.LENGTH_SHORT).show()
+            activity.snackbar(activity.getString(R.string.file_manager_missing)).show()
         }
     }
 }

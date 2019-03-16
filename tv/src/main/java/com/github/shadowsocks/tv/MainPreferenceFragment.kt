@@ -48,6 +48,7 @@ import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
+import com.github.shadowsocks.preference.HostsSummaryProvider
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
@@ -60,12 +61,14 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         private const val REQUEST_CONNECT = 1
         private const val REQUEST_REPLACE_PROFILES = 2
         private const val REQUEST_EXPORT_PROFILES = 3
+        private const val REQUEST_HOSTS = 4
         private const val TAG = "MainPreferenceFragment"
     }
 
     private lateinit var fab: ListPreference
     private lateinit var stats: Preference
     private lateinit var controlImport: Preference
+    private lateinit var hosts: EditTextPreference
     private lateinit var serviceMode: Preference
     private lateinit var tfo: SwitchPreference
     private lateinit var shareOverLan: Preference
@@ -79,6 +82,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             Key.modeTransproxy -> Pair(true, true)
             else -> throw IllegalArgumentException("newValue: $newValue")
         }
+        hosts.isEnabled = enabledLocalDns
         portLocalDns.isEnabled = enabledLocalDns
         portTransproxy.isEnabled = enabledTransproxy
         true
@@ -118,19 +122,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         })
         if (msg != null) Toast.makeText(requireContext(), getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
-        if (state == BaseService.State.Stopped) {
-            controlImport.isEnabled = true
-            tfo.isEnabled = true
-            serviceMode.isEnabled = true
-            shareOverLan.isEnabled = true
-            portProxy.isEnabled = true
-            onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
-        } else {
-            controlImport.isEnabled = false
-            tfo.isEnabled = false
-            serviceMode.isEnabled = false
-            shareOverLan.isEnabled = false
-            portProxy.isEnabled = false
+        val stopped = state == BaseService.State.Stopped
+        controlImport.isEnabled = stopped
+        tfo.isEnabled = stopped
+        serviceMode.isEnabled = stopped
+        shareOverLan.isEnabled = stopped
+        portProxy.isEnabled = stopped
+        if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
             portLocalDns.isEnabled = false
             portTransproxy.isEnabled = false
         }
@@ -183,6 +181,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
+        hosts = findPreference(Key.hosts)!!
+        hosts.summaryProvider = HostsSummaryProvider
         serviceMode = findPreference(Key.serviceMode)!!
         shareOverLan = findPreference(Key.shareOverLan)!!
         portProxy = findPreference(Key.portProxy)!!
@@ -192,13 +192,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         portTransproxy = findPreference(Key.portTransproxy)!!
         portTransproxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
         serviceMode.onPreferenceChangeListener = onServiceModeChange
-        findPreference<Preference>(Key.about)!!.apply {
-            summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
-            setOnPreferenceClickListener {
-                Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
-                true
-            }
-        }
+        findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
 
         tester = ViewModelProviders.of(this).get()
         changeState(BaseService.State.Idle) // reset everything to init state
@@ -274,15 +268,25 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             }, REQUEST_EXPORT_PROFILES)
             true
         }
+        Key.about -> {
+            Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
+            true
+        }
         else -> super.onPreferenceTreeClick(preference)
     }
 
-    private fun startFilesForResult(intent: Intent, requestCode: Int) {
+    override fun onDisplayPreferenceDialog(preference: Preference?) {
+        if (preference != hosts || startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), REQUEST_HOSTS))
+            super.onDisplayPreferenceDialog(preference)
+    }
+
+    private fun startFilesForResult(intent: Intent, requestCode: Int): Boolean {
         try {
             startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
-            return
+            return false
         } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
         Toast.makeText(requireContext(), R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
+        return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -314,6 +318,16 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                     }
                 } catch (e: Exception) {
                     printLog(e)
+                    Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+            REQUEST_HOSTS -> {
+                if (resultCode != Activity.RESULT_OK) return
+                val context = requireContext()
+                try {
+                    // we read and persist all its content here to avoid content URL permission issues
+                    hosts.text = context.contentResolver.openInputStream(data!!.data!!)!!.bufferedReader().readText()
+                } catch (e: RuntimeException) {
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
             }
