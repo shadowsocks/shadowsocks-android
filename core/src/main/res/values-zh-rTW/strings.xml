@@ -26,6 +26,8 @@
 <string name="proxied_apps">"個別應用程式的 VPN"</string>
 <string name="proxied_apps_summary">"為已選擇的應用程式設定 VPN"</string>
 <string name="on">"開"</string>
+
+<!-- Fuzzy -->
 <string name="bypass_apps">"略過模式"</string>
 <string name="bypass_apps_summary">"啟用此選項，會略過已選擇的應用程式"</string>
 <string name="auto_connect">"自動連線"</string>
@@ -34,7 +36,11 @@
 <!-- Fuzzy -->
 <string name="tcp_fastopen_summary">"切換需要 ROOT 權限"</string>
 <string name="tcp_fastopen_summary_unsupported">"不支援的核心版本：%s &lt; 3.7.1"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns">"DNS 轉送"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns_summary">"使用 UDP 向遠端轉送 DNS 封包"</string>
 
 <!-- notification category -->
@@ -123,6 +129,8 @@
 
 <!-- misc -->
 <string name="advanced">"高級"</string>
+
+<!-- misc -->
 <string name="service_mode">"服務模式"</string>
 <string name="service_mode_proxy">"仅代理"</string>
 <string name="service_mode_transproxy">"透明代理"</string>

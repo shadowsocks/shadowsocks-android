@@ -29,14 +29,15 @@ import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.migration.RecreateSchemaMigration
 import com.github.shadowsocks.utils.Key
 
-@Database(entities = [Profile::class, KeyValuePair::class], version = 27)
+@Database(entities = [Profile::class, KeyValuePair::class], version = 28)
 abstract class PrivateDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
             Room.databaseBuilder(app, PrivateDatabase::class.java, Key.DB_PROFILE)
                     .addMigrations(
                             Migration26,
-                            Migration27
+                            Migration27,
+                            Migration28
                     )
                     .fallbackToDestructiveMigration()
                     .allowMainThreadQueries()
@@ -60,5 +61,9 @@ abstract class PrivateDatabase : RoomDatabase() {
     object Migration27 : Migration(26, 27) {
         override fun migrate(database: SupportSQLiteDatabase) =
                 database.execSQL("ALTER TABLE `Profile` ADD COLUMN `udpFallback` INTEGER")
+    }
+    object Migration28 : Migration(27, 28) {
+        override fun migrate(database: SupportSQLiteDatabase) =
+                database.execSQL("ALTER TABLE `Profile` ADD COLUMN `metered` INTEGER NOT NULL DEFAULT 0")
     }
 }

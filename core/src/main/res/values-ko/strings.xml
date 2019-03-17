@@ -26,6 +26,8 @@
 <string name="proxied_apps">"원하는 앱만 프락시 적용하기"</string>
 <string name="proxied_apps_summary">"선택한 앱에만 프락시를 적용합니다"</string>
 <string name="on">"활성화"</string>
+
+<!-- Fuzzy -->
 <string name="bypass_apps">"선택된 앱들만 프록시 적용 제외하기"</string>
 <string name="bypass_apps_summary">"이 옵션을 활성화하면 선택된 앱들은 프락시를 사용하지 않습니다"</string>
 <string name="auto_connect">"자동 접속"</string>
@@ -34,7 +36,11 @@
 <!-- Fuzzy -->
 <string name="tcp_fastopen_summary">"루트 권한이 필요합니다"</string>
 <string name="tcp_fastopen_summary_unsupported">"지원하지 않는 버전의 커널입니다: %s &lt; 3.7.1"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns">"DNS 포워딩"</string>
+
+<!-- Fuzzy -->
 <string name="udp_dns_summary">"모든 DNS 요청을 외부로 포워딩 합니다"</string>
 
 <!-- notification category -->

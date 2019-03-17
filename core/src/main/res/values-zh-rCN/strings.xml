@@ -25,14 +25,14 @@
 <string name="proxied_apps">"分应用 VPN"</string>
 <string name="proxied_apps_summary">"允许部分应用绕过 VPN"</string>
 <string name="on">"启用"</string>
-<string name="bypass_apps">"绕行模式"</string>
+<string name="bypass_apps">"绕行"</string>
 <string name="bypass_apps_summary">"绕过选择的应用"</string>
 <string name="auto_connect">"自动连接"</string>
 <string name="auto_connect_summary">"允许 Shadowsocks 随系统启动"</string>
 <string name="tcp_fastopen_summary">"切换可能需要 ROOT 权限"</string>
 <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本: %s &lt; 3.7.1"</string>
-<string name="udp_dns">"DNS 转发"</string>
-<string name="udp_dns_summary">"转发所有 DNS 请求到远程服务器"</string>
+<string name="udp_dns">"使用 UDP DNS"</string>
+<string name="udp_dns_summary">"需要远程服务器支持 UDP 转发"</string>
 
 <!-- notification category -->
 <string name="forward_success">"后台服务已开始运行。"</string>
@@ -121,6 +121,8 @@
 
 <!-- misc -->
 <string name="advanced">"高级选项"</string>
+
+<!-- misc -->
 <string name="service_mode">"服务模式"</string>
 <string name="service_mode_proxy">"仅代理"</string>
 <string name="service_mode_transproxy">"透明代理"</string>
@@ -147,4 +149,9 @@
 <string name="share_over_lan">"通过局域网分享"</string>
 <string name="connection_test_pending">"检查连接"</string>
 <string name="file_manager_missing">"请安装文件管理器，如 MiXplorer"</string>
+<string name="tcp_fastopen_failure">"切换失败"</string>
+<string name="udp_fallback">"UDP 配置"</string>
+<string name="action_replace_file">"从文件替换…"</string>
+<string name="off">"关"</string>
+<string name="proxied_apps_mode">"模式"</string>
 </resources>

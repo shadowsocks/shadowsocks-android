@@ -46,4 +46,11 @@ class MigrationTest {
         db.close()
         privateDatabase.runMigrationsAndValidate(TEST_DB, 27, true, PrivateDatabase.Migration27)
     }
+    @Test
+    @Throws(IOException::class)
+    fun migrate28() {
+        val db = privateDatabase.createDatabase(TEST_DB, 27)
+        db.close()
+        privateDatabase.runMigrationsAndValidate(TEST_DB, 28, true, PrivateDatabase.Migration28)
+    }
 }
