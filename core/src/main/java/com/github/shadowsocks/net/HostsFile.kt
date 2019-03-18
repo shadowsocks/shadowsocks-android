@@ -18,19 +18,22 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.preference
+package com.github.shadowsocks.net
 
-import android.text.InputFilter
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import androidx.preference.EditTextPreference
+import com.github.shadowsocks.utils.computeIfAbsentCompat
+import com.github.shadowsocks.utils.parseNumericAddress
+import java.net.InetAddress
 
-object PortPreferenceListener : EditTextPreference.OnBindEditTextListener {
-    private val portLengthFilter = arrayOf(InputFilter.LengthFilter(5))
-
-    override fun onBindEditText(editText: EditText) {
-        editText.inputType = EditorInfo.TYPE_CLASS_NUMBER
-        editText.filters = portLengthFilter
-        editText.setSingleLine()
+class HostsFile(input: String = "") {
+    private val map = mutableMapOf<String, MutableSet<InetAddress>>()
+    init {
+        for (line in input.lineSequence()) {
+            val entries = line.substringBefore('#').splitToSequence(' ', '\t').filter { it.isNotEmpty() }
+            val address = entries.firstOrNull()?.parseNumericAddress() ?: continue
+            for (hostname in entries.drop(1)) map.computeIfAbsentCompat(hostname) { LinkedHashSet(1) }.add(address)
+        }
     }
+
+    val configuredHostnames get() = map.size
+    fun resolve(hostname: String) = map[hostname]?.shuffled() ?: emptyList()
 }
