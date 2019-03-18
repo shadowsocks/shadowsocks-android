@@ -22,13 +22,11 @@ package com.github.shadowsocks.preference
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
-import com.google.android.material.snackbar.Snackbar
 
 class BrowsableEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragmentCompat() {
     fun setKey(key: String) {
