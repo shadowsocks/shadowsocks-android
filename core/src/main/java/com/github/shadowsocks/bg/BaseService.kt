@@ -90,10 +90,6 @@ object BaseService {
             binder.stateChanged(s, msg)
             state = s
         }
-
-        init {
-            RemoteConfig.fetch()
-        }
     }
 
     class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), AutoCloseable {
@@ -341,7 +337,6 @@ object BaseService {
 
                     proxy.scheduleUpdate()
                     data.udpFallback?.scheduleUpdate()
-                    RemoteConfig.fetch()
 
                     data.changeState(State.Connected)
                 } catch (_: CancellationException) {

@@ -40,6 +40,7 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.URL
 import java.net.UnknownHostException
 import java.security.MessageDigest
 
@@ -51,12 +52,16 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     var trafficMonitor: TrafficMonitor? = null
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
     val pluginPath by lazy { PluginManager.init(plugin) }
+    private var scheduleConfigUpdate = false
 
     suspend fun init(service: BaseService.Interface) {
         if (profile.host == "198.199.101.152") {
+            scheduleConfigUpdate = true
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
-            val conn = service.openConnection(RemoteConfig.proxyUrl) as HttpURLConnection
+            val (config, success) = RemoteConfig.fetch()
+            scheduleConfigUpdate = !success
+            val conn = service.openConnection(URL(config.getString("proxy_url"))) as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
 
@@ -134,6 +139,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
     fun scheduleUpdate() {
         if (route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(route)
+        if (scheduleConfigUpdate) RemoteConfig.scheduleFetch()
     }
 
     fun shutdown(scope: CoroutineScope) {
