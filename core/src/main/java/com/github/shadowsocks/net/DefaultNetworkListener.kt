@@ -26,9 +26,8 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
-import androidx.core.content.getSystemService
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.Core.app
+import com.github.shadowsocks.Core
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -84,7 +83,7 @@ object DefaultNetworkListener {
 
     suspend fun start(key: Any, listener: (Network?) -> Unit) = networkActor.send(NetworkMessage.Start(key, listener))
     suspend fun get() = if (fallback) @TargetApi(23) {
-        connectivity.activeNetwork ?: throw UnknownHostException()  // failed to listen, return current if available
+        Core.connectivity.activeNetwork ?: throw UnknownHostException() // failed to listen, return current if available
     } else NetworkMessage.Get().run {
         networkActor.send(this)
         response.await()
@@ -102,7 +101,6 @@ object DefaultNetworkListener {
     }
 
     private var fallback = false
-    private val connectivity = app.getSystemService<ConnectivityManager>()!!
     private val request = NetworkRequest.Builder().apply {
         addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
@@ -119,16 +117,16 @@ object DefaultNetworkListener {
      */
     private fun register() {
         if (Build.VERSION.SDK_INT in 24..27) @TargetApi(24) {
-            connectivity.registerDefaultNetworkCallback(Callback)
+            Core.connectivity.registerDefaultNetworkCallback(Callback)
         } else try {
             fallback = false
             // we want REQUEST here instead of LISTEN
-            connectivity.requestNetwork(request, Callback)
+            Core.connectivity.requestNetwork(request, Callback)
         } catch (e: SecurityException) {
             // known bug: https://stackoverflow.com/a/33509180/2245107
             if (Build.VERSION.SDK_INT != 23) Crashlytics.logException(e)
             fallback = true
         }
     }
-    private fun unregister() = connectivity.unregisterNetworkCallback(Callback)
+    private fun unregister() = Core.connectivity.unregisterNetworkCallback(Callback)
 }

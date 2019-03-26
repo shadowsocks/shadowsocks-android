@@ -27,6 +27,7 @@ import android.content.IntentFilter
 import android.os.*
 import android.util.Log
 import androidx.core.content.getSystemService
+import androidx.core.os.BuildCompat
 import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
@@ -289,7 +290,12 @@ object BaseService {
         }
 
         suspend fun preInit() { }
-        suspend fun resolver(host: String) = InetAddress.getAllByName(host)
+        suspend fun resolver(host: String): Array<InetAddress> {
+            return if (BuildCompat.isAtLeastQ()) {
+                // prefer non-blocking version if available
+                DnsResolverCompat.resolve(Core.connectivity.activeNetwork ?: return emptyArray(), host)
+            } else InetAddress.getAllByName(host)
+        }
         suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
