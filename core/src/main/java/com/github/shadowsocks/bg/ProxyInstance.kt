@@ -91,8 +91,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (profile.host.parseNumericAddress() == null) {
             var retries = 0
             while (true) try {
-                val io = GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }
-                profile.host = io.await().firstOrNull()?.hostAddress ?: throw UnknownHostException()
+                profile.host = service.resolver(profile.host).firstOrNull()?.hostAddress ?: throw UnknownHostException()
                 return
             } catch (e: UnknownHostException) {
                 // retries are only needed on Chrome OS where arc0 is brought up/down during VPN changes

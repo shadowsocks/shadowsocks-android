@@ -26,6 +26,9 @@ import android.net.Network
 import android.os.Handler
 import android.os.HandlerThread
 import androidx.core.os.BuildCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.InetAddress
 import kotlin.coroutines.resume
@@ -40,7 +43,8 @@ sealed class DnsResolverCompat {
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
 
     private object DnsResolverCompat21 : DnsResolverCompat() {
-        override suspend fun resolve(network: Network, host: String) = network.getAllByName(host)
+        override suspend fun resolve(network: Network, host: String) =
+                GlobalScope.async(Dispatchers.IO) { network.getAllByName(host) }.await()
     }
 
     @TargetApi(29)
