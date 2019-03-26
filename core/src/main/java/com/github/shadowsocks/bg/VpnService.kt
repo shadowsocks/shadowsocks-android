@@ -199,13 +199,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn
-        val fd = conn.fd
 
         val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
                 "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
-                "--netif-netmask", "255.255.255.0",
                 "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
-                "--tunfd", fd.toString(),
                 "--tunmtu", VPN_MTU.toString(),
                 "--sock-path", "sock_path",
                 "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
