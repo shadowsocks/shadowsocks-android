@@ -49,11 +49,6 @@
                 android:entryValues="@array/route_value"
                 android:summary="%s"
                 android:title="@string/route_list"/>
-        <AutoSummaryEditTextPreference
-                android:key="remoteDns"
-                android:icon="@drawable/ic_action_dns"
-                android:title="@string/remote_dns"
-                app:pref_summaryHasText="%s"/>
         <SwitchPreference
                 android:key="isIpv6"
                 android:icon="@drawable/ic_image_looks_6"
@@ -65,13 +60,17 @@
                 android:summary="@string/proxied_apps_summary"
                 android:title="@string/proxied_apps"/>
         <SwitchPreference
-            android:key="metered"
-            android:icon="@drawable/ic_device_data_usage"
-            android:summary="@string/metered_summary"
-            android:title="@string/metered"/>
+                android:key="metered"
+                android:icon="@drawable/ic_device_data_usage"
+                android:summary="@string/metered_summary"
+                android:title="@string/metered"/>
+        <AutoSummaryEditTextPreference
+                android:key="remoteDns"
+                android:icon="@drawable/ic_action_dns"
+                android:title="@string/remote_dns"
+                app:pref_summaryHasText="%s"/>
         <SwitchPreference
                 android:key="isUdpDns"
-                android:icon="@drawable/ic_action_dns"
                 android:summary="@string/udp_dns_summary"
                 android:title="@string/udp_dns"/>
 
