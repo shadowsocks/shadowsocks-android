@@ -42,11 +42,6 @@
                 app:entryValues="@array/route_value"
                 app:title="@string/route_list"
                 app:useSimpleSummaryProvider="true"/>
-        <EditTextPreference
-                app:key="remoteDns"
-                app:icon="@drawable/ic_action_dns"
-                app:title="@string/remote_dns"
-                app:useSimpleSummaryProvider="true"/>
         <SwitchPreference
                 app:key="isIpv6"
                 app:icon="@drawable/ic_image_looks_6"
@@ -58,15 +53,20 @@
                 app:summary="@string/proxied_apps_summary"
                 app:title="@string/proxied_apps"/>
         <SwitchPreference
-                app:key="isUdpDns"
-                app:icon="@drawable/ic_action_dns"
-                app:summary="@string/udp_dns_summary"
-                app:title="@string/udp_dns"/>
-        <SwitchPreference
                 app:key="metered"
                 app:icon="@drawable/ic_device_data_usage"
                 app:summary="@string/metered_summary"
                 app:title="@string/metered"/>
+        <EditTextPreference
+                app:key="remoteDns"
+                app:icon="@drawable/ic_action_dns"
+                app:title="@string/remote_dns"
+                app:useSimpleSummaryProvider="true"/>
+        <SwitchPreference
+            app:key="isUdpDns"
+            app:icon="@drawable/ic_action_dns"
+            app:summary="@string/udp_dns_summary"
+            app:title="@string/udp_dns"/>
 
     </PreferenceCategory>
 

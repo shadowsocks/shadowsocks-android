@@ -89,7 +89,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     private val job = SupervisorJob()
     override val coroutineContext = job + CoroutineExceptionHandler { _, t -> printLog(t) }
 
-    suspend fun start(listen: SocketAddress) = DatagramChannel.open().apply {
+    suspend fun start(listen: SocketAddress) = DatagramChannel.open().run {
         configureBlocking(false)
         socket().bind(listen)
         monitor.register(this, SelectionKey.OP_READ) { handlePacket(this) }

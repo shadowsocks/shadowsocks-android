@@ -29,4 +29,4 @@
 	branch = stable
 [submodule "core/src/main/jni/libev"]
 	path = core/src/main/jni/libev
-	url = https://github.com/shadowsocks/libev.git
+	url = https://git.lighttpd.net/libev.git
