@@ -50,7 +50,7 @@ mavenPublish {
 
 dependencies {
     api 'androidx.core:core-ktx:1.0.1'
-    api 'com.google.android.material:material:1.1.0-alpha04'
+    api 'com.google.android.material:material:1.1.0-alpha05'
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"

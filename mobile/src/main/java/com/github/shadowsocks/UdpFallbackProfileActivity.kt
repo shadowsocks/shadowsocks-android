@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.resolveResourceId
 
@@ -61,7 +62,7 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
         internal val profiles = (ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf())
-                .filter { it.id != editingId && it.plugin.isNullOrEmpty() }
+                .filter { it.id != editingId && PluginConfiguration(it.plugin ?: "").selected.isEmpty() }
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
                 holder.bind(if (position == 0) null else profiles[position - 1])

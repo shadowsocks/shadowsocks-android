@@ -114,7 +114,7 @@ include $(CLEAR_VARS)
 LIBEVENT_SOURCES := \
 	buffer.c bufferevent.c event.c \
 	bufferevent_sock.c bufferevent_ratelim.c \
-	evthread.c log.c evutil.c evutil_time.c evmap.c epoll.c poll.c signal.c select.c
+	evthread.c log.c evutil.c evutil_rand.c evutil_time.c evmap.c epoll.c poll.c signal.c select.c
 
 LOCAL_MODULE := event
 LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
