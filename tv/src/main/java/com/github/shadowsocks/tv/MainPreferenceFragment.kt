@@ -92,7 +92,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         private set
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) = changeState(state, msg)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-        if (profileId == 0L) requireContext().let { context ->
+        if (profileId == 0L) context?.let { context ->
             this.stats.summary = getString(R.string.stat_summary,
                     getString(R.string.speed, Formatter.formatFileSize(context, stats.txRate)),
                     getString(R.string.speed, Formatter.formatFileSize(context, stats.rxRate)),
@@ -102,6 +102,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     }
 
     private fun changeState(state: BaseService.State, msg: String? = null) {
+        val context = context ?: return
         fab.isEnabled = state.canStop || state == BaseService.State.Stopped
         fab.setTitle(when (state) {
             BaseService.State.Connecting -> R.string.connecting
@@ -116,9 +117,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             tester.status.removeObservers(this)
             if (state != BaseService.State.Idle) tester.invalidate()
         } else tester.status.observe(this, Observer {
-            it.retrieve(stats::setTitle) { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
+            it.retrieve(stats::setTitle) { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
         })
-        if (msg != null) Toast.makeText(requireContext(), getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
+        if (msg != null) Toast.makeText(context, getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
         if (state == BaseService.State.Stopped) {
             controlImport.isEnabled = true
