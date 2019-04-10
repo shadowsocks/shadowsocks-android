@@ -178,6 +178,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 Template.Url -> AclItem(text, true)
             }
         }, arg)
+
+        override fun onClick(dialog: DialogInterface?, which: Int) {
+            if (which != DialogInterface.BUTTON_NEGATIVE) super.onClick(dialog, which)
+        }
     }
 
     private inner class AclRuleViewHolder(view: View) : RecyclerView.ViewHolder(view),
