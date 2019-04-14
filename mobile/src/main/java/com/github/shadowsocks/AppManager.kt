@@ -53,6 +53,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.layout_apps.*
 import kotlinx.android.synthetic.main.layout_apps_item.view.*
 import kotlinx.coroutines.*
+import kotlin.coroutines.coroutineContext
 
 class AppManager : AppCompatActivity() {
     companion object {
@@ -125,7 +126,7 @@ class AppManager : AppCompatActivity() {
 
         suspend fun reload() {
             apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
-                yield()
+                coroutineContext[Job]!!.ensureActive()
                 ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
             }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
         }
@@ -196,7 +197,7 @@ class AppManager : AppCompatActivity() {
     @UiThread
     private fun loadApps() {
         loader?.cancel()
-        loader = GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+        loader = GlobalScope.launch(Dispatchers.Main.immediate) {
             loading.crossFadeFrom(list)
             val adapter = list.adapter as AppsAdapter
             withContext(Dispatchers.IO) { adapter.reload() }
