@@ -63,7 +63,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     companion object {
         private const val REQUEST_CODE_ADD = 1
         private const val REQUEST_CODE_EDIT = 2
-        private const val TEMPLATE_REGEX_DOMAIN = "(^|\\.)%s$"
 
         private const val SELECTED_SUBNETS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_SUBNETS"
         private const val SELECTED_HOSTNAMES = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
@@ -170,14 +169,16 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             inputLayout.error = message
         }
 
-        override val ret get() = AclEditResult(editText.text.toString().let { text ->
-            when (Template.values()[templateSelector.selectedItemPosition]) {
-                Template.Generic -> AclItem(text)
-                Template.Domain -> AclItem(TEMPLATE_REGEX_DOMAIN.format(Locale.ENGLISH, IDN.toASCII(text,
-                        IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES).replace(".", "\\.")))
-                Template.Url -> AclItem(text, true)
-            }
-        }, arg)
+        override fun ret(which: Int) = if (which != DialogInterface.BUTTON_POSITIVE) null else {
+            AclEditResult(editText.text.toString().let { text ->
+                when (Template.values()[templateSelector.selectedItemPosition]) {
+                    Template.Generic -> AclItem(text)
+                    Template.Domain -> AclItem(IDN.toASCII(text, IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
+                            .replace(".", "\\.").let { "(^|\\.)$it\$" })
+                    Template.Url -> AclItem(text, true)
+                }
+            }, arg)
+        }
 
         override fun onClick(dialog: DialogInterface?, which: Int) {
             if (which != DialogInterface.BUTTON_NEGATIVE) super.onClick(dialog, which)
