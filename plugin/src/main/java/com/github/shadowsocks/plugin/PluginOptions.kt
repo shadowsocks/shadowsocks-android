@@ -42,25 +42,22 @@ class PluginOptions : HashMap<String, String?> {
         val tokenizer = StringTokenizer("$options;", "\\=;", true)
         val current = StringBuilder()
         var key: String? = null
-        while (tokenizer.hasMoreTokens()) {
-            val nextToken = tokenizer.nextToken()
-            when (nextToken) {
-                "\\" -> current.append(tokenizer.nextToken())
-                "=" -> if (key == null) {
-                    key = current.toString()
-                    current.setLength(0)
-                } else current.append(nextToken)
-                ";" -> {
-                    if (key != null) {
-                        put(key, current.toString())
-                        key = null
-                    } else if (current.isNotEmpty())
-                        if (parseId) id = current.toString() else put(current.toString(), null)
-                    current.setLength(0)
-                    parseId = false
-                }
-                else -> current.append(nextToken)
+        while (tokenizer.hasMoreTokens()) when (val nextToken = tokenizer.nextToken()) {
+            "\\" -> current.append(tokenizer.nextToken())
+            "=" -> if (key == null) {
+                key = current.toString()
+                current.setLength(0)
+            } else current.append(nextToken)
+            ";" -> {
+                if (key != null) {
+                    put(key, current.toString())
+                    key = null
+                } else if (current.isNotEmpty())
+                    if (parseId) id = current.toString() else put(current.toString(), null)
+                current.setLength(0)
+                parseId = false
             }
+            else -> current.append(nextToken)
         }
     }
 

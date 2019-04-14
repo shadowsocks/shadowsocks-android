@@ -38,7 +38,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions.checkReleaseBuilds false
+    packagingOptions.exclude '**/*.kotlin_*'
     splits {
         abi {
             enable true

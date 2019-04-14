@@ -104,8 +104,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         }
     }
 
-    private val job = Job()
-    override val coroutineContext get() = Dispatchers.Main + job
+    override val coroutineContext = Dispatchers.Main.immediate + Job()
 
     @MainThread
     fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
@@ -118,7 +117,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
 
     @MainThread
     fun close(scope: CoroutineScope) {
-        job.cancel()
-        scope.launch { job.join() }
+        cancel()
+        coroutineContext[Job]!!.also { job -> scope.launch { job.join() } }
     }
 }

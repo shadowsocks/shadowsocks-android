@@ -91,7 +91,7 @@ class HttpsTest : ViewModel() {
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
-        running = conn to GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+        running = conn to GlobalScope.launch(Dispatchers.Main.immediate) {
             status.value = withContext(Dispatchers.IO) {
                 try {
                     val start = SystemClock.elapsedRealtime()
