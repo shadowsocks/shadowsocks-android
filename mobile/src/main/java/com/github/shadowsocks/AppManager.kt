@@ -264,8 +264,8 @@ class AppManager : AppCompatActivity() {
                 return true
             }
             R.id.action_export_clipboard -> {
-                clipboard.primaryClip = ClipData.newPlainText(Key.individual,
-                        "${DataStore.bypass}\n${DataStore.individual}")
+                clipboard.setPrimaryClip(ClipData.newPlainText(Key.individual,
+                        "${DataStore.bypass}\n${DataStore.individual}"))
                 Snackbar.make(list, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
                 return true
             }

@@ -297,7 +297,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                 try {
                     ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
                         context.contentResolver.openInputStream(it)
-                    }, true)
+                    }.filterNotNull(), true)
                 } catch (e: Exception) {
                     printLog(e)
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
