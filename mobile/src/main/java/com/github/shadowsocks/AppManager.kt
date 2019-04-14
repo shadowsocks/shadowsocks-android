@@ -69,7 +69,7 @@ class AppManager : AppCompatActivity() {
                     receiver = null
                     cachedApps = null
                 }
-                AppManager.instance?.loadApps()
+                instance?.loadApps()
             }
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
             val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
@@ -109,7 +109,7 @@ class AppManager : AppCompatActivity() {
         }
 
         fun handlePayload(payloads: List<String>) {
-            if (payloads.contains(AppManager.SWITCH)) itemView.itemcheck.isChecked = isProxiedApp(item)
+            if (payloads.contains(SWITCH)) itemView.itemcheck.isChecked = isProxiedApp(item)
         }
 
         override fun onClick(v: View?) {
@@ -117,7 +117,7 @@ class AppManager : AppCompatActivity() {
             DataStore.individual = apps.filter { isProxiedApp(it) }.joinToString("\n") { it.packageName }
             DataStore.dirty = true
 
-            appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, AppManager.SWITCH)
+            appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, SWITCH)
         }
     }
 
@@ -281,7 +281,7 @@ class AppManager : AppCompatActivity() {
                         DataStore.dirty = true
                         Snackbar.make(list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
                         initProxiedUids(apps)
-                        appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, AppManager.SWITCH)
+                        appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, SWITCH)
                         return true
                     } catch (_: IllegalArgumentException) { }
                 }
