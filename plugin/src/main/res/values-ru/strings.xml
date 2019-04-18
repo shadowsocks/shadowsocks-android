@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="proxy_cat">"Настройки сервера"</string>
+<string name="feature_cat">"Настройки опций"</string>
+<string name="unsaved_changes_prompt">"Сохранить изменения?"</string>
+<string name="yes">"Да"</string>
+<string name="no">"Нет"</string>
+<string name="apply">"Применить"</string>
+</resources>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:title="@string/app_name">
+    <!-- profileId is stored in privateStore so its value needs to be populated manually -->
+    <ListPreference
+        android:key="profileId"
+        android:title="@string/connect"
+        android:summary="%s"
+        android:persistent="false"/>
+    <Preference
+        android:key="control.stats"
+        android:title="@string/connection_test_pending"
+        android:summary="@string/stat_summary"/>
+    <Preference
+        android:key="control.import"
+        android:title="@string/action_replace_file"/>
+    <Preference
+        android:key="control.export"
+        android:title="@string/action_export_file"/>
+    <PreferenceCategory
+        android:title="@string/settings"
+        app:initialExpandedChildrenCount="2">
+        <SwitchPreference
+            android:key="isAutoConnect"
+            android:persistent="false"
+            android:summary="@string/auto_connect_summary"
+            android:title="@string/auto_connect"/>
+        <SwitchPreference
+            android:key="tcp_fastopen"
+            android:summary="@string/tcp_fastopen_summary"
+            android:title="TCP Fast Open"/>
+
+        <ListPreference
+            android:key="serviceMode"
+            android:entries="@array/service_modes"
+            android:entryValues="@array/service_mode_values"
+            android:defaultValue="vpn"
+            android:summary="%s"
+            android:title="@string/service_mode"/>
+        <SwitchPreference
+            android:key="shareOverLan"
+            android:title="@string/share_over_lan"/>
+        <com.takisoft.preferencex.AutoSummaryEditTextPreference
+            android:key="portProxy"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:singleLine="true"
+            android:title="@string/port_proxy"/>
+        <com.takisoft.preferencex.AutoSummaryEditTextPreference
+            android:key="portLocalDns"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:singleLine="true"
+            android:title="@string/port_local_dns"/>
+        <com.takisoft.preferencex.AutoSummaryEditTextPreference
+            android:key="portTransproxy"
+            android:inputType="number"
+            android:maxLength="5"
+            app:pref_summaryHasText="%s"
+            android:singleLine="true"
+            android:title="@string/port_transproxy"/>
+    </PreferenceCategory>
+
+    <Preference
+        android:key="about"
+        android:title="@string/about"/>
+
+</PreferenceScreen>

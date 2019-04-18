@@ -1,0 +1,21 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_apply_all"
+          android:title="@string/action_apply_all"
+          android:alphabeticShortcut="a"
+          app:alphabeticModifiers="CTRL|SHIFT"
+          app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_export_clipboard"
+        android:alphabeticShortcut="c"
+        android:icon="?attr/actionModeCopyDrawable"
+        android:title="@string/action_export"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_import_clipboard"
+        android:alphabeticShortcut="v"
+        android:icon="?attr/actionModePasteDrawable"
+        android:title="@string/action_import"
+        app:showAsAction="ifRoom"/>
+</menu>

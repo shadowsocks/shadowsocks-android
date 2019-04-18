@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background_selected">@color/material_primary_800</color>
+    <color name="background_stat">@color/material_primary_600</color>
+</resources>

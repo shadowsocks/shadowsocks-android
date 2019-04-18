@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/main"
+           android:checkableBehavior="single">
+        <item android:id="@+id/profiles"
+              android:title="@string/profiles"
+              android:icon="@drawable/ic_action_description"/>
+        <item android:id="@+id/customRules"
+              android:title="@string/custom_rules"
+              android:icon="@drawable/ic_action_assignment"/>
+        <item android:id="@+id/globalSettings"
+              android:title="@string/settings"
+              android:icon="@drawable/ic_action_settings"/>
+    </group>
+    <group android:id="@+id/misc"
+           android:checkableBehavior="single">
+        <item android:id="@+id/faq"
+              android:checkable="false"
+              android:title="@string/faq"
+              android:icon="@drawable/ic_action_help_outline"/>
+        <item android:id="@+id/about"
+              android:title="@string/about"
+              android:icon="@drawable/ic_action_copyright"/>
+    </group>
+</menu>

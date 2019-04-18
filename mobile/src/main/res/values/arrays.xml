@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="route_entry">
+        <item>@string/route_entry_all</item>
+        <item>@string/route_entry_bypass_lan</item>
+        <item>@string/route_entry_bypass_chn</item>
+        <item>@string/route_entry_bypass_lan_chn</item>
+        <item>@string/route_entry_gfwlist</item>
+        <item>@string/route_entry_chinalist</item>
+        <item>@string/custom_rules</item>
+    </string-array>
+    <string-array name="route_value" translatable="false">
+        <item>all</item>
+        <item>bypass-lan</item>
+        <item>bypass-china</item>
+        <item>bypass-lan-china</item>
+        <item>gfwlist</item>
+        <item>china-list</item>
+        <item>custom-rules</item>
+    </string-array>
+
+    <string-array name="acl_rule_templates" translatable="false">
+        <item>@string/acl_rule_templates_generic</item>
+        <item>@string/acl_rule_templates_domain</item>
+        <item>@string/acl_rule_online_config</item>
+    </string-array>
+
+    <string-array name="service_modes">
+        <item>@string/service_mode_proxy</item>
+        <item>@string/service_mode_vpn</item>
+        <item>@string/service_mode_transproxy</item>
+    </string-array>
+    <string-array name="service_mode_values" translatable="false">
+        <item>proxy</item>
+        <item>vpn</item>
+        <item>transproxy</item>
+    </string-array>
+</resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Source: https://android.googlesource.com/platform/frameworks/support/+/b80f425/leanback-preference/src/main/res/layout/leanback_list_preference_item_single.xml -->
+<!--
+  ~ Copyright (C) 2015 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/container"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="?android:attr/selectableItemBackground"
+              android:clickable="true"
+              android:focusable="true"
+              android:descendantFocusability="blocksDescendants"
+              android:orientation="horizontal"
+              android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+              android:paddingEnd="?android:attr/listPreferredItemPaddingEnd" >
+
+    <RadioButton
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        style="?android:attr/radioButtonStyle"
+        android:background="@null"
+        android:focusable="false"
+        android:clickable="false"
+        android:layout_marginEnd="@dimen/lb_preference_item_icon_margin_end"
+        android:layout_gravity="center_vertical" />
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:duplicateParentState="true"
+                  android:orientation="vertical">
+        <Space android:layout_width="0dp" android:layout_height="@dimen/lb_preference_item_text_space_top" />
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/lb_preference_item_primary_text_margin_bottom"
+            android:duplicateParentState="true"
+            android:textAppearance="?android:attr/textAppearanceListItem"/>
+        <com.github.shadowsocks.widget.AutoCollapseTextView
+            android:id="@android:id/summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:duplicateParentState="true"
+            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+            android:textSize="@dimen/lb_preference_item_secondary_text_size"/>
+        <Space android:layout_width="0dp" android:layout_height="@dimen/lb_preference_item_text_space_bottom" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,52 +1,14 @@
-language: android
+sudo: required
 
-jdk:
-  - oraclejdk8
+addons:
+    artifacts: true
 
-env:
-    global:
-        - NDK_VERSION=r12b
-        - NDK_CCACHE=ccache
-        - GOROOT_BOOTSTRAP=$GOROOT
-        - ANDROID_NDK_HOME=$HOME/.android/android-ndk-${NDK_VERSION}
-        - SBTPATH=$HOME/.sbt
-        - PATH=${ANDROID_NDK_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools:${PATH}
+services:
+    - docker
 
-scala:
-    - 2.11.8
-
-before_cache:
-    - find $HOME/.sbt -name "*.lock" | xargs rm
-    - find $HOME/.ivy2 -name "*.lock" | xargs rm
-
-cache:
-    directories:
-        - $HOME/.ivy2
-        - $HOME/.sbt
-
-android:
-    components:
-        - tools
-        - build-tools-24.0.1
-        - extra-google-m2repository
-
-install:
-    - >
-      if [ ! -d "$ANDROID_NDK_HOME" ]; then
-          mkdir -p $ANDROID_NDK_HOME;
-          pushd $HOME/.android;
-          export ARCH=`uname -m`;
-          wget -q http://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          unzip -q android-ndk-${NDK_VERSION}-linux-${ARCH}.zip;
-          popd;
-      fi
-    - >
-      if [ ! -f "$SBTPATH/sbt" ]; then
-          pushd $SBTPATH;
-          wget -q https://raw.githubusercontent.com/paulp/sbt-extras/master/sbt;
-          chmod a+x sbt;
-          popd;
-      fi
+before_install:
+    - docker pull circleci/android:api-28-ndk
+    - chmod -R a+wrx .
 
 script:
-    - $SBTPATH/sbt native-build android:package-debug
+    - docker run --rm -v ${PWD}:/build circleci/android:api-28-ndk bash -c "cd /build; ./gradlew assembleDebug check"

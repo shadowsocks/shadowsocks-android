@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/snackbar"
+        android:clipChildren="false"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <FrameLayout
+            android:id="@+id/fragment_holder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <com.github.shadowsocks.widget.ServiceButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="6dp"
+            android:nextFocusDown="@+id/stats"
+            app:layout_dodgeInsetEdges="top"
+            app:layout_anchor="@id/stats"
+            app:backgroundTint="@color/background_service"
+            app:fabSize="normal"
+            app:pressedTranslationZ="6dp"
+            app:srcCompat="@drawable/ic_service_idle"/>
+
+        <com.github.shadowsocks.widget.StatsBar
+            android:id="@+id/stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:nextFocusUp="@+id/fab"
+            app:backgroundTint="@color/background_stat"
+            app:contentInsetStart="0dp"
+            app:layout_scrollFlags="enterAlways|scroll"
+            app:hideOnScroll="true">
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:orientation="vertical"
+                android:padding="16dip">
+
+                <TextView
+                    android:id="@+id/tx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_columnWeight="1"/>
+
+                <TextView
+                    android:id="@+id/txRate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:gravity="end"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_row="0"
+                    android:layout_column="2"
+                    android:layout_columnWeight="1"/>
+
+                <TextView
+                    android:id="@+id/rx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_column="0"
+                    android:layout_columnWeight="1"
+                    android:layout_row="1"/>
+
+                <TextView
+                    android:id="@+id/rxRate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:singleLine="true"
+                    android:gravity="end"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_column="2"
+                    android:layout_columnWeight="1"
+                    android:layout_row="1"/>
+
+                <TextView
+                    android:id="@+id/status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="16sp"
+                    android:layout_gravity="fill_horizontal"
+                    android:layout_row="2"
+                    android:layout_column="0"
+                    android:layout_columnSpan="3"
+                    tools:text="@string/connection_test_available"/>
+
+            </GridLayout>
+
+        </com.github.shadowsocks.widget.StatsBar>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/navigation"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:itemIconTint="@color/nav_item_tint"
+        app:itemTextColor="@color/nav_item_tint"
+        app:headerLayout="@layout/navigation_header"
+        app:menu="@menu/navigation_main" />
+</androidx.drawerlayout.widget.DrawerLayout>

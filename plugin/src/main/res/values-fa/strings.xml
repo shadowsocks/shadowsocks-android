@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="proxy_cat">"تنظیمات سرور"</string>
+<string name="feature_cat">"تنظیمات ویژگی‌ها"</string>
+<string name="unsaved_changes_prompt">"تغییرات ذخیره نشده‌اند. ذخیره شوند؟"</string>
+<string name="yes">"بله"</string>
+<string name="no">"خیر"</string>
+<string name="apply">"تایید"</string>
+</resources>
