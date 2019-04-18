@@ -129,11 +129,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (DataStore.serviceMode == Key.modeVpn)
-            if (BaseVpnService.prepare(this) != null)
-                startActivity(Intent(this, VpnRequestActivity::class.java)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
+        if (DataStore.serviceMode == Key.modeVpn) {
+            if (prepare(this) != null) {
+                startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
+        }
         stopRunner()
         return Service.START_NOT_STICKY
     }
