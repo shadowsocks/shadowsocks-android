@@ -37,13 +37,13 @@ object RemoteConfig {
     }
 
     fun scheduleFetch() = config.fetch().addOnCompleteListener {
-        if (it.isSuccessful) config.activateFetched() else it.exception?.log()
+        if (it.isSuccessful) config.activate() else it.exception?.log()
     }
 
     suspend fun fetch() = suspendCancellableCoroutine<Pair<FirebaseRemoteConfig, Boolean>> { cont ->
         config.fetch().addOnCompleteListener {
             if (it.isSuccessful) {
-                config.activateFetched()
+                config.activate()
                 cont.resume(config to true)
             } else {
                 it.exception?.log()

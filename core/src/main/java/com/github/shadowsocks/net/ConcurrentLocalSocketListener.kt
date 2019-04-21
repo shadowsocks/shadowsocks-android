@@ -27,8 +27,7 @@ import java.io.File
 
 abstract class ConcurrentLocalSocketListener(name: String, socketFile: File) : LocalSocketListener(name, socketFile),
         CoroutineScope {
-    private val job = SupervisorJob()
-    override val coroutineContext get() = Dispatchers.IO + job + CoroutineExceptionHandler { _, t -> printLog(t) }
+    override val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { _, t -> printLog(t) }
 
     override fun accept(socket: LocalSocket) {
         launch { super.accept(socket) }
@@ -36,8 +35,8 @@ abstract class ConcurrentLocalSocketListener(name: String, socketFile: File) : L
 
     override fun shutdown(scope: CoroutineScope) {
         running = false
-        job.cancel()
+        cancel()
         super.shutdown(scope)
-        scope.launch { job.join() }
+        coroutineContext[Job]!!.also { job -> scope.launch { job.join() } }
     }
 }

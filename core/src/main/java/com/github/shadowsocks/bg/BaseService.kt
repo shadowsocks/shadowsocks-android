@@ -254,7 +254,7 @@ object BaseService {
             if (data.state == State.Stopping) return
             // channge the state
             data.changeState(State.Stopping)
-            GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+            GlobalScope.launch(Dispatchers.Main.immediate) {
                 Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
