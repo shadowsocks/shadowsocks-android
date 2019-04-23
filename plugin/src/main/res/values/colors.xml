@@ -21,5 +21,7 @@
   <color name="color_primary">@color/material_primary_500</color>
   <color name="color_primary_dark">@color/material_primary_700</color>
   <color name="color_primary_text">@color/material_primary_500</color>
+
+  <color name="color_tint">@color/material_grey_600</color>
   
 </resources>

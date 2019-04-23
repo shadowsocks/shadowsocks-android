@@ -9,6 +9,7 @@
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="windowActionModeOverlay">true</item>
+        <item name="preferenceTheme">@style/PreferenceTheme</item>
     </style>
     <style name="Theme.MaterialComponents.DayNight.BottomSheetDialog"
            parent="@style/Theme.MaterialComponents.Light.BottomSheetDialog"/>
@@ -24,4 +25,7 @@
         <item name="windowNoTitle">true</item>
     </style>
     <style name="ThemeOverlay.AppCompat.DayNight" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
+        <item name="android:tint">@color/color_tint</item>
+    </style>
 </resources>

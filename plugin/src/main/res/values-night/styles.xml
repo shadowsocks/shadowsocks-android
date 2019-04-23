@@ -9,6 +9,7 @@
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="windowActionModeOverlay">true</item>
+        <item name="preferenceTheme">@style/PreferenceTheme</item>
     </style>
     <style name="Theme.MaterialComponents.DayNight.BottomSheetDialog"
            parent="@style/Theme.MaterialComponents.BottomSheetDialog"/>
