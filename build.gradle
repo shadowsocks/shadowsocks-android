@@ -27,7 +27,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'com.android.tools.build:gradle:3.4.0'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
         classpath 'com.google.gms:google-services:4.2.0'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
