@@ -43,7 +43,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         }
         boot.isChecked = BootReceiver.enabled
-        if (Build.VERSION.SDK_INT >= 24) boot.setSummary(R.string.auto_connect_summary_v24)
 
         val canToggleLocked = findPreference(Key.directBootAware)
         if (Build.VERSION.SDK_INT >= 24) canToggleLocked.setOnPreferenceChangeListener { _, newValue ->

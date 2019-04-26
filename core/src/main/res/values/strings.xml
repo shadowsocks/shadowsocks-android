@@ -54,8 +54,6 @@
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
   <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
-  <string name="auto_connect_summary_v24">Enable Shadowsocks on startup. Recommended to use always-on VPN
-    instead</string>
   <string name="direct_boot_aware">Allow Toggling in Lock Screen</string>
   <string name="direct_boot_aware_summary">Your selected profile information will be less protected</string>
   <string name="tcp_fastopen_summary">Toggling might require ROOT permission</string>
