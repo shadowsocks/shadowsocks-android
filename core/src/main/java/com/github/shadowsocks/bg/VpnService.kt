@@ -56,8 +56,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
         private const val PRIVATE_VLAN4_ROUTER = "172.19.0.2"
-        private const val PRIVATE_VLAN6_CLIENT = "fdfe:dcba:9876::1"
-        private const val PRIVATE_VLAN6_ROUTER = "fdfe:dcba:9876::2"
+        private const val PRIVATE_VLAN6_CLIENT = "ddfe:dcba:9876::1"
+        private const val PRIVATE_VLAN6_ROUTER = "ddfe:dcba:9876::2"
 
         /**
          * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
