@@ -20,6 +20,7 @@
         android:key="control.export"
         android:title="@string/action_export_file"/>
     <PreferenceCategory
+        android:key="settings"
         android:title="@string/settings"
         app:initialExpandedChildrenCount="2">
         <SwitchPreference
