@@ -42,7 +42,7 @@ object LocalDnsService {
                 .lineSequence().map(Subnet.Companion::fromString).filterNotNull().toList()
     }
 
-    private val servers = WeakHashMap<LocalDnsService.Interface, LocalDnsServer>()
+    private val servers = WeakHashMap<Interface, LocalDnsServer>()
 
     interface Interface : BaseService.Interface {
         override suspend fun startProcesses() {

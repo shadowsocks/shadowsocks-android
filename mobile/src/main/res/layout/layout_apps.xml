@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:duplicateParentState="false">
-  <androidx.appcompat.widget.Toolbar
+  <com.google.android.material.appbar.MaterialToolbar
       android:layout_height="?attr/actionBarSize"
       android:layout_width="match_parent"
       android:background="?attr/colorPrimary"
@@ -25,7 +25,7 @@
         android:iconifiedByDefault="false"
         android:queryHint="@android:string/search_go"/>
 
-  </androidx.appcompat.widget.Toolbar>
+  </com.google.android.material.appbar.MaterialToolbar>
 
   <androidx.constraintlayout.widget.ConstraintLayout
       android:layout_width="fill_parent"

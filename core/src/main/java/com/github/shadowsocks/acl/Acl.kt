@@ -121,8 +121,7 @@ class Acl {
                 val blocks = (line as java.lang.String).split("#", 2)
                 val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
                 if (url != null) urls.add(URL(url))
-                val input = blocks[0].trim()
-                when (input) {
+                when (val input = blocks[0].trim()) {
                     "[outbound_block_list]" -> {
                         hostnames = null
                         subnets = null

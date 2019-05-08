@@ -45,27 +45,24 @@ androidExtensions {
 
 def lifecycleVersion = '2.0.0'
 def roomVersion = '2.0.0'
-def workVersion = '1.0.0'
 dependencies {
     api project(':plugin')
-    api "android.arch.work:work-runtime-ktx:$workVersion"
     api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     api 'androidx.preference:preference:1.1.0-alpha04'
     api "androidx.room:room-runtime:$roomVersion"
-    api 'com.crashlytics.sdk.android:crashlytics:2.9.9'
-    api 'com.google.firebase:firebase-config:16.4.1'
-    api 'com.google.firebase:firebase-core:16.0.8'
+    api 'androidx.work:work-runtime-ktx:2.0.1'
+    api 'com.crashlytics.sdk.android:crashlytics:2.10.0'
+    api 'com.google.firebase:firebase-config:17.0.0'
+    api 'com.google.firebase:firebase-core:16.0.9'
     api 'dnsjava:dnsjava:2.1.8'
-    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.1'
     api 'org.connectbot.jsocks:jsocks:1.0.0'
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
-    testImplementation "androidx.arch.core:core-testing:$lifecycleVersion"
     testImplementation "junit:junit:$junitVersion"
-    androidTestImplementation "android.arch.work:work-testing:$workVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
-    androidTestImplementation "androidx.test.ext:junit-ktx:1.1.0"
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.0'
 }

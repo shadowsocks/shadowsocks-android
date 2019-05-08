@@ -18,6 +18,7 @@
         app:key="control.export"
         app:title="@string/action_export_file"/>
     <PreferenceCategory
+        app:key="settings"
         app:title="@string/settings"
         app:initialExpandedChildrenCount="3">
         <SwitchPreference
