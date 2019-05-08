@@ -49,7 +49,7 @@ dependencies {
     api project(':plugin')
     api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    api 'androidx.preference:preference:1.1.0-alpha04'
+    api 'androidx.preference:preference:1.1.0-alpha05'
     api "androidx.room:room-runtime:$roomVersion"
     api 'androidx.work:work-runtime-ktx:2.0.1'
     api 'com.crashlytics.sdk.android:crashlytics:2.10.0'
