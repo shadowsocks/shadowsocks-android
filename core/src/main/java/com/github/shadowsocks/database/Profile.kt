@@ -87,7 +87,7 @@ data class Profile(
                     if (match != null) {
                         val profile = Profile()
                         feature?.copyFeatureSettingsTo(profile)
-                        profile.method = match.groupValues[1].toLowerCase()
+                        profile.method = match.groupValues[1].toLowerCase(Locale.ENGLISH)
                         profile.password = match.groupValues[2]
                         profile.host = match.groupValues[3]
                         profile.remotePort = match.groupValues[4].toInt()

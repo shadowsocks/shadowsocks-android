@@ -61,6 +61,9 @@ fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_IN
             if (BuildCompat.isAtLeastQ()) it else parseNumericAddress.invoke(null, this) as InetAddress
         }
 
+fun <K, V> MutableMap<K, V>.computeIfAbsentCompat(key: K, value: () -> V) = if (Build.VERSION.SDK_INT >= 24)
+    computeIfAbsent(key) { value() } else this[key] ?: value().also { put(key, it) }
+
 fun HttpURLConnection.disconnectFromMain() {
     if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
 }

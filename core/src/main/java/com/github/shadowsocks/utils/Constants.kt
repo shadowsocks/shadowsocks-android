@@ -65,6 +65,7 @@ object Key {
     const val dirty = "profileDirty"
 
     const val tfo = "tcp_fastopen"
+    const val hosts = "hosts"
     const val assetUpdateTime = "assetUpdateTime"
 
     // TV specific values

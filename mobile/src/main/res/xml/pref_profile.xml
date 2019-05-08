@@ -2,99 +2,93 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <AutoSummaryEditTextPreference
-            android:key="profileName"
-            app:pref_summaryHasText="%s"
-            android:title="@string/profile_name"/>
+    <EditTextPreference
+            app:key="profileName"
+            app:title="@string/profile_name"
+            app:useSimpleSummaryProvider="true"/>
 
     <PreferenceCategory
-            android:title="@string/proxy_cat">
+            app:title="@string/proxy_cat">
 
-        <AutoSummaryEditTextPreference
-                android:key="proxy"
-                app:pref_summaryHasText="%s"
-                android:singleLine="true"
-                android:title="@string/proxy"/>
-        <AutoSummaryEditTextPreference
-                android:key="remotePortNum"
-                android:inputType="number"
-                android:maxLength="5"
-                app:pref_summaryHasText="%s"
-                android:singleLine="true"
-                android:title="@string/remote_port"/>
-        <AutoSummaryEditTextPreference
-                android:inputType="textPassword"
-                android:typeface="monospace"
-                app:pref_summaryPasswordSubstituteLength="0"
-                android:key="sitekey"
-                app:pref_summaryHasText="%s"
-                android:singleLine="true"
-                android:title="@string/sitekey"/>
-        <SimpleMenuPreference
-                android:key="encMethod"
-                android:icon="@drawable/ic_notification_enhanced_encryption"
-                android:entries="@array/enc_method_entry"
-                android:entryValues="@array/enc_method_value"
-                android:summary="%s"
-                android:title="@string/enc_method"/>
+        <EditTextPreference
+                app:key="proxy"
+                app:singleLine="true"
+                app:title="@string/proxy"
+                app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+                app:key="remotePortNum"
+                app:title="@string/remote_port"
+                app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+                app:dialogLayout="@layout/preference_dialog_password"
+                app:key="sitekey"
+                app:title="@string/sitekey"/>
+        <com.takisoft.preferencex.SimpleMenuPreference
+                app:key="encMethod"
+                app:icon="@drawable/ic_notification_enhanced_encryption"
+                app:entries="@array/enc_method_entry"
+                app:entryValues="@array/enc_method_value"
+                app:title="@string/enc_method"
+                app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/feature_cat">
+            app:title="@string/feature_cat">
 
-        <SimpleMenuPreference
-                android:key="route"
-                android:entries="@array/route_entry"
-                android:entryValues="@array/route_value"
-                android:summary="%s"
-                android:title="@string/route_list"/>
+        <com.takisoft.preferencex.SimpleMenuPreference
+                app:key="route"
+                app:entries="@array/route_entry"
+                app:entryValues="@array/route_value"
+                app:title="@string/route_list"
+                app:useSimpleSummaryProvider="true"/>
         <SwitchPreference
-                android:key="isIpv6"
-                android:icon="@drawable/ic_image_looks_6"
-                android:summary="@string/ipv6_summary"
-                android:title="@string/ipv6"/>
+                app:key="isIpv6"
+                app:icon="@drawable/ic_image_looks_6"
+                app:summary="@string/ipv6_summary"
+                app:title="@string/ipv6"/>
         <SwitchPreference
-                android:key="isProxyApps"
-                android:icon="@drawable/ic_navigation_apps"
-                android:summary="@string/proxied_apps_summary"
-                android:title="@string/proxied_apps"/>
+                app:key="isProxyApps"
+                app:icon="@drawable/ic_navigation_apps"
+                app:summary="@string/proxied_apps_summary"
+                app:title="@string/proxied_apps"/>
         <SwitchPreference
-                android:key="metered"
-                android:icon="@drawable/ic_device_data_usage"
-                android:summary="@string/metered_summary"
-                android:title="@string/metered"/>
-        <AutoSummaryEditTextPreference
-                android:key="remoteDns"
-                android:icon="@drawable/ic_action_dns"
-                android:title="@string/remote_dns"
-                app:pref_summaryHasText="%s"/>
+                app:key="metered"
+                app:icon="@drawable/ic_device_data_usage"
+                app:summary="@string/metered_summary"
+                app:title="@string/metered"/>
+        <EditTextPreference
+                app:key="remoteDns"
+                app:icon="@drawable/ic_action_dns"
+                app:title="@string/remote_dns"
+                app:useSimpleSummaryProvider="true"/>
         <SwitchPreference
-                android:key="isUdpDns"
-                android:summary="@string/udp_dns_summary"
-                android:title="@string/udp_dns"/>
+            app:key="isUdpDns"
+            app:icon="@drawable/ic_action_dns"
+            app:summary="@string/udp_dns_summary"
+            app:title="@string/udp_dns"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
-            android:title="@string/plugin">
+            app:title="@string/plugin">
 
         <com.github.shadowsocks.preference.IconListPreference
-                android:key="plugin"
-                android:persistent="false"
-                android:summary="%s"
-                android:title="@string/plugin"/>
-        <AutoSummaryEditTextPreference
-                android:key="plugin.configure"
-                android:icon="@drawable/ic_action_settings"
-                android:persistent="false"
-                android:singleLine="true"
-                app:pref_summaryHasText="%s"
-                android:title="@string/plugin_configure"/>
+                app:key="plugin"
+                app:persistent="false"
+                app:title="@string/plugin"
+                app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+                app:key="plugin.configure"
+                app:icon="@drawable/ic_action_settings"
+                app:persistent="false"
+                app:singleLine="true"
+                app:title="@string/plugin_configure"
+                app:useSimpleSummaryProvider="true"/>
         <Preference
-                android:key="udpFallback"
-                android:title="@string/udp_fallback"
-                android:summary="@string/plugin_disabled">
+                app:key="udpFallback"
+                app:title="@string/udp_fallback"
+                app:summary="@string/plugin_disabled">
             <intent android:targetPackage="com.github.shadowsocks"
                     android:targetClass="com.github.shadowsocks.UdpFallbackProfileActivity"/>
         </Preference>

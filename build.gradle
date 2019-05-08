@@ -8,7 +8,6 @@ buildscript {
         minSdkVersion = 21
         sdkVersion = 28
         compileSdkVersion = 'android-Q'
-        preferencexVersion = '1.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.1.1'
         androidEspressoVersion = '3.1.1'

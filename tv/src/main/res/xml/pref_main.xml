@@ -1,73 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:title="@string/app_name">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+                  app:title="@string/app_name">
     <!-- profileId is stored in privateStore so its value needs to be populated manually -->
     <ListPreference
-        android:key="profileId"
-        android:title="@string/connect"
-        android:summary="%s"
-        android:persistent="false"/>
+        app:key="profileId"
+        app:title="@string/connect"
+        app:persistent="false"
+        app:useSimpleSummaryProvider="true"/>
     <Preference
-        android:key="control.stats"
-        android:title="@string/connection_test_pending"
-        android:summary="@string/stat_summary"/>
+        app:key="control.stats"
+        app:title="@string/connection_test_pending"
+        app:summary="@string/stat_summary"/>
     <Preference
-        android:key="control.import"
-        android:title="@string/action_replace_file"/>
+        app:key="control.import"
+        app:title="@string/action_replace_file"/>
     <Preference
-        android:key="control.export"
-        android:title="@string/action_export_file"/>
+        app:key="control.export"
+        app:title="@string/action_export_file"/>
     <PreferenceCategory
-        android:key="settings"
-        android:title="@string/settings"
-        app:initialExpandedChildrenCount="2">
+        app:key="settings"
+        app:title="@string/settings"
+        app:initialExpandedChildrenCount="3">
         <SwitchPreference
-            android:key="isAutoConnect"
-            android:persistent="false"
-            android:summary="@string/auto_connect_summary"
-            android:title="@string/auto_connect"/>
+            app:key="isAutoConnect"
+            app:persistent="false"
+            app:summary="@string/auto_connect_summary"
+            app:title="@string/auto_connect"/>
         <SwitchPreference
-            android:key="tcp_fastopen"
-            android:summary="@string/tcp_fastopen_summary"
-            android:title="TCP Fast Open"/>
+            app:key="tcp_fastopen"
+            app:summary="@string/tcp_fastopen_summary"
+            app:title="TCP Fast Open"/>
+        <EditTextPreference
+            app:key="hosts"
+            app:title="hosts"/>
 
         <ListPreference
-            android:key="serviceMode"
-            android:entries="@array/service_modes"
-            android:entryValues="@array/service_mode_values"
-            android:defaultValue="vpn"
-            android:summary="%s"
-            android:title="@string/service_mode"/>
+            app:key="serviceMode"
+            app:entries="@array/service_modes"
+            app:entryValues="@array/service_mode_values"
+            app:defaultValue="vpn"
+            app:title="@string/service_mode"
+            app:useSimpleSummaryProvider="true"/>
         <SwitchPreference
-            android:key="shareOverLan"
-            android:title="@string/share_over_lan"/>
-        <com.takisoft.preferencex.AutoSummaryEditTextPreference
-            android:key="portProxy"
-            android:inputType="number"
-            android:maxLength="5"
-            app:pref_summaryHasText="%s"
-            android:singleLine="true"
-            android:title="@string/port_proxy"/>
-        <com.takisoft.preferencex.AutoSummaryEditTextPreference
-            android:key="portLocalDns"
-            android:inputType="number"
-            android:maxLength="5"
-            app:pref_summaryHasText="%s"
-            android:singleLine="true"
-            android:title="@string/port_local_dns"/>
-        <com.takisoft.preferencex.AutoSummaryEditTextPreference
-            android:key="portTransproxy"
-            android:inputType="number"
-            android:maxLength="5"
-            app:pref_summaryHasText="%s"
-            android:singleLine="true"
-            android:title="@string/port_transproxy"/>
+            app:key="shareOverLan"
+            app:title="@string/share_over_lan"/>
+        <EditTextPreference
+            app:key="portProxy"
+            app:title="@string/port_proxy"
+            app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+            app:key="portLocalDns"
+            app:title="@string/port_local_dns"
+            app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+            app:key="portTransproxy"
+            app:title="@string/port_transproxy"
+            app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
 
     <Preference
-        android:key="about"
-        android:title="@string/about"/>
+        app:key="about"
+        app:title="@string/about"/>
 
 </PreferenceScreen>
