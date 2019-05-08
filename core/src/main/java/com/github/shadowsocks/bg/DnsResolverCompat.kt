@@ -23,19 +23,22 @@ package com.github.shadowsocks.bg
 import android.annotation.TargetApi
 import android.net.DnsResolver
 import android.net.Network
-import android.os.Handler
-import android.os.HandlerThread
+import android.net.ParseException
+import android.os.CancellationSignal
+import android.system.ErrnoException
 import androidx.core.os.BuildCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.InetAddress
+import java.util.concurrent.Executor
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 sealed class DnsResolverCompat {
     companion object : DnsResolverCompat() {
-        private val instance by lazy { if (BuildCompat.isAtLeastQ()) DnsResolverCompat29() else DnsResolverCompat21 }
+        private val instance by lazy { if (BuildCompat.isAtLeastQ()) DnsResolverCompat29 else DnsResolverCompat21 }
 
         override suspend fun resolve(network: Network, host: String) = instance.resolve(network, host)
     }
@@ -48,18 +51,22 @@ sealed class DnsResolverCompat {
     }
 
     @TargetApi(29)
-    private class DnsResolverCompat29 : DnsResolverCompat() {
-        private val handler = Handler(HandlerThread("DnsResolverCompat").run {
-            start()
-            looper
-        })
-
+    private object DnsResolverCompat29 : DnsResolverCompat() {
+        /**
+         * This executor will run on its caller directly. On Q beta 3, this is called in main thread.
+         */
+        private val executor = Executor { it.run() }
         override suspend fun resolve(network: Network, host: String): Array<InetAddress> {
             return suspendCancellableCoroutine { cont ->
+                val signal = CancellationSignal()
+                cont.invokeOnCancellation { signal.cancel() }
                 // retry should be handled by client instead
-                DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, handler) {
-                    cont.resume(it.toTypedArray())
-                }
+                DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, executor,
+                        signal, object : DnsResolver.InetAddressAnswerCallback() {
+                    override fun onAnswer(answer: MutableList<InetAddress>) = cont.resume(answer.toTypedArray())
+                    override fun onQueryException(exception: ErrnoException) = cont.resumeWithException(exception)
+                    override fun onParseException(exception: ParseException) = cont.resumeWithException(exception)
+                })
             }
         }
     }

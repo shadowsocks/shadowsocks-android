@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.utils
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -28,7 +29,6 @@ import android.content.pm.PackageInfo
 import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
-import android.net.InetAddresses
 import android.net.Uri
 import android.os.Build
 import android.system.Os
@@ -46,7 +46,7 @@ import java.net.InetAddress
 
 val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 
-private val parseNumericAddress by lazy {
+private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
         isAccessible = true
     }
@@ -54,12 +54,11 @@ private val parseNumericAddress by lazy {
 /**
  * A slightly more performant variant of parseNumericAddress.
  *
- * Bug: https://issuetracker.google.com/issues/123456213
+ * Bug in Android 9.0 and lower: https://issuetracker.google.com/issues/123456213
  */
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let {
-            if (BuildCompat.isAtLeastQ()) InetAddresses.parseNumericAddress(this)
-            else parseNumericAddress.invoke(null, this) as InetAddress
+            if (BuildCompat.isAtLeastQ()) it else parseNumericAddress.invoke(null, this) as InetAddress
         }
 
 fun HttpURLConnection.disconnectFromMain() {
