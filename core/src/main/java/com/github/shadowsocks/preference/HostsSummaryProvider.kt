@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,21 +18,16 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.preference
 
-import android.app.Application
-import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.EditTextPreference
+import androidx.preference.Preference
+import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.HostsFile
 
-class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        Core.init(this, MainActivity::class)
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        Core.updateNotificationChannels()
+object HostsSummaryProvider : Preference.SummaryProvider<EditTextPreference> {
+    override fun provideSummary(preference: EditTextPreference?): CharSequence {
+        val count = HostsFile(preference!!.text ?: "").configuredHostnames
+        return preference.context.resources.getQuantityString(R.plurals.hosts_summary, count, count)
     }
 }

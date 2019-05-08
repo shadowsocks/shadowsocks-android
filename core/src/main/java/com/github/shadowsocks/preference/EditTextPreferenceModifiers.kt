@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,21 +18,28 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.preference
 
-import android.app.Application
-import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatDelegate
+import android.graphics.Typeface
+import android.text.InputFilter
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import androidx.preference.EditTextPreference
 
-class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        Core.init(this, MainActivity::class)
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+object EditTextPreferenceModifiers {
+    object Monospace : EditTextPreference.OnBindEditTextListener {
+        override fun onBindEditText(editText: EditText) {
+            editText.typeface = Typeface.MONOSPACE
+        }
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        Core.updateNotificationChannels()
+    object Port : EditTextPreference.OnBindEditTextListener {
+        private val portLengthFilter = arrayOf(InputFilter.LengthFilter(5))
+
+        override fun onBindEditText(editText: EditText) {
+            editText.inputType = EditorInfo.TYPE_CLASS_NUMBER
+            editText.filters = portLengthFilter
+            editText.setSingleLine()
+        }
     }
 }

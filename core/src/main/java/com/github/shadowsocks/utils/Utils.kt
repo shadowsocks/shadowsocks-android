@@ -54,8 +54,11 @@ private val parseNumericAddress by lazy {
  *
  * Bug: https://issuetracker.google.com/issues/123456213
  */
-fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
+fun String.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
+
+fun <K, V> MutableMap<K, V>.computeIfAbsentCompat(key: K, value: () -> V) = if (Build.VERSION.SDK_INT >= 24)
+    computeIfAbsent(key) { value() } else this[key] ?: value().also { put(key, it) }
 
 fun HttpURLConnection.disconnectFromMain() {
     if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }

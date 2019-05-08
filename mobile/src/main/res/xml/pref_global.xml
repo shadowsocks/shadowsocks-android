@@ -1,51 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:key="settings_screen"
-    app:initialExpandedChildrenCount="3">
-    <SwitchPreference android:key="isAutoConnect"
-                      android:persistent="false"
-                      android:summary="@string/auto_connect_summary"
-                      android:title="@string/auto_connect"/>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+                  app:initialExpandedChildrenCount="4">
     <SwitchPreference
-        android:key="directBootAware"
-        android:icon="@drawable/ic_action_lock"
-        android:summary="@string/direct_boot_aware_summary"
-        android:title="@string/direct_boot_aware"/>
+        app:key="isAutoConnect"
+        app:persistent="false"
+        app:summary="@string/auto_connect_summary"
+        app:title="@string/auto_connect"/>
     <SwitchPreference
-        android:key="tcp_fastopen"
-        android:icon="@drawable/ic_action_offline_bolt"
-        android:summary="@string/tcp_fastopen_summary"
-        android:title="TCP Fast Open"/>
+        app:key="directBootAware"
+        app:icon="@drawable/ic_action_lock"
+        app:summary="@string/direct_boot_aware_summary"
+        app:title="@string/direct_boot_aware"/>
+    <SwitchPreference
+        app:key="tcp_fastopen"
+        app:icon="@drawable/ic_action_offline_bolt"
+        app:summary="@string/tcp_fastopen_summary"
+        app:title="TCP Fast Open"/>
+    <EditTextPreference
+        app:key="hosts"
+        app:title="hosts"/>
 
-    <SimpleMenuPreference
-        android:key="serviceMode"
-        android:entries="@array/service_modes"
-        android:entryValues="@array/service_mode_values"
-        android:defaultValue="vpn"
-        android:summary="%s"
-        android:title="@string/service_mode"/>
-    <AutoSummaryEditTextPreference
-        android:key="portProxy"
-        android:inputType="number"
-        android:maxLength="5"
-        app:pref_summaryHasText="%s"
-        android:singleLine="true"
-        android:title="@string/port_proxy"/>
-    <AutoSummaryEditTextPreference
-        android:key="portLocalDns"
-        android:icon="@drawable/ic_action_dns"
-        android:inputType="number"
-        android:maxLength="5"
-        app:pref_summaryHasText="%s"
-        android:singleLine="true"
-        android:title="@string/port_local_dns"/>
-    <AutoSummaryEditTextPreference
-        android:key="portTransproxy"
-        android:inputType="number"
-        android:maxLength="5"
-        app:pref_summaryHasText="%s"
-        android:singleLine="true"
-        android:title="@string/port_transproxy"/>
+    <com.takisoft.preferencex.SimpleMenuPreference
+        app:key="serviceMode"
+        app:entries="@array/service_modes"
+        app:entryValues="@array/service_mode_values"
+        app:defaultValue="vpn"
+        app:title="@string/service_mode"
+        app:useSimpleSummaryProvider="true"/>
+    <EditTextPreference
+        app:key="portProxy"
+        app:title="@string/port_proxy"
+        app:useSimpleSummaryProvider="true"/>
+    <EditTextPreference
+        app:key="portLocalDns"
+        app:icon="@drawable/ic_action_dns"
+        app:title="@string/port_local_dns"
+        app:useSimpleSummaryProvider="true"/>
+    <EditTextPreference
+        app:key="portTransproxy"
+        app:title="@string/port_transproxy"
+        app:useSimpleSummaryProvider="true"/>
 </PreferenceScreen>

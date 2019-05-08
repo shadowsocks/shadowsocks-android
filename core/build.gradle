@@ -49,13 +49,12 @@ dependencies {
     api project(':plugin')
     api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    api 'androidx.preference:preference:1.0.0'
+    api 'androidx.preference:preference:1.1.0-alpha05'
     api "androidx.room:room-runtime:$roomVersion"
     api 'androidx.work:work-runtime-ktx:2.0.1'
     api 'com.crashlytics.sdk.android:crashlytics:2.10.0'
     api 'com.google.firebase:firebase-config:17.0.0'
     api 'com.google.firebase:firebase-core:16.0.9'
-    api "com.takisoft.preferencex:preferencex:$preferencexVersion"
     api 'dnsjava:dnsjava:2.1.8'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.1'
     api 'org.connectbot.jsocks:jsocks:1.0.0'

@@ -63,6 +63,7 @@ class VpnRequestActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode != REQUEST_CONNECT) return super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK) Core.startService() else {
             Toast.makeText(this, R.string.vpn_permission_denied, Toast.LENGTH_LONG).show()
             Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")

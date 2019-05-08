@@ -209,7 +209,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         else ImportProfilesDialogFragment().withArg(ProfilesArg(profiles)).show(supportFragmentManager, null)
     }
 
-    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
             Key.serviceMode -> handler.post {
                 connection.disconnect(this)

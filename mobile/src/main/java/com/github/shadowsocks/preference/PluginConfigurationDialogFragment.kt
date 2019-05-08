@@ -23,15 +23,21 @@ package com.github.shadowsocks.preference
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
+import androidx.preference.EditTextPreferenceDialogFragmentCompat
+import androidx.preference.PreferenceDialogFragmentCompat
 import com.github.shadowsocks.ProfileConfigActivity
 import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.plugin.PluginManager
-import com.takisoft.preferencex.EditTextPreferenceDialogFragmentCompat
 
 class PluginConfigurationDialogFragment : EditTextPreferenceDialogFragmentCompat() {
     companion object {
-        const val PLUGIN_ID_FRAGMENT_TAG =
+        private const val PLUGIN_ID_FRAGMENT_TAG =
                 "com.github.shadowsocks.preference.PluginConfigurationDialogFragment.PLUGIN_ID"
+    }
+
+    fun setArg(key: String, plugin: String) {
+        arguments = bundleOf(PreferenceDialogFragmentCompat.ARG_KEY to key, PLUGIN_ID_FRAGMENT_TAG to plugin)
     }
 
     private lateinit var editText: EditText

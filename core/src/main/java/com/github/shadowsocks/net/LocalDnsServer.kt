@@ -43,7 +43,9 @@ import java.nio.channels.SocketChannel
  *   https://github.com/shadowsocks/overture/tree/874f22613c334a3b78e40155a55479b7b69fee04
  */
 class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAddress>,
-                     private val remoteDns: Socks5Endpoint, private val proxy: SocketAddress) : CoroutineScope {
+                     private val remoteDns: Socks5Endpoint,
+                     private val proxy: SocketAddress,
+                     private val hosts: HostsFile) : CoroutineScope {
     /**
      * Forward all requests to remote and ignore localResolver.
      */
@@ -70,7 +72,18 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             if (request.header.getFlag(Flags.RD.toInt())) header.setFlag(Flags.RD.toInt())
             request.question?.also { addRecord(it, Section.QUESTION) }
         }
+
+        private fun cookDnsResponse(request: Message, results: Iterable<InetAddress>) =
+                ByteBuffer.wrap(prepareDnsResponse(request).apply {
+                    header.setFlag(Flags.RA.toInt())   // recursion available
+                    for (address in results) addRecord(when (address) {
+                        is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
+                        is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
+                        else -> throw IllegalStateException("Unsupported address $address")
+                    }, Section.ANSWER)
+                }.toWire())
     }
+
     private val monitor = ChannelMonitor()
 
     override val coroutineContext = SupervisorJob() + CoroutineExceptionHandler { _, t -> printLog(t) }
@@ -101,10 +114,16 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         return supervisorScope {
             val remote = async { withTimeout(TIMEOUT) { forward(packet) } }
             try {
-                if (forwardOnly || request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
+                if (request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
                 val question = request.question
                 if (question?.type != Type.A) return@supervisorScope remote.await()
                 val host = question.name.toString(true)
+                val hostsResults = hosts.resolve(host)
+                if (hostsResults.isNotEmpty()) {
+                    remote.cancel()
+                    return@supervisorScope cookDnsResponse(request, hostsResults)
+                }
+                if (forwardOnly) return@supervisorScope remote.await()
                 if (remoteDomainMatcher?.containsMatchIn(host) == true) return@supervisorScope remote.await()
                 val localResults = try {
                     withTimeout(TIMEOUT) { GlobalScope.async(Dispatchers.IO) { localResolver(host) }.await() }
@@ -117,14 +136,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 if (localResults.isEmpty()) return@supervisorScope remote.await()
                 if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
                     remote.cancel()
-                    ByteBuffer.wrap(prepareDnsResponse(request).apply {
-                        header.setFlag(Flags.RA.toInt())   // recursion available
-                        for (address in localResults) addRecord(when (address) {
-                            is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
-                            is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
-                            else -> throw IllegalStateException("Unsupported address $address")
-                        }, Section.ANSWER)
-                    }.toWire())
+                    cookDnsResponse(request, localResults.asIterable())
                 } else remote.await()
             } catch (e: Exception) {
                 remote.cancel()
