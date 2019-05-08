@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     val snackbar by lazy { findViewById<CoordinatorLayout>(R.id.snackbar) }
     fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
-        view.translationY += fab.top + fab.translationY - snackbar.measuredHeight
+        anchorView = fab
     }
 
     private val customTabsIntent by lazy {
