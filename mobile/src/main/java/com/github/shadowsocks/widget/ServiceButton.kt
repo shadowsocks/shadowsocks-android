@@ -77,14 +77,9 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
             }
             else -> changeState(iconStopped, animate)
         }
-        if (state == BaseService.State.Connected) {
-            checked = true
-            TooltipCompat.setTooltipText(this, context.getString(R.string.stop))
-        } else {
-            checked = false
-            TooltipCompat.setTooltipText(this, context.getString(R.string.connect))
-        }
+        checked = state == BaseService.State.Connected
         refreshDrawableState()
+        TooltipCompat.setTooltipText(this, context.getString(if (state.canStop) R.string.stop else R.string.connect))
         isEnabled = state.canStop || state == BaseService.State.Stopped
     }
 
