@@ -27,6 +27,7 @@ import android.net.ParseException
 import android.os.CancellationSignal
 import android.system.ErrnoException
 import androidx.core.os.BuildCompat
+import com.github.shadowsocks.Core
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -41,33 +42,44 @@ sealed class DnsResolverCompat {
         private val instance by lazy { if (BuildCompat.isAtLeastQ()) DnsResolverCompat29 else DnsResolverCompat21 }
 
         override suspend fun resolve(network: Network, host: String) = instance.resolve(network, host)
+        override suspend fun resolveOnActiveNetwork(host: String) = instance.resolveOnActiveNetwork(host)
     }
 
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
+    abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
 
     private object DnsResolverCompat21 : DnsResolverCompat() {
         override suspend fun resolve(network: Network, host: String) =
                 GlobalScope.async(Dispatchers.IO) { network.getAllByName(host) }.await()
+        override suspend fun resolveOnActiveNetwork(host: String) =
+                GlobalScope.async(Dispatchers.IO) { InetAddress.getAllByName(host) }.await()
     }
 
     @TargetApi(29)
     private object DnsResolverCompat29 : DnsResolverCompat() {
         /**
-         * This executor will run on its caller directly. On Q beta 3, this is called in main thread.
+         * This executor will run on its caller directly. On Q beta 3, this results in calling in main thread.
          */
-        private val executor = Executor { it.run() }
+        private object InPlaceExecutor : Executor {
+            override fun execute(command: Runnable?) = command!!.run()
+        }
+
         override suspend fun resolve(network: Network, host: String): Array<InetAddress> {
             return suspendCancellableCoroutine { cont ->
                 val signal = CancellationSignal()
                 cont.invokeOnCancellation { signal.cancel() }
                 // retry should be handled by client instead
-                DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, executor,
+                DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, InPlaceExecutor,
                         signal, object : DnsResolver.InetAddressAnswerCallback() {
                     override fun onAnswer(answer: MutableList<InetAddress>) = cont.resume(answer.toTypedArray())
                     override fun onQueryException(exception: ErrnoException) = cont.resumeWithException(exception)
                     override fun onParseException(exception: ParseException) = cont.resumeWithException(exception)
                 })
             }
+        }
+
+        override suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress> {
+            return resolve(Core.connectivity.activeNetwork ?: return emptyArray(), host)
         }
     }
 }

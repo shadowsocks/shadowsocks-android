@@ -27,7 +27,6 @@ import android.content.IntentFilter
 import android.os.*
 import android.util.Log
 import androidx.core.content.getSystemService
-import androidx.core.os.BuildCompat
 import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
@@ -45,7 +44,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
 import java.net.BindException
-import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
@@ -290,12 +288,7 @@ object BaseService {
         }
 
         suspend fun preInit() { }
-        suspend fun resolver(host: String): Array<InetAddress> {
-            return if (BuildCompat.isAtLeastQ()) {
-                // prefer non-blocking version if available
-                DnsResolverCompat.resolve(Core.connectivity.activeNetwork ?: return emptyArray(), host)
-            } else InetAddress.getAllByName(host)
-        }
+        suspend fun resolver(host: String) = DnsResolverCompat.resolveOnActiveNetwork(host)
         suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
