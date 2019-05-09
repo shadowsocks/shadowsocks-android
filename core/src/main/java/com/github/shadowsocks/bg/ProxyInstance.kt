@@ -32,10 +32,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.disconnectFromMain
-import com.github.shadowsocks.utils.parseNumericAddress
-import com.github.shadowsocks.utils.signaturesCompat
+import com.github.shadowsocks.utils.*
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
@@ -65,15 +62,11 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             conn.requestMethod = "POST"
             conn.doOutput = true
 
-            val proxies = try {
-                withContext(Dispatchers.IO) {
-                    conn.outputStream.bufferedWriter().use {
-                        it.write("sig=" + Base64.encodeToString(mdg.digest(), Base64.DEFAULT))
-                    }
-                    conn.inputStream.bufferedReader().readText()
+            val proxies = conn.useCancellable {
+                outputStream.bufferedWriter().use {
+                    it.write("sig=" + Base64.encodeToString(mdg.digest(), Base64.DEFAULT))
                 }
-            } finally {
-                conn.disconnectFromMain()
+                inputStream.bufferedReader().readText()
             }.split('|').toMutableList()
             proxies.shuffle()
             val proxy = proxies.first().split(':')

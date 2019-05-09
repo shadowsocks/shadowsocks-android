@@ -30,8 +30,11 @@ import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.disconnectFromMain
-import kotlinx.coroutines.*
+import com.github.shadowsocks.utils.useCancellable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.Proxy
@@ -75,7 +78,7 @@ class HttpsTest : ViewModel() {
         }
     }
 
-    private var running: Pair<HttpURLConnection, Job>? = null
+    private var running: Job? = null
     val status = MutableLiveData<Status>().apply { value = Status.Idle }
 
     fun testConnection() {
@@ -91,26 +94,25 @@ class HttpsTest : ViewModel() {
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
-        running = conn to GlobalScope.launch(Dispatchers.Main.immediate) {
-            status.value = withContext(Dispatchers.IO) {
+        running = GlobalScope.launch(Dispatchers.Main.immediate) {
+            status.value = conn.useCancellable {
                 try {
                     val start = SystemClock.elapsedRealtime()
-                    val code = conn.responseCode
+                    val code = responseCode
                     val elapsed = SystemClock.elapsedRealtime() - start
-                    if (code == 204 || code == 200 && conn.responseLength == 0L) Status.Success(elapsed)
+                    if (code == 204 || code == 200 && responseLength == 0L) Status.Success(elapsed)
                     else Status.Error.UnexpectedResponseCode(code)
                 } catch (e: IOException) {
                     Status.Error.IOFailure(e)
                 } finally {
-                    conn.disconnect()
+                    disconnect()
                 }
             }
         }
     }
 
-    private fun cancelTest() = running?.let { (conn, job) ->
-        job.cancel()    // ensure job is cancelled before interrupting
-        conn.disconnectFromMain()
+    private fun cancelTest() {
+        running?.cancel()
         running = null
     }
 

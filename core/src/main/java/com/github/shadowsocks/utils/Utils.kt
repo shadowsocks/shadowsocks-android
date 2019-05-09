@@ -36,11 +36,10 @@ import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.InetAddress
+import kotlin.coroutines.resume
 
 val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 
@@ -60,8 +59,13 @@ fun String.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INE
 fun <K, V> MutableMap<K, V>.computeIfAbsentCompat(key: K, value: () -> V) = if (Build.VERSION.SDK_INT >= 24)
     computeIfAbsent(key) { value() } else this[key] ?: value().also { put(key, it) }
 
-fun HttpURLConnection.disconnectFromMain() {
-    if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
+suspend fun <T> HttpURLConnection.useCancellable(block: HttpURLConnection.() -> T) = withContext(Dispatchers.IO) {
+    suspendCancellableCoroutine<T> { cont ->
+        cont.invokeOnCancellation {
+            if (Build.VERSION.SDK_INT >= 26) disconnect() else launch(Dispatchers.IO) { disconnect() }
+        }
+        cont.resume(block())
+    }
 }
 
 fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
