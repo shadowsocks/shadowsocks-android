@@ -58,7 +58,6 @@ dependencies {
     api 'dnsjava:dnsjava:2.1.8'
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.1'
     api 'org.connectbot.jsocks:jsocks:1.0.0'
-    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
