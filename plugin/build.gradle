@@ -26,6 +26,11 @@ android {
         testInstrumentationRunner "androidx.testgetRepositoryPassword().runner.AndroidJUnitRunner"
     }
 
+    compileOptions {
+        sourceCompatibility javaVersion
+        targetCompatibility javaVersion
+    }
+
     buildTypes {
         release {
             minifyEnabled false
