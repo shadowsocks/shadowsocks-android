@@ -56,6 +56,19 @@
         </service>
 
         <activity
+            android:name="com.github.shadowsocks.UrlImportActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"
+            android:excludeFromRecents="true"
+            android:taskAffinity="">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="ss"/>
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name="com.github.shadowsocks.VpnRequestActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
             android:excludeFromRecents="true"
