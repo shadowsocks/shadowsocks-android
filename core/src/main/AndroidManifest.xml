@@ -58,8 +58,7 @@
         <activity
             android:name="com.github.shadowsocks.UrlImportActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
-            android:excludeFromRecents="true"
-            android:taskAffinity="">
+            android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
