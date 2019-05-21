@@ -1,8 +1,8 @@
 # Submitting Issues
 
 * Issues can be submitted in two different places:
-  <li>[The GitHub issue log](https://github.com/shadowsocks/shadowsocks-android/issues)</li>
-  <li>[The Shadowsocks.org Discourse Forum](https://discourse.shadowsocks.org/c/implementations/shadowsocks-android)</li>
+    1) [The GitHub issue log](https://github.com/shadowsocks/shadowsocks-android/issues)
+    2) [The Shadowsocks.org Discourse Forum](https://discourse.shadowsocks.org/c/implementations/shadowsocks-android)
 * Please search for your issues in both places before submitting new issues.
 * If you have any questions, please check the [FAQ](https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md) and the questions submitted at the [Discourse Forum](https://discourse.shadowsocks.org/c/implementations/shadowsocks-android)
 * General discussions should go to [Discourse forum](https://discourse.shadowsocks.org/c/implementations/shadowsocks-android);
