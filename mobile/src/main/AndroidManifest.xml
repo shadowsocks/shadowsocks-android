@@ -3,12 +3,9 @@
           package="com.github.shadowsocks"
           tools:ignore="MissingLeanbackSupport">
 
-    <uses-permission android:name="android.permission.NFC" />
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.touchscreen"
-                  android:required="false"/>
-    <uses-feature android:name="android.hardware.nfc"
                   android:required="false"/>
     <uses-feature android:name="android.hardware.camera"
                   android:required="false"/>
