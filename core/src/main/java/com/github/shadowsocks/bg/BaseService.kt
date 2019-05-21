@@ -76,6 +76,7 @@ object BaseService {
         var notification: ServiceNotification? = null
         val closeReceiver = broadcastReceiver { _, intent ->
             when (intent.action) {
+                Intent.ACTION_SHUTDOWN -> service.persistStats()
                 Action.RELOAD -> service.forceLoad()
                 else -> service.stopRunner()
             }
@@ -287,6 +288,9 @@ object BaseService {
                 if (restart) startRunner() else stopSelf()
             }
         }
+
+        fun persistStats() =
+                listOfNotNull(data.proxy, data.udpFallback).forEach { it.trafficMonitor?.persistStats(it.profile.id) }
 
         suspend fun preInit() { }
         suspend fun resolver(host: String) = InetAddress.getAllByName(host)
