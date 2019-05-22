@@ -43,7 +43,7 @@ object Key {
 
     const val route = "route"
 
-    const val isAutoConnect = "isAutoConnect"
+    const val persistAcrossReboot = "isAutoConnect"
     const val directBootAware = "directBootAware"
 
     const val proxyApps = "isProxyApps"

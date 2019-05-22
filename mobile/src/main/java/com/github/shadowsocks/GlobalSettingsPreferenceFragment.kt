@@ -37,7 +37,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
-        val boot = findPreference(Key.isAutoConnect) as SwitchPreference
+        val boot = findPreference(Key.persistAcrossReboot) as SwitchPreference
         boot.setOnPreferenceChangeListener { _, value ->
             BootReceiver.enabled = value as Boolean
             true

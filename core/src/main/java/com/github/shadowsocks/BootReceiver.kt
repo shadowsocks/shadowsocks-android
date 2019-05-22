@@ -43,6 +43,10 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (!DataStore.persistAcrossReboot) {   // sanity check
+            enabled = false
+            return
+        }
         val doStart = when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED -> !DataStore.directBootAware
             Intent.ACTION_LOCKED_BOOT_COMPLETED -> DataStore.directBootAware
