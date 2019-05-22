@@ -4,12 +4,12 @@ apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {
     ext {
+        javaVersion = JavaVersion.VERSION_1_8
         kotlinVersion = '1.3.31'
         minSdkVersion = 21
         sdkVersion = 28
         compileSdkVersion = 28
         buildToolsVersion = '28.0.3'
-        preferencexVersion = '1.0.0'
         junitVersion = '4.12'
         androidTestVersion = '1.1.1'
         androidEspressoVersion = '3.1.1'
@@ -27,11 +27,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
+        classpath 'com.android.tools.build:gradle:3.4.1'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
         classpath 'com.google.gms:google-services:4.2.0'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
-        classpath 'io.fabric.tools:gradle:1.28.1'
+        classpath 'io.fabric.tools:gradle:1.29.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }

@@ -59,6 +59,10 @@
   <string name="tcp_fastopen_summary">Toggling might require ROOT permission</string>
   <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
   <string name="tcp_fastopen_failure">Toggle failed</string>
+  <plurals name="hosts_summary">
+    <item quantity="one">1 hostname configured</item>
+    <item quantity="other">%d hostnames configured</item>
+  </plurals>
   <string name="udp_dns">Send DNS over UDP</string>
   <string name="udp_dns_summary">Requires UDP forwarding on server side</string>
   <string name="udp_fallback">UDP Fallback</string>
@@ -80,7 +84,6 @@
   <!-- alert category -->
   <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
-  <string name="file_manager_missing">Please install a file manager like MiXplorer</string>
   <string name="connect">Connect</string>
 
   <!-- menu category -->
@@ -109,7 +112,7 @@
   <string name="profile_config">Profile config</string>
   <string name="delete">Remove</string>
   <string name="delete_confirm_prompt">Are you sure you want to remove this profile?</string>
-  <string name="share_qr_nfc">QR code/NFC</string>
+  <string name="share_qr_nfc">QR code</string>
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>

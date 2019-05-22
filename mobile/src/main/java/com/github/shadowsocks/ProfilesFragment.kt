@@ -23,9 +23,6 @@ package com.github.shadowsocks
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.*
-import android.nfc.NdefMessage
-import android.nfc.NdefRecord
-import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.text.format.Formatter
 import android.util.LongSparseArray
@@ -82,32 +79,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             arguments = bundleOf(Pair(KEY_URL, url))
         }
 
-        private val url get() = arguments?.getString(KEY_URL)!!
-        private val nfcShareItem by lazy { url.toByteArray() }
-        private var adapter: NfcAdapter? = null
-
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             val image = ImageView(context)
             image.layoutParams = LinearLayout.LayoutParams(-1, -1)
             val size = resources.getDimensionPixelSize(R.dimen.qr_code_size)
-            image.setImageBitmap((QRCode.from(url).withSize(size, size) as QRCode).bitmap())
+            image.setImageBitmap((QRCode.from(arguments?.getString(KEY_URL)!!).withSize(size, size) as QRCode).bitmap())
             return image
-        }
-
-        override fun onAttach(context: Context) {
-            super.onAttach(context)
-            val adapter = NfcAdapter.getDefaultAdapter(context)
-            adapter?.setNdefPushMessage(NdefMessage(arrayOf(
-                    NdefRecord(NdefRecord.TNF_ABSOLUTE_URI, nfcShareItem, byteArrayOf(), nfcShareItem))), activity)
-            this.adapter = adapter
-        }
-
-        override fun onDetach() {
-            super.onDetach()
-            val activity = activity
-            if (activity != null && !activity.isFinishing && !activity.isDestroyed)
-                adapter?.setNdefPushMessage(null, activity)
-            adapter = null
         }
     }
 
@@ -202,7 +179,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
 
         override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
-            R.id.action_qr_code_nfc -> {
+            R.id.action_qr_code -> {
                 requireFragmentManager().beginTransaction().add(QRCodeDialog(this.item.toString()), "")
                         .commitAllowingStateLoss()
                 true

@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,21 +18,33 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.preference
 
-import android.app.Application
-import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatDelegate
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
+import androidx.preference.EditTextPreferenceDialogFragmentCompat
+import com.github.shadowsocks.MainActivity
+import com.github.shadowsocks.R
 
-class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        Core.init(this, MainActivity::class)
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+class BrowsableEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragmentCompat() {
+    fun setKey(key: String) {
+        arguments = bundleOf(Pair(ARG_KEY, key))
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        Core.updateNotificationChannels()
+    override fun onPrepareDialogBuilder(builder: AlertDialog.Builder) {
+        super.onPrepareDialogBuilder(builder)
+        builder.setNeutralButton(R.string.browse) { _, _ ->
+            val activity = activity as MainActivity
+            try {
+                targetFragment!!.startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                }, targetRequestCode)
+                return@setNeutralButton
+            } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
+            activity.snackbar(activity.getString(R.string.file_manager_missing)).show()
+        }
     }
 }

@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,21 +18,28 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+package com.github.shadowsocks.utils
 
-import android.app.Application
-import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.activity.ComponentActivity
+import androidx.annotation.MainThread
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 
-class App : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        Core.init(this, MainActivity::class)
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+/**
+ * See also: https://stackoverflow.com/a/30821062/2245107
+ */
+object SingleInstanceActivity : DefaultLifecycleObserver {
+    private val active = mutableSetOf<Class<LifecycleOwner>>()
+
+    @MainThread
+    fun register(activity: ComponentActivity) = if (active.add(activity.javaClass)) apply {
+        activity.lifecycle.addObserver(this)
+    } else {
+        activity.finish()
+        null
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        Core.updateNotificationChannels()
+    override fun onDestroy(owner: LifecycleOwner) {
+        check(active.remove(owner.javaClass)) { "Double destroy?" }
     }
 }
