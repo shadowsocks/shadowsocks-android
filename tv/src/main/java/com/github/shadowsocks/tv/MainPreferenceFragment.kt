@@ -161,12 +161,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         stats = findPreference(Key.controlStats)
         controlImport = findPreference(Key.controlImport)
 
-        (findPreference(Key.persistAcrossReboot) as SwitchPreference).apply {
-            setOnPreferenceChangeListener { _, value ->
-                BootReceiver.enabled = value as Boolean
-                true
-            }
-            isChecked = BootReceiver.enabled
+        (findPreference(Key.persistAcrossReboot) as SwitchPreference).setOnPreferenceChangeListener { _, value ->
+            BootReceiver.enabled = value as Boolean
+            true
         }
 
         tfo = findPreference(Key.tfo) as SwitchPreference
