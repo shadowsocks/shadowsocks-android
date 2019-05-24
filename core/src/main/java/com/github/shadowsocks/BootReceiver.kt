@@ -25,6 +25,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.UserManager
+import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.preference.DataStore
 
@@ -40,11 +43,16 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val locked = when (intent.action) {
-            Intent.ACTION_BOOT_COMPLETED -> false
-            Intent.ACTION_LOCKED_BOOT_COMPLETED -> true // constant will be folded so no need to do version checks
-            else -> return
+        if (!DataStore.persistAcrossReboot) {   // sanity check
+            enabled = false
+            return
         }
-        if (DataStore.directBootAware == locked) Core.startService()
+        val doStart = when (intent.action) {
+            Intent.ACTION_BOOT_COMPLETED -> !DataStore.directBootAware
+            Intent.ACTION_LOCKED_BOOT_COMPLETED -> DataStore.directBootAware
+            else -> DataStore.directBootAware ||
+                    Build.VERSION.SDK_INT >= 24 && app.getSystemService<UserManager>()?.isUserUnlocked != false
+        }
+        if (doStart) Core.startService()
     }
 }

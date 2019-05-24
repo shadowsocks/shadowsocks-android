@@ -22,6 +22,7 @@ package com.github.shadowsocks.preference
 
 import android.os.Binder
 import androidx.preference.PreferenceDataStore
+import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.PrivateDatabase
 import com.github.shadowsocks.database.PublicDatabase
@@ -61,6 +62,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var profileId: Long
         get() = publicStore.getLong(Key.id) ?: 0
         set(value) = publicStore.putLong(Key.id, value)
+    val persistAcrossReboot get() = publicStore.getBoolean(Key.persistAcrossReboot)
+            ?: BootReceiver.enabled.also { publicStore.putBoolean(Key.persistAcrossReboot, it) }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
     val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
@@ -101,6 +104,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
      * Initialize settings that have complicated default values.
      */
     fun initGlobal() {
+        persistAcrossReboot
         if (publicStore.getBoolean(Key.tfo) == null) publicStore.putBoolean(Key.tfo, tcpFastOpen)
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns

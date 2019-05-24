@@ -28,14 +28,14 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.utils.signaturesCompat
+import com.github.shadowsocks.utils.useCancellable
 import kotlinx.coroutines.*
 import java.io.File
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.UnknownHostException
@@ -138,22 +138,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     fun shutdown(scope: CoroutineScope) {
         trafficMonitor?.apply {
             thread.shutdown(scope)
-            // Make sure update total traffic when stopping the runner
-            try {
-                // profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
-                val profile = ProfileManager.getProfile(profile.id) ?: return
-                profile.tx += current.txTotal
-                profile.rx += current.rxTotal
-                ProfileManager.updateProfile(profile)
-            } catch (e: IOException) {
-                if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
-                val profile = DirectBoot.getDeviceProfile()!!.toList().filterNotNull().single { it.id == profile.id }
-                profile.tx += current.txTotal
-                profile.rx += current.rxTotal
-                profile.dirty = true
-                DirectBoot.update(profile)
-                DirectBoot.listenForUnlock()
-            }
+            persistStats(profile.id)    // Make sure update total traffic when stopping the runner
         }
         trafficMonitor = null
         configFile?.delete()    // remove old config possibly in device storage
