@@ -61,21 +61,33 @@ object Core {
 
     lateinit var app: Application
     lateinit var configureIntent: (Context) -> PendingIntent
-    val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
-    val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
-    val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }
+    val packageInfo: PackageInfo by lazy {
+        getPackageInfo(app.packageName)
+    }
+    val deviceStorage by lazy {
+        if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app)
+    }
+    val analytics: FirebaseAnalytics by lazy {
+        FirebaseAnalytics.getInstance(deviceStorage)
+    }
     val directBootSupported by lazy {
-        Build.VERSION.SDK_INT >= 24 && app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
-                DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
+        Build.VERSION.SDK_INT >= 24 &&
+            app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
     }
 
-    val activeProfileIds get() = ProfileManager.getProfile(DataStore.profileId).let {
-        if (it == null) emptyList() else listOfNotNull(it.id, it.udpFallback)
-    }
-    val currentProfile: Pair<Profile, Profile?>? get() {
-        if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply { return this }
-        return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
-    }
+    val activeProfileIds
+        get() = ProfileManager.getProfile(DataStore.profileId).let {
+            if (it == null) emptyList() else listOfNotNull(it.id, it.udpFallback)
+        }
+    val currentProfile: Pair<Profile, Profile?>?
+        get() {
+            if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply {
+                return this
+            }
+            return ProfileManager.expand(
+                ProfileManager.getProfile(DataStore.profileId) ?: return null
+            )
+        }
 
     fun switchProfile(id: Long): Profile {
         val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
@@ -86,11 +98,18 @@ object Core {
     fun init(app: Application, configureClass: KClass<out Any>) {
         this.app = app
         this.configureIntent = {
-            PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0)
+            PendingIntent.getActivity(
+                it,
+                0,
+                Intent(it, configureClass.java).setFlags(
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                ),
+                0
+            )
         }
 
-        if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
+        if (Build.VERSION.SDK_INT >= 24) {
+            // migrate old files
             deviceStorage.moveDatabaseFrom(app, Key.DB_PUBLIC)
             val old = Acl.getFile(Acl.CUSTOM_RULES, app)
             if (old.canRead()) {
@@ -101,19 +120,29 @@ object Core {
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
-        Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
+        Fabric.with(deviceStorage, Crashlytics()) // multiple processes needs manual set-up
         FirebaseApp.initializeApp(deviceStorage)
         WorkManager.initialize(deviceStorage, Configuration.Builder().build())
 
         // handle data restored/crash
-        if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
-                app.getSystemService<UserManager>()?.isUserUnlocked == true) DirectBoot.flushTrafficStats()
+        if (Build.VERSION.SDK_INT >= 24 &&
+            DataStore
+                .directBootAware &&
+            app.getSystemService<UserManager>()?.isUserUnlocked == true) {
+            DirectBoot.flushTrafficStats()
+        }
         if (DataStore.tcpFastOpen && !TcpFastOpen.sendEnabled) TcpFastOpen.enableTimeout()
         if (DataStore.publicStore.getLong(Key.assetUpdateTime, -1) != packageInfo.lastUpdateTime) {
             val assetManager = app.assets
             try {
-                for (file in assetManager.list("acl")!!) assetManager.open("acl/$file").use { input ->
-                    File(deviceStorage.noBackupFilesDir, file).outputStream().use { output -> input.copyTo(output) }
+                for (file in assetManager.list("acl")!!) assetManager.open("acl/$file").use {
+                    input
+                    ->
+                    File(deviceStorage.noBackupFilesDir, file).outputStream().use {
+                        output
+                        ->
+                        input.copyTo(output)
+                    }
                 }
             } catch (e: IOException) {
                 printLog(e)
@@ -126,38 +155,61 @@ object Core {
     fun updateNotificationChannels() {
         if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {
             val nm = app.getSystemService<NotificationManager>()!!
-            nm.createNotificationChannels(listOf(
-                    NotificationChannel("service-vpn", app.getText(R.string.service_vpn),
-                            NotificationManager.IMPORTANCE_LOW),
-                    NotificationChannel("service-proxy", app.getText(R.string.service_proxy),
-                            NotificationManager.IMPORTANCE_LOW),
-                    NotificationChannel("service-transproxy", app.getText(R.string.service_transproxy),
-                            NotificationManager.IMPORTANCE_LOW)))
+            nm.createNotificationChannels(
+                listOf(
+                    NotificationChannel(
+                        "service-vpn",
+                        app.getText(R.string.service_vpn),
+                        NotificationManager.IMPORTANCE_LOW
+                    ),
+                    NotificationChannel(
+                        "service-proxy",
+                        app.getText(R.string.service_proxy),
+                        NotificationManager.IMPORTANCE_LOW
+                    ),
+                    NotificationChannel(
+                        "service-transproxy",
+                        app.getText(R.string.service_transproxy),
+                        NotificationManager.IMPORTANCE_LOW
+                    )
+                )
+            )
             nm.deleteNotificationChannel("service-nat") // NAT mode is gone for good
         }
     }
 
-    fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,
-            if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
-            else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
+    fun getPackageInfo(packageName: String) =
+        app.packageManager.getPackageInfo(
+            packageName,
+            if (Build.VERSION.SDK_INT >= 28) {
+                PackageManager.GET_SIGNING_CERTIFICATES
+            } else {
+                @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES
+            }
+        )!!
 
-    fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
+    fun startService() =
+        ContextCompat.startForegroundService(
+            app,
+            Intent(app, ShadowsocksConnection.serviceClass)
+        )
     fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
     fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
 
-    fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
-        init {
-            app.registerReceiver(this, IntentFilter().apply {
-                addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
-                addDataScheme("package")
-            })
-        }
+    fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) =
+        object : BroadcastReceiver() {
+            init {
+                app.registerReceiver(this, IntentFilter().apply {
+                    addAction(Intent.ACTION_PACKAGE_ADDED)
+                    addAction(Intent.ACTION_PACKAGE_REMOVED)
+                    addDataScheme("package")
+                })
+            }
 
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
-            callback()
-            if (onetime) app.unregisterReceiver(this)
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
+                callback()
+                if (onetime) app.unregisterReceiver(this)
+            }
         }
-    }
 }

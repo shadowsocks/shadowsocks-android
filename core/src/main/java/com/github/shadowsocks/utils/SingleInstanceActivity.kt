@@ -32,14 +32,17 @@ object SingleInstanceActivity : DefaultLifecycleObserver {
     private val active = mutableSetOf<Class<LifecycleOwner>>()
 
     @MainThread
-    fun register(activity: ComponentActivity) = if (active.add(activity.javaClass)) apply {
-        activity.lifecycle.addObserver(this)
-    } else {
-        activity.finish()
-        null
-    }
+    fun register(activity: ComponentActivity) =
+        if (active.add(activity.javaClass)) apply {
+            activity.lifecycle.addObserver(this)
+        } else {
+            activity.finish()
+            null
+        }
 
     override fun onDestroy(owner: LifecycleOwner) {
-        check(active.remove(owner.javaClass)) { "Double destroy?" }
+        check(active.remove(owner.javaClass)) {
+            "Double destroy?"
+        }
     }
 }

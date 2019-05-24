@@ -42,5 +42,5 @@ package com.github.shadowsocks.plugin
  *&lt;/manifest&gt;</pre>
  */
 abstract class HelpActivity : OptionsCapableActivity() {
-    override fun onInitializePluginOptions(options: PluginOptions) { }
+    override fun onInitializePluginOptions(options: PluginOptions) {}
 }

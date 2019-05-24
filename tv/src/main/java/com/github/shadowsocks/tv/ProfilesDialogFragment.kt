@@ -35,7 +35,9 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 
 class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
-    private inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+    private inner class ProfileViewHolder(
+        view: View
+    ) : RecyclerView.ViewHolder(view), View.OnClickListener {
         val widgetView = view.findViewById<CompoundButton>(R.id.button)
         val titleView = view.findViewById<TextView>(android.R.id.title)
         init {
@@ -54,9 +56,14 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
     private inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
         val profiles = ProfileManager.getAllProfiles()!!
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ProfileViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.leanback_list_preference_item_single_2,
-                        parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            ProfileViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    R.layout.leanback_list_preference_item_single_2,
+                    parent,
+                    false
+                )
+            )
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
             val profile = profiles[position]
@@ -66,8 +73,13 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
                 if (!profile.name.isNullOrEmpty()) this += profile.formattedAddress
                 val id = PluginConfiguration(profile.plugin ?: "").selected
                 if (id.isNotEmpty()) this += getString(R.string.profile_plugin, id)
-                if (profile.tx > 0 || profile.rx > 0) this += getString(R.string.traffic,
-                        Formatter.formatFileSize(activity, profile.tx), Formatter.formatFileSize(activity, profile.rx))
+                if (profile.tx > 0 || profile.rx > 0) {
+                    this += getString(
+                        R.string.traffic,
+                        Formatter.formatFileSize(activity, profile.tx),
+                        Formatter.formatFileSize(activity, profile.rx)
+                    )
+                }
             }.joinToString("\n")
         }
 
@@ -76,11 +88,17 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
 
     private val adapter = ProfilesAdapter()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return super.onCreateView(inflater, container, savedInstanceState)!!.also {
             val list = it.findViewById<RecyclerView>(android.R.id.list)
             list.adapter = adapter
-            list.layoutManager!!.scrollToPosition(adapter.profiles.indexOfFirst { it.id == DataStore.profileId })
+            list.layoutManager!!.scrollToPosition(adapter.profiles.indexOfFirst {
+                it.id == DataStore.profileId
+            })
         }
     }
 }

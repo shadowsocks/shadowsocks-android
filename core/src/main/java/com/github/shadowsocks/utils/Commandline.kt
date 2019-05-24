@@ -62,17 +62,17 @@ object Commandline {
         val result = StringBuilder()
         for (arg in args) {
             if (result.isNotEmpty()) result.append(' ')
-            (0 until arg.length)
-                    .map { arg[it] }
-                    .forEach {
-                        when (it) {
-                            ' ', '\\', '"', '\'' -> {
-                                result.append('\\')  // intentionally no break
-                                result.append(it)
-                            }
-                            else -> result.append(it)
-                        }
+            (0 until arg.length).map {
+                arg[it]
+            }.forEach {
+                when (it) {
+                    ' ', '\\', '"', '\'' -> {
+                        result.append('\\') // intentionally no break
+                        result.append(it)
                     }
+                    else -> result.append(it)
+                }
+            }
         }
         return result.toString()
     }
@@ -84,7 +84,7 @@ object Commandline {
      * @return empty string for null or no command, else every argument split
      * by spaces and quoted by quoting rules.
      */
-    fun toString(args: Array<String>) = toString(args.asIterable()) // thanks to Java, arrays aren't iterable
+    fun toString(args: Array<String>) = toString(args.asIterable())
 
     /**
      * Crack a command line.
@@ -130,11 +130,10 @@ object Commandline {
                     lastTokenIsSlash = if (lastTokenIsSlash) {
                         current.append(nextTok)
                         false
-                    } else
-                        true
+                    } else true
                 } else {
                     if (lastTokenIsSlash) {
-                        current.append("\\")   // unescaped
+                        current.append("\\") // unescaped
                         lastTokenIsSlash = false
                     }
                     current.append(nextTok)
@@ -143,19 +142,23 @@ object Commandline {
                     if (lastTokenIsSlash) {
                         current.append(nextTok)
                         lastTokenIsSlash = false
-                    } else if ("\\" == nextTok)
-                        lastTokenIsSlash = true
-                    else if ("\'" == nextTok) {
-                        state = inQuote
-                    } else if ("\"" == nextTok) {
-                        state = inDoubleQuote
-                    } else if (" " == nextTok) {
-                        if (lastTokenHasBeenQuoted || current.isNotEmpty()) {
-                            result.add(current.toString())
-                            current.setLength(0)
-                        }
                     } else {
-                        current.append(nextTok)
+                        if ("\\" == nextTok) {
+                            lastTokenIsSlash = true
+                        } else {
+                            if ("\'" == nextTok) {
+                                state = inQuote
+                            } else if ("\"" == nextTok) {
+                                state = inDoubleQuote
+                            } else if (" " == nextTok) {
+                                if (lastTokenHasBeenQuoted || current.isNotEmpty()) {
+                                    result.add(current.toString())
+                                    current.setLength(0)
+                                }
+                            } else {
+                                current.append(nextTok)
+                            }
+                        }
                     }
                     lastTokenHasBeenQuoted = false
                 }
@@ -167,7 +170,11 @@ object Commandline {
         if (state == inQuote || state == inDoubleQuote) {
             throw IllegalArgumentException("unbalanced quotes in $toProcess")
         }
-        if (lastTokenIsSlash) throw IllegalArgumentException("escape character following nothing in $toProcess")
+        if (lastTokenIsSlash) {
+            throw IllegalArgumentException(
+                "escape character following nothing in $toProcess"
+            )
+        }
         return result.toTypedArray()
     }
 }

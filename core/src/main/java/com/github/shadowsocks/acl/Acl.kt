@@ -47,7 +47,8 @@ class Acl {
 
         val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
-        fun getFile(id: String, context: Context = Core.deviceStorage) = File(context.noBackupFilesDir, "$id.acl")
+        fun getFile(id: String, context: Context = Core.deviceStorage) =
+            File(context.noBackupFilesDir, "$id.acl")
 
         var customRules: Acl
             get() {
@@ -60,21 +61,35 @@ class Acl {
                 }
                 return acl
             }
-            set(value) = DataStore.publicStore.putString(CUSTOM_RULES,
-                    if ((!value.bypass || value.subnets.size() == 0) && value.bypassHostnames.size() == 0 &&
-                            value.proxyHostnames.size() == 0 && value.urls.size() == 0) null else value.toString())
+            set(value) =
+                DataStore.publicStore.putString(
+                    CUSTOM_RULES,
+                    if ((!value.bypass || value.subnets.size() == 0) &&
+                        value.bypassHostnames.size() == 0 &&
+                        value.proxyHostnames.size() == 0 &&
+                        value.urls.size() == 0) {
+                        null
+                    } else {
+                        value.toString()
+                    }
+                )
         fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
     }
 
     private abstract class BaseSorter<T> : SortedList.Callback<T>() {
-        override fun onInserted(position: Int, count: Int) { }
-        override fun areContentsTheSame(oldItem: T?, newItem: T?): Boolean = oldItem == newItem
-        override fun onMoved(fromPosition: Int, toPosition: Int) { }
-        override fun onChanged(position: Int, count: Int) { }
-        override fun onRemoved(position: Int, count: Int) { }
+        override fun onInserted(position: Int, count: Int) {}
+        override fun areContentsTheSame(oldItem: T?, newItem: T?): Boolean =
+            oldItem == newItem
+        override fun onMoved(fromPosition: Int, toPosition: Int) {}
+        override fun onChanged(position: Int, count: Int) {}
+        override fun onRemoved(position: Int, count: Int) {}
         override fun areItemsTheSame(item1: T?, item2: T?): Boolean = item1 == item2
         override fun compare(o1: T?, o2: T?): Int =
-                if (o1 == null) if (o2 == null) 0 else 1 else if (o2 == null) -1 else compareNonNull(o1, o2)
+            if (o1 == null) {
+                if (o2 == null) 0 else 1
+            } else {
+                if (o2 == null) -1 else compareNonNull(o1, o2)
+            }
         abstract fun compareNonNull(o1: T, o2: T): Int
     }
     private open class DefaultSorter<T : Comparable<T>> : BaseSorter<T>() {
@@ -83,7 +98,15 @@ class Acl {
     private object StringSorter : DefaultSorter<String>()
     private object SubnetSorter : DefaultSorter<Subnet>()
     private object URLSorter : BaseSorter<URL>() {
-        private val ordering = compareBy<URL>({ it.host }, { it.port }, { it.file }, { it.protocol })
+        private val ordering = compareBy<URL>({
+            it.host
+        }, {
+            it.port
+        }, {
+            it.file
+        }, {
+            it.protocol
+        })
         override fun compareNonNull(o1: URL, o2: URL): Int = ordering.compare(o1, o2)
     }
 
@@ -111,15 +134,23 @@ class Acl {
         subnets.clear()
         urls.clear()
         bypass = defaultBypass
-        val bypassSubnets by lazy { SortedList(Subnet::class.java, SubnetSorter) }
-        val proxySubnets by lazy { SortedList(Subnet::class.java, SubnetSorter) }
-        var hostnames: SortedList<String>? = if (defaultBypass) proxyHostnames else bypassHostnames
-        var subnets: SortedList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
+        val bypassSubnets by lazy {
+            SortedList(Subnet::class.java, SubnetSorter)
+        }
+        val proxySubnets by lazy {
+            SortedList(Subnet::class.java, SubnetSorter)
+        }
+        var hostnames: SortedList<String>? =
+            if (defaultBypass) proxyHostnames else bypassHostnames
+        var subnets: SortedList<Subnet>? =
+            if (defaultBypass) proxySubnets else bypassSubnets
         reader.useLines {
             for (line in it) {
                 @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                 val blocks = (line as java.lang.String).split("#", 2)
-                val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
+                val url = networkAclParser.matchEntire(blocks.getOrElse(1) {
+                    ""
+                })?.groupValues?.getOrNull(1)
                 if (url != null) urls.add(URL(url))
                 when (val input = blocks[0].trim()) {
                     "[outbound_block_list]" -> {
@@ -136,39 +167,57 @@ class Acl {
                     }
                     "[reject_all]", "[bypass_all]" -> bypass = true
                     "[accept_all]", "[proxy_all]" -> bypass = false
-                    else -> if (subnets != null && input.isNotEmpty()) {
-                        val subnet = Subnet.fromString(input)
-                        if (subnet == null) hostnames!!.add(input) else subnets!!.add(subnet)
+                    else -> {
+                        if (subnets != null && input.isNotEmpty()) {
+                            val subnet = Subnet.fromString(input)
+                            if (subnet == null) {
+                                hostnames!!.add(input)
+                            } else {
+                                subnets!!.add(subnet)
+                            }
+                        }
                     }
                 }
             }
         }
-        for (item in (if (bypass) proxySubnets else bypassSubnets).asIterable()) this.subnets.add(item)
+        for (item in (if (bypass) proxySubnets else bypassSubnets).asIterable()) this.subnets.add(
+            item
+        )
         return this
     }
 
     fun fromId(id: String): Acl = try {
         fromReader(getFile(id).bufferedReader())
-    } catch (_: IOException) { this }
+    } catch (`_`: IOException) {
+        this
+    }
 
     suspend fun flatten(depth: Int, connect: suspend (URL) -> URLConnection): Acl {
-        if (depth > 0) for (url in urls.asIterable()) {
-            val child = Acl()
-            try {
-                child.fromReader(connect(url).getInputStream().bufferedReader(), bypass).flatten(depth - 1, connect)
-            } catch (e: IOException) {
-                e.printStackTrace()
-                continue
+        if (depth > 0) {
+            for (url in urls.asIterable()) {
+                val child = Acl()
+                try {
+                    child.fromReader(
+                        connect(url).getInputStream().bufferedReader(),
+                        bypass
+                    ).flatten(depth - 1, connect)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    continue
+                }
+                if (bypass != child.bypass) {
+                    Crashlytics.log(
+                        Log.WARN,
+                        TAG,
+                        "Imported network ACL has a conflicting mode set. " + "This will probably not work as intended. URL: $url"
+                    )
+                    child.subnets.clear() // subnets for the different mode are discarded
+                    child.bypass = bypass
+                }
+                for (item in child.bypassHostnames.asIterable()) bypassHostnames.add(item)
+                for (item in child.proxyHostnames.asIterable()) proxyHostnames.add(item)
+                for (item in child.subnets.asIterable()) subnets.add(item)
             }
-            if (bypass != child.bypass) {
-                Crashlytics.log(Log.WARN, TAG, "Imported network ACL has a conflicting mode set. " +
-                        "This will probably not work as intended. URL: $url")
-                child.subnets.clear() // subnets for the different mode are discarded
-                child.bypass = bypass
-            }
-            for (item in child.bypassHostnames.asIterable()) bypassHostnames.add(item)
-            for (item in child.proxyHostnames.asIterable()) proxyHostnames.add(item)
-            for (item in child.subnets.asIterable()) subnets.add(item)
         }
         urls.clear()
         return this
@@ -177,16 +226,20 @@ class Acl {
     override fun toString(): String {
         val result = StringBuilder()
         result.append(if (bypass) "[bypass_all]\n" else "[proxy_all]\n")
-        val bypassList = (if (bypass) {
-            bypassHostnames.asIterable().asSequence()
-        } else {
-            subnets.asIterable().asSequence().map(Subnet::toString) + bypassHostnames.asIterable().asSequence()
-        }).toList()
-        val proxyList = (if (bypass) {
-            subnets.asIterable().asSequence().map(Subnet::toString) + proxyHostnames.asIterable().asSequence()
-        } else {
-            proxyHostnames.asIterable().asSequence()
-        }).toList()
+        val bypassList =
+            (if (bypass) {
+                bypassHostnames.asIterable().asSequence()
+            } else {
+                subnets.asIterable().asSequence().map(Subnet::toString) + bypassHostnames.asIterable().asSequence()
+            })
+                .toList()
+        val proxyList =
+            (if (bypass) {
+                subnets.asIterable().asSequence().map(Subnet::toString) + proxyHostnames.asIterable().asSequence()
+            } else {
+                proxyHostnames.asIterable().asSequence()
+            })
+                .toList()
         if (bypassList.isNotEmpty()) {
             result.append("[bypass_list]\n")
             result.append(bypassList.joinToString("\n"))
@@ -197,7 +250,9 @@ class Acl {
             result.append(proxyList.joinToString("\n"))
             result.append('\n')
         }
-        result.append(urls.asIterable().joinToString("") { "#IMPORT_URL <$it>\n" })
+        result.append(urls.asIterable().joinToString("") {
+            "#IMPORT_URL <$it>\n"
+        })
         return result.toString()
     }
 }

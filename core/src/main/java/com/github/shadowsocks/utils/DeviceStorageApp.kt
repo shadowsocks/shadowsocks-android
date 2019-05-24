@@ -27,7 +27,9 @@ import android.content.Context
 
 @SuppressLint("Registered")
 @TargetApi(24)
-class DeviceStorageApp(context: Context) : Application() {
+class DeviceStorageApp(
+    context: Context
+) : Application() {
     init {
         attachBaseContext(context.createDeviceProtectedStorageContext())
     }

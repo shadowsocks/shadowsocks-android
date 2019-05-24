@@ -37,20 +37,27 @@ import java.io.IOException
 import java.io.InputStream
 import kotlin.concurrent.thread
 
-class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : CoroutineScope {
+class GuardedProcessPool(
+    private val onFatal: suspend (IOException) -> Unit
+) : CoroutineScope {
     companion object {
         private const val TAG = "GuardedProcessPool"
         private val pid by lazy {
-            Class.forName("java.lang.ProcessManager\$ProcessImpl").getDeclaredField("pid").apply { isAccessible = true }
+            Class.forName("java.lang.ProcessManager\$ProcessImpl").getDeclaredField("pid").apply {
+                isAccessible = true
+            }
         }
     }
 
-    private inner class Guard(private val cmd: List<String>) {
+    private inner class Guard(
+        private val cmd: List<String>
+    ) {
         private lateinit var process: Process
 
         private fun streamLogger(input: InputStream, logger: (String) -> Unit) = try {
             input.bufferedReader().forEachLine(logger)
-        } catch (_: IOException) { }    // ignore
+        } catch (`_`: IOException) {
+        }
 
         fun start() {
             process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
@@ -62,44 +69,70 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
             val exitChannel = Channel<Int>()
             try {
                 while (true) {
-                    thread(name = "stderr-$cmdName") { streamLogger(process.errorStream) { Log.e(cmdName, it) } }
+                    thread(name = "stderr-$cmdName") {
+                        streamLogger(process.errorStream) {
+                            Log.e(cmdName, it)
+                        }
+                    }
                     thread(name = "stdout-$cmdName") {
-                        streamLogger(process.inputStream) { Log.i(cmdName, it) }
+                        streamLogger(process.inputStream) {
+                            Log.i(cmdName, it)
+                        }
                         // this thread also acts as a daemon thread for waitFor
-                        runBlocking { exitChannel.send(process.waitFor()) }
+                        runBlocking {
+                            exitChannel.send(process.waitFor())
+                        }
                     }
                     val startTime = SystemClock.elapsedRealtime()
                     val exitCode = exitChannel.receive()
                     running = false
                     if (SystemClock.elapsedRealtime() - startTime < 1000) {
-                        throw IOException("$cmdName exits too fast (exit code: $exitCode)")
+                        throw IOException(
+                            "$cmdName exits too fast (exit code: $exitCode)"
+                        )
                     }
-                    Crashlytics.log(Log.DEBUG, TAG,
-                            "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
+                    Crashlytics.log(
+                        Log.DEBUG,
+                        TAG,
+                        "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)"
+                    )
                     start()
                     running = true
                     onRestartCallback?.invoke()
                 }
             } catch (e: IOException) {
-                Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
-                GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
+                Crashlytics.log(
+                    Log.WARN,
+                    TAG,
+                    "error occurred. stop guard: " + Commandline.toString(cmd)
+                )
+                GlobalScope.launch(Dispatchers.Main) {
+                    onFatal(e)
+                }
             } finally {
-                if (running) withContext(NonCancellable) {  // clean-up cannot be cancelled
-                    if (Build.VERSION.SDK_INT < 24) {
-                        try {
-                            Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
-                        } catch (e: ErrnoException) {
-                            if (e.errno != OsConstants.ESRCH) throw e
+                if (running) {
+                    withContext(NonCancellable) {
+                        // clean-up cannot be cancelled
+                        if (Build.VERSION.SDK_INT < 24) {
+                            try {
+                                Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
+                            } catch (e: ErrnoException) {
+                                if (e.errno != OsConstants.ESRCH) throw e
+                            }
+                            if (withTimeoutOrNull(500) {
+                                exitChannel.receive()
+                            } != null) return@withContext
                         }
-                        if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
+                        process.destroy() // kill the process
+                        if (Build.VERSION.SDK_INT >= 26) {
+                            if (withTimeoutOrNull(1000) {
+                                exitChannel.receive()
+                            } != null) return@withContext
+                            process.destroyForcibly() // Force to kill the process if it's still alive
+                        }
+                        exitChannel.receive()
                     }
-                    process.destroy()                       // kill the process
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        if (withTimeoutOrNull(1000) { exitChannel.receive() } != null) return@withContext
-                        process.destroyForcibly()           // Force to kill the process if it's still alive
-                    }
-                    exitChannel.receive()
-                }                                           // otherwise process already exited, nothing to be done
+                } // otherwise process already exited, nothing to be done
             }
         }
     }
@@ -111,13 +144,19 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
         Guard(cmd).apply {
             start() // if start fails, IOException will be thrown directly
-            launch { looper(onRestartCallback) }
+            launch {
+                looper(onRestartCallback)
+            }
         }
     }
 
     @MainThread
     fun close(scope: CoroutineScope) {
         cancel()
-        coroutineContext[Job]!!.also { job -> scope.launch { job.join() } }
+        coroutineContext[Job]!!.also { job ->
+            scope.launch {
+                job.join()
+            }
+        }
     }
 }

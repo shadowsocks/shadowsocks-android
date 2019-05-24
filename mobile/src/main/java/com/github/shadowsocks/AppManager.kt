@@ -64,37 +64,50 @@ class AppManager : AppCompatActivity() {
 
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: Map<String, PackageInfo>? = null
-        private fun getCachedApps(pm: PackageManager) = synchronized(AppManager) {
-            if (receiver == null) receiver = Core.listenForPackageChanges {
-                synchronized(AppManager) {
-                    receiver = null
-                    cachedApps = null
+        private fun getCachedApps(pm: PackageManager) =
+            synchronized(AppManager) {
+                if (receiver == null) receiver = Core.listenForPackageChanges {
+                    synchronized(AppManager) {
+                        receiver = null
+                        cachedApps = null
+                    }
+                    instance?.loadApps()
                 }
-                instance?.loadApps()
-            }
-            // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
-            val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                    .filter {
+                // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
+                val cachedApps =
+                    cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS).filter {
                         when (it.packageName) {
                             app.packageName -> false
                             "android" -> true
-                            else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
+                            else -> {
+                                it.requestedPermissions?.contains(
+                                    Manifest.permission.INTERNET
+                                ) == true
+                            }
                         }
+                    }.associateBy {
+                        it.packageName
                     }
-                    .associateBy { it.packageName }
-            this.cachedApps = cachedApps
-            cachedApps
-        }
+                this.cachedApps = cachedApps
+                cachedApps
+            }
     }
 
-    private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
-                             val packageName: String) {
-        val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
-        val icon: Drawable get() = appInfo.loadIcon(pm)
-        val uid get() = appInfo.uid
+    private class ProxiedApp(
+        private val pm: PackageManager,
+        private val appInfo: ApplicationInfo,
+        val packageName: String
+    ) {
+        val name: CharSequence = appInfo.loadLabel(pm) // cached for sorting
+        val icon: Drawable
+            get() = appInfo.loadIcon(pm)
+        val uid
+            get() = appInfo.uid
     }
 
-    private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+    private inner class AppViewHolder(
+        view: View
+    ) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private lateinit var item: ProxiedApp
 
         init {
@@ -110,12 +123,22 @@ class AppManager : AppCompatActivity() {
         }
 
         fun handlePayload(payloads: List<String>) {
-            if (payloads.contains(SWITCH)) itemView.itemcheck.isChecked = isProxiedApp(item)
+            if (payloads.contains(SWITCH)) {
+                itemView.itemcheck.isChecked = isProxiedApp(item)
+            }
         }
 
         override fun onClick(v: View?) {
-            if (isProxiedApp(item)) proxiedUids.delete(item.uid) else proxiedUids[item.uid] = true
-            DataStore.individual = apps.filter { isProxiedApp(it) }.joinToString("\n") { it.packageName }
+            if (isProxiedApp(item)) {
+                proxiedUids.delete(item.uid)
+            } else {
+                proxiedUids[item.uid] = true
+            }
+            DataStore.individual = apps.filter {
+                isProxiedApp(it)
+            }.joinToString("\n") {
+                it.packageName
+            }
             DataStore.dirty = true
 
             appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, SWITCH)
@@ -129,50 +152,84 @@ class AppManager : AppCompatActivity() {
             apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
                 ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
-            }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
+            }.sortedWith(compareBy({
+                !isProxiedApp(it)
+            }, {
+                it.name.toString()
+            }))
         }
 
-        override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
-        override fun onBindViewHolder(holder: AppViewHolder, position: Int, payloads: List<Any>) {
+        override fun onBindViewHolder(holder: AppViewHolder, position: Int) =
+            holder.bind(filteredApps[position])
+        override fun onBindViewHolder(
+            holder: AppViewHolder,
+            position: Int,
+            payloads: List<Any>
+        ) {
             if (payloads.isNotEmpty()) {
-                @Suppress("UNCHECKED_CAST")
-                holder.handlePayload(payloads as List<String>)
+                @Suppress("UNCHECKED_CAST") holder.handlePayload(payloads as List<String>)
                 return
             }
 
             onBindViewHolder(holder, position)
         }
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder =
-                AppViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.layout_apps_item, parent, false))
+            AppViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    R.layout.layout_apps_item,
+                    parent,
+                    false
+                )
+            )
         override fun getItemCount(): Int = filteredApps.size
 
-        private val filterImpl = object : Filter() {
-            override fun performFiltering(constraint: CharSequence) = FilterResults().apply {
-                val filteredApps = if (constraint.isEmpty()) apps else apps.filter {
-                    it.name.contains(constraint, true) ||
-                            it.packageName.contains(constraint, true) ||
-                            it.uid.toString().contains(constraint)
-                }
-                count = filteredApps.size
-                values = filteredApps
-            }
+        private val filterImpl =
+            object : Filter() {
+                override fun performFiltering(constraint: CharSequence) =
+                    FilterResults().apply {
+                        val filteredApps =
+                            if (constraint.isEmpty()) {
+                                apps
+                            } else {
+                                apps.filter {
+                                    it
+                                        .name
+                                        .contains(constraint, true) ||
+                                        it
+                                            .packageName
+                                            .contains(constraint, true) ||
+                                        it
+                                            .uid
+                                            .toString()
+                                            .contains(constraint)
+                                }
+                            }
+                        count = filteredApps.size
+                        values = filteredApps
+                    }
 
-            override fun publishResults(constraint: CharSequence, results: FilterResults) {
-                @Suppress("UNCHECKED_CAST")
-                filteredApps = results.values as List<ProxiedApp>
-                notifyDataSetChanged()
+                override fun publishResults(
+                    constraint: CharSequence,
+                    results: FilterResults
+                ) {
+                    @Suppress("UNCHECKED_CAST") filteredApps = results.values as List<ProxiedApp>
+                    notifyDataSetChanged()
+                }
             }
-        }
         override fun getFilter(): Filter = filterImpl
     }
 
     private val proxiedUids = SparseBooleanArray()
-    private val clipboard by lazy { getSystemService<ClipboardManager>()!! }
+    private val clipboard by lazy {
+        getSystemService<ClipboardManager>()!!
+    }
     private var loader: Job? = null
     private var apps = emptyList<ProxiedApp>()
     private val appsAdapter = AppsAdapter()
 
-    private val shortAnimTime by lazy { resources.getInteger(android.R.integer.config_shortAnimTime).toLong() }
+    private val shortAnimTime by lazy {
+        resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+    }
     private fun View.crossFadeFrom(other: View) {
         clearAnimation()
         other.clearAnimation()
@@ -201,7 +258,9 @@ class AppManager : AppCompatActivity() {
         loader = GlobalScope.launch(Dispatchers.Main.immediate) {
             loading.crossFadeFrom(list)
             val adapter = list.adapter as AppsAdapter
-            withContext(Dispatchers.IO) { adapter.reload() }
+            withContext(Dispatchers.IO) {
+                adapter.reload()
+            }
             adapter.filter.filter(search.query)
             list.crossFadeFrom(loading)
         }
@@ -239,7 +298,9 @@ class AppManager : AppCompatActivity() {
 
         search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false
-            override fun onQueryTextChange(newText: String?) = true.also { appsAdapter.filter.filter(newText) }
+            override fun onQueryTextChange(newText: String?) = true.also {
+                appsAdapter.filter.filter(newText)
+            }
         })
 
         instance = this
@@ -262,30 +323,53 @@ class AppManager : AppCompatActivity() {
                     }
                     if (DataStore.directBootAware) DirectBoot.update()
                     Snackbar.make(list, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
-                } else Snackbar.make(list, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                } else {
+                    Snackbar.make(list, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                }
                 return true
             }
             R.id.action_export_clipboard -> {
-                clipboard.primaryClip = ClipData.newPlainText(Key.individual,
-                        "${DataStore.bypass}\n${DataStore.individual}")
+                clipboard.primaryClip = ClipData.newPlainText(
+                    Key.individual,
+                    "${DataStore.bypass}\n${DataStore.individual}"
+                )
                 Snackbar.make(list, R.string.action_export_msg, Snackbar.LENGTH_LONG).show()
                 return true
             }
             R.id.action_import_clipboard -> {
-                val proxiedAppString = clipboard.primaryClip?.getItemAt(0)?.text?.toString()
+                val proxiedAppString =
+                    clipboard.primaryClip?.getItemAt(0)?.text?.toString()
                 if (!proxiedAppString.isNullOrEmpty()) {
                     val i = proxiedAppString.indexOf('\n')
                     try {
-                        val (enabled, apps) = if (i < 0) Pair(proxiedAppString, "") else
-                            Pair(proxiedAppString.substring(0, i), proxiedAppString.substring(i + 1))
-                        bypassGroup.check(if (enabled.toBoolean()) R.id.btn_bypass else R.id.btn_on)
+                        val (enabled, apps) =
+                            if (i < 0) {
+                                Pair(proxiedAppString, "")
+                            } else {
+                                Pair(
+                                    proxiedAppString.substring(0, i),
+                                    proxiedAppString.substring(i + 1)
+                                )
+                            }
+                        bypassGroup.check(
+                            if (enabled.toBoolean()) R.id.btn_bypass else R.id.btn_on
+                        )
                         DataStore.individual = apps
                         DataStore.dirty = true
-                        Snackbar.make(list, R.string.action_import_msg, Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(
+                            list,
+                            R.string.action_import_msg,
+                            Snackbar.LENGTH_LONG
+                        ).show()
                         initProxiedUids(apps)
-                        appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, SWITCH)
+                        appsAdapter.notifyItemRangeChanged(
+                            0,
+                            appsAdapter.itemCount,
+                            SWITCH
+                        )
                         return true
-                    } catch (_: IllegalArgumentException) { }
+                    } catch (`_`: IllegalArgumentException) {
+                    }
                 }
                 Snackbar.make(list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
             }
@@ -293,9 +377,16 @@ class AppManager : AppCompatActivity() {
         return false
     }
 
-    override fun onKeyUp(keyCode: Int, event: KeyEvent?) = if (keyCode == KeyEvent.KEYCODE_MENU)
-        if (toolbar.isOverflowMenuShowing) toolbar.hideOverflowMenu() else toolbar.showOverflowMenu()
-    else super.onKeyUp(keyCode, event)
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?) =
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            if (toolbar.isOverflowMenuShowing) {
+                toolbar.hideOverflowMenu()
+            } else {
+                toolbar.showOverflowMenu()
+            }
+        } else {
+            super.onKeyUp(keyCode, event)
+        }
 
     override fun onDestroy() {
         instance = null

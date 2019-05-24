@@ -24,16 +24,23 @@ import com.github.shadowsocks.utils.computeIfAbsentCompat
 import com.github.shadowsocks.utils.parseNumericAddress
 import java.net.InetAddress
 
-class HostsFile(input: String = "") {
+class HostsFile(
+    input: String = ""
+) {
     private val map = mutableMapOf<String, MutableSet<InetAddress>>()
     init {
         for (line in input.lineSequence()) {
-            val entries = line.substringBefore('#').splitToSequence(' ', '\t').filter { it.isNotEmpty() }
+            val entries = line.substringBefore('#').splitToSequence(' ', '\t').filter {
+                it.isNotEmpty()
+            }
             val address = entries.firstOrNull()?.parseNumericAddress() ?: continue
-            for (hostname in entries.drop(1)) map.computeIfAbsentCompat(hostname) { LinkedHashSet(1) }.add(address)
+            for (hostname in entries.drop(1)) map.computeIfAbsentCompat(hostname) {
+                LinkedHashSet(1)
+            }.add(address)
         }
     }
 
-    val configuredHostnames get() = map.size
+    val configuredHostnames
+        get() = map.size
     fun resolve(hostname: String) = map[hostname]?.shuffled() ?: emptyList()
 }

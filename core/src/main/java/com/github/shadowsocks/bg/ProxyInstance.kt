@@ -44,11 +44,16 @@ import java.security.MessageDigest
 /**
  * This class sets up environment for ss-local.
  */
-class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
+class ProxyInstance(
+    val profile: Profile,
+    private val route: String = profile.route
+) {
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
-    val pluginPath by lazy { PluginManager.init(plugin) }
+    val pluginPath by lazy {
+        PluginManager.init(plugin)
+    }
     private var scheduleConfigUpdate = false
 
     suspend fun init(service: BaseService.Interface) {
@@ -58,7 +63,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
             val (config, success) = RemoteConfig.fetch()
             scheduleConfigUpdate = !success
-            val conn = service.openConnection(URL(config.getString("proxy_url"))) as HttpURLConnection
+            val conn =
+                service.openConnection(URL(config.getString("proxy_url"))) as HttpURLConnection
             conn.requestMethod = "POST"
             conn.doOutput = true
 
@@ -76,22 +82,33 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             profile.method = proxy[3].trim()
         }
 
-        if (route == Acl.CUSTOM_RULES) withContext(Dispatchers.IO) {
-            Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
+        if (route == Acl.CUSTOM_RULES) {
+            withContext(Dispatchers.IO) {
+                Acl.save(
+                    Acl.CUSTOM_RULES,
+                    Acl.customRules.flatten(10, service::openConnection)
+                )
+            }
         }
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
             var retries = 0
             while (true) try {
-                val io = GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }
+                val io = GlobalScope.async(Dispatchers.IO) {
+                    service.resolver(profile.host)
+                }
                 profile.host = io.await().firstOrNull()?.hostAddress ?: throw UnknownHostException()
                 return
             } catch (e: UnknownHostException) {
                 // retries are only needed on Chrome OS where arc0 is brought up/down during VPN changes
                 if (!DataStore.hasArc0) throw e
                 Thread.yield()
-                Crashlytics.log(Log.WARN, "ProxyInstance-resolver", "Retry resolving attempt #${++retries}")
+                Crashlytics.log(
+                    Log.WARN,
+                    "ProxyInstance-resolver",
+                    "Retry resolving attempt #${++retries}"
+                )
             }
         }
     }
@@ -100,21 +117,41 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    fun start(
+        service: BaseService.Interface,
+        stat: File,
+        configFile: File,
+        extraFlag: String? = null
+    ) {
         trafficMonitor = TrafficMonitor(stat)
 
         this.configFile = configFile
         val config = profile.toJson()
-        if (pluginPath != null) config.put("plugin", pluginPath).put("plugin_opts", plugin.toString())
+        if (pluginPath != null) {
+            config.put("plugin", pluginPath).put("plugin_opts", plugin.toString())
+        }
         configFile.writeText(config.toString())
 
-        val cmd = service.buildAdditionalArguments(arrayListOf(
-                File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "-b", DataStore.listenAddress,
-                "-l", DataStore.portProxy.toString(),
-                "-t", "600",
-                "-S", stat.absolutePath,
-                "-c", configFile.absolutePath))
+        val cmd =
+            service
+                .buildAdditionalArguments(
+                    arrayListOf(
+                        File(
+                            (service as Context).applicationInfo.nativeLibraryDir,
+                            Executable.SS_LOCAL
+                        ).absolutePath,
+                        "-b",
+                        DataStore.listenAddress,
+                        "-l",
+                        DataStore.portProxy.toString(),
+                        "-t",
+                        "600",
+                        "-S",
+                        stat.absolutePath,
+                        "-c",
+                        configFile.absolutePath
+                    )
+                )
         if (extraFlag != null) cmd.add(extraFlag)
 
         if (route != Acl.ALL) {
@@ -138,10 +175,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     fun shutdown(scope: CoroutineScope) {
         trafficMonitor?.apply {
             thread.shutdown(scope)
-            persistStats(profile.id)    // Make sure update total traffic when stopping the runner
+            persistStats(profile.id) // Make sure update total traffic when stopping the runner
         }
         trafficMonitor = null
-        configFile?.delete()    // remove old config possibly in device storage
+        configFile?.delete() // remove old config possibly in device storage
         configFile = null
     }
 }

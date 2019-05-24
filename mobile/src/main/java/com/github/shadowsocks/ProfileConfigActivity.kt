@@ -40,7 +40,9 @@ class ProfileConfigActivity : AppCompatActivity() {
     }
 
     class UnsavedChangesDialogFragment : AlertDialogFragment<Empty, Empty>() {
-        override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
+        override fun AlertDialog.Builder.prepare(
+            listener: DialogInterface.OnClickListener
+        ) {
             setTitle(R.string.unsaved_changes_prompt)
             setPositiveButton(R.string.yes, listener)
             setNegativeButton(R.string.no, listener)
@@ -48,7 +50,9 @@ class ProfileConfigActivity : AppCompatActivity() {
         }
     }
 
-    private val child by lazy { supportFragmentManager.findFragmentById(R.id.content) as ProfileConfigFragment }
+    private val child by lazy {
+        supportFragmentManager.findFragmentById(R.id.content) as ProfileConfigFragment
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,15 +77,25 @@ class ProfileConfigActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = child.onOptionsItemSelected(item)
 
     override fun onBackPressed() {
-        if (DataStore.dirty) UnsavedChangesDialogFragment().show(child, ProfileConfigFragment.REQUEST_UNSAVED_CHANGES)
-        else super.onBackPressed()
+        if (DataStore.dirty) {
+            UnsavedChangesDialogFragment().show(
+                child,
+                ProfileConfigFragment.REQUEST_UNSAVED_CHANGES
+            )
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != REQUEST_CODE_PLUGIN_HELP) super.onActivityResult(requestCode, resultCode, data)
-        else if (resultCode == Activity.RESULT_OK) AlertDialog.Builder(this)
-                .setTitle("?")
-                .setMessage(data?.getCharSequenceExtra(PluginContract.EXTRA_HELP_MESSAGE))
-                .show()
+        if (requestCode != REQUEST_CODE_PLUGIN_HELP) {
+            super.onActivityResult(requestCode, resultCode, data)
+        } else {
+            if (resultCode == Activity.RESULT_OK) {
+                AlertDialog.Builder(this).setTitle("?").setMessage(
+                    data?.getCharSequenceExtra(PluginContract.EXTRA_HELP_MESSAGE)
+                ).show()
+            }
+        }
     }
 }

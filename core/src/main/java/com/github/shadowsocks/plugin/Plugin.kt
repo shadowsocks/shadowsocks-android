@@ -25,8 +25,12 @@ import android.graphics.drawable.Drawable
 abstract class Plugin {
     abstract val id: String
     abstract val label: CharSequence
-    open val icon: Drawable? get() = null
-    open val defaultConfig: String? get() = null
-    open val packageName: String get() = ""
-    open val trusted: Boolean get() = true
+    open val icon: Drawable?
+        get() = null
+    open val defaultConfig: String?
+        get() = null
+    open val packageName: String
+        get() = ""
+    open val trusted: Boolean
+        get() = true
 }

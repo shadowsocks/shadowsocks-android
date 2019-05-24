@@ -47,39 +47,60 @@ import java.net.URLConnection
 class HttpsTest : ViewModel() {
     sealed class Status {
         protected abstract val status: CharSequence
-        open fun retrieve(setStatus: (CharSequence) -> Unit, errorCallback: (String) -> Unit) = setStatus(status)
+        open fun retrieve(
+            setStatus: (CharSequence) -> Unit,
+            errorCallback: (String) -> Unit
+        ) = setStatus(status)
 
         object Idle : Status() {
-            override val status get() = app.getText(R.string.vpn_connected)
+            override val status
+                get() = app.getText(R.string.vpn_connected)
         }
         object Testing : Status() {
-            override val status get() = app.getText(R.string.connection_test_testing)
+            override val status
+                get() = app.getText(R.string.connection_test_testing)
         }
-        class Success(private val elapsed: Long) : Status() {
-            override val status get() = app.getString(R.string.connection_test_available, elapsed)
+        class Success(
+            private val elapsed: Long
+        ) : Status() {
+            override val status
+                get() = app.getString(R.string.connection_test_available, elapsed)
         }
         sealed class Error : Status() {
-            override val status get() = app.getText(R.string.connection_test_fail)
+            override val status
+                get() = app.getText(R.string.connection_test_fail)
             protected abstract val error: String
             private var shown = false
-            override fun retrieve(setStatus: (CharSequence) -> Unit, errorCallback: (String) -> Unit) {
+            override fun retrieve(
+                setStatus: (CharSequence) -> Unit,
+                errorCallback: (String) -> Unit
+            ) {
                 super.retrieve(setStatus, errorCallback)
                 if (shown) return
                 shown = true
                 errorCallback(error)
             }
 
-            class UnexpectedResponseCode(private val code: Int) : Error() {
-                override val error get() = app.getString(R.string.connection_test_error_status_code, code)
+            class UnexpectedResponseCode(
+                private val code: Int
+            ) : Error() {
+                override val error
+                    get() =
+                        app.getString(R.string.connection_test_error_status_code, code)
             }
-            class IOFailure(private val e: IOException) : Error() {
-                override val error get() = app.getString(R.string.connection_test_error, e.message)
+            class IOFailure(
+                private val e: IOException
+            ) : Error() {
+                override val error
+                    get() = app.getString(R.string.connection_test_error, e.message)
             }
         }
     }
 
     private var running: Job? = null
-    val status = MutableLiveData<Status>().apply { value = Status.Idle }
+    val status = MutableLiveData<Status>().apply {
+        value = Status.Idle
+    }
 
     fun testConnection() {
         cancelTest()
@@ -100,8 +121,11 @@ class HttpsTest : ViewModel() {
                     val start = SystemClock.elapsedRealtime()
                     val code = responseCode
                     val elapsed = SystemClock.elapsedRealtime() - start
-                    if (code == 204 || code == 200 && responseLength == 0L) Status.Success(elapsed)
-                    else Status.Error.UnexpectedResponseCode(code)
+                    if (code == 204 || code == 200 && responseLength == 0L) {
+                        Status.Success(elapsed)
+                    } else {
+                        Status.Error.UnexpectedResponseCode(code)
+                    }
                 } catch (e: IOException) {
                     Status.Error.IOFailure(e)
                 } finally {
@@ -122,5 +146,6 @@ class HttpsTest : ViewModel() {
     }
 
     private val URLConnection.responseLength: Long
-        get() = if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
+        get() =
+            if (Build.VERSION.SDK_INT >= 24) contentLengthLong else contentLength.toLong()
 }

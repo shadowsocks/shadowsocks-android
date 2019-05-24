@@ -60,8 +60,13 @@ abstract class NativePluginProvider : ContentProvider() {
      */
     protected abstract fun populateFiles(provider: PathProvider)
 
-    override fun query(uri: Uri, projection: Array<out String>?, selection: String?, selectionArgs: Array<out String>?,
-                       sortOrder: String?): Cursor {
+    override fun query(
+        uri: Uri,
+        projection: Array<out String>?,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+        sortOrder: String?
+    ): Cursor {
         check(selection == null && selectionArgs == null && sortOrder == null)
         val result = MatrixCursor(projection)
         populateFiles(PathProvider(uri, result))
@@ -84,14 +89,23 @@ abstract class NativePluginProvider : ContentProvider() {
         return openFile(uri)
     }
 
-    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? = when (method) {
-        PluginContract.METHOD_GET_EXECUTABLE -> bundleOf(Pair(PluginContract.EXTRA_ENTRY, getExecutable()))
-        else -> super.call(method, arg, extras)
-    }
+    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? =
+        when (method) {
+            PluginContract.METHOD_GET_EXECUTABLE -> {
+                bundleOf(Pair(PluginContract.EXTRA_ENTRY, getExecutable()))
+            }
+            else -> super.call(method, arg, extras)
+        }
 
     // Methods that should not be used
-    override fun insert(p0: Uri?, p1: ContentValues?): Uri = throw UnsupportedOperationException()
-    override fun update(p0: Uri?, p1: ContentValues?, p2: String?, p3: Array<out String>?): Int =
-            throw UnsupportedOperationException()
-    override fun delete(p0: Uri?, p1: String?, p2: Array<out String>?): Int = throw UnsupportedOperationException()
+    override fun insert(p0: Uri?, p1: ContentValues?): Uri =
+        throw UnsupportedOperationException()
+    override fun update(
+        p0: Uri?,
+        p1: ContentValues?,
+        p2: String?,
+        p3: Array<out String>?
+    ): Int = throw UnsupportedOperationException()
+    override fun delete(p0: Uri?, p1: String?, p2: Array<out String>?): Int =
+        throw UnsupportedOperationException()
 }

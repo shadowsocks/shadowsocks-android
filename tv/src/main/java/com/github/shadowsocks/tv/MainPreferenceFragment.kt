@@ -55,8 +55,7 @@ import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
 
-class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
-        OnPreferenceDataStoreChangeListener {
+class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener {
     companion object {
         private const val REQUEST_CONNECT = 1
         private const val REQUEST_REPLACE_PROFILES = 2
@@ -75,31 +74,46 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var portProxy: EditTextPreference
     private lateinit var portLocalDns: EditTextPreference
     private lateinit var portTransproxy: EditTextPreference
-    private val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
-        val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
-            Key.modeProxy -> Pair(false, false)
-            Key.modeVpn -> Pair(true, false)
-            Key.modeTransproxy -> Pair(true, true)
-            else -> throw IllegalArgumentException("newValue: $newValue")
+    private val onServiceModeChange =
+        Preference.OnPreferenceChangeListener { _, newValue ->
+            val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
+                Key.modeProxy -> Pair(false, false)
+                Key.modeVpn -> Pair(true, false)
+                Key.modeTransproxy -> Pair(true, true)
+                else -> throw IllegalArgumentException("newValue: $newValue")
+            }
+            hosts.isEnabled = enabledLocalDns
+            portLocalDns.isEnabled = enabledLocalDns
+            portTransproxy.isEnabled = enabledTransproxy
+            true
         }
-        hosts.isEnabled = enabledLocalDns
-        portLocalDns.isEnabled = enabledLocalDns
-        portTransproxy.isEnabled = enabledTransproxy
-        true
-    }
     private lateinit var tester: HttpsTest
 
     // service
     var state = BaseService.State.Idle
         private set
-    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) = changeState(state, msg)
+    override fun stateChanged(
+        state: BaseService.State,
+        profileName: String?,
+        msg: String?
+    ) = changeState(state, msg)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-        if (profileId == 0L) context?.let { context ->
-            this.stats.summary = getString(R.string.stat_summary,
-                    getString(R.string.speed, Formatter.formatFileSize(context, stats.txRate)),
-                    getString(R.string.speed, Formatter.formatFileSize(context, stats.rxRate)),
+        if (profileId == 0L) {
+            context?.let { context ->
+                this.stats.summary = getString(
+                    R.string.stat_summary,
+                    getString(
+                        R.string.speed,
+                        Formatter.formatFileSize(context, stats.txRate)
+                    ),
+                    getString(
+                        R.string.speed,
+                        Formatter.formatFileSize(context, stats.rxRate)
+                    ),
                     Formatter.formatFileSize(context, stats.txTotal),
-                    Formatter.formatFileSize(context, stats.rxTotal))
+                    Formatter.formatFileSize(context, stats.rxTotal)
+                )
+            }
         }
     }
 
@@ -119,9 +133,17 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             tester.status.removeObservers(this)
             if (state != BaseService.State.Idle) tester.invalidate()
         } else tester.status.observe(this, Observer {
-            it.retrieve(stats::setTitle) { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+            it.retrieve(stats::setTitle) {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            }
         })
-        if (msg != null) Toast.makeText(context, getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
+        if (msg != null) {
+            Toast.makeText(
+                context,
+                getString(R.string.vpn_error, msg),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         this.state = state
         val stopped = state == BaseService.State.Stopped
         controlImport.isEnabled = stopped
@@ -129,7 +151,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         serviceMode.isEnabled = stopped
         shareOverLan.isEnabled = stopped
         portProxy.isEnabled = stopped
-        if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
+        if (stopped) {
+            onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
+        } else {
             portLocalDns.isEnabled = false
             portTransproxy.isEnabled = false
         }
@@ -139,7 +163,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.values()[service.state]
-    } catch (_: DeadObjectException) {
+    } catch (`_`: DeadObjectException) {
         BaseService.State.Idle
     })
     override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
@@ -157,7 +181,10 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         stats = findPreference(Key.controlStats)!!
         controlImport = findPreference(Key.controlImport)!!
 
-        findPreference<SwitchPreference>(Key.persistAcrossReboot)!!.setOnPreferenceChangeListener { _, value ->
+        findPreference<SwitchPreference>(Key.persistAcrossReboot)!!.setOnPreferenceChangeListener {
+            _,
+            value
+            ->
             BootReceiver.enabled = value as Boolean
             true
         }
@@ -167,16 +194,30 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
                 val result = TcpFastOpen.enable()?.trim()
-                if (TcpFastOpen.sendEnabled) true else {
-                    Toast.makeText(requireContext(), if (result.isNullOrEmpty())
-                        getText(R.string.tcp_fastopen_failure) else result, Toast.LENGTH_SHORT).show()
+                if (TcpFastOpen.sendEnabled) {
+                    true
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        if (result.isNullOrEmpty()) {
+                            getText(R.string.tcp_fastopen_failure)
+                        } else {
+                            result
+                        },
+                        Toast.LENGTH_SHORT
+                    ).show()
                     false
                 }
-            } else true
+            } else {
+                true
+            }
         }
         if (!TcpFastOpen.supported) {
             tfo.isEnabled = false
-            tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
+            tfo.summary = getString(
+                R.string.tcp_fastopen_summary_unsupported,
+                System.getProperty("os.version")
+            )
         }
 
         hosts = findPreference(Key.hosts)!!
@@ -190,7 +231,10 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         portTransproxy = findPreference(Key.portTransproxy)!!
         portTransproxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
         serviceMode.onPreferenceChangeListener = onServiceModeChange
-        findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
+        findPreference<Preference>(Key.about)!!.summary = getString(
+            R.string.about_title,
+            BuildConfig.VERSION_NAME
+        )
 
         tester = ViewModelProviders.of(this).get()
         changeState(BaseService.State.Idle) // reset everything to init state
@@ -212,8 +256,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         ProfileManager.ensureNotEmpty()
         val profiles = ProfileManager.getAllProfiles()!!
         fab.value = null
-        fab.entries = profiles.map { it.formattedName }.toTypedArray()
-        fab.entryValues = profiles.map { it.id.toString() }.toTypedArray()
+        fab.entries = profiles.map {
+            it.formattedName
+        }.toTypedArray()
+        fab.entryValues = profiles.map {
+            it.id.toString()
+        }.toTypedArray()
     }
 
     fun startService() {
@@ -221,8 +269,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             state != BaseService.State.Stopped -> return
             DataStore.serviceMode == Key.modeVpn -> {
                 val intent = VpnService.prepare(requireContext())
-                if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
-                else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+                if (intent != null) {
+                    startActivityForResult(intent, REQUEST_CONNECT)
+                } else {
+                    onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+                }
             }
             else -> Core.startService()
         }
@@ -242,56 +293,90 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         super.onStop()
     }
 
-    override fun onPreferenceTreeClick(preference: Preference?) = when (preference?.key) {
-        Key.id -> {
-            if (state == BaseService.State.Connected) Core.stopService()
-            true
+    override fun onPreferenceTreeClick(preference: Preference?) =
+        when (preference?.key) {
+            Key.id -> {
+                if (state == BaseService.State.Connected) Core.stopService()
+                true
+            }
+            Key.controlStats -> {
+                tester.testConnection()
+                true
+            }
+            Key.controlImport -> {
+                startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+                    type = "application/*"
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
+                }, REQUEST_REPLACE_PROFILES)
+                true
+            }
+            Key.controlExport -> {
+                startFilesForResult(
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        type = "application/json"
+                        putExtra(Intent.EXTRA_TITLE, "profiles.json") // optional title that can be edited
+                    },
+                    REQUEST_EXPORT_PROFILES
+                )
+                true
+            }
+            Key.about -> {
+                Toast.makeText(
+                    requireContext(),
+                    "https://shadowsocks.org/android",
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
+            else -> super.onPreferenceTreeClick(preference)
         }
-        Key.controlStats -> {
-            tester.testConnection()
-            true
-        }
-        Key.controlImport -> {
-            startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-                type = "application/*"
-                putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
-            }, REQUEST_REPLACE_PROFILES)
-            true
-        }
-        Key.controlExport -> {
-            startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                type = "application/json"
-                putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
-            }, REQUEST_EXPORT_PROFILES)
-            true
-        }
-        Key.about -> {
-            Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
-            true
-        }
-        else -> super.onPreferenceTreeClick(preference)
-    }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
-        if (preference != hosts || startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), REQUEST_HOSTS))
+        if (preference != hosts ||
+            startFilesForResult(
+                Intent(Intent.ACTION_GET_CONTENT).setType("*/*"),
+                REQUEST_HOSTS
+            )) {
             super.onDisplayPreferenceDialog(preference)
+        }
     }
 
     private fun startFilesForResult(intent: Intent, requestCode: Int): Boolean {
         try {
-            startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
+            startActivityForResult(
+                intent.addCategory(Intent.CATEGORY_OPENABLE),
+                requestCode
+            )
             return false
-        } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
-        Toast.makeText(requireContext(), R.string.file_manager_missing, Toast.LENGTH_SHORT).show()
+        } catch (`_`: ActivityNotFoundException) {
+        } catch (`_`: SecurityException) {
+        }
+        Toast.makeText(
+            requireContext(),
+            R.string.file_manager_missing,
+            Toast.LENGTH_SHORT
+        ).show()
         return true
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REQUEST_CONNECT -> if (resultCode == Activity.RESULT_OK) Core.startService() else {
-                Toast.makeText(requireContext(), R.string.vpn_permission_denied, Toast.LENGTH_SHORT).show()
-                Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+            REQUEST_CONNECT -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    Core.startService()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.vpn_permission_denied,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Crashlytics.log(
+                        Log.ERROR,
+                        TAG,
+                        "Failed to start VpnService from onActivityResult: $data"
+                    )
+                }
             }
             REQUEST_REPLACE_PROFILES -> {
                 if (resultCode != Activity.RESULT_OK) return
@@ -310,13 +395,15 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                 if (resultCode != Activity.RESULT_OK) return
                 val profiles = ProfileManager.serializeToJson()
                 val context = requireContext()
-                if (profiles != null) try {
-                    context.contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
-                        it.write(profiles.toString(2))
+                if (profiles != null) {
+                    try {
+                        context.contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
+                            it.write(profiles.toString(2))
+                        }
+                    } catch (e: Exception) {
+                        printLog(e)
+                        Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: Exception) {
-                    printLog(e)
-                    Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
             }
             REQUEST_HOSTS -> {

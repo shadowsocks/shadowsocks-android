@@ -36,25 +36,49 @@ import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
 
-class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
-                                         defStyleAttr: Int = R.attr.bottomAppBarStyle) :
-        BottomAppBar(context, attrs, defStyleAttr) {
+class StatsBar @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = R.attr.bottomAppBarStyle
+) : BottomAppBar(context, attrs, defStyleAttr) {
     private lateinit var statusText: TextView
     private lateinit var txText: TextView
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
-    private val tester = ViewModelProviders.of(context as FragmentActivity).get<HttpsTest>()
-    private val behavior = object : Behavior() {
-        val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
-        override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
-                                    dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int, type: Int,
-                                    consumed: IntArray) {
-            val dy = dyConsumed + dyUnconsumed
-            super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (Math.abs(dy) >= threshold) dy else 0,
-                    dxUnconsumed, 0, type, consumed)
+    private val tester =
+        ViewModelProviders.of(context as FragmentActivity).get<HttpsTest>()
+    private val behavior =
+        object : Behavior() {
+            val threshold =
+                context
+                    .resources
+                    .getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
+            override fun onNestedScroll(
+                coordinatorLayout: CoordinatorLayout,
+                child: BottomAppBar,
+                target: View,
+                dxConsumed: Int,
+                dyConsumed: Int,
+                dxUnconsumed: Int,
+                dyUnconsumed: Int,
+                type: Int,
+                consumed: IntArray
+            ) {
+                val dy = dyConsumed + dyUnconsumed
+                super.onNestedScroll(
+                    coordinatorLayout,
+                    child,
+                    target,
+                    dxConsumed,
+                    if (Math.abs(dy) >= threshold) dy else 0,
+                    dxUnconsumed,
+                    0,
+                    type,
+                    consumed
+                )
+            }
         }
-    }
     override fun getBehavior() = behavior
 
     override fun setOnClickListener(l: OnClickListener?) {
@@ -80,7 +104,9 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         } else {
             behavior.slideUp(this)
             tester.status.observe(activity, Observer {
-                it.retrieve(statusText::setText) { activity.snackbar(it).show() }
+                it.retrieve(statusText::setText) {
+                    activity.snackbar(it).show()
+                }
             })
         }
     }
@@ -88,8 +114,14 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     fun updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
         txText.text = "▲ ${Formatter.formatFileSize(context, txTotal)}"
         rxText.text = "▼ ${Formatter.formatFileSize(context, rxTotal)}"
-        txRateText.text = context.getString(R.string.speed, Formatter.formatFileSize(context, txRate))
-        rxRateText.text = context.getString(R.string.speed, Formatter.formatFileSize(context, rxRate))
+        txRateText.text = context.getString(
+            R.string.speed,
+            Formatter.formatFileSize(context, txRate)
+        )
+        rxRateText.text = context.getString(
+            R.string.speed,
+            Formatter.formatFileSize(context, rxRate)
+        )
     }
 
     fun testConnection() = tester.testConnection()

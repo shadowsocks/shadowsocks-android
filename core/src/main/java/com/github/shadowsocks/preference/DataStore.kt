@@ -50,7 +50,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     }
 
     // hopefully hashCode = mHandle doesn't change, currently this is true from KitKat to Nougat
-    private val userIndex by lazy { Binder.getCallingUserHandle().hashCode() }
+    private val userIndex by lazy {
+        Binder.getCallingUserHandle().hashCode()
+    }
     private fun getLocalPort(key: String, default: Int): Int {
         val value = publicStore.getInt(key)
         return if (value != null) {
@@ -62,12 +64,19 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var profileId: Long
         get() = publicStore.getLong(Key.id) ?: 0
         set(value) = publicStore.putLong(Key.id, value)
-    val persistAcrossReboot get() = publicStore.getBoolean(Key.persistAcrossReboot)
-            ?: BootReceiver.enabled.also { publicStore.putBoolean(Key.persistAcrossReboot, it) }
-    val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
-    val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
-    val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
-    val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
+    val persistAcrossReboot
+        get() =
+            publicStore.getBoolean(Key.persistAcrossReboot) ?: BootReceiver.enabled.also {
+                publicStore.putBoolean(Key.persistAcrossReboot, it)
+            }
+    val canToggleLocked: Boolean
+        get() = publicStore.getBoolean(Key.directBootAware) == true
+    val directBootAware: Boolean
+        get() = Core.directBootSupported && canToggleLocked
+    val tcpFastOpen: Boolean
+        get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
+    val serviceMode
+        get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
 
     /**
      * An alternative way to detect this interface could be checking MAC address = 00:ff:aa:00:00:55, but there is no
@@ -78,7 +87,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         while (retry < 5) {
             try {
                 return@lazy NetworkInterface.getByName("arc0") != null
-            } catch (_: SocketException) { }
+            } catch (`_`: SocketException) {
+            }
             retry++
             Thread.sleep(100L shl retry)
         }
@@ -88,11 +98,18 @@ object DataStore : OnPreferenceDataStoreChangeListener {
      * Binding bogus IP address 100.115.92.2 in Chrome OS directly does not seem to work reliably. It might be due to
      * the IP may not be available when the device is not connected to any network.
      */
-    val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, hasArc0)) "0.0.0.0" else "127.0.0.1"
+    val listenAddress
+        get() =
+            if (publicStore.getBoolean(Key.shareOverLan, hasArc0)) {
+                "0.0.0.0"
+            } else {
+                "127.0.0.1"
+            }
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
-    val proxyAddress get() = InetSocketAddress("127.0.0.1", portProxy)
+    val proxyAddress
+        get() = InetSocketAddress("127.0.0.1", portProxy)
     var portLocalDns: Int
         get() = getLocalPort(Key.portLocalDns, 5450)
         set(value) = publicStore.putString(Key.portLocalDns, value.toString())
@@ -105,10 +122,14 @@ object DataStore : OnPreferenceDataStoreChangeListener {
      */
     fun initGlobal() {
         persistAcrossReboot
-        if (publicStore.getBoolean(Key.tfo) == null) publicStore.putBoolean(Key.tfo, tcpFastOpen)
+        if (publicStore.getBoolean(Key.tfo) == null) {
+            publicStore.putBoolean(Key.tfo, tcpFastOpen)
+        }
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
-        if (publicStore.getString(Key.portTransproxy) == null) portTransproxy = portTransproxy
+        if (publicStore.getString(Key.portTransproxy) == null) {
+            portTransproxy = portTransproxy
+        }
     }
 
     var editingId: Long?

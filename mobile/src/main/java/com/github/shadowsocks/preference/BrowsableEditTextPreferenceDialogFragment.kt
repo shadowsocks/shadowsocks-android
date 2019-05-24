@@ -38,12 +38,17 @@ class BrowsableEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragme
         builder.setNeutralButton(R.string.browse) { _, _ ->
             val activity = activity as MainActivity
             try {
-                targetFragment!!.startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "*/*"
-                }, targetRequestCode)
+                targetFragment!!.startActivityForResult(
+                    Intent(Intent.ACTION_GET_CONTENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "*/*"
+                    },
+                    targetRequestCode
+                )
                 return@setNeutralButton
-            } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
+            } catch (`_`: ActivityNotFoundException) {
+            } catch (`_`: SecurityException) {
+            }
             activity.snackbar(activity.getString(R.string.file_manager_missing)).show()
         }
     }

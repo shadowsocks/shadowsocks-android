@@ -63,56 +63,83 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
 
     private fun fallback() {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark")))
-        } catch (_: ActivityNotFoundException) { }
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("market://details?id=tw.com.quickmark")
+                )
+            )
+        } catch (`_`: ActivityNotFoundException) {
+        }
         finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        detector = BarcodeDetector.Builder(this)
-                .setBarcodeFormats(Barcode.QR_CODE)
-                .build()
+        detector = BarcodeDetector.Builder(this).setBarcodeFormats(Barcode.QR_CODE).build()
         if (!detector.isOperational) {
             val availability = GoogleApiAvailability.getInstance()
-            val dialog = availability.getErrorDialog(this, availability.isGooglePlayServicesAvailable(this),
-                    REQUEST_GOOGLE_API)
+            val dialog =
+                availability
+                    .getErrorDialog(
+                        this,
+                        availability.isGooglePlayServicesAvailable(this),
+                        REQUEST_GOOGLE_API
+                    )
             if (dialog == null) {
-                Toast.makeText(this, R.string.common_google_play_services_notification_ticker, Toast.LENGTH_SHORT)
-                        .show()
+                Toast.makeText(
+                    this,
+                    R.string.common_google_play_services_notification_ticker,
+                    Toast.LENGTH_SHORT
+                ).show()
                 fallback()
             } else {
-                dialog.setOnDismissListener { fallback() }
+                dialog.setOnDismissListener {
+                    fallback()
+                }
                 dialog.show()
             }
             return
         }
-        if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed("scan")
+        if (Build.VERSION.SDK_INT >= 25) {
+            getSystemService<ShortcutManager>()!!.reportShortcutUsed("scan")
+        }
         if (try {
-                    getSystemService<CameraManager>()?.cameraIdList?.isEmpty()
-                } catch (_: CameraAccessException) {
-                    true
-                } != false) {
+            getSystemService<CameraManager>()?.cameraIdList?.isEmpty()
+        } catch (`_`: CameraAccessException) {
+            true
+        } != false) {
             startImport()
             return
         }
         setContentView(R.layout.layout_scanner)
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-        val capture = supportFragmentManager.findFragmentById(R.id.barcode) as BarcodeCapture
+        val capture =
+            supportFragmentManager.findFragmentById(R.id.barcode) as BarcodeCapture
         capture.setCustomDetector(detector)
         capture.setRetrieval(this)
     }
 
     override fun onRetrieved(barcode: Barcode) = runOnUiThread {
-        Profile.findAllUrls(barcode.rawValue, Core.currentProfile?.first).forEach { ProfileManager.createProfile(it) }
+        Profile.findAllUrls(barcode.rawValue, Core.currentProfile?.first).forEach {
+            ProfileManager.createProfile(it)
+        }
         onSupportNavigateUp()
     }
-    override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
-    override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) { }
-    override fun onRetrievedFailed(reason: String?) = Crashlytics.log(Log.WARN, TAG, reason)
+    override fun onRetrievedMultiple(
+        closetToClick: Barcode?,
+        barcode: MutableList<BarcodeGraphic>?
+    ) = check(false)
+    override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) {}
+    override fun onRetrievedFailed(reason: String?) =
+        Crashlytics.log(Log.WARN, TAG, reason)
     override fun onPermissionRequestDenied() {
-        Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this,
+            R.string.add_profile_scanner_permission_required,
+            Toast.LENGTH_SHORT
+        ).show()
         startImport()
     }
 
@@ -128,31 +155,44 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
         else -> false
     }
 
-    private fun startImport(manual: Boolean = false) = startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-        addCategory(Intent.CATEGORY_OPENABLE)
-        type = "image/*"
-        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-    }, if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
+    private fun startImport(manual: Boolean = false) =
+        startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }, if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
-                val feature = Core.currentProfile?.first
-                var success = false
-                for (uri in data!!.datas) try {
-                    detector.detect(Frame.Builder().setBitmap(contentResolver.openBitmap(uri)).build())
-                            .forEach { _, barcode ->
-                                Profile.findAllUrls(barcode.rawValue, feature).forEach {
-                                    ProfileManager.createProfile(it)
-                                    success = true
-                                }
+            REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    val feature = Core.currentProfile?.first
+                    var success = false
+                    for (uri in data!!.datas) try {
+                        detector.detect(
+                            Frame.Builder().setBitmap(contentResolver.openBitmap(uri)).build()
+                        ).forEach { _, barcode ->
+                            Profile.findAllUrls(barcode.rawValue, feature).forEach {
+                                ProfileManager.createProfile(it)
+                                success = true
                             }
-                } catch (e: Exception) {
-                    printLog(e)
+                        }
+                    } catch (e: Exception) {
+                        printLog(e)
+                    }
+                    Toast.makeText(
+                        this,
+                        if (success) {
+                            R.string.action_import_msg
+                        } else {
+                            R.string.action_import_err
+                        },
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onSupportNavigateUp()
+                } else {
+                    if (requestCode == REQUEST_IMPORT_OR_FINISH) onSupportNavigateUp()
                 }
-                Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
-                        Toast.LENGTH_SHORT).show()
-                onSupportNavigateUp()
-            } else if (requestCode == REQUEST_IMPORT_OR_FINISH) onSupportNavigateUp()
+            }
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }

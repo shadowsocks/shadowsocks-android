@@ -24,25 +24,39 @@ import com.github.shadowsocks.utils.parseNumericAddress
 import java.net.InetAddress
 import java.util.*
 
-class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet> {
+class Subnet(
+    val address: InetAddress,
+    val prefixSize: Int
+) : Comparable<Subnet> {
     companion object {
         fun fromString(value: String): Subnet? {
             @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
             val parts = (value as java.lang.String).split("/", 2)
             val addr = parts[0].parseNumericAddress() ?: return null
-            return if (parts.size == 2) try {
-                val prefixSize = parts[1].toInt()
-                if (prefixSize < 0 || prefixSize > addr.address.size shl 3) null else Subnet(addr, prefixSize)
-            } catch (_: NumberFormatException) {
-                null
-            } else Subnet(addr, addr.address.size shl 3)
+            return if (parts.size == 2) {
+                try {
+                    val prefixSize = parts[1].toInt()
+                    if (prefixSize < 0 || prefixSize > addr.address.size shl 3) {
+                        null
+                    } else {
+                        Subnet(addr, prefixSize)
+                    }
+                } catch (`_`: NumberFormatException) {
+                    null
+                }
+            } else {
+                Subnet(addr, addr.address.size shl 3)
+            }
         }
     }
 
-    private val addressLength get() = address.address.size shl 3
+    private val addressLength
+        get() = address.address.size shl 3
 
     init {
-        if (prefixSize < 0 || prefixSize > addressLength) throw IllegalArgumentException("prefixSize: $prefixSize")
+        if (prefixSize < 0 || prefixSize > addressLength) {
+            throw IllegalArgumentException("prefixSize: $prefixSize")
+        }
     }
 
     fun matches(other: InetAddress): Boolean {
@@ -61,7 +75,11 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
     }
 
     override fun toString(): String =
-            if (prefixSize == addressLength) address.hostAddress else address.hostAddress + '/' + prefixSize
+        if (prefixSize == addressLength) {
+            address.hostAddress
+        } else {
+            address.hostAddress + '/' + prefixSize
+        }
 
     private fun Byte.unsigned() = toInt() and 0xFF
     override fun compareTo(other: Subnet): Int {
@@ -70,7 +88,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
         var result = addrThis.size.compareTo(addrThat.size) // IPv4 address goes first
         if (result != 0) return result
         for ((x, y) in addrThis zip addrThat) {
-            result = x.unsigned().compareTo(y.unsigned())   // undo sign extension of signed byte
+            result = x.unsigned().compareTo(y.unsigned()) // undo sign extension of signed byte
             if (result != 0) return result
         }
         return prefixSize.compareTo(other.prefixSize)

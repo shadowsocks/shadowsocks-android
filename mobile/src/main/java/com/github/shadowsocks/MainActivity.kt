@@ -55,8 +55,7 @@ import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
-        NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener, NavigationView.OnNavigationItemSelectedListener {
     companion object {
         private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
@@ -70,62 +69,84 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     internal lateinit var drawer: DrawerLayout
     private lateinit var navigation: NavigationView
 
-    val snackbar by lazy { findViewById<CoordinatorLayout>(R.id.snackbar) }
-    fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
-        anchorView = fab
+    val snackbar by lazy {
+        findViewById<CoordinatorLayout>(R.id.snackbar)
     }
+    fun snackbar(text: CharSequence = "") =
+        Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
+            anchorView = fab
+        }
 
     private val customTabsIntent by lazy {
-        CustomTabsIntent.Builder()
-                .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
-                .build()
+        CustomTabsIntent.Builder().setToolbarColor(
+            ContextCompat.getColor(this, R.color.color_primary)
+        ).build()
     }
     fun launchUrl(uri: String) = try {
         customTabsIntent.launchUrl(this, uri.toUri())
-    } catch (_: ActivityNotFoundException) {
+    } catch (`_`: ActivityNotFoundException) {
         snackbar(uri).show()
     }
 
     // service
     var state = BaseService.State.Idle
-    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
-            changeState(state, msg, true)
+    override fun stateChanged(
+        state: BaseService.State,
+        profileName: String?,
+        msg: String?
+    ) = changeState(state, msg, true)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-        if (profileId == 0L) this@MainActivity.stats.updateTraffic(
-                stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
+        if (profileId == 0L) {
+            this@MainActivity.stats.updateTraffic(
+                stats.txRate,
+                stats.rxRate,
+                stats.txTotal,
+                stats.rxTotal
+            )
+        }
         if (state != BaseService.State.Stopping) {
-            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
-                    ?.onTrafficUpdated(profileId, stats)
+            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)?.onTrafficUpdated(
+                profileId,
+                stats
+            )
         }
     }
     override fun trafficPersisted(profileId: Long) {
         ProfilesFragment.instance?.onTrafficPersisted(profileId)
     }
 
-    private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = false) {
+    private fun changeState(
+        state: BaseService.State,
+        msg: String? = null,
+        animate: Boolean = false
+    ) {
         fab.changeState(state, this.state, animate)
         stats.changeState(state)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
         this.state = state
-        ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
+        ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged() // refresh button enabled state
         stateListener?.invoke(state)
     }
 
-    private fun toggle() = when {
-        state.canStop -> Core.stopService()
-        DataStore.serviceMode == Key.modeVpn -> {
-            val intent = VpnService.prepare(this)
-            if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
-            else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+    private fun toggle() =
+        when {
+            state.canStop -> Core.stopService()
+            DataStore.serviceMode == Key.modeVpn -> {
+                val intent = VpnService.prepare(this)
+                if (intent != null) {
+                    startActivityForResult(intent, REQUEST_CONNECT)
+                } else {
+                    onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
+                }
+            }
+            else -> Core.startService()
         }
-        else -> Core.startService()
-    }
 
     private val handler = Handler()
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.values()[service.state]
-    } catch (_: DeadObjectException) {
+    } catch (`_`: DeadObjectException) {
         BaseService.State.Idle
     })
     override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
@@ -136,11 +157,17 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when {
-            requestCode != REQUEST_CONNECT -> super.onActivityResult(requestCode, resultCode, data)
+            requestCode != REQUEST_CONNECT -> {
+                super.onActivityResult(requestCode, resultCode, data)
+            }
             resultCode == Activity.RESULT_OK -> Core.startService()
             else -> {
                 snackbar().setText(R.string.vpn_permission_denied).show()
-                Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+                Crashlytics.log(
+                    Log.ERROR,
+                    TAG,
+                    "Failed to start VpnService from onActivityResult: $data"
+                )
             }
         }
     }
@@ -150,7 +177,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_main)
         stats = findViewById(R.id.stats)
-        stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
+        stats.setOnClickListener {
+            if (state == BaseService.State.Connected) stats.testConnection()
+        }
         drawer = findViewById(R.id.drawer)
         navigation = findViewById(R.id.navigation)
         navigation.setNavigationItemSelectedListener(this)
@@ -160,7 +189,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         }
 
         fab = findViewById(R.id.fab)
-        fab.setOnClickListener { toggle() }
+        fab.setOnClickListener {
+            toggle()
+        }
 
         changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(this, this)
@@ -208,8 +239,11 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     override fun onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawers() else {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawers()
+        } else {
+            val currentFragment =
+                supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
             if (!currentFragment.onBackPressed()) {
                 if (currentFragment is ProfilesFragment) super.onBackPressed() else {
                     navigation.menu.findItem(R.id.profiles).isChecked = true
@@ -219,20 +253,25 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         }
     }
 
-    override fun onKeyShortcut(keyCode: Int, event: KeyEvent) = when {
-        keyCode == KeyEvent.KEYCODE_G && event.hasModifiers(KeyEvent.META_CTRL_ON) -> {
-            toggle()
-            true
+    override fun onKeyShortcut(keyCode: Int, event: KeyEvent) =
+        when {
+            keyCode == KeyEvent.KEYCODE_G && event.hasModifiers(KeyEvent.META_CTRL_ON) -> {
+                toggle()
+                true
+            }
+            keyCode == KeyEvent.KEYCODE_T && event.hasModifiers(KeyEvent.META_CTRL_ON) -> {
+                stats.testConnection()
+                true
+            }
+            else -> {
+                (supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment).toolbar.menu.let {
+                    it.setQwertyMode(
+                        KeyCharacterMap.load(event.deviceId).keyboardType != KeyCharacterMap.NUMERIC
+                    )
+                    it.performShortcut(keyCode, event, 0)
+                }
+            }
         }
-        keyCode == KeyEvent.KEYCODE_T && event.hasModifiers(KeyEvent.META_CTRL_ON) -> {
-            stats.testConnection()
-            true
-        }
-        else -> (supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment).toolbar.menu.let {
-            it.setQwertyMode(KeyCharacterMap.load(event.deviceId).keyboardType != KeyCharacterMap.NUMERIC)
-            it.performShortcut(keyCode, event, 0)
-        }
-    }
 
     override fun onStop() {
         connection.bandwidthTimeout = 0

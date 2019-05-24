@@ -33,28 +33,47 @@ import com.github.shadowsocks.tv.preference.LeanbackSingleListPreferenceDialogFr
 import com.github.shadowsocks.utils.Key
 
 class MainFragment : LeanbackSettingsFragmentCompat() {
-    override fun onPreferenceStartInitialScreen() = startPreferenceFragment(MainPreferenceFragment())
-    override fun onPreferenceStartScreen(caller: PreferenceFragmentCompat?, pref: PreferenceScreen?): Boolean {
+    override fun onPreferenceStartInitialScreen() =
+        startPreferenceFragment(MainPreferenceFragment())
+    override fun onPreferenceStartScreen(
+        caller: PreferenceFragmentCompat?,
+        pref: PreferenceScreen?
+    ): Boolean {
         onPreferenceStartInitialScreen()
         return true
     }
-    override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat?, pref: Preference?) = false
-    override fun onPreferenceDisplayDialog(caller: PreferenceFragmentCompat, pref: Preference?): Boolean {
+    override fun onPreferenceStartFragment(
+        caller: PreferenceFragmentCompat?,
+        pref: Preference?
+    ) = false
+    override fun onPreferenceDisplayDialog(
+        caller: PreferenceFragmentCompat,
+        pref: Preference?
+    ): Boolean {
         if (pref?.key == Key.id) {
-            if ((childFragmentManager.findFragmentById(R.id.settings_preference_fragment_container)
-                            as MainPreferenceFragment).state == BaseService.State.Stopped) {
-                startPreferenceFragment(ProfilesDialogFragment().apply {
-                    arguments = bundleOf(Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, Key.id))
-                    setTargetFragment(caller, 0)
-                })
+            if ((childFragmentManager.findFragmentById(
+                R.id.settings_preference_fragment_container
+            ) as MainPreferenceFragment).state == BaseService.State.Stopped) {
+                startPreferenceFragment(
+                    ProfilesDialogFragment().apply {
+                        arguments = bundleOf(
+                            Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, Key.id)
+                        )
+                        setTargetFragment(caller, 0)
+                    }
+                )
             }
             return true
         }
         if (pref is ListPreference && pref !is MultiSelectListPreference) {
-            startPreferenceFragment(LeanbackSingleListPreferenceDialogFragment().apply {
-                arguments = bundleOf(Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, pref.key))
-                setTargetFragment(caller, 0)
-            })
+            startPreferenceFragment(
+                LeanbackSingleListPreferenceDialogFragment().apply {
+                    arguments = bundleOf(
+                        Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, pref.key)
+                    )
+                    setTargetFragment(caller, 0)
+                }
+            )
             return true
         }
         return super.onPreferenceDisplayDialog(caller, pref)

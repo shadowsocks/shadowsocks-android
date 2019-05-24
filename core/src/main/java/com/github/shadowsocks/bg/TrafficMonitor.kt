@@ -32,24 +32,32 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class TrafficMonitor(statFile: File) {
-    val thread = object : LocalSocketListener("TrafficMonitor-" + statFile.name, statFile) {
-        private val buffer = ByteArray(16)
-        private val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
-        override fun acceptInternal(socket: LocalSocket) {
-            if (socket.inputStream.read(buffer) != 16) throw IOException("Unexpected traffic stat length")
-            val tx = stat.getLong(0)
-            val rx = stat.getLong(8)
-            if (current.txTotal != tx) {
-                current.txTotal = tx
-                dirty = true
-            }
-            if (current.rxTotal != rx) {
-                current.rxTotal = rx
-                dirty = true
+class TrafficMonitor(
+    statFile: File
+) {
+    val thread =
+        object : LocalSocketListener("TrafficMonitor-" + statFile.name, statFile) {
+            private val buffer = ByteArray(16)
+            private val stat = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN)
+            override fun acceptInternal(socket: LocalSocket) {
+                if (socket.inputStream.read(buffer) != 16) {
+                    throw IOException("Unexpected traffic stat length")
+                }
+                val tx = stat.getLong(0)
+                val rx = stat.getLong(8)
+                if (current.txTotal != tx) {
+                    current.txTotal = tx
+                    dirty = true
+                }
+                if (current.rxTotal != rx) {
+                    current.rxTotal = rx
+                    dirty = true
+                }
             }
         }
-    }.apply { start() }
+            .apply {
+                start()
+            }
 
     val current = TrafficStats()
     var out = TrafficStats()
@@ -85,7 +93,9 @@ class TrafficMonitor(statFile: File) {
     }
 
     fun persistStats(id: Long) {
-        check(!persisted) { "Double persisting?" }
+        check(!persisted) {
+            "Double persisting?"
+        }
         persisted = true
         try {
             // profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
@@ -95,7 +105,10 @@ class TrafficMonitor(statFile: File) {
             ProfileManager.updateProfile(profile)
         } catch (e: IOException) {
             if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
-            val profile = DirectBoot.getDeviceProfile()!!.toList().filterNotNull().single { it.id == id }
+            val profile =
+                DirectBoot.getDeviceProfile()!!.toList().filterNotNull().single {
+                    it.id == id
+                }
             profile.tx += current.txTotal
             profile.rx += current.rxTotal
             profile.dirty = true

@@ -44,38 +44,63 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         private const val REQUEST_BROWSE = 1
     }
 
-    private val hosts by lazy { findPreference<EditTextPreference>(Key.hosts)!! }
+    private val hosts by lazy {
+        findPreference<EditTextPreference>(Key.hosts)!!
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_global)
-        findPreference<SwitchPreference>(Key.persistAcrossReboot)!!.setOnPreferenceChangeListener { _, value ->
+        findPreference<SwitchPreference>(Key.persistAcrossReboot)!!.setOnPreferenceChangeListener {
+            _,
+            value
+            ->
             BootReceiver.enabled = value as Boolean
             true
         }
 
         val canToggleLocked = findPreference<Preference>(Key.directBootAware)!!
-        if (Build.VERSION.SDK_INT >= 24) canToggleLocked.setOnPreferenceChangeListener { _, newValue ->
-            if (Core.directBootSupported && newValue as Boolean) DirectBoot.update() else DirectBoot.clean()
-            true
-        } else canToggleLocked.remove()
+        if (Build.VERSION.SDK_INT >= 24) {
+            canToggleLocked.setOnPreferenceChangeListener { _, newValue ->
+                if (Core.directBootSupported && newValue as Boolean) {
+                    DirectBoot.update()
+                } else {
+                    DirectBoot.clean()
+                }
+                true
+            }
+        } else {
+            canToggleLocked.remove()
+        }
 
         val tfo = findPreference<SwitchPreference>(Key.tfo)!!
         tfo.isChecked = DataStore.tcpFastOpen
         tfo.setOnPreferenceChangeListener { _, value ->
             if (value as Boolean && !TcpFastOpen.sendEnabled) {
                 val result = TcpFastOpen.enable()?.trim()
-                if (TcpFastOpen.sendEnabled) true else {
+                if (TcpFastOpen.sendEnabled) {
+                    true
+                } else {
                     (activity as MainActivity).snackbar(
-                            if (result.isNullOrEmpty()) getText(R.string.tcp_fastopen_failure) else result).show()
+                        if (result.isNullOrEmpty()) {
+                            getText(R.string.tcp_fastopen_failure)
+                        } else {
+                            result
+                        }
+                    ).show()
                     false
                 }
-            } else true
+            } else {
+                true
+            }
         }
         if (!TcpFastOpen.supported) {
             tfo.isEnabled = false
-            tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
+            tfo.summary = getString(
+                R.string.tcp_fastopen_summary_unsupported,
+                System.getProperty("os.version")
+            )
         }
 
         hosts.onBindEditTextListener = EditTextPreferenceModifiers.Monospace
@@ -99,27 +124,34 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             portTransproxy.isEnabled = enabledTransproxy
             true
         }
-        val listener: (BaseService.State) -> Unit = {
-            val stopped = it == BaseService.State.Stopped
-            tfo.isEnabled = stopped
-            serviceMode.isEnabled = stopped
-            portProxy.isEnabled = stopped
-            if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
-                hosts.isEnabled = false
-                portLocalDns.isEnabled = false
-                portTransproxy.isEnabled = false
+        val listener: (BaseService.State) -> Unit =
+            {
+                val stopped = it == BaseService.State.Stopped
+                tfo.isEnabled = stopped
+                serviceMode.isEnabled = stopped
+                portProxy.isEnabled = stopped
+                if (stopped) {
+                    onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode)
+                } else {
+                    hosts.isEnabled = false
+                    portLocalDns.isEnabled = false
+                    portTransproxy.isEnabled = false
+                }
             }
-        }
         listener((activity as MainActivity).state)
         MainActivity.stateListener = listener
         serviceMode.onPreferenceChangeListener = onServiceModeChange
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
-        if (preference == hosts) BrowsableEditTextPreferenceDialogFragment().apply {
-            setKey(hosts.key)
-            setTargetFragment(this@GlobalSettingsPreferenceFragment, REQUEST_BROWSE)
-        }.show(fragmentManager ?: return, hosts.key) else super.onDisplayPreferenceDialog(preference)
+        if (preference == hosts) {
+            BrowsableEditTextPreferenceDialogFragment().apply {
+                setKey(hosts.key)
+                setTargetFragment(this@GlobalSettingsPreferenceFragment, REQUEST_BROWSE)
+            }.show(fragmentManager ?: return, hosts.key)
+        } else {
+            super.onDisplayPreferenceDialog(preference)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

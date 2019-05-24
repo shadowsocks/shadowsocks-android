@@ -39,18 +39,26 @@ import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.utils.resolveResourceId
 
 class UdpFallbackProfileActivity : AppCompatActivity() {
-    inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+    inner class ProfileViewHolder(
+        view: View
+    ) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private var item: Profile? = null
         private val text = itemView.findViewById<CheckedTextView>(android.R.id.text1)
 
         init {
-            view.setBackgroundResource(theme.resolveResourceId(android.R.attr.selectableItemBackground))
+            view.setBackgroundResource(
+                theme.resolveResourceId(android.R.attr.selectableItemBackground)
+            )
             itemView.setOnClickListener(this)
         }
 
         fun bind(item: Profile?) {
             this.item = item
-            if (item == null) text.setText(R.string.plugin_disabled) else text.text = item.formattedName
+            if (item == null) {
+                text.setText(R.string.plugin_disabled)
+            } else {
+                text.text = item.formattedName
+            }
             text.isChecked = udpFallback == item?.id
         }
 
@@ -62,14 +70,32 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        internal val profiles = (ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf())
-                .filter { it.id != editingId && PluginConfiguration(it.plugin ?: "").selected.isEmpty() }
+        internal val profiles =
+            (ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf())
+                .filter {
+                    it.id != editingId &&
+                        PluginConfiguration(it.plugin ?: "")
+                            .selected
+                            .isEmpty()
+                }
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
-                holder.bind(if (position == 0) null else profiles[position - 1])
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
-                LayoutInflater.from(parent.context).inflate(Resources.getSystem()
-                        .getIdentifier("select_dialog_singlechoice_material", "layout", "android"), parent, false))
+            holder.bind(if (position == 0) null else profiles[position - 1])
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): ProfileViewHolder =
+            ProfileViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    Resources.getSystem().getIdentifier(
+                        "select_dialog_singlechoice_material",
+                        "layout",
+                        "android"
+                    ),
+                    parent,
+                    false
+                )
+            )
         override fun getItemCount(): Int = 1 + profiles.size
     }
 
@@ -89,14 +115,19 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.udp_fallback)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.setNavigationOnClickListener {
+            finish()
+        }
 
         val profilesList = findViewById<RecyclerView>(R.id.list)
         val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = lm
         profilesList.itemAnimator = DefaultItemAnimator()
         profilesList.adapter = profilesAdapter
-        if (DataStore.udpFallback != null)
-            lm.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.udpFallback } + 1)
+        if (DataStore.udpFallback != null) {
+            lm.scrollToPosition(profilesAdapter.profiles.indexOfFirst {
+                it.id == DataStore.udpFallback
+            } + 1)
+        }
     }
 }

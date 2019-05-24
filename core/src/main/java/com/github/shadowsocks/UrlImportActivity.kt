@@ -35,9 +35,13 @@ import kotlinx.android.parcel.Parcelize
 
 class UrlImportActivity : AppCompatActivity() {
     @Parcelize
-    data class ProfilesArg(val profiles: List<Profile>) : Parcelable
+    data class ProfilesArg(
+        val profiles: List<Profile>
+    ) : Parcelable
     class ImportProfilesDialogFragment : AlertDialogFragment<ProfilesArg, Empty>() {
-        override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
+        override fun AlertDialog.Builder.prepare(
+            listener: DialogInterface.OnClickListener
+        ) {
             setTitle(R.string.add_profile_dialog)
             setPositiveButton(R.string.yes, listener)
             setNegativeButton(R.string.no, listener)
@@ -45,7 +49,9 @@ class UrlImportActivity : AppCompatActivity() {
         }
 
         override fun onClick(dialog: DialogInterface?, which: Int) {
-            if (which == DialogInterface.BUTTON_POSITIVE) arg.profiles.forEach { ProfileManager.createProfile(it) }
+            if (which == DialogInterface.BUTTON_POSITIVE) arg.profiles.forEach {
+                ProfileManager.createProfile(it)
+            }
             requireActivity().finish()
         }
 
@@ -65,8 +71,14 @@ class UrlImportActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleShareIntent() = intent.data?.toString()?.let { sharedStr ->
-        val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile?.first).toList()
-        if (profiles.isEmpty()) null else ImportProfilesDialogFragment().withArg(ProfilesArg(profiles))
-    }
+    private fun handleShareIntent() =
+        intent.data?.toString()?.let { sharedStr ->
+            val profiles =
+                Profile.findAllUrls(sharedStr, Core.currentProfile?.first).toList()
+            if (profiles.isEmpty()) {
+                null
+            } else {
+                ImportProfilesDialogFragment().withArg(ProfilesArg(profiles))
+            }
+        }
 }

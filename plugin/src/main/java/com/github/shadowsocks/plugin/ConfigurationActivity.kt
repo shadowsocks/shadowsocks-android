@@ -57,7 +57,10 @@ abstract class ConfigurationActivity : OptionsCapableActivity() {
      * @param options PluginOptions to save.
      */
     fun saveChanges(options: PluginOptions) =
-            setResult(Activity.RESULT_OK, Intent().putExtra(PluginContract.EXTRA_OPTIONS, options.toString()))
+        setResult(
+            Activity.RESULT_OK,
+            Intent().putExtra(PluginContract.EXTRA_OPTIONS, options.toString())
+        )
 
     /**
      * Finish this activity and request manual editor to pop up instead.

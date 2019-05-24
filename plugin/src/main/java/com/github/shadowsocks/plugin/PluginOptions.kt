@@ -32,13 +32,23 @@ class PluginOptions : HashMap<String, String?> {
 
     constructor() : super()
     constructor(initialCapacity: Int) : super(initialCapacity)
-    constructor(initialCapacity: Int, loadFactor: Float) : super(initialCapacity, loadFactor)
+    constructor(
+        initialCapacity: Int,
+        loadFactor: Float
+    ) : super(initialCapacity, loadFactor)
 
-    private constructor(options: String?, parseId: Boolean) : this() {
+    private constructor(
+        options: String?,
+        parseId: Boolean
+    ) : this() {
         @Suppress("NAME_SHADOWING")
         var parseId = parseId
         if (options.isNullOrEmpty()) return
-        check(options.all { !it.isISOControl() }) { "No control characters allowed." }
+        check(options.all {
+            !it.isISOControl()
+        }) {
+            "No control characters allowed."
+        }
         val tokenizer = StringTokenizer("$options;", "\\=;", true)
         val current = StringBuilder()
         var key: String? = null
@@ -52,8 +62,15 @@ class PluginOptions : HashMap<String, String?> {
                 if (key != null) {
                     put(key, current.toString())
                     key = null
-                } else if (current.isNotEmpty())
-                    if (parseId) id = current.toString() else put(current.toString(), null)
+                } else {
+                    if (current.isNotEmpty()) {
+                        if (parseId) {
+                            id = current.toString()
+                        } else {
+                            put(current.toString(), null)
+                        }
+                    }
+                }
                 current.setLength(0)
                 parseId = false
             }
@@ -72,19 +89,19 @@ class PluginOptions : HashMap<String, String?> {
      * @return Old value before put.
      */
     fun putWithDefault(key: String, value: String?, default: String? = null) =
-            if (value == null || value == default) remove(key) else put(key, value)
+        if (value == null || value == default) remove(key) else put(key, value)
 
-    private fun append(result: StringBuilder, str: String) = (0 until str.length)
-            .map { str[it] }
-            .forEach {
-                when (it) {
-                    '\\', '=', ';' -> {
-                        result.append('\\') // intentionally no break
-                        result.append(it)
-                    }
-                    else -> result.append(it)
-                }
+    private fun append(result: StringBuilder, str: String) = (0 until str.length).map {
+        str[it]
+    }.forEach {
+        when (it) {
+            '\\', '=', ';' -> {
+                result.append('\\') // intentionally no break
+                result.append(it)
             }
+            else -> result.append(it)
+        }
+    }
 
     fun toString(trimId: Boolean): String {
         val result = StringBuilder()
@@ -104,7 +121,10 @@ class PluginOptions : HashMap<String, String?> {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        return javaClass == other?.javaClass && super.equals(other) && id == (other as PluginOptions).id
+        return javaClass == other?.javaClass &&
+            super
+                .equals(other) &&
+            id == (other as PluginOptions).id
     }
     override fun hashCode(): Int = Objects.hash(super.hashCode(), id)
 }

@@ -29,23 +29,39 @@ private sealed class ArrayIterator<out T> : Iterator<T> {
     abstract operator fun get(index: Int): T
     private var count = 0
     override fun hasNext() = count < size
-    override fun next(): T = if (hasNext()) this[count++] else throw NoSuchElementException()
+    override fun next(): T =
+        if (hasNext()) this[count++] else throw NoSuchElementException()
 }
 
-private class ClipDataIterator(private val data: ClipData) : ArrayIterator<ClipData.Item>() {
-    override val size get() = data.itemCount
+private class ClipDataIterator(
+    private val data: ClipData
+) : ArrayIterator<ClipData.Item>() {
+    override val size
+        get() = data.itemCount
     override fun get(index: Int) = data.getItemAt(index)
 }
-fun ClipData.asIterable() = Iterable { ClipDataIterator(this) }
+fun ClipData.asIterable() = Iterable {
+    ClipDataIterator(this)
+}
 
-private class JSONArrayIterator(private val arr: JSONArray) : ArrayIterator<Any>() {
-    override val size get() = arr.length()
+private class JSONArrayIterator(
+    private val arr: JSONArray
+) : ArrayIterator<Any>() {
+    override val size
+        get() = arr.length()
     override fun get(index: Int) = arr.get(index)
 }
-fun JSONArray.asIterable() = Iterable { JSONArrayIterator(this) }
+fun JSONArray.asIterable() = Iterable {
+    JSONArrayIterator(this)
+}
 
-private class SortedListIterator<out T>(private val list: SortedList<T>) : ArrayIterator<T>() {
-    override val size get() = list.size()
+private class SortedListIterator<out T>(
+    private val list: SortedList<T>
+) : ArrayIterator<T>() {
+    override val size
+        get() = list.size()
     override fun get(index: Int) = list[index]
 }
-fun <T> SortedList<T>.asIterable() = Iterable { SortedListIterator(this) }
+fun <T> SortedList<T>.asIterable() = Iterable {
+    SortedListIterator(this)
+}

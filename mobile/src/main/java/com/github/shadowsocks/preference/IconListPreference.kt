@@ -25,23 +25,31 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.preference.ListPreference
 
-class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
+class IconListPreference(
+    context: Context,
+    attrs: AttributeSet? = null
+) : ListPreference(context, attrs) {
     companion object FallbackProvider : SummaryProvider<IconListPreference> {
         override fun provideSummary(preference: IconListPreference?): CharSequence? {
             val i = preference?.selectedEntry
-            return if (i != null && i < 0) preference.unknownValueSummary?.format(preference.value) else
+            return if (i != null && i < 0) {
+                preference.unknownValueSummary?.format(preference.value)
+            } else {
                 preference?.entry
+            }
         }
     }
 
     var entryIcons: Array<Drawable?>? = null
-    val selectedEntry: Int get() = entryValues.indexOf(value)
-    val entryIcon: Drawable? get() = entryIcons?.getOrNull(selectedEntry)
-//    fun setEntryIcons(@ArrayRes entryIconsResId: Int) {
-//        val array = getContext().getResources().obtainTypedArray(entryIconsResId)
-//        entryIcons = Array(array.length(), { i -> array.getDrawable(i) })
-//        array.recycle()
-//    }
+    val selectedEntry: Int
+        get() = entryValues.indexOf(value)
+    val entryIcon: Drawable?
+        get() = entryIcons?.getOrNull(selectedEntry)
+    //    fun setEntryIcons(@ArrayRes entryIconsResId: Int) {
+    //        val array = getContext().getResources().obtainTypedArray(entryIconsResId)
+    //        entryIcons = Array(array.length(), { i -> array.getDrawable(i) })
+    //        array.recycle()
+    //    }
 
     var unknownValueSummary: String? = null
     var entryPackageNames: Array<String>? = null
@@ -61,10 +69,6 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
                 true
             } else false
         }
-//        val a = context.obtainStyledAttributes(attrs, R.styleable.IconListPreference)
-//        val entryIconsResId: Int = a.getResourceId(R.styleable.IconListPreference_entryIcons, -1)
-//        if (entryIconsResId != -1) entryIcons = entryIconsResId
-//        a.recycle()
     }
 
     fun init() {

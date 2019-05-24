@@ -42,8 +42,10 @@ import com.github.shadowsocks.R
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
-    private inner class IconListViewHolder(val dialog: BottomSheetDialog, view: View) : RecyclerView.ViewHolder(view),
-            View.OnClickListener, View.OnLongClickListener {
+    private inner class IconListViewHolder(
+        val dialog: BottomSheetDialog,
+        view: View
+    ) : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnLongClickListener {
         private var index = 0
         private val text1 = view.findViewById<TextView>(android.R.id.text1)
         private val text2 = view.findViewById<TextView>(android.R.id.text2)
@@ -60,8 +62,9 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
             val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
             text1.setTypeface(null, typeface)
             text2.setTypeface(null, typeface)
-            text2.isVisible = preference.entryValues[i].isNotEmpty() &&
-                    preference.entries[i] != preference.entryValues[i]
+            text2.isVisible = preference.entryValues[i]
+                .isNotEmpty() &&
+                preference.entries[i] != preference.entryValues[i]
             icon.setImageDrawable(preference.entryIcons?.get(i))
             index = i
         }
@@ -74,21 +77,31 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         override fun onLongClick(p0: View?): Boolean {
             val pn = preference.entryPackageNames?.get(index) ?: return false
             return try {
-                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.Builder()
-                        .scheme("package")
-                        .opaquePart(pn)
-                        .build()))
+                startActivity(
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.Builder().scheme("package").opaquePart(pn).build()
+                    )
+                )
                 true
-            } catch (_: ActivityNotFoundException) {
+            } catch (`_`: ActivityNotFoundException) {
                 false
             }
         }
     }
-    private inner class IconListAdapter(private val dialog: BottomSheetDialog) :
-            RecyclerView.Adapter<IconListViewHolder>() {
+    private inner class IconListAdapter(
+        private val dialog: BottomSheetDialog
+    ) : RecyclerView.Adapter<IconListViewHolder>() {
         override fun getItemCount(): Int = preference.entries.size
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = IconListViewHolder(dialog,
-                LayoutInflater.from(parent.context).inflate(R.layout.icon_list_item_2, parent, false))
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            IconListViewHolder(
+                dialog,
+                LayoutInflater.from(parent.context).inflate(
+                    R.layout.icon_list_item_2,
+                    parent,
+                    false
+                )
+            )
         override fun onBindViewHolder(holder: IconListViewHolder, position: Int) {
             if (preference.selectedEntry < 0) holder.bind(position) else when (position) {
                 0 -> holder.bind(preference.selectedEntry, true)
@@ -102,7 +115,9 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         arguments = bundleOf(PreferenceDialogFragmentCompat.ARG_KEY to key)
     }
 
-    private val preference by lazy { getPreference() as IconListPreference }
+    private val preference by lazy {
+        getPreference() as IconListPreference
+    }
     private var clickedIndex = -1
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -116,7 +131,9 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         recycler.itemAnimator = DefaultItemAnimator()
         recycler.adapter = IconListAdapter(dialog)
         recycler.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
         dialog.setContentView(recycler)
         dialog.findViewById<View>(R.id.touch_outside)!!.isFocusable = false
         return dialog

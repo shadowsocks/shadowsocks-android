@@ -30,9 +30,11 @@ import java.nio.ByteBuffer
 import java.nio.channels.*
 
 class ChannelMonitor : Thread("ChannelMonitor") {
-    private data class Registration(val channel: SelectableChannel,
-                                    val ops: Int,
-                                    val listener: (SelectionKey) -> Unit) {
+    private data class Registration(
+        val channel: SelectableChannel,
+        val ops: Int,
+        val listener: (SelectionKey) -> Unit
+    ) {
         val result = CompletableDeferred<SelectionKey>()
     }
 
@@ -43,8 +45,11 @@ class ChannelMonitor : Thread("ChannelMonitor") {
     @Volatile
     private var running = true
 
-    private fun registerInternal(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit) =
-            channel.register(selector, ops, block)
+    private fun registerInternal(
+        channel: SelectableChannel,
+        ops: Int,
+        block: (SelectionKey) -> Unit
+    ) = channel.register(selector, ops, block)
 
     init {
         registrationPipe.source().apply {
@@ -70,9 +75,15 @@ class ChannelMonitor : Thread("ChannelMonitor") {
      * Prevent NetworkOnMainThreadException because people enable strict mode for no reasons.
      */
     private suspend fun WritableByteChannel.writeCompat(src: ByteBuffer) =
-            if (Build.VERSION.SDK_INT <= 23) withContext(Dispatchers.Default) { write(src) } else write(src)
+        if (Build.VERSION.SDK_INT <= 23) withContext(Dispatchers.Default) {
+            write(src)
+        } else write(src)
 
-    suspend fun register(channel: SelectableChannel, ops: Int, block: (SelectionKey) -> Unit): SelectionKey {
+    suspend fun register(
+        channel: SelectableChannel,
+        ops: Int,
+        block: (SelectionKey) -> Unit
+    ): SelectionKey {
         val registration = Registration(channel, ops, block)
         pendingRegistrations.send(registration)
         ByteBuffer.allocateDirect(1).also { junk ->
@@ -86,15 +97,17 @@ class ChannelMonitor : Thread("ChannelMonitor") {
         return registration.result.await()
     }
 
-    suspend fun wait(channel: SelectableChannel, ops: Int) = CompletableDeferred<SelectionKey>().run {
-        register(channel, ops) {
-            if (it.isValid) try {
-                it.interestOps(0)   // stop listening
-            } catch (_: CancelledKeyException) { }
-            complete(it)
+    suspend fun wait(channel: SelectableChannel, ops: Int) =
+        CompletableDeferred<SelectionKey>().run {
+            register(channel, ops) {
+                if (it.isValid) try {
+                    it.interestOps(0) // stop listening
+                } catch (`_`: CancelledKeyException) {
+                }
+                complete(it)
+            }
+            await()
         }
-        await()
-    }
 
     override fun run() {
         while (running) {
@@ -120,7 +133,9 @@ class ChannelMonitor : Thread("ChannelMonitor") {
         selector.wakeup()
         scope.launch {
             closeChannel.receive()
-            selector.keys().forEach { it.channel().close() }
+            selector.keys().forEach {
+                it.channel().close()
+            }
             selector.close()
         }
     }

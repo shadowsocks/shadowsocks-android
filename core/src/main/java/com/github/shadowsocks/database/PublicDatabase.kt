@@ -31,20 +31,23 @@ import com.github.shadowsocks.utils.Key
 abstract class PublicDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
-            Room.databaseBuilder(Core.deviceStorage, PublicDatabase::class.java, Key.DB_PUBLIC)
-                    .allowMainThreadQueries()
-                    .addMigrations(
-                            Migration3
-                    )
-                    .fallbackToDestructiveMigration()
-                    .build()
+            Room.databaseBuilder(
+                Core.deviceStorage,
+                PublicDatabase::class.java,
+                Key.DB_PUBLIC
+            ).allowMainThreadQueries().addMigrations(Migration3).fallbackToDestructiveMigration().build()
         }
 
-        val kvPairDao get() = instance.keyValuePairDao()
+        val kvPairDao
+            get() = instance.keyValuePairDao()
     }
     abstract fun keyValuePairDao(): KeyValuePair.Dao
 
-    internal object Migration3 : RecreateSchemaMigration(2, 3, "KeyValuePair",
-            "(`key` TEXT NOT NULL, `valueType` INTEGER NOT NULL, `value` BLOB NOT NULL, PRIMARY KEY(`key`))",
-            "`key`, `valueType`, `value`")
+    internal object Migration3 : RecreateSchemaMigration(
+        2,
+        3,
+        "KeyValuePair",
+        "(`key` TEXT NOT NULL, `valueType` INTEGER NOT NULL, `value` BLOB NOT NULL, PRIMARY KEY(`key`))",
+        "`key`, `valueType`, `value`"
+    )
 }

@@ -34,17 +34,32 @@ import android.service.quicksettings.TileService as BaseTileService
 
 @RequiresApi(24)
 class TileService : BaseTileService(), ShadowsocksConnection.Callback {
-    private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle) }
-    private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
-    private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
-    private val keyguard by lazy { getSystemService<KeyguardManager>()!! }
+    private val iconIdle by lazy {
+        Icon.createWithResource(this, R.drawable.ic_service_idle)
+    }
+    private val iconBusy by lazy {
+        Icon.createWithResource(this, R.drawable.ic_service_busy)
+    }
+    private val iconConnected by lazy {
+        Icon.createWithResource(this, R.drawable.ic_service_active)
+    }
+    private val keyguard by lazy {
+        getSystemService<KeyguardManager>()!!
+    }
     private var tapPending = false
 
     private val connection = ShadowsocksConnection()
-    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
-            updateTile(state) { profileName }
+    override fun stateChanged(
+        state: BaseService.State,
+        profileName: String?,
+        msg: String?
+    ) = updateTile(state) {
+        profileName
+    }
     override fun onServiceConnected(service: IShadowsocksService) {
-        updateTile(BaseService.State.values()[service.state]) { service.profileName }
+        updateTile(BaseService.State.values()[service.state]) {
+            service.profileName
+        }
         if (tapPending) {
             tapPending = false
             onClick()
@@ -61,7 +76,11 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
     }
 
     override fun onClick() {
-        if (isLocked && !DataStore.canToggleLocked) unlockAndRun(this::toggle) else toggle()
+        if (isLocked && !DataStore.canToggleLocked) {
+            unlockAndRun(this::toggle)
+        } else {
+            toggle()
+        }
     }
 
     private fun updateTile(serviceState: BaseService.State, profileName: () -> String?) {
@@ -94,10 +113,14 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
 
     private fun toggle() {
         val service = connection.service
-        if (service == null) tapPending = true else BaseService.State.values()[service.state].let { state ->
-            when {
-                state.canStop -> Core.stopService()
-                state == BaseService.State.Stopped -> Core.startService()
+        if (service == null) {
+            tapPending = true
+        } else {
+            BaseService.State.values()[service.state].let { state ->
+                when {
+                    state.canStop -> Core.stopService()
+                    state == BaseService.State.Stopped -> Core.startService()
+                }
             }
         }
     }

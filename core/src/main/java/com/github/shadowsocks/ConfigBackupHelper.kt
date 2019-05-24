@@ -26,6 +26,13 @@ import com.github.shadowsocks.utils.Key
 
 @Deprecated("Only used in API level < 23. For 6.0+, Auto Backup for Apps is used.")
 class ConfigBackupHelper : BackupAgentHelper() {
-    override fun onCreate() = addHelper("com.github.shadowsocks.database.profile", FileBackupHelper(this,
-            "../databases/" + Key.DB_PROFILE, "../databases/" + Key.DB_PUBLIC))
+    override fun onCreate() =
+        addHelper(
+            "com.github.shadowsocks.database.profile",
+            FileBackupHelper(
+                this,
+                "../databases/" + Key.DB_PROFILE,
+                "../databases/" + Key.DB_PUBLIC
+            )
+        )
 }

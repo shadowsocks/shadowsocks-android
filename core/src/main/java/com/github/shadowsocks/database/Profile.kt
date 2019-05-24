@@ -46,92 +46,115 @@ import java.util.*
 @Entity
 @Parcelize
 data class Profile(
-        @PrimaryKey(autoGenerate = true)
-        var id: Long = 0,
-        var name: String? = "",
-        var host: String = "198.199.101.152",
-        var remotePort: Int = 8388,
-        var password: String = "u1rRWTssNv0p",
-        var method: String = "aes-256-cfb",
-        var route: String = "all",
-        var remoteDns: String = "dns.google",
-        var proxyApps: Boolean = false,
-        var bypass: Boolean = false,
-        var udpdns: Boolean = false,
-        var ipv6: Boolean = true,
-        @TargetApi(28)
-        var metered: Boolean = false,
-        var individual: String = "",
-        var tx: Long = 0,
-        var rx: Long = 0,
-        var userOrder: Long = 0,
-        var plugin: String? = null,
-        var udpFallback: Long? = null,
+    @PrimaryKey(autoGenerate = true)
+    var id: Long = 0,
+    var name: String? = "",
+    var host: String = "198.199.101.152",
+    var remotePort: Int = 8388,
+    var password: String = "u1rRWTssNv0p",
+    var method: String = "aes-256-cfb",
+    var route: String = "all",
+    var remoteDns: String = "dns.google",
+    var proxyApps: Boolean = false,
+    var bypass: Boolean = false,
+    var udpdns: Boolean = false,
+    var ipv6: Boolean = true,
+    @TargetApi(28)
+    var metered: Boolean = false,
+    var individual: String = "",
+    var tx: Long = 0,
+    var rx: Long = 0,
+    var userOrder: Long = 0,
+    var plugin: String? = null,
+    var udpFallback: Long? = null,
 
-        @Ignore // not persisted in db, only used by direct boot
-        var dirty: Boolean = false
+    @Ignore
+    var dirty: Boolean = false
 ) : Parcelable, Serializable {
     companion object {
         private const val TAG = "ShadowParser"
         private const val serialVersionUID = 1L
         private val pattern =
-                """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()
+            """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]"""
+                .toRegex()
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
-        fun findAllUrls(data: CharSequence?, feature: Profile? = null) = pattern.findAll(data ?: "").map {
-            val uri = it.value.toUri()
-            try {
-                if (uri.userInfo == null) {
-                    val match = legacyPattern.matchEntire(String(Base64.decode(uri.host, Base64.NO_PADDING)))
-                    if (match != null) {
-                        val profile = Profile()
-                        feature?.copyFeatureSettingsTo(profile)
-                        profile.method = match.groupValues[1].toLowerCase(Locale.ENGLISH)
-                        profile.password = match.groupValues[2]
-                        profile.host = match.groupValues[3]
-                        profile.remotePort = match.groupValues[4].toInt()
-                        profile.plugin = uri.getQueryParameter(Key.plugin)
-                        profile.name = uri.fragment
-                        profile
-                    } else {
-                        Log.e(TAG, "Unrecognized URI: ${it.value}")
-                        null
-                    }
-                } else {
-                    val match = userInfoPattern.matchEntire(String(Base64.decode(uri.userInfo,
-                            Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE)))
-                    if (match != null) {
-                        val profile = Profile()
-                        feature?.copyFeatureSettingsTo(profile)
-                        profile.method = match.groupValues[1]
-                        profile.password = match.groupValues[2]
-                        // bug in Android: https://code.google.com/p/android/issues/detail?id=192855
-                        try {
-                            val javaURI = URI(it.value)
-                            profile.host = javaURI.host ?: ""
-                            if (profile.host.firstOrNull() == '[' && profile.host.lastOrNull() == ']')
-                                profile.host = profile.host.substring(1, profile.host.length - 1)
-                            profile.remotePort = javaURI.port
+        fun findAllUrls(data: CharSequence?, feature: Profile? = null) =
+            pattern.findAll(data ?: "").map {
+                val uri = it.value.toUri()
+                try {
+                    if (uri.userInfo == null) {
+                        val match =
+                            legacyPattern
+                                .matchEntire(
+                                    String(Base64.decode(uri.host, Base64.NO_PADDING))
+                                )
+                        if (match != null) {
+                            val profile = Profile()
+                            feature?.copyFeatureSettingsTo(profile)
+                            profile.method = match.groupValues[1].toLowerCase(
+                                Locale.ENGLISH
+                            )
+                            profile.password = match.groupValues[2]
+                            profile.host = match.groupValues[3]
+                            profile.remotePort = match.groupValues[4].toInt()
                             profile.plugin = uri.getQueryParameter(Key.plugin)
-                            profile.name = uri.fragment ?: ""
+                            profile.name = uri.fragment
                             profile
-                        } catch (e: URISyntaxException) {
-                            Log.e(TAG, "Invalid URI: ${it.value}")
+                        } else {
+                            Log.e(TAG, "Unrecognized URI: ${it.value}")
                             null
                         }
                     } else {
-                        Log.e(TAG, "Unknown user info: ${it.value}")
-                        null
+                        val match =
+                            userInfoPattern
+                                .matchEntire(
+                                    String(
+                                        Base64.decode(
+                                            uri.userInfo,
+                                            Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE
+                                        )
+                                    )
+                                )
+                        if (match != null) {
+                            val profile = Profile()
+                            feature?.copyFeatureSettingsTo(profile)
+                            profile.method = match.groupValues[1]
+                            profile.password = match.groupValues[2]
+                            // bug in Android: https://code.google.com/p/android/issues/detail?id=192855
+                            try {
+                                val javaURI = URI(it.value)
+                                profile.host = javaURI.host ?: ""
+                                if (profile.host.firstOrNull() == '[' &&
+                                    profile.host.lastOrNull() == ']') {
+                                    profile.host = profile.host.substring(
+                                        1,
+                                        profile.host.length - 1
+                                    )
+                                }
+                                profile.remotePort = javaURI.port
+                                profile.plugin = uri.getQueryParameter(Key.plugin)
+                                profile.name = uri.fragment ?: ""
+                                profile
+                            } catch (e: URISyntaxException) {
+                                Log.e(TAG, "Invalid URI: ${it.value}")
+                                null
+                            }
+                        } else {
+                            Log.e(TAG, "Unknown user info: ${it.value}")
+                            null
+                        }
                     }
+                } catch (e: IllegalArgumentException) {
+                    Log.e(TAG, "Invalid base64 detected: ${it.value}")
+                    null
                 }
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Invalid base64 detected: ${it.value}")
-                null
-            }
-        }.filterNotNull()
+            }.filterNotNull()
 
-        private class JsonParser(private val feature: Profile? = null) : ArrayList<Profile>() {
+        private class JsonParser(
+            private val feature: Profile? = null
+        ) : ArrayList<Profile>() {
             private val fallbackMap = mutableMapOf<Profile, Profile>()
 
             private fun tryParse(json: JSONObject, fallback: Boolean = false): Profile? {
@@ -152,7 +175,9 @@ data class Profile(
                     feature?.copyFeatureSettingsTo(this)
                     val id = json.optString("plugin")
                     if (!id.isNullOrEmpty()) {
-                        plugin = PluginOptions(id, json.optString("plugin_opts")).toString(false)
+                        plugin = PluginOptions(id, json.optString("plugin_opts")).toString(
+                            false
+                        )
                     }
                     name = json.optString("remarks")
                     route = json.optString("route", route)
@@ -163,10 +188,16 @@ data class Profile(
                     json.optJSONObject("proxy_apps")?.also {
                         proxyApps = it.optBoolean("enabled", proxyApps)
                         bypass = it.optBoolean("bypass", bypass)
-                        individual = it.optJSONArray("android_list")?.asIterable()?.joinToString("\n") ?: individual
+                        individual = it.optJSONArray("android_list")?.asIterable()?.joinToString(
+                            "\n"
+                        ) ?: individual
                     }
                     udpdns = json.optBoolean("udpdns", udpdns)
-                    json.optJSONObject("udp_fallback")?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }
+                    json.optJSONObject("udp_fallback")?.let {
+                        tryParse(it, true)
+                    }?.also {
+                        fallbackMap[this] = it
+                    }
                 }
             }
 
@@ -174,20 +205,29 @@ data class Profile(
                 when (json) {
                     is JSONObject -> {
                         val profile = tryParse(json)
-                        if (profile != null) add(profile) else for (key in json.keys()) process(json.get(key))
+                        if (profile != null) {
+                            add(profile)
+                        } else {
+                            for (key in json.keys()) process(json.get(key))
+                        }
                     }
                     is JSONArray -> json.asIterable().forEach(this::process)
-                    // ignore other types
                 }
             }
             fun finalize(create: (Profile) -> Unit) {
                 val profiles = ProfileManager.getAllProfiles() ?: emptyList()
                 for ((profile, fallback) in fallbackMap) {
-                    val match = profiles.firstOrNull {
-                        fallback.host == it.host && fallback.remotePort == it.remotePort &&
-                                fallback.password == it.password && fallback.method == it.method &&
-                                it.plugin.isNullOrEmpty()
-                    }
+                    val match =
+                        profiles
+                            .firstOrNull {
+                                fallback.host == it.host &&
+                                    fallback.remotePort == it.remotePort &&
+                                    fallback.password == it.password &&
+                                    fallback.method == it.method &&
+                                    it
+                                        .plugin
+                                        .isNullOrEmpty()
+                            }
                     profile.udpFallback = if (match == null) {
                         create(fallback)
                         fallback.id
@@ -196,11 +236,12 @@ data class Profile(
                 }
             }
         }
-        fun parseJson(json: String, feature: Profile? = null, create: (Profile) -> Unit) = JsonParser(feature).run {
-            process(JSONTokener(json).nextValue())
-            for (profile in this) create(profile)
-            finalize(create)
-        }
+        fun parseJson(json: String, feature: Profile? = null, create: (Profile) -> Unit) =
+            JsonParser(feature).run {
+                process(JSONTokener(json).nextValue())
+                for (profile in this) create(profile)
+                finalize(create)
+            }
     }
 
     @androidx.room.Dao
@@ -230,8 +271,10 @@ data class Profile(
         fun deleteAll(): Int
     }
 
-    val formattedAddress get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
-    val formattedName get() = if (name.isNullOrEmpty()) formattedAddress else name!!
+    val formattedAddress
+        get() = (if (host.contains(":")) "[%s]:%d" else "%s:%d").format(host, remotePort)
+    val formattedName
+        get() = if (name.isNullOrEmpty()) formattedAddress else name!!
 
     fun copyFeatureSettingsTo(profile: Profile) {
         profile.route = route
@@ -244,49 +287,61 @@ data class Profile(
     }
 
     fun toUri(): Uri {
-        val auth = Base64.encodeToString("$method:$password".toByteArray(),
-                Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE)
+        val auth =
+            Base64
+                .encodeToString(
+                    "$method:$password".toByteArray(),
+                    Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE
+                )
         val wrappedHost = if (host.contains(':')) "[$host]" else host
-        val builder = Uri.Builder()
-                .scheme("ss")
-                .encodedAuthority("$auth@$wrappedHost:$remotePort")
+        val builder =
+            Uri.Builder().scheme("ss").encodedAuthority("$auth@$wrappedHost:$remotePort")
         val configuration = PluginConfiguration(plugin ?: "")
-        if (configuration.selected.isNotEmpty())
-            builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))
+        if (configuration.selected.isNotEmpty()) {
+            builder.appendQueryParameter(
+                Key.plugin,
+                configuration.selectedOptions.toString(false)
+            )
+        }
         if (!name.isNullOrEmpty()) builder.fragment(name)
         return builder.build()
     }
     override fun toString() = toUri().toString()
 
-    fun toJson(profiles: LongSparseArray<Profile>? = null): JSONObject = JSONObject().apply {
-        put("server", host)
-        put("server_port", remotePort)
-        put("password", password)
-        put("method", method)
-        if (profiles == null) return@apply
-        PluginConfiguration(plugin ?: "").selectedOptions.also {
-            if (it.id.isNotEmpty()) {
-                put("plugin", it.id)
-                put("plugin_opts", it.toString())
+    fun toJson(profiles: LongSparseArray<Profile>? = null): JSONObject =
+        JSONObject().apply {
+            put("server", host)
+            put("server_port", remotePort)
+            put("password", password)
+            put("method", method)
+            if (profiles == null) return@apply
+            PluginConfiguration(plugin ?: "").selectedOptions.also {
+                if (it.id.isNotEmpty()) {
+                    put("plugin", it.id)
+                    put("plugin_opts", it.toString())
+                }
+            }
+            put("remarks", name)
+            put("route", route)
+            put("remote_dns", remoteDns)
+            put("ipv6", ipv6)
+            put("metered", metered)
+            put("proxy_apps", JSONObject().apply {
+                put("enabled", proxyApps)
+                if (proxyApps) {
+                    put("bypass", bypass)
+                    // android_ prefix is used because package names are Android specific
+                    put("android_list", JSONArray(individual.split("\n")))
+                }
+            })
+            put("udpdns", udpdns)
+            val fallback = profiles.get(udpFallback ?: return@apply)
+            if (fallback != null && fallback.plugin.isNullOrEmpty()) {
+                fallback.toJson().also {
+                    put("udp_fallback", it)
+                }
             }
         }
-        put("remarks", name)
-        put("route", route)
-        put("remote_dns", remoteDns)
-        put("ipv6", ipv6)
-        put("metered", metered)
-        put("proxy_apps", JSONObject().apply {
-            put("enabled", proxyApps)
-            if (proxyApps) {
-                put("bypass", bypass)
-                // android_ prefix is used because package names are Android specific
-                put("android_list", JSONArray(individual.split("\n")))
-            }
-        })
-        put("udpdns", udpdns)
-        val fallback = profiles.get(udpFallback ?: return@apply)
-        if (fallback != null && fallback.plugin.isNullOrEmpty()) fallback.toJson().also { put("udp_fallback", it) }
-    }
 
     fun serialize() {
         DataStore.editingId = id

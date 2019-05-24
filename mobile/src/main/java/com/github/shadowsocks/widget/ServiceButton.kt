@@ -33,8 +33,11 @@ import com.github.shadowsocks.bg.BaseService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.*
 
-class ServiceButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
-        FloatingActionButton(context, attrs, defStyleAttr) {
+class ServiceButton @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : FloatingActionButton(context, attrs, defStyleAttr) {
     private val callback = object : Animatable2Compat.AnimationCallback() {
         override fun onAnimationEnd(drawable: Drawable) {
             super.onAnimationEnd(drawable)
@@ -48,47 +51,78 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         }
     }
 
-    private fun createIcon(@DrawableRes resId: Int): AnimatedVectorDrawableCompat {
+    private fun createIcon(@DrawableRes
+    resId: Int): AnimatedVectorDrawableCompat {
         val result = AnimatedVectorDrawableCompat.create(context, resId)!!
         result.registerAnimationCallback(callback)
         return result
     }
 
-    private val iconStopped by lazy { createIcon(R.drawable.ic_service_stopped) }
-    private val iconConnecting by lazy { createIcon(R.drawable.ic_service_connecting) }
-    private val iconConnected by lazy { createIcon(R.drawable.ic_service_connected) }
-    private val iconStopping by lazy { createIcon(R.drawable.ic_service_stopping) }
+    private val iconStopped by lazy {
+        createIcon(R.drawable.ic_service_stopped)
+    }
+    private val iconConnecting by lazy {
+        createIcon(R.drawable.ic_service_connecting)
+    }
+    private val iconConnected by lazy {
+        createIcon(R.drawable.ic_service_connected)
+    }
+    private val iconStopping by lazy {
+        createIcon(R.drawable.ic_service_stopping)
+    }
     private val animationQueue = ArrayDeque<AnimatedVectorDrawableCompat>()
 
     private var checked = false
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
         val drawableState = super.onCreateDrawableState(extraSpace + 1)
-        if (checked) View.mergeDrawableStates(drawableState, intArrayOf(android.R.attr.state_checked))
+        if (checked) {
+            View.mergeDrawableStates(
+                drawableState,
+                intArrayOf(android.R.attr.state_checked)
+            )
+        }
         return drawableState
     }
 
-    fun changeState(state: BaseService.State, previousState: BaseService.State, animate: Boolean) {
+    fun changeState(
+        state: BaseService.State,
+        previousState: BaseService.State,
+        animate: Boolean
+    ) {
         when (state) {
             BaseService.State.Connecting -> changeState(iconConnecting, animate)
             BaseService.State.Connected -> changeState(iconConnected, animate)
             BaseService.State.Stopping -> {
-                changeState(iconStopping, animate && previousState == BaseService.State.Connected)
+                changeState(
+                    iconStopping,
+                    animate && previousState == BaseService.State.Connected
+                )
             }
             else -> changeState(iconStopped, animate)
         }
         checked = state == BaseService.State.Connected
         refreshDrawableState()
-        TooltipCompat.setTooltipText(this, context.getString(if (state.canStop) R.string.stop else R.string.connect))
+        TooltipCompat.setTooltipText(
+            this,
+            context.getString(if (state.canStop) R.string.stop else R.string.connect)
+        )
         isEnabled = state.canStop || state == BaseService.State.Stopped
     }
 
     private fun changeState(icon: AnimatedVectorDrawableCompat, animate: Boolean) {
-        fun counters(a: AnimatedVectorDrawableCompat, b: AnimatedVectorDrawableCompat): Boolean =
-                a == iconStopped && b == iconConnecting ||
-                a == iconConnecting && b == iconStopped ||
-                a == iconConnected && b == iconStopping ||
-                a == iconStopping && b == iconConnected
+        fun counters(
+            a: AnimatedVectorDrawableCompat,
+            b: AnimatedVectorDrawableCompat
+        ): Boolean =
+            a == iconStopped &&
+                b == iconConnecting ||
+                a == iconConnecting &&
+                    b == iconStopped ||
+                a == iconConnected &&
+                    b == iconStopping ||
+                a == iconStopping &&
+                    b == iconConnected
         if (animate) {
             if (animationQueue.size < 2 || !counters(animationQueue.last, icon)) {
                 animationQueue.add(icon)
@@ -101,7 +135,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
             animationQueue.peekFirst()?.stop()
             animationQueue.clear()
             setImageDrawable(icon)
-            icon.start()    // force ensureAnimatorSet to be called so that stop() will work
+            icon.start() // force ensureAnimatorSet to be called so that stop() will work
             icon.stop()
         }
     }

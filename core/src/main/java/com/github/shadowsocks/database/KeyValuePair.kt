@@ -55,19 +55,24 @@ class KeyValuePair() {
     var value: ByteArray = ByteArray(0)
 
     val boolean: Boolean?
-        get() = if (valueType == TYPE_BOOLEAN) ByteBuffer.wrap(value).get() != 0.toByte() else null
+        get() =
+            if (valueType == TYPE_BOOLEAN) {
+                ByteBuffer.wrap(value).get() != 0.toByte()
+            } else {
+                null
+            }
     val float: Float?
         get() = if (valueType == TYPE_FLOAT) ByteBuffer.wrap(value).float else null
     @Suppress("DEPRECATION")
     @Deprecated("Use long.", ReplaceWith("long"))
     val int: Int?
         get() = if (valueType == TYPE_INT) ByteBuffer.wrap(value).int else null
-    val long: Long? get() = when (valueType) {
-        @Suppress("DEPRECATION")
-        TYPE_INT -> ByteBuffer.wrap(value).int.toLong()
-        TYPE_LONG -> ByteBuffer.wrap(value).long
-        else -> null
-    }
+    val long: Long?
+        get() = when (valueType) {
+            @Suppress("DEPRECATION") TYPE_INT -> ByteBuffer.wrap(value).int.toLong()
+            TYPE_LONG -> ByteBuffer.wrap(value).long
+            else -> null
+        }
     val string: String?
         get() = if (valueType == TYPE_STRING) String(value) else null
     val stringSet: Set<String>?

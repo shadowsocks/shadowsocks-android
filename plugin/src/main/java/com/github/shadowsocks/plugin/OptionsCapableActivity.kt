@@ -41,7 +41,9 @@ abstract class OptionsCapableActivity : AppCompatActivity() {
      *
      * @param options PluginOptions parsed.
      */
-    protected abstract fun onInitializePluginOptions(options: PluginOptions = pluginOptions())
+    protected abstract fun onInitializePluginOptions(
+        options: PluginOptions = pluginOptions()
+    )
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)

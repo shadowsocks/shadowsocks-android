@@ -31,7 +31,13 @@ abstract class HelpCallback : HelpActivity() {
     abstract fun produceHelpMessage(options: PluginOptions): CharSequence
 
     override fun onInitializePluginOptions(options: PluginOptions) {
-        setResult(RESULT_OK, Intent().putExtra(PluginContract.EXTRA_HELP_MESSAGE, produceHelpMessage(options)))
+        setResult(
+            RESULT_OK,
+            Intent().putExtra(
+                PluginContract.EXTRA_HELP_MESSAGE,
+                produceHelpMessage(options)
+            )
+        )
         finish()
     }
 }

@@ -37,19 +37,27 @@ object Executable {
     private val EXECUTABLES = setOf(SS_LOCAL, REDSOCKS, TUN2SOCKS)
 
     fun killAll() {
-        for (process in File("/proc").listFiles { _, name -> TextUtils.isDigitsOnly(name) }) {
+        for (process in File("/proc").listFiles { _, name ->
+            TextUtils.isDigitsOnly(name)
+        }) {
             val exe = File(try {
                 File(process, "cmdline").inputStream().bufferedReader().readText()
-            } catch (_: IOException) {
+            } catch (`_`: IOException) {
                 continue
             }.split(Character.MIN_VALUE, limit = 2).first())
-            if (EXECUTABLES.contains(exe.name)) try {
-                Os.kill(process.name.toInt(), OsConstants.SIGKILL)
-            } catch (e: ErrnoException) {
-                if (e.errno != OsConstants.ESRCH) {
-                    e.printStackTrace()
-                    Crashlytics.log(Log.WARN, "kill", "SIGKILL ${exe.absolutePath} (${process.name}) failed")
-                    Crashlytics.logException(e)
+            if (EXECUTABLES.contains(exe.name)) {
+                try {
+                    Os.kill(process.name.toInt(), OsConstants.SIGKILL)
+                } catch (e: ErrnoException) {
+                    if (e.errno != OsConstants.ESRCH) {
+                        e.printStackTrace()
+                        Crashlytics.log(
+                            Log.WARN,
+                            "kill",
+                            "SIGKILL ${exe.absolutePath} (${process.name}) failed"
+                        )
+                        Crashlytics.logException(e)
+                    }
                 }
             }
         }

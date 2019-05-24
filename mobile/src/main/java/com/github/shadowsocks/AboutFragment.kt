@@ -35,15 +35,21 @@ import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
 
 class AboutFragment : ToolbarFragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.layout_about, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.layout_about, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
         view.findViewById<TextView>(R.id.tv_about).apply {
-            text = SpannableStringBuilder(resources.openRawResource(R.raw.about).bufferedReader().readText()
-                    .parseAsHtml(HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
+            text = SpannableStringBuilder(
+                resources.openRawResource(R.raw.about).bufferedReader().readText().parseAsHtml(
+                    HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM
+                )
+            ).apply {
                 for (span in getSpans(0, length, URLSpan::class.java)) {
                     setSpan(object : ClickableSpan() {
                         override fun onClick(view: View) {

@@ -65,26 +65,30 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
     }
 
-    class CloseableFd(val fd: FileDescriptor) : Closeable {
+    class CloseableFd(
+        val fd: FileDescriptor
+    ) : Closeable {
         override fun close() = Os.close(fd)
     }
 
-    private inner class ProtectWorker : ConcurrentLocalSocketListener("ShadowsocksVpnThread",
-            File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
+    private inner class ProtectWorker : ConcurrentLocalSocketListener(
+        "ShadowsocksVpnThread",
+        File(Core.deviceStorage.noBackupFilesDir, "protect_path")
+    ) {
         override fun acceptInternal(socket: LocalSocket) {
             socket.inputStream.read()
             val fd = socket.ancillaryFileDescriptors!!.single()!!
             CloseableFd(fd).use {
                 socket.outputStream.write(if (underlyingNetwork.let { network ->
-                            if (network != null && Build.VERSION.SDK_INT >= 23) try {
-                                network.bindSocket(fd)
-                                true
-                            } catch (e: IOException) {
-                                // suppress ENONET (Machine is not on the network)
-                                if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
-                                false
-                            } else protect(getInt.invoke(fd) as Int)
-                        }) 0 else 1)
+                    if (network != null && Build.VERSION.SDK_INT >= 23) try {
+                        network.bindSocket(fd)
+                        true
+                    } catch (e: IOException) {
+                        // suppress ENONET (Machine is not on the network)
+                        if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
+                        false
+                    } else protect(getInt.invoke(fd) as Int)
+                }) 0 else 1)
             }
         }
     }
@@ -94,22 +98,28 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override val data = BaseService.Data(this)
-    override val tag: String get() = "ShadowsocksVpnService"
+    override val tag: String
+        get() = "ShadowsocksVpnService"
     override fun createNotification(profileName: String): ServiceNotification =
-            ServiceNotification(this, profileName, "service-vpn")
+        ServiceNotification(this, profileName, "service-vpn")
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
     private var active = false
     private var metered = false
-    private var underlyingNetwork: Network? = null
+    private var underlyingNetwork: Network? =
+        null
         set(value) {
             field = value
-            if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
+            if (active && Build.VERSION.SDK_INT >= 22) {
+                setUnderlyingNetworks(underlyingNetworks)
+            }
         }
-    private val underlyingNetworks get() =
-        // clearing underlyingNetworks makes Android 9+ consider the network to be metered
-        if (Build.VERSION.SDK_INT >= 28 && metered) null else underlyingNetwork?.let { arrayOf(it) }
+    private val underlyingNetworks
+        get() // clearing underlyingNetworks makes Android 9+ consider the network to be metered
+        = if (Build.VERSION.SDK_INT >= 28 && metered) null else underlyingNetwork?.let {
+            arrayOf(it)
+        }
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
@@ -121,7 +131,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override fun killProcesses(scope: CoroutineScope) {
         super.killProcesses(scope)
         active = false
-        scope.launch { DefaultNetworkListener.stop(this) }
+        scope.launch {
+            DefaultNetworkListener.stop(this)
+        }
         worker?.shutdown(scope)
         worker = null
         conn?.close()
@@ -131,19 +143,35 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (DataStore.serviceMode == Key.modeVpn) {
             if (prepare(this) != null) {
-                startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
+                startActivity(
+                    Intent(this, VpnRequestActivity::class.java).addFlags(
+                        Intent.FLAG_ACTIVITY_NEW_TASK
+                    )
+                )
+            } else {
+                return super<LocalDnsService.Interface>.onStartCommand(
+                    intent,
+                    flags,
+                    startId
+                )
+            }
         }
         stopRunner()
         return Service.START_NOT_STICKY
     }
 
-    override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
-    override suspend fun resolver(host: String) = DefaultNetworkListener.get().getAllByName(host)
-    override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
+    override suspend fun preInit() = DefaultNetworkListener.start(this) {
+        underlyingNetwork = it
+    }
+    override suspend fun resolver(host: String) =
+        DefaultNetworkListener.get().getAllByName(host)
+    override suspend fun openConnection(url: URL) =
+        DefaultNetworkListener.get().openConnection(url)
 
     override suspend fun startProcesses() {
-        worker = ProtectWorker().apply { start() }
+        worker = ProtectWorker().apply {
+            start()
+        }
         super.startProcesses()
         sendFd(startVpn())
     }
@@ -155,7 +183,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     private suspend fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
-        val builder = Builder()
+        val builder =
+            Builder()
                 .setConfigureIntent(Core.configureIntent(this))
                 .setSession(profile.formattedName)
                 .setMtu(VPN_MTU)
@@ -169,16 +198,19 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
         if (profile.proxyApps) {
             val me = packageName
-            profile.individual.split('\n')
-                    .filter { it != me }
-                    .forEach {
-                        try {
-                            if (profile.bypass) builder.addDisallowedApplication(it)
-                            else builder.addAllowedApplication(it)
-                        } catch (ex: PackageManager.NameNotFoundException) {
-                            printLog(ex)
-                        }
+            profile.individual.split('\n').filter {
+                it != me
+            }.forEach {
+                try {
+                    if (profile.bypass) {
+                        builder.addDisallowedApplication(it)
+                    } else {
+                        builder.addAllowedApplication(it)
                     }
+                } catch (ex: PackageManager.NameNotFoundException) {
+                    printLog(ex)
+                }
+            }
             if (!profile.bypass) builder.addAllowedApplication(me)
         }
 
@@ -194,19 +226,28 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         }
 
         metered = profile.metered
-        active = true   // possible race condition here?
+        active = true // possible race condition here?
         if (Build.VERSION.SDK_INT >= 22) builder.setUnderlyingNetworks(underlyingNetworks)
 
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn
 
-        val cmd = arrayListOf(File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
-                "--netif-ipaddr", PRIVATE_VLAN4_ROUTER,
-                "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
-                "--tunmtu", VPN_MTU.toString(),
-                "--sock-path", "sock_path",
-                "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
-                "--loglevel", "warning")
+        val cmd =
+            arrayListOf(
+                File(applicationInfo.nativeLibraryDir, Executable.TUN2SOCKS).absolutePath,
+                "--netif-ipaddr",
+                PRIVATE_VLAN4_ROUTER,
+                "--socks-server-addr",
+                "${DataStore.listenAddress}:${DataStore.portProxy}",
+                "--tunmtu",
+                VPN_MTU.toString(),
+                "--sock-path",
+                "sock_path",
+                "--dnsgw",
+                "127.0.0.1:${DataStore.portLocalDns}",
+                "--loglevel",
+                "warning"
+            )
         if (profile.ipv6) {
             cmd += "--netif-ip6addr"
             cmd += PRIVATE_VLAN6_ROUTER
@@ -228,7 +269,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         while (true) try {
             delay(50L shl tries)
             LocalSocket().use { localSocket ->
-                localSocket.connect(LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM))
+                localSocket.connect(
+                    LocalSocketAddress(path, LocalSocketAddress.Namespace.FILESYSTEM)
+                )
                 localSocket.setFileDescriptorsForSend(arrayOf(fd))
                 localSocket.outputStream.write(42)
             }

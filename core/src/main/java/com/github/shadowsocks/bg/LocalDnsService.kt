@@ -36,10 +36,12 @@ import java.util.*
 
 object LocalDnsService {
     private val googleApisTester =
-            "(^|\\.)googleapis(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}\$".toRegex()
+        "(^|\\.)googleapis(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}\$"
+            .toRegex()
     private val chinaIpList by lazy {
-        app.resources.openRawResource(R.raw.china_ip_list).bufferedReader()
-                .lineSequence().map(Subnet.Companion::fromString).filterNotNull().toList()
+        app.resources.openRawResource(R.raw.china_ip_list).bufferedReader().lineSequence().map(
+            Subnet.Companion::fromString
+        ).filterNotNull().toList()
     }
 
     private val servers = WeakHashMap<Interface, LocalDnsServer>()
@@ -49,20 +51,24 @@ object LocalDnsService {
             super.startProcesses()
             val profile = data.proxy!!.profile
             val dns = URI("dns://${profile.remoteDns}")
-            LocalDnsServer(this::resolver,
-                    Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
-                    DataStore.proxyAddress,
-                    HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")).apply {
+            LocalDnsServer(
+                this::resolver,
+                Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
+                DataStore.proxyAddress,
+                HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")
+            ).apply {
                 tcp = !profile.udpdns
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                         remoteDomainMatcher = googleApisTester
                         localIpMatcher = chinaIpList
                     }
-                    Acl.CHINALIST -> { }
+                    Acl.CHINALIST -> {}
                     else -> forwardOnly = true
                 }
-            }.also { servers[this] = it }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
+            }.also {
+                servers[this] = it
+            }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
         }
 
         override fun killProcesses(scope: CoroutineScope) {

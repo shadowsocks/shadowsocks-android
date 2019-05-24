@@ -32,17 +32,37 @@ import androidx.recyclerview.widget.RecyclerView
  */
 open class LeanbackSingleListPreferenceDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
     companion object {
-        private val mEntryValues = LeanbackListPreferenceDialogFragmentCompat::class.java
-                .getDeclaredField("mEntryValues").apply { isAccessible = true }
-        private val mInitialSelection = LeanbackListPreferenceDialogFragmentCompat::class.java
-                .getDeclaredField("mInitialSelection").apply { isAccessible = true }
+        private val mEntryValues =
+            LeanbackListPreferenceDialogFragmentCompat::class
+                .java
+                .getDeclaredField("mEntryValues")
+                .apply {
+                    isAccessible = true
+                }
+        private val mInitialSelection =
+            LeanbackListPreferenceDialogFragmentCompat::class
+                .java
+                .getDeclaredField("mInitialSelection")
+                .apply {
+                    isAccessible = true
+                }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val selected = mInitialSelection.get(this) as? String
-        val index = (mEntryValues.get(this) as? Array<CharSequence?>)?.indexOfFirst { it == selected }
+        val index = (mEntryValues.get(this) as? Array<CharSequence?>)?.indexOfFirst {
+            it == selected
+        }
         return super.onCreateView(inflater, container, savedInstanceState)!!.also {
-            if (index != null) it.findViewById<RecyclerView>(android.R.id.list).layoutManager!!.scrollToPosition(index)
+            if (index != null) {
+                it.findViewById<RecyclerView>(android.R.id.list).layoutManager!!.scrollToPosition(
+                    index
+                )
+            }
         }
     }
 }

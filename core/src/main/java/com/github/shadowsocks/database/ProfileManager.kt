@@ -53,11 +53,17 @@ object ProfileManager {
     }
 
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
-        val profiles = if (replace) getAllProfiles()?.associateBy { it.formattedAddress } else null
+        val profiles = if (replace) getAllProfiles()?.associateBy {
+            it.formattedAddress
+        } else null
         val feature = if (replace) {
-            profiles?.values?.singleOrNull { it.id == DataStore.profileId }
+            profiles?.values?.singleOrNull {
+                it.id == DataStore.profileId
+            }
         } else Core.currentProfile?.first
-        val lazyClear = lazy { clear() }
+        val lazyClear = lazy {
+            clear()
+        }
         var result: Exception? = null
         for (json in jsons) try {
             Profile.parseJson(json.bufferedReader().readText(), feature) {
@@ -78,15 +84,22 @@ object ProfileManager {
     }
     fun serializeToJson(profiles: List<Profile>? = getAllProfiles()): JSONArray? {
         if (profiles == null) return null
-        val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
-        return JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray())
+        val lookup = LongSparseArray<Profile>(profiles.size).apply {
+            profiles.forEach {
+                put(it.id, it)
+            }
+        }
+        return JSONArray(profiles.map {
+            it.toJson(lookup)
+        }.toTypedArray())
     }
 
     /**
      * Note: It's caller's responsibility to update DirectBoot profile if necessary.
      */
     @Throws(SQLException::class)
-    fun updateProfile(profile: Profile) = check(PrivateDatabase.profileDao.update(profile) == 1)
+    fun updateProfile(profile: Profile) =
+        check(PrivateDatabase.profileDao.update(profile) == 1)
 
     @Throws(IOException::class)
     fun getProfile(id: Long): Profile? = try {
@@ -99,7 +112,10 @@ object ProfileManager {
     }
 
     @Throws(IOException::class)
-    fun expand(profile: Profile): Pair<Profile, Profile?> = Pair(profile, profile.udpFallback?.let { getProfile(it) })
+    fun expand(profile: Profile): Pair<Profile, Profile?> =
+        Pair(profile, profile.udpFallback?.let {
+            getProfile(it)
+        })
 
     @Throws(SQLException::class)
     fun delProfile(id: Long) {

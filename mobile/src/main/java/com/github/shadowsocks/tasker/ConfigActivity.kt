@@ -39,12 +39,16 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.resolveResourceId
 
 class ConfigActivity : AppCompatActivity() {
-    inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+    inner class ProfileViewHolder(
+        view: View
+    ) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private var item: Profile? = null
         private val text = itemView.findViewById<CheckedTextView>(android.R.id.text1)
 
         init {
-            view.setBackgroundResource(theme.resolveResourceId(android.R.attr.selectableItemBackground))
+            view.setBackgroundResource(
+                theme.resolveResourceId(android.R.attr.selectableItemBackground)
+            )
             itemView.setOnClickListener(this)
         }
 
@@ -69,13 +73,30 @@ class ConfigActivity : AppCompatActivity() {
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
+        internal val profiles =
+            ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
-                if (position == 0) holder.bindDefault() else holder.bind(profiles[position - 1])
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
-                LayoutInflater.from(parent.context).inflate(Resources.getSystem()
-                        .getIdentifier("select_dialog_singlechoice_material", "layout", "android"), parent, false))
+            if (position == 0) {
+                holder.bindDefault()
+            } else {
+                holder.bind(profiles[position - 1])
+            }
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): ProfileViewHolder =
+            ProfileViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    Resources.getSystem().getIdentifier(
+                        "select_dialog_singlechoice_material",
+                        "layout",
+                        "android"
+                    ),
+                    parent,
+                    false
+                )
+            )
         override fun getItemCount(): Int = 1 + profiles.size
     }
 
@@ -96,7 +117,9 @@ class ConfigActivity : AppCompatActivity() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.app_name)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
-        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.setNavigationOnClickListener {
+            finish()
+        }
 
         switch = findViewById(R.id.serviceSwitch)
         switch.isChecked = taskerOption.switchOn
@@ -105,7 +128,10 @@ class ConfigActivity : AppCompatActivity() {
         profilesList.layoutManager = lm
         profilesList.itemAnimator = DefaultItemAnimator()
         profilesList.adapter = profilesAdapter
-        if (taskerOption.profileId >= 0)
-            lm.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == taskerOption.profileId } + 1)
+        if (taskerOption.profileId >= 0) {
+            lm.scrollToPosition(profilesAdapter.profiles.indexOfFirst {
+                it.id == taskerOption.profileId
+            } + 1)
+        }
     }
 }

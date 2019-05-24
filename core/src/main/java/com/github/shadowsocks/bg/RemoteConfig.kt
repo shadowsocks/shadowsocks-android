@@ -29,26 +29,34 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 object RemoteConfig {
-    private val config by lazy { FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) } }
+    private val config by lazy {
+        FirebaseRemoteConfig.getInstance().apply {
+            setDefaults(R.xml.default_configs)
+        }
+    }
 
     private fun Exception.log() {
         Log.w("RemoteConfig", this)
-        Core.analytics.logEvent("femote_config_failure", bundleOf(Pair(javaClass.simpleName, message)))
+        Core.analytics.logEvent(
+            "femote_config_failure",
+            bundleOf(Pair(javaClass.simpleName, message))
+        )
     }
 
     fun scheduleFetch() = config.fetch().addOnCompleteListener {
         if (it.isSuccessful) config.activate() else it.exception?.log()
     }
 
-    suspend fun fetch() = suspendCancellableCoroutine<Pair<FirebaseRemoteConfig, Boolean>> { cont ->
-        config.fetch().addOnCompleteListener {
-            if (it.isSuccessful) {
-                config.activate()
-                cont.resume(config to true)
-            } else {
-                it.exception?.log()
-                cont.resume(config to false)
+    suspend fun fetch() =
+        suspendCancellableCoroutine<Pair<FirebaseRemoteConfig, Boolean>> { cont ->
+            config.fetch().addOnCompleteListener {
+                if (it.isSuccessful) {
+                    config.activate()
+                    cont.resume(config to true)
+                } else {
+                    it.exception?.log()
+                    cont.resume(config to false)
+                }
             }
         }
-    }
 }

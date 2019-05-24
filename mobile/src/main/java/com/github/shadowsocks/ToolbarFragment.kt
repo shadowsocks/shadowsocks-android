@@ -37,10 +37,12 @@ open class ToolbarFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         toolbar = view.findViewById(R.id.toolbar)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
-        toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(GravityCompat.START) }
+        toolbar.setNavigationOnClickListener {
+            (activity as MainActivity).drawer.openDrawer(GravityCompat.START)
+        }
     }
 
-    open fun onTrafficUpdated(profileId: Long, stats: TrafficStats) { }
+    open fun onTrafficUpdated(profileId: Long, stats: TrafficStats) {}
 
     open fun onBackPressed(): Boolean = false
 }

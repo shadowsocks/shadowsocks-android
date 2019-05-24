@@ -64,12 +64,16 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private const val REQUEST_CODE_ADD = 1
         private const val REQUEST_CODE_EDIT = 2
 
-        private const val SELECTED_SUBNETS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_SUBNETS"
-        private const val SELECTED_HOSTNAMES = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
-        private const val SELECTED_URLS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
+        private const val SELECTED_SUBNETS =
+            "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_SUBNETS"
+        private const val SELECTED_HOSTNAMES =
+            "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
+        private const val SELECTED_URLS =
+            "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
 
         // unescaped: (?<=^(\(\^\|\\\.\)|\^\(\.\*\\\.\)\?)).*(?=\$$)
-        private val domainPattern = "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
+        private val domainPattern =
+            "(?<=^(\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?)).*(?=\\\$\$)".toRegex()
 
         @Suppress("FunctionName")
         private fun AclItem(item: Any) = when (item) {
@@ -83,22 +87,29 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     private enum class Template {
         Generic,
         Domain,
-        Url;
+        Url
     }
     @Parcelize
-    data class AclItem(val item: String = "", val isUrl: Boolean = false) : Parcelable {
+    data class AclItem(
+        val item: String = "",
+        val isUrl: Boolean = false
+    ) : Parcelable {
         fun toAny() = if (isUrl) URL(item) else Subnet.fromString(item) ?: item
     }
     @Parcelize
-    data class AclEditResult(val edited: AclItem, val replacing: AclItem) : Parcelable
-    class AclRuleDialogFragment : AlertDialogFragment<AclItem, AclEditResult>(),
-            TextWatcher, AdapterView.OnItemSelectedListener {
+    data class AclEditResult(
+        val edited: AclItem,
+        val replacing: AclItem
+    ) : Parcelable
+    class AclRuleDialogFragment : AlertDialogFragment<AclItem, AclEditResult>(), TextWatcher, AdapterView.OnItemSelectedListener {
         private lateinit var templateSelector: Spinner
         private lateinit var editText: EditText
         private lateinit var inputLayout: TextInputLayout
         private lateinit var positive: Button
 
-        override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
+        override fun AlertDialog.Builder.prepare(
+            listener: DialogInterface.OnClickListener
+        ) {
             val activity = requireActivity()
             val view = activity.layoutInflater.inflate(R.layout.dialog_acl_rule, null)
             templateSelector = view.findViewById(R.id.template_selector)
@@ -112,8 +123,12 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     val match = domainPattern.find(arg.item)
                     if (match != null) {
                         templateSelector.setSelection(Template.Domain.ordinal)
-                        editText.setText(IDN.toUnicode(match.value.replace("\\.", "."),
-                                IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES))
+                        editText.setText(
+                            IDN.toUnicode(
+                                match.value.replace("\\.", "."),
+                                IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES
+                            )
+                        )
                     }
                 }
             }
@@ -132,13 +147,26 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             validate()
         }
 
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+        override fun beforeTextChanged(
+            s: CharSequence?,
+            start: Int,
+            count: Int,
+            after: Int
+        ) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         override fun afterTextChanged(s: Editable) = validate(value = s)
         override fun onNothingSelected(parent: AdapterView<*>?) = check(false)
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = validate(position)
+        override fun onItemSelected(
+            parent: AdapterView<*>?,
+            view: View?,
+            position: Int,
+            id: Long
+        ) = validate(position)
 
-        private fun validate(template: Int = templateSelector.selectedItemPosition, value: Editable = editText.text) {
+        private fun validate(
+            template: Int = templateSelector.selectedItemPosition,
+            value: Editable = editText.text
+        ) {
             var message = ""
             positive.isEnabled = when (Template.values()[template]) {
                 Template.Generic -> value.toString().run {
@@ -150,43 +178,67 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                         false
                     }
                 }
-                Template.Domain -> try {
-                    IDN.toASCII(value.toString(), IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
-                    true
-                } catch (e: IllegalArgumentException) {
-                    message = e.cause?.readableMessage ?: e.readableMessage
-                    false
+                Template.Domain -> {
+                    try {
+                        IDN.toASCII(
+                            value.toString(),
+                            IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES
+                        )
+                        true
+                    } catch (e: IllegalArgumentException) {
+                        message = e.cause?.readableMessage ?: e.readableMessage
+                        false
+                    }
                 }
-                Template.Url -> try {
-                    val url = URL(value.toString())
-                    if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
-                    true
-                } catch (e: MalformedURLException) {
-                    message = e.readableMessage
-                    false
+                Template.Url -> {
+                    try {
+                        val url = URL(value.toString())
+                        if ("http".equals(url.protocol, true)) {
+                            message = getString(R.string.cleartext_http_warning)
+                        }
+                        true
+                    } catch (e: MalformedURLException) {
+                        message = e.readableMessage
+                        false
+                    }
                 }
             }
             inputLayout.error = message
         }
 
-        override fun ret(which: Int) = if (which != DialogInterface.BUTTON_POSITIVE) null else {
-            AclEditResult(editText.text.toString().let { text ->
-                when (Template.values()[templateSelector.selectedItemPosition]) {
-                    Template.Generic -> AclItem(text)
-                    Template.Domain -> AclItem(IDN.toASCII(text, IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
-                            .replace(".", "\\.").let { "(^|\\.)$it\$" })
-                    Template.Url -> AclItem(text, true)
-                }
-            }, arg)
-        }
+        override fun ret(which: Int) =
+            if (which != DialogInterface.BUTTON_POSITIVE) {
+                null
+            } else {
+                AclEditResult(
+                    editText.text.toString().let { text ->
+                        when (Template.values()[templateSelector.selectedItemPosition]) {
+                            Template.Generic -> AclItem(text)
+                            Template.Domain -> {
+                                AclItem(
+                                    IDN.toASCII(
+                                        text,
+                                        IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES
+                                    ).replace(".", "\\.").let {
+                                        "(^|\\.)$it\$"
+                                    }
+                                )
+                            }
+                            Template.Url -> AclItem(text, true)
+                        }
+                    },
+                    arg
+                )
+            }
 
         override fun onClick(dialog: DialogInterface?, which: Int) {
             if (which != DialogInterface.BUTTON_NEGATIVE) super.onClick(dialog, which)
         }
     }
 
-    private inner class AclRuleViewHolder(view: View) : RecyclerView.ViewHolder(view),
-            View.OnClickListener, View.OnLongClickListener {
+    private inner class AclRuleViewHolder(
+        view: View
+    ) : RecyclerView.ViewHolder(view), View.OnClickListener, View.OnLongClickListener {
         lateinit var item: Any
         private val text = view.findViewById<TextView>(android.R.id.text1)
 
@@ -214,11 +266,17 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
 
         override fun onClick(v: View?) {
-            if (selectedItems.isNotEmpty()) onLongClick(v)
-            else AclRuleDialogFragment().withArg(AclItem(item)).show(this@CustomRulesFragment, REQUEST_CODE_EDIT)
+            if (selectedItems.isNotEmpty()) {
+                onLongClick(v)
+            } else {
+                AclRuleDialogFragment().withArg(AclItem(item)).show(
+                    this@CustomRulesFragment,
+                    REQUEST_CODE_EDIT
+                )
+            }
         }
         override fun onLongClick(v: View?): Boolean {
-            if (!selectedItems.add(item)) selectedItems.remove(item)    // toggle
+            if (!selectedItems.add(item)) selectedItems.remove(item) // toggle
             onSelectedItemsUpdated()
             itemView.isSelected = !itemView.isSelected
             return true
@@ -231,14 +289,27 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
         override fun onBindViewHolder(holder: AclRuleViewHolder, i: Int) {
             val j = i - acl.subnets.size()
-            if (j < 0) holder.bind(acl.subnets[i]) else {
+            if (j < 0) {
+                holder.bind(acl.subnets[i])
+            } else {
                 val k = j - acl.proxyHostnames.size()
-                if (k < 0) holder.bind(acl.proxyHostnames[j]) else holder.bind(acl.urls[k])
+                if (k < 0) {
+                    holder.bind(acl.proxyHostnames[j])
+                } else {
+                    holder.bind(acl.urls[k])
+                }
             }
         }
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = AclRuleViewHolder(LayoutInflater
-                .from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false))
-        override fun getItemCount(): Int = acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.size()
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+            AclRuleViewHolder(
+                LayoutInflater.from(parent.context).inflate(
+                    android.R.layout.simple_list_item_1,
+                    parent,
+                    false
+                )
+            )
+        override fun getItemCount(): Int =
+            acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.size()
 
         private fun apply() {
             if (!savePending) {
@@ -286,11 +357,18 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         fun addToProxy(input: String): Int? {
             val acl = Acl().fromReader(input.reader(), true)
             var result: Int? = null
-            if (acl.bypass) acl.subnets.asIterable().asSequence().map { addSubnet(it) }
-                    .forEach { if (result == null) result = it }
-            (acl.proxyHostnames.asIterable().asSequence().map { addHostname(it) } +
-                    acl.urls.asIterable().asSequence().map { addURL(it) })
-                    .forEach { if (result == null) result = it }
+            if (acl.bypass) acl.subnets.asIterable().asSequence().map {
+                addSubnet(it)
+            }.forEach {
+                if (result == null) result = it
+            }
+            (acl.proxyHostnames.asIterable().asSequence().map {
+                addHostname(it)
+            } + acl.urls.asIterable().asSequence().map {
+                addURL(it)
+            }).forEach {
+                if (result == null) result = it
+            }
             return result
         }
 
@@ -320,20 +398,30 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     apply()
                 }
                 is String -> {
-                    notifyItemRemoved(acl.subnets.size() + acl.proxyHostnames.indexOf(item))
+                    notifyItemRemoved(
+                        acl.subnets.size() + acl.proxyHostnames.indexOf(item)
+                    )
                     acl.proxyHostnames.remove(item)
                     apply()
                 }
                 is URL -> {
-                    notifyItemRemoved(acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.indexOf(item))
+                    notifyItemRemoved(
+                        acl.subnets.size() + acl.proxyHostnames.size() + acl.urls.indexOf(
+                            item
+                        )
+                    )
                     acl.urls.remove(item)
                     apply()
                 }
             }
         }
         fun removeSelected() {
-            undoManager.remove(selectedItems.map { Pair(0, it) })
-            selectedItems.forEach { remove(it) }
+            undoManager.remove(selectedItems.map {
+                Pair(0, it)
+            })
+            selectedItems.forEach {
+                remove(it)
+            }
             selectedItems.clear()
             onSelectedItemsUpdated()
         }
@@ -351,32 +439,50 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
     }
 
-    private val isEnabled get() = (activity as MainActivity).state == BaseService.State.Stopped ||
-            Core.currentProfile?.first?.route != Acl.CUSTOM_RULES
+    private val isEnabled
+        get() =
+            (activity as MainActivity).state == BaseService.State.Stopped ||
+                Core.currentProfile?.first?.route != Acl.CUSTOM_RULES
 
     private val selectedItems = HashSet<Any>()
-    private val adapter by lazy { AclRulesAdapter() }
+    private val adapter by lazy {
+        AclRulesAdapter()
+    }
     private lateinit var list: RecyclerView
     private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<Any>
-    private val clipboard by lazy { requireContext().getSystemService<ClipboardManager>()!! }
-
-    private fun onSelectedItemsUpdated() {
-        if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
+    private val clipboard by lazy {
+        requireContext().getSystemService<ClipboardManager>()!!
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.layout_custom_rules, container, false)
+    private fun onSelectedItemsUpdated() {
+        if (selectedItems.isEmpty()) {
+            mode?.finish()
+        } else {
+            if (mode == null) mode = toolbar.startActionMode(this)
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.layout_custom_rules, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (savedInstanceState != null) {
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
-                    ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_HOSTNAMES)
-                    ?: arrayOf())
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }
-                    ?: listOf())
+            selectedItems.addAll(
+                savedInstanceState.getStringArray(SELECTED_SUBNETS)?.mapNotNull(
+                    Subnet.Companion::fromString
+                ) ?: listOf()
+            )
+            selectedItems.addAll(
+                savedInstanceState.getStringArray(SELECTED_HOSTNAMES) ?: arrayOf()
+            )
+            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map {
+                URL(it)
+            } ?: listOf())
             onSelectedItemsUpdated()
         }
         toolbar.setTitle(R.string.custom_rules)
@@ -388,14 +494,29 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
         undoManager = UndoSnackbarManager(activity, adapter::undo)
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
-            override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
+        ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(
+                0,
+                ItemTouchHelper.START or ItemTouchHelper.END
+            ) {
+                override fun getSwipeDirs(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ): Int =
+                    if (isEnabled && selectedItems.isEmpty()) {
+                        super.getSwipeDirs(recyclerView, viewHolder)
+                    } else {
+                        0
+                    }
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
                     adapter.remove(viewHolder.adapterPosition)
-            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
-                                target: RecyclerView.ViewHolder): Boolean = false
-        }).attachToRecyclerView(list)
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean = false
+            }
+        ).attachToRecyclerView(list)
     }
 
     override fun onBackPressed(): Boolean {
@@ -408,10 +529,18 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putStringArray(SELECTED_SUBNETS, selectedItems.filterIsInstance<Subnet>().map(Subnet::toString)
-                .toTypedArray())
-        outState.putStringArray(SELECTED_HOSTNAMES, selectedItems.filterIsInstance<String>().toTypedArray())
-        outState.putStringArray(SELECTED_URLS, selectedItems.filterIsInstance<URL>().map(URL::toString).toTypedArray())
+        outState.putStringArray(
+            SELECTED_SUBNETS,
+            selectedItems.filterIsInstance<Subnet>().map(Subnet::toString).toTypedArray()
+        )
+        outState.putStringArray(
+            SELECTED_HOSTNAMES,
+            selectedItems.filterIsInstance<String>().toTypedArray()
+        )
+        outState.putStringArray(
+            SELECTED_URLS,
+            selectedItems.filterIsInstance<URL>().map(URL::toString).toTypedArray()
+        )
     }
 
     private fun copySelected() {
@@ -427,29 +556,42 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         clipboard.primaryClip = ClipData.newPlainText(null, acl.toString())
     }
 
-    override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_manual_settings -> {
-            AclRuleDialogFragment().withArg(AclItem()).show(this, REQUEST_CODE_ADD)
-            true
-        }
-        R.id.action_import_clipboard -> {
-            try {
-                check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
-            } catch (exc: Exception) {
-                (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
-                exc.printStackTrace()
+    override fun onMenuItemClick(item: MenuItem): Boolean =
+        when (item.itemId) {
+            R.id.action_manual_settings -> {
+                AclRuleDialogFragment().withArg(AclItem()).show(this, REQUEST_CODE_ADD)
+                true
             }
-            true
+            R.id.action_import_clipboard -> {
+                try {
+                    check(
+                        adapter.addToProxy(
+                            clipboard.primaryClip!!.getItemAt(0).text.toString()
+                        ) != null
+                    )
+                } catch (exc: Exception) {
+                    (activity as MainActivity).snackbar().setText(
+                        R.string.action_import_err
+                    ).show()
+                    exc.printStackTrace()
+                }
+                true
+            }
+            R.id.action_import_gfwlist -> {
+                val acl = Acl().fromId(Acl.GFWLIST)
+                if (!acl.bypass) acl.subnets.asIterable().forEach {
+                    adapter.addSubnet(it)
+                }
+                acl.proxyHostnames.asIterable().forEach {
+                    adapter.addHostname(it)
+                }
+                acl.urls.asIterable().forEach {
+                    adapter.addURL(it)
+                }
+                true
+            }
+            else -> false
         }
-        R.id.action_import_gfwlist -> {
-            val acl = Acl().fromId(Acl.GFWLIST)
-            if (!acl.bypass) acl.subnets.asIterable().forEach { adapter.addSubnet(it) }
-            acl.proxyHostnames.asIterable().forEach { adapter.addHostname(it) }
-            acl.urls.asIterable().forEach { adapter.addURL(it) }
-            true
-        }
-        else -> false
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val editing = when (requestCode) {
@@ -457,11 +599,17 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             REQUEST_CODE_EDIT -> true
             else -> return super.onActivityResult(requestCode, resultCode, data)
         }
-        val ret by lazy { AlertDialogFragment.getRet<AclEditResult>(data!!) }
+        val ret by lazy {
+            AlertDialogFragment.getRet<AclEditResult>(data!!)
+        }
         when (resultCode) {
             DialogInterface.BUTTON_POSITIVE -> {
                 if (editing) adapter.remove(ret.replacing.toAny())
-                adapter.add(ret.edited.toAny())?.also { list.post { list.scrollToPosition(it) } }
+                adapter.add(ret.edited.toAny())?.also {
+                    list.post {
+                        list.scrollToPosition(it)
+                    }
+                }
             }
             DialogInterface.BUTTON_NEUTRAL -> ret.replacing.toAny().let { item ->
                 adapter.remove(item)
@@ -481,45 +629,52 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         val window = activity.window
         // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
         // for dark mode, it's roughly 850? (#303030)
-        window.statusBarColor = ContextCompat.getColor(activity, when {
-            resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES ->
-                android.R.color.black
-            Build.VERSION.SDK_INT >= 23 -> {
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                R.color.material_grey_300
+        window.statusBarColor = ContextCompat.getColor(
+            activity,
+            when {
+                resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES -> {
+                    android.R.color.black
+                }
+                Build.VERSION.SDK_INT >= 23 -> {
+                    window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    R.color.material_grey_300
+                }
+                else -> R.color.material_grey_600
             }
-            else -> R.color.material_grey_600
-        })
+        )
         activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
         toolbar.touchscreenBlocksFocus = true
         return true
     }
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean = false
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_select_all -> {
-            adapter.selectAll()
-            true
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean =
+        when (item.itemId) {
+            R.id.action_select_all -> {
+                adapter.selectAll()
+                true
+            }
+            R.id.action_cut -> {
+                copySelected()
+                adapter.removeSelected()
+                true
+            }
+            R.id.action_copy -> {
+                copySelected()
+                true
+            }
+            R.id.action_delete -> {
+                adapter.removeSelected()
+                true
+            }
+            else -> false
         }
-        R.id.action_cut -> {
-            copySelected()
-            adapter.removeSelected()
-            true
-        }
-        R.id.action_copy -> {
-            copySelected()
-            true
-        }
-        R.id.action_delete -> {
-            adapter.removeSelected()
-            true
-        }
-        else -> false
-    }
     override fun onDestroyActionMode(mode: ActionMode) {
         val activity = requireActivity()
         val window = activity.window
-        window.statusBarColor = ContextCompat.getColor(activity,
-                activity.theme.resolveResourceId(android.R.attr.statusBarColor))
+        window.statusBarColor = ContextCompat.getColor(
+            activity,
+            activity.theme.resolveResourceId(android.R.attr.statusBarColor)
+        )
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
         toolbar.touchscreenBlocksFocus = false
         selectedItems.clear()

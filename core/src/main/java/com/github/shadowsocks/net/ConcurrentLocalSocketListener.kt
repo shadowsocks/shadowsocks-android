@@ -25,18 +25,29 @@ import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import java.io.File
 
-abstract class ConcurrentLocalSocketListener(name: String, socketFile: File) : LocalSocketListener(name, socketFile),
-        CoroutineScope {
-    override val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { _, t -> printLog(t) }
+abstract class ConcurrentLocalSocketListener(
+    name: String,
+    socketFile: File
+) : LocalSocketListener(name, socketFile), CoroutineScope {
+    override val coroutineContext =
+        Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { _, t ->
+            printLog(t)
+        }
 
     override fun accept(socket: LocalSocket) {
-        launch { super.accept(socket) }
+        launch {
+            super.accept(socket)
+        }
     }
 
     override fun shutdown(scope: CoroutineScope) {
         running = false
         cancel()
         super.shutdown(scope)
-        coroutineContext[Job]!!.also { job -> scope.launch { job.join() } }
+        coroutineContext[Job]!!.also { job ->
+            scope.launch {
+                job.join()
+            }
+        }
     }
 }

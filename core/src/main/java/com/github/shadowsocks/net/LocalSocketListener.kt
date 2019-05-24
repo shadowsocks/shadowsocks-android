@@ -34,11 +34,21 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
-abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name) {
-    private val localSocket = LocalSocket().apply {
-        socketFile.delete() // It's a must-have to close and reuse previous local socket.
-        bind(LocalSocketAddress(socketFile.absolutePath, LocalSocketAddress.Namespace.FILESYSTEM))
-    }
+abstract class LocalSocketListener(
+    name: String,
+    socketFile: File
+) : Thread(name) {
+    private val localSocket =
+        LocalSocket()
+            .apply {
+                socketFile.delete() // It's a must-have to close and reuse previous local socket.
+                bind(
+                    LocalSocketAddress(
+                        socketFile.absolutePath,
+                        LocalSocketAddress.Namespace.FILESYSTEM
+                    )
+                )
+            }
     private val serverSocket = LocalServerSocket(localSocket.fileDescriptor)
     private val closeChannel = Channel<Unit>(1)
     @Volatile
@@ -47,7 +57,9 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
     /**
      * Inherited class do not need to close input/output streams as they will be closed automatically.
      */
-    protected open fun accept(socket: LocalSocket) = socket.use { acceptInternal(socket) }
+    protected open fun accept(socket: LocalSocket) = socket.use {
+        acceptInternal(socket)
+    }
     protected abstract fun acceptInternal(socket: LocalSocket)
     final override fun run() {
         localSocket.use {
@@ -67,13 +79,19 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
         running = false
         localSocket.fileDescriptor?.apply {
             // see also: https://issuetracker.google.com/issues/36945762#comment15
-            if (valid()) try {
-                Os.shutdown(this, OsConstants.SHUT_RDWR)
-            } catch (e: ErrnoException) {
-                // suppress fd inactive or already closed
-                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw IOException(e)
+            if (valid()) {
+                try {
+                    Os.shutdown(this, OsConstants.SHUT_RDWR)
+                } catch (e: ErrnoException) {
+                    // suppress fd inactive or already closed
+                    if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) {
+                        throw IOException(e)
+                    }
+                }
             }
         }
-        scope.launch { closeChannel.receive() }
+        scope.launch {
+            closeChannel.receive()
+        }
     }
 }

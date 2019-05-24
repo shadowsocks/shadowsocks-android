@@ -1,5 +1,17 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.github.grihabor.blue:gradle_plugin:0.1.0-a8"
+  }
+}
+
+apply plugin: "com.github.grihabor.blue"
 apply plugin: 'com.github.ben-manes.versions'
 
 buildscript {

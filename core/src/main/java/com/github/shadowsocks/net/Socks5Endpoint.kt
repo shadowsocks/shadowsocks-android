@@ -30,9 +30,16 @@ import java.net.Inet6Address
 import java.nio.ByteBuffer
 import kotlin.math.max
 
-class Socks5Endpoint(host: String, port: Int) {
+class Socks5Endpoint(
+    host: String,
+    port: Int
+) {
     private val dest = host.parseNumericAddress().let { numeric ->
-        val bytes = numeric?.address ?: host.toByteArray().apply { check(size < 256) { "Hostname too long" } }
+        val bytes = numeric?.address ?: host.toByteArray().apply {
+            check(size < 256) {
+                "Hostname too long"
+            }
+        }
         val type = when (numeric) {
             null -> Socks5Message.SOCKS_ATYP_DOMAINNAME
             is Inet4Address -> Socks5Message.SOCKS_ATYP_IPV4
@@ -49,15 +56,17 @@ class Socks5Endpoint(host: String, port: Int) {
     private val headerReserved = max(3 + 3 + 16, 3 + dest.size)
 
     fun tcpWrap(message: ByteBuffer): ByteBuffer {
-        check(message.remaining() < 65536) { "TCP message too large" }
+        check(message.remaining() < 65536) {
+            "TCP message too large"
+        }
         return ByteBuffer.allocateDirect(8 + dest.size + message.remaining()).apply {
             put(Socks5Message.SOCKS_VERSION.toByte())
-            put(1)  // nmethods
-            put(0)  // no authentication required
+            put(1) // nmethods
+            put(0) // no authentication required
             // header
             put(Socks5Message.SOCKS_VERSION.toByte())
             put(Socks4Message.REQUEST_CONNECT.toByte())
-            put(0)  // reserved
+            put(0) // reserved
             put(dest)
             // data
             putShort(message.remaining().toShort())
@@ -66,20 +75,34 @@ class Socks5Endpoint(host: String, port: Int) {
         }
     }
     fun tcpReceiveBuffer(size: Int) = ByteBuffer.allocateDirect(headerReserved + 4 + size)
-    suspend fun tcpUnwrap(buffer: ByteBuffer, reader: (ByteBuffer) -> Int, wait: suspend () -> Unit) {
+    suspend fun tcpUnwrap(
+        buffer: ByteBuffer,
+        reader: (ByteBuffer) -> Int,
+        wait: suspend () -> Unit
+    ) {
         suspend fun readBytes(till: Int) {
             if (buffer.position() >= till) return
             while (reader(buffer) >= 0 && buffer.position() < till) wait()
-            if (buffer.position() < till) throw EOFException("${buffer.position()} < $till")
+            if (buffer.position() < till) {
+                throw EOFException("${buffer.position()} < $till")
+            }
         }
         suspend fun read(index: Int): Byte {
             readBytes(index + 1)
             return buffer[index]
         }
-        check(read(0) == Socks5Message.SOCKS_VERSION.toByte()) { "Unsupported SOCKS version" }
-        if (read(1) != 0.toByte()) throw IOException("Unsupported authentication ${buffer[1]}")
-        check(read(2) == Socks5Message.SOCKS_VERSION.toByte()) { "Unsupported SOCKS version" }
-        if (read(3) != 0.toByte()) throw IOException("SOCKS5 server returned error ${buffer[3]}")
+        check(read(0) == Socks5Message.SOCKS_VERSION.toByte()) {
+            "Unsupported SOCKS version"
+        }
+        if (read(1) != 0.toByte()) {
+            throw IOException("Unsupported authentication ${buffer[1]}")
+        }
+        check(read(2) == Socks5Message.SOCKS_VERSION.toByte()) {
+            "Unsupported SOCKS version"
+        }
+        if (read(3) != 0.toByte()) {
+            throw IOException("SOCKS5 server returned error ${buffer[3]}")
+        }
         val dataOffset = when (read(5)) {
             Socks5Message.SOCKS_ATYP_IPV4.toByte() -> 4
             Socks5Message.SOCKS_ATYP_DOMAINNAME.toByte() -> 1 + read(6)
@@ -91,7 +114,9 @@ class Socks5Endpoint(host: String, port: Int) {
         buffer.position(dataOffset)
         val dataLength = buffer.short.toUShort().toInt()
         val end = buffer.position() + dataLength
-        check(end <= buffer.capacity()) { "Buffer too small to contain the message" }
+        check(end <= buffer.capacity()) {
+            "Buffer too small to contain the message"
+        }
         buffer.mark()
         buffer.position(buffer.limit()) // restore old position
         buffer.limit(end)
@@ -99,15 +124,16 @@ class Socks5Endpoint(host: String, port: Int) {
         buffer.reset()
     }
 
-    fun udpWrap(packet: ByteBuffer) = ByteBuffer.allocateDirect(3 + dest.size + packet.remaining()).apply {
-        // header
-        putShort(0) // reserved
-        put(0)      // fragment number
-        put(dest)
-        // data
-        put(packet)
-        flip()
-    }
+    fun udpWrap(packet: ByteBuffer) =
+        ByteBuffer.allocateDirect(3 + dest.size + packet.remaining()).apply {
+            // header
+            putShort(0) // reserved
+            put(0) // fragment number
+            put(dest)
+            // data
+            put(packet)
+            flip()
+        }
     fun udpReceiveBuffer(size: Int) = ByteBuffer.allocateDirect(headerReserved + size)
     fun udpUnwrap(packet: ByteBuffer) {
         packet.position(3)
