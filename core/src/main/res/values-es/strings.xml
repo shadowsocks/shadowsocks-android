@@ -4,7 +4,7 @@
 <string name="remote_dns">"DNS Remoto"</string>
 <string name="stat_summary">"Enviado: \t\t\t\t\t%3$s\t↑\t%1$s
 Recibido: \t%4$s\t↓\t%2$s"</string>
-<string name="connection_test_testing">"Probando..."</string>
+<string name="connection_test_testing">"Probando…"</string>
 <string name="connection_test_available">"Éxito: El establecimiento de la comunicación HTTPS tomó %dms"</string>
 <string name="connection_test_error">"Fallo al detectar conexión a Internet: %s"</string>
 <string name="connection_test_fail">"Internet no disponible"</string>
@@ -38,7 +38,7 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
 <string name="invalid_server">"Nombre de servidor inválido"</string>
 <string name="service_failed">"Fallo al conectar al servidor remoto"</string>
 <string name="stop">"Detener"</string>
-<string name="stopping">"Apagando..."</string>
+<string name="stopping">"Apagando…"</string>
 <string name="reboot_required">"Fallo al iniciar servicio VPN. Puede que tengas que reiniciar tu dispositivo."</string>
 <string name="profile_invalid_input">"No se ha encontrado datos de perfil válidos."</string>
 
@@ -88,19 +88,19 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
 <string name="received">"Recibido:"</string>
 
 <!-- status -->
-<string name="connecting">"Conectando..."</string>
+<string name="connecting">"Conectando…"</string>
 <string name="vpn_connected">"Conectado, presiona para verificar la conexión"</string>
 <string name="not_connected">"No conectado"</string>
 
 <!-- acl -->
 <string name="custom_rules">"Reglas personalizadas"</string>
-<string name="action_add_rule">"Agregar regla(s)..."</string>
+<string name="action_add_rule">"Agregar regla(s)…"</string>
 <string name="edit_rule">"Editar regla"</string>
 <string name="route_entry_all">"Todo"</string>
 
 <!-- plugin -->
 <string name="plugin">"Complemento"</string>
-<string name="plugin_configure">"Configurar..."</string>
+<string name="plugin_configure">"Configurar…"</string>
 <string name="plugin_disabled">"Deshabilitado"</string>
 <string name="plugin_unknown">"Complemento desconocido %s"</string>
 <string name="plugin_untrusted">"Precaución: Este complemento no parece venir de una fuente confiable."</string>
@@ -124,17 +124,17 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
 <string name="service_transproxy">"Servicio Transproxy"</string>
 <string name="vpn_permission_denied">"Permiso denegado al crear servicio VPN"</string>
 <string name="direct_boot_aware_summary">"La información del perfil seleccionado será menos protegida"</string>
-<string name="action_import_file">"Importar desde archivo..."</string>
+<string name="action_import_file">"Importar desde archivo…"</string>
 <string name="night_mode">"Modo nocturno"</string>
 <string name="night_mode_system">"Seguir sistema"</string>
 <string name="night_mode_auto">"Auto"</string>
 <string name="night_mode_on">"Encendido"</string>
 <string name="night_mode_off">"Apagado"</string>
 <string name="send_email">"Enviar email"</string>
-<string name="action_export_more">"Exportar..."</string>
-<string name="action_export_file">"Exportar a archivo..."</string>
+<string name="action_export_more">"Exportar…"</string>
+<string name="action_export_file">"Exportar a archivo…"</string>
 <string name="share_over_lan">"Compartir por LAN"</string>
 <string name="connection_test_pending">"Verificar conectividad"</string>
 <string name="file_manager_missing">"Por favor, instala un explorador de archivos como MiXplorer"</string>
-<string name="action_replace_file">"Reemplazar desde archivo..."</string>
+<string name="action_replace_file">"Reemplazar desde archivo…"</string>
 </resources>
