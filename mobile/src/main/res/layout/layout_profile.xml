@@ -68,14 +68,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="0dp"
             android:layout_marginBottom="@dimen/profile_padding"
-            android:layout_marginEnd="12dp"
             android:layout_toStartOf="@+id/traffic"
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="@string/profile_plugin"/>
+            tools:text="@string/profile_plugin" />
 
         <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@+id/traffic"
@@ -83,11 +84,24 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_gravity="bottom"
+            android:layout_marginEnd="104dp"
             android:layout_marginBottom="@dimen/profile_padding"
-            android:layout_marginEnd="12dp"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="@string/traffic"/>
+            tools:text="@string/traffic" />
+
+        <com.github.shadowsocks.widget.AutoCollapseTextView
+            android:id="@+id/ping_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="bottom"
+            android:layout_marginEnd="18dp"
+            android:layout_marginBottom="@dimen/profile_padding"
+            android:ellipsize="end"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="@string/ping_time" />
     </RelativeLayout>
 </LinearLayout>

@@ -141,4 +141,6 @@
 <string name="service_transproxy">"透明代理服務"</string>
 <string name="vpn_permission_denied">"没有權限創建 VPN 服務"</string>
 <string name="auto_connect_summary_v24">"允許 Shadowsocks 隨系統啟動，建議使用始終開啟的 VPN"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

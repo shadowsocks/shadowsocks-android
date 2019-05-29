@@ -144,4 +144,6 @@
 <string name="night_mode_auto">"Oto"</string>
 <string name="night_mode_on">"Açık"</string>
 <string name="night_mode_off">"Kapalı"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

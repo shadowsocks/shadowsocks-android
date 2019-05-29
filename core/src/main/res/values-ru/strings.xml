@@ -159,4 +159,6 @@
 <string name="share_over_lan">"Поделиться через LAN"</string>
 <string name="connection_test_pending">"Проверить подключение"</string>
 <string name="file_manager_missing">"Установите файловый менеджер"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

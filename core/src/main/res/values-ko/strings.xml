@@ -113,4 +113,6 @@
 <string name="plugin_untrusted">"경고: 이 플러그인은 신뢰할 수 있는 출처에서 온 것이 아닌 것 같습니다"</string>
 <string name="profile_plugin">"플러그인: %s"</string>
 <string name="add_profile_scanner_permission_required">"QR 코드를 읽어 들이려면 카메라 권한이 필요합니다"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

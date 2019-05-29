@@ -43,15 +43,15 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.datas
-import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import kotlinx.android.synthetic.main.layout_profile.*
 import net.glxn.qrgen.android.QRCode
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -126,6 +126,26 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 tx += txTotal
                 rx += rxTotal
             }
+
+
+
+            doAsync {
+                uiThread {
+                    ping_label.text = "wait..."
+                }
+               val pingResult = NetworkUtils.ping(item.host)
+                uiThread {
+                    if(pingResult.type){
+                        ping_label.text = "Ping: ${pingResult.time}"
+                    }else{
+                        ping_label.text = "time out"
+                    }
+
+                }
+            }
+
+
+
             text1.text = item.formattedName
             text2.text = ArrayList<String>().apply {
                 if (!item.name.isNullOrEmpty()) this += item.formattedAddress
@@ -135,6 +155,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             val context = requireContext()
             traffic.text = if (tx <= 0 && rx <= 0) null else getString(R.string.traffic,
                     Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
+
+
 
             if (item.id == DataStore.profileId) {
                 itemView.isSelected = true
@@ -211,6 +233,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             val pos = itemCount
             profiles += profile
             notifyItemInserted(pos)
+        }
+
+        fun refresh(){
+            profiles.forEach {
+                val currenId = it.id
+                val index = profiles.indexOfFirst { it.id == currenId }
+                notifyItemChanged(index)
+            }
         }
 
         fun move(from: Int, to: Int) {
@@ -384,6 +414,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     clipboard.primaryClip = ClipData.newPlainText(null, profiles.joinToString("\n"))
                     R.string.action_export_msg
                 } else R.string.action_export_err).show()
+                true
+            }
+            // click to test all nodes using Ping
+            // fix https://github.com/shadowsocks/shadowsocks-android/issues/2215
+            R.id.ping_test_server -> {
+                profilesAdapter.refresh()
                 true
             }
             R.id.action_export_file -> {

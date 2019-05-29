@@ -137,4 +137,6 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
 <string name="connection_test_pending">"Verificar conectividad"</string>
 <string name="file_manager_missing">"Por favor, instala un explorador de archivos como MiXplorer"</string>
 <string name="action_replace_file">"Reemplazar desde archivo…"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

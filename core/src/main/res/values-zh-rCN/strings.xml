@@ -154,4 +154,6 @@
 <string name="action_replace_file">"从文件替换…"</string>
 <string name="off">"关"</string>
 <string name="proxied_apps_mode">"模式"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

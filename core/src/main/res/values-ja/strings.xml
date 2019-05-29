@@ -150,4 +150,6 @@
 <string name="action_export_more">"エクスポート"</string>
 <string name="action_export_file">"ファイルへエクスポート"</string>
 <string name="cleartext_http_warning">"クリアテキスト（平文）通信は安全ではありません"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>

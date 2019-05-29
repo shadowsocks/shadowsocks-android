@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:alphabeticShortcut="s"
+        android:id="@+id/ping_test_server"
+        android:title="@string/ping_test_server"
+        app:showAsAction="always">
+    </item>
+    <item
         android:alphabeticShortcut="n"
         android:icon="@drawable/ic_action_note_add"
         android:title="@string/add_profile"

@@ -144,4 +144,6 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
 <string name="share_over_lan">"Partager sur le réseau local"</string>
 <string name="connection_test_pending">"Vérifier la connectivité"</string>
 <string name="file_manager_missing">"Veuillez installer un gestionnaire de fichier tel que MiXplorer"</string>
+    <string name="ping_test_server">Ping</string>
+    <string name="ping_time">Ping: 200ms</string>
 </resources>
