@@ -10,8 +10,8 @@ buildscript {
         sdkVersion = 28
         compileSdkVersion = 'android-Q'
         junitVersion = '4.12'
-        androidTestVersion = '1.1.1'
-        androidEspressoVersion = '3.1.1'
+        androidTestVersion = '1.2.0-beta01'
+        androidEspressoVersion = '3.2.0-beta01'
         versionCode = 4080050
         versionName = '4.8.0-nightly'
         resConfigs = ['es', 'fa', 'fr', 'ja', 'ko', 'ru', 'tr', 'zh-rCN', 'zh-rTW']
@@ -26,7 +26,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:3.5.0-beta03'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
         classpath 'com.google.gms:google-services:4.2.0'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'

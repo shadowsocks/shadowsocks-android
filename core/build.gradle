@@ -47,8 +47,8 @@ androidExtensions {
     experimental = true
 }
 
-def lifecycleVersion = '2.0.0'
-def roomVersion = '2.0.0'
+def lifecycleVersion = '2.1.0-beta01'
+def roomVersion = '2.1.0-rc01'
 dependencies {
     api project(':plugin')
     api "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
@@ -68,5 +68,5 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.0'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1-beta01'
 }

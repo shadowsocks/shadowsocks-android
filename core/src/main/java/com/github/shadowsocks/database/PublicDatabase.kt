@@ -36,6 +36,7 @@ abstract class PublicDatabase : RoomDatabase() {
                     .addMigrations(
                             Migration3
                     )
+                    .enableMultiInstanceInvalidation()
                     .fallbackToDestructiveMigration()
                     .build()
         }
