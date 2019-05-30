@@ -169,15 +169,18 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             inputLayout.error = message
         }
 
-        override fun ret(which: Int) = if (which != DialogInterface.BUTTON_POSITIVE) null else {
-            AclEditResult(editText.text.toString().let { text ->
-                when (Template.values()[templateSelector.selectedItemPosition]) {
-                    Template.Generic -> AclItem(text)
-                    Template.Domain -> AclItem(IDN.toASCII(text, IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
-                            .replace(".", "\\.").let { "(^|\\.)$it\$" })
-                    Template.Url -> AclItem(text, true)
-                }
-            }, arg)
+        override fun ret(which: Int) = when (which) {
+            DialogInterface.BUTTON_POSITIVE, DialogInterface.BUTTON_NEUTRAL -> {
+                AclEditResult(editText.text.toString().let { text ->
+                    when (Template.values()[templateSelector.selectedItemPosition]) {
+                        Template.Generic -> AclItem(text)
+                        Template.Domain -> AclItem(IDN.toASCII(text, IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
+                                .replace(".", "\\.").let { "(^|\\.)$it\$" })
+                        Template.Url -> AclItem(text, true)
+                    }
+                }, arg)
+            }
+            else -> null
         }
 
         override fun onClick(dialog: DialogInterface?, which: Int) {

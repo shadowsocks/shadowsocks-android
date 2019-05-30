@@ -3,7 +3,6 @@
                   app:initialExpandedChildrenCount="4">
     <SwitchPreference
         app:key="isAutoConnect"
-        app:persistent="false"
         app:summary="@string/auto_connect_summary"
         app:title="@string/auto_connect"/>
     <SwitchPreference

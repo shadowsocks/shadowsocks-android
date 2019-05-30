@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2018 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2018 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2019 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2019 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,16 +18,28 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.tv
+package com.github.shadowsocks.utils
 
-import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
-import com.github.shadowsocks.utils.SingleInstanceActivity
+import androidx.activity.ComponentActivity
+import androidx.annotation.MainThread
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 
-class MainActivity : FragmentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        SingleInstanceActivity.register(this) ?: return
-        setContentView(R.layout.activity_main)
+/**
+ * See also: https://stackoverflow.com/a/30821062/2245107
+ */
+object SingleInstanceActivity : DefaultLifecycleObserver {
+    private val active = mutableSetOf<Class<LifecycleOwner>>()
+
+    @MainThread
+    fun register(activity: ComponentActivity) = if (active.add(activity.javaClass)) apply {
+        activity.lifecycle.addObserver(this)
+    } else {
+        activity.finish()
+        null
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        check(active.remove(owner.javaClass)) { "Double destroy?" }
     }
 }

@@ -35,6 +35,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.utils.resolveResourceId
 
 class UdpFallbackProfileActivity : AppCompatActivity() {
@@ -77,11 +78,12 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
     private val profilesAdapter = ProfilesAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (editingId == null) {
             finish()
             return
         }
-        super.onCreate(savedInstanceState)
+        SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_udp_fallback)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
