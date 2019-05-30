@@ -62,9 +62,11 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
             val exitChannel = Channel<Int>()
             try {
                 while (true) {
-                    thread(name = "stderr-$cmdName") { streamLogger(process.errorStream) { Log.e(cmdName, it) } }
+                    thread(name = "stderr-$cmdName") {
+                        streamLogger(process.errorStream) { Crashlytics.log(Log.ERROR, cmdName, it) }
+                    }
                     thread(name = "stdout-$cmdName") {
-                        streamLogger(process.inputStream) { Log.i(cmdName, it) }
+                        streamLogger(process.inputStream) { Crashlytics.log(Log.VERBOSE, cmdName, it) }
                         // this thread also acts as a daemon thread for waitFor
                         runBlocking { exitChannel.send(process.waitFor()) }
                     }
@@ -73,7 +75,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                     running = false
                     if (SystemClock.elapsedRealtime() - startTime < 1000) {
                         throw IOException("$cmdName exits too fast (exit code: $exitCode)")
-                    }
+                    } else Crashlytics.logException(IOException("$cmdName unexpectedly exits with code $exitCode"))
                     Crashlytics.log(Log.DEBUG, TAG,
                             "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
