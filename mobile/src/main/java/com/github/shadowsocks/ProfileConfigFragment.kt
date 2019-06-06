@@ -74,7 +74,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         val activity = requireActivity()
         profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
         addPreferencesFromResource(R.xml.pref_profile)
-        findPreference<EditTextPreference>(Key.remotePort)!!.onBindEditTextListener = EditTextPreferenceModifiers.Port
+        findPreference<EditTextPreference>(Key.remotePort)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
         val serviceMode = DataStore.serviceMode
         findPreference<Preference>(Key.remoteDns)!!.isEnabled = serviceMode != Key.modeProxy
@@ -104,7 +104,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             }
             true
         }
-        pluginConfigure.onBindEditTextListener = EditTextPreferenceModifiers.Monospace
+        pluginConfigure.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
         pluginConfigure.onPreferenceChangeListener = this
         initPlugins()
         receiver = Core.listenForPackageChanges(false) { initPlugins() }

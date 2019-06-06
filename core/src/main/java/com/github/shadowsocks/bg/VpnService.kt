@@ -30,7 +30,6 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
-import androidx.core.os.BuildCompat
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
@@ -109,9 +108,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
         }
     private val underlyingNetworks get() =
-        // clearing underlyingNetworks makes Android 9+ consider the network to be metered
-        if (Build.VERSION.SDK_INT == 28 && !BuildCompat.isAtLeastQ() && metered) null
-        else underlyingNetwork?.let { arrayOf(it) }
+        // clearing underlyingNetworks makes Android 9 consider the network to be metered
+        if (Build.VERSION.SDK_INT == 28 && metered) null else underlyingNetwork?.let { arrayOf(it) }
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
@@ -199,7 +197,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         active = true   // possible race condition here?
         if (Build.VERSION.SDK_INT >= 22) {
             builder.setUnderlyingNetworks(underlyingNetworks)
-            if (BuildCompat.isAtLeastQ()) builder.setMetered(metered)
+            if (Build.VERSION.SDK_INT >= 29) builder.setMetered(metered)
         }
 
         val conn = builder.establish() ?: throw NullConnectionException()

@@ -23,10 +23,8 @@ package com.github.shadowsocks.bg
 import android.annotation.TargetApi
 import android.net.DnsResolver
 import android.net.Network
-import android.net.ParseException
+import android.os.Build
 import android.os.CancellationSignal
-import android.system.ErrnoException
-import androidx.core.os.BuildCompat
 import com.github.shadowsocks.Core
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -39,7 +37,7 @@ import kotlin.coroutines.resumeWithException
 
 sealed class DnsResolverCompat {
     companion object : DnsResolverCompat() {
-        private val instance by lazy { if (BuildCompat.isAtLeastQ()) DnsResolverCompat29 else DnsResolverCompat21 }
+        private val instance by lazy { if (Build.VERSION.SDK_INT >= 29) DnsResolverCompat29 else DnsResolverCompat21 }
 
         override suspend fun resolve(network: Network, host: String) = instance.resolve(network, host)
         override suspend fun resolveOnActiveNetwork(host: String) = instance.resolveOnActiveNetwork(host)
@@ -70,10 +68,10 @@ sealed class DnsResolverCompat {
                 cont.invokeOnCancellation { signal.cancel() }
                 // retry should be handled by client instead
                 DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, InPlaceExecutor,
-                        signal, object : DnsResolver.InetAddressAnswerCallback() {
-                    override fun onAnswer(answer: MutableList<InetAddress>) = cont.resume(answer.toTypedArray())
-                    override fun onQueryException(exception: ErrnoException) = cont.resumeWithException(exception)
-                    override fun onParseException(exception: ParseException) = cont.resumeWithException(exception)
+                        signal, object : DnsResolver.Callback<Collection<InetAddress>> {
+                    override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) =
+                            cont.resume(answer.toTypedArray())
+                    override fun onError(error: DnsResolver.DnsException) = cont.resumeWithException(error)
                 })
             }
         }

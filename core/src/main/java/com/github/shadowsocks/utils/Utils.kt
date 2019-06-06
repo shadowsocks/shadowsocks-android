@@ -35,10 +35,12 @@ import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
-import androidx.core.os.BuildCompat
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import kotlin.coroutines.resume
@@ -57,7 +59,7 @@ private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
  */
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let {
-            if (BuildCompat.isAtLeastQ()) it else parseNumericAddress.invoke(null, this) as InetAddress
+            if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress.invoke(null, this) as InetAddress
         }
 
 fun <K, V> MutableMap<K, V>.computeIfAbsentCompat(key: K, value: () -> V) = if (Build.VERSION.SDK_INT >= 24)

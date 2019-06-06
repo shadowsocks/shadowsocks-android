@@ -78,15 +78,15 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
-        hosts.onBindEditTextListener = EditTextPreferenceModifiers.Monospace
+        hosts.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
         hosts.summaryProvider = HostsSummaryProvider
         val serviceMode = findPreference<Preference>(Key.serviceMode)!!
         val portProxy = findPreference<EditTextPreference>(Key.portProxy)!!
-        portProxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
+        portProxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         val portLocalDns = findPreference<EditTextPreference>(Key.portLocalDns)!!
-        portLocalDns.onBindEditTextListener = EditTextPreferenceModifiers.Port
+        portLocalDns.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)!!
-        portTransproxy.onBindEditTextListener = EditTextPreferenceModifiers.Port
+        portTransproxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
             val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
                 Key.modeProxy -> Pair(false, false)
