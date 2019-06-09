@@ -289,6 +289,10 @@ class AppManager : AppCompatActivity() {
                 }
                 Snackbar.make(list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
             }
+            android.R.id.home -> {
+                this.onBackPressed()
+                return true
+            }
         }
         return false
     }
