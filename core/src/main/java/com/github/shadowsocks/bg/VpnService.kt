@@ -108,8 +108,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             if (active && Build.VERSION.SDK_INT >= 22) setUnderlyingNetworks(underlyingNetworks)
         }
     private val underlyingNetworks get() =
-        // clearing underlyingNetworks makes Android 9+ consider the network to be metered
-        if (Build.VERSION.SDK_INT >= 28 && metered) null else underlyingNetwork?.let { arrayOf(it) }
+        // clearing underlyingNetworks makes Android 9 consider the network to be metered
+        if (Build.VERSION.SDK_INT == 28 && metered) null else underlyingNetwork?.let { arrayOf(it) }
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
@@ -139,7 +139,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
-    override suspend fun resolver(host: String) = DefaultNetworkListener.get().getAllByName(host)
+    override suspend fun resolver(host: String) = DnsResolverCompat.resolve(DefaultNetworkListener.get(), host)
     override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
 
     override suspend fun startProcesses() {
@@ -195,7 +195,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
         metered = profile.metered
         active = true   // possible race condition here?
-        if (Build.VERSION.SDK_INT >= 22) builder.setUnderlyingNetworks(underlyingNetworks)
+        if (Build.VERSION.SDK_INT >= 22) {
+            builder.setUnderlyingNetworks(underlyingNetworks)
+            if (Build.VERSION.SDK_INT >= 29) builder.setMetered(metered)
+        }
 
         val conn = builder.establish() ?: throw NullConnectionException()
         this.conn = conn

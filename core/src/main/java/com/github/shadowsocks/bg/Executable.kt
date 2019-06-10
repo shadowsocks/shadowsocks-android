@@ -37,7 +37,7 @@ object Executable {
     private val EXECUTABLES = setOf(SS_LOCAL, REDSOCKS, TUN2SOCKS)
 
     fun killAll() {
-        for (process in File("/proc").listFiles { _, name -> TextUtils.isDigitsOnly(name) }) {
+        for (process in File("/proc").listFiles { _, name -> TextUtils.isDigitsOnly(name) } ?: return) {
             val exe = File(try {
                 File(process, "cmdline").inputStream().bufferedReader().readText()
             } catch (_: IOException) {

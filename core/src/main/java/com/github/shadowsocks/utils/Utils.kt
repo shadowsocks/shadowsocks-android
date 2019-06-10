@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.utils
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
@@ -36,25 +37,30 @@ import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import kotlin.coroutines.resume
 
 val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 
-private val parseNumericAddress by lazy {
+private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
         isAccessible = true
     }
 }
 /**
- * A slightly more performant variant of InetAddress.parseNumericAddress.
+ * A slightly more performant variant of parseNumericAddress.
  *
- * Bug: https://issuetracker.google.com/issues/123456213
+ * Bug in Android 9.0 and lower: https://issuetracker.google.com/issues/123456213
  */
-fun String.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
-        ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let { parseNumericAddress.invoke(null, this) as InetAddress }
+fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
+        ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let {
+            if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress.invoke(null, this) as InetAddress
+        }
 
 fun <K, V> MutableMap<K, V>.computeIfAbsentCompat(key: K, value: () -> V) = if (Build.VERSION.SDK_INT >= 24)
     computeIfAbsent(key) { value() } else this[key] ?: value().also { put(key, it) }

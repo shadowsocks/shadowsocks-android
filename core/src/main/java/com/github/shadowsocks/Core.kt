@@ -31,6 +31,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.UserManager
 import androidx.annotation.RequiresApi
@@ -61,6 +62,7 @@ object Core {
 
     lateinit var app: Application
     lateinit var configureIntent: (Context) -> PendingIntent
+    val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
     val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }

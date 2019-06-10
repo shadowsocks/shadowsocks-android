@@ -427,7 +427,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 is URL -> acl.urls.add(it)
             }
         }
-        clipboard.primaryClip = ClipData.newPlainText(null, acl.toString())
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, acl.toString()))
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {

@@ -49,7 +49,7 @@ import androidx.core.os.bundleOf
  *&lt;/manifest&gt;</pre>
  */
 abstract class NativePluginProvider : ContentProvider() {
-    override fun getType(p0: Uri?): String = "application/x-elf"
+    override fun getType(uri: Uri): String? = "application/x-elf"
 
     override fun onCreate(): Boolean = true
 
@@ -61,7 +61,7 @@ abstract class NativePluginProvider : ContentProvider() {
     protected abstract fun populateFiles(provider: PathProvider)
 
     override fun query(uri: Uri, projection: Array<out String>?, selection: String?, selectionArgs: Array<out String>?,
-                       sortOrder: String?): Cursor {
+                       sortOrder: String?): Cursor? {
         check(selection == null && selectionArgs == null && sortOrder == null)
         val result = MatrixCursor(projection)
         populateFiles(PathProvider(uri, result))
@@ -78,8 +78,8 @@ abstract class NativePluginProvider : ContentProvider() {
      */
     open fun getExecutable(): String = throw UnsupportedOperationException()
 
-    abstract fun openFile(uri: Uri?): ParcelFileDescriptor
-    override fun openFile(uri: Uri?, mode: String?): ParcelFileDescriptor {
+    abstract fun openFile(uri: Uri): ParcelFileDescriptor
+    override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
         check(mode == "r")
         return openFile(uri)
     }
@@ -90,8 +90,9 @@ abstract class NativePluginProvider : ContentProvider() {
     }
 
     // Methods that should not be used
-    override fun insert(p0: Uri?, p1: ContentValues?): Uri = throw UnsupportedOperationException()
-    override fun update(p0: Uri?, p1: ContentValues?, p2: String?, p3: Array<out String>?): Int =
+    override fun insert(uri: Uri, values: ContentValues?): Uri? = throw UnsupportedOperationException()
+    override fun update(uri: Uri, values: ContentValues?, selection: String?, selectionArgs: Array<out String>?): Int =
             throw UnsupportedOperationException()
-    override fun delete(p0: Uri?, p1: String?, p2: Array<out String>?): Int = throw UnsupportedOperationException()
+    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int =
+            throw UnsupportedOperationException()
 }

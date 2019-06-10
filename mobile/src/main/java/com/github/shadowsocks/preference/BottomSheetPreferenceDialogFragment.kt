@@ -99,7 +99,7 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     }
 
     fun setArg(key: String) {
-        arguments = bundleOf(PreferenceDialogFragmentCompat.ARG_KEY to key)
+        arguments = bundleOf(ARG_KEY to key)
     }
 
     private val preference by lazy { getPreference() as IconListPreference }

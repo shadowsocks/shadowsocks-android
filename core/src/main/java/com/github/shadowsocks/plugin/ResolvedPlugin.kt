@@ -30,10 +30,10 @@ import com.github.shadowsocks.utils.signaturesCompat
 abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin() {
     protected abstract val metaData: Bundle
 
-    override val id: String by lazy { metaData.getString(PluginContract.METADATA_KEY_ID) }
+    override val id: String by lazy { metaData.getString(PluginContract.METADATA_KEY_ID)!! }
     override val label: CharSequence by lazy { resolveInfo.loadLabel(app.packageManager) }
     override val icon: Drawable by lazy { resolveInfo.loadIcon(app.packageManager) }
-    override val defaultConfig: String by lazy { metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
+    override val defaultConfig: String? by lazy { metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
     override val packageName: String get() = resolveInfo.resolvePackageName
     override val trusted by lazy {
         Core.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)

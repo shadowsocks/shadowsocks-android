@@ -39,6 +39,7 @@ abstract class PrivateDatabase : RoomDatabase() {
                             Migration27,
                             Migration28
                     )
+                    .enableMultiInstanceInvalidation()
                     .fallbackToDestructiveMigration()
                     .allowMainThreadQueries()
                     .build()

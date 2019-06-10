@@ -185,7 +185,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_clipboard -> {
-                clipboard.primaryClip = ClipData.newPlainText(null, this.item.toString())
+                clipboard.setPrimaryClip(ClipData.newPlainText(null, this.item.toString()))
                 true
             }
             else -> false
@@ -381,7 +381,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             R.id.action_export_clipboard -> {
                 val profiles = ProfileManager.getAllProfiles()
                 (activity as MainActivity).snackbar().setText(if (profiles != null) {
-                    clipboard.primaryClip = ClipData.newPlainText(null, profiles.joinToString("\n"))
+                    clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.joinToString("\n")))
                     R.string.action_export_msg
                 } else R.string.action_export_err).show()
                 true
@@ -413,7 +413,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 try {
                     ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
                         activity.contentResolver.openInputStream(it)
-                    })
+                    }.filterNotNull())
                 } catch (e: Exception) {
                     activity.snackbar(e.readableMessage).show()
                 }
@@ -423,7 +423,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 try {
                     ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
                         activity.contentResolver.openInputStream(it)
-                    }, true)
+                    }.filterNotNull(), true)
                 } catch (e: Exception) {
                     activity.snackbar(e.readableMessage).show()
                 }
