@@ -45,17 +45,20 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
     private val tester = ViewModelProviders.of(context as FragmentActivity).get<HttpsTest>()
-    private val behavior = object : Behavior() {
-        val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
-        override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
-                                    dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int, type: Int,
-                                    consumed: IntArray) {
-            val dy = dyConsumed + dyUnconsumed
-            super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (Math.abs(dy) >= threshold) dy else 0,
-                    dxUnconsumed, 0, type, consumed)
+    private lateinit var behavior: Behavior
+    override fun getBehavior(): Behavior {
+        if (!this::behavior.isInitialized) behavior = object : Behavior() {
+            val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
+            override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
+                                        dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
+                                        type: Int, consumed: IntArray) {
+                val dy = dyConsumed + dyUnconsumed
+                super.onNestedScroll(coordinatorLayout, child, target, dxConsumed,
+                        if (Math.abs(dy) >= threshold) dy else 0, dxUnconsumed, 0, type, consumed)
+            }
         }
+        return behavior
     }
-    override fun getBehavior() = behavior
 
     override fun setOnClickListener(l: OnClickListener?) {
         statusText = findViewById(R.id.status)
