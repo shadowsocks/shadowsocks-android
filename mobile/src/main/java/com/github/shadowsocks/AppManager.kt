@@ -27,6 +27,7 @@ import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -250,8 +251,8 @@ class AppManager : AppCompatActivity() {
         menuInflater.inflate(R.menu.app_manager_menu, menu)
         return true
     }
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.action_apply_all -> {
                 val profiles = ProfileManager.getAllProfiles()
                 if (profiles != null) {
@@ -290,8 +291,11 @@ class AppManager : AppCompatActivity() {
                 Snackbar.make(list, R.string.action_import_err, Snackbar.LENGTH_LONG).show()
             }
         }
-        return false
+        return super.onOptionsItemSelected(item)
     }
+
+    override fun supportNavigateUpTo(upIntent: Intent) =
+            super.supportNavigateUpTo(upIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?) = if (keyCode == KeyEvent.KEYCODE_MENU)
         if (toolbar.isOverflowMenuShowing) toolbar.hideOverflowMenu() else toolbar.showOverflowMenu()

@@ -45,7 +45,6 @@
         <activity
             android:name=".UdpFallbackProfileActivity"
             android:label="@string/udp_fallback"
-            android:parentActivityName=".ProfileConfigActivity"
             android:excludeFromRecents="true"/>
 
         <activity
