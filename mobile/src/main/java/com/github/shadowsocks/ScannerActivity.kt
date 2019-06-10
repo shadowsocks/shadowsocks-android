@@ -128,6 +128,11 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
         else -> false
     }
 
+    /**
+     * See also: https://stackoverflow.com/a/31350642/2245107
+     */
+    override fun shouldUpRecreateTask(targetIntent: Intent?) = super.shouldUpRecreateTask(targetIntent) || isTaskRoot
+
     private fun startImport(manual: Boolean = false) = startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
         addCategory(Intent.CATEGORY_OPENABLE)
         type = "image/*"
