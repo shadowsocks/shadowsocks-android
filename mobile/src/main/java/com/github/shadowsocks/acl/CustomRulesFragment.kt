@@ -446,7 +446,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
         R.id.action_import_gfwlist -> {
             val acl = Acl().fromId(Acl.GFWLIST)
-            if (!acl.bypass) acl.subnets.asIterable().forEach { adapter.addSubnet(it) }
+            if (acl.bypass) acl.subnets.asIterable().forEach { adapter.addSubnet(it) }
             acl.proxyHostnames.asIterable().forEach { adapter.addHostname(it) }
             acl.urls.asIterable().forEach { adapter.addURL(it) }
             true
