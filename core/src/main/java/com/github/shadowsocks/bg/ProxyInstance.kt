@@ -58,7 +58,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
             val (config, success) = RemoteConfig.fetch()
             scheduleConfigUpdate = !success
-            val conn = service.openConnection(URL(config.getString("proxy_url"))) as HttpURLConnection
+            val conn = withContext(Dispatchers.IO) {
+                // Network.openConnection might use networking, see https://issuetracker.google.com/issues/135242093
+                service.openConnection(URL(config.getString("proxy_url"))) as HttpURLConnection
+            }
             conn.requestMethod = "POST"
             conn.doOutput = true
 
