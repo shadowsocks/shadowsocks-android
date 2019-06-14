@@ -325,7 +325,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                 try {
                     // we read and persist all its content here to avoid content URL permission issues
                     hosts.text = context.contentResolver.openInputStream(data!!.data!!)!!.bufferedReader().readText()
-                } catch (e: RuntimeException) {
+                } catch (e: Exception) {
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
             }

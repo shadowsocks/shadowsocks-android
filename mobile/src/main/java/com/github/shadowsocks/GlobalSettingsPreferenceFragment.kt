@@ -130,7 +130,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
                 try {
                     // we read and persist all its content here to avoid content URL permission issues
                     hosts.text = activity.contentResolver.openInputStream(data!!.data!!)!!.bufferedReader().readText()
-                } catch (e: RuntimeException) {
+                } catch (e: Exception) {
                     activity.snackbar(e.readableMessage).show()
                 }
             }
