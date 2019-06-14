@@ -38,7 +38,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.work.Configuration
-import androidx.work.WorkManager
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -57,7 +56,7 @@ import java.io.File
 import java.io.IOException
 import kotlin.reflect.KClass
 
-object Core {
+object Core : Configuration.Provider {
     const val TAG = "Core"
 
     lateinit var app: Application
@@ -85,7 +84,7 @@ object Core {
         return result
     }
 
-    fun init(app: Application, configureClass: KClass<out Any>) {
+    fun <T> init(app: T, configureClass: KClass<out Any>) where T : Application, T : Configuration.Provider {
         this.app = app
         this.configureIntent = {
             PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
@@ -105,7 +104,6 @@ object Core {
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
         Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
         FirebaseApp.initializeApp(deviceStorage)
-        WorkManager.initialize(deviceStorage, Configuration.Builder().build())
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
@@ -138,6 +136,8 @@ object Core {
             nm.deleteNotificationChannel("service-nat") // NAT mode is gone for good
         }
     }
+
+    override fun getWorkManagerConfiguration() = Configuration.Builder().build()
 
     fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,
             if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
