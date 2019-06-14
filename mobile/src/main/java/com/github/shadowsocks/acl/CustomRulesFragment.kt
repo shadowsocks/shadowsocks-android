@@ -96,7 +96,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private lateinit var templateSelector: Spinner
         private lateinit var editText: EditText
         private lateinit var inputLayout: TextInputLayout
-        private lateinit var positive: Button
+        private val positive by lazy { (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE) }
 
         override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
             val activity = requireActivity()
@@ -128,7 +128,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
         override fun onStart() {
             super.onStart()
-            positive = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
             validate()
         }
 
