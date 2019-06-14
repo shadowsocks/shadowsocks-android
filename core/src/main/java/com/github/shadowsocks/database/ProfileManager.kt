@@ -26,6 +26,8 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.printLog
+import com.google.gson.JsonParser
+import com.google.gson.stream.JsonReader
 import org.json.JSONArray
 import java.io.IOException
 import java.io.InputStream
@@ -52,6 +54,7 @@ object ProfileManager {
         return profile
     }
 
+    private val jsonParser = JsonParser()
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
         val profiles = if (replace) getAllProfiles()?.associateBy { it.formattedAddress } else null
         val feature = if (replace) {
@@ -60,7 +63,9 @@ object ProfileManager {
         val lazyClear = lazy { clear() }
         var result: Exception? = null
         for (json in jsons) try {
-            Profile.parseJson(json.bufferedReader().readText(), feature) {
+            Profile.parseJson(jsonParser.parse(JsonReader(json.bufferedReader()).apply {
+                isLenient = true
+            }), feature) {
                 if (replace) {
                     lazyClear.value
                     // if two profiles has the same address, treat them as the same profile and copy stats over
