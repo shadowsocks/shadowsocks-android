@@ -86,20 +86,21 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
     var bandwidthTimeout = 0L
         set(value) {
             val service = service
-            if (bandwidthTimeout != value && service != null)
-                if (value > 0) service.startListeningForBandwidth(serviceCallback, value) else try {
-                    service.stopListeningForBandwidth(serviceCallback)
-                } catch (_: DeadObjectException) { }
+            if (bandwidthTimeout != value && service != null) try {
+                if (value > 0) service.startListeningForBandwidth(serviceCallback, value)
+                else service.stopListeningForBandwidth(serviceCallback)
+            } catch (_: DeadObjectException) { }
             field = value
         }
     var service: IShadowsocksService? = null
 
     override fun onServiceConnected(name: ComponentName?, binder: IBinder) {
         this.binder = binder
-        if (listenForDeath) binder.linkToDeath(this, 0)
         val service = IShadowsocksService.Stub.asInterface(binder)!!
         this.service = service
-        if (!callbackRegistered) try {
+        try {
+            if (listenForDeath) binder.linkToDeath(this, 0)
+            check(!callbackRegistered)
             service.registerCallback(serviceCallback)
             callbackRegistered = true
             if (bandwidthTimeout > 0) service.startListeningForBandwidth(serviceCallback, bandwidthTimeout)
@@ -116,6 +117,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
 
     override fun binderDied() {
         service = null
+        callbackRegistered = false
         callback?.also { handler.post(it::onBinderDied) }
     }
 
