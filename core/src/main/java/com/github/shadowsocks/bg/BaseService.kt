@@ -94,7 +94,7 @@ object BaseService {
         }
     }
 
-    class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), AutoCloseable {
+    class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), CoroutineScope, AutoCloseable {
         val callbacks = object : RemoteCallbackList<IShadowsocksServiceCallback>() {
             override fun onCallbackDied(callback: IShadowsocksServiceCallback?, cookie: Any?) {
                 super.onCallbackDied(callback, cookie)
@@ -102,7 +102,8 @@ object BaseService {
             }
         }
         private val bandwidthListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
-        private val handler = Handler()
+        override val coroutineContext = Dispatchers.Main.immediate + Job()
+        private var looper: Job? = null
 
         override fun getState(): Int = (data?.state ?: State.Idle).ordinal
         override fun getProfileName(): String = data?.proxy?.profile?.name ?: "Idle"
@@ -123,56 +124,63 @@ object BaseService {
             callbacks.finishBroadcast()
         }
 
-        private fun registerTimeout() {
-            handler.postDelayed(this::onTimeout, bandwidthListeners.values.min() ?: return)
-        }
-        private fun onTimeout() {
-            val proxies = listOfNotNull(data?.proxy, data?.udpFallback)
-            val stats = proxies
-                    .map { Pair(it.profile.id, it.trafficMonitor?.requestUpdate()) }
-                    .filter { it.second != null }
-                    .map { Triple(it.first, it.second!!.first, it.second!!.second) }
-            if (stats.any { it.third } && data?.state == State.Connected && bandwidthListeners.isNotEmpty()) {
-                val sum = stats.fold(TrafficStats()) { a, b -> a + b.second }
-                broadcast { item ->
-                    if (bandwidthListeners.contains(item.asBinder())) {
-                        stats.forEach { (id, stats) -> item.trafficUpdated(id, stats) }
-                        item.trafficUpdated(0, sum)
+        private suspend fun loop() {
+            while (true) {
+                delay(bandwidthListeners.values.min() ?: return)
+                val proxies = listOfNotNull(data?.proxy, data?.udpFallback)
+                val stats = proxies
+                        .map { Pair(it.profile.id, it.trafficMonitor?.requestUpdate()) }
+                        .filter { it.second != null }
+                        .map { Triple(it.first, it.second!!.first, it.second!!.second) }
+                if (stats.any { it.third } && data?.state == State.Connected && bandwidthListeners.isNotEmpty()) {
+                    val sum = stats.fold(TrafficStats()) { a, b -> a + b.second }
+                    broadcast { item ->
+                        if (bandwidthListeners.contains(item.asBinder())) {
+                            stats.forEach { (id, stats) -> item.trafficUpdated(id, stats) }
+                            item.trafficUpdated(0, sum)
+                        }
                     }
                 }
             }
-            registerTimeout()
         }
 
         override fun startListeningForBandwidth(cb: IShadowsocksServiceCallback, timeout: Long) {
-            val wasEmpty = bandwidthListeners.isEmpty()
-            if (bandwidthListeners.put(cb.asBinder(), timeout) == null) {
-                if (wasEmpty) registerTimeout()
-                if (data?.state != State.Connected) return
-                var sum = TrafficStats()
-                val data = data
-                val proxy = data?.proxy ?: return
-                proxy.trafficMonitor?.out.also { stats ->
-                    cb.trafficUpdated(proxy.profile.id, if (stats == null) sum else {
-                        sum += stats
-                        stats
-                    })
-                }
-                data.udpFallback?.also { udpFallback ->
-                    udpFallback.trafficMonitor?.out.also { stats ->
-                        cb.trafficUpdated(udpFallback.profile.id, if (stats == null) TrafficStats() else {
+            launch {
+                val wasEmpty = bandwidthListeners.isEmpty()
+                if (bandwidthListeners.put(cb.asBinder(), timeout) == null) {
+                    if (wasEmpty) {
+                        check(looper == null)
+                        looper = launch { loop() }
+                    }
+                    if (data?.state != State.Connected) return@launch
+                    var sum = TrafficStats()
+                    val data = data
+                    val proxy = data?.proxy ?: return@launch
+                    proxy.trafficMonitor?.out.also { stats ->
+                        cb.trafficUpdated(proxy.profile.id, if (stats == null) sum else {
                             sum += stats
                             stats
                         })
                     }
+                    data.udpFallback?.also { udpFallback ->
+                        udpFallback.trafficMonitor?.out.also { stats ->
+                            cb.trafficUpdated(udpFallback.profile.id, if (stats == null) TrafficStats() else {
+                                sum += stats
+                                stats
+                            })
+                        }
+                    }
+                    cb.trafficUpdated(0, sum)
                 }
-                cb.trafficUpdated(0, sum)
             }
         }
 
         override fun stopListeningForBandwidth(cb: IShadowsocksServiceCallback) {
-            if (bandwidthListeners.remove(cb.asBinder()) != null && bandwidthListeners.isEmpty()) {
-                handler.removeCallbacksAndMessages(null)
+            launch {
+                if (bandwidthListeners.remove(cb.asBinder()) != null && bandwidthListeners.isEmpty()) {
+                    looper!!.cancel()
+                    looper = null
+                }
             }
         }
 
@@ -194,7 +202,7 @@ object BaseService {
 
         override fun close() {
             callbacks.kill()
-            handler.removeCallbacksAndMessages(null)
+            cancel()
             data = null
         }
     }
