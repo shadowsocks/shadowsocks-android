@@ -25,6 +25,7 @@ import android.util.LongSparseArray
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.forEachTry
 import com.github.shadowsocks.utils.printLog
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
@@ -61,8 +62,7 @@ object ProfileManager {
             profiles?.values?.singleOrNull { it.id == DataStore.profileId }
         } else Core.currentProfile?.first
         val lazyClear = lazy { clear() }
-        var result: Exception? = null
-        for (json in jsons) try {
+        jsons.asIterable().forEachTry { json ->
             Profile.parseJson(jsonParser.parse(JsonReader(json.bufferedReader()).apply {
                 isLenient = true
             }), feature) {
@@ -76,10 +76,7 @@ object ProfileManager {
                 }
                 createProfile(it)
             }
-        } catch (e: Exception) {
-            if (result == null) result = e else result.addSuppressed(e)
         }
-        if (result != null) throw result
     }
     fun serializeToJson(profiles: List<Profile>? = getAllProfiles()): JSONArray? {
         if (profiles == null) return null

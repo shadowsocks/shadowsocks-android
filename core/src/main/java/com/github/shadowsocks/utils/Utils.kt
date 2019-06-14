@@ -45,6 +45,19 @@ import java.net.HttpURLConnection
 import java.net.InetAddress
 import kotlin.coroutines.resume
 
+fun <T> Iterable<T>.forEachTry(action: (T) -> Unit) {
+    var result: Exception? = null
+    for (element in this) try {
+        action(element)
+    } catch (e: Exception) {
+        if (result == null) result = e else result.addSuppressed(e)
+    }
+    if (result != null) {
+        result.printStackTrace()
+        throw result
+    }
+}
+
 val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 
 private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {

@@ -40,9 +40,7 @@ import androidx.core.util.forEach
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.utils.datas
-import com.github.shadowsocks.utils.openBitmap
-import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.*
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture
 import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic
@@ -142,20 +140,22 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
         when (requestCode) {
             REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
                 val feature = Core.currentProfile?.first
-                var success = false
-                for (uri in data!!.datas) try {
-                    detector.detect(Frame.Builder().setBitmap(contentResolver.openBitmap(uri)).build())
-                            .forEach { _, barcode ->
-                                Profile.findAllUrls(barcode.rawValue, feature).forEach {
-                                    ProfileManager.createProfile(it)
-                                    success = true
+                try {
+                    var success = false
+                    data!!.datas.forEachTry { uri ->
+                        detector.detect(Frame.Builder().setBitmap(contentResolver.openBitmap(uri)).build())
+                                .forEach { _, barcode ->
+                                    Profile.findAllUrls(barcode.rawValue, feature).forEach {
+                                        ProfileManager.createProfile(it)
+                                        success = true
+                                    }
                                 }
-                            }
+                    }
+                    Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
+                            Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
-                    printLog(e)
+                    Toast.makeText(this, e.readableMessage, Toast.LENGTH_LONG).show()
                 }
-                Toast.makeText(this, if (success) R.string.action_import_msg else R.string.action_import_err,
-                        Toast.LENGTH_SHORT).show()
                 onSupportNavigateUp()
             } else if (requestCode == REQUEST_IMPORT_OR_FINISH) onSupportNavigateUp()
             else -> super.onActivityResult(requestCode, resultCode, data)
