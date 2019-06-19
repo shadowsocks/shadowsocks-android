@@ -1,4 +1,6 @@
 * 1.3.0:
+  * Optional new metadata `com.github.shadowsocks.plugin.executable_path` for even faster initialization;
+    (see doc for `PluginContract.METADATA_KEY_EXECUTABLE_PATH` for more information)
   * Breaking API change: `val AlertDialogFragment.ret: Ret?` => `fun AlertDialogFragment.ret(which: Int): Ret?`;
     (nothing needs to be done if you are not using this API)
   * Dependency updates:
