@@ -54,20 +54,18 @@ sealed class DnsResolverCompat {
     }
 
     @TargetApi(29)
-    private object DnsResolverCompat29 : DnsResolverCompat() {
+    private object DnsResolverCompat29 : DnsResolverCompat(), Executor {
         /**
-         * This executor will run on its caller directly. On Q beta 3, this results in calling in main thread.
+         * This executor will run on its caller directly. On Q beta 3 thru 4, this results in calling in main thread.
          */
-        private object InPlaceExecutor : Executor {
-            override fun execute(command: Runnable?) = command!!.run()
-        }
+        override fun execute(command: Runnable) = command.run()
 
         override suspend fun resolve(network: Network, host: String): Array<InetAddress> {
             return suspendCancellableCoroutine { cont ->
                 val signal = CancellationSignal()
                 cont.invokeOnCancellation { signal.cancel() }
                 // retry should be handled by client instead
-                DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, InPlaceExecutor,
+                DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, this,
                         signal, object : DnsResolver.Callback<Collection<InetAddress>> {
                     override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) =
                             cont.resume(answer.toTypedArray())
