@@ -1,3 +1,11 @@
+* 1.3.0:
+  * Breaking API change: `val AlertDialogFragment.ret: Ret?` => `fun AlertDialogFragment.ret(which: Int): Ret?`;
+    (nothing needs to be done if you are not using this API)
+  * Dependency updates:
+    - Now targeting API 29;
+    - `androidx.core:core-ktx:1.1.0-rc01`;
+    - `com.google.android.material:material:1.1.0-alpha07`;
+    - `org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.31`.
 * 1.2.0:
   * New helper class `AlertDialogFragment` for creating `AlertDialog` that persists through configuration changes;
   * Dependency update: `com.google.android.material:material:1.1.0-alpha03`.
