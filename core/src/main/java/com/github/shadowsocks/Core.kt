@@ -37,7 +37,6 @@ import android.os.UserManager
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import androidx.work.Configuration
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -56,14 +55,14 @@ import java.io.File
 import java.io.IOException
 import kotlin.reflect.KClass
 
-object Core : Configuration.Provider {
+object Core {
     const val TAG = "Core"
 
     lateinit var app: Application
     lateinit var configureIntent: (Context) -> PendingIntent
     val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
-    val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
+    val deviceStorage by lazy { DeviceStorageApp(app) }
     val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }
     val directBootSupported by lazy {
         Build.VERSION.SDK_INT >= 24 && app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
@@ -84,7 +83,7 @@ object Core : Configuration.Provider {
         return result
     }
 
-    fun <T> init(app: T, configureClass: KClass<out Any>) where T : Application, T : Configuration.Provider {
+    fun init(app: Application, configureClass: KClass<out Any>) {
         this.app = app
         this.configureIntent = {
             PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
@@ -136,8 +135,6 @@ object Core : Configuration.Provider {
             nm.deleteNotificationChannel("service-nat") // NAT mode is gone for good
         }
     }
-
-    override fun getWorkManagerConfiguration() = Configuration.Builder().build()
 
     fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,
             if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES

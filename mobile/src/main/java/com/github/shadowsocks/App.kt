@@ -21,17 +21,17 @@
 package com.github.shadowsocks
 
 import android.app.Application
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.work.Configuration
 
-class App : Application(), Configuration.Provider by Core {
+class App : Application() {
     override fun onCreate() {
         super.onCreate()
         Core.init(this, MainActivity::class)
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     }
 
-    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+    override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         Core.updateNotificationChannels()
     }

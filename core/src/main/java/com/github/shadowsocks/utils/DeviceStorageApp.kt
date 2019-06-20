@@ -21,15 +21,15 @@
 package com.github.shadowsocks.utils
 
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import androidx.work.Configuration
 
 @SuppressLint("Registered")
-@TargetApi(24)
-class DeviceStorageApp(context: Context) : Application() {
+class DeviceStorageApp(context: Context) : Application(), Configuration.Provider {
     init {
-        attachBaseContext(context.createDeviceProtectedStorageContext())
+        attachBaseContext(if (Build.VERSION.SDK_INT >= 24) context.createDeviceProtectedStorageContext() else context)
     }
 
     /**
@@ -37,4 +37,6 @@ class DeviceStorageApp(context: Context) : Application() {
      * protected storage.
      */
     override fun getApplicationContext() = this
+
+    override fun getWorkManagerConfiguration() = Configuration.Builder().build()
 }
