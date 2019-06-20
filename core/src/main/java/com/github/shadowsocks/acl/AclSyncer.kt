@@ -22,7 +22,7 @@ package com.github.shadowsocks.acl
 
 import android.content.Context
 import androidx.work.*
-import com.github.shadowsocks.Core.app
+import com.github.shadowsocks.Core
 import kotlinx.coroutines.Dispatchers
 import java.io.IOException
 import java.net.URL
@@ -32,16 +32,16 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
     companion object {
         private const val KEY_ROUTE = "route"
 
-        fun schedule(route: String) = WorkManager.getInstance(app).enqueueUniqueWork(route, ExistingWorkPolicy.REPLACE,
-                OneTimeWorkRequestBuilder<AclSyncer>().run {
-                    setInputData(Data.Builder().putString(KEY_ROUTE, route).build())
-                    setConstraints(Constraints.Builder()
-                            .setRequiredNetworkType(NetworkType.UNMETERED)
-                            .setRequiresCharging(true)
-                            .build())
-                    setInitialDelay(10, TimeUnit.SECONDS)
-                    build()
-                })
+        fun schedule(route: String) = WorkManager.getInstance(Core.deviceStorage).enqueueUniqueWork(
+                route, ExistingWorkPolicy.REPLACE, OneTimeWorkRequestBuilder<AclSyncer>().run {
+            setInputData(Data.Builder().putString(KEY_ROUTE, route).build())
+            setConstraints(Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.UNMETERED)
+                    .setRequiresCharging(true)
+                    .build())
+            setInitialDelay(10, TimeUnit.SECONDS)
+            build()
+        })
     }
 
     override val coroutineContext get() = Dispatchers.IO
