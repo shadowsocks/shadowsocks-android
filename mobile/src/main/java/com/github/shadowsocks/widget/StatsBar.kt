@@ -35,6 +35,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
+import kotlin.math.abs
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
@@ -53,8 +54,8 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
                                         dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
                                         type: Int, consumed: IntArray) {
                 val dy = dyConsumed + dyUnconsumed
-                super.onNestedScroll(coordinatorLayout, child, target, dxConsumed,
-                        if (Math.abs(dy) >= threshold) dy else 0, dxUnconsumed, 0, type, consumed)
+                super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (abs(dy) >= threshold) dy else 0,
+                        dxUnconsumed, 0, type, consumed)
             }
         }
         return behavior

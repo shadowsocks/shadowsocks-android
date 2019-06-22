@@ -27,7 +27,7 @@ import java.util.*
 
 class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val selected: String) {
     private constructor(plugins: List<PluginOptions>) : this(
-            plugins.filter { it.id.isNotEmpty() }.associate { it.id to it },
+            plugins.filter { it.id.isNotEmpty() }.associateBy { it.id },
             if (plugins.isEmpty()) "" else plugins[0].id)
     constructor(plugin: String) : this(plugin.split('\n').map { line ->
         if (line.startsWith("kcptun ")) {

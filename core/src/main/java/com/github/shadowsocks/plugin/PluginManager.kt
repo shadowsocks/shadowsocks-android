@@ -108,7 +108,7 @@ object PluginManager {
         if (cachedPlugins == null) {
             val pm = app.packageManager
             cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),
-                    PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associate { it.id to it }
+                    PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associateBy { it.id }
         }
         cachedPlugins!!
     }
