@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ProviderInfo
 import android.content.pm.Signature
 import android.database.Cursor
 import android.net.Uri
@@ -41,6 +42,8 @@ import java.io.File
 import java.io.FileNotFoundException
 
 object PluginManager {
+    private const val TAG = "PluginManager"
+
     class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin) {
         override fun getLocalizedMessage() = app.getString(com.github.shadowsocks.core.R.string.plugin_unknown, plugin)
     }
@@ -137,28 +140,51 @@ object PluginManager {
 
     private fun initNative(options: PluginOptions): String? {
         val providers = app.packageManager.queryIntentContentProviders(
-                Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(options.id)), 0)
+                Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(options.id)), PackageManager.GET_META_DATA)
         if (providers.isEmpty()) return null
-        val uri = Uri.Builder()
-                .scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(providers.single().providerInfo.authority)
-                .build()
-        val cr = app.contentResolver
-        return try {
-            initNativeFast(cr, options, uri)
+        val provider = providers.single().providerInfo
+        var failure: Throwable? = null
+        try {
+            initNativeFaster(provider)?.also { return it }
         } catch (t: Throwable) {
-            Crashlytics.log(Log.WARN, "PluginManager",
-                    "Initializing native plugin fast mode failed. Falling back to slow mode.")
-            printLog(t)
-            initNativeSlow(cr, options, uri)
+            Crashlytics.log(Log.WARN, TAG, "Initializing native plugin faster mode failed")
+            failure = t
+        }
+
+        val uri = Uri.Builder().apply {
+            scheme(ContentResolver.SCHEME_CONTENT)
+            authority(provider.authority)
+        }.build()
+        val cr = app.contentResolver
+        try {
+            return initNativeFast(cr, options, uri)
+        } catch (t: Throwable) {
+            Crashlytics.log(Log.WARN, TAG, "Initializing native plugin fast mode failed")
+            failure?.also { t.addSuppressed(it) }
+            failure = t
+        }
+
+        try {
+            return initNativeSlow(cr, options, uri)
+        } catch (t: Throwable) {
+            failure?.also { t.addSuppressed(it) }
+            throw t
         }
     }
 
-    private fun initNativeFast(cr: ContentResolver, options: PluginOptions, uri: Uri): String {
-        val result = cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null,
-                bundleOf(Pair(PluginContract.EXTRA_OPTIONS, options.id)))!!.getString(PluginContract.EXTRA_ENTRY)!!
-        check(File(result).canExecute())
-        return result
+    private fun initNativeFaster(provider: ProviderInfo): String? {
+        return provider.metaData.getString(PluginContract.METADATA_KEY_EXECUTABLE_PATH)?.let { relativePath ->
+            File(provider.applicationInfo.nativeLibraryDir).resolve(relativePath).apply {
+                check(canExecute())
+            }.absolutePath
+        }
+    }
+
+    private fun initNativeFast(cr: ContentResolver, options: PluginOptions, uri: Uri): String? {
+        return cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null,
+                bundleOf(PluginContract.EXTRA_OPTIONS to options.id))?.getString(PluginContract.EXTRA_ENTRY)?.also {
+            check(File(it).canExecute())
+        }
     }
 
     @SuppressLint("Recycle")

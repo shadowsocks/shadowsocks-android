@@ -69,7 +69,11 @@ abstract class NativePluginProvider : ContentProvider() {
     }
 
     /**
-     * Returns executable entry absolute path. This is used if plugin is sharing UID with the host.
+     * Returns executable entry absolute path.
+     * This is used for fast mode initialization where ss-local launches your native binary at the path given directly.
+     * In order for this to work, plugin app is encouraged to have the following in its AndroidManifest.xml:
+     *  - android:installLocation="internalOnly" for <manifest>
+     *  - android:extractNativeLibs="true" for <application>
      *
      * Default behavior is throwing UnsupportedOperationException. If you don't wish to use this feature, use the
      * default behavior.
