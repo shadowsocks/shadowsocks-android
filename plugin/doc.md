@@ -136,8 +136,8 @@ Every native mode plugin MUST have a content provider to provide the native exec
 * MUST implement `query` that returns the file list which MUST include `$PLUGIN_ID` when having
   these as arguments:
   - `uri = "content://$authority_of_your_provider`;
-  - `projection = ["path", "mode"]`; (relative path, for example `obfs-local`; file mode, for
-    example `755`)
+  - `projection = ["path", "mode"]`; (relative path, for example `obfs-local`; file mode as integer, for
+    example `0b110100100`)
   - `selection = null`;
   - `selectionArgs = null`;
   - `sortOrder = null`;
@@ -186,9 +186,18 @@ If your plugin binary executable can run in place, you can support native mode w
   `com.github.shadowsocks.plugin.EXTRA_ENTRY` when having `method = "shadowsocks:getExecutable"`;
   (`com.github.shadowsocks.plugin.EXTRA_OPTIONS` is provided in extras as well just in case you
   need them)
+* SHOULD define `android:installLocation="internalOnly"` for `<manifest>` in AndroidManifest.xml;
+* SHOULD define `android:extractNativeLibs="true"` for `<application>` in AndroidManifest.xml;
 
 If you don't plan to support this mode, you can just throw `UnsupportedOperationException` when
  being invoked. It will fallback to the slow routine automatically.
+
+### Native mode without binary copying and setup
+
+Additionally, if your plugin only needs to supply the path of your executable without doing any extra setup work,
+ you can use an additional `meta-data` with name `com.github.shadowsocks.plugin.executable_path`
+ to supply executable path to your native binary.
+This allows the host app to launch your plugin without ever launching your app.
 
 ## JVM mode
 
@@ -229,7 +238,7 @@ Plugin app must include this in their application tag: (which should be automati
 
 ```
 <meta-data android:name="com.github.shadowsocks.plugin.version"
-           android:value="0.0.2"/>
+           android:value="1.0.0"/>
 ```
 
 # Android TV

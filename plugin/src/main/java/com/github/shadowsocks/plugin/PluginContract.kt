@@ -88,7 +88,11 @@ object PluginContract {
      * The metadata key to retrieve executable path to your native binary.
      * This path should be relative to your application's nativeLibraryDir.
      *
-     * If this is set, the host app will prefer this value and (probably) not launch your app at all.
+     * If this is set, the host app will prefer this value and (probably) not launch your app at all (aka faster mode).
+     * In order for this to work, plugin app is encouraged to have the following in its AndroidManifest.xml:
+     *  - android:installLocation="internalOnly" for <manifest>
+     *  - android:extractNativeLibs="true" for <application>
+     *
      * Do not use this if you plan to do some setup work before giving away your binary path,
      *  or your native binary is not at a fixed location relative to your application's nativeLibraryDir.
      *
@@ -112,11 +116,11 @@ object PluginContract {
      */
     const val COLUMN_PATH = "path"
     /**
-     * File mode bits. Default value is "644".
+     * File mode bits. Default value is 644 in octal.
      *
-     * Example: "755"
+     * Example: 0b110100100 (for 755 in octal)
      *
-     * Type: String
+     * Type: Int or String (deprecated)
      */
     const val COLUMN_MODE = "mode"
 
