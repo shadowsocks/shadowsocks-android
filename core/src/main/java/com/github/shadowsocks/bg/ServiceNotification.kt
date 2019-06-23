@@ -83,8 +83,13 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
 
     init {
         service as Context
-        if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
-                service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0))
+        val closeAction = NotificationCompat.Action.Builder(
+                R.drawable.ic_navigation_close,
+                service.getString(R.string.stop),
+                PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0)).apply {
+            setShowsUserInterface(false)
+        }.build()
+        if (Build.VERSION.SDK_INT < 24) builder.addAction(closeAction) else builder.addInvisibleAction(closeAction)
         update(if (service.getSystemService<PowerManager>()?.isInteractive != false)
             Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
         service.registerReceiver(lockReceiver, IntentFilter().apply {
