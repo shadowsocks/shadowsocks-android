@@ -31,8 +31,6 @@ import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
 import java.net.InetSocketAddress
-import java.net.NetworkInterface
-import java.net.SocketException
 
 object DataStore : OnPreferenceDataStoreChangeListener {
     val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
@@ -68,27 +66,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
     val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && DataStore.publicStore.getBoolean(Key.tfo, true)
     val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
-
-    /**
-     * An alternative way to detect this interface could be checking MAC address = 00:ff:aa:00:00:55, but there is no
-     * reliable way of getting MAC address for now.
-     */
-    val hasArc0 by lazy {
-        var retry = 0
-        while (retry < 5) {
-            try {
-                return@lazy NetworkInterface.getByName("arc0") != null
-            } catch (_: SocketException) { }
-            retry++
-            Thread.sleep(100L shl retry)
-        }
-        false
-    }
-    /**
-     * Binding bogus IP address 100.115.92.2 in Chrome OS directly does not seem to work reliably. It might be due to
-     * the IP may not be available when the device is not connected to any network.
-     */
-    val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, hasArc0)) "0.0.0.0" else "127.0.0.1"
+    val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, false)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int
         get() = getLocalPort(Key.portProxy, 1080)
         set(value) = publicStore.putString(Key.portProxy, value.toString())
