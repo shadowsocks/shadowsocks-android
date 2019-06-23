@@ -107,7 +107,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         val request = try {
             Message(packet)
         } catch (e: IOException) {  // we cannot parse the message, do not attempt to handle it at all
-            printLog(e)
+            Crashlytics.log(Log.WARN, TAG, e.message)
             return forward(packet)
         }
         return supervisorScope {
