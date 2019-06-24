@@ -72,6 +72,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private val isEnabled get() = (activity as MainActivity).state.let { it.canStop || it == BaseService.State.Stopped }
     private fun isProfileEditable(id: Long) =
             (activity as MainActivity).state == BaseService.State.Stopped || id !in Core.activeProfileIds
+    private var isAdLoaded = false
 
     @SuppressLint("ValidFragment")
     class QRCodeDialog() : DialogFragment() {
@@ -144,13 +145,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 if (selectedItem === this) selectedItem = null
             }
 
-            var adView = adView
-            if (item.host == "198.199.101.152") {
-                if (adView == null) {
+            if (!isAdLoaded && item.host == "198.199.101.152") {
+                if (this.adView == null) {
                     val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                             AdSize.SMART_BANNER.getHeightInPixels(context))
                     params.gravity = Gravity.CENTER_HORIZONTAL
-                    adView = AdView(context)
+
+                    var adView = AdView(context)
                     adView.layoutParams = params
                     adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
                     adView.adSize = AdSize.SMART_BANNER
@@ -163,8 +164,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     adBuilder.addTestDevice("7509D18EB8AF82F915874FEF53877A64")
                     adView.loadAd(adBuilder.build())
                     this.adView = adView
-                } else adView.visibility = View.VISIBLE
-            } else adView?.visibility = View.GONE
+                } else this.adView?.visibility = View.VISIBLE
+
+                isAdLoaded = true
+            } else this.adView?.visibility = View.GONE
         }
 
         override fun onClick(v: View?) {
@@ -295,6 +298,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         toolbar.setTitle(R.string.profiles)
         toolbar.inflateMenu(R.menu.profile_manager_menu)
         toolbar.setOnMenuItemClickListener(this)
+
+        isAdLoaded = false
 
         ProfileManager.ensureNotEmpty()
         val profilesList = view.findViewById<RecyclerView>(R.id.list)
