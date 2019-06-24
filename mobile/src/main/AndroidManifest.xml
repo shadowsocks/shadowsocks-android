@@ -76,7 +76,8 @@
                  android:process=":bg"
                  android:directBootAware="true"
                  android:icon="@drawable/ic_service_active"
-                 android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+                 android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+                 tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
