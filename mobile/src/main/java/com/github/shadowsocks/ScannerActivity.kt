@@ -61,7 +61,8 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
 
     private fun fallback() {
         try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=tw.com.quickmark")))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(
+                    "market://details?id=com.github.sumimakito.awesomeqrsample")))
         } catch (_: ActivityNotFoundException) { }
         finish()
     }
