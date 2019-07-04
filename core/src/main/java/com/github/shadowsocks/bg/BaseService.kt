@@ -36,12 +36,10 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.broadcastReceiver
-import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
@@ -232,7 +230,7 @@ object BaseService {
 
         fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> = cmd
 
-        suspend fun startProcesses() {
+        suspend fun startProcesses(hosts: HostsFile) {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
                             ?.isUserUnlocked != false) app else Core.deviceStorage).noBackupFilesDir
             val udpFallback = data.udpFallback
@@ -343,14 +341,15 @@ object BaseService {
                 try {
                     Executable.killAll()    // clean up old processes
                     preInit()
-                    proxy.init(this@Interface)
-                    data.udpFallback?.init(this@Interface)
+                    val hosts = HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")
+                    proxy.init(this@Interface, hosts)
+                    data.udpFallback?.init(this@Interface, hosts)
 
                     data.processes = GuardedProcessPool {
                         printLog(it)
                         stopRunner(false, it.readableMessage)
                     }
-                    startProcesses()
+                    startProcesses(hosts)
 
                     proxy.scheduleUpdate()
                     data.udpFallback?.scheduleUpdate()

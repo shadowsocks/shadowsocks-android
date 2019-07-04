@@ -28,7 +28,6 @@ import com.github.shadowsocks.net.LocalDnsServer
 import com.github.shadowsocks.net.Socks5Endpoint
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Key
 import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
 import java.net.URI
@@ -45,14 +44,14 @@ object LocalDnsService {
     private val servers = WeakHashMap<Interface, LocalDnsServer>()
 
     interface Interface : BaseService.Interface {
-        override suspend fun startProcesses() {
-            super.startProcesses()
+        override suspend fun startProcesses(hosts: HostsFile) {
+            super.startProcesses(hosts)
             val profile = data.proxy!!.profile
             val dns = URI("dns://${profile.remoteDns}")
             LocalDnsServer(this::resolver,
                     Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
                     DataStore.proxyAddress,
-                    HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")).apply {
+                    hosts).apply {
                 tcp = !profile.udpdns
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {

@@ -23,6 +23,7 @@ package com.github.shadowsocks.bg
 import android.app.Service
 import android.content.Intent
 import com.github.shadowsocks.Core
+import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
 import java.io.File
 
@@ -56,9 +57,9 @@ redsocks {
                 File(applicationInfo.nativeLibraryDir, Executable.REDSOCKS).absolutePath, "-c", "redsocks.conf"))
     }
 
-    override suspend fun startProcesses() {
+    override suspend fun startProcesses(hosts: HostsFile) {
         startRedsocksDaemon()
-        super.startProcesses()
+        super.startProcesses(hosts)
     }
 
     override fun onDestroy() {

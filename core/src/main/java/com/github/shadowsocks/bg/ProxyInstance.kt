@@ -26,6 +26,7 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
@@ -51,7 +52,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     val pluginPath by lazy { PluginManager.init(plugin) }
     private var scheduleConfigUpdate = false
 
-    suspend fun init(service: BaseService.Interface) {
+    suspend fun init(service: BaseService.Interface, hosts: HostsFile) {
         if (profile.host == "198.199.101.152") {
             scheduleConfigUpdate = true
             val mdg = MessageDigest.getInstance("SHA-1")
@@ -85,7 +86,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
-            profile.host = service.resolver(profile.host).firstOrNull()?.hostAddress ?: throw UnknownHostException()
+            profile.host = (hosts.resolve(profile.host).firstOrNull() ?: service.resolver(profile.host).firstOrNull())
+                    ?.hostAddress ?: throw UnknownHostException()
         }
     }
 
