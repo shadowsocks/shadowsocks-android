@@ -53,7 +53,7 @@ mavenPublish {
 }
 
 dependencies {
-    api 'androidx.core:core-ktx:1.1.0-rc01'
+    api 'androidx.core:core-ktx:1.1.0-rc02'
     api 'com.google.android.material:material:1.1.0-alpha07'
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     testImplementation "junit:junit:$junitVersion"
