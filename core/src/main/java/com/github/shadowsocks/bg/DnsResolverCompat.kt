@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.IOException
 import java.net.InetAddress
 import java.util.concurrent.Executor
 import kotlin.coroutines.resume
@@ -69,7 +70,7 @@ sealed class DnsResolverCompat {
                         signal, object : DnsResolver.Callback<Collection<InetAddress>> {
                     override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) =
                             cont.resume(answer.toTypedArray())
-                    override fun onError(error: DnsResolver.DnsException) = cont.resumeWithException(error)
+                    override fun onError(error: DnsResolver.DnsException) = cont.resumeWithException(IOException(error))
                 })
             }
         }

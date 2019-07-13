@@ -20,8 +20,6 @@
 
 package com.github.shadowsocks.net
 
-import android.net.DnsResolver
-import android.os.Build
 import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.printLog
@@ -144,9 +142,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 when (e) {
                     is TimeoutCancellationException -> Crashlytics.log(Log.WARN, TAG, "Remote resolving timed out")
                     is CancellationException -> { } // ignore
-                    else -> if (e is IOException || Build.VERSION.SDK_INT >= 29 && e is DnsResolver.DnsException) {
-                        Crashlytics.log(Log.WARN, TAG, e.message)
-                    } else printLog(e)
+                    is IOException -> Crashlytics.log(Log.WARN, TAG, e.message)
+                    else -> printLog(e)
                 }
                 ByteBuffer.wrap(prepareDnsResponse(request).apply {
                     header.rcode = Rcode.SERVFAIL
