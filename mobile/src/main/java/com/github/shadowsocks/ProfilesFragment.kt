@@ -118,34 +118,29 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         fun attach() {
             if (!isAdLoaded && item.host == "198.199.101.152") {
-                if (this.adView == null) {
-                    val params = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            AdSize.SMART_BANNER.getHeightInPixels(context))
-                    params.gravity = Gravity.CENTER_HORIZONTAL
-
-                    var adView = AdView(context)
-                    adView.layoutParams = params
-                    adView.adUnitId = "ca-app-pub-9097031975646651/7760346322"
-                    adView.adSize = AdSize.SMART_BANNER
-
-                    itemView.findViewById<LinearLayout>(R.id.content).addView(adView)
-
-                    // Load Ad
-                    val adBuilder = AdRequest.Builder()
-                    adBuilder.addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
-                    adBuilder.addTestDevice("7509D18EB8AF82F915874FEF53877A64")
-                    adView.loadAd(adBuilder.build())
-                    this.adView = adView
-                } else this.adView?.visibility = View.VISIBLE
-
+                if (adView == null) {
+                    adView = AdView(context).apply {
+                        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                AdSize.SMART_BANNER.getHeightInPixels(context)).apply {
+                            gravity = Gravity.CENTER_HORIZONTAL
+                        }
+                        adUnitId = "ca-app-pub-9097031975646651/7760346322"
+                        adSize = AdSize.SMART_BANNER
+                        itemView.findViewById<LinearLayout>(R.id.content).addView(this)
+                        loadAd(AdRequest.Builder().apply {
+                            addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
+                            addTestDevice("7509D18EB8AF82F915874FEF53877A64")
+                        }.build())
+                    }
+                } else adView?.visibility = View.VISIBLE
                 isAdLoaded = true
-            } else this.adView?.visibility = View.GONE
+            } else adView?.visibility = View.GONE
         }
 
         fun detach() {
-            if (this.adView?.visibility == View.VISIBLE) {
+            if (adView?.visibility == View.VISIBLE) {
                 isAdLoaded = false
-                this.adView?.visibility == View.GONE
+                adView?.visibility = View.GONE
             }
         }
 
