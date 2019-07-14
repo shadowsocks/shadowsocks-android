@@ -28,21 +28,24 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.migration.RecreateSchemaMigration
 import com.github.shadowsocks.utils.Key
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Database(entities = [Profile::class, KeyValuePair::class], version = 28)
 abstract class PrivateDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
-            Room.databaseBuilder(app, PrivateDatabase::class.java, Key.DB_PROFILE)
-                    .addMigrations(
-                            Migration26,
-                            Migration27,
-                            Migration28
-                    )
-                    .enableMultiInstanceInvalidation()
-                    .fallbackToDestructiveMigration()
-                    .allowMainThreadQueries()
-                    .build()
+            Room.databaseBuilder(app, PrivateDatabase::class.java, Key.DB_PROFILE).apply {
+                addMigrations(
+                        Migration26,
+                        Migration27,
+                        Migration28
+                )
+                allowMainThreadQueries()
+                enableMultiInstanceInvalidation()
+                fallbackToDestructiveMigration()
+                setQueryExecutor { GlobalScope.launch { it.run() } }
+            }.build()
         }
 
         val profileDao get() = instance.profileDao()
