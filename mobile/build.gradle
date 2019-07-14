@@ -42,6 +42,7 @@ android {
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
+    kotlinOptions.jvmTarget = javaVersion
     packagingOptions.exclude '**/*.kotlin_*'
     splits {
         abi {

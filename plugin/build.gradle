@@ -30,6 +30,8 @@ android {
         targetCompatibility javaVersion
     }
 
+    kotlinOptions.jvmTarget = javaVersion
+
     buildTypes {
         release {
             minifyEnabled false
