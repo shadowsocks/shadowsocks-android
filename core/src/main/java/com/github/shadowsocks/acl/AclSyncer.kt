@@ -53,6 +53,6 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
         Result.success()
     } catch (e: IOException) {
         e.printStackTrace()
-        Result.retry()
+        if (runAttemptCount > 5) Result.failure() else Result.retry()
     }
 }

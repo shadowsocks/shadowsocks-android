@@ -51,6 +51,7 @@ androidExtensions {
 
 def lifecycleVersion = '2.1.0-rc01'
 def roomVersion = '2.1.0'
+def workVersion = '2.2.0-beta01'
 dependencies {
     api project(':plugin')
     api "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
@@ -58,7 +59,8 @@ dependencies {
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     api 'androidx.preference:preference:1.1.0-rc01'
     api "androidx.room:room-runtime:$roomVersion"
-    api 'androidx.work:work-runtime-ktx:2.1.0'
+    api "androidx.work:work-runtime-ktx:$workVersion"
+    api "androidx.work:work-gcm:$workVersion"
     api 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     api 'com.google.code.gson:gson:2.8.5'
     api 'com.google.firebase:firebase-config:18.0.0'
