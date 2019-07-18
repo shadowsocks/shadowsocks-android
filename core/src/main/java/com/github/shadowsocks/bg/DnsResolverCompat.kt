@@ -21,18 +21,20 @@
 package com.github.shadowsocks.bg
 
 import android.annotation.TargetApi
+import android.app.ActivityManager
 import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
+import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.suspendCancellableCoroutine
+import com.github.shadowsocks.Core.app
+import kotlinx.coroutines.*
 import java.io.IOException
+import java.lang.Runnable
 import java.net.InetAddress
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -48,10 +50,20 @@ sealed class DnsResolverCompat {
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
 
     private object DnsResolverCompat21 : DnsResolverCompat() {
+        /**
+         * This dispatcher is used for noncancellable possibly-forever-blocking operations in network IO.
+         *
+         * See also: https://issuetracker.google.com/issues/133874590
+         */
+        private val unboundedIO by lazy {
+            if (app.getSystemService<ActivityManager>()!!.isLowRamDevice) Dispatchers.IO
+            else Executors.newCachedThreadPool().asCoroutineDispatcher()
+        }
+
         override suspend fun resolve(network: Network, host: String) =
-                GlobalScope.async(Dispatchers.IO) { network.getAllByName(host) }.await()
+                GlobalScope.async(unboundedIO) { network.getAllByName(host) }.await()
         override suspend fun resolveOnActiveNetwork(host: String) =
-                GlobalScope.async(Dispatchers.IO) { InetAddress.getAllByName(host) }.await()
+                GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
     }
 
     @TargetApi(29)
