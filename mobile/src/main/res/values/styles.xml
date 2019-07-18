@@ -4,4 +4,7 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
+    <style name="stats_status">
+        <item name="android:ellipsize">marquee</item>
+    </style>
 </resources>
