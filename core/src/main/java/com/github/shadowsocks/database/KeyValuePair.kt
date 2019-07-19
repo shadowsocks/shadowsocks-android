@@ -120,7 +120,7 @@ class KeyValuePair() {
         val stream = ByteArrayOutputStream()
         val intBuffer = ByteBuffer.allocate(4)
         for (v in value) {
-            intBuffer.reset()
+            intBuffer.rewind()
             stream.write(intBuffer.putInt(v.length).array())
             stream.write(v.toByteArray())
         }
