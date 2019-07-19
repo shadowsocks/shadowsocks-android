@@ -81,10 +81,10 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         findPreference<Preference>(Key.ipv6)!!.isEnabled = serviceMode == Key.modeVpn
         isProxyApps = findPreference(Key.proxyApps)!!
         isProxyApps.isEnabled = serviceMode == Key.modeVpn
-        isProxyApps.setOnPreferenceClickListener {
+        isProxyApps.setOnPreferenceChangeListener { _, newValue ->
             startActivity(Intent(activity, AppManager::class.java))
-            isProxyApps.isChecked = true
-            false
+            if (newValue as Boolean) DataStore.dirty = true
+            newValue
         }
         findPreference<Preference>(Key.metered)!!.apply {
             if (Build.VERSION.SDK_INT >= 28) isEnabled = serviceMode == Key.modeVpn else remove()
