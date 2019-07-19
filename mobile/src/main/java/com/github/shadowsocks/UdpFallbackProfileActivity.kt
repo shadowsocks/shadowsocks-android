@@ -28,6 +28,8 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -36,6 +38,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.SingleInstanceActivity
+import com.github.shadowsocks.utils.consumeSystemWindowInsetTop
 import com.github.shadowsocks.utils.resolveResourceId
 
 class UdpFallbackProfileActivity : AppCompatActivity() {
@@ -85,18 +88,28 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
         }
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_udp_fallback)
+        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += insets.systemWindowInsetTop }
+            insets.consumeSystemWindowInsetTop()
+        }
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.udp_fallback)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
         toolbar.setNavigationOnClickListener { finish() }
 
-        val profilesList = findViewById<RecyclerView>(R.id.list)
-        val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        profilesList.layoutManager = lm
-        profilesList.itemAnimator = DefaultItemAnimator()
-        profilesList.adapter = profilesAdapter
-        if (DataStore.udpFallback != null)
-            lm.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.udpFallback } + 1)
+        findViewById<RecyclerView>(R.id.list).apply {
+            setOnApplyWindowInsetsListener { v, insets ->
+                v.updatePadding(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+                insets.consumeSystemWindowInsets()
+            }
+            itemAnimator = DefaultItemAnimator()
+            adapter = profilesAdapter
+            layoutManager = LinearLayoutManager(this@UdpFallbackProfileActivity, RecyclerView.VERTICAL, false).apply {
+                if (DataStore.udpFallback != null) {
+                    scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.udpFallback } + 1)
+                }
+            }
+        }
     }
 }

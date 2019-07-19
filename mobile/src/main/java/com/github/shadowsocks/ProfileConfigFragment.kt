@@ -28,7 +28,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.updatePadding
 import androidx.preference.*
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.Profile
@@ -110,6 +112,14 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         receiver = Core.listenForPackageChanges(false) { initPlugins() }
         udpFallback = findPreference(Key.udpFallback)!!
         DataStore.privateStore.registerChangeListener(this)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        listView.setOnApplyWindowInsetsListener { v, insets ->
+            v.updatePadding(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+            insets.consumeSystemWindowInsets()
+        }
     }
 
     private fun initPlugins() {
