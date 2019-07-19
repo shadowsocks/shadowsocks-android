@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Shadowsocks.Navigation">
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <style name="Theme.Shadowsocks.Immersive.Navigation">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
     <style name="stats_status">

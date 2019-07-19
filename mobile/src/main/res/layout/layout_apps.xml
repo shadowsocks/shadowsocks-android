@@ -94,6 +94,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/list"
+            android:clipToPadding="false"
             android:visibility="gone"
             app:fastScrollEnabled="true"
             app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb"

@@ -17,7 +17,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Shadowsocks.Navigation"
+            android:theme="@style/Theme.Shadowsocks.Immersive.Navigation"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -33,6 +33,7 @@
 
         <activity
             android:name=".ProfileConfigActivity"
+            android:theme="@style/Theme.Shadowsocks.Immersive"
             android:excludeFromRecents="true"
             android:label="@string/profile_config"/>
 
@@ -40,11 +41,13 @@
             android:name=".AppManager"
             android:label="@string/proxied_apps"
             android:parentActivityName=".ProfileConfigActivity"
+            android:theme="@style/Theme.Shadowsocks.Immersive"
             android:excludeFromRecents="true"/>
 
         <activity
             android:name=".UdpFallbackProfileActivity"
             android:label="@string/udp_fallback"
+            android:theme="@style/Theme.Shadowsocks.Immersive"
             android:excludeFromRecents="true"/>
 
         <activity
@@ -54,7 +57,7 @@
             android:excludeFromRecents="true"/>
 
         <activity android:name=".tasker.ConfigActivity"
-                  android:icon="@mipmap/ic_launcher">
+                  android:theme="@style/Theme.Shadowsocks.Immersive">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
@@ -72,7 +75,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".bg.TileService" android:label="@string/quick_toggle"
+        <service android:name=".bg.TileService"
+                 android:label="@string/quick_toggle"
                  android:process=":bg"
                  android:directBootAware="true"
                  android:icon="@drawable/ic_service_active"

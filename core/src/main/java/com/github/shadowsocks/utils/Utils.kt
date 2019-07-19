@@ -34,6 +34,7 @@ import android.os.Build
 import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
+import android.view.WindowInsets
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
@@ -113,6 +114,10 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
 }
 
 val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNull { it.uri } ?: emptyList())
+
+@Suppress("DEPRECATION")
+fun WindowInsets.consumeSystemWindowInsetTop() = replaceSystemWindowInsets(
+        systemWindowInsetLeft, 0, systemWindowInsetRight, systemWindowInsetBottom)
 
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)

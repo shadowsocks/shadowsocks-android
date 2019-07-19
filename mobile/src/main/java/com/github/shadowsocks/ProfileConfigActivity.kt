@@ -26,13 +26,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.updateLayoutParams
 import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.plugin.Empty
 import com.github.shadowsocks.plugin.PluginContract
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.SingleInstanceActivity
+import com.github.shadowsocks.utils.consumeSystemWindowInsetTop
 
 class ProfileConfigActivity : AppCompatActivity() {
     companion object {
@@ -54,6 +58,10 @@ class ProfileConfigActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_profile_config)
+        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += insets.systemWindowInsetTop }
+            insets.consumeSystemWindowInsetTop()
+        }
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar!!.apply {
             setDisplayHomeAsUpEnabled(true)
