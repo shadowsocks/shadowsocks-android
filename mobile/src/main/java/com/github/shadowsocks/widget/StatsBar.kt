@@ -73,7 +73,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     private fun setStatus(text: CharSequence) {
         statusText.text = text
-        if (Build.VERSION.SDK_INT >= 26) statusText.tooltipText = text
+        if (Build.VERSION.SDK_INT >= 26) tooltipText = text
     }
 
     fun changeState(state: BaseService.State) {
