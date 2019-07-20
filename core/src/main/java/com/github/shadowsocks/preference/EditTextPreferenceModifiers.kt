@@ -40,6 +40,7 @@ object EditTextPreferenceModifiers {
             editText.inputType = EditorInfo.TYPE_CLASS_NUMBER
             editText.filters = portLengthFilter
             editText.setSingleLine()
+            editText.setSelection(editText.text.length)
         }
     }
 }
