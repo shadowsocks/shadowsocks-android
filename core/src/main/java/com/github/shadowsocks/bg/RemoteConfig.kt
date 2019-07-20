@@ -25,8 +25,7 @@ import androidx.core.os.bundleOf
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.core.R
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
+import kotlinx.coroutines.tasks.await
 
 object RemoteConfig {
     private val config by lazy { FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) } }
@@ -40,15 +39,11 @@ object RemoteConfig {
         if (it.isSuccessful) config.activate() else it.exception?.log()
     }
 
-    suspend fun fetch() = suspendCancellableCoroutine<Pair<FirebaseRemoteConfig, Boolean>> { cont ->
-        config.fetch().addOnCompleteListener {
-            if (it.isSuccessful) {
-                config.activate()
-                cont.resume(config to true)
-            } else {
-                it.exception?.log()
-                cont.resume(config to false)
-            }
-        }
+    suspend fun fetch() = try {
+        config.fetch().await()
+        config to true
+    } catch (e: Exception) {
+        e.log()
+        config to false
     }
 }
