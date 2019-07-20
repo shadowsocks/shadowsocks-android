@@ -117,7 +117,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         listView.setOnApplyWindowInsetsListener { v, insets ->
-            v.updatePadding(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+            v.updatePadding(bottom = insets.systemWindowInsetBottom)
             insets.consumeSystemWindowInsets()
         }
     }

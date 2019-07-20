@@ -96,7 +96,7 @@ class ConfigActivity : AppCompatActivity() {
         taskerOption = Settings.fromIntent(intent)
         setContentView(R.layout.layout_tasker)
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += insets.systemWindowInsetTop }
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.systemWindowInsetTop }
             insets.consumeSystemWindowInsetTop()
         }
 
@@ -109,7 +109,7 @@ class ConfigActivity : AppCompatActivity() {
         switch.isChecked = taskerOption.switchOn
         findViewById<RecyclerView>(R.id.list).apply {
             setOnApplyWindowInsetsListener { v, insets ->
-                v.updatePadding(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+                v.updatePadding(bottom = insets.systemWindowInsetBottom)
                 insets.consumeSystemWindowInsets()
             }
             itemAnimator = DefaultItemAnimator()

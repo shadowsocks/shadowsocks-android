@@ -59,7 +59,7 @@ class ProfileConfigActivity : AppCompatActivity() {
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_profile_config)
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += insets.systemWindowInsetTop }
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.systemWindowInsetTop }
             insets.consumeSystemWindowInsetTop()
         }
         setSupportActionBar(findViewById(R.id.toolbar))

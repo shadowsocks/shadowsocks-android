@@ -216,7 +216,7 @@ class AppManager : AppCompatActivity() {
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_apps)
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += insets.systemWindowInsetTop }
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.systemWindowInsetTop }
             insets.consumeSystemWindowInsetTop()
         }
         setSupportActionBar(toolbar)
@@ -242,7 +242,7 @@ class AppManager : AppCompatActivity() {
 
         initProxiedUids()
         list.setOnApplyWindowInsetsListener { v, insets ->
-            v.updatePadding(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+            v.updatePadding(bottom = insets.systemWindowInsetBottom)
             insets.consumeSystemWindowInsets()
         }
         list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)

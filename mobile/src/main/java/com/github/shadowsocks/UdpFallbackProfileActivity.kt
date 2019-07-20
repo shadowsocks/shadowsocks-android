@@ -89,7 +89,7 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_udp_fallback)
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin += insets.systemWindowInsetTop }
+            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.systemWindowInsetTop }
             insets.consumeSystemWindowInsetTop()
         }
 
@@ -100,7 +100,7 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
 
         findViewById<RecyclerView>(R.id.list).apply {
             setOnApplyWindowInsetsListener { v, insets ->
-                v.updatePadding(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+                v.updatePadding(bottom = insets.systemWindowInsetBottom)
                 insets.consumeSystemWindowInsets()
             }
             itemAnimator = DefaultItemAnimator()
