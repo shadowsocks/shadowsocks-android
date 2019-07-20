@@ -42,7 +42,6 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.util.set
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,7 +52,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.SingleInstanceActivity
-import com.github.shadowsocks.utils.consumeSystemWindowInsetTop
+import com.github.shadowsocks.utils.consumeSystemWindowInsetsWithList
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.layout_apps.*
 import kotlinx.android.synthetic.main.layout_apps_item.view.*
@@ -215,10 +214,7 @@ class AppManager : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_apps)
-        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.systemWindowInsetTop }
-            insets.consumeSystemWindowInsetTop()
-        }
+        consumeSystemWindowInsetsWithList()
         setSupportActionBar(toolbar)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 

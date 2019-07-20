@@ -34,8 +34,11 @@ import android.os.Build
 import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
-import android.view.WindowInsets
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.AttrRes
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.updateLayoutParams
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
@@ -115,9 +118,17 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
 
 val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNull { it.uri } ?: emptyList())
 
-@Suppress("DEPRECATION")
-fun WindowInsets.consumeSystemWindowInsetTop() = replaceSystemWindowInsets(
-        systemWindowInsetLeft, 0, systemWindowInsetRight, systemWindowInsetBottom)
+fun AppCompatActivity.consumeSystemWindowInsetsWithList() {
+    findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
+        v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            leftMargin = insets.systemWindowInsetLeft
+            topMargin = insets.systemWindowInsetTop
+            rightMargin = insets.systemWindowInsetRight
+        }
+        @Suppress("DEPRECATION")
+        insets.replaceSystemWindowInsets(0, 0, 0, insets.systemWindowInsetBottom)
+    }
+}
 
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)

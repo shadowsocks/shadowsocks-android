@@ -28,7 +28,6 @@ import android.view.ViewGroup
 import android.widget.CheckedTextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +37,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.SingleInstanceActivity
-import com.github.shadowsocks.utils.consumeSystemWindowInsetTop
+import com.github.shadowsocks.utils.consumeSystemWindowInsetsWithList
 import com.github.shadowsocks.utils.resolveResourceId
 
 class UdpFallbackProfileActivity : AppCompatActivity() {
@@ -88,10 +87,7 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
         }
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_udp_fallback)
-        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
-            v.updateLayoutParams<ViewGroup.MarginLayoutParams> { topMargin = insets.systemWindowInsetTop }
-            insets.consumeSystemWindowInsetTop()
-        }
+        consumeSystemWindowInsetsWithList()
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.udp_fallback)
