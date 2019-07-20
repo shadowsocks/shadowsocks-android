@@ -28,5 +28,4 @@
         <item name="android:windowCloseOnTouchOutside">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="ThemeOverlay.AppCompat.DayNight" parent="ThemeOverlay.AppCompat.Light"/>
 </resources>
