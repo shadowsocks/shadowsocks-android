@@ -3,7 +3,4 @@
     <style name="Theme.Shadowsocks.Immersive.Navigation">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
-    <style name="stats_status">
-        <item name="android:ellipsize">marquee</item>
-    </style>
 </resources>

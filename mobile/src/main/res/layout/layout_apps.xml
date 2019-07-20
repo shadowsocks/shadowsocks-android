@@ -76,7 +76,7 @@
           android:layout_weight="1"
           android:text="@string/bypass_apps"
           tools:checked="true"
-          android:tooltipText="@string/bypass_apps_summary" />
+          app:tooltipText="@string/bypass_apps_summary" />
     </RadioGroup>
 
   </androidx.constraintlayout.widget.ConstraintLayout>

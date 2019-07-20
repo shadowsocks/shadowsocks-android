@@ -21,11 +21,11 @@
 package com.github.shadowsocks.widget
 
 import android.content.Context
-import android.os.Build
 import android.text.format.Formatter
 import android.util.AttributeSet
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
@@ -73,7 +73,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     private fun setStatus(text: CharSequence) {
         statusText.text = text
-        if (Build.VERSION.SDK_INT >= 26) tooltipText = text
+        TooltipCompat.setTooltipText(this, text)
     }
 
     fun changeState(state: BaseService.State) {
