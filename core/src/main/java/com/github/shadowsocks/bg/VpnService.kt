@@ -90,7 +90,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         }
     }
 
-    inner class NullConnectionException : NullPointerException() {
+    inner class NullConnectionException : NullPointerException(), BaseService.ExpectedException {
         override fun getLocalizedMessage() = getString(R.string.reboot_required)
     }
 

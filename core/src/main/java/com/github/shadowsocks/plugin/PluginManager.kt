@@ -36,6 +36,7 @@ import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
+import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.signaturesCompat
 import java.io.File
@@ -44,7 +45,8 @@ import java.io.FileNotFoundException
 object PluginManager {
     private const val TAG = "PluginManager"
 
-    class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin) {
+    class PluginNotFoundException(private val plugin: String) : FileNotFoundException(plugin),
+            BaseService.ExpectedException {
         override fun getLocalizedMessage() = app.getString(com.github.shadowsocks.core.R.string.plugin_unknown, plugin)
     }
 

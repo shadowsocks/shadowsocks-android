@@ -31,6 +31,7 @@ import com.github.shadowsocks.preference.DataStore
 import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
 import java.net.URI
+import java.net.URISyntaxException
 import java.util.*
 
 object LocalDnsService {
@@ -47,7 +48,11 @@ object LocalDnsService {
         override suspend fun startProcesses(hosts: HostsFile) {
             super.startProcesses(hosts)
             val profile = data.proxy!!.profile
-            val dns = URI("dns://${profile.remoteDns}")
+            val dns = try {
+                URI("dns://${profile.remoteDns}")
+            } catch (e: URISyntaxException) {
+                throw BaseService.ExpectedExceptionWrapper(e)
+            }
             LocalDnsServer(this::resolver,
                     Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
                     DataStore.proxyAddress,

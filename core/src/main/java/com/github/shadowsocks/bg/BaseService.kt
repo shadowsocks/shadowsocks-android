@@ -37,13 +37,11 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.HostsFile
-import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
-import java.net.BindException
 import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
@@ -65,6 +63,9 @@ object BaseService {
 
     const val CONFIG_FILE = "shadowsocks.conf"
     const val CONFIG_FILE_UDP = "shadowsocks-udp.conf"
+
+    interface ExpectedException
+    class ExpectedExceptionWrapper(e: Exception) : Exception(e.localizedMessage, e), ExpectedException
 
     class Data internal constructor(private val service: Interface) {
         var state = State.Stopped
@@ -360,11 +361,7 @@ object BaseService {
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {
-                    if (exc !is PluginManager.PluginNotFoundException &&
-                            exc !is BindException &&
-                            exc !is VpnService.NullConnectionException) {
-                        printLog(exc)
-                    }
+                    if (exc is ExpectedException) exc.printStackTrace() else printLog(exc)
                     stopRunner(false, "${getString(R.string.service_failed)}: ${exc.readableMessage}")
                 } finally {
                     data.connectingJob = null

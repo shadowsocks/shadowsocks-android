@@ -22,6 +22,7 @@ package com.github.shadowsocks.net
 
 import android.util.Log
 import com.crashlytics.android.Crashlytics
+import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
@@ -91,7 +92,11 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
 
     suspend fun start(listen: SocketAddress) = DatagramChannel.open().run {
         configureBlocking(false)
-        socket().bind(listen)
+        try {
+            socket().bind(listen)
+        } catch (e: BindException) {
+            throw BaseService.ExpectedExceptionWrapper(e)
+        }
         monitor.register(this, SelectionKey.OP_READ) { handlePacket(this) }
     }
 
