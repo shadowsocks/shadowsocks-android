@@ -12,8 +12,8 @@ buildscript {
         junitVersion = '4.12'
         androidTestVersion = '1.2.0'
         androidEspressoVersion = '3.2.0'
-        versionCode = 4080250
-        versionName = '4.8.2-nightly'
+        versionCode = 4080350
+        versionName = '4.8.3-nightly'
         resConfigs = ['es', 'fa', 'fr', 'ja', 'ko', 'ru', 'tr', 'zh-rCN', 'zh-rTW']
     }
 
