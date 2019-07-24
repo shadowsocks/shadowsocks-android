@@ -22,10 +22,16 @@
 -->
 
 <resources>
-    <string name="proxy_cat">"Sunucu Ayarları"</string>
-    <string name="feature_cat">"Özellik Ayarları"</string>
-    <string name="unsaved_changes_prompt">"Değişiklikler kaydedilmedi. Kaydetmek ister misiniz?"</string>
-    <string name="yes">"Evet"</string>
-    <string name="no">"Hayır"</string>
-    <string name="apply">"Uygula"</string>
+    <string name="quick_toggle">"تغيير"</string>
+    <string name="remote_dns">"سيرفر ال DNS"</string>
+    <string name="stat_summary">"ارسل: \t%3$s\t↑\t%1$s
+استقبل: \t%4$s\t↓\t%2$s"</string>
+    <string name="connection_test_testing">"اختبار الاتصال..."</string>
+    <string name="connection_test_error">"فشل فحص اتصال الانترنت: %s"</string>
+    <string name="connection_test_fail">"لا يوجد اتصال بالانترنت"</string>
+    <string name="connection_test_error_status_code">"خطآ رقم: #%d"</string>
+    <string name="proxy">"السيرفر"</string>
+    <string name="remote_port">"المنفذ"</string>
+    <string name="sitekey">"كلمة المرور"</string>
+    <string name="enc_method">"طريقة التشفير"</string>
 </resources>
