@@ -28,7 +28,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import kotlinx.coroutines.tasks.await
 
 object RemoteConfig {
-    private val config by lazy { FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) } }
+    private val config = FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) }
 
     private fun Exception.log() {
         Log.w("RemoteConfig", this)
