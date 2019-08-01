@@ -5,6 +5,12 @@
         <item name="android:colorButtonNormal">@color/material_accent_200</item>
         <item name="android:colorPrimary">@color/color_primary</item>
         <item name="android:colorPrimaryDark">@color/color_primary_dark</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Leanback</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.Shadowsocks.TV</item>
+    </style>
+    <style name="PreferenceThemeOverlay.Shadowsocks.TV" parent="@style/PreferenceThemeOverlay.v14.Leanback">
+        <item name="android:colorAccent">@color/material_accent_200</item>
+        <item name="android:colorButtonNormal">@color/material_accent_200</item>
+        <item name="android:colorPrimary">@color/color_primary</item>
+        <item name="android:colorPrimaryDark">@color/color_primary_dark</item>
     </style>
 </resources>
