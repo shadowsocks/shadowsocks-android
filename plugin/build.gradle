@@ -55,7 +55,7 @@ mavenPublish {
 }
 
 dependencies {
-    api 'androidx.core:core-ktx:1.1.0-rc02'
+    api 'androidx.core:core-ktx:1.1.0-rc03'
     api 'androidx.drawerlayout:drawerlayout:1.1.0-alpha02'  // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
     api 'com.google.android.material:material:1.1.0-alpha09'
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
