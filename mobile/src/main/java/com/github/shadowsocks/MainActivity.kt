@@ -33,6 +33,7 @@ import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
@@ -76,9 +77,15 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     private val customTabsIntent by lazy {
-        CustomTabsIntent.Builder()
-                .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
-                .build()
+        CustomTabsIntent.Builder().apply {
+            setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+            setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_LIGHT, CustomTabColorSchemeParams.Builder().apply {
+                setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.light_color_primary))
+            }.build())
+            setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, CustomTabColorSchemeParams.Builder().apply {
+                setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.dark_color_primary))
+            }.build())
+        }.build()
     }
     fun launchUrl(uri: String) = try {
         customTabsIntent.launchUrl(this, uri.toUri())

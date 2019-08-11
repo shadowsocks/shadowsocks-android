@@ -18,8 +18,15 @@
   <color name="material_primary_900">@color/material_blue_grey_900</color>
   <color name="material_accent_200">@color/material_green_a700</color>
 
-  <color name="color_primary">@color/material_primary_500</color>
-  <color name="color_primary_dark">@color/material_primary_700</color>
-  <color name="color_primary_text">@color/material_primary_500</color>
+  <color name="light_color_primary">@color/material_primary_500</color>
+  <color name="light_color_primary_dark">@color/material_primary_700</color>
+  <color name="light_color_primary_text">@color/material_primary_500</color>
+  <color name="dark_color_primary">@color/material_primary_800</color>
+  <color name="dark_color_primary_dark">@color/material_primary_900</color>
+  <color name="dark_color_primary_text">@color/material_primary_300</color>
+
+  <color name="color_primary">@color/light_color_primary</color>
+  <color name="color_primary_dark">@color/light_color_primary_dark</color>
+  <color name="color_primary_text">@color/light_color_primary_text</color>
   
 </resources>
