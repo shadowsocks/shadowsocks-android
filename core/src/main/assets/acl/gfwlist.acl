@@ -1,6 +1,5 @@
 #
 # GFW list from https://github.com/gfwlist/gfwlist/blob/master/gfwlist.txt
-# updated on 2019-07-09
 #
 
 [bypass_all]
@@ -690,6 +689,7 @@
 (^|\.)bunbunhk\.com$
 (^|\.)busayari\.com$
 (^|\.)businessinsider\.com$
+(^|\.)businesstoday\.com\.tw$
 (^|\.)businessweek\.com$
 (^|\.)busu\.org$
 (^|\.)busytrade\.com$
@@ -1218,6 +1218,7 @@
 (^|\.)dipity\.com$
 (^|\.)directcreative\.com$
 (^|\.)discoins\.com$
+(^|\.)disconnect\.me$
 (^|\.)discordapp\.com$
 (^|\.)discordapp\.net$
 (^|\.)discuss\.com\.hk$
@@ -1239,6 +1240,7 @@
 (^|\.)dmm\.co\.jp$
 (^|\.)dns-dns\.com$
 (^|\.)dns-stuff\.com$
+(^|\.)dns\.google$
 (^|\.)dns04\.com$
 (^|\.)dns05\.com$
 (^|\.)dns1\.us$
@@ -1407,6 +1409,7 @@
 (^|\.)en\.favotter\.net$
 (^|\.)en\.hao123\.com$
 (^|\.)enanyang\.my$
+(^|\.)encyclopedia\.com$
 (^|\.)enewstree\.com$
 (^|\.)enfal\.de$
 (^|\.)engagedaily\.org$
@@ -5161,7 +5164,6 @@
 (^|\.)www\.dmm\.com$
 (^|\.)www\.dwheeler\.com$
 (^|\.)www\.eastturkistan\.net$
-(^|\.)www\.ftchinese\.com$
 (^|\.)www\.gmiddle\.com$
 (^|\.)www\.gmiddle\.net$
 (^|\.)www\.hustlercash\.com$
