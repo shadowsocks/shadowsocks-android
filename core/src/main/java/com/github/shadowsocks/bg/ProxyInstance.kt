@@ -85,8 +85,12 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             profile.method = proxy[3].trim()
         }
 
-        if (route == Acl.CUSTOM_RULES) withContext(Dispatchers.IO) {
-            Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
+        if (route == Acl.CUSTOM_RULES) try {
+            withContext(Dispatchers.IO) {
+                Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
+            }
+        } catch (e: IOException) {
+            throw BaseService.ExpectedExceptionWrapper(e)
         }
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
