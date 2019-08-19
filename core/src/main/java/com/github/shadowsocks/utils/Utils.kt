@@ -125,8 +125,8 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
 
 val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNull { it.uri } ?: emptyList())
 
-fun AppCompatActivity.consumeSystemWindowInsetsWithList() {
-    findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, insets ->
+fun AppCompatActivity.consumeSystemWindowInsetsWithList() = findViewById<View>(android.R.id.content).apply {
+    setOnApplyWindowInsetsListener { v, insets ->
         v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             leftMargin = insets.systemWindowInsetLeft
             topMargin = insets.systemWindowInsetTop
@@ -135,6 +135,7 @@ fun AppCompatActivity.consumeSystemWindowInsetsWithList() {
         @Suppress("DEPRECATION")
         insets.replaceSystemWindowInsets(0, 0, 0, insets.systemWindowInsetBottom)
     }
+    systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 }
 
 fun printLog(t: Throwable) {

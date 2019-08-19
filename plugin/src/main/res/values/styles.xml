@@ -9,13 +9,8 @@
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
-    <style name="ThemeOverlay.MaterialComponents.Dialog.Alert.Immersive">
-        <item name="android:windowTranslucentNavigation">false</item>
-    </style>
     <style name="Theme.Shadowsocks.Immersive">
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-        <item name="alertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert.Immersive</item>
+        <item name="android:navigationBarColor">#6000</item>
     </style>
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>

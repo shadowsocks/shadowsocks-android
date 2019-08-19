@@ -32,6 +32,7 @@ import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
@@ -159,6 +160,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         stats = findViewById(R.id.stats)
         stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
+        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         navigation = findViewById(R.id.navigation)
         navigation.setNavigationItemSelectedListener(this)
         if (savedInstanceState == null) {
