@@ -169,7 +169,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
 
         override fun ret(which: Int) = when (which) {
-            DialogInterface.BUTTON_POSITIVE, DialogInterface.BUTTON_NEUTRAL -> {
+            DialogInterface.BUTTON_POSITIVE -> {
                 AclEditResult(editText.text.toString().let { text ->
                     when (Template.values()[templateSelector.selectedItemPosition]) {
                         Template.Generic -> AclItem(text)
@@ -179,6 +179,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                     }
                 }, arg)
             }
+            DialogInterface.BUTTON_NEUTRAL -> AclEditResult(arg, arg)
             else -> null
         }
 
