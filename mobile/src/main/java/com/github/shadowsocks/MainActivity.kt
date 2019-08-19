@@ -26,8 +26,8 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
-import android.os.DeadObjectException
 import android.os.Handler
+import android.os.RemoteException
 import android.util.Log
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.values()[service.state]
-    } catch (_: DeadObjectException) {
+    } catch (_: RemoteException) {
         BaseService.State.Idle
     })
     override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
