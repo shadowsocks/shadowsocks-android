@@ -94,7 +94,7 @@ object BaseService {
     }
 
     class Binder(private var data: Data? = null) : IShadowsocksService.Stub(), CoroutineScope, AutoCloseable {
-        val callbacks = object : RemoteCallbackList<IShadowsocksServiceCallback>() {
+        private val callbacks = object : RemoteCallbackList<IShadowsocksServiceCallback>() {
             override fun onCallbackDied(callback: IShadowsocksServiceCallback?, cookie: Any?) {
                 super.onCallbackDied(callback, cookie)
                 stopListeningForBandwidth(callback ?: return)
@@ -112,15 +112,19 @@ object BaseService {
         }
 
         private fun broadcast(work: (IShadowsocksServiceCallback) -> Unit) {
-            repeat(callbacks.beginBroadcast()) {
-                try {
-                    work(callbacks.getBroadcastItem(it))
-                } catch (_: RemoteException) {
-                } catch (e: Exception) {
-                    printLog(e)
+            val count = callbacks.beginBroadcast()
+            try {
+                repeat(count) {
+                    try {
+                        work(callbacks.getBroadcastItem(it))
+                    } catch (_: RemoteException) {
+                    } catch (e: Exception) {
+                        printLog(e)
+                    }
                 }
+            } finally {
+                callbacks.finishBroadcast()
             }
-            callbacks.finishBroadcast()
         }
 
         private suspend fun loop() {
