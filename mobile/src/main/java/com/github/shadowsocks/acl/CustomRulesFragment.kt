@@ -50,6 +50,8 @@ import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.resolveResourceId
+import com.github.shadowsocks.widget.ListHolderListener
+import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.parcel.Parcelize
@@ -373,6 +375,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.setOnApplyWindowInsetsListener(ListHolderListener)
         if (savedInstanceState != null) {
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
                     ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
@@ -387,6 +390,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         toolbar.setOnMenuItemClickListener(this)
         val activity = activity as MainActivity
         list = view.findViewById(R.id.list)
+        list.setOnApplyWindowInsetsListener(MainListListener)
         list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter

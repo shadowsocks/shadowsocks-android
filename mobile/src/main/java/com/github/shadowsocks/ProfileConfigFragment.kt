@@ -30,7 +30,6 @@ import android.os.Parcelable
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
-import androidx.core.view.updatePadding
 import androidx.preference.*
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.Profile
@@ -38,6 +37,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.*
 import com.github.shadowsocks.preference.*
 import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.widget.ListListener
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.parcel.Parcelize
 
@@ -116,10 +116,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        listView.setOnApplyWindowInsetsListener { v, insets ->
-            v.updatePadding(bottom = insets.systemWindowInsetBottom)
-            insets.consumeSystemWindowInsets()
-        }
+        listView.setOnApplyWindowInsetsListener(ListListener)
     }
 
     private fun initPlugins() {

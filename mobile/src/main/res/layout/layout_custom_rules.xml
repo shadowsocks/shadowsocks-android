@@ -4,6 +4,7 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:fitsSystemWindows="true"
               android:orientation="vertical">
     <include layout="@layout/toolbar_light_dark"/>
     <FrameLayout android:layout_width="match_parent"
@@ -13,7 +14,6 @@
             android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="32dp"
             android:clipToPadding="false"
             app:fastScrollEnabled="true"
             app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb"

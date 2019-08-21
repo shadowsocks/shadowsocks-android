@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <style name="Theme.Shadowsocks.Immersive.Navigation">
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
     </style>
 </resources>

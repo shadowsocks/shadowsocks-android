@@ -24,6 +24,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -38,6 +39,7 @@ import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.HostsSummaryProvider
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.remove
+import com.github.shadowsocks.widget.MainListListener
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
     companion object {
@@ -113,6 +115,11 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         listener((activity as MainActivity).state)
         MainActivity.stateListener = listener
         serviceMode.onPreferenceChangeListener = onServiceModeChange
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        listView.setOnApplyWindowInsetsListener(MainListListener)
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {

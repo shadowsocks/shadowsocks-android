@@ -29,10 +29,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.RemoteException
 import android.util.Log
-import android.view.KeyCharacterMap
-import android.view.KeyEvent
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
@@ -40,6 +37,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
@@ -170,6 +168,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
         fab = findViewById(R.id.fab)
         fab.setOnClickListener { toggle() }
+        fab.setOnApplyWindowInsetsListener { view, insets ->
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.systemWindowInsetBottom +
+                        resources.getDimensionPixelOffset(R.dimen.mtrl_bottomappbar_fab_bottom_margin)
+            }
+            insets
+        }
 
         changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(this, this)

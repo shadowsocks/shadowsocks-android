@@ -6,19 +6,19 @@
     android:id="@+id/drawer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_primary"
     android:fitsSystemWindows="true">
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/snackbar"
-        android:background="?android:attr/windowBackground"
         android:clipChildren="false"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-        <FrameLayout
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/fragment_holder"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"/>
 
         <com.github.shadowsocks.widget.ServiceButton
             android:id="@+id/fab"
@@ -26,7 +26,6 @@
             android:layout_height="wrap_content"
             android:elevation="6dp"
             android:nextFocusDown="@+id/stats"
-            app:layout_dodgeInsetEdges="top"
             app:layout_anchor="@id/stats"
             app:backgroundTint="@color/background_service"
             app:fabSize="normal"
@@ -38,6 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+            android:fitsSystemWindows="true"
             android:nextFocusUp="@+id/fab"
             app:backgroundTint="@color/background_stat"
             app:contentInsetStart="0dp"
@@ -47,7 +47,7 @@
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
+                android:background="?android:attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="16dip">
 
@@ -128,6 +128,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:insetForeground="@null"
         app:itemIconTint="@color/nav_item_tint"
         app:itemTextColor="@color/nav_item_tint"
         app:headerLayout="@layout/navigation_header"

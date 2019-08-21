@@ -30,15 +30,15 @@ import android.widget.CheckedTextView
 import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.utils.consumeSystemWindowInsetsWithList
 import com.github.shadowsocks.utils.resolveResourceId
+import com.github.shadowsocks.widget.ListHolderListener
+import com.github.shadowsocks.widget.ListListener
 
 class ConfigActivity : AppCompatActivity() {
     inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -94,7 +94,7 @@ class ConfigActivity : AppCompatActivity() {
         }
         taskerOption = Settings.fromIntent(intent)
         setContentView(R.layout.layout_tasker)
-        consumeSystemWindowInsetsWithList()
+        ListHolderListener.setup(this)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.app_name)
@@ -104,10 +104,7 @@ class ConfigActivity : AppCompatActivity() {
         switch = findViewById(R.id.serviceSwitch)
         switch.isChecked = taskerOption.switchOn
         findViewById<RecyclerView>(R.id.list).apply {
-            setOnApplyWindowInsetsListener { v, insets ->
-                v.updatePadding(bottom = insets.systemWindowInsetBottom)
-                insets.consumeSystemWindowInsets()
-            }
+            setOnApplyWindowInsetsListener(ListListener)
             itemAnimator = DefaultItemAnimator()
             adapter = profilesAdapter
             layoutManager = LinearLayoutManager(this@ConfigActivity, RecyclerView.VERTICAL, false).apply {

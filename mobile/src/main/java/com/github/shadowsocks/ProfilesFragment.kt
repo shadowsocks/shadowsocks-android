@@ -22,7 +22,10 @@ package com.github.shadowsocks
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
 import android.os.Bundle
 import android.text.format.Formatter
 import android.util.LongSparseArray
@@ -47,6 +50,8 @@ import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.widget.ListHolderListener
+import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -301,6 +306,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.setOnApplyWindowInsetsListener(ListHolderListener)
         toolbar.setTitle(R.string.profiles)
         toolbar.inflateMenu(R.menu.profile_manager_menu)
         toolbar.setOnMenuItemClickListener(this)
@@ -309,6 +315,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         ProfileManager.ensureNotEmpty()
         val profilesList = view.findViewById<RecyclerView>(R.id.list)
+        profilesList.setOnApplyWindowInsetsListener(MainListListener)
         val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = layoutManager
         profilesList.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
