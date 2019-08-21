@@ -50,6 +50,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.SingleInstanceActivity
+import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.ServiceButton
 import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     internal lateinit var drawer: DrawerLayout
     private lateinit var navigation: NavigationView
 
-    val snackbar by lazy { findViewById<CoordinatorLayout>(R.id.snackbar) }
+    lateinit var snackbar: CoordinatorLayout private set
     fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
         anchorView = fab
     }
@@ -155,6 +156,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         super.onCreate(savedInstanceState)
         SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_main)
+        snackbar = findViewById(R.id.snackbar)
+        snackbar.setOnApplyWindowInsetsListener(ListHolderListener)
         stats = findViewById(R.id.stats)
         stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
