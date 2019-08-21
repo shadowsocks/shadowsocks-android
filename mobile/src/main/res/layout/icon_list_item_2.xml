@@ -8,7 +8,8 @@
               android:focusable="true">
     <ImageView android:id="@android:id/icon"
                android:layout_width="52dp"
-               android:layout_height="52dp"/>
+               android:layout_height="52dp"
+               android:importantForAccessibility="no"/>
     <Space android:layout_width="4dp"
            android:layout_height="wrap_content"/>
     <LinearLayout android:orientation="vertical"

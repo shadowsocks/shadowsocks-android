@@ -7,6 +7,7 @@
                android:layout_height="wrap_content"
                android:orientation="vertical"
                android:adjustViewBounds="true"
+               android:importantForAccessibility="no"
                android:scaleType="centerCrop"
                android:src="@drawable/background_header"/>
 
