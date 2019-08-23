@@ -49,7 +49,7 @@ androidExtensions {
     experimental = true
 }
 
-def coroutinesVersion = '1.3.0-RC2'
+def coroutinesVersion = '1.3.0'
 def lifecycleVersion = '2.1.0-rc01'
 def roomVersion = '2.1.0'
 def workVersion = '2.2.0'
