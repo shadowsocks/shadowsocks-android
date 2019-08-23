@@ -4,5 +4,4 @@
     <dimen name="profile_padding">8dp</dimen>
     <dimen name="main_list_padding_bottom">88dp</dimen>
     <dimen name="bottom_sheet_padding">8dp</dimen>
-    <dimen name="stats_bar_scroll_threshold">4dp</dimen>
 </resources>
