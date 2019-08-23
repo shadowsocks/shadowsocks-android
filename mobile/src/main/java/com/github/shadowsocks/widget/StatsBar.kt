@@ -27,7 +27,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
 import androidx.lifecycle.lifecycleScope
@@ -46,7 +45,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
-    private val tester = ViewModelProvider(context as FragmentActivity).get<HttpsTest>()
+    private val tester = ViewModelProvider(context as MainActivity).get<HttpsTest>()
     private lateinit var behavior: Behavior
     override fun getBehavior(): Behavior {
         if (!this::behavior.isInitialized) behavior = object : Behavior() {
