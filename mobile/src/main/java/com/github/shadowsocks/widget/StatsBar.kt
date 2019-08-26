@@ -27,16 +27,15 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.observe
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
-import kotlin.math.abs
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
@@ -46,16 +45,14 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
-    private val tester = ViewModelProviders.of(context as FragmentActivity).get<HttpsTest>()
+    private val tester = ViewModelProvider(context as MainActivity).get<HttpsTest>()
     private lateinit var behavior: Behavior
     override fun getBehavior(): Behavior {
         if (!this::behavior.isInitialized) behavior = object : Behavior() {
-            val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
             override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
                                         dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
                                         type: Int, consumed: IntArray) {
-                val dy = dyConsumed + dyUnconsumed
-                super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (abs(dy) >= threshold) dy else 0,
+                super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed + dyUnconsumed,
                         dxUnconsumed, 0, type, consumed)
             }
         }
@@ -78,7 +75,11 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     fun changeState(state: BaseService.State) {
         val activity = context as MainActivity
-        if (state != BaseService.State.Connected) {
+        if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
+            activity.lifecycleScope.launchWhenStarted { performShow() }
+            tester.status.observe(activity) { it.retrieve(this::setStatus) { msg -> activity.snackbar(msg).show() } }
+        } else {
+            activity.lifecycleScope.launchWhenStarted { performHide() }
             updateTraffic(0, 0, 0, 0)
             tester.status.removeObservers(activity)
             if (state != BaseService.State.Idle) tester.invalidate()
@@ -87,11 +88,6 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
                 BaseService.State.Stopping -> R.string.stopping
                 else -> R.string.not_connected
             }))
-        } else {
-            behavior.slideUp(this)
-            tester.status.observe(activity, Observer {
-                it.retrieve(this::setStatus) { activity.snackbar(it).show() }
-            })
         }
     }
 

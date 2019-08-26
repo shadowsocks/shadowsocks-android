@@ -32,9 +32,9 @@ import android.text.format.Formatter
 import android.util.Log
 import android.widget.Toast
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
+import androidx.lifecycle.observe
 import androidx.preference.*
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
@@ -113,14 +113,13 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             else -> R.string.connect
         })
         stats.setTitle(R.string.connection_test_pending)
-        stats.isVisible = state == BaseService.State.Connected
-        if (state != BaseService.State.Connected) {
+        if ((state == BaseService.State.Connected).also { stats.isVisible = it }) tester.status.observe(this) {
+            it.retrieve(stats::setTitle) { msg -> Toast.makeText(context, msg, Toast.LENGTH_LONG).show() }
+        } else {
             trafficUpdated(0, TrafficStats())
             tester.status.removeObservers(this)
             if (state != BaseService.State.Idle) tester.invalidate()
-        } else tester.status.observe(this, Observer {
-            it.retrieve(stats::setTitle) { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
-        })
+        }
         if (msg != null) Toast.makeText(context, getString(R.string.vpn_error, msg), Toast.LENGTH_SHORT).show()
         this.state = state
         val stopped = state == BaseService.State.Stopped
@@ -192,7 +191,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         serviceMode.onPreferenceChangeListener = onServiceModeChange
         findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
 
-        tester = ViewModelProviders.of(this).get()
+        tester = ViewModelProvider(this).get()
         changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(requireContext(), this)
         DataStore.publicStore.registerChangeListener(this)
