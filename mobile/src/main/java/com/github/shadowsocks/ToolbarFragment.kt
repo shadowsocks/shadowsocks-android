@@ -25,7 +25,6 @@ import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
-import com.github.shadowsocks.aidl.TrafficStats
 
 /**
  * @author Mygod
@@ -39,8 +38,6 @@ open class ToolbarFragment : Fragment() {
         toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
         toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(GravityCompat.START) }
     }
-
-    open fun onTrafficUpdated(profileId: Long, stats: TrafficStats) { }
 
     open fun onBackPressed(): Boolean = false
 }

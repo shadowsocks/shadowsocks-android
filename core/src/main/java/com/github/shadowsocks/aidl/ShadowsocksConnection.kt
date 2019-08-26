@@ -84,10 +84,9 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
 
     var bandwidthTimeout = 0L
         set(value) {
-            val service = service
-            if (bandwidthTimeout != value && service != null) try {
-                if (value > 0) service.startListeningForBandwidth(serviceCallback, value)
-                else service.stopListeningForBandwidth(serviceCallback)
+            try {
+                if (value > 0) service?.startListeningForBandwidth(serviceCallback, value)
+                else service?.stopListeningForBandwidth(serviceCallback)
             } catch (_: RemoteException) { }
             field = value
         }

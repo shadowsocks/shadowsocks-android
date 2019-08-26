@@ -461,7 +461,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         }
     }
 
-    override fun onTrafficUpdated(profileId: Long, stats: TrafficStats) {
+    fun onTrafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId != 0L) {  // ignore aggregate stats
             statsCache.put(profileId, stats)
             profilesAdapter.refreshId(profileId)

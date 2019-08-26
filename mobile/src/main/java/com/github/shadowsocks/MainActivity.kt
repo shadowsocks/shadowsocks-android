@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         if (profileId == 0L) this@MainActivity.stats.updateTraffic(
                 stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
         if (state != BaseService.State.Stopping) {
-            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
+            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ProfilesFragment)
                     ?.onTrafficUpdated(profileId, stats)
         }
     }
@@ -201,7 +201,10 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (item.isChecked) drawer.closeDrawers() else {
             when (item.itemId) {
-                R.id.profiles -> displayFragment(ProfilesFragment())
+                R.id.profiles -> {
+                    displayFragment(ProfilesFragment())
+                    connection.bandwidthTimeout = connection.bandwidthTimeout   // request stats update
+                }
                 R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
                 R.id.about -> {
                     Core.analytics.logEvent("about", Bundle())

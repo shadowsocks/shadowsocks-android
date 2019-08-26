@@ -149,32 +149,29 @@ object BaseService {
 
         override fun startListeningForBandwidth(cb: IShadowsocksServiceCallback, timeout: Long) {
             launch {
-                val wasEmpty = bandwidthListeners.isEmpty()
-                if (bandwidthListeners.put(cb.asBinder(), timeout) == null) {
-                    if (wasEmpty) {
-                        check(looper == null)
-                        looper = launch { loop() }
-                    }
-                    if (data?.state != State.Connected) return@launch
-                    var sum = TrafficStats()
-                    val data = data
-                    val proxy = data?.proxy ?: return@launch
-                    proxy.trafficMonitor?.out.also { stats ->
-                        cb.trafficUpdated(proxy.profile.id, if (stats == null) sum else {
+                if (bandwidthListeners.isEmpty() and (bandwidthListeners.put(cb.asBinder(), timeout) == null)) {
+                    check(looper == null)
+                    looper = launch { loop() }
+                }
+                if (data?.state != State.Connected) return@launch
+                var sum = TrafficStats()
+                val data = data
+                val proxy = data?.proxy ?: return@launch
+                proxy.trafficMonitor?.out.also { stats ->
+                    cb.trafficUpdated(proxy.profile.id, if (stats == null) sum else {
+                        sum += stats
+                        stats
+                    })
+                }
+                data.udpFallback?.also { udpFallback ->
+                    udpFallback.trafficMonitor?.out.also { stats ->
+                        cb.trafficUpdated(udpFallback.profile.id, if (stats == null) TrafficStats() else {
                             sum += stats
                             stats
                         })
                     }
-                    data.udpFallback?.also { udpFallback ->
-                        udpFallback.trafficMonitor?.out.also { stats ->
-                            cb.trafficUpdated(udpFallback.profile.id, if (stats == null) TrafficStats() else {
-                                sum += stats
-                                stats
-                            })
-                        }
-                    }
-                    cb.trafficUpdated(0, sum)
                 }
+                cb.trafficUpdated(0, sum)
             }
         }
 
