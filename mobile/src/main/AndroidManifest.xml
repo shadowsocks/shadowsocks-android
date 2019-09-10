@@ -12,8 +12,8 @@
 
     <application
         android:name=".App"
-        tools:ignore="MissingTvBanner">
-
+        android:supportsRtl="true"
+        tools:ignore="GoogleAppIndexingWarning,MissingTvBanner">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

@@ -92,8 +92,8 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     }
 
     fun updateTraffic(txRate: Long, rxRate: Long, txTotal: Long, rxTotal: Long) {
-        txText.text = "▲ ${Formatter.formatFileSize(context, txTotal)}"
-        rxText.text = "▼ ${Formatter.formatFileSize(context, rxTotal)}"
+        txText.text = context.getString(R.string.speed_upload, Formatter.formatFileSize(context, txTotal))
+        rxText.text = context.getString(R.string.speed_download, Formatter.formatFileSize(context, rxTotal))
         txRateText.text = context.getString(R.string.speed, Formatter.formatFileSize(context, txRate))
         rxRateText.text = context.getString(R.string.speed, Formatter.formatFileSize(context, rxRate))
     }

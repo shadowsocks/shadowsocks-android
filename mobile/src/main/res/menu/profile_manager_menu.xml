@@ -5,7 +5,7 @@
         android:alphabeticShortcut="n"
         android:icon="@drawable/ic_action_note_add"
         android:title="@string/add_profile"
-        app:showAsAction="always">
+        app:showAsAction="ifRoom">
         <menu>
             <item
                 android:id="@+id/action_scan_qr_code"
@@ -34,7 +34,7 @@
         android:alphabeticShortcut="s"
         android:icon="@drawable/ic_file_file_upload"
         android:title="@string/action_export_more"
-        app:showAsAction="always">
+        app:showAsAction="ifRoom">
         <menu>
             <item
                 android:id="@+id/action_export_clipboard"

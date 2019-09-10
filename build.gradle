@@ -9,7 +9,7 @@ buildscript {
         minSdkVersion = 21
         sdkVersion = 29
         compileSdkVersion = 29
-        lifecycleVersion = '2.2.0-alpha03'
+        lifecycleVersion = '2.2.0-alpha04'
         junitVersion = '4.12'
         androidTestVersion = '1.2.0'
         androidEspressoVersion = '3.2.0'

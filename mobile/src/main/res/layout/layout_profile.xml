@@ -16,8 +16,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        >
+        android:layout_marginStart="16dp">
 
         <TextView
             android:id="@android:id/text1"
@@ -60,8 +59,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        >
+        android:layout_marginStart="16dp">
 
         <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@android:id/text2"

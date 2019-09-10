@@ -18,6 +18,8 @@
   <string name="remote_dns">Remote DNS</string>
   <string name="traffic">%1$s↑\t%2$s↓</string>
   <string name="stat_summary">Sent: \t\t\t\t\t%3$s\t↑\t%1$s\nReceived: \t%4$s\t↓\t%2$s</string>
+  <string name="speed_upload">▲ %s</string>
+  <string name="speed_download">▼ %s</string>
   <string name="speed">%s/s</string>
   <string name="connection_test_pending">Check Connectivity</string>
   <string name="connection_test_testing">Testing…</string>

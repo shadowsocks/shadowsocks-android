@@ -41,6 +41,7 @@ class UndoSnackbarManager<in T>(private val activity: MainActivity, private val 
                     commit?.invoke(recycleBin)
                     recycleBin.clear()
                 }
+                else -> {}
             }
             last = null
         }
