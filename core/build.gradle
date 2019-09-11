@@ -58,14 +58,14 @@ dependencies {
     api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    api 'androidx.preference:preference:1.1.0-rc01'
+    api 'androidx.preference:preference:1.1.0'
     api "androidx.room:room-runtime:$roomVersion"
     api "androidx.work:work-runtime-ktx:$workVersion"
     api "androidx.work:work-gcm:$workVersion"
     api 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     api 'com.google.code.gson:gson:2.8.5'
-    api 'com.google.firebase:firebase-analytics:17.1.0'
-    api 'com.google.firebase:firebase-config:19.0.0'
+    api 'com.google.firebase:firebase-analytics:17.2.0'
+    api 'com.google.firebase:firebase-config:19.0.1'
     api 'dnsjava:dnsjava:2.1.9'
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
@@ -75,5 +75,5 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.1-beta01'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.2-alpha02'
 }

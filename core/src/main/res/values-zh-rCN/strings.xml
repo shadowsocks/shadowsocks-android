@@ -108,10 +108,6 @@
     <string name="profile_default">"使用当前配置"</string>
 
     <!-- status -->
-    <string name="sent">"发送："</string>
-    <string name="received">"接收："</string>
-
-    <!-- status -->
     <string name="connecting">"连接中…"</string>
     <string name="vpn_connected">"已连接，点击测试连接"</string>
     <string name="not_connected">"未连接"</string>
@@ -142,9 +138,6 @@
     <string name="add_profile_methods_manual_settings">"手动设置"</string>
 
     <!-- misc -->
-    <string name="advanced">"高级选项"</string>
-
-    <!-- misc -->
     <string name="service_mode">"服务模式"</string>
     <string name="service_mode_proxy">"仅代理"</string>
     <string name="service_mode_transproxy">"透明代理"</string>
@@ -154,23 +147,16 @@
     <string name="service_proxy">"代理模式"</string>
     <string name="service_transproxy">"透明代理模式"</string>
     <string name="vpn_permission_denied">"创建 VPN 服务权限不足"</string>
-    <string name="auto_connect_summary_v24">"允许 Shadowsocks 随系统启动，建议使用始终开启的 VPN"</string>
     <string name="direct_boot_aware">"允许锁屏时切换"</string>
     <string name="direct_boot_aware_summary">"选中的配置信息会不那么安全"</string>
     <string name="acl_rule_online_config">"在线规则文件 URL"</string>
     <string name="action_import_file">"从文件导入…"</string>
-    <string name="night_mode">"夜间模式"</string>
-    <string name="night_mode_system">"跟随系统"</string>
-    <string name="night_mode_auto">"自动"</string>
-    <string name="night_mode_on">"开启"</string>
-    <string name="night_mode_off">"关闭"</string>
     <string name="send_email">"发送电子邮件"</string>
     <string name="action_export_more">"导出…"</string>
     <string name="action_export_file">"导出至文件…"</string>
     <string name="cleartext_http_warning">"HTTP 明文流量不安全"</string>
     <string name="share_over_lan">"通过局域网分享"</string>
     <string name="connection_test_pending">"检查连接"</string>
-    <string name="file_manager_missing">"请安装文件管理器，如 MiXplorer"</string>
     <string name="tcp_fastopen_failure">"切换失败"</string>
     <string name="udp_fallback">"UDP 配置"</string>
     <string name="action_replace_file">"从文件替换…"</string>

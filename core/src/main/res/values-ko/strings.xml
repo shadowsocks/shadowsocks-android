@@ -115,10 +115,6 @@
     <string name="profile_default">"현재 프로필 사용"</string>
 
     <!-- status -->
-    <string name="sent">"송신:"</string>
-    <string name="received">"수신:"</string>
-
-    <!-- status -->
     <string name="connecting">"연결 중…"</string>
     <string name="vpn_connected">"연결 완료. 탭 하면 연결 상태를 검사합니다."</string>
     <string name="not_connected">"연결되지 않음"</string>

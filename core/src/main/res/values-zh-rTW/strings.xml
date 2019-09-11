@@ -116,10 +116,6 @@
     <string name="profile_default">"使用目前的設定檔"</string>
 
     <!-- status -->
-    <string name="sent">"傳送:"</string>
-    <string name="received">"接收:"</string>
-
-    <!-- status -->
     <string name="connecting">"連線中…"</string>
     <string name="vpn_connected">"已連線，輕觸以檢查連線能力"</string>
     <string name="not_connected">"未連線"</string>
@@ -150,9 +146,6 @@
     <string name="add_profile_methods_manual_settings">"手動設置"</string>
 
     <!-- misc -->
-    <string name="advanced">"高級"</string>
-
-    <!-- misc -->
     <string name="service_mode">"服務模式"</string>
     <string name="service_mode_proxy">"仅代理"</string>
     <string name="service_mode_transproxy">"透明代理"</string>
@@ -162,5 +155,4 @@
     <string name="service_proxy">"代理服務"</string>
     <string name="service_transproxy">"透明代理服務"</string>
     <string name="vpn_permission_denied">"没有權限創建 VPN 服務"</string>
-    <string name="auto_connect_summary_v24">"允許 Shadowsocks 隨系統啟動，建議使用始終開啟的 VPN"</string>
 </resources>

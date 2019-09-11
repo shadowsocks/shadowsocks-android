@@ -118,10 +118,6 @@
     <string name="profile_default">"現在のプロファイルを使用する"</string>
 
     <!-- status -->
-    <string name="sent">"送信済み:"</string>
-    <string name="received">"受信済み:"</string>
-
-    <!-- status -->
     <string name="connecting">"接続中…"</string>
     <string name="vpn_connected">"接続済み、タップして接続状況をチェック"</string>
     <string name="not_connected">"未接続"</string>
@@ -152,9 +148,6 @@
     <string name="add_profile_methods_manual_settings">"手動設定"</string>
 
     <!-- misc -->
-    <string name="advanced">"アドバンス"</string>
-
-    <!-- misc -->
     <string name="service_mode">"サービスモード"</string>
     <string name="service_mode_proxy">"プロキシのみ"</string>
     <string name="service_mode_transproxy">"トランスプロキシ"</string>
@@ -164,20 +157,15 @@
     <string name="service_proxy">"プロキシサービス"</string>
     <string name="service_transproxy">"トランスプロキシサービス"</string>
     <string name="vpn_permission_denied">"VPNサービス作成のアクセス許可が拒否されました"</string>
-    <string name="auto_connect_summary_v24">"起動時にShadowsockを有効。 VPN常時接続の使用をお勧めします"</string>
     <string name="direct_boot_aware_summary">"選択されたプロファイル情報はより少ない保護を受けることになります"</string>
     <string name="acl_rule_online_config">"オンライン設定のURL"</string>
     <string name="action_import_file">"ファイルからのインポート"</string>
-    <string name="night_mode">"夜間モード"</string>
-    <string name="night_mode_system">"システムに基づく"</string>
-    <string name="night_mode_auto">"オート"</string>
     <string name="send_email">"電子メール送信"</string>
     <string name="action_export_more">"エクスポート"</string>
     <string name="action_export_file">"ファイルへエクスポート"</string>
     <string name="cleartext_http_warning">"クリアテキスト（平文）通信は安全ではありません"</string>
     <string name="share_over_lan">"LAN経由でシェア"</string>
     <string name="connection_test_pending">"接続チェック中"</string>
-    <string name="file_manager_missing">"ファイルマネージャーをインストールしてください（MiXplorerなど）"</string>
     <string name="tcp_fastopen_failure">"切り替え失敗"</string>
     <string name="udp_fallback">"UDPフォールバック"</string>
     <string name="action_replace_file">"ファイルから置き換え"</string>

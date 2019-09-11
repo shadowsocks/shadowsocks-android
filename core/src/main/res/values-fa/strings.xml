@@ -97,12 +97,8 @@
     <!-- tasker -->
     <string name="toggle_service_state">"فعال‌کردن سرویس"</string>
     <string name="start_service_default">"وصل‌شدن به سرور فعلی"</string>
-    <string name="start_service">"وصل شدن به "</string>
+    <string name="start_service">"وصل شدن به s%"</string>
     <string name="profile_default">"استفاده از پروفایل فعلی"</string>
-
-    <!-- status -->
-    <string name="sent">"فرستاده‌شده:"</string>
-    <string name="received">"دریافت‌شده:"</string>
 
     <!-- status -->
     <string name="connecting">"در حال اتصال…"</string>
@@ -127,9 +123,6 @@
     <string name="add_profile_methods_manual_settings">"تنظیمات دستی"</string>
 
     <!-- misc -->
-    <string name="advanced">"پیشرفته"</string>
-
-    <!-- misc -->
     <string name="service_mode">"وضعیت سرویس"</string>
     <string name="service_mode_proxy">"فقط پروکسی"</string>
     <string name="service_mode_vpn">"وی‌پی‌ان"</string>
@@ -140,6 +133,5 @@
     <string name="service_proxy">"سرویس پروکسی"</string>
     <string name="service_transproxy">"سرویس ترانس‌پروکسی"</string>
     <string name="vpn_permission_denied">"مجوز برای ساخت وی‌پی‌ان فراهم نیست"</string>
-    <string name="auto_connect_summary_v24">"شدوساکس را از ابتدا فعال کن. توصیه می‌شود که به جای این گزینه از گزینه always-on vpn استفاده شود"</string>
     <string name="action_import_file">"ورودی از فایل…"</string>
 </resources>

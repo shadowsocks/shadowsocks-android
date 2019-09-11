@@ -26,4 +26,5 @@
     <string name="yes">"Sí"</string>
     <string name="no">"No"</string>
     <string name="apply">"Aplicar"</string>
+    <string name="file_manager_missing">"Por favor, instala un explorador de archivos como MiXplorer"</string>
 </resources>

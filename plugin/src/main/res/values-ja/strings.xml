@@ -28,4 +28,5 @@
     <string name="yes">"はい"</string>
     <string name="no">"いいえ"</string>
     <string name="apply">"適応"</string>
+    <string name="file_manager_missing">"ファイルマネージャーをインストールしてください（MiXplorerなど）"</string>
 </resources>

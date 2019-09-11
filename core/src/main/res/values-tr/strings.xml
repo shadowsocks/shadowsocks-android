@@ -111,10 +111,6 @@
     <string name="profile_default">"Şu anki profili kullan"</string>
 
     <!-- status -->
-    <string name="sent">"Gönderildi:"</string>
-    <string name="received">"Alındı:"</string>
-
-    <!-- status -->
     <string name="connecting">"Bağlanılıyor…"</string>
     <string name="vpn_connected">"Bağlandı, test etmek için tıklayın"</string>
     <string name="not_connected">"Bağlı değil"</string>
@@ -145,9 +141,6 @@
     <string name="add_profile_methods_manual_settings">"Manuel Ayarlar"</string>
 
     <!-- misc -->
-    <string name="advanced">"Gelişmiş"</string>
-
-    <!-- misc -->
     <string name="service_mode">"Servis modu"</string>
     <string name="service_mode_proxy">"Sadece proxy"</string>
     <string name="port_proxy">"SOCKS5 proxy portu"</string>
@@ -156,14 +149,8 @@
     <string name="service_proxy">"Proxy Servisi"</string>
     <string name="service_transproxy">"Transproxy Servisi"</string>
     <string name="vpn_permission_denied">"VPN servisi yaratma isteği reddedildi"</string>
-    <string name="auto_connect_summary_v24">"Shadowsockı cihazla beraber başlat. Bunun yerine her zaman açık VPN kullanılması tavsiye edilirö"</string>
     <string name="direct_boot_aware">"Ekran kitliyken açıp kapamaya izin ver."</string>
     <string name="direct_boot_aware_summary">"Seçili profil bilginiz daha az korunacak."</string>
     <string name="acl_rule_online_config">"Online ayarlar URL'i"</string>
     <string name="action_import_file">"Dosyadan al…"</string>
-    <string name="night_mode">"Gece modu"</string>
-    <string name="night_mode_system">"Takip sistemi"</string>
-    <string name="night_mode_auto">"Oto"</string>
-    <string name="night_mode_on">"Açık"</string>
-    <string name="night_mode_off">"Kapalı"</string>
 </resources>

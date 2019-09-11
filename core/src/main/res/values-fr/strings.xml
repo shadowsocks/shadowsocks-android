@@ -111,10 +111,6 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="profile_default">"Utiliser le profil actuel"</string>
 
     <!-- status -->
-    <string name="sent">"Envoyé :"</string>
-    <string name="received">"Reçu :"</string>
-
-    <!-- status -->
     <string name="connecting">"Connexion…"</string>
     <string name="vpn_connected">"Connecté, toucher pour vérifier la connexion"</string>
     <string name="not_connected">"Non connecté"</string>
@@ -141,9 +137,6 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="add_profile_methods_manual_settings">"Paramètres manuels"</string>
 
     <!-- misc -->
-    <string name="advanced">"Avancé"</string>
-
-    <!-- misc -->
     <string name="service_mode">"Mode Service"</string>
     <string name="service_mode_proxy">"Proxy seul"</string>
     <string name="port_proxy">"Port proxy SOCKS5"</string>
@@ -152,18 +145,14 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="service_proxy">"Service Proxy"</string>
     <string name="service_transproxy">"Service Transproxy"</string>
     <string name="vpn_permission_denied">"Permission de créer un service VPN refusée"</string>
-    <string name="auto_connect_summary_v24">"Activer Shadowsocks au démarrage. Plutôt recommandé d'utiliser le VPN permanent"</string>
     <string name="direct_boot_aware">"Activation-Désactivation sur écran verrouillé"</string>
     <string name="direct_boot_aware_summary">"Vos informations de profil sélectionnées seront moins protégées"</string>
     <string name="acl_rule_online_config">"URL de config en ligne"</string>
     <string name="action_import_file">"Importer depuis un fichier…"</string>
-    <string name="night_mode">"Mode nuit"</string>
-    <string name="night_mode_system">"Suivre la config système"</string>
     <string name="send_email">"Envoyer un email"</string>
     <string name="action_export_more">"Exporter…"</string>
     <string name="action_export_file">"Exporter dans un fichier…"</string>
     <string name="cleartext_http_warning">"Le trafic HTTP en clair n'est pas sécurisé"</string>
     <string name="share_over_lan">"Partager sur le réseau local"</string>
     <string name="connection_test_pending">"Vérifier la connectivité"</string>
-    <string name="file_manager_missing">"Veuillez installer un gestionnaire de fichier tel que MiXplorer"</string>
 </resources>

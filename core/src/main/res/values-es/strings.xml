@@ -106,10 +106,6 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
     <string name="profile_default">"Usar el perfil actual"</string>
 
     <!-- status -->
-    <string name="sent">"Enviado:"</string>
-    <string name="received">"Recibido:"</string>
-
-    <!-- status -->
     <string name="connecting">"Conectando…"</string>
     <string name="vpn_connected">"Conectado, presiona para verificar la conexión"</string>
     <string name="not_connected">"No conectado"</string>
@@ -134,9 +130,6 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
     <string name="add_profile_methods_manual_settings">"Configuración manual"</string>
 
     <!-- misc -->
-    <string name="advanced">"Avanzado"</string>
-
-    <!-- misc -->
     <string name="service_mode">"Modo de servicio"</string>
     <string name="service_mode_proxy">"Sólo Proxy"</string>
     <string name="service_mode_vpn">"VPN"</string>
@@ -147,16 +140,10 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
     <string name="vpn_permission_denied">"Permiso denegado al crear servicio VPN"</string>
     <string name="direct_boot_aware_summary">"La información del perfil seleccionado será menos protegida"</string>
     <string name="action_import_file">"Importar desde archivo…"</string>
-    <string name="night_mode">"Modo nocturno"</string>
-    <string name="night_mode_system">"Seguir sistema"</string>
-    <string name="night_mode_auto">"Auto"</string>
-    <string name="night_mode_on">"Encendido"</string>
-    <string name="night_mode_off">"Apagado"</string>
     <string name="send_email">"Enviar email"</string>
     <string name="action_export_more">"Exportar…"</string>
     <string name="action_export_file">"Exportar a archivo…"</string>
     <string name="share_over_lan">"Compartir por LAN"</string>
     <string name="connection_test_pending">"Verificar conectividad"</string>
-    <string name="file_manager_missing">"Por favor, instala un explorador de archivos como MiXplorer"</string>
     <string name="action_replace_file">"Reemplazar desde archivo…"</string>
 </resources>

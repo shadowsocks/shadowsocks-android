@@ -111,10 +111,6 @@
     <string name="profile_default">"Использовать текущий профиль"</string>
 
     <!-- status -->
-    <string name="sent">"Отправлено:"</string>
-    <string name="received">"Получено:"</string>
-
-    <!-- status -->
     <string name="connecting">"Соединение…"</string>
     <string name="vpn_connected">"Подключено, нажмите для проверки соединения"</string>
     <string name="not_connected">"Не подключено"</string>
@@ -145,9 +141,6 @@
     <string name="add_profile_methods_manual_settings">"Ручные настройки"</string>
 
     <!-- misc -->
-    <string name="advanced">"Дополнительно"</string>
-
-    <!-- misc -->
     <string name="service_mode">"Режим"</string>
     <string name="service_mode_proxy">"Только прокси"</string>
     <string name="service_mode_transproxy">"Прозрачный прокси"</string>
@@ -157,27 +150,20 @@
     <string name="service_proxy">"Служба прокси"</string>
     <string name="service_transproxy">"Служба прозрачный прокси"</string>
     <string name="vpn_permission_denied">"Нет разрешения на создание VPN соединения"</string>
-    <string name="auto_connect_summary_v24">"Включить Shadowsocks во время запуска. Лучше использовать режим постоянной VPN."</string>
     <string name="speed">"%s/с"</string>
     <string name="direct_boot_aware">"Разрешить переключение на экране блокировки"</string>
     <string name="direct_boot_aware_summary">"Данные в выбранном профиле будут хуже защищены"</string>
     <string name="acl_rule_online_config">"URL конфигурации"</string>
     <string name="action_import_file">"Импортировать из файла…"</string>
-    <string name="night_mode">"Ночной режим"</string>
-    <string name="night_mode_system">"Как в системе"</string>
-    <string name="night_mode_auto">"Авто"</string>
-    <string name="night_mode_on">"Вкл"</string>
-    <string name="night_mode_off">"Выкл"</string>
     <string name="send_email">"Отправить письмо"</string>
     <string name="action_export_more">"Экспорт…"</string>
     <string name="action_export_file">"Экспорт в файл…"</string>
     <string name="cleartext_http_warning">"Текстовый трафик HTTP не защищён"</string>
     <string name="share_over_lan">"Поделиться через LAN"</string>
     <string name="connection_test_pending">"Проверить подключение"</string>
-    <string name="file_manager_missing">"Установите файловый менеджер"</string>
     <string name="tcp_fastopen_failure">"Не удалось переключить"</string>
     <string name="udp_fallback">"Возврат к UDP"</string>
-    <string name="action_replace_file">"Заменить из файла..."</string>
+    <string name="action_replace_file">"Заменить из файла…"</string>
     <string name="off">"Выкл"</string>
     <string name="proxied_apps_mode">"Режим"</string>
     <string name="metered">"Лимитное соединение"</string>
