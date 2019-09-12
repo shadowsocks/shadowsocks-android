@@ -12,6 +12,9 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
       - run:
+          name: Run Lint
+          command: ./gradlew lintDebug
+      - run:
           name: Run Build and Tests
           command: ./gradlew assembleDebug check
       - save_cache:

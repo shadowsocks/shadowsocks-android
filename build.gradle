@@ -41,6 +41,17 @@ allprojects {
         google()
         jcenter()
     }
+
+    afterEvaluate { project ->
+        if (project.hasProperty("android")) {
+            android {
+                lintOptions {
+                    warningsAsErrors = true
+                    abortOnError true
+                }
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {
