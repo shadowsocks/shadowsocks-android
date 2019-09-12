@@ -4,9 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="?attr/actionBarSize"
     android:layout_width="match_parent"
-    android:background="?attr/colorPrimary"
     android:elevation="4dp"
     android:touchscreenBlocksFocus="false"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    android:theme="@style/Theme.Shadowsocks.ActionBar"
     app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"
     android:id="@+id/toolbar" />

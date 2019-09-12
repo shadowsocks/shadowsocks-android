@@ -98,7 +98,7 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="add_profile_dialog">"Ajouter ce profil Shadowsocks?"</string>
     <string name="add_profile_methods_scan_qr_code">"Scanner le QR Code"</string>
     <plurals name="removed">
-        <item quantity="one">"Supprimé"</item>
+        <item quantity="one">"%d Supprimé"</item>
         <item quantity="other">"%d éléments supprimés"</item>
     </plurals>
     <string name="undo">"Annuler"</string>

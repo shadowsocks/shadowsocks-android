@@ -493,9 +493,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 android.R.color.black
             Build.VERSION.SDK_INT >= 23 -> {
                 window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                R.color.material_grey_300
+                R.color.material_light_grey_300
             }
-            else -> R.color.material_grey_600
+            else -> R.color.material_light_grey_600
         })
         activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
         toolbar.touchscreenBlocksFocus = true

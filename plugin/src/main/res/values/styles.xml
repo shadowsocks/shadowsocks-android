@@ -12,6 +12,9 @@
     <style name="Theme.Shadowsocks.Immersive">
         <item name="android:navigationBarColor">#6000</item>
     </style>
+    <style name="Theme.Shadowsocks.ActionBar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:background">?attr/colorPrimary</item>
+    </style>
     <style name="Theme.AppCompat.Translucent" parent="Theme.AppCompat.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>

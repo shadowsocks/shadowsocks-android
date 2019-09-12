@@ -22,6 +22,7 @@ package com.github.shadowsocks.widget
 
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
+import com.google.android.material.snackbar.BaseTransientBottomBar.BaseCallback
 import com.google.android.material.snackbar.Snackbar
 
 /**
@@ -37,7 +38,7 @@ class UndoSnackbarManager<in T>(private val activity: MainActivity, private val 
     private val removedCallback = object : Snackbar.Callback() {
         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
             when (event) {
-                DISMISS_EVENT_SWIPE, DISMISS_EVENT_MANUAL, DISMISS_EVENT_TIMEOUT -> {
+                BaseCallback.DISMISS_EVENT_SWIPE, BaseCallback.DISMISS_EVENT_MANUAL, BaseCallback.DISMISS_EVENT_TIMEOUT -> {
                     commit?.invoke(recycleBin)
                     recycleBin.clear()
                 }

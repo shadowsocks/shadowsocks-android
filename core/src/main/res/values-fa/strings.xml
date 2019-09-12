@@ -97,7 +97,7 @@
     <!-- tasker -->
     <string name="toggle_service_state">"فعال‌کردن سرویس"</string>
     <string name="start_service_default">"وصل‌شدن به سرور فعلی"</string>
-    <string name="start_service">"وصل شدن به s%"</string>
+    <string name="start_service">"وصل شدن به %s"</string>
     <string name="profile_default">"استفاده از پروفایل فعلی"</string>
 
     <!-- status -->

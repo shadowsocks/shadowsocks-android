@@ -52,7 +52,8 @@
         app:layout_constraintEnd_toEndOf="@+id/title"
         app:layout_constraintStart_toStartOf="@+id/title"
         app:layout_constraintTop_toBottomOf="@+id/title"
-        tools:text="com.package.name (10000)" />
+        tools:text="com.package.name (10000)"
+        tools:targetApi="m" />
 
     <Switch
         android:id="@+id/itemcheck"

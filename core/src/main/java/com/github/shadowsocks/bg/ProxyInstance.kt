@@ -52,13 +52,14 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
     val pluginPath by lazy { PluginManager.init(plugin) }
     private var scheduleConfigUpdate = false
+    private val remoteConfig by lazy { RemoteConfig() }
 
     suspend fun init(service: BaseService.Interface, hosts: HostsFile) {
         if (profile.host == "198.199.101.152") {
             scheduleConfigUpdate = true
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
-            val (config, success) = RemoteConfig.fetch()
+            val (config, success) = remoteConfig.fetch()
             scheduleConfigUpdate = !success
             val conn = withContext(Dispatchers.IO) {
                 // Network.openConnection might use networking, see https://issuetracker.google.com/issues/135242093
@@ -139,7 +140,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
     fun scheduleUpdate() {
         if (route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(route)
-        if (scheduleConfigUpdate) RemoteConfig.scheduleFetch()
+        if (scheduleConfigUpdate) remoteConfig.scheduleFetch()
     }
 
     fun shutdown(scope: CoroutineScope) {

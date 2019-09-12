@@ -44,8 +44,14 @@ class AutoCollapseTextView @JvmOverloads constructor(context: Context, attrs: At
         Crashlytics.logException(e)
     }
 
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
     override fun onTouchEvent(event: MotionEvent?) = try {
         super.onTouchEvent(event)
+        performClick()
     } catch (e: IndexOutOfBoundsException) {
         e.printStackTrace()
         Crashlytics.logException(e)

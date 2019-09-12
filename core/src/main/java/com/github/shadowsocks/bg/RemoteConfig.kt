@@ -27,8 +27,8 @@ import com.github.shadowsocks.core.R
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import kotlinx.coroutines.tasks.await
 
-object RemoteConfig {
-    private val config = FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) }
+class RemoteConfig {
+    private val config = FirebaseRemoteConfig.getInstance().apply { setDefaultsAsync(R.xml.default_configs) }
 
     private fun Exception.log() {
         Log.w("RemoteConfig", this)

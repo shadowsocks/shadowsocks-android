@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -63,6 +64,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         /**
          * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
          */
+        @SuppressLint("DiscouragedPrivateApi")
         private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
     }
 

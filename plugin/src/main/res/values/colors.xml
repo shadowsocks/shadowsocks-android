@@ -2,6 +2,9 @@
 
 <resources>
 
+  <color name="material_light_grey_100">#FFF5F5F5</color>
+  <color name="material_light_grey_300">#FFE0E0E0</color>
+  <color name="material_light_grey_600">#FF757575</color>
   <color name="material_green_700">#388E3C</color>
   <color name="material_green_a700">#00C853</color>
   <color name="material_blue_grey_100">#CFD8DC</color>

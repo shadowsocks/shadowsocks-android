@@ -23,7 +23,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:banner="@mipmap/banner">
+        android:banner="@mipmap/banner"
+        tools:targetApi="n">
 
         <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
                    android:value="true" />
@@ -77,7 +78,8 @@
         <receiver android:name="com.github.shadowsocks.BootReceiver"
                   android:process=":bg"
                   android:directBootAware="true"
-                  android:enabled="false">
+                  android:enabled="false"
+                  tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
@@ -86,55 +88,72 @@
         </receiver>
 
         <service android:name="com.google.firebase.components.ComponentDiscoveryService"
-                 android:directBootAware="true"/>
+                 android:directBootAware="true"
+                 tools:targetApi="n" />
         <provider android:name="com.crashlytics.android.CrashlyticsInitProvider"
-                  tools:node="remove"/>
+                  android:authorities="com.github.shadowsocks.core.CrashlyticsInitProvider"
+                  android:exported="false"
+                  tools:node="remove" />
         <provider android:name="com.google.firebase.provider.FirebaseInitProvider"
+                  android:authorities="com.github.shadowsocks.core.FirebaseInitProvider"
+                  android:exported="false"
                   tools:node="remove"/>
         <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
         <provider android:name="androidx.work.impl.WorkManagerInitializer"
+                  android:authorities="com.github.shadowsocks.core.WorkManagerInitializer"
+                  android:exported="false"
                   tools:node="remove"/>
         <service android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
                  android:process=":bg"
                  android:directBootAware="true"
-                 tools:replace="android:directBootAware"/>
+                 tools:replace="android:directBootAware"
+                 tools:targetApi="n" />
         <service android:name="androidx.work.impl.background.systemjob.SystemJobService"
                  android:process=":bg"
                  android:directBootAware="true"
-                 tools:replace="android:directBootAware"/>
+                 tools:replace="android:directBootAware"
+                 tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
         <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
                   android:process=":bg"
                   android:directBootAware="true"
-                  tools:replace="android:directBootAware"/>
+                  tools:replace="android:directBootAware"
+                  tools:targetApi="n" />
 
         <!-- Used for API < 23. https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager-gcm/src/main/AndroidManifest.xml -->
         <service android:name="androidx.work.impl.background.gcm.WorkManagerGcmService"
                  android:process=":bg"
                  android:directBootAware="true"
-                 tools:replace="android:directBootAware"/>
+                 tools:replace="android:directBootAware"
+                 tools:targetApi="n" />
     </application>
 </manifest>

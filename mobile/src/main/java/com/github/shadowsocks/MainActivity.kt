@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         fab.setOnApplyWindowInsetsListener { view, insets ->
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = insets.systemWindowInsetBottom +
-                        resources.getDimensionPixelOffset(R.dimen.mtrl_bottomappbar_fab_bottom_margin)
+                        resources.getDimensionPixelOffset(R.dimen.bottomappbar_fab_bottom_margin)
             }
             insets
         }
