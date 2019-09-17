@@ -208,10 +208,12 @@ data class Profile(
                 }
             }
         }
-        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Unit) = JsonParser(feature).run {
-            process(json)
-            for (profile in this) create(profile)
-            finalize(create)
+        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Unit) {
+            JsonParser(feature).run {
+                process(json)
+                for (profile in this) create(profile)
+                finalize(create)
+            }
         }
     }
 

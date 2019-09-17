@@ -167,7 +167,7 @@ object Commandline {
         if (state == inQuote || state == inDoubleQuote) {
             throw IllegalArgumentException("unbalanced quotes in $toProcess")
         }
-        if (lastTokenIsSlash) throw IllegalArgumentException("escape character following nothing in $toProcess")
+        require(!lastTokenIsSlash) { "escape character following nothing in $toProcess" }
         return result.toTypedArray()
     }
 }
