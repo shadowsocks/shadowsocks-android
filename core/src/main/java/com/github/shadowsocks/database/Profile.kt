@@ -112,8 +112,9 @@ data class Profile(
                         try {
                             val javaURI = URI(it.value)
                             profile.host = javaURI.host ?: ""
-                            if (profile.host.firstOrNull() == '[' && profile.host.lastOrNull() == ']')
+                            if (profile.host.firstOrNull() == '[' && profile.host.lastOrNull() == ']') {
                                 profile.host = profile.host.substring(1, profile.host.length - 1)
+                            }
                             profile.remotePort = javaURI.port
                             profile.plugin = uri.getQueryParameter(Key.plugin)
                             profile.name = uri.fragment ?: ""
@@ -208,10 +209,12 @@ data class Profile(
                 }
             }
         }
-        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Unit) = JsonParser(feature).run {
-            process(json)
-            for (profile in this) create(profile)
-            finalize(create)
+        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Unit) {
+            JsonParser(feature).run {
+                process(json)
+                for (profile in this) create(profile)
+                finalize(create)
+            }
         }
     }
 
@@ -263,8 +266,9 @@ data class Profile(
                 .scheme("ss")
                 .encodedAuthority("$auth@$wrappedHost:$remotePort")
         val configuration = PluginConfiguration(plugin ?: "")
-        if (configuration.selected.isNotEmpty())
+        if (configuration.selected.isNotEmpty()) {
             builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))
+        }
         if (!name.isNullOrEmpty()) builder.fragment(name)
         return builder.build()
     }

@@ -42,7 +42,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
     private val addressLength get() = address.address.size shl 3
 
     init {
-        if (prefixSize < 0 || prefixSize > addressLength) throw IllegalArgumentException("prefixSize: $prefixSize")
+        require(prefixSize in 0..addressLength) { "prefixSize $prefixSize not in 0..$addressLength" }
     }
 
     fun matches(other: InetAddress): Boolean {

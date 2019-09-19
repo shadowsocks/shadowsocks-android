@@ -37,7 +37,7 @@ class Socks5Endpoint(host: String, port: Int) {
             null -> Socks5Message.SOCKS_ATYP_DOMAINNAME
             is Inet4Address -> Socks5Message.SOCKS_ATYP_IPV4
             is Inet6Address -> Socks5Message.SOCKS_ATYP_IPV6
-            else -> throw IllegalStateException("Unsupported address type $numeric")
+            else -> error("Unsupported address type $numeric")
         }
         ByteBuffer.allocate(bytes.size + (if (numeric == null) 1 else 0) + 3).apply {
             put(type.toByte())

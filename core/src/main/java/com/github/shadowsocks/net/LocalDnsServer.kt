@@ -79,7 +79,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     for (address in results) addRecord(when (address) {
                         is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
                         is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
-                        else -> throw IllegalStateException("Unsupported address $address")
+                        else -> error("Unsupported address $address")
                     }, Section.ANSWER)
                 }.toWire())
     }

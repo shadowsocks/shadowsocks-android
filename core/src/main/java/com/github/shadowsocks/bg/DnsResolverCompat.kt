@@ -31,7 +31,6 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import kotlinx.coroutines.*
 import java.io.IOException
-import java.lang.Runnable
 import java.net.InetAddress
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
