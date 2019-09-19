@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.acl
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.DialogInterface
@@ -102,6 +103,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
         override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
             val activity = requireActivity()
+            @SuppressLint("InflateParams")
             val view = activity.layoutInflater.inflate(R.layout.dialog_acl_rule, null)
             templateSelector = view.findViewById(R.id.template_selector)
             editText = view.findViewById(R.id.content)
