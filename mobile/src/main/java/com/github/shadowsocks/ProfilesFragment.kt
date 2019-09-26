@@ -30,9 +30,7 @@ import android.os.Bundle
 import android.text.format.Formatter
 import android.util.LongSparseArray
 import android.view.*
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.widget.TooltipCompat
@@ -53,10 +51,15 @@ import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.*
+import com.google.android.gms.ads.formats.MediaView
+import com.google.android.gms.ads.formats.NativeAdOptions
+import com.google.android.gms.ads.formats.UnifiedNativeAd
+import com.google.android.gms.ads.formats.UnifiedNativeAdView
 import net.glxn.qrgen.android.QRCode
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashSet
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -102,7 +105,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private val text2 = itemView.findViewById<TextView>(android.R.id.text2)
         private val traffic = itemView.findViewById<TextView>(R.id.traffic)
         private val edit = itemView.findViewById<View>(R.id.edit)
-        private var adView: AdView? = null
+        private var currentNativeAd: UnifiedNativeAd? = null
+        private var isAttached = false
 
         init {
             edit.setOnClickListener {
@@ -121,32 +125,129 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             TooltipCompat.setTooltipText(share, share.contentDescription)
         }
 
-        fun attach() {
-            if (!isAdLoaded && item.host == "198.199.101.152") {
-                if (adView == null) {
-                    adView = AdView(context).apply {
-                        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                AdSize.SMART_BANNER.getHeightInPixels(context)).apply {
-                            gravity = Gravity.CENTER_HORIZONTAL
-                        }
-                        adUnitId = "ca-app-pub-9097031975646651/7760346322"
-                        adSize = AdSize.SMART_BANNER
-                        itemView.findViewById<LinearLayout>(R.id.content).addView(this)
-                        loadAd(AdRequest.Builder().apply {
-                            addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
-                            addTestDevice("7509D18EB8AF82F915874FEF53877A64")
-                        }.build())
+        fun populateUnifiedNativeAdView(nativeAd: UnifiedNativeAd, adView: UnifiedNativeAdView) {
+            // You must call destroy on old ads when you are done with them,
+            // otherwise you will have a memory leak.
+            currentNativeAd?.destroy()
+            currentNativeAd = nativeAd
+
+            // Set other ad assets.
+            adView.headlineView = adView.findViewById(R.id.ad_headline)
+            adView.bodyView = adView.findViewById(R.id.ad_body)
+            adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
+            adView.iconView = adView.findViewById(R.id.ad_app_icon)
+            adView.starRatingView = adView.findViewById(R.id.ad_stars)
+            adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
+
+            // The headline and media content are guaranteed to be in every UnifiedNativeAd.
+            (adView.headlineView as TextView).text = nativeAd.headline
+
+            // These assets aren't guaranteed to be in every UnifiedNativeAd, so it's important to
+            // check before trying to display them.
+            if (nativeAd.body == null) {
+                adView.bodyView.visibility = View.INVISIBLE
+            } else {
+                adView.bodyView.visibility = View.VISIBLE
+                (adView.bodyView as TextView).text = nativeAd.body
+            }
+
+            if (nativeAd.callToAction == null) {
+                adView.callToActionView.visibility = View.INVISIBLE
+            } else {
+                adView.callToActionView.visibility = View.VISIBLE
+                (adView.callToActionView as Button).text = nativeAd.callToAction
+            }
+
+            if (nativeAd.icon == null) {
+                adView.iconView.visibility = View.GONE
+            } else {
+                (adView.iconView as ImageView).setImageDrawable(
+                        nativeAd.icon.drawable)
+                adView.iconView.visibility = View.VISIBLE
+            }
+
+            if (nativeAd.starRating == null) {
+                adView.starRatingView.visibility = View.INVISIBLE
+            } else {
+                (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
+                adView.starRatingView.visibility = View.VISIBLE
+            }
+
+            if (nativeAd.advertiser == null) {
+                adView.advertiserView.visibility = View.INVISIBLE
+            } else {
+                (adView.advertiserView as TextView).text = nativeAd.advertiser
+                adView.advertiserView.visibility = View.VISIBLE
+            }
+
+            // This method tells the Google Mobile Ads SDK that you have finished populating your
+            // native ad view with this native ad.
+            adView.setNativeAd(nativeAd)
+
+            // Get the video controller for the ad. One will always be provided, even if the ad doesn't
+            // have a video asset.
+            val vc = nativeAd.videoController
+
+            // Updates the UI to say whether or not this ad has a video asset.
+            if (vc.hasVideoContent()) {
+                // Create a new VideoLifecycleCallbacks object and pass it to the VideoController. The
+                // VideoController will call methods on this object when events occur in the video
+                // lifecycle.
+                vc.videoLifecycleCallbacks = object : VideoController.VideoLifecycleCallbacks() {
+                    override fun onVideoEnd() {
+                        super.onVideoEnd()
                     }
-                } else adView?.visibility = View.VISIBLE
-                isAdLoaded = true
-            } else adView?.visibility = View.GONE
+                }
+            }
+        }
+
+        fun attach() {
+            isAttached = true
+
+            if (item.host == "198.199.101.152") {
+                val builder = AdLoader.Builder(context, "ca-app-pub-9097031975646651/9333091620")
+                builder.forUnifiedNativeAd { unifiedNativeAd ->
+                    if (!isAdLoaded && isAttached) {
+                        // OnUnifiedNativeAdLoadedListener implementation.
+                        val adView = layoutInflater
+                                .inflate(R.layout.ad_unified, null) as UnifiedNativeAdView
+                        populateUnifiedNativeAdView(unifiedNativeAd, adView)
+                        val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
+
+                        adContainer.removeAllViews()
+                        adContainer.addView(adView)
+
+                        isAdLoaded = true
+                    }
+                }
+
+                val videoOptions = VideoOptions.Builder()
+                        .setStartMuted(true)
+                        .build()
+                val adOptions = NativeAdOptions.Builder()
+                        .setVideoOptions(videoOptions)
+                        .build()
+                builder.withNativeAdOptions(adOptions)
+
+                val adLoader = builder.build()
+                adLoader.loadAd(AdRequest.Builder().apply {
+                    addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
+                    addTestDevice("7509D18EB8AF82F915874FEF53877A64")
+                }.build())
+
+            } else {
+                itemView.findViewById<LinearLayout>(R.id.ad_container).removeAllViews()
+            }
         }
 
         fun detach() {
-            if (adView?.visibility == View.VISIBLE) {
+            isAttached = false
+            if (currentNativeAd != null) {
                 isAdLoaded = false
-                adView?.visibility = View.GONE
             }
+            currentNativeAd?.destroy()
+            currentNativeAd = null
+            itemView.findViewById<LinearLayout>(R.id.ad_container).removeAllViews()
         }
 
         fun bind(item: Profile) {
