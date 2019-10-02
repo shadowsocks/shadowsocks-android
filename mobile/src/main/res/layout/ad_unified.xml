@@ -2,7 +2,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -28,8 +28,8 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:adjustViewBounds="true"
+                    android:importantForAccessibility="no"
                     android:paddingBottom="5dp"
-                    android:paddingRight="5dp"
                     android:paddingEnd="5dp"/>
 
                 <LinearLayout

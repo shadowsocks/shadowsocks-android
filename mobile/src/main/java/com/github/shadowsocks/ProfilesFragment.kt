@@ -29,7 +29,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.format.Formatter
 import android.util.LongSparseArray
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
@@ -51,15 +54,13 @@ import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.google.android.gms.ads.*
-import com.google.android.gms.ads.formats.MediaView
+import com.google.android.gms.ads.AdLoader
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.VideoOptions
 import com.google.android.gms.ads.formats.NativeAdOptions
 import com.google.android.gms.ads.formats.UnifiedNativeAd
 import com.google.android.gms.ads.formats.UnifiedNativeAdView
 import net.glxn.qrgen.android.QRCode
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -125,7 +126,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             TooltipCompat.setTooltipText(share, share.contentDescription)
         }
 
-        fun populateUnifiedNativeAdView(nativeAd: UnifiedNativeAd, adView: UnifiedNativeAdView) {
+        private fun populateUnifiedNativeAdView(nativeAd: UnifiedNativeAd, adView: UnifiedNativeAdView) {
             // You must call destroy on old ads when you are done with them,
             // otherwise you will have a memory leak.
             currentNativeAd?.destroy()
@@ -183,22 +184,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             // This method tells the Google Mobile Ads SDK that you have finished populating your
             // native ad view with this native ad.
             adView.setNativeAd(nativeAd)
-
-            // Get the video controller for the ad. One will always be provided, even if the ad doesn't
-            // have a video asset.
-            val vc = nativeAd.videoController
-
-            // Updates the UI to say whether or not this ad has a video asset.
-            if (vc.hasVideoContent()) {
-                // Create a new VideoLifecycleCallbacks object and pass it to the VideoController. The
-                // VideoController will call methods on this object when events occur in the video
-                // lifecycle.
-                vc.videoLifecycleCallbacks = object : VideoController.VideoLifecycleCallbacks() {
-                    override fun onVideoEnd() {
-                        super.onVideoEnd()
-                    }
-                }
-            }
         }
 
         fun attach() {
@@ -209,10 +194,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 builder.forUnifiedNativeAd { unifiedNativeAd ->
                     if (!isAdLoaded && isAttached) {
                         // OnUnifiedNativeAdLoadedListener implementation.
-                        val adView = layoutInflater
-                                .inflate(R.layout.ad_unified, null) as UnifiedNativeAdView
-                        populateUnifiedNativeAdView(unifiedNativeAd, adView)
                         val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
+                        val adView = layoutInflater.inflate(R.layout.ad_unified, adContainer,
+                                false) as UnifiedNativeAdView
+                        populateUnifiedNativeAdView(unifiedNativeAd, adView)
 
                         adContainer.removeAllViews()
                         adContainer.addView(adView)
@@ -234,7 +219,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
                     addTestDevice("7509D18EB8AF82F915874FEF53877A64")
                 }.build())
-
             } else {
                 itemView.findViewById<LinearLayout>(R.id.ad_container).removeAllViews()
             }
@@ -293,7 +277,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
             R.id.action_qr_code -> {
-                requireFragmentManager().beginTransaction().add(QRCodeDialog(this.item.toString()), "")
+                parentFragmentManager.beginTransaction().add(QRCodeDialog(this.item.toString()), "")
                         .commitAllowingStateLoss()
                 true
             }
