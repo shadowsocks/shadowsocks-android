@@ -47,6 +47,8 @@
     <string name="bypass_apps">"حالت صرف‌نظر"</string>
     <string name="bypass_apps_summary">"این اپلیکیشن‌ها از وی‌پی‌ان استفاده نکنند"</string>
     <string name="auto_connect">"وصل‌شدن اتوماتیک"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"فعال‌شدن شدوساکس لحظه روشن‌شدن گوشی"</string>
 
     <!-- Fuzzy -->
@@ -89,6 +91,8 @@
     <string name="profile_config">"تنظیمات پروفایل"</string>
     <string name="delete">"حذف"</string>
     <string name="delete_confirm_prompt">"آیا مطمئن هستید که می‌خواهید این پروفایل را حذف کنید؟"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"NFC یا QR Code"</string>
     <string name="add_profile_dialog">"این پروفایل اضافه شود؟"</string>
     <string name="add_profile_methods_scan_qr_code">"اسکن‌کردن QR Code"</string>

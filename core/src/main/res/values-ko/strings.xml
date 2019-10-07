@@ -53,6 +53,8 @@
     <string name="bypass_apps">"선택된 앱들만 프록시 적용 제외하기"</string>
     <string name="bypass_apps_summary">"이 옵션을 활성화하면 선택된 앱들은 프락시를 사용하지 않습니다"</string>
     <string name="auto_connect">"자동 접속"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"장치가 켜질 때 Shadowsocks를 자동으로 활성화합니다"</string>
 
     <!-- Fuzzy -->
@@ -99,6 +101,8 @@
     <string name="profile_config">"프로필 설정"</string>
     <string name="delete">"삭제"</string>
     <string name="delete_confirm_prompt">"정말 이 프로필을 삭제하시겠습니까?"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"QR 코드/NFC"</string>
     <string name="add_profile_dialog">"이 Shadowsocks 프로필을 추가하시겠습니까?"</string>
     <string name="add_profile_methods_scan_qr_code">"QR 코드 읽기"</string>

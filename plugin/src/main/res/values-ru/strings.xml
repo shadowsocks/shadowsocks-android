@@ -28,4 +28,5 @@
     <string name="yes">"Да"</string>
     <string name="no">"Нет"</string>
     <string name="apply">"Применить"</string>
+    <string name="file_manager_missing">"Установите файловый менеджер"</string>
 </resources>

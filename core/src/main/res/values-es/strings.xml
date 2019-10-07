@@ -51,6 +51,8 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
     <!-- Fuzzy -->
     <string name="bypass_apps">"Modo Bypass"</string>
     <string name="auto_connect">"Conexión Automática"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"Activar Shadowsocks al iniciar"</string>
     <string name="tcp_fastopen_summary_unsupported">"Versión del Núcleo sin soporte: %s &lt; 3.7.1"</string>
     <string name="udp_dns">"Enviar DNS sobre UDP"</string>
@@ -89,6 +91,8 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
     <string name="profile_config">"Configuración de Perfil"</string>
     <string name="delete">"Remover"</string>
     <string name="delete_confirm_prompt">"¿Estás seguro de querer remover este perfil?"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"Código QR/NFC"</string>
     <string name="add_profile_dialog">"Agregar este Perfil Shadowsocks?"</string>
     <string name="add_profile_methods_scan_qr_code">"Escanear código QR"</string>

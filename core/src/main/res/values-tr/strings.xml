@@ -48,6 +48,8 @@
     <string name="bypass_apps">"Bypass Modu"</string>
     <string name="bypass_apps_summary">"Seçili uygulamaları bypass etmek için bu seçeneği açın"</string>
     <string name="auto_connect">"Otomatik Bağlan"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"Shadowsocks'ı cihazı başlatırken aç"</string>
 
     <!-- Fuzzy -->
@@ -94,6 +96,8 @@
     <string name="profile_config">"Profil ayarları"</string>
     <string name="delete">"Kaldır"</string>
     <string name="delete_confirm_prompt">"Bu profili kaldırmak istediğinize emin misiniz?"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"QR kodu/NFC"</string>
     <string name="add_profile_dialog">"Bu Shadowsocks Profilini ekle?"</string>
     <string name="add_profile_methods_scan_qr_code">"QR kodu tarat"</string>

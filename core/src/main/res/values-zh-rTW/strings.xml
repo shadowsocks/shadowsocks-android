@@ -53,6 +53,8 @@
     <string name="bypass_apps">"略過模式"</string>
     <string name="bypass_apps_summary">"啟用此選項，會略過已選擇的應用程式"</string>
     <string name="auto_connect">"自動連線"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"在裝置啟動時啟用 Shadowsocks"</string>
 
     <!-- Fuzzy -->
@@ -100,6 +102,8 @@
     <string name="profile_config">"設定檔設定"</string>
     <string name="delete">"刪除"</string>
     <string name="delete_confirm_prompt">"您確定要移除這個設定檔嗎？"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"QR 碼 / NFC"</string>
     <string name="add_profile_dialog">"為 Shadowsocks 新增此設定檔？"</string>
     <string name="add_profile_methods_scan_qr_code">"掃描 QR 碼"</string>

@@ -50,7 +50,7 @@
     <string name="bypass_apps">"绕行"</string>
     <string name="bypass_apps_summary">"绕过选择的应用"</string>
     <string name="auto_connect">"自动连接"</string>
-    <string name="auto_connect_summary">"允许 Shadowsocks 随系统启动"</string>
+    <string name="auto_connect_summary">"系统启动或应用更新后自动恢复运行"</string>
     <string name="tcp_fastopen_summary">"切换可能需要 ROOT 权限"</string>
     <string name="tcp_fastopen_summary_unsupported">"不支持的内核版本: %s &lt; 3.7.1"</string>
     <string name="udp_dns">"使用 UDP DNS"</string>
@@ -92,7 +92,7 @@
     <string name="profile_config">"配置文件设置"</string>
     <string name="delete">"删除"</string>
     <string name="delete_confirm_prompt">"您确定要删除此配置文件？"</string>
-    <string name="share_qr_nfc">"二维码 / NFC"</string>
+    <string name="share_qr_nfc">"二维码"</string>
     <string name="add_profile_dialog">"为影梭添加此配置文件？"</string>
     <string name="add_profile_methods_scan_qr_code">"扫描二维码"</string>
     <plurals name="removed">
@@ -178,4 +178,7 @@
     <string name="proxied_apps_mode">"模式"</string>
     <string name="metered">"网络限制"</string>
     <string name="metered_summary">"使系统视此 VPN 为按流量计费"</string>
+    <plurals name="hosts_summary">
+        <item quantity="other">"配置了 %d 个主机名"</item>
+    </plurals>
 </resources>

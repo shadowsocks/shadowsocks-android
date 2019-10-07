@@ -54,6 +54,8 @@
     <string name="bypass_apps">"バイパスモード（迂回モード）"</string>
     <string name="bypass_apps_summary">"このモードを選択した場合、指定したアプリのパケットはプロキシを経由しない"</string>
     <string name="auto_connect">"自動接続"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"システム起動時にバックグラウンドで本サービスを開始"</string>
 
     <!-- Fuzzy -->
@@ -101,6 +103,8 @@
     <string name="profile_config">"プロファイル編集"</string>
     <string name="delete">"削除"</string>
     <string name="delete_confirm_prompt">"このプロファイルを削除しますか"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"QR コード / NFC"</string>
     <string name="add_profile_dialog">"Shadowsocks用プロファイルを追加しますか"</string>
     <string name="add_profile_methods_scan_qr_code">"QR コードを読み取る"</string>

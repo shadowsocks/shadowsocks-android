@@ -52,6 +52,8 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="bypass_apps">"Mode exclusion"</string>
     <string name="bypass_apps_summary">"Activer cette option pour exclure les applications sélectionnées"</string>
     <string name="auto_connect">"Connection auto"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"Activer Shadowsocks au démarrage"</string>
 
     <!-- Fuzzy -->
@@ -94,6 +96,8 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="profile_config">"Config profil"</string>
     <string name="delete">"Supprimer"</string>
     <string name="delete_confirm_prompt">"Êtes-vous sûr de vouloir supprimer ce profil?"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"QR Code/NFC"</string>
     <string name="add_profile_dialog">"Ajouter ce profil Shadowsocks?"</string>
     <string name="add_profile_methods_scan_qr_code">"Scanner le QR Code"</string>

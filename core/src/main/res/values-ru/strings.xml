@@ -50,6 +50,8 @@
     <string name="bypass_apps">"В обход прокси"</string>
     <string name="bypass_apps_summary">"Включите эту опцию для работы выбранных приложений в обход прокси"</string>
     <string name="auto_connect">"Авто-подключение"</string>
+
+    <!-- Fuzzy -->
     <string name="auto_connect_summary">"Запускать Shadowsocks при включении"</string>
     <string name="tcp_fastopen_summary">"Переключение может запрашивать ROOT права"</string>
     <string name="tcp_fastopen_summary_unsupported">"Неподдерживаемая версия ядра: %s &lt; 3.7.1"</string>
@@ -92,6 +94,8 @@
     <string name="profile_config">"Настройка профиля"</string>
     <string name="delete">"Удалить"</string>
     <string name="delete_confirm_prompt">"Вы уверены, что хотите удалить этот профиль?"</string>
+
+    <!-- Fuzzy -->
     <string name="share_qr_nfc">"QR-код/NFC"</string>
     <string name="add_profile_dialog">"Добавить этот профиль Shadowsocks?"</string>
     <string name="add_profile_methods_scan_qr_code">"Сканировать QR-код"</string>
