@@ -193,16 +193,20 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 val builder = AdLoader.Builder(context, "ca-app-pub-9097031975646651/9333091620")
                 builder.forUnifiedNativeAd { unifiedNativeAd ->
                     if (!isAdLoaded && isAttached) {
-                        // OnUnifiedNativeAdLoadedListener implementation.
-                        val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
-                        val adView = layoutInflater.inflate(R.layout.ad_unified, adContainer,
-                                false) as UnifiedNativeAdView
-                        populateUnifiedNativeAdView(unifiedNativeAd, adView)
+                        try {
+                            // OnUnifiedNativeAdLoadedListener implementation.
+                            val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
+                            val adView = layoutInflater.inflate(R.layout.ad_unified, adContainer,
+                                    false) as UnifiedNativeAdView
+                            populateUnifiedNativeAdView(unifiedNativeAd, adView)
 
-                        adContainer.removeAllViews()
-                        adContainer.addView(adView)
+                            adContainer.removeAllViews()
+                            adContainer.addView(adView)
 
-                        isAdLoaded = true
+                            isAdLoaded = true
+                        } catch (ex: IllegalStateException) {
+                            // Ignore the adView layout exception
+                        }
                     }
                 }
 
