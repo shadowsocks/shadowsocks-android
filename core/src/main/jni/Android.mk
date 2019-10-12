@@ -139,22 +139,6 @@ LOCAL_SRC_FILES := $(addprefix libancillary/, $(ANCILLARY_SOURCE))
 include $(BUILD_STATIC_LIBRARY)
 
 ########################################################
-## libbloom
-########################################################
-
-include $(CLEAR_VARS)
-
-BLOOM_SOURCE := bloom.c murmur2/MurmurHash2.c
-
-LOCAL_MODULE := libbloom
-LOCAL_CFLAGS += -I$(LOCAL_PATH)/shadowsocks-libev/libbloom \
-				-I$(LOCAL_PATH)/shadowsocks-libev/libbloom/murmur2
-
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libbloom/, $(BLOOM_SOURCE))
-
-include $(BUILD_STATIC_LIBRARY)
-
-########################################################
 ## libipset
 ########################################################
 
@@ -173,7 +157,7 @@ LOCAL_MODULE := libipset
 LOCAL_CFLAGS += -I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
 				-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libipset/src/libipset/,$(IPSET_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libipset/,$(IPSET_SOURCE))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -200,7 +184,26 @@ LOCAL_MODULE := libcork
 LOCAL_CFLAGS += -I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 				-DCORK_API=CORK_LOCAL
 
-LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/src/libcork/,$(CORK_SOURCE))
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libcork/,$(CORK_SOURCE))
+
+include $(BUILD_STATIC_LIBRARY)
+
+########################################################
+## libudns
+########################################################
+
+include $(CLEAR_VARS)
+
+UDNS_SOURCES := udns_dn.c udns_dntosp.c udns_parse.c udns_resolver.c udns_init.c \
+	udns_misc.c udns_XtoX.c \
+	udns_rr_a.c udns_rr_ptr.c udns_rr_mx.c udns_rr_txt.c udns_bl.c \
+	udns_rr_srv.c udns_rr_naptr.c udns_codes.c udns_jran.c
+
+LOCAL_MODULE := libudns
+LOCAL_CFLAGS += -I$(LOCAL_PATH)/shadowsocks-libev/libudns \
+				-DHAVE_DECL_INET_NTOP
+
+LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/libudns/,$(UDNS_SOURCES))
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -211,11 +214,10 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libev
-LOCAL_CFLAGS += -DNDEBUG -DHAVE_CONFIG_H \
-				-I$(LOCAL_PATH)/include/libev
+LOCAL_CFLAGS += -I$(LOCAL_PATH)/include/libev
 LOCAL_SRC_FILES := \
-	libev/ev.c \
-	libev/event.c
+	shadowsocks-libev/libev/ev.c \
+	shadowsocks-libev/libev/event.c
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -233,7 +235,7 @@ REDSOCKS_SOURCES := base.c http-connect.c \
 LOCAL_STATIC_LIBRARIES := libevent
 
 LOCAL_MODULE := redsocks
-LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES)) 
+LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES))
 LOCAL_CFLAGS := -std=gnu99 -DUSE_IPTABLES \
 	-I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
@@ -247,31 +249,29 @@ include $(BUILD_SHARED_EXECUTABLE)
 
 include $(CLEAR_VARS)
 
-SHADOWSOCKS_SOURCES := local.c \
-	cache.c udprelay.c utils.c netutils.c json.c jconf.c \
-	acl.c http.c tls.c rule.c \
-	crypto.c aead.c stream.c base64.c \
-	plugin.c ppbloom.c \
+SHADOWSOCKS_SOURCES := local.c cache.c udprelay.c encrypt.c \
+	utils.c netutils.c json.c jconf.c acl.c http.c tls.c rule.c \
 	android.c
 
 LOCAL_MODULE    := ss-local
 LOCAL_SRC_FILES := $(addprefix shadowsocks-libev/src/, $(SHADOWSOCKS_SOURCES))
 LOCAL_CFLAGS    := -Wall -fno-strict-aliasing -DMODULE_LOCAL \
-					-DUSE_CRYPTO_MBEDTLS -DHAVE_CONFIG_H \
+					-DUSE_CRYPTO_MBEDTLS -DANDROID -DHAVE_CONFIG_H \
 					-DCONNECT_IN_PROGRESS=EINPROGRESS \
 					-I$(LOCAL_PATH)/include/shadowsocks-libev \
 					-I$(LOCAL_PATH)/include \
 					-I$(LOCAL_PATH)/libancillary \
 					-I$(LOCAL_PATH)/mbedtls/include  \
 					-I$(LOCAL_PATH)/pcre \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libudns \
+					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include \
 					-I$(LOCAL_PATH)/libsodium/src/libsodium/include/sodium \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libcork/include \
 					-I$(LOCAL_PATH)/shadowsocks-libev/libipset/include \
-					-I$(LOCAL_PATH)/shadowsocks-libev/libbloom \
-					-I$(LOCAL_PATH)/libev
+					-I$(LOCAL_PATH)/shadowsocks-libev/libev \
+					-I$(LOCAL_PATH)/shadowsocks-libev/src
 
-LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libbloom \
+LOCAL_STATIC_LIBRARIES := libev libmbedtls libipset libcork libudns \
 	libsodium libancillary libpcre
 
 LOCAL_LDLIBS := -llog

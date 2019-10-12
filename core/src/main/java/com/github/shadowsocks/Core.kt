@@ -30,27 +30,25 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
+import android.os.Build.VERSION_CODES.O
+import android.os.Build.VERSION_CODES.Q
 import android.os.UserManager
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.work.SSRSubSyncer
 import com.github.shadowsocks.utils.*
-import com.google.firebase.FirebaseApp
-import com.google.firebase.analytics.FirebaseAnalytics
-import io.fabric.sdk.android.Fabric
+import com.github.shadowsocks.work.UpdateCheck
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.GlobalScope
@@ -67,7 +65,6 @@ object Core {
     val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
-    val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }
     val directBootSupported by lazy {
         Build.VERSION.SDK_INT >= 24 && app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
                 DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
@@ -96,21 +93,16 @@ object Core {
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
             deviceStorage.moveDatabaseFrom(app, Key.DB_PUBLIC)
-            val old = Acl.getFile(Acl.CUSTOM_RULES, app)
-            if (old.canRead()) {
-                Acl.getFile(Acl.CUSTOM_RULES).writeText(old.readText())
-                old.delete()
-            }
         }
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
-        Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
-        FirebaseApp.initializeApp(deviceStorage)
         WorkManager.initialize(deviceStorage, Configuration.Builder().apply {
             setExecutor { GlobalScope.launch { it.run() } }
             setTaskExecutor { GlobalScope.launch { it.run() } }
         }.build())
+        UpdateCheck.enqueue()
+        if (DataStore.ssrSubAutoUpdate) SSRSubSyncer.enqueue()
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&
@@ -131,7 +123,7 @@ object Core {
     }
 
     fun updateNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {
+        if (Build.VERSION.SDK_INT >= O) @RequiresApi(O) {
             val nm = app.getSystemService<NotificationManager>()!!
             nm.createNotificationChannels(listOf(
                     NotificationChannel("service-vpn", app.getText(R.string.service_vpn),
@@ -140,30 +132,36 @@ object Core {
                     NotificationChannel("service-proxy", app.getText(R.string.service_proxy),
                             NotificationManager.IMPORTANCE_LOW),
                     NotificationChannel("service-transproxy", app.getText(R.string.service_transproxy),
-                            NotificationManager.IMPORTANCE_LOW)))
-            nm.deleteNotificationChannel("service-nat") // NAT mode is gone for good
+                            NotificationManager.IMPORTANCE_MIN),
+                    NotificationChannel("update", app.getText(R.string.update_channel),
+                            NotificationManager.IMPORTANCE_DEFAULT)
+            ).apply {
+                forEach {
+                    it.setShowBadge(false)
+                    if (Build.VERSION.SDK_INT >= Q) {
+                        it.setAllowBubbles(false)
+                    }
+                }
+            })
         }
     }
 
-    fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,
-            if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
-            else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
+    fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName, 0)!!
 
     fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
-    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
-    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
+    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))
+    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE).setPackage(app.packageName))
 
     fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
         init {
             app.registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
+                addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
                 addDataScheme("package")
             })
         }
 
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
             callback()
             if (onetime) app.unregisterReceiver(this)
         }

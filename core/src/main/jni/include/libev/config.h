@@ -124,3 +124,6 @@
 
 /* Version number of package */
 #define VERSION "4.11"
+
+#define DNDEBUG 1
+#define HAVE_CONFIG_H 1

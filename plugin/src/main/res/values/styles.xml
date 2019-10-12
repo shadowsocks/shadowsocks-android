@@ -7,6 +7,7 @@
         <item name="colorButtonNormal">@color/material_accent_200</item>
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="android:colorBackground">@color/color_background</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
     <style name="Theme.Shadowsocks.Immersive">

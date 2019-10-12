@@ -1,7 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-apply plugin: 'com.github.ben-manes.versions'
-
 buildscript {
     ext {
         javaVersion = JavaVersion.VERSION_1_8
@@ -9,29 +7,19 @@ buildscript {
         minSdkVersion = 21
         sdkVersion = 29
         compileSdkVersion = 29
-        lifecycleVersion = '2.2.0-alpha05'
-        junitVersion = '4.12'
-        androidTestVersion = '1.2.0'
-        androidEspressoVersion = '3.2.0'
+        buildToolsVersion = '29.0.2'
         versionCode = 4080550
         versionName = '4.8.5-nightly'
-        resConfigs = ['ar', 'es', 'fa', 'fr', 'ja', 'ko', 'ru', 'tr', 'zh-rCN', 'zh-rTW']
+        resConfigs = ['zh-rCN']
     }
 
     repositories {
         google()
         jcenter()
-        maven {
-            url 'https://maven.fabric.io/public'
-        }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.25.0'
-        classpath 'com.google.gms:google-services:4.3.2'
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
-        classpath 'io.fabric.tools:gradle:1.31.1'
+        classpath 'com.android.tools.build:gradle:3.6.0-beta01'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }

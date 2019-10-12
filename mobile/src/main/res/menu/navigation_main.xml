@@ -5,9 +5,6 @@
         <item android:id="@+id/profiles"
               android:title="@string/profiles"
               android:icon="@drawable/ic_action_description"/>
-        <item android:id="@+id/customRules"
-              android:title="@string/custom_rules"
-              android:icon="@drawable/ic_action_assignment"/>
         <item android:id="@+id/globalSettings"
               android:title="@string/settings"
               android:icon="@drawable/ic_action_settings"/>

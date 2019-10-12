@@ -33,6 +33,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
+import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
@@ -85,7 +86,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         val closeAction = NotificationCompat.Action.Builder(
                 R.drawable.ic_navigation_close,
                 service.getString(R.string.stop),
-                PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0)).apply {
+                PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE).setPackage(app.packageName), 0)).apply {
             setShowsUserInterface(false)
         }.build()
         if (Build.VERSION.SDK_INT < 24) builder.addAction(closeAction) else builder.addInvisibleAction(closeAction)

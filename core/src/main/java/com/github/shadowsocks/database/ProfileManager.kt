@@ -54,6 +54,29 @@ object ProfileManager {
         return profile
     }
 
+    fun deletProfiles(profiles: List<Profile>) {
+        val first: Long = Core.currentProfile?.first?.id ?: -1
+        val second: Long = Core.currentProfile?.second?.id ?: -1
+        profiles.forEach {
+            if ((it.id != first) and (it.id != second)) delProfile(it.id)
+        }
+    }
+
+    fun createProfilesFromSub(profiles: List<Profile>, group: String) {
+        val old = getAllProfilesByGroup(group).toMutableList()
+        if (!old.isNullOrEmpty()) {
+            profiles.filter {
+                for (i: Profile in old) if (it.isSameAs(i)) {
+                    old.remove(it)
+                    return@filter false
+                }
+                return@filter true
+            }
+            deletProfiles(old)
+        }
+        profiles.forEach { createProfile(it) }
+    }
+
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
         val profiles = if (replace) getAllProfiles()?.associateBy { it.formattedAddress } else null
         val feature = if (replace) {
@@ -134,5 +157,15 @@ object ProfileManager {
     } catch (ex: SQLException) {
         printLog(ex)
         null
+    }
+
+    @Throws(IOException::class)
+    fun getAllProfilesByGroup(group: String): List<Profile> = try {
+        PrivateDatabase.profileDao.listByGroup(group)
+    } catch (ex: SQLiteCantOpenDatabaseException) {
+        throw IOException(ex)
+    } catch (ex: SQLException) {
+        printLog(ex)
+        emptyList()
     }
 }

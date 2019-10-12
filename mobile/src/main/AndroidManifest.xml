@@ -1,14 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.github.shadowsocks"
-          tools:ignore="MissingLeanbackSupport">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.github.shadowsocks"
+    tools:ignore="MissingLeanbackSupport">
 
-    <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.touchscreen"
-                  android:required="false"/>
-    <uses-feature android:name="android.hardware.camera"
-                  android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
     <application
         android:name=".App"
@@ -17,47 +14,47 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Shadowsocks.Immersive.Navigation"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.Shadowsocks.Immersive.Navigation">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
-            <meta-data android:name="android.app.shortcuts"
-                       android:resource="@xml/shortcuts"/>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity
             android:name=".ProfileConfigActivity"
-            android:theme="@style/Theme.Shadowsocks.Immersive"
             android:excludeFromRecents="true"
-            android:label="@string/profile_config"/>
+            android:label="@string/profile_config"
+            android:theme="@style/Theme.Shadowsocks.Immersive" />
 
         <activity
             android:name=".AppManager"
+            android:excludeFromRecents="true"
             android:label="@string/proxied_apps"
             android:parentActivityName=".ProfileConfigActivity"
-            android:theme="@style/Theme.Shadowsocks.Immersive"
-            android:excludeFromRecents="true"/>
+            android:theme="@style/Theme.Shadowsocks.Immersive" />
 
         <activity
             android:name=".UdpFallbackProfileActivity"
+            android:excludeFromRecents="true"
             android:label="@string/udp_fallback"
-            android:theme="@style/Theme.Shadowsocks.Immersive"
-            android:excludeFromRecents="true"/>
+            android:theme="@style/Theme.Shadowsocks.Immersive" />
 
         <activity
-            android:name=".ScannerActivity"
-            android:label="@string/add_profile_methods_scan_qr_code"
-            android:parentActivityName=".MainActivity"
-            android:excludeFromRecents="true"/>
-
-        <activity android:name=".tasker.ConfigActivity"
-                  android:theme="@style/Theme.Shadowsocks.Immersive">
+            android:name=".tasker.ConfigActivity"
+            android:permission="com.joaomgcd.taskersettings.SET_SETTING"
+            android:theme="@style/Theme.Shadowsocks.Immersive">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
@@ -65,39 +62,39 @@
 
         <activity
             android:name=".QuickToggleShortcut"
-            android:label="@string/quick_toggle"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:excludeFromRecents="true"
+            android:label="@string/quick_toggle"
+            android:process=":bg"
             android:taskAffinity=""
-            android:process=":bg">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
         </activity>
 
-        <service android:name=".bg.TileService"
-                 android:label="@string/quick_toggle"
-                 android:process=":bg"
-                 android:directBootAware="true"
-                 android:icon="@drawable/ic_service_active"
-                 android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
-                 tools:targetApi="n">
+        <service
+            android:name=".bg.TileService"
+            android:directBootAware="true"
+            android:icon="@drawable/ic_service_active"
+            android:label="@string/quick_toggle"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:process=":bg"
+            tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
 
-        <receiver android:name=".tasker.ActionListener"
-                  android:process=":bg"
-                  android:directBootAware="true"
-                  tools:ignore="ExportedReceiver">
+        <receiver
+            android:name=".tasker.ActionListener"
+            android:directBootAware="true"
+            android:permission="com.joaomgcd.taskersettings.SET_SETTING"
+            android:process=":bg"
+            tools:targetApi="n">
             <intent-filter>
-                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
+                <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING" />
             </intent-filter>
         </receiver>
 
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-9097031975646651~3330146721"/>
     </application>
 </manifest>

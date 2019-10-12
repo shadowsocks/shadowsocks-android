@@ -28,6 +28,9 @@
     <string name="yes">"是"</string>
     <string name="no">"否"</string>
     <string name="apply">"应用"</string>
-    <string name="file_manager_missing">"请安装文件管理器，如 MiXplorer"</string>
     <string name="browse">"浏览…"</string>
+    <string name="file_manager_missing">"请安装文件管理器，如 MiXplorer"</string>
+    <string name="update">"更新"</string>
+    <string name="update_success">"已更新"</string>
+    <string name="update_fail">"更新失败"</string>
 </resources>

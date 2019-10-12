@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#7488A1</color>
+    <color name="ic_launcher_background">@color/material_blue_grey_500</color>
+
+    <attr name="flow_horizontalSeparator" />
+    <attr name="flow_verticalSeparator" />
+    <attr name="motionPathRotate" />
+    <attr name="motionProgress" />
+    <attr name="waveDecay" />
+    <attr name="duration" />
 </resources>

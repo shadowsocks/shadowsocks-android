@@ -8,4 +8,7 @@
     <string name="apply">Apply</string>
     <string name="browse">Browse…</string>
     <string name="file_manager_missing">Please install a file manager like MiXplorer</string>
+    <string name="update">更新</string>
+    <string name="update_success">已更新</string>
+    <string name="update_fail">更新失败</string>
 </resources>

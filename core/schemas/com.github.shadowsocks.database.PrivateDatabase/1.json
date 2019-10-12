@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 26,
-    "identityHash": "a69accf94393d71abdb60873d4ea74a2",
+    "version": 1,
+    "identityHash": "5a6cb189120c505c36707122dfa74d69",
     "entities": [
       {
         "tableName": "Profile",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `host` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `password` TEXT NOT NULL, `method` TEXT NOT NULL, `route` TEXT NOT NULL, `remoteDns` TEXT NOT NULL, `proxyApps` INTEGER NOT NULL, `bypass` INTEGER NOT NULL, `udpdns` INTEGER NOT NULL, `ipv6` INTEGER NOT NULL, `individual` TEXT NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `plugin` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `host` TEXT NOT NULL, `remotePort` INTEGER NOT NULL, `password` TEXT NOT NULL, `protocol` TEXT NOT NULL, `protocol_param` TEXT NOT NULL, `obfs` TEXT NOT NULL, `obfs_param` TEXT NOT NULL, `method` TEXT NOT NULL, `route` TEXT NOT NULL, `remoteDns` TEXT NOT NULL, `proxyApps` INTEGER NOT NULL, `bypass` INTEGER NOT NULL, `udpdns` INTEGER NOT NULL, `url_group` TEXT NOT NULL, `ipv6` INTEGER NOT NULL, `metered` INTEGER NOT NULL, `individual` TEXT NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `elapsed` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `plugin` TEXT, `udpFallback` INTEGER)",
         "fields": [
           {
             "fieldPath": "id",
@@ -18,7 +18,7 @@
             "fieldPath": "name",
             "columnName": "name",
             "affinity": "TEXT",
-            "notNull": false
+            "notNull": true
           },
           {
             "fieldPath": "host",
@@ -35,6 +35,30 @@
           {
             "fieldPath": "password",
             "columnName": "password",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protocol",
+            "columnName": "protocol",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "protocol_param",
+            "columnName": "protocol_param",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "obfs",
+            "columnName": "obfs",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "obfs_param",
+            "columnName": "obfs_param",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -75,8 +99,20 @@
             "notNull": true
           },
           {
+            "fieldPath": "url_group",
+            "columnName": "url_group",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
             "fieldPath": "ipv6",
             "columnName": "ipv6",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metered",
+            "columnName": "metered",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -99,6 +135,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "elapsed",
+            "columnName": "elapsed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "userOrder",
             "columnName": "userOrder",
             "affinity": "INTEGER",
@@ -108,6 +150,12 @@
             "fieldPath": "plugin",
             "columnName": "plugin",
             "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "udpFallback",
+            "columnName": "udpFallback",
+            "affinity": "INTEGER",
             "notNull": false
           }
         ],
@@ -151,11 +199,44 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "SSRSub",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `url` TEXT NOT NULL, `url_group` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url_group",
+            "columnName": "url_group",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
+    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"a69accf94393d71abdb60873d4ea74a2\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5a6cb189120c505c36707122dfa74d69')"
     ]
   }
 }

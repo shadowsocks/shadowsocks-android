@@ -1,96 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditTextPreference
-            app:key="profileName"
-            app:title="@string/profile_name"
-            app:useSimpleSummaryProvider="true"/>
+        app:key="groupName"
+        app:title="@string/group_name"
+        app:useSimpleSummaryProvider="true" />
 
-    <PreferenceCategory
-            app:title="@string/proxy_cat">
+    <EditTextPreference
+        app:key="profileName"
+        app:title="@string/profile_name"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory app:title="@string/proxy_cat">
 
         <EditTextPreference
-                app:key="proxy"
-                app:singleLine="true"
-                app:title="@string/proxy"
-                app:useSimpleSummaryProvider="true"/>
+            app:key="proxy"
+            app:singleLine="true"
+            app:title="@string/proxy"
+            app:useSimpleSummaryProvider="true" />
         <EditTextPreference
-                app:key="remotePortNum"
-                app:title="@string/remote_port"
-                app:useSimpleSummaryProvider="true"/>
+            app:key="remotePortNum"
+            app:title="@string/remote_port"
+            app:useSimpleSummaryProvider="true" />
         <EditTextPreference
-                app:dialogLayout="@layout/preference_dialog_password"
-                app:key="sitekey"
-                app:title="@string/sitekey"/>
+            app:dialogLayout="@layout/preference_dialog_password"
+            app:key="sitekey"
+            app:title="@string/sitekey" />
         <com.takisoft.preferencex.SimpleMenuPreference
-                app:key="encMethod"
-                app:icon="@drawable/ic_notification_enhanced_encryption"
-                app:entries="@array/enc_method_entry"
-                app:entryValues="@array/enc_method_value"
-                app:title="@string/enc_method"
-                app:useSimpleSummaryProvider="true"/>
+            app:entries="@array/enc_method_entry"
+            app:entryValues="@array/enc_method_value"
+            app:icon="@drawable/ic_notification_enhanced_encryption"
+            app:key="encMethod"
+            app:title="@string/enc_method"
+            app:useSimpleSummaryProvider="true" />
+
+        <com.takisoft.preferencex.SimpleMenuPreference
+            app:entries="@array/protocol_entry"
+            app:entryValues="@array/protocol_value"
+            app:icon="@drawable/ic_compare_arrows_black"
+            app:key="ssrProtocol"
+            app:title="@string/ssr_protocol"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="ssrProtocolParam"
+            app:title="@string/ssr_protocol_param"
+            app:useSimpleSummaryProvider="true" />
+
+        <com.takisoft.preferencex.SimpleMenuPreference
+            app:entries="@array/obfs_entry"
+            app:entryValues="@array/obfs_value"
+            app:icon="@drawable/ic_texture_black"
+            app:key="ssrObfs"
+            app:title="@string/ssr_obfs"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="ssrObfsParam"
+            app:title="@string/ssr_obfs_param"
+            app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-            app:title="@string/feature_cat">
+    <PreferenceCategory app:title="@string/feature_cat">
 
         <com.takisoft.preferencex.SimpleMenuPreference
-                app:key="route"
-                app:entries="@array/route_entry"
-                app:entryValues="@array/route_value"
-                app:title="@string/route_list"
-                app:useSimpleSummaryProvider="true"/>
+            app:entries="@array/route_entry"
+            app:entryValues="@array/route_value"
+            app:key="route"
+            app:title="@string/route_list"
+            app:useSimpleSummaryProvider="true" />
         <SwitchPreference
-                app:key="isIpv6"
-                app:icon="@drawable/ic_image_looks_6"
-                app:summary="@string/ipv6_summary"
-                app:title="@string/ipv6"/>
+            app:icon="@drawable/ic_image_looks_6"
+            app:key="isIpv6"
+            app:summary="@string/ipv6_summary"
+            app:title="@string/ipv6" />
         <SwitchPreference
-                app:key="isProxyApps"
-                app:icon="@drawable/ic_navigation_apps"
-                app:summary="@string/proxied_apps_summary"
-                app:title="@string/proxied_apps"/>
+            app:icon="@drawable/ic_navigation_apps"
+            app:key="isProxyApps"
+            app:summary="@string/proxied_apps_summary"
+            app:title="@string/proxied_apps" />
         <SwitchPreference
-                app:key="metered"
-                app:icon="@drawable/ic_device_data_usage"
-                app:summary="@string/metered_summary"
-                app:title="@string/metered"/>
+            app:icon="@drawable/ic_device_data_usage"
+            app:key="metered"
+            app:summary="@string/metered_summary"
+            app:title="@string/metered" />
         <EditTextPreference
-                app:key="remoteDns"
-                app:icon="@drawable/ic_action_dns"
-                app:title="@string/remote_dns"
-                app:useSimpleSummaryProvider="true"/>
-        <SwitchPreference
-            app:key="isUdpDns"
             app:icon="@drawable/ic_action_dns"
+            app:key="remoteDns"
+            app:title="@string/remote_dns"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_action_dns"
+            app:key="isUdpDns"
             app:summary="@string/udp_dns_summary"
-            app:title="@string/udp_dns"/>
+            app:title="@string/udp_dns" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-            app:title="@string/plugin">
+    <PreferenceCategory app:title="@string/plugin">
 
-        <com.github.shadowsocks.preference.IconListPreference
-                app:key="plugin"
-                app:persistent="false"
-                app:title="@string/plugin"
-                app:useSimpleSummaryProvider="true"/>
-        <EditTextPreference
-                app:key="plugin.configure"
-                app:icon="@drawable/ic_action_settings"
-                app:persistent="false"
-                app:singleLine="true"
-                app:title="@string/plugin_configure"
-                app:useSimpleSummaryProvider="true"/>
         <Preference
-                app:key="udpFallback"
-                app:title="@string/udp_fallback"
-                app:summary="@string/plugin_disabled">
-            <intent android:targetPackage="com.github.shadowsocks"
-                    android:targetClass="com.github.shadowsocks.UdpFallbackProfileActivity"/>
+            app:key="udpFallback"
+            app:summary="@string/plugin_disabled"
+            app:title="@string/udp_fallback">
+            <intent
+                android:targetClass="com.github.shadowsocks.UdpFallbackProfileActivity"
+                android:targetPackage="@string/applicationId" />
         </Preference>
 
     </PreferenceCategory>

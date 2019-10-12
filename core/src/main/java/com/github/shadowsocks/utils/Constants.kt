@@ -20,6 +20,8 @@
 
 package com.github.shadowsocks.utils
 
+import com.github.shadowsocks.Core.app
+
 object Key {
     /**
      * Public config that doesn't need to be kept secret.
@@ -29,6 +31,7 @@ object Key {
 
     const val id = "profileId"
     const val name = "profileName"
+    const val group = "groupName"
 
     const val individual = "Proxyed"
 
@@ -55,6 +58,10 @@ object Key {
     const val host = "proxy"
     const val password = "sitekey"
     const val method = "encMethod"
+    const val protocol = "ssrProtocol"
+    const val protocol_param = "ssrProtocolParam"
+    const val obfs = "ssrObfs"
+    const val obfs_param = "ssrObfsParam"
     const val remotePort = "remotePortNum"
     const val remoteDns = "remoteDns"
 
@@ -73,12 +80,19 @@ object Key {
     const val controlImport = "control.import"
     const val controlExport = "control.export"
     const val about = "about"
+
+    const val ssrSub = "ssrSub"
+    const val ssrSubAutoUpdate = "ssrsub_autoupdate"
+
+    const val aclUrl = "acl_url"
 }
 
 object Action {
-    const val SERVICE = "com.github.shadowsocks.SERVICE"
-    const val CLOSE = "com.github.shadowsocks.CLOSE"
-    const val RELOAD = "com.github.shadowsocks.RELOAD"
+    val SERVICE = app.packageName + ".SERVICE"
+    val CLOSE = app.packageName + ".CLOSE"
+    val RELOAD = app.packageName + ".RELOAD"
 
-    const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
+    val EXTRA_PROFILE_ID = app.packageName + "EXTRA_PROFILE_ID"
+
+    val SERVICE_PERMISSION = app.packageName + ".SERVICE"
 }

@@ -47,7 +47,7 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
 
     override suspend fun doWork(): Result = try {
         val route = inputData.getString(KEY_ROUTE)!!
-        val connection = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openConnection() as HttpURLConnection
+        val connection = URL("https://raw.githubusercontent.com/shadowsocks/shadowsocks-android/master/core/src/main/assets/acl/$route.acl").openConnection() as HttpURLConnection
         val acl = connection.useCancellable { inputStream.bufferedReader().use { it.readText() } }
         Acl.getFile(route).printWriter().use { it.write(acl) }
         Result.success()

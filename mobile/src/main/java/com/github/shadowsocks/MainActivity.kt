@@ -41,7 +41,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
-import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
@@ -207,14 +206,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
                 }
                 R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
                 R.id.about -> {
-                    Core.analytics.logEvent("about", Bundle())
                     displayFragment(AboutFragment())
                 }
                 R.id.faq -> {
                     launchUrl(getString(R.string.faq_url))
                     return true
                 }
-                R.id.customRules -> displayFragment(CustomRulesFragment())
                 else -> return false
             }
             item.isChecked = true

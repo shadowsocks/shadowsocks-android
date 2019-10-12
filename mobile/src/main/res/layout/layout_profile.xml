@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Based on: https://github.com/android/platform_frameworks_base/blob/505e3ab/core/res/res/layout/simple_list_item_2.xml -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content"
@@ -16,7 +14,7 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         >
 
         <TextView
@@ -31,7 +29,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold"
-            tools:text="@string/profile_name"/>
+            tools:text="@string/profile_name" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/share"
@@ -43,7 +41,7 @@
             android:focusable="true"
             android:nextFocusLeft="@+id/container"
             android:padding="12dp"
-            app:srcCompat="@drawable/ic_social_share"/>
+            app:srcCompat="@drawable/ic_social_share" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/edit"
@@ -54,28 +52,27 @@
             android:contentDescription="@string/edit"
             android:focusable="true"
             android:padding="12dp"
-            app:srcCompat="@drawable/ic_image_edit"/>
+            app:srcCompat="@drawable/ic_image_edit" />
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        >
+        android:layout_marginStart="16dp">
 
         <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@android:id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="@dimen/profile_padding"
             android:layout_marginEnd="12dp"
+            android:layout_marginBottom="@dimen/profile_padding"
             android:layout_toStartOf="@+id/traffic"
             android:ellipsize="end"
             android:maxLines="2"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="@string/profile_plugin"/>
+            tools:text="@string/profile_plugin" />
 
         <com.github.shadowsocks.widget.AutoCollapseTextView
             android:id="@+id/traffic"
@@ -83,12 +80,12 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="@dimen/profile_padding"
             android:layout_marginEnd="12dp"
+            android:layout_marginBottom="@dimen/profile_padding"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary"
-            tools:text="@string/traffic"/>
+            tools:text="@string/traffic" />
     </RelativeLayout>
 
     <LinearLayout

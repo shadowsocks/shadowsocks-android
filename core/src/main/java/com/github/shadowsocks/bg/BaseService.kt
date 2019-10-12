@@ -27,7 +27,6 @@ import android.content.IntentFilter
 import android.os.*
 import android.util.Log
 import androidx.core.content.getSystemService
-import androidx.core.os.bundleOf
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
@@ -39,7 +38,6 @@ import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
-import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.coroutines.*
 import java.io.File
 import java.net.URL
@@ -240,7 +238,6 @@ object BaseService {
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
                     if (udpFallback == null) "-u" else null)
-            check(udpFallback?.pluginPath == null) { "UDP fallback cannot have plugins" }
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
@@ -265,7 +262,6 @@ object BaseService {
             // channge the state
             data.changeState(State.Stopping)
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
                 // we use a coroutineScope here to allow clean-up in parallel
@@ -331,12 +327,11 @@ object BaseService {
                     addAction(Action.RELOAD)
                     addAction(Intent.ACTION_SHUTDOWN)
                     addAction(Action.CLOSE)
-                })
+                }, Action.SERVICE_PERMISSION, null)
                 data.closeReceiverRegistered = true
             }
 
             data.notification = createNotification(profile.formattedName)
-            Core.analytics.logEvent("start", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
 
             data.changeState(State.Connecting)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
