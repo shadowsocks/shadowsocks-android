@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.ClipData
@@ -65,7 +64,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
          */
         var instance: ProfilesFragment? = null
 
-        private const val KEY_URL = "com.github.shadowsocks.QRCodeDialog.KEY_URL"
+        private const val KEY_URL = "QRCodeDialog.KEY_URL"
         private const val REQUEST_IMPORT_PROFILES = 1
         private const val REQUEST_REPLACE_PROFILES = 3
         private const val REQUEST_EXPORT_PROFILES = 2
@@ -79,7 +78,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private fun isProfileEditable(id: Long) =
             (activity as MainActivity).state == BaseService.State.Stopped || id !in Core.activeProfileIds
 
-    @SuppressLint("ValidFragment")
     class QRCodeDialog() : DialogFragment() {
         constructor(url: String) : this() {
             arguments = bundleOf(Pair(KEY_URL, url))
@@ -329,6 +327,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
                     startActivityForResult(intent, REQUEST_SCAN_QRCODE)
                 } catch (_: ActivityNotFoundException) {
+                    (activity as MainActivity). launchUrl(getString(R.string.faq_url))
                 }
                 true
             }

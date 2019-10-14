@@ -95,9 +95,9 @@
     <string name="profiles">"配置文件"</string>
     <string name="settings">"设置选项"</string>
     <string name="faq">"常见问题"</string>
-    <string name="faq_url">https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md</string>
+    <string name="faq_url">https://github.com/shadowsocksRb/shadowsocksRb-android/blob/master/FAQ.md</string>
     <string name="about">"关于"</string>
-    <string name="about_title">"酸酸乳 (ShadowsocksRb) %s"</string>
+    <string name="about_title">"ShadowsocksRb %s"</string>
     <string name="edit">"编辑"</string>
     <string name="share">"分享"</string>
     <string name="add_profile">"添加配置文件"</string>

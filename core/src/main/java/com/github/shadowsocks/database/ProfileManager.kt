@@ -43,6 +43,7 @@ object ProfileManager {
         fun onRemove(profileId: Long)
         fun onCleared()
     }
+
     var listener: Listener? = null
 
     @Throws(SQLException::class)
@@ -64,17 +65,14 @@ object ProfileManager {
 
     fun createProfilesFromSub(profiles: List<Profile>, group: String) {
         val old = getAllProfilesByGroup(group).toMutableList()
-        if (!old.isNullOrEmpty()) {
-            profiles.filter {
-                for (i: Profile in old) if (it.isSameAs(i)) {
-                    old.remove(it)
-                    return@filter false
-                }
-                return@filter true
+        profiles.filter {
+            for (i: Profile in old) if (it.isSameAs(i)) {
+                old.remove(i)
+                return@filter false
             }
-            deletProfiles(old)
-        }
-        profiles.forEach { createProfile(it) }
+            return@filter true
+        }.forEach { createProfile(it) }
+        deletProfiles(old)
     }
 
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
@@ -97,6 +95,7 @@ object ProfileManager {
             }
         }
     }
+
     fun serializeToJson(profiles: List<Profile>? = getAllProfiles()): JSONArray? {
         if (profiles == null) return null
         val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }

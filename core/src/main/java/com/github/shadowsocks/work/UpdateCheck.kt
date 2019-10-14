@@ -12,7 +12,6 @@ import com.github.shadowsocks.core.BuildConfig
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.utils.useCancellable
 import com.google.gson.JsonStreamParser
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -20,6 +19,9 @@ import java.util.concurrent.TimeUnit
 
 class UpdateCheck(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
     companion object {
+
+        const val url = "https://raw.githubusercontent.com/shadowsocksRb/shadowsocksRb-android/master/update.json"
+
         fun enqueue() = WorkManager.getInstance(Core.deviceStorage).enqueueUniquePeriodicWork(
                 "UpdateCheck", ExistingPeriodicWorkPolicy.REPLACE,
                 PeriodicWorkRequestBuilder<UpdateCheck>(1, TimeUnit.DAYS).run {
@@ -32,7 +34,7 @@ class UpdateCheck(context: Context, workerParams: WorkerParameters) : CoroutineW
     }
 
     override suspend fun doWork(): Result = try {
-        val connection = URL("").openConnection() as HttpURLConnection
+        val connection = URL(url).openConnection() as HttpURLConnection
         val json = connection.useCancellable { inputStream.bufferedReader() }
         val info = JsonStreamParser(json).asSequence().single().asJsonObject
         if (info["version"].asInt > BuildConfig.VERSION_CODE) {
@@ -41,8 +43,8 @@ class UpdateCheck(context: Context, workerParams: WorkerParameters) : CoroutineW
                     .setColor(ContextCompat.getColor(app, R.color.material_primary_500))
                     .setSmallIcon(R.drawable.ic_service_active)
                     .setCategory(NotificationCompat.CATEGORY_STATUS)
-                    .setContentTitle(info["title"].toString())
-                    .setContentText(info["text"].toString())
+                    .setContentTitle(info["title"].asString)
+                    .setContentText(info["text"].asString)
             nm.notify(62, builder.build())
         }
         Result.success()
