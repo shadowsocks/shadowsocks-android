@@ -23,3 +23,8 @@
 ## 5.插件栏的UDP配置是什么
 
 将UDP改为通过此服务器转发
+
+## 6.下载地址
+
+* [GitHub](https://github.com/shadowsocksRb/shadowsocksRb-android/releases)
+* [Telegram](https://t.me/ShadowsocksRb)
