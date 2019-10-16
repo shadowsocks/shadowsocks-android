@@ -31,6 +31,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.*
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.SparseBooleanArray
@@ -76,7 +77,8 @@ class AppManager : AppCompatActivity() {
                 instance?.loadApps()
             }
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
-            val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+            val cachedApps = cachedApps ?: pm.getInstalledPackages(
+                    GET_PERMISSIONS or MATCH_UNINSTALLED_PACKAGES or MATCH_DISABLED_COMPONENTS)
                     .filter {
                         when (it.packageName) {
                             app.packageName -> false
@@ -108,6 +110,7 @@ class AppManager : AppCompatActivity() {
             item = app
             itemView.itemicon.setImageDrawable(app.icon)
             itemView.title.text = app.name
+            @SuppressLint("SetTextI18n")
             itemView.desc.text = "${app.packageName} (${app.uid})"
             itemView.itemcheck.isChecked = isProxiedApp(app)
         }
@@ -132,7 +135,7 @@ class AppManager : AppCompatActivity() {
             apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
                 ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
-            }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
+            }.sortedWith(compareBy({ !isProxiedApp(it) }, { isSystemApp(it) }, { it.name.toString() }))
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
@@ -198,6 +201,9 @@ class AppManager : AppCompatActivity() {
 
     private fun isProxiedApp(app: ProxiedApp) = proxiedUids[app.uid]
 
+    private fun isSystemApp(app: ProxiedApp) =
+            (cachedApps?.get(app.packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM)) != 0
+
     @UiThread
     private fun loadApps() {
         loader?.cancel()
@@ -259,15 +265,17 @@ class AppManager : AppCompatActivity() {
         when (item.itemId) {
             R.id.action_apply_all -> {
                 val profiles = ProfileManager.getAllProfiles()
-                if (profiles != null) {
+                if (!profiles.isNullOrEmpty()) {
                     val proxiedAppString = DataStore.individual
                     profiles.forEach {
                         it.individual = proxiedAppString
+                        it.bypass = DataStore.bypass
+                        it.proxyApps = true
                         ProfileManager.updateProfile(it)
                     }
                     if (DataStore.directBootAware) DirectBoot.update()
                     Snackbar.make(list, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
-                } else Snackbar.make(list, R.string.action_export_err, Snackbar.LENGTH_LONG).show()
+                }
                 return true
             }
             R.id.action_export_clipboard -> {
