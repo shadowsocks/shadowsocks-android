@@ -28,3 +28,7 @@
 
 * [GitHub](https://github.com/shadowsocksRb/shadowsocksRb-android/releases)
 * [Telegram](https://t.me/ShadowsocksRb)
+
+## 7.输入订阅链接无反应
+
+通过明文传递信息是不安全的，如果您的订阅链接是HTTP链接，它将会被静默的忽略。请要求服务提供商将订阅链接升级到HTTPS以避免节点信息泄露。
