@@ -21,8 +21,10 @@
 package com.github.shadowsocks
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ShortcutManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.core.content.getSystemService
@@ -33,24 +35,40 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.bg.BaseService
 
-@Suppress("DEPRECATION")
-@Deprecated("This shortcut is inefficient and should be superseded by TileService for API 24+.")
-class QuickToggleShortcut : Activity(), ShadowsocksConnection.Callback {
+class Shortcut : Activity(), ShadowsocksConnection.Callback {
+    companion object {
+        const val SHORTCUT_TOGGLE = "toggle"
+        const val SHORTCUT_SCAN = "scan"
+        const val REQUEST_SCAN = 5
+    }
+
     private val connection = ShadowsocksConnection()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (intent.action == Intent.ACTION_CREATE_SHORTCUT) {
-            setResult(RESULT_OK, ShortcutManagerCompat.createShortcutResultIntent(this,
-                    ShortcutInfoCompat.Builder(this, "toggle")
-                            .setIntent(Intent(this, QuickToggleShortcut::class.java).setAction(Intent.ACTION_MAIN))
-                            .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_shadowsocks_launcher))
-                            .setShortLabel(getString(R.string.quick_toggle))
-                            .build()))
-            finish()
-        } else {
-            connection.connect(this, this)
-            if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed("toggle")
+        when (intent.action) {
+            Intent.ACTION_CREATE_SHORTCUT -> {
+                setResult(RESULT_OK, ShortcutManagerCompat.createShortcutResultIntent(this,
+                        ShortcutInfoCompat.Builder(this, SHORTCUT_TOGGLE)
+                                .setIntent(Intent(this, Shortcut::class.java).setAction(SHORTCUT_TOGGLE))
+                                .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_shadowsocks_launcher))
+                                .setShortLabel(getString(R.string.quick_toggle))
+                                .build()))
+                finish()
+            }
+            SHORTCUT_SCAN -> {
+                try {
+                    val intent = Intent("com.google.zxing.client.android.SCAN")
+                    intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
+                    startActivityForResult(intent, REQUEST_SCAN)
+                } catch (_: ActivityNotFoundException) {
+                }
+                if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed(SHORTCUT_SCAN)
+            }
+            SHORTCUT_TOGGLE, Intent.ACTION_MAIN -> {
+                connection.connect(this, this)
+                if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed(SHORTCUT_TOGGLE)
+            }
         }
     }
 
@@ -63,7 +81,19 @@ class QuickToggleShortcut : Activity(), ShadowsocksConnection.Callback {
         finish()
     }
 
-    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) { }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK) when (requestCode) {
+            REQUEST_SCAN -> {
+                val contents = data?.getStringExtra("SCAN_RESULT")
+                val uri = Uri.parse(contents)
+                startActivity(Intent(this, UrlImportActivity::class.java).setData(uri))
+            }
+        }
+        finish()
+    }
+
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {}
 
     override fun onDestroy() {
         connection.disconnect(this)

@@ -327,7 +327,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
                     startActivityForResult(intent, REQUEST_SCAN_QRCODE)
                 } catch (_: ActivityNotFoundException) {
-                    (activity as MainActivity). launchUrl(getString(R.string.faq_url))
+                    (activity as MainActivity).launchUrl(getString(R.string.faq_url))
                 }
                 true
             }

@@ -24,7 +24,9 @@ import android.app.Activity
 import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.ShortcutManager
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.RemoteException
@@ -35,6 +37,8 @@ import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.updateLayoutParams
@@ -127,6 +131,28 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         else -> Core.startService()
     }
 
+    private fun updateShortcuts() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            val shortcutManager = getSystemService<ShortcutManager>(ShortcutManager::class.java)
+            val toggle = ShortcutInfoCompat.Builder(this, Shortcut.SHORTCUT_TOGGLE)
+                    .setIntent(Intent(this, Shortcut::class.java).setAction(Shortcut.SHORTCUT_TOGGLE))
+                    .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_shadowsocks_launcher))
+                    .setShortLabel(Core.app.getString(R.string.quick_toggle))
+                    .build()
+                    .toShortcutInfo()
+            val scan = ShortcutInfoCompat.Builder(this, Shortcut.SHORTCUT_SCAN)
+                    .setIntent(Intent(this, Shortcut::class.java).setAction(Shortcut.SHORTCUT_SCAN))
+                    .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_camera_launcher))
+                    .setShortLabel(Core.app.getString(R.string.add_profile_methods_scan_qr_code))
+                    .build()
+                    .toShortcutInfo()
+            val shortcuts = listOf(toggle, scan)
+            shortcutManager?.run {
+                if (dynamicShortcuts.size != shortcuts.size) dynamicShortcuts = shortcuts
+            }
+        }
+    }
+
     private val handler = Handler()
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
@@ -181,6 +207,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
+        updateShortcuts()
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {

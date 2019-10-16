@@ -19,17 +19,11 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.APPLICATION_PREFERENCES" />
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
 
         <activity
@@ -61,7 +55,7 @@
         </activity>
 
         <activity
-            android:name=".QuickToggleShortcut"
+            android:name=".Shortcut"
             android:excludeFromRecents="true"
             android:label="@string/quick_toggle"
             android:process=":bg"
