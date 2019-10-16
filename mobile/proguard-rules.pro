@@ -1,7 +1,0 @@
--optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
--keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
--dontskipnonpubliclibraryclasses
--allowaccessmodification
--optimizationpasses 7
--repackageclasses
--verbose

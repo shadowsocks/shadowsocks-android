@@ -20,7 +20,7 @@ android {
             minifyEnabled true
             shrinkResources true
             signingConfig signingConfigs.debug
-            proguardFiles 'proguard-rules.pro'
+            proguardFiles 'r8-rules.pro'
         }
     }
     compileOptions {
