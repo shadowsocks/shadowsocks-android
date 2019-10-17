@@ -6,18 +6,19 @@
 
 ### 编译
 
-准备工作
-
 * JDK 1.8
 * Android SDK
-  - Android NDK
+  - Android SDK Build-Tools 29.0.2
+  - Android SDK Platform 29
+  - NDK (Side by side) 20.0.5594570
+  - Android SDK Tools
 
 ```bash
 git clone --recurse-submodules https://github.com/shadowsocksRb/shadowsocksRb-android.git
 cd shadowsocksRb-android
-# 建议打开 mobile/build.gradle ,修改 applicationId 以规避检测
+# 建议编辑 mobile/build.gradle ,修改 applicationId 以规避检测
 ./gradlew aR
-# adb install mobile/build/outputs/apk/release/mobile-release.apk
+adb install mobile/build/outputs/apk/release/mobile-release.apk
 ```
 
 ### 贡献
