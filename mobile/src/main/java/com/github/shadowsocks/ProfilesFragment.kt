@@ -40,6 +40,7 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
@@ -192,21 +193,17 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             if (item.host == "198.199.101.152") {
                 val builder = AdLoader.Builder(context, "ca-app-pub-9097031975646651/9333091620")
                 builder.forUnifiedNativeAd { unifiedNativeAd ->
-                    if (!isAdLoaded && isAttached) {
-                        try {
-                            // OnUnifiedNativeAdLoadedListener implementation.
-                            val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
-                            val adView = layoutInflater.inflate(R.layout.ad_unified, adContainer,
-                                    false) as UnifiedNativeAdView
-                            populateUnifiedNativeAdView(unifiedNativeAd, adView)
+                    if (!isAdLoaded && isAttached) lifecycleScope.launchWhenStarted {
+                        // OnUnifiedNativeAdLoadedListener implementation.
+                        val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
+                        val adView = layoutInflater.inflate(R.layout.ad_unified, adContainer,
+                                false) as UnifiedNativeAdView
+                        populateUnifiedNativeAdView(unifiedNativeAd, adView)
 
-                            adContainer.removeAllViews()
-                            adContainer.addView(adView)
+                        adContainer.removeAllViews()
+                        adContainer.addView(adView)
 
-                            isAdLoaded = true
-                        } catch (ex: IllegalStateException) {
-                            // Ignore the adView layout exception
-                        }
+                        isAdLoaded = true
                     }
                 }
 
