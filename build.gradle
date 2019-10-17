@@ -9,7 +9,7 @@ buildscript {
         minSdkVersion = 21
         sdkVersion = 29
         compileSdkVersion = 29
-        lifecycleVersion = '2.2.0-alpha05'
+        lifecycleVersion = '2.2.0-beta01'
         junitVersion = '4.12'
         androidTestVersion = '1.2.0'
         androidEspressoVersion = '3.2.0'
@@ -27,11 +27,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.25.0'
+        classpath 'com.android.tools.build:gradle:3.5.1'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.27.0'
         classpath 'com.google.gms:google-services:4.3.2'
         classpath 'com.vanniktech:gradle-maven-publish-plugin:0.8.0'
-        classpath 'io.fabric.tools:gradle:1.31.1'
+        classpath 'io.fabric.tools:gradle:1.31.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
