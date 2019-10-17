@@ -1,4 +1,4 @@
-# https://github.com/arturbosch/detekt/blob/1.0.1/detekt-cli/src/main/resources/default-detekt-config.yml
+# https://github.com/arturbosch/detekt/blob/1.1.0/detekt-cli/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -93,8 +93,7 @@ exceptions:
     active: true
     methodNames: 'toString,hashCode,equals,finalize'
   InstanceOfCheckForException:
-    active: true
-    excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
+    active: false
   NotImplementedDeclaration:
     active: true
   PrintStackTrace:
@@ -103,6 +102,7 @@ exceptions:
     active: false
   ReturnFromFinally:
     active: true
+    ignoreLabeled: true
   SwallowedException:
     active: true
     ignoredExceptionTypes: 'InterruptedException,NumberFormatException,ParseException,MalformedURLException'
@@ -325,6 +325,8 @@ performance:
 
 potential-bugs:
   active: true
+  Deprecation:
+    active: true
   DuplicateCaseInWhenExpression:
     active: true
   EqualsAlwaysReturnsTrueOrFalse:
@@ -332,6 +334,8 @@ potential-bugs:
   EqualsWithHashCodeExist:
     active: true
   ExplicitGarbageCollectionCall:
+    active: true
+  HasPlatformType:
     active: true
   InvalidRange:
     active: true
@@ -378,9 +382,11 @@ style:
   ForbiddenComment:
     active: true
     values: 'TODO:,FIXME:,STOPSHIP:'
+    allowedPatterns: ""
   ForbiddenImport:
     active: true
     imports: ''
+    forbiddenPatterns: ""
   ForbiddenVoid:
     active: true
     ignoreOverridden: true
@@ -389,6 +395,7 @@ style:
     active: true
     ignoreOverridableFunction: true
     excludedFunctions: 'describeContents'
+    excludeAnnotatedFunction: "dagger.Provides"
   LibraryCodeMustSpecifyReturnType:
     active: true
   LoopWithTooManyJumpStatements:
@@ -419,10 +426,12 @@ style:
   OptionalUnit:
     active: true
   OptionalWhenBraces:
-    active: true
+    active: false
   PreferToOverPairSyntax:
     active: false
   ProtectedMemberInFinalClass:
+    active: true
+  RedundantExplicitType:
     active: true
   RedundantVisibilityModifierRule:
     active: true
@@ -461,9 +470,13 @@ style:
   UnusedPrivateMember:
     active: true
     allowedNames: "(_|ignored|expected|serialVersionUID)"
+  UseArrayLiteralsInAnnotations:
+    active: true
   UseCheckOrError:
     active: true
   UseDataClass:
+    active: false
+  UseIfInsteadOfWhen:
     active: false
   UseRequire:
     active: true
