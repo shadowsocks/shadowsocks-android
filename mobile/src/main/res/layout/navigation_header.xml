@@ -17,7 +17,7 @@
               android:layout_centerVertical="true"
               android:fontFamily="@font/iceland"
               android:gravity="center"
-              android:text="shadowsocks"
+              android:text="shadowsocksRb"
               android:textColor="@android:color/white"
               android:textSize="32sp"
               tools:ignore="HardcodedText"/>
