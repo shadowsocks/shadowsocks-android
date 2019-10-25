@@ -59,7 +59,7 @@ object ProfileManager {
         val first: Long = Core.currentProfile?.first?.id ?: -1
         val second: Long = Core.currentProfile?.second?.id ?: -1
         profiles.forEach {
-            if ((it.id != first) and (it.id != second)) delProfile(it.id)
+            if (it.id != first && it.id != second) delProfile(it.id)
         }
     }
 

@@ -1,5 +1,6 @@
 {
   "version": "401",
   "title": "检测到新版本",
-  "text": "请尽快更新"
+  "text": "请尽快更新",
+  "uri": "https://github.com/shadowsocksRb/shadowsocksRb-android/releases/latest"
 }

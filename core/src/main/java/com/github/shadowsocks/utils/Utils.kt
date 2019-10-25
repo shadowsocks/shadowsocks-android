@@ -123,7 +123,6 @@ val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNu
 
 fun printLog(t: Throwable) {
     Crashlytics.logException(t)
-    t.printStackTrace()
 }
 
 fun Preference.remove() = parent!!.removePreference(this)
