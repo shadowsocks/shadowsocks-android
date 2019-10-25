@@ -120,6 +120,12 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             ssrSubs.removeAt(pos)
             notifyItemRemoved(pos)
         }
+
+        fun updateAll(){
+            ssrSubs.clear()
+            ssrSubs.addAll(SSRSubManager.getAllSSRSub())
+            notifyDataSetChanged()
+        }
     }
 
     private val ssrsub by lazy { findPreference<Preference>(Key.ssrSub)!! }
@@ -317,7 +323,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
                                 getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
                                 getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = true
                                 getButton(AlertDialog.BUTTON_NEGATIVE).text = getString(R.string.update_success)
-                                ssrsubAdapter.notifyDataSetChanged()
+                                ssrsubAdapter.updateAll()
                             }
                         }
                     }
