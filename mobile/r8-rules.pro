@@ -1,3 +1,3 @@
--keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-keepattributes InnerClasses
 -allowaccessmodification
 -repackageclasses

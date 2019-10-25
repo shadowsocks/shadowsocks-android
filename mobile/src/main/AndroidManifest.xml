@@ -1,15 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.github.shadowsocks"
-    tools:ignore="MissingLeanbackSupport">
+    package="com.github.shadowsocks">
 
-    <uses-feature
-        android:name="android.hardware.touchscreen"
-        android:required="false" />
-
-    <application
-        android:name=".App"
-        tools:ignore="MissingTvBanner">
+    <application android:name=".App">
 
         <activity
             android:name=".MainActivity"
@@ -22,10 +15,8 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ProfileConfigActivity"
             android:excludeFromRecents="true"

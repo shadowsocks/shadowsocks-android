@@ -32,6 +32,9 @@ android {
         exclude '/META-INF/*.version'
         exclude '**/*.kotlin_*'
     }
+    aaptOptions {
+        additionalParameters "--preferred-density", "xxxhdpi"
+    }
 }
 
 androidExtensions {
