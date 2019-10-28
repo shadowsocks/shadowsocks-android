@@ -202,7 +202,7 @@ class AppManager : AppCompatActivity() {
     private fun isProxiedApp(app: ProxiedApp) = proxiedUids[app.uid]
 
     private fun isSystemApp(app: ProxiedApp) =
-            (cachedApps?.get(app.packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM)) != 0
+            cachedApps?.get(app.packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM) != 0
 
     @UiThread
     private fun loadApps() {
