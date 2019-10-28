@@ -150,20 +150,19 @@ object Core {
             else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
     fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
-    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
-    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
+    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))
+    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE).setPackage(app.packageName))
 
     fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
         init {
             app.registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
+                addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
                 addDataScheme("package")
             })
         }
 
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
             callback()
             if (onetime) app.unregisterReceiver(this)
         }
