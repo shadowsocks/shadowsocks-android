@@ -146,10 +146,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
                     .setShortLabel(Core.app.getString(R.string.add_profile_methods_scan_qr_code))
                     .build()
                     .toShortcutInfo()
-            val shortcuts = listOf(toggle, scan)
-            shortcutManager?.run {
-                if (dynamicShortcuts.size != shortcuts.size) dynamicShortcuts = shortcuts
-            }
+            shortcutManager?.dynamicShortcuts = listOf(toggle, scan)
         }
     }
 
