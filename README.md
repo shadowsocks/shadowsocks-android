@@ -10,7 +10,7 @@
 * Android SDK
   - Android SDK Build-Tools 29.0.2
   - Android SDK Platform 29
-  - NDK (Side by side) 20.0.5594570
+  - NDK (Side by side) 21.0.5935234
   - Android SDK Tools
 
 ```bash
