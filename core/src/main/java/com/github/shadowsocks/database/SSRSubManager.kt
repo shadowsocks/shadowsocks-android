@@ -5,6 +5,7 @@ import android.util.Base64
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.useCancellable
+import kotlinx.coroutines.withTimeout
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -47,16 +48,12 @@ object SSRSubManager {
         emptyList()
     }
 
-    private suspend fun getResponse(url: String): String {
-        try {
-            val connection = URL(url).openConnection() as HttpURLConnection
-            val body = connection.useCancellable { inputStream.bufferedReader().use { it.readText() } }
-            return String(Base64.decode(body, Base64.URL_SAFE))
-        } catch (e: Exception) {
-            printLog(e)
-        }
-        return ""
-    }
+    private suspend fun getResponse(url: String) =
+            withTimeout(10000L) {
+                val connection = URL(url).openConnection() as HttpURLConnection
+                val body = connection.useCancellable { inputStream.bufferedReader().use { it.readText() } }
+                String(Base64.decode(body, Base64.URL_SAFE))
+            }
 
     fun deletProfiles(ssrSub: SSRSub) {
         val profiles = ProfileManager.getAllProfilesByGroup(ssrSub.url_group)
@@ -96,15 +93,20 @@ object SSRSubManager {
 
     suspend fun create(url: String): SSRSub? {
         if (url.isEmpty()) return null
-        val response = getResponse(url)
-        val profiles = Profile.findAllSSRUrls(response, Core.currentProfile?.first).toList()
-        if (profiles.isNullOrEmpty()) return null
-        val new = SSRSub(url = url, url_group = profiles[0].url_group)
-        getAllSSRSub().forEach {
-            if (it.url_group == new.url_group) return null
+        try {
+            val response = getResponse(url)
+            val profiles = Profile.findAllSSRUrls(response, Core.currentProfile?.first).toList()
+            if (profiles.isNullOrEmpty() || profiles[0].url_group.isEmpty()) return null
+            val new = SSRSub(url = url, url_group = profiles[0].url_group)
+            getAllSSRSub().forEach {
+                if (it.url_group == new.url_group) return null
+            }
+            createSSRSub(new)
+            update(new, response)
+            return new
+        } catch (e: Exception) {
+            printLog(e)
+            return null
         }
-        createSSRSub(new)
-        update(new, response)
-        return new
     }
 }

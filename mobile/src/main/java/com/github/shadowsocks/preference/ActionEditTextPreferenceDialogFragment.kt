@@ -9,11 +9,9 @@ import androidx.core.os.bundleOf
 import androidx.preference.EditTextPreferenceDialogFragmentCompat
 import com.github.shadowsocks.R
 import com.github.shadowsocks.acl.Acl
+import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.useCancellable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -41,10 +39,13 @@ class ActionEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragmentC
                 mButtonNeutral.isEnabled = false
                 GlobalScope.launch(Dispatchers.IO) {
                     try {
-                        val connection = URL(mEditText.text.toString()).openConnection() as HttpURLConnection
-                        val acl = connection.useCancellable { inputStream.bufferedReader().use { it.readText() } }
-                        Acl.getFile(Acl.CUSTOM_RULES).printWriter().use { it.write(acl) }
-                    } catch (_: Exception) {
+                        withTimeout(10000L) {
+                            val connection = URL(mEditText.text.toString()).openConnection() as HttpURLConnection
+                            val acl = connection.useCancellable { inputStream.bufferedReader().use { it.readText() } }
+                            Acl.getFile(Acl.CUSTOM_RULES).printWriter().use { it.write(acl) }
+                        }
+                    } catch (e: Exception) {
+                        printLog(e)
                         success = false
                     }
                     withContext(Dispatchers.Main.immediate) {

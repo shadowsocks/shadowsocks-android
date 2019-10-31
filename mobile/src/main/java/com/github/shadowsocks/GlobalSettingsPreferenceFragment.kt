@@ -48,11 +48,8 @@ import com.github.shadowsocks.database.SSRSub
 import com.github.shadowsocks.database.SSRSubManager
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.*
+import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.work.SSRSubSyncer
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.readableMessage
-import com.github.shadowsocks.utils.remove
 import com.github.shadowsocks.widget.MainListListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -121,7 +118,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             notifyItemRemoved(pos)
         }
 
-        fun updateAll(){
+        fun updateAll() {
             ssrSubs.clear()
             ssrSubs.addAll(SSRSubManager.getAllSSRSub())
             notifyDataSetChanged()
@@ -202,7 +199,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         serviceMode.onPreferenceChangeListener = onServiceModeChange
 
         ssrsub.onPreferenceClickListener = Preference.OnPreferenceClickListener { ssrSubDialog(); true }
-        val count=SSRSubManager.getAllSSRSub().count()
+        val count = SSRSubManager.getAllSSRSub().count()
         ssrsub.summary = resources.getQuantityString(R.plurals.ssrsub_manage_summary, count, count)
         findPreference<SwitchPreference>(Key.ssrSubAutoUpdate)!!.setOnPreferenceChangeListener { _, newValue ->
             SSRSubSyncer.run { if (newValue as Boolean) enqueue() else cancel() }
@@ -223,7 +220,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             }.show(parentFragmentManager, hosts.key)
             acl -> ActionEditTextPreferenceDialogFragment().apply {
                 setKey(acl.key)
-                setTargetFragment(this@GlobalSettingsPreferenceFragment,0)
+                setTargetFragment(this@GlobalSettingsPreferenceFragment, 0)
             }.show(parentFragmentManager, acl.key)
             else -> super.onDisplayPreferenceDialog(preference)
         }
@@ -318,11 +315,18 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
                         getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
                         getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = false
                         GlobalScope.launch(Dispatchers.IO) {
-                            SSRSubManager.updateAll()
+                            var success = true
+                            try {
+                                SSRSubManager.updateAll()
+                            } catch (e: Exception) {
+                                printLog(e)
+                                success = false
+                            }
                             withContext(Dispatchers.Main.immediate) {
                                 getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
                                 getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = true
-                                getButton(AlertDialog.BUTTON_NEGATIVE).text = getString(R.string.update_success)
+                                getButton(AlertDialog.BUTTON_NEGATIVE).text =
+                                        if (success) getString(R.string.update_success) else getString(R.string.update_fail)
                                 ssrsubAdapter.updateAll()
                             }
                         }
