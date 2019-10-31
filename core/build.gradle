@@ -55,6 +55,7 @@ dependencies {
     api "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    api "androidx.recyclerview:recyclerview:1.1.0-rc01"
     api 'androidx.preference:preference:1.1.0'
     api "androidx.room:room-runtime:$roomVersion"
     api "androidx.work:work-runtime-ktx:$workVersion"
