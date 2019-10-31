@@ -92,11 +92,11 @@ class AppManager : AppCompatActivity() {
         }
     }
 
-    private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
+    private class ProxiedApp(private val pm: PackageManager, val packageInfo: PackageInfo,
                              val packageName: String) {
-        val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
-        val icon: Drawable get() = appInfo.loadIcon(pm)
-        val uid get() = appInfo.uid
+        val name: CharSequence = packageInfo.applicationInfo.loadLabel(pm)    // cached for sorting
+        val icon: Drawable get() = packageInfo.applicationInfo.loadIcon(pm)
+        val uid get() = packageInfo.applicationInfo.uid
     }
 
     private inner class AppViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -134,8 +134,13 @@ class AppManager : AppCompatActivity() {
         suspend fun reload() {
             apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
-                ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
-            }.sortedWith(compareBy({ !isProxiedApp(it) }, { isSystemApp(it) }, { it.name.toString() }))
+                ProxiedApp(packageManager, packageInfo, packageName)
+            }.sortedWith(compareBy(
+                    { !isProxiedApp(it) },
+                    { it.packageInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM },
+                    { -it.packageInfo.firstInstallTime },
+                    { it.name.toString() }
+            ))
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
@@ -200,9 +205,6 @@ class AppManager : AppCompatActivity() {
     }
 
     private fun isProxiedApp(app: ProxiedApp) = proxiedUids[app.uid]
-
-    private fun isSystemApp(app: ProxiedApp) =
-            (cachedApps?.get(app.packageName)?.applicationInfo?.flags?.and(ApplicationInfo.FLAG_SYSTEM)) != 0
 
     @UiThread
     private fun loadApps() {
