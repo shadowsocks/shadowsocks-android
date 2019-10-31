@@ -19,8 +19,13 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
+            versionNameSuffix = '-nightly'
             signingConfig signingConfigs.debug
             proguardFiles 'r8-rules.pro'
+        }
+        debug {
+            applicationIdSuffix = '.debug'
+            versionNameSuffix = '-debug'
         }
     }
     compileOptions {
