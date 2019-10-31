@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.bg
 
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -70,6 +71,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         }
     }
     private var callbackRegistered = false
+    private var isChannelClosed = false
 
     private val builder = NotificationCompat.Builder(service as Context, channel)
             .setWhen(0)
@@ -90,11 +92,17 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             setShowsUserInterface(false)
         }.build()
         if (Build.VERSION.SDK_INT < 24) builder.addAction(closeAction) else builder.addInvisibleAction(closeAction)
-        updateCallback(service.getSystemService<PowerManager>()?.isInteractive != false)
-        service.registerReceiver(this, IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_ON)
-            addAction(Intent.ACTION_SCREEN_OFF)
-        })
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelInfo = service.getSystemService<NotificationManager>()?.getNotificationChannel(channel)
+            if (channelInfo?.importance == NotificationManager.IMPORTANCE_NONE) isChannelClosed = true
+        }
+        if (!isChannelClosed) {
+            updateCallback(service.getSystemService<PowerManager>()?.isInteractive != false)
+            service.registerReceiver(this, IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_SCREEN_OFF)
+            })
+        }
         show()
     }
 
@@ -116,8 +124,11 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
     private fun show() = (service as Service).startForeground(1, builder.build())
 
     fun destroy() {
-        (service as Service).unregisterReceiver(this)
-        updateCallback(false)
+        service as Service
+        if (!isChannelClosed) {
+            service.unregisterReceiver(this)
+            updateCallback(false)
+        }
         service.stopForeground(true)
     }
 }
