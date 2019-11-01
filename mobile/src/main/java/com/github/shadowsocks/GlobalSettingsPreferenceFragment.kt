@@ -21,6 +21,8 @@
 package com.github.shadowsocks
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.DialogInterface.*
 import android.content.Intent
 import android.os.Build
@@ -34,6 +36,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.getSystemService
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -61,12 +64,15 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         private const val REQUEST_BROWSE = 1
     }
 
-    inner class SSRSubViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+    inner class SSRSubViewHolder(view: View) : RecyclerView.ViewHolder(view),
+            View.OnClickListener, View.OnLongClickListener {
         internal lateinit var item: SSRSub
         private val text2 = itemView.findViewById<TextView>(android.R.id.text2)
+        private val clipboard by lazy { requireContext().getSystemService<ClipboardManager>()!! }
 
         init {
             itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
         }
 
         private fun updateText(isShowUrl: Boolean = false) {
@@ -87,6 +93,11 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         override fun onClick(v: View?) {
             updateText(true)
+        }
+
+        override fun onLongClick(v: View?): Boolean {
+            clipboard.setPrimaryClip(ClipData.newPlainText(null, this.item.url))
+            return true
         }
     }
 
