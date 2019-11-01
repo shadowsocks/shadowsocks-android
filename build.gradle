@@ -8,8 +8,8 @@ buildscript {
         sdkVersion = 29
         compileSdkVersion = 29
         buildToolsVersion = '29.0.2'
-        versionCode = 402
-        versionName = '4.8.5R.2'
+        versionCode = 403
+        versionName = '4.8.5R.3'
         resConfigs = ['zh-rCN']
     }
 
