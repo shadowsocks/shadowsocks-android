@@ -63,14 +63,22 @@ object SSRSubManager {
     suspend fun update(ssrSub: SSRSub, b: String = "") {
         val response = if (b.isEmpty()) getResponse(ssrSub.url) else b
         var profiles = Profile.findAllSSRUrls(response, Core.currentProfile?.first).toList()
-        if (profiles.isEmpty()) {
-            deletProfiles(ssrSub)
-            ssrSub.url_group = "Invalid link"
-            updateSSRSub(ssrSub)
-            return
-        } else {
-            ssrSub.url_group = profiles[0].url_group
-            updateSSRSub(ssrSub)
+        when {
+            profiles.isEmpty() -> {
+                deletProfiles(ssrSub)
+                ssrSub.status = SSRSub.EMPTY
+                updateSSRSub(ssrSub)
+                return
+            }
+            ssrSub.url_group != profiles[0].url_group -> {
+                ssrSub.status = SSRSub.NAME_CHANGED
+                updateSSRSub(ssrSub)
+                return
+            }
+            else -> {
+                ssrSub.status = SSRSub.NORMAL
+                updateSSRSub(ssrSub)
+            }
         }
 
         val count = profiles.count()
@@ -88,7 +96,15 @@ object SSRSubManager {
 
     suspend fun updateAll() {
         val ssrsubs = getAllSSRSub()
-        ssrsubs.forEach { update(it) }
+        ssrsubs.forEach {
+            try {
+                update(it)
+            } catch (e: Exception) {
+                it.status = SSRSub.NETWORK_ERROR
+                updateSSRSub(it)
+                printLog(e)
+            }
+        }
     }
 
     suspend fun create(url: String): SSRSub? {

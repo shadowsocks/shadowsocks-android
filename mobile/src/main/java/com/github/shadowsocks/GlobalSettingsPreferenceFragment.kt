@@ -70,7 +70,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         private fun updateText(isShowUrl: Boolean = false) {
-            val builder = SpannableStringBuilder().append(this.item.url_group + "\n")
+            val builder = SpannableStringBuilder().append(this.item.displayName + "\n")
             if (isShowUrl) {
                 val start = builder.length
                 builder.append(this.item.url)
@@ -315,18 +315,11 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
                         getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
                         getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = false
                         GlobalScope.launch(Dispatchers.IO) {
-                            var success = true
-                            try {
-                                SSRSubManager.updateAll()
-                            } catch (e: Exception) {
-                                printLog(e)
-                                success = false
-                            }
+                            SSRSubManager.updateAll()
                             withContext(Dispatchers.Main.immediate) {
                                 getButton(AlertDialog.BUTTON_POSITIVE).isEnabled = true
                                 getButton(AlertDialog.BUTTON_NEUTRAL).isEnabled = true
-                                getButton(AlertDialog.BUTTON_NEGATIVE).text =
-                                        if (success) getString(R.string.update_success) else getString(R.string.update_fail)
+                                getButton(AlertDialog.BUTTON_NEGATIVE).text = getString(R.string.update_success)
                                 ssrsubAdapter.updateAll()
                             }
                         }
