@@ -329,7 +329,8 @@ data class Profile(
         DataStore.editingId = null
         // It's assumed that default values are never used, so 0/false/null is always used even if that isn't the case
         name = DataStore.privateStore.getString(Key.name) ?: ""
-        host = DataStore.privateStore.getString(Key.host) ?: ""
+        // It's safe to trim the hostname, as we expect no leading or trailing whitespaces here
+        host = (DataStore.privateStore.getString(Key.host) ?: "").trim()
         remotePort = parsePort(DataStore.privateStore.getString(Key.remotePort), 8388, 1)
         password = DataStore.privateStore.getString(Key.password) ?: ""
         method = DataStore.privateStore.getString(Key.method) ?: ""
