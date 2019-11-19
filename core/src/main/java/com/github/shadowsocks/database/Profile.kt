@@ -60,7 +60,7 @@ data class Profile(
         var proxyApps: Boolean = false,
         var bypass: Boolean = false,
         var udpdns: Boolean = false,
-        var ipv6: Boolean = true,
+        var ipv6: Boolean = false,
         @TargetApi(28)
         var metered: Boolean = false,
         var individual: String = "",
@@ -323,6 +323,7 @@ data class Profile(
         DataStore.udpFallback = udpFallback
         DataStore.privateStore.remove(Key.dirty)
     }
+
     fun deserialize() {
         check(id == 0L || DataStore.editingId == id)
         DataStore.editingId = null

@@ -64,7 +64,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
             ?: BootReceiver.enabled.also { publicStore.putBoolean(Key.persistAcrossReboot, it) }
     val canToggleLocked: Boolean get() = publicStore.getBoolean(Key.directBootAware) == true
     val directBootAware: Boolean get() = Core.directBootSupported && canToggleLocked
-    val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && publicStore.getBoolean(Key.tfo, true)
+    val tcpFastOpen: Boolean get() = TcpFastOpen.sendEnabled && publicStore.getBoolean(Key.tfo, false)
     val serviceMode get() = publicStore.getString(Key.serviceMode) ?: Key.modeVpn
     val listenAddress get() = if (publicStore.getBoolean(Key.shareOverLan, false)) "0.0.0.0" else "127.0.0.1"
     var portProxy: Int
