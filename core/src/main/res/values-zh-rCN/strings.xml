@@ -101,6 +101,7 @@
     <string name="edit">"编辑"</string>
     <string name="share">"分享"</string>
     <string name="add_profile">"添加配置文件"</string>
+    <string name="save_log">保存日志</string>
     <string name="action_apply_all">"应用设置到所有配置文件"</string>
     <string name="action_export_more">"导出…"</string>
     <string name="action_export_file">"导出至文件…"</string>

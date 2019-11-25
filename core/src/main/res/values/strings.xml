@@ -102,6 +102,7 @@
   <string name="edit">Edit</string>
   <string name="share">Share</string>
   <string name="add_profile">Add Profile</string>
+  <string name="save_log">保存日志</string>
   <string name="action_apply_all">Apply Settings to All Profiles</string>
   <string name="action_export_more">Export…</string>
   <string name="action_export_file">Export to file…</string>
