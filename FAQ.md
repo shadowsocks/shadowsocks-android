@@ -50,7 +50,7 @@
 
 ## 9.需要批量测试功能
 
-参考[issue2215](https://github.com/shadowsocks/shadowsocks-android/issues/2215)，目前本项目处于等待上游实现状态。
+参考[shadowsocks#issue2215](https://github.com/shadowsocks/shadowsocks-android/issues/2215)，目前本项目处于等待上游实现状态。
 
 确认过原SSR实现，问题太多，取消移植。
 
@@ -67,3 +67,7 @@
 ## 12.可以添加SSRR的新协议吗
 
 不能。shadowsocksRb永远不会触碰SSR协议部分，仅同步SS上游和作客户端兼容性维护。
+
+## 13.各ROM兼容性问题
+
+转至[shadowsocks 常见问题](https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md#why-is-my-rom-not-supported)查看，包括部分应用无法联网，没有流量等问题。
