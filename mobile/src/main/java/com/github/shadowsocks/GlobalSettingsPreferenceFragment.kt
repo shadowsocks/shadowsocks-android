@@ -196,7 +196,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         val listener: (BaseService.State) -> Unit = {
             val stopped = it == BaseService.State.Stopped
             tfo.isEnabled = stopped
-            acl.isEnabled = stopped
             serviceMode.isEnabled = stopped
             portProxy.isEnabled = stopped
             if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
