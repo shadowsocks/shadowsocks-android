@@ -122,7 +122,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             try {
                 if (request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
                 val question = request.question
-                if (question?.type != Type.A) return@supervisorScope remote.await()
+                if (question?.type != Type.A && question?.type != Type.AAAA) return@supervisorScope remote.await()
                 val host = question.name.toString(true)
                 val hostsResults = hosts.resolve(host)
                 if (hostsResults.isNotEmpty()) {
