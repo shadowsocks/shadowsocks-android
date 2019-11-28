@@ -71,3 +71,9 @@
 ## 13.各ROM兼容性问题
 
 转至[shadowsocks 常见问题](https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md#why-is-my-rom-not-supported)查看，包括部分应用无法联网，没有流量等问题。
+
+## 14.国内应用网速缓慢
+
+使用分应用VPN功能绕过对国内应用的代理。
+
+多数情况下，是由于应用的DNS智能分流，将域名分配到国外服务器，但ACL规则指示对此域名直连。
