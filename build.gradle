@@ -3,7 +3,7 @@
 buildscript {
     ext {
         javaVersion = JavaVersion.VERSION_1_8
-        kotlinVersion = '1.3.60-eap-25'
+        kotlinVersion = '1.3.61'
         minSdkVersion = 21
         sdkVersion = 29
         compileSdkVersion = 29
@@ -17,9 +17,11 @@ buildscript {
         google()
         jcenter()
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+        maven { url 'https://storage.googleapis.com/r8-releases/raw'}
     }
 
     dependencies {
+        classpath 'com.android.tools:r8:2.0.5-dev'
         classpath 'com.android.tools.build:gradle:4.0.0-alpha04'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
