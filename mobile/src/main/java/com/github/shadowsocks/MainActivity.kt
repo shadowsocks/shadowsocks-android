@@ -25,6 +25,12 @@ import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ShortcutManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Icon
+import android.graphics.drawable.LayerDrawable
 import android.net.VpnService
 import android.os.Build
 import android.os.Bundle
@@ -33,12 +39,15 @@ import android.os.RemoteException
 import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.graphics.drawable.toAdaptiveIcon
+import androidx.core.graphics.drawable.toIcon
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.updateLayoutParams
@@ -132,17 +141,40 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     private fun updateShortcuts() {
+        fun getBitmap(id: Int): Bitmap {
+            var drawable = AppCompatResources.getDrawable(this, id)!!
+            if (drawable is BitmapDrawable)
+                return drawable.bitmap
+            if (Build.VERSION.SDK_INT >= 26 && drawable is AdaptiveIconDrawable) {
+                drawable = LayerDrawable(arrayOf(drawable.background, drawable.foreground))
+            }
+            val bitmap = Bitmap.createBitmap(
+                    drawable.intrinsicWidth, drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            return bitmap
+        }
+
+        fun getIcon(id: Int): Icon {
+            return if (Build.VERSION.SDK_INT >= 26)
+                getBitmap(id).toAdaptiveIcon()
+            else
+                getBitmap(id).toIcon()
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             val shortcutManager = getSystemService<ShortcutManager>(ShortcutManager::class.java)
             val toggle = ShortcutInfoCompat.Builder(this, Shortcut.SHORTCUT_TOGGLE)
                     .setIntent(Intent(this, Shortcut::class.java).setAction(Shortcut.SHORTCUT_TOGGLE))
-                    .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_shadowsocks_launcher))
+                    .setIcon(IconCompat.createFromIcon(this, getIcon(R.drawable.ic_qu_shadowsocks_launcher)))
                     .setShortLabel(Core.app.getString(R.string.quick_toggle))
                     .build()
                     .toShortcutInfo()
             val scan = ShortcutInfoCompat.Builder(this, Shortcut.SHORTCUT_SCAN)
                     .setIntent(Intent(this, Shortcut::class.java).setAction(Shortcut.SHORTCUT_SCAN))
-                    .setIcon(IconCompat.createWithResource(this, R.drawable.ic_qu_camera_launcher))
+                    .setIcon(IconCompat.createFromIcon(this, getIcon(R.drawable.ic_qu_camera_launcher)))
                     .setShortLabel(Core.app.getString(R.string.add_profile_methods_scan_qr_code))
                     .build()
                     .toShortcutInfo()
