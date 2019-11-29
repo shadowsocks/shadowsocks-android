@@ -20,11 +20,10 @@ android {
                 arguments "-j${Runtime.runtime.availableProcessors()}"
             }
         }
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
+        javaCompileOptions.annotationProcessorOptions.arguments = [
+                "room.incremental": "true",
+                "room.schemaLocation": "$projectDir/schemas".toString(),
+        ]
     }
 
     compileOptions {
