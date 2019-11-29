@@ -1,7 +1,8 @@
 ## 1.二维码扫描功能
 
-需要安装[条码扫描器](https://play.google.com/store/apps/details?id=com.google.zxing.client.android).
-不内置扫描功能.
+需要安装[条码扫描器](https://play.google.com/store/apps/details?id=com.google.zxing.client.android)，不内置扫描功能。
+
+无法访问Google Play可以[从GitHub下载](https://github.com/shadowsocksRb/zxing-android/releases/latest)。
 
 ## 2.界面变化太大
 
