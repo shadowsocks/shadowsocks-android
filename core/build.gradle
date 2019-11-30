@@ -65,3 +65,9 @@ dependencies {
     api 'org.connectbot.jsocks:jsocks:1.0.0'
     kapt "androidx.room:room-compiler:$roomVersion"
 }
+
+task deleteCxx(type: Delete) {
+    delete file('.cxx')
+}
+
+clean.finalizedBy deleteCxx
