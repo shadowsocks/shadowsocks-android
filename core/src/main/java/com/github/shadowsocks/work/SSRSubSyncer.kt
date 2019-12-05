@@ -1,6 +1,9 @@
 package com.github.shadowsocks.work
 
 import android.content.Context
+import android.os.Build
+import android.os.UserManager
+import androidx.core.content.getSystemService
 import androidx.work.*
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.SSRSubManager
@@ -27,14 +30,20 @@ class SSRSubSyncer(context: Context, workerParams: WorkerParameters) : Coroutine
         fun cancel() = WorkManager.getInstance(Core.deviceStorage).cancelUniqueWork(NAME)
     }
 
-    override suspend fun doWork(): Result = try {
-        SSRSubManager.updateAll()
-        Result.success()
-    } catch (e: IOException) {
-        printLog(e)
-        if (runAttemptCount > 5) {
-            cancel()
-            Result.failure()
-        } else Result.retry()
+    override suspend fun doWork(): Result {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+                Core.app.getSystemService<UserManager>()?.isUserUnlocked == false)
+            return Result.retry()
+
+        return try {
+            SSRSubManager.updateAll()
+            Result.success()
+        } catch (e: IOException) {
+            printLog(e)
+            if (runAttemptCount > 5) {
+                cancel()
+                Result.failure()
+            } else Result.retry()
+        }
     }
 }
