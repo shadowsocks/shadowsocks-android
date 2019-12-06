@@ -12,7 +12,7 @@ android {
         targetSdkVersion rootProject.sdkVersion
         versionCode rootProject.versionCode
         versionName rootProject.versionName
-        ndkVersion "21.0.6011959-rc2"
+        ndkVersion rootProject.ndkVersion
 
         externalNativeBuild {
             ndkBuild {

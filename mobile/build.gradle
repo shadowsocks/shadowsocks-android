@@ -13,6 +13,7 @@ android {
         versionCode rootProject.versionCode
         versionName rootProject.versionName
         resConfigs rootProject.resConfigs
+        ndkVersion rootProject.ndkVersion
         resValue 'string', 'applicationId', applicationId
     }
     buildTypes {

@@ -6,11 +6,11 @@
 
 ### 编译
 
-* JDK 1.8
+* OpenJDK 1.8
 * Android SDK
   - Android SDK Build-Tools 29.0.2
   - Android SDK Platform 29
-  - NDK (Side by side) 21.0.5935234
+  - NDK (Side by side) 21.0.6011959-rc2
   - Android SDK Tools
 
 ```bash
