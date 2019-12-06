@@ -13,6 +13,7 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.core.BuildConfig
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.useCancellable
 import com.google.gson.JsonStreamParser
@@ -43,10 +44,12 @@ class UpdateCheck(context: Context, workerParams: WorkerParameters) : CoroutineW
         val info = JsonStreamParser(json).asSequence().single().asJsonObject
         if (info["version"].asInt > BuildConfig.VERSION_CODE) {
             val nm = app.getSystemService<NotificationManager>()!!
-            val intent= Intent(Intent.ACTION_VIEW).setData(Uri.parse(info["uri"].asString))
+            val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse(info["uri"].asString))
             val builder = NotificationCompat.Builder(app as Context, "update")
                     .setColor(ContextCompat.getColor(app, R.color.material_primary_500))
-                    .setContentIntent(PendingIntent.getActivity(app,0,intent,0))
+                    .setContentIntent(PendingIntent.getActivity(app, 0, intent, 0))
+                    .setVisibility(if (DataStore.canToggleLocked) NotificationCompat.VISIBILITY_PUBLIC
+                    else NotificationCompat.VISIBILITY_PRIVATE)
                     .setSmallIcon(R.drawable.ic_service_active)
                     .setCategory(NotificationCompat.CATEGORY_STATUS)
                     .setContentTitle(info["title"].asString)
