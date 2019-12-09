@@ -78,7 +78,8 @@ class AppManager : AppCompatActivity() {
                 instance?.loadApps()
             }
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
-            val cachedApps = cachedApps ?: pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+            val cachedApps = cachedApps ?: pm.getInstalledPackages(
+                    PackageManager.GET_PERMISSIONS or PackageManager.MATCH_UNINSTALLED_PACKAGES)
                     .filter {
                         when (it.packageName) {
                             app.packageName -> false
@@ -265,6 +266,7 @@ class AppManager : AppCompatActivity() {
                     val proxiedAppString = DataStore.individual
                     profiles.forEach {
                         it.individual = proxiedAppString
+                        it.bypass = DataStore.bypass
                         ProfileManager.updateProfile(it)
                     }
                     if (DataStore.directBootAware) DirectBoot.update()
