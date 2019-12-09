@@ -126,7 +126,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         if (preference == hosts) BrowsableEditTextPreferenceDialogFragment().apply {
             setKey(hosts.key)
             setTargetFragment(this@GlobalSettingsPreferenceFragment, REQUEST_BROWSE)
-        }.show(fragmentManager ?: return, hosts.key) else super.onDisplayPreferenceDialog(preference)
+        }.show(parentFragmentManager, hosts.key) else super.onDisplayPreferenceDialog(preference)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -136,7 +136,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         PluginConfigurationDialogFragment().apply {
             setArg(Key.pluginConfigure, pluginConfiguration.selected)
             setTargetFragment(this@ProfileConfigFragment, 0)
-        }.show(fragmentManager ?: return, Key.pluginConfigure)
+        }.show(parentFragmentManager, Key.pluginConfigure)
     }
 
     private fun saveAndExit() {
@@ -178,7 +178,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             Key.plugin -> BottomSheetPreferenceDialogFragment().apply {
                 setArg(Key.plugin)
                 setTargetFragment(this@ProfileConfigFragment, 0)
-            }.show(fragmentManager ?: return, Key.plugin)
+            }.show(parentFragmentManager, Key.plugin)
             Key.pluginConfigure -> {
                 val intent = PluginManager.buildIntent(pluginConfiguration.selected, PluginContract.ACTION_CONFIGURE)
                 if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else {
