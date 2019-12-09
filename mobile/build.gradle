@@ -60,12 +60,12 @@ androidExtensions {
 
 dependencies {
     implementation project(':core')
-    implementation 'androidx.browser:browser:1.2.0-alpha08'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta2'
+    implementation 'androidx.browser:browser:1.2.0-rc01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta3'
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
     implementation 'com.google.android.gms:play-services-vision:19.0.0'
-    implementation 'com.google.firebase:firebase-ads:18.2.0'
-    implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.0.0'
+    implementation 'com.google.firebase:firebase-ads:18.3.0'
+    implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.1.0'
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.4'
     implementation 'net.glxn.qrgen:android:2.0'
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'

@@ -37,6 +37,7 @@ import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.bg.BaseService
+import com.github.shadowsocks.utils.listenForPackageChanges
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.signaturesCompat
 import java.io.File
@@ -101,7 +102,7 @@ object PluginManager {
     private var receiver: BroadcastReceiver? = null
     private var cachedPlugins: Map<String, Plugin>? = null
     fun fetchPlugins(): Map<String, Plugin> = synchronized(this) {
-        if (receiver == null) receiver = Core.listenForPackageChanges {
+        if (receiver == null) receiver = app.listenForPackageChanges {
             synchronized(this) {
                 receiver = null
                 cachedPlugins = null

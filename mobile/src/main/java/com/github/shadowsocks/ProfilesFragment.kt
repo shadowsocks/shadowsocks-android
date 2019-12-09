@@ -191,7 +191,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             isAttached = true
 
             if (item.host == "198.199.101.152") {
-                val builder = AdLoader.Builder(context, "ca-app-pub-9097031975646651/9333091620")
+                val builder = AdLoader.Builder(context, "ca-app-pub-3283768469187309/8632513739")
                 builder.forUnifiedNativeAd { unifiedNativeAd ->
                     if (!isAdLoaded && isAttached) lifecycleScope.launchWhenStarted {
                         // OnUnifiedNativeAdLoadedListener implementation.

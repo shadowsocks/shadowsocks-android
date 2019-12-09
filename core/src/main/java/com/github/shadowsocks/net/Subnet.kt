@@ -56,8 +56,8 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
             ++i
         }
         if (i * 8 == prefixSize) return true
-        val mask = 256 - (1 shl (i * 8 + 8 - prefixSize))
-        return (a[i].toInt() and mask) == (b[i].toInt() and mask)
+        val mask = 256 - (1 shl i * 8 + 8 - prefixSize)
+        return a[i].toInt() and mask == b[i].toInt() and mask
     }
 
     override fun toString(): String =

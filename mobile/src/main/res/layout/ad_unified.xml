@@ -6,7 +6,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="#FFFFFF"
         android:minHeight="40dp"
         android:orientation="vertical">
 
@@ -41,7 +40,7 @@
                         android:id="@+id/ad_headline"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="#000000"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:maxLines="1"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -55,6 +54,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="bottom"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:textSize="12sp"
                             android:textStyle="bold"/>
 
@@ -81,6 +81,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="start"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp" />
 
                 <LinearLayout
@@ -94,6 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="12dp"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:gravity="center"
                         android:textSize="12sp" />
                 </LinearLayout>

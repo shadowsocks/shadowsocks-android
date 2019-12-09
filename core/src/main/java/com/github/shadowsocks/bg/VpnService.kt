@@ -183,14 +183,18 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             if (!profile.bypass) builder.addAllowedApplication(me)
         }
 
-        when (profile.route) {
-            Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
-            else -> {
-                resources.getStringArray(R.array.bypass_private_route).forEach {
-                    val subnet = Subnet.fromString(it)!!
-                    builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
+        if (Build.VERSION.SDK_INT == 29) {
+            builder.addRoute("0.0.0.0", 0)
+        } else {
+            when (profile.route) {
+                Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
+                else -> {
+                    resources.getStringArray(R.array.bypass_private_route).forEach {
+                        val subnet = Subnet.fromString(it)!!
+                        builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
+                    }
+                    builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
                 }
-                builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
             }
         }
 
