@@ -78,6 +78,10 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         preferenceManager.preferenceDataStore = DataStore.privateStore
         val activity = requireActivity()
         profileId = activity.intent.getLongExtra(Action.EXTRA_PROFILE_ID, -1L)
+        if (profileId != -1L && profileId != DataStore.editingId) {
+            activity.finish()
+            return
+        }
         addPreferencesFromResource(R.xml.pref_profile)
         findPreference<EditTextPreference>(Key.remotePort)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
