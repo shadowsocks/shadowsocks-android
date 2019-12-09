@@ -25,10 +25,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -152,20 +150,4 @@ object Core {
     fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
     fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
     fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
-
-    fun listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
-        init {
-            app.registerReceiver(this, IntentFilter().apply {
-                addAction(Intent.ACTION_PACKAGE_ADDED)
-                addAction(Intent.ACTION_PACKAGE_REMOVED)
-                addDataScheme("package")
-            })
-        }
-
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
-            callback()
-            if (onetime) app.unregisterReceiver(this)
-        }
-    }
 }
