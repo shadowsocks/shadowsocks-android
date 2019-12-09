@@ -54,7 +54,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private var scheduleConfigUpdate = false
 
     suspend fun init(service: BaseService.Interface, hosts: HostsFile) {
-        if (profile.host == "198.199.101.152") {
+        if (profile.isSponsored) {
             scheduleConfigUpdate = true
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())

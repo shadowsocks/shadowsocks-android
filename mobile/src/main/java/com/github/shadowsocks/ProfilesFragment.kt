@@ -199,7 +199,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         fun attach() {
             isAttached = true
 
-            if (item.host == "198.199.101.152") {
+            if (item.isSponsored) {
                 val builder = AdLoader.Builder(context, "ca-app-pub-3283768469187309/8632513739")
                 builder.forUnifiedNativeAd { unifiedNativeAd ->
                     if (!isAdLoaded && isAttached) lifecycleScope.launchWhenStarted {
