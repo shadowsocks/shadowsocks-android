@@ -90,7 +90,7 @@
         <receiver android:name=".tasker.ActionListener"
                   android:process=":bg"
                   android:directBootAware="true"
-                  android:permission="com.joaomgcd.taskersettings.SET_SETTING">
+                  tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
             </intent-filter>
