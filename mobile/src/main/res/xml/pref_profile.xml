@@ -4,6 +4,7 @@
 
     <EditTextPreference
             app:key="profileName"
+            app:icon="@drawable/ic_social_emoji_symbols"
             app:title="@string/profile_name"
             app:useSimpleSummaryProvider="true"/>
 
@@ -12,16 +13,18 @@
 
         <EditTextPreference
                 app:key="proxy"
-                app:singleLine="true"
+                app:icon="@drawable/ic_hardware_router"
                 app:title="@string/proxy"
                 app:useSimpleSummaryProvider="true"/>
         <EditTextPreference
                 app:key="remotePortNum"
+                app:icon="@drawable/ic_maps_directions_boat"
                 app:title="@string/remote_port"
                 app:useSimpleSummaryProvider="true"/>
         <EditTextPreference
                 app:dialogLayout="@layout/preference_dialog_password"
                 app:key="sitekey"
+                app:icon="@drawable/ic_settings_password"
                 app:title="@string/sitekey"/>
         <com.takisoft.preferencex.SimpleMenuPreference
                 app:key="encMethod"
@@ -38,6 +41,7 @@
 
         <com.takisoft.preferencex.SimpleMenuPreference
                 app:key="route"
+                app:icon="@drawable/ic_maps_directions"
                 app:entries="@array/route_entry"
                 app:entryValues="@array/route_value"
                 app:title="@string/route_list"
@@ -82,11 +86,11 @@
                 app:key="plugin.configure"
                 app:icon="@drawable/ic_action_settings"
                 app:persistent="false"
-                app:singleLine="true"
                 app:title="@string/plugin_configure"
                 app:useSimpleSummaryProvider="true"/>
         <Preference
                 app:key="udpFallback"
+                app:icon="@drawable/ic_maps_360"
                 app:title="@string/udp_fallback"
                 app:summary="@string/plugin_disabled">
             <intent android:targetPackage="com.github.shadowsocks"

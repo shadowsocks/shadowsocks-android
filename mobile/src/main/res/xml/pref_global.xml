@@ -3,6 +3,7 @@
                   app:initialExpandedChildrenCount="4">
     <SwitchPreference
         app:key="isAutoConnect"
+        app:icon="@drawable/ic_communication_phonelink_ring"
         app:summary="@string/auto_connect_summary"
         app:title="@string/auto_connect"/>
     <SwitchPreference
@@ -17,10 +18,12 @@
         app:title="TCP Fast Open"/>
     <EditTextPreference
         app:key="hosts"
+        app:icon="@drawable/ic_maps_menu_book"
         app:title="hosts"/>
 
     <com.takisoft.preferencex.SimpleMenuPreference
         app:key="serviceMode"
+        app:icon="@drawable/ic_device_developer_mode"
         app:entries="@array/service_modes"
         app:entryValues="@array/service_mode_values"
         app:defaultValue="vpn"
@@ -28,6 +31,7 @@
         app:useSimpleSummaryProvider="true"/>
     <EditTextPreference
         app:key="portProxy"
+        app:icon="@drawable/ic_maps_directions_boat"
         app:title="@string/port_proxy"
         app:useSimpleSummaryProvider="true"/>
     <EditTextPreference
