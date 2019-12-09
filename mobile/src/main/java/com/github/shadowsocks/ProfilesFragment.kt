@@ -42,6 +42,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -62,6 +63,7 @@ import com.google.android.gms.ads.formats.NativeAdOptions
 import com.google.android.gms.ads.formats.UnifiedNativeAd
 import com.google.android.gms.ads.formats.UnifiedNativeAdView
 import net.glxn.qrgen.android.QRCode
+import net.glxn.qrgen.core.exception.QRGenerationException
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -94,7 +96,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             val image = ImageView(context)
             image.layoutParams = LinearLayout.LayoutParams(-1, -1)
             val size = resources.getDimensionPixelSize(R.dimen.qr_code_size)
-            image.setImageBitmap((QRCode.from(arguments?.getString(KEY_URL)!!).withSize(size, size) as QRCode).bitmap())
+            val qrcode = QRCode.from(arguments?.getString(KEY_URL)!!).withSize(size, size) as QRCode
+            try {
+                image.setImageBitmap(qrcode.bitmap())
+            } catch (e: QRGenerationException) {
+                Crashlytics.logException(e)
+                (activity as MainActivity).snackbar().setText(e.cause!!.readableMessage).show()
+                dismiss()
+            }
             return image
         }
     }
