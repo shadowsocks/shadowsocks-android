@@ -3,6 +3,11 @@
           package="com.github.shadowsocks.core"
           android:installLocation="internalOnly">
 
+    <permission
+        android:name="${applicationId}.SERVICE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="${applicationId}.SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>

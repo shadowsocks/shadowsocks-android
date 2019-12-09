@@ -102,7 +102,6 @@ fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = 
 
 fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return
         callback()
         if (onetime) context.unregisterReceiver(this)
     }

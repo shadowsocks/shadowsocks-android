@@ -148,6 +148,6 @@ object Core {
             else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
     fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
-    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD))
-    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE))
+    fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))
+    fun stopService() = app.sendBroadcast(Intent(Action.CLOSE).setPackage(app.packageName))
 }

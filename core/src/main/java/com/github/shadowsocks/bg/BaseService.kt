@@ -331,7 +331,7 @@ object BaseService {
                     addAction(Action.RELOAD)
                     addAction(Intent.ACTION_SHUTDOWN)
                     addAction(Action.CLOSE)
-                })
+                }, "$packageName.SERVICE", null)
                 data.closeReceiverRegistered = true
             }
 
