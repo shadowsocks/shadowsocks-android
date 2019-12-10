@@ -248,7 +248,7 @@ class AppManager : AppCompatActivity() {
         list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = appsAdapter
-        FastScrollerBuilder(list).build()
+        FastScrollerBuilder(list).useMd2Style().build()
 
         search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false
