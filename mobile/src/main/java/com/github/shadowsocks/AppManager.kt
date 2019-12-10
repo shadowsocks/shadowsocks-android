@@ -31,6 +31,9 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.GET_PERMISSIONS
+import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
+import android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.SparseBooleanArray
@@ -79,7 +82,7 @@ class AppManager : AppCompatActivity() {
             }
             // Labels and icons can change on configuration (locale, etc.) changes, therefore they are not cached.
             val cachedApps = cachedApps ?: pm.getInstalledPackages(
-                    PackageManager.GET_PERMISSIONS or PackageManager.MATCH_UNINSTALLED_PACKAGES)
+                    GET_PERMISSIONS or MATCH_UNINSTALLED_PACKAGES or MATCH_DISABLED_COMPONENTS)
                     .filter {
                         when (it.packageName) {
                             app.packageName -> false
@@ -93,7 +96,7 @@ class AppManager : AppCompatActivity() {
         }
     }
 
-    private class ProxiedApp(private val pm: PackageManager, private val appInfo: ApplicationInfo,
+    private class ProxiedApp(private val pm: PackageManager, val appInfo: ApplicationInfo,
                              val packageName: String) {
         val name: CharSequence = appInfo.loadLabel(pm)    // cached for sorting
         val icon: Drawable get() = appInfo.loadIcon(pm)
@@ -135,7 +138,11 @@ class AppManager : AppCompatActivity() {
             apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
                 ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
-            }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
+            }.sortedWith(compareBy(
+                    { !isProxiedApp(it) },
+                    { it.appInfo.flags and ApplicationInfo.FLAG_SYSTEM },
+                    { it.name.toString() }
+            ))
         }
 
         override fun onBindViewHolder(holder: AppViewHolder, position: Int) = holder.bind(filteredApps[position])
