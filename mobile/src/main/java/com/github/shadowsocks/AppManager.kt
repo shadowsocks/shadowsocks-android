@@ -173,7 +173,7 @@ class AppManager : AppCompatActivity() {
         }
         override fun getFilter(): Filter = filterImpl
 
-        override fun getPopupText(position: Int) = filteredApps[position].name.firstOrNull().toString()
+        override fun getPopupText(position: Int) = filteredApps[position].name.firstOrNull()?.toString() ?: ""
     }
 
     private val proxiedUids = SparseBooleanArray()
