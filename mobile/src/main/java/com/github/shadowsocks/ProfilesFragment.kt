@@ -26,6 +26,8 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.text.format.Formatter
 import android.util.LongSparseArray
@@ -62,10 +64,13 @@ import com.google.android.gms.ads.VideoOptions
 import com.google.android.gms.ads.formats.NativeAdOptions
 import com.google.android.gms.ads.formats.UnifiedNativeAd
 import com.google.android.gms.ads.formats.UnifiedNativeAdView
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.WriterException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.glxn.qrgen.android.QRCode
-import net.glxn.qrgen.core.exception.QRGenerationException
+import java.nio.charset.StandardCharsets
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -78,6 +83,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private const val REQUEST_IMPORT_PROFILES = 1
         private const val REQUEST_REPLACE_PROFILES = 3
         private const val REQUEST_EXPORT_PROFILES = 2
+
+        private val iso88591 = StandardCharsets.ISO_8859_1.newEncoder()
     }
 
     /**
@@ -119,19 +126,30 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             arguments = bundleOf(Pair(KEY_URL, url))
         }
 
-        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            val image = ImageView(context)
-            image.layoutParams = LinearLayout.LayoutParams(-1, -1)
-            val size = resources.getDimensionPixelSize(R.dimen.qr_code_size)
-            val qrcode = QRCode.from(arguments?.getString(KEY_URL)!!).withSize(size, size) as QRCode
-            try {
-                image.setImageBitmap(qrcode.bitmap())
-            } catch (e: QRGenerationException) {
-                Crashlytics.logException(e)
-                (activity as MainActivity).snackbar().setText(e.cause!!.readableMessage).show()
-                dismiss()
+        /**
+         * Based on:
+         * https://android.googlesource.com/platform/packages/apps/Settings/+/0d706f0/src/com/android/settings/wifi/qrcode/QrCodeGenerator.java
+         * https://android.googlesource.com/platform/packages/apps/Settings/+/8a9ccfd/src/com/android/settings/wifi/dpp/WifiDppQrCodeGeneratorFragment.java#153
+         */
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = try {
+            val url = arguments?.getString(KEY_URL)!!
+            val size = resources.getDimensionPixelSize(R.dimen.qrcode_size)
+            val hints = mutableMapOf<EncodeHintType, Any>()
+            if (!iso88591.canEncode(url)) hints[EncodeHintType.CHARACTER_SET] = StandardCharsets.UTF_8.name()
+            val qrBits = MultiFormatWriter().encode(url, BarcodeFormat.QR_CODE, size, size, hints)
+            ImageView(context).apply {
+                layoutParams = ViewGroup.LayoutParams(size, size)
+                setImageBitmap(Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565).apply {
+                    for (x in 0 until size) for (y in 0 until size) {
+                        setPixel(x, y, if (qrBits.get(x, y)) Color.BLACK else Color.WHITE)
+                    }
+                })
             }
-            return image
+        } catch (e: WriterException) {
+            Crashlytics.logException(e)
+            (activity as MainActivity).snackbar().setText(e.readableMessage).show()
+            dismiss()
+            null
         }
     }
 

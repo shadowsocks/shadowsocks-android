@@ -65,9 +65,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
     implementation 'com.google.android.gms:play-services-vision:19.0.0'
     implementation 'com.google.firebase:firebase-ads:18.3.0'
+    implementation 'com.google.zxing:core:3.4.0'
     implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.1.0'
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.4'
-    implementation 'net.glxn.qrgen:android:2.0'
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
