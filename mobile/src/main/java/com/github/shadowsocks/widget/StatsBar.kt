@@ -36,6 +36,8 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
@@ -75,11 +77,14 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     fun changeState(state: BaseService.State) {
         val activity = context as MainActivity
+        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launchWhenStarted {
+            withContext(Dispatchers.Main) { what() }
+        }
         if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
-            activity.lifecycleScope.launchWhenStarted { performShow() }
+            postWhenStarted { performShow() }
             tester.status.observe(activity) { it.retrieve(this::setStatus) { msg -> activity.snackbar(msg).show() } }
         } else {
-            activity.lifecycleScope.launchWhenStarted { performHide() }
+            postWhenStarted { performHide() }
             updateTraffic(0, 0, 0, 0)
             tester.status.removeObservers(activity)
             if (state != BaseService.State.Idle) tester.invalidate()

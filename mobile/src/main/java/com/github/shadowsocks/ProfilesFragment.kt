@@ -43,6 +43,7 @@ import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.*
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -56,6 +57,7 @@ import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import net.glxn.qrgen.android.QRCode
+import net.glxn.qrgen.core.exception.QRGenerationException
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
@@ -87,7 +89,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             val image = ImageView(context)
             image.layoutParams = LinearLayout.LayoutParams(-1, -1)
             val size = resources.getDimensionPixelSize(R.dimen.qr_code_size)
-            image.setImageBitmap((QRCode.from(arguments?.getString(KEY_URL)!!).withSize(size, size) as QRCode).bitmap())
+            val qrcode = QRCode.from(arguments?.getString(KEY_URL)!!).withSize(size, size) as QRCode
+            try {
+                image.setImageBitmap(qrcode.bitmap())
+            } catch (e: QRGenerationException) {
+                Crashlytics.logException(e)
+                (activity as MainActivity).snackbar().setText(e.cause!!.readableMessage).show()
+                dismiss()
+            }
             return image
         }
     }
@@ -259,6 +268,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private var selectedItem: ProfileViewHolder? = null
 
     val profilesAdapter by lazy { ProfilesAdapter() }
+    private lateinit var profilesList: RecyclerView
+    private val layoutManager by lazy { LinearLayoutManager(context, RecyclerView.VERTICAL, false) }
     private lateinit var undoManager: UndoSnackbarManager<Profile>
     private val statsCache = LongSparseArray<TrafficStats>()
 
@@ -278,12 +289,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         toolbar.setTitle(R.string.profiles)
         toolbar.inflateMenu(R.menu.profile_manager_menu)
         toolbar.setOnMenuItemClickListener(this)
-
-
         ProfileManager.ensureNotEmpty()
-        val profilesList = view.findViewById<RecyclerView>(R.id.list)
+        profilesList = view.findViewById(R.id.list)
         profilesList.setOnApplyWindowInsetsListener(MainListListener)
-        val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         profilesList.layoutManager = layoutManager
         profilesList.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
         layoutManager.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.profileId })

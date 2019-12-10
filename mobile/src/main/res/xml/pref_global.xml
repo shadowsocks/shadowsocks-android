@@ -2,6 +2,7 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     app:initialExpandedChildrenCount="7">
     <SwitchPreference
+        app:icon="@drawable/ic_communication_phonelink_ring"
         app:key="isAutoConnect"
         app:summary="@string/auto_connect_summary"
         app:title="@string/auto_connect" />
@@ -16,6 +17,7 @@
         app:summary="@string/tcp_fastopen_summary"
         app:title="TCP Fast Open" />
     <EditTextPreference
+        app:icon="@drawable/ic_maps_menu_book"
         app:key="hosts"
         app:title="hosts" />
     <EditTextPreference
@@ -36,10 +38,12 @@
         app:defaultValue="vpn"
         app:entries="@array/service_modes"
         app:entryValues="@array/service_mode_values"
+        app:icon="@drawable/ic_device_developer_mode"
         app:key="serviceMode"
         app:title="@string/service_mode"
         app:useSimpleSummaryProvider="true" />
     <EditTextPreference
+        app:icon="@drawable/ic_maps_directions_boat"
         app:key="portProxy"
         app:title="@string/port_proxy"
         app:useSimpleSummaryProvider="true" />

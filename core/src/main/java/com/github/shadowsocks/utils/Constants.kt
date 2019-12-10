@@ -93,6 +93,4 @@ object Action {
     val RELOAD = app.packageName + ".RELOAD"
 
     val EXTRA_PROFILE_ID = app.packageName + "EXTRA_PROFILE_ID"
-
-    val SERVICE_PERMISSION = app.packageName + ".SERVICE"
 }

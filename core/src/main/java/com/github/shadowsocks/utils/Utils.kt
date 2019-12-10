@@ -21,10 +21,7 @@
 package com.github.shadowsocks.utils
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageInfo
 import android.content.res.Resources
 import android.graphics.BitmapFactory
@@ -101,6 +98,19 @@ fun parsePort(str: String?, default: Int, min: Int = 1025): Int {
 
 fun broadcastReceiver(callback: (Context, Intent) -> Unit): BroadcastReceiver = object : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) = callback(context, intent)
+}
+
+fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Unit) = object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        callback()
+        if (onetime) context.unregisterReceiver(this)
+    }
+}.apply {
+    registerReceiver(this, IntentFilter().apply {
+        addAction(Intent.ACTION_PACKAGE_ADDED)
+        addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED)
+        addDataScheme("package")
+    })
 }
 
 fun ContentResolver.openBitmap(uri: Uri) =

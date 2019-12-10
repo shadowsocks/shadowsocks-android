@@ -43,6 +43,7 @@ import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.util.set
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,6 +53,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.SingleInstanceActivity
+import com.github.shadowsocks.utils.listenForPackageChanges
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.ListListener
 import com.google.android.material.snackbar.Snackbar
@@ -69,7 +71,7 @@ class AppManager : AppCompatActivity() {
         private var receiver: BroadcastReceiver? = null
         private var cachedApps: Map<String, PackageInfo>? = null
         private fun getCachedApps(pm: PackageManager) = synchronized(AppManager) {
-            if (receiver == null) receiver = Core.listenForPackageChanges {
+            if (receiver == null) receiver = app.listenForPackageChanges {
                 synchronized(AppManager) {
                     receiver = null
                     cachedApps = null
@@ -209,7 +211,7 @@ class AppManager : AppCompatActivity() {
     @UiThread
     private fun loadApps() {
         loader?.cancel()
-        loader = GlobalScope.launch(Dispatchers.Main.immediate) {
+        loader = lifecycleScope.launchWhenCreated {
             loading.crossFadeFrom(list)
             val adapter = list.adapter as AppsAdapter
             withContext(Dispatchers.IO) { adapter.reload() }

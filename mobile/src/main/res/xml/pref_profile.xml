@@ -8,6 +8,7 @@
         app:useSimpleSummaryProvider="true" />
 
     <EditTextPreference
+        app:icon="@drawable/ic_social_emoji_symbols"
         app:key="profileName"
         app:title="@string/profile_name"
         app:useSimpleSummaryProvider="true" />
@@ -15,16 +16,18 @@
     <PreferenceCategory app:title="@string/proxy_cat">
 
         <EditTextPreference
+            app:icon="@drawable/ic_hardware_router"
             app:key="proxy"
-            app:singleLine="true"
             app:title="@string/proxy"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
+            app:icon="@drawable/ic_maps_directions_boat"
             app:key="remotePortNum"
             app:title="@string/remote_port"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:dialogLayout="@layout/preference_dialog_password"
+            app:icon="@drawable/ic_settings_password"
             app:key="sitekey"
             app:title="@string/sitekey" />
         <com.takisoft.preferencex.SimpleMenuPreference
@@ -68,6 +71,7 @@
         <com.takisoft.preferencex.SimpleMenuPreference
             app:entries="@array/route_entry"
             app:entryValues="@array/route_value"
+            app:icon="@drawable/ic_maps_directions"
             app:key="route"
             app:title="@string/route_list"
             app:useSimpleSummaryProvider="true" />
@@ -102,6 +106,7 @@
     <PreferenceCategory app:title="@string/plugin">
 
         <Preference
+            app:icon="@drawable/ic_maps_360"
             app:key="udpFallback"
             app:summary="@string/plugin_disabled"
             app:title="@string/udp_fallback">
