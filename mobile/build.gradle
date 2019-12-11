@@ -27,6 +27,7 @@ android {
         debug {
             applicationIdSuffix = '.debug'
             versionNameSuffix = '-debug'
+            resValue 'string', 'applicationId', defaultConfig.applicationId + applicationIdSuffix
         }
     }
     compileOptions {
