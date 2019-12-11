@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditTextPreference
+        android:icon="@drawable/ic_baseline_group_work"
         app:key="groupName"
         app:title="@string/group_name"
         app:useSimpleSummaryProvider="true" />
@@ -47,6 +48,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
+            app:icon="@drawable/ic_baseline_format_align_left"
             app:key="ssrProtocolParam"
             app:title="@string/ssr_protocol_param"
             app:useSimpleSummaryProvider="true" />
@@ -60,6 +62,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
+            app:icon="@drawable/ic_baseline_format_align_left"
             app:key="ssrObfsParam"
             app:title="@string/ssr_obfs_param"
             app:useSimpleSummaryProvider="true" />

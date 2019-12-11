@@ -27,9 +27,11 @@
         app:useSimpleSummaryProvider="true" />
 
     <Preference
+        app:icon="@drawable/ic_baseline_rss_feed"
         app:key="ssrSub"
         app:title="@string/ssrsub_manage" />
     <SwitchPreference
+        app:icon="@drawable/ic_baseline_autorenew"
         app:key="ssrsub_autoupdate"
         app:summary="@string/ssrsub_autoupdate_summary"
         app:title="@string/ssrsub_autoupdate" />
