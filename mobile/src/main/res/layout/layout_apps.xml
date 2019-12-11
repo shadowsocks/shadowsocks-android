@@ -96,11 +96,6 @@
             android:id="@+id/list"
             android:clipToPadding="false"
             android:visibility="gone"
-            app:fastScrollEnabled="true"
-            app:fastScrollHorizontalThumbDrawable="@drawable/fastscroll_thumb"
-            app:fastScrollHorizontalTrackDrawable="@drawable/transparent"
-            app:fastScrollVerticalThumbDrawable="@drawable/fastscroll_thumb"
-            app:fastScrollVerticalTrackDrawable="@drawable/transparent"
             tools:listitem="@layout/layout_apps_item"
             tools:visibility="visible"/>
   </androidx.coordinatorlayout.widget.CoordinatorLayout>

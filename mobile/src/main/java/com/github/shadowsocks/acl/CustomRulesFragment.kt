@@ -56,6 +56,7 @@ import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.parcel.Parcelize
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import java.net.IDN
 import java.net.MalformedURLException
 import java.net.URL
@@ -396,6 +397,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
+        FastScrollerBuilder(list).useMd2Style().build()
         undoManager = UndoSnackbarManager(activity, adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =

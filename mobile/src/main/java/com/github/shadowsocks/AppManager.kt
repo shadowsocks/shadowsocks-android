@@ -59,6 +59,8 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.layout_apps.*
 import kotlinx.android.synthetic.main.layout_apps_item.view.*
 import kotlinx.coroutines.*
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
+import me.zhanghai.android.fastscroll.PopupTextProvider
 import kotlin.coroutines.coroutineContext
 
 class AppManager : AppCompatActivity() {
@@ -128,7 +130,7 @@ class AppManager : AppCompatActivity() {
         }
     }
 
-    private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>(), Filterable {
+    private inner class AppsAdapter : RecyclerView.Adapter<AppViewHolder>(), Filterable, PopupTextProvider {
         private var filteredApps = apps
 
         suspend fun reload() {
@@ -170,6 +172,8 @@ class AppManager : AppCompatActivity() {
             }
         }
         override fun getFilter(): Filter = filterImpl
+
+        override fun getPopupText(position: Int) = filteredApps[position].name.firstOrNull()?.toString() ?: ""
     }
 
     private val proxiedUids = SparseBooleanArray()
@@ -244,6 +248,7 @@ class AppManager : AppCompatActivity() {
         list.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = appsAdapter
+        FastScrollerBuilder(list).useMd2Style().build()
 
         search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?) = false
