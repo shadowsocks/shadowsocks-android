@@ -17,13 +17,10 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url 'https://storage.googleapis.com/r8-releases/raw'}
     }
 
     dependencies {
-        classpath 'com.android.tools:r8:2.0.5-dev'
-        classpath 'com.android.tools.build:gradle:4.0.0-alpha05'
+        classpath 'com.android.tools.build:gradle:4.0.0-alpha06'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
@@ -32,7 +29,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     }
 }
 
