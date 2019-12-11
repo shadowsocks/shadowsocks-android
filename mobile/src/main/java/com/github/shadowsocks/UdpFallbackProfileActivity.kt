@@ -34,14 +34,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.utils.resolveResourceId
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.ListListener
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.layout_udp_fallback.*
 
 class UdpFallbackProfileActivity : AppCompatActivity() {
     inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         private var item: Profile? = null
+        private var pos: Int = 0
         private val text = itemView.findViewById<CheckedTextView>(android.R.id.text1)
 
         init {
@@ -49,34 +53,41 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
             itemView.setOnClickListener(this)
         }
 
-        fun bind(item: Profile?) {
+        fun bind(item: Profile?, position: Int) {
             this.item = item
+            this.pos = position
             if (item == null) text.setText(R.string.plugin_disabled) else text.text = item.formattedName
             text.isChecked = udpFallback == item?.id
+            if (text.isChecked) selected = position
         }
 
         override fun onClick(v: View?) {
             DataStore.udpFallback = item?.id
             DataStore.dirty = true
-            finish()
+            udpFallback = item?.id
+            profilesAdapter.notifyItemChanged(pos)
+            profilesAdapter.notifyItemChanged(selected)
         }
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        internal val profiles = (ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf())
-                .filter { it.id != editingId }
+        internal val profiles = (ProfileManager.getAllProfiles()?.toMutableList()
+                ?: mutableListOf()).filter { it.id != editingId }
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
-                holder.bind(if (position == 0) null else profiles[position - 1])
+                holder.bind(if (position == 0) null else profiles[position - 1], position)
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
                 LayoutInflater.from(parent.context).inflate(Resources.getSystem()
                         .getIdentifier("select_dialog_singlechoice_material", "layout", "android"), parent, false))
+
         override fun getItemCount(): Int = 1 + profiles.size
     }
 
     private var editingId = DataStore.editingId
     private var udpFallback = DataStore.udpFallback
     private val profilesAdapter = ProfilesAdapter()
+    private var selected = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +103,22 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
         toolbar.setTitle(R.string.udp_fallback)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
         toolbar.setNavigationOnClickListener { finish() }
+        toolbar.inflateMenu(R.menu.udp_fallback_menu)
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.action_apply_all) {
+                val profiles = ProfileManager.getAllProfiles()
+                if (!profiles.isNullOrEmpty()) {
+                    profiles.forEach {
+                        if (it.id == DataStore.udpFallback) return@forEach
+                        it.udpFallback = DataStore.udpFallback
+                        ProfileManager.updateProfile(it)
+                    }
+                    if (DataStore.directBootAware) DirectBoot.update()
+                    Snackbar.make(list, R.string.action_apply_all, Snackbar.LENGTH_LONG).show()
+                }
+                true
+            } else false
+        }
 
         findViewById<RecyclerView>(R.id.list).apply {
             setOnApplyWindowInsetsListener(ListListener)

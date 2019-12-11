@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_apply_all"
+        android:alphabeticShortcut="a"
+        android:title="@string/action_apply_all"
+        app:alphabeticModifiers="CTRL|SHIFT"
+        app:showAsAction="never" />
+</menu>
