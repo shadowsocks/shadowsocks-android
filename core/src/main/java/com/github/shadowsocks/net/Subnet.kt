@@ -27,8 +27,7 @@ import java.util.*
 class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet> {
     companion object {
         fun fromString(value: String): Subnet? {
-            @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-            val parts = (value as java.lang.String).split("/", 2)
+            val parts = value.split('/', limit = 2)
             val addr = parts[0].parseNumericAddress() ?: return null
             return if (parts.size == 2) try {
                 val prefixSize = parts[1].toInt()

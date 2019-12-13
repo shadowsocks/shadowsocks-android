@@ -117,8 +117,7 @@ class Acl {
         var subnets: SortedList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
         reader.useLines {
             for (line in it) {
-                @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-                val blocks = (line as java.lang.String).split("#", 2)
+                val blocks = line.split('#', limit = 2)
                 val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
                 if (url != null) urls.add(URL(url))
                 when (val input = blocks[0].trim()) {
