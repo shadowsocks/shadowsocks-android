@@ -39,6 +39,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.Inet6Address
 import java.net.URL
 import java.net.UnknownHostException
 import java.security.MessageDigest
@@ -95,7 +96,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
-            profile.host = (hosts.resolve(profile.host).firstOrNull() ?: try {
+            // if fails/null, use IPv4 only, otherwise pick a random IPv4/IPv6 address
+            val hasIpv6 = service.getActiveNetwork()?.let { Core.connectivity.getLinkProperties(it) }?.linkAddresses
+                    ?.any { it.address is Inet6Address } == true
+            profile.host = (hosts.resolve(profile.host, if (hasIpv6) null else false).firstOrNull() ?: try {
                 service.resolver(profile.host).firstOrNull()
             } catch (_: IOException) {
                 null

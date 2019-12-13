@@ -129,7 +129,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     else -> return@supervisorScope remote.await()
                 }
                 val host = question.name.toString(true)
-                val hostsResults = hosts.resolve(host)
+                val hostsResults = hosts.resolve(host, isIpv6)
                 if (hostsResults.isNotEmpty()) {
                     remote.cancel()
                     return@supervisorScope cookDnsResponse(request, hostsResults)
