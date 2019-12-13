@@ -98,8 +98,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (profile.host.parseNumericAddress() == null) {
             // if fails/null, use IPv4 only, otherwise pick a random IPv4/IPv6 address
             val hasIpv6 = service.getActiveNetwork()?.let { Core.connectivity.getLinkProperties(it) }?.linkAddresses
-                    ?.any { it.address is Inet6Address } == true
-            profile.host = (hosts.resolve(profile.host, if (hasIpv6) null else false).firstOrNull() ?: try {
+                    ?.any { it.address.run { this is Inet6Address && !isLinkLocalAddress && !isIPv4CompatibleAddress } }
+            profile.host = (hosts.resolve(profile.host, if (hasIpv6 == true) null else false).firstOrNull() ?: try {
                 service.resolver(profile.host).firstOrNull()
             } catch (_: IOException) {
                 null
