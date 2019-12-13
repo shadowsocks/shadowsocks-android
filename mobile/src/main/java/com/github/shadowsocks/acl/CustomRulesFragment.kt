@@ -381,7 +381,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         view.setOnApplyWindowInsetsListener(ListHolderListener)
         if (savedInstanceState != null) {
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
-                    ?.mapNotNull(Subnet.Companion::fromString) ?: listOf())
+                    ?.mapNotNull { Subnet.fromString(it) } ?: listOf())
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_HOSTNAMES)
                     ?: arrayOf())
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }

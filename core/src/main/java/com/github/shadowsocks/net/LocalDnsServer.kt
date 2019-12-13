@@ -55,7 +55,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
      */
     var tcp = true
     var remoteDomainMatcher: Regex? = null
-    var localIpMatcher: List<Subnet> = emptyList()
+    var localIpv4Matcher: List<Subnet> = emptyList()
+    var localIpv6Matcher: List<Subnet> = emptyList()
 
     companion object {
         private const val TAG = "LocalDnsServer"
@@ -122,7 +123,11 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             try {
                 if (request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
                 val question = request.question
-                if (question?.type != Type.A) return@supervisorScope remote.await()
+                val isIpv6 = when (question?.type) {
+                    Type.A -> false
+                    Type.AAAA -> true
+                    else -> return@supervisorScope remote.await()
+                }
                 val host = question.name.toString(true)
                 val hostsResults = hosts.resolve(host)
                 if (hostsResults.isNotEmpty()) {
@@ -140,7 +145,8 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     return@supervisorScope remote.await()
                 }
                 if (localResults.isEmpty()) return@supervisorScope remote.await()
-                if (localIpMatcher.isEmpty() || localIpMatcher.any { subnet -> localResults.any(subnet::matches) }) {
+                val matcher = if (isIpv6) localIpv6Matcher else localIpv4Matcher
+                if (matcher.isEmpty() || matcher.any { subnet -> localResults.any(subnet::matches) }) {
                     remote.cancel()
                     cookDnsResponse(request, localResults.asIterable())
                 } else remote.await()

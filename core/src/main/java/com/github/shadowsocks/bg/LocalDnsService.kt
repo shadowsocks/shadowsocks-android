@@ -37,9 +37,15 @@ import java.util.*
 object LocalDnsService {
     private val googleApisTester =
             "(^|\\.)googleapis(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}\$".toRegex()
-    private val chinaIpList by lazy {
-        app.resources.openRawResource(R.raw.china_ip_list).bufferedReader()
-                .lineSequence().map(Subnet.Companion::fromString).filterNotNull().toList()
+    private val chinaIpv4List by lazy {
+        app.resources.openRawResource(R.raw.zone_cn).bufferedReader().lineSequence().map {
+            Subnet.fromString(it, 4)
+        }.filterNotNull().toList()
+    }
+    private val chinaIpv6List by lazy {
+        app.resources.openRawResource(R.raw.zone_cn_ipv6).bufferedReader().lineSequence().map {
+            Subnet.fromString(it, 16)
+        }.filterNotNull().toList()
     }
 
     private val servers = WeakHashMap<Interface, LocalDnsServer>()
@@ -61,7 +67,8 @@ object LocalDnsService {
                 when (profile.route) {
                     Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
                         remoteDomainMatcher = googleApisTester
-                        localIpMatcher = chinaIpList
+                        localIpv4Matcher = chinaIpv4List
+                        localIpv6Matcher = chinaIpv6List
                     }
                     Acl.CHINALIST -> { }
                     else -> forwardOnly = true
