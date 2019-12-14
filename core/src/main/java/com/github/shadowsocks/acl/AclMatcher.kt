@@ -33,8 +33,8 @@ class AclMatcher(acl: Acl) {
     private val proxyDomains = acl.proxyHostnames.asIterable().map { it.toRegex() }
     private val bypass = acl.bypass
 
-    fun shouldBypassIpv4(ip: ByteArray) = bypass xor subnetsIpv4.any { (subnet, subnetIp) -> subnet.matches(subnetIp, ip) }
-    fun shouldBypassIpv6(ip: ByteArray) = bypass xor subnetsIpv6.any { (subnet, subnetIp) -> subnet.matches(subnetIp, ip) }
+    fun shouldBypassIpv4(ip: ByteArray) = bypass xor subnetsIpv4.any { (subnet, sip) -> subnet.matches(sip, ip) }
+    fun shouldBypassIpv6(ip: ByteArray) = bypass xor subnetsIpv6.any { (subnet, sip) -> subnet.matches(sip, ip) }
     fun shouldBypass(host: String): Boolean? {
         if (bypassDomains.any { it.matches(host) }) return true
         if (proxyDomains.any { it.matches(host) }) return false
