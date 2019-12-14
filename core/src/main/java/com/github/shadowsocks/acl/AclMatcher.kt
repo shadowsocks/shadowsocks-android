@@ -20,26 +20,31 @@
 
 package com.github.shadowsocks.acl
 
+import android.util.Log
 import com.github.shadowsocks.net.Subnet
 import java.net.Inet4Address
 import java.net.Inet6Address
+import kotlin.system.measureNanoTime
 
-class AclMatcher(id: String) {
-    private val subnetsIpv4: List<Subnet.Immutable>
-    private val subnetsIpv6: List<Subnet.Immutable>
+class AclMatcher {
+    private var subnetsIpv4 = emptyList<Subnet.Immutable>()
+    private var subnetsIpv6 = emptyList<Subnet.Immutable>()
     private val bypassDomains = mutableListOf<Regex>()
     private val proxyDomains = mutableListOf<Regex>()
-    private val bypass: Boolean
+    private var bypass = false
 
-    init {
-        val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), {
-//            bypassDomains.add(it.toRegex())
-        }, {
-            if (it.startsWith("(?:^|\\.)googleapis")) proxyDomains.add(it.toRegex())
-        })
-        subnetsIpv4 = subnets.filter { it.address is Inet4Address }.map { it.toImmutable() }
-        subnetsIpv6 = subnets.filter { it.address is Inet6Address }.map { it.toImmutable() }
-        this.bypass = bypass
+    suspend fun init(id: String) {
+        val time = measureNanoTime {
+            val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), {
+                // bypassDomains.add(it.toRegex())
+            }, {
+                if (it.startsWith("(?:^|\\.)googleapis")) proxyDomains.add(it.toRegex())
+            })
+            subnetsIpv4 = subnets.filter { it.address is Inet4Address }.map { it.toImmutable() }
+            subnetsIpv6 = subnets.filter { it.address is Inet6Address }.map { it.toImmutable() }
+            this.bypass = bypass
+        }
+        Log.d("AclMatcher", "ACL initialized in $time ns")
     }
 
     fun shouldBypassIpv4(ip: ByteArray) = bypass xor subnetsIpv4.any { it.matches(ip) }

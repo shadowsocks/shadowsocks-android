@@ -51,7 +51,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                       * Forward UDP queries to TCP.
                       */
                      private val tcp: Boolean = false,
-                     private val acl: AclMatcher? = null) : CoroutineScope {
+                     private val aclSpawn: suspend () -> AclMatcher? = { null }) : CoroutineScope {
     companion object {
         private const val TAG = "LocalDnsServer"
         private const val TIMEOUT = 10_000L
@@ -84,6 +84,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     override val coroutineContext = SupervisorJob() + CoroutineExceptionHandler { _, t ->
         if (t is IOException) Crashlytics.log(Log.WARN, TAG, t.message) else printLog(t)
     }
+    private val acl = async { aclSpawn() }
 
     suspend fun start(listen: SocketAddress) = DatagramChannel.open().run {
         configureBlocking(false)
@@ -128,7 +129,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     remote.cancel()
                     return@supervisorScope cookDnsResponse(request, hostsResults)
                 }
-                if (acl == null) return@supervisorScope remote.await()
+                val acl = acl.await() ?: return@supervisorScope remote.await()
                 val useLocal = when (acl.shouldBypass(host)) {
                     true -> true.also { remote.cancel() }
                     false -> return@supervisorScope remote.await()

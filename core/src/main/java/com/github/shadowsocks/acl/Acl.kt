@@ -28,11 +28,15 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.asIterable
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 import java.io.Reader
 import java.net.URL
 import java.net.URLConnection
+import kotlin.coroutines.coroutineContext
 
 class Acl {
     companion object {
@@ -65,8 +69,8 @@ class Acl {
                             value.proxyHostnames.size() == 0 && value.urls.size() == 0) null else value.toString())
         fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
 
-        fun <T> parse(reader: Reader, bypassHostnames: (String) -> T, proxyHostnames: (String) -> T,
-                      urls: ((URL) -> T)? = null, defaultBypass: Boolean = false): Pair<Boolean, List<Subnet>> {
+        suspend fun <T> parse(reader: Reader, bypassHostnames: (String) -> T, proxyHostnames: (String) -> T,
+                              urls: ((URL) -> T)? = null, defaultBypass: Boolean = false): Pair<Boolean, List<Subnet>> {
             var bypass = defaultBypass
             val bypassSubnets = mutableListOf<Subnet>()
             val proxySubnets = mutableListOf<Subnet>()
@@ -74,6 +78,7 @@ class Acl {
             var subnets: MutableList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
             reader.useLines {
                 for (line in it) {
+                    coroutineContext[Job]!!.ensureActive()
                     val input = (if (urls == null) line else {
                         val blocks = line.split('#', limit = 2)
                         val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
@@ -150,7 +155,9 @@ class Acl {
         proxyHostnames.clear()
         subnets.clear()
         urls.clear()
-        val (bypass, subnets) = parse(reader, bypassHostnames::add, proxyHostnames::add, urls::add, defaultBypass)
+        val (bypass, subnets) = runBlocking {
+            parse(reader, bypassHostnames::add, proxyHostnames::add, urls::add, defaultBypass)
+        }
         this.bypass = bypass
         for (item in subnets) this.subnets.add(item)
         return this

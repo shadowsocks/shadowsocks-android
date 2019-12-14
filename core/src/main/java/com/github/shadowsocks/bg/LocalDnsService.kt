@@ -48,8 +48,9 @@ object LocalDnsService {
                     Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
                     DataStore.proxyAddress,
                     hosts,
-                    !profile.udpdns,
-                    if (profile.route == Acl.ALL) null else AclMatcher(profile.route)).also {
+                    !profile.udpdns) {
+                if (profile.route == Acl.ALL) null else AclMatcher().apply { init(profile.route) }
+            }.also {
                 servers[this] = it
             }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
         }
