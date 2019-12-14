@@ -25,14 +25,16 @@ import java.net.Inet4Address
 import java.net.Inet6Address
 
 class AclMatcher(acl: Acl) {
-    private val subnetsIpv4 = acl.subnets.asIterable().filter { it.address is Inet4Address }
-    private val subnetsIpv6 = acl.subnets.asIterable().filter { it.address is Inet6Address }
+    private val subnetsIpv4 =
+            acl.subnets.asIterable().filter { it.address is Inet4Address }.map { it to it.address.address }
+    private val subnetsIpv6 =
+            acl.subnets.asIterable().filter { it.address is Inet6Address }.map { it to it.address.address }
     private val bypassDomains = acl.bypassHostnames.asIterable().map { it.toRegex() }
     private val proxyDomains = acl.proxyHostnames.asIterable().map { it.toRegex() }
     private val bypass = acl.bypass
 
-    fun shouldBypass(ip: Inet4Address) = bypass xor subnetsIpv4.any { it.matches(ip) }
-    fun shouldBypass(ip: Inet6Address) = bypass xor subnetsIpv6.any { it.matches(ip) }
+    fun shouldBypassIpv4(ip: ByteArray) = bypass xor subnetsIpv4.any { (subnet, subnetIp) -> subnet.matches(subnetIp, ip) }
+    fun shouldBypassIpv6(ip: ByteArray) = bypass xor subnetsIpv6.any { (subnet, subnetIp) -> subnet.matches(subnetIp, ip) }
     fun shouldBypass(host: String): Boolean? {
         if (bypassDomains.any { it.matches(host) }) return true
         if (proxyDomains.any { it.matches(host) }) return false

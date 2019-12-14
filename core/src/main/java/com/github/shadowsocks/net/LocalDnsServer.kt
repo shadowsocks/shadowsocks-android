@@ -145,14 +145,14 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 if (isIpv6) {
                     val filtered = localResults.filterIsInstance<Inet6Address>()
                     if (useLocal) return@supervisorScope cookDnsResponse(request, filtered)
-                    if (filtered.any { acl.shouldBypass(it) }) {
+                    if (filtered.any { acl.shouldBypassIpv6(it.address) }) {
                         remote.cancel()
                         cookDnsResponse(request, filtered)
                     } else remote.await()
                 } else {
                     val filtered = localResults.filterIsInstance<Inet4Address>()
                     if (useLocal) return@supervisorScope cookDnsResponse(request, filtered)
-                    if (filtered.any { acl.shouldBypass(it) }) {
+                    if (filtered.any { acl.shouldBypassIpv4(it.address) }) {
                         remote.cancel()
                         cookDnsResponse(request, filtered)
                     } else remote.await()

@@ -45,11 +45,12 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
         require(prefixSize in 0..addressLength) { "prefixSize $prefixSize not in 0..$addressLength" }
     }
 
-    fun matches(other: InetAddress): Boolean {
-        if (address.javaClass != other.javaClass) return false
-        // TODO optimize?
-        val a = address.address
-        val b = other.address
+    /**
+     * Optimized version of matches.
+     * a corresponds to this address and b is the address in question.
+     */
+    fun matches(a: ByteArray, b: ByteArray): Boolean {
+        if (a.size != b.size) return false
         var i = 0
         while (i * 8 < prefixSize && i * 8 + 8 <= prefixSize) {
             if (a[i] != b[i]) return false
