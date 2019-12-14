@@ -21,39 +21,29 @@
 package com.github.shadowsocks.acl
 
 import com.github.shadowsocks.net.Subnet
-import com.google.re2j.Pattern
 import java.net.Inet4Address
 import java.net.Inet6Address
 
 class AclMatcher(id: String) {
     private val subnetsIpv4: List<Subnet.Immutable>
     private val subnetsIpv6: List<Subnet.Immutable>
-    private val bypassDomains: Pattern?
-    private val proxyDomains: Pattern?
+    private val bypassDomains = mutableListOf<Regex>()
+    private val proxyDomains = mutableListOf<Regex>()
     private val bypass: Boolean
 
     init {
-        val bypassBuilder = StringBuilder()
-        val proxyBuilder = StringBuilder()
-        val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), {
-            if (bypassBuilder.isNotEmpty()) bypassBuilder.append('|')
-            bypassBuilder.append(it)
-        }, {
-            if (proxyBuilder.isNotEmpty()) proxyBuilder.append('|')
-            proxyBuilder.append(it)
-        })
+        val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), { bypassDomains.add(it.toRegex()) },
+                { proxyDomains.add(it.toRegex()) })
         subnetsIpv4 = subnets.filter { it.address is Inet4Address }.map { it.toImmutable() }
         subnetsIpv6 = subnets.filter { it.address is Inet6Address }.map { it.toImmutable() }
-        bypassDomains = if (bypassBuilder.isEmpty()) null else Pattern.compile(bypassBuilder.toString())
-        proxyDomains = if (proxyBuilder.isEmpty()) null else Pattern.compile(proxyBuilder.toString())
         this.bypass = bypass
     }
 
     fun shouldBypassIpv4(ip: ByteArray) = bypass xor subnetsIpv4.any { it.matches(ip) }
     fun shouldBypassIpv6(ip: ByteArray) = bypass xor subnetsIpv6.any { it.matches(ip) }
     fun shouldBypass(host: String): Boolean? {
-        if (bypassDomains?.matches(host) == true) return true
-        if (proxyDomains?.matches(host) == false) return false
+        if (bypassDomains.any { it.matches(host) }) return true
+        if (proxyDomains.any { it.matches(host) }) return false
         return null
     }
 }
