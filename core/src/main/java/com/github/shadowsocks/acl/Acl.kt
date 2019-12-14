@@ -74,10 +74,13 @@ class Acl {
             var subnets: MutableList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
             reader.useLines {
                 for (line in it) {
-                    val blocks = line.split('#', limit = 2)
-                    val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
-                    if (url != null) urls!!(URL(url))
-                    when (val input = blocks[0].trim()) {
+                    val input = (if (urls == null) line else {
+                        val blocks = line.split('#', limit = 2)
+                        val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
+                        if (url != null) urls(URL(url))
+                        blocks[0]
+                    }).trim()
+                    if (input.getOrNull(0) == '[') when (input) {
                         "[outbound_block_list]" -> {
                             hostnames = null
                             subnets = null
@@ -92,10 +95,10 @@ class Acl {
                         }
                         "[reject_all]", "[bypass_all]" -> bypass = true
                         "[accept_all]", "[proxy_all]" -> bypass = false
-                        else -> if (subnets != null && input.isNotEmpty()) {
-                            val subnet = Subnet.fromString(input)
-                            if (subnet == null) hostnames!!(input) else subnets!!.add(subnet)
-                        }
+                        else -> error("Unrecognized block: $input")
+                    } else if (subnets != null && input.isNotEmpty()) {
+                        val subnet = Subnet.fromString(input)
+                        if (subnet == null) hostnames!!(input) else subnets!!.add(subnet)
                     }
                 }
             }

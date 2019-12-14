@@ -23,7 +23,6 @@ package com.github.shadowsocks.bg
 import android.app.Service
 import android.content.Intent
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
 import java.io.File
