@@ -86,14 +86,6 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             profile.method = proxy[3].trim()
         }
 
-        if (route == Acl.CUSTOM_RULES) try {
-            withContext(Dispatchers.IO) {
-                Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
-            }
-        } catch (e: IOException) {
-            throw BaseService.ExpectedExceptionWrapper(e)
-        }
-
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
             // if fails/null, use IPv4 only, otherwise pick a random IPv4/IPv6 address
