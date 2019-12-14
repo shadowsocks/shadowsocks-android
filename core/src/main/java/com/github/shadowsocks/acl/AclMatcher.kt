@@ -34,16 +34,24 @@ class AclMatcher {
     private var bypass = false
 
     suspend fun init(id: String) {
+        fun Sequence<Subnet>.dedup() = sequence {
+            val iterator = map { it.toImmutable() }.sortedWith(Subnet.Immutable).iterator()
+            var current: Subnet.Immutable? = null
+            while (iterator.hasNext()) {
+                val next = iterator.next()
+                if (current?.matches(next) == true) continue
+                yield(next)
+                current = next
+            }
+        }.toList()
         val time = measureNanoTime {
             val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), {
                 // bypassDomains.add(it.toRegex())
             }, {
                 if (it.startsWith("(?:^|\\.)googleapis")) proxyDomains.add(it.toRegex())
             })
-            subnetsIpv4 = subnets.asSequence().filter { it.address is Inet4Address }.map { it.toImmutable() }
-                    .sortedWith(Subnet.Immutable).toList()
-            subnetsIpv6 = subnets.asSequence().filter { it.address is Inet6Address }.map { it.toImmutable() }
-                    .sortedWith(Subnet.Immutable).toList()
+            subnetsIpv4 = subnets.asSequence().filter { it.address is Inet4Address }.dedup()
+            subnetsIpv6 = subnets.asSequence().filter { it.address is Inet6Address }.dedup()
             this.bypass = bypass
         }
         Log.d("AclMatcher", "ACL initialized in $time ns")

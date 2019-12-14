@@ -56,6 +56,8 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
                 return 0
             }
         }
+
+        fun matches(b: Immutable) = matches(b.a)
         fun matches(b: ByteArray): Boolean {
             if (a.size != b.size) return false
             var i = 0
