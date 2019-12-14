@@ -36,8 +36,8 @@ object LocalDnsService {
     private val servers = WeakHashMap<Interface, LocalDnsServer>()
 
     interface Interface : BaseService.Interface {
-        override suspend fun startProcesses(hosts: HostsFile, acl: Lazy<Acl?>) {
-            super.startProcesses(hosts, acl)
+        override suspend fun startProcesses(hosts: HostsFile) {
+            super.startProcesses(hosts)
             val profile = data.proxy!!.profile
             val dns = try {
                 URI("dns://${profile.remoteDns}")
@@ -49,7 +49,7 @@ object LocalDnsService {
                     DataStore.proxyAddress,
                     hosts,
                     !profile.udpdns,
-                    acl.value?.let { AclMatcher(it) }).also {
+                    if (profile.route == Acl.ALL) null else AclMatcher(profile.route)).also {
                 servers[this] = it
             }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
         }

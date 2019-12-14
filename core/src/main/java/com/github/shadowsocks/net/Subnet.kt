@@ -45,21 +45,20 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
         require(prefixSize in 0..addressLength) { "prefixSize $prefixSize not in 0..$addressLength" }
     }
 
-    /**
-     * Optimized version of matches.
-     * a corresponds to this address and b is the address in question.
-     */
-    fun matches(a: ByteArray, b: ByteArray): Boolean {
-        if (a.size != b.size) return false
-        var i = 0
-        while (i * 8 < prefixSize && i * 8 + 8 <= prefixSize) {
-            if (a[i] != b[i]) return false
-            ++i
+    class Immutable(private val a: ByteArray, private val prefixSize: Int) {
+        fun matches(b: ByteArray): Boolean {
+            if (a.size != b.size) return false
+            var i = 0
+            while (i * 8 < prefixSize && i * 8 + 8 <= prefixSize) {
+                if (a[i] != b[i]) return false
+                ++i
+            }
+            if (i * 8 == prefixSize) return true
+            val mask = 256 - (1 shl i * 8 + 8 - prefixSize)
+            return a[i].toInt() and mask == b[i].toInt() and mask
         }
-        if (i * 8 == prefixSize) return true
-        val mask = 256 - (1 shl i * 8 + 8 - prefixSize)
-        return a[i].toInt() and mask == b[i].toInt() and mask
     }
+    fun toImmutable() = Immutable(address.address, prefixSize)
 
     override fun toString(): String =
             if (prefixSize == addressLength) address.hostAddress else address.hostAddress + '/' + prefixSize

@@ -58,9 +58,9 @@ redsocks {
                 File(applicationInfo.nativeLibraryDir, Executable.REDSOCKS).absolutePath, "-c", "redsocks.conf"))
     }
 
-    override suspend fun startProcesses(hosts: HostsFile, acl: Lazy<Acl?>) {
+    override suspend fun startProcesses(hosts: HostsFile) {
         startRedsocksDaemon()
-        super.startProcesses(hosts, acl)
+        super.startProcesses(hosts)
     }
 
     override fun onDestroy() {

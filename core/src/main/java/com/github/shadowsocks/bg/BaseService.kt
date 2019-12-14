@@ -234,7 +234,7 @@ object BaseService {
 
         fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> = cmd
 
-        suspend fun startProcesses(hosts: HostsFile, acl: Lazy<Acl?>) {
+        suspend fun startProcesses(hosts: HostsFile) {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
                             ?.isUserUnlocked != false) app else Core.deviceStorage).noBackupFilesDir
             val udpFallback = data.udpFallback
@@ -349,21 +349,21 @@ object BaseService {
                     val hosts = HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")
                     proxy.init(this@Interface, hosts)
                     data.udpFallback?.init(this@Interface, hosts)
-                    val acl = if (profile.route == Acl.CUSTOM_RULES) try {
+                    if (profile.route == Acl.CUSTOM_RULES) try {
                         withContext(Dispatchers.IO) {
                             Acl.customRules.flatten(10, this@Interface::openConnection).also {
                                 Acl.save(Acl.CUSTOM_RULES, it)
                             }
-                        }.let { lazy { it } }
+                        }
                     } catch (e: IOException) {
                         throw ExpectedExceptionWrapper(e)
-                    } else lazy { if (profile.route == Acl.ALL) null else Acl().fromId(profile.route) }
+                    }
 
                     data.processes = GuardedProcessPool {
                         printLog(it)
                         stopRunner(false, it.readableMessage)
                     }
-                    startProcesses(hosts, acl)
+                    startProcesses(hosts)
 
                     proxy.scheduleUpdate()
                     data.udpFallback?.scheduleUpdate()
