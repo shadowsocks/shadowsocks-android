@@ -67,10 +67,10 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
     override fun compareTo(other: Subnet): Int {
         val addrThis = address.address
         val addrThat = other.address.address
-        var result = addrThis.size.compareTo(addrThat.size) // IPv4 address goes first
+        var result = addrThis.size.compareTo(addrThat.size)                 // IPv4 address goes first
         if (result != 0) return result
-        for ((x, y) in addrThis zip addrThat) {
-            result = x.unsigned().compareTo(y.unsigned())   // undo sign extension of signed byte
+        for (i in addrThis.indices) {
+            result = addrThis[i].unsigned().compareTo(addrThat[i].unsigned())   // undo sign extension of signed byte
             if (result != 0) return result
         }
         return prefixSize.compareTo(other.prefixSize)
