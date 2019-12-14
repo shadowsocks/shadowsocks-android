@@ -20,13 +20,11 @@
 
 package com.github.shadowsocks.bg
 
-import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
-import com.github.shadowsocks.core.R
+import com.github.shadowsocks.acl.AclMatcher
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.net.LocalDnsServer
 import com.github.shadowsocks.net.Socks5Endpoint
-import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import kotlinx.coroutines.CoroutineScope
 import java.net.InetSocketAddress
@@ -35,24 +33,11 @@ import java.net.URISyntaxException
 import java.util.*
 
 object LocalDnsService {
-    private val googleApisTester =
-            "(^|\\.)googleapis(\\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){1,2}\$".toRegex()
-    private val chinaIpv4List by lazy {
-        app.resources.openRawResource(R.raw.zone_cn).bufferedReader().lineSequence().map {
-            Subnet.fromString(it, 4)
-        }.filterNotNull().toList()
-    }
-    private val chinaIpv6List by lazy {
-        app.resources.openRawResource(R.raw.zone_cn_ipv6).bufferedReader().lineSequence().map {
-            Subnet.fromString(it, 16)
-        }.filterNotNull().toList()
-    }
-
     private val servers = WeakHashMap<Interface, LocalDnsServer>()
 
     interface Interface : BaseService.Interface {
-        override suspend fun startProcesses(hosts: HostsFile) {
-            super.startProcesses(hosts)
+        override suspend fun startProcesses(hosts: HostsFile, acl: Lazy<Acl?>) {
+            super.startProcesses(hosts, acl)
             val profile = data.proxy!!.profile
             val dns = try {
                 URI("dns://${profile.remoteDns}")
@@ -62,18 +47,11 @@ object LocalDnsService {
             LocalDnsServer(this::resolver,
                     Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
                     DataStore.proxyAddress,
-                    hosts).apply {
-                tcp = !profile.udpdns
-                when (profile.route) {
-                    Acl.BYPASS_CHN, Acl.BYPASS_LAN_CHN, Acl.GFWLIST, Acl.CUSTOM_RULES -> {
-                        remoteDomainMatcher = googleApisTester
-                        localIpv4Matcher = chinaIpv4List
-                        localIpv6Matcher = chinaIpv6List
-                    }
-                    Acl.CHINALIST -> { }
-                    else -> forwardOnly = true
-                }
-            }.also { servers[this] = it }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
+                    hosts,
+                    !profile.udpdns,
+                    acl.value?.let { AclMatcher(it) }).also {
+                servers[this] = it
+            }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
         }
 
         override fun killProcesses(scope: CoroutineScope) {

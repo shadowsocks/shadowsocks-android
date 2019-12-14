@@ -144,9 +144,9 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override suspend fun resolver(host: String) = DnsResolverCompat.resolve(DefaultNetworkListener.get(), host)
     override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
 
-    override suspend fun startProcesses(hosts: HostsFile) {
+    override suspend fun startProcesses(hosts: HostsFile, acl: Lazy<Acl?>) {
         worker = ProtectWorker().apply { start() }
-        super.startProcesses(hosts)
+        super.startProcesses(hosts, acl)
         sendFd(startVpn())
     }
 

@@ -22,6 +22,7 @@ package com.github.shadowsocks.net
 
 import android.util.Log
 import com.crashlytics.android.Crashlytics
+import com.github.shadowsocks.acl.AclMatcher
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
@@ -45,19 +46,12 @@ import java.nio.channels.SocketChannel
 class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAddress>,
                      private val remoteDns: Socks5Endpoint,
                      private val proxy: SocketAddress,
-                     private val hosts: HostsFile) : CoroutineScope {
-    /**
-     * Forward all requests to remote and ignore localResolver.
-     */
-    var forwardOnly = false
-    /**
-     * Forward UDP queries to TCP.
-     */
-    var tcp = true
-    var remoteDomainMatcher: Regex? = null
-    var localIpv4Matcher: List<Subnet> = emptyList()
-    var localIpv6Matcher: List<Subnet> = emptyList()
-
+                     private val hosts: HostsFile,
+                     /**
+                      * Forward UDP queries to TCP.
+                      */
+                     private val tcp: Boolean = false,
+                     private val acl: AclMatcher? = null) : CoroutineScope {
     companion object {
         private const val TAG = "LocalDnsServer"
         private const val TIMEOUT = 10_000L
@@ -134,8 +128,12 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     remote.cancel()
                     return@supervisorScope cookDnsResponse(request, hostsResults)
                 }
-                if (forwardOnly) return@supervisorScope remote.await()
-                if (remoteDomainMatcher?.containsMatchIn(host) == true) return@supervisorScope remote.await()
+                if (acl == null) return@supervisorScope remote.await()
+                val useLocal = when (acl.shouldBypass(host)) {
+                    true -> true.also { remote.cancel() }
+                    false -> return@supervisorScope remote.await()
+                    null -> false
+                }
                 val localResults = try {
                     withTimeout(TIMEOUT) { localResolver(host) }
                 } catch (_: TimeoutCancellationException) {
@@ -144,12 +142,21 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 } catch (_: UnknownHostException) {
                     return@supervisorScope remote.await()
                 }
-                if (localResults.isEmpty()) return@supervisorScope remote.await()
-                val matcher = if (isIpv6) localIpv6Matcher else localIpv4Matcher
-                if (matcher.isEmpty() || matcher.any { subnet -> localResults.any(subnet::matches) }) {
-                    remote.cancel()
-                    cookDnsResponse(request, localResults.asIterable())
-                } else remote.await()
+                if (isIpv6) {
+                    val filtered = localResults.filterIsInstance<Inet6Address>()
+                    if (useLocal) return@supervisorScope cookDnsResponse(request, filtered)
+                    if (filtered.any { acl.shouldBypass(it) }) {
+                        remote.cancel()
+                        cookDnsResponse(request, filtered)
+                    } else remote.await()
+                } else {
+                    val filtered = localResults.filterIsInstance<Inet4Address>()
+                    if (useLocal) return@supervisorScope cookDnsResponse(request, filtered)
+                    if (filtered.any { acl.shouldBypass(it) }) {
+                        remote.cancel()
+                        cookDnsResponse(request, filtered)
+                    } else remote.await()
+                }
             } catch (e: Exception) {
                 remote.cancel()
                 when (e) {
