@@ -40,15 +40,22 @@ class AclMatcher {
             }, {
                 if (it.startsWith("(?:^|\\.)googleapis")) proxyDomains.add(it.toRegex())
             })
-            subnetsIpv4 = subnets.filter { it.address is Inet4Address }.map { it.toImmutable() }
-            subnetsIpv6 = subnets.filter { it.address is Inet6Address }.map { it.toImmutable() }
+            subnetsIpv4 = subnets.asSequence().filter { it.address is Inet4Address }.map { it.toImmutable() }
+                    .sortedWith(Subnet.Immutable).toList()
+            subnetsIpv6 = subnets.asSequence().filter { it.address is Inet6Address }.map { it.toImmutable() }
+                    .sortedWith(Subnet.Immutable).toList()
             this.bypass = bypass
         }
         Log.d("AclMatcher", "ACL initialized in $time ns")
     }
 
-    fun shouldBypassIpv4(ip: ByteArray) = bypass xor subnetsIpv4.any { it.matches(ip) }
-    fun shouldBypassIpv6(ip: ByteArray) = bypass xor subnetsIpv6.any { it.matches(ip) }
+    private fun quickMatches(subnets: List<Subnet.Immutable>, ip: ByteArray): Boolean {
+        val i = subnets.binarySearch(Subnet.Immutable(ip), Subnet.Immutable)
+        return i >= 0 || i < -1 && subnets[-i - 2].matches(ip)
+    }
+
+    fun shouldBypassIpv4(ip: ByteArray) = bypass xor quickMatches(subnetsIpv4, ip)
+    fun shouldBypassIpv6(ip: ByteArray) = bypass xor quickMatches(subnetsIpv6, ip)
     fun shouldBypass(host: String): Boolean? {
         if (bypassDomains.any { it.matches(host) }) return true
         if (proxyDomains.any { it.matches(host) }) return false
