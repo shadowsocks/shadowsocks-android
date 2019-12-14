@@ -32,8 +32,11 @@ class AclMatcher(id: String) {
     private val bypass: Boolean
 
     init {
-        val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), { bypassDomains.add(it.toRegex()) },
-                { proxyDomains.add(it.toRegex()) })
+        val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), {
+//            bypassDomains.add(it.toRegex())
+        }, {
+            if (it.startsWith("(?:^|\\.)googleapis")) proxyDomains.add(it.toRegex())
+        })
         subnetsIpv4 = subnets.filter { it.address is Inet4Address }.map { it.toImmutable() }
         subnetsIpv6 = subnets.filter { it.address is Inet6Address }.map { it.toImmutable() }
         this.bypass = bypass
