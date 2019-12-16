@@ -123,7 +123,7 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     Type.AAAA -> true
                     else -> return@supervisorScope remote.await()
                 }
-                val host = question.name.toString(true)
+                val host = question.name.canonicalize().toString(true)
                 val hostsResults = hosts.resolve(host, isIpv6)
                 if (hostsResults.isNotEmpty()) {
                     remote.cancel()
