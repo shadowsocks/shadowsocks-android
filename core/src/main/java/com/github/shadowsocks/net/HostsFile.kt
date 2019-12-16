@@ -37,11 +37,9 @@ class HostsFile(input: String = "") {
     }
 
     val configuredHostnames get() = map.size
-    fun resolve(hostname: String, isIpv6: Boolean? = null): Collection<InetAddress> {
-        var result: Collection<InetAddress> = map[hostname] ?: return emptyList()
-        if (isIpv6 != null) {
-            result = if (isIpv6) result.filterIsInstance<Inet6Address>() else result.filterIsInstance<Inet4Address>()
-        }
-        return result.shuffled()
+    fun resolve(hostname: String, isIpv6: Boolean): List<InetAddress> {
+        return (map[hostname] ?: return emptyList()).run {
+            if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
+        }.shuffled()
     }
 }

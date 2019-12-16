@@ -20,17 +20,28 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.app.ActivityManager
 import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
+import com.github.shadowsocks.utils.int
+import com.github.shadowsocks.utils.parseNumericAddress
+import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.use
 import kotlinx.coroutines.*
+import java.io.FileDescriptor
 import java.io.IOException
+import java.net.Inet4Address
+import java.net.Inet6Address
 import java.net.InetAddress
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -39,16 +50,69 @@ import kotlin.coroutines.resumeWithException
 
 sealed class DnsResolverCompat {
     companion object : DnsResolverCompat() {
-        private val instance by lazy { if (Build.VERSION.SDK_INT >= 29) DnsResolverCompat29 else DnsResolverCompat21 }
+        private val instance by lazy {
+            when (Build.VERSION.SDK_INT) {
+                in 29..Int.MAX_VALUE -> DnsResolverCompat29
+                in 23 until 29 -> DnsResolverCompat23
+                in 21 until 23 -> DnsResolverCompat21()
+                else -> error("Unsupported API level")
+            }
+        }
 
+        /**
+         * Based on: https://android.googlesource.com/platform/frameworks/base/+/9f97f97/core/java/android/net/util/DnsUtils.java#341
+         */
+        private val address4 = "8.8.8.8".parseNumericAddress()!!
+        private val address6 = "2000::".parseNumericAddress()!!
+        fun haveIpv4(network: Network) = checkConnectivity(network, OsConstants.AF_INET, address4)
+        fun haveIpv6(network: Network) = checkConnectivity(network, OsConstants.AF_INET6, address6)
+        private fun checkConnectivity(network: Network, domain: Int, addr: InetAddress) = try {
+            Os.socket(domain, OsConstants.SOCK_DGRAM, OsConstants.IPPROTO_UDP).use { socket ->
+                instance.bindSocket(network, socket)
+                Os.connect(socket, addr, 0)
+            }
+            true
+        } catch (_: IOException) {
+            false
+        } catch (_: ErrnoException) {
+            false
+        } catch (e: ReflectiveOperationException) {
+            check(Build.VERSION.SDK_INT < 23)
+            printLog(e)
+            val addresses = Core.connectivity.getLinkProperties(network)?.linkAddresses
+            true == when (addr) {
+                is Inet4Address -> addresses?.any { it.address is Inet4Address }
+                is Inet6Address -> addresses?.any {
+                    it.address.run { this is Inet6Address && !isLinkLocalAddress && !isIPv4CompatibleAddress }
+                }
+                else -> error("Unknown address type")
+            }
+        }
+
+        override fun bindSocket(network: Network, socket: FileDescriptor) = instance.bindSocket(network, socket)
         override suspend fun resolve(network: Network, host: String) = instance.resolve(network, host)
         override suspend fun resolveOnActiveNetwork(host: String) = instance.resolveOnActiveNetwork(host)
     }
 
+    @Throws(IOException::class)
+    abstract fun bindSocket(network: Network, socket: FileDescriptor)
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
 
-    private object DnsResolverCompat21 : DnsResolverCompat() {
+    @SuppressLint("PrivateApi")
+    private open class DnsResolverCompat21 : DnsResolverCompat() {
+        private val bindSocketToNetwork by lazy {
+            Class.forName("android.net.NetworkUtils").getDeclaredMethod("bindSocketToNetwork")
+        }
+        private val netId by lazy { Network::class.java.getDeclaredField("netId") }
+        override fun bindSocket(network: Network, socket: FileDescriptor) {
+            val netId = netId.get(network)!!
+            val err = bindSocketToNetwork.invoke(null, socket.int, netId) as Int
+            if (err == 0) return
+            val message = "Binding socket to network $netId"
+            throw IOException(message, ErrnoException(message, -err))
+        }
+
         /**
          * This dispatcher is used for noncancellable possibly-forever-blocking operations in network IO.
          *
@@ -65,12 +129,19 @@ sealed class DnsResolverCompat {
                 GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
     }
 
+    @TargetApi(23)
+    private object DnsResolverCompat23 : DnsResolverCompat21() {
+        override fun bindSocket(network: Network, socket: FileDescriptor) = network.bindSocket(socket)
+    }
+
     @TargetApi(29)
     private object DnsResolverCompat29 : DnsResolverCompat(), Executor {
         /**
          * This executor will run on its caller directly. On Q beta 3 thru 4, this results in calling in main thread.
          */
         override fun execute(command: Runnable) = command.run()
+
+        override fun bindSocket(network: Network, socket: FileDescriptor) = network.bindSocket(socket)
 
         override suspend fun resolve(network: Network, host: String): Array<InetAddress> {
             return suspendCancellableCoroutine { cont ->

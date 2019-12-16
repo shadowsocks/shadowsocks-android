@@ -89,9 +89,11 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
             // if fails/null, use IPv4 only, otherwise pick a random IPv4/IPv6 address
-            val hasIpv6 = service.getActiveNetwork()?.let { Core.connectivity.getLinkProperties(it) }?.linkAddresses
-                    ?.any { it.address.run { this is Inet6Address && !isLinkLocalAddress && !isIPv4CompatibleAddress } }
-            profile.host = (hosts.resolve(profile.host, if (hasIpv6 == true) null else false).firstOrNull() ?: try {
+            val network = service.getActiveNetwork() ?: throw UnknownHostException()
+            val hasIpv4 = DnsResolverCompat.haveIpv4(network)
+            val hasIpv6 = DnsResolverCompat.haveIpv6(network)
+            if (!hasIpv4 && !hasIpv6) throw UnknownHostException()
+            profile.host = (hosts.resolve(profile.host, hasIpv6).firstOrNull() ?: try {
                 service.resolver(profile.host).firstOrNull()
             } catch (_: IOException) {
                 null
