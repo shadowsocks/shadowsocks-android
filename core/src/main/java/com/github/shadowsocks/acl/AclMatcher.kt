@@ -21,8 +21,8 @@
 package com.github.shadowsocks.acl
 
 import android.util.Log
+import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.Subnet
-import java.lang.IllegalArgumentException
 import java.net.Inet4Address
 import java.net.Inet6Address
 import kotlin.system.measureNanoTime
@@ -38,7 +38,7 @@ class AclMatcher : AutoCloseable {
 
         @JvmStatic private external fun addBypassDomain(handle: Long, regex: String): Boolean
         @JvmStatic private external fun addProxyDomain(handle: Long, regex: String): Boolean
-        @JvmStatic private external fun build(handle: Long): String?
+        @JvmStatic private external fun build(handle: Long, memoryLimit: Long): String?
         @JvmStatic private external fun matchHost(handle: Long, host: String): Int
     }
 
@@ -67,7 +67,6 @@ class AclMatcher : AutoCloseable {
                 current = next
             }
         }.toList()
-        fun String.fail(): Nothing = throw Re2Exception(this)
         check(handle == 0L)
         handle = init()
         val time = measureNanoTime {
@@ -76,7 +75,7 @@ class AclMatcher : AutoCloseable {
             }, {
                 check(addProxyDomain(handle, it))
             })
-            build(handle)
+            build(handle, if (Core.activity.isLowRamDevice) 8 shl 20 else 64 shl 20)?.also { throw Re2Exception(it) }
             subnetsIpv4 = subnets.asSequence().filter { it.address is Inet4Address }.dedup()
             subnetsIpv6 = subnets.asSequence().filter { it.address is Inet6Address }.dedup()
             this.bypass = bypass

@@ -52,13 +52,19 @@ Java_com_github_shadowsocks_acl_AclMatcher_addProxyDomain(JNIEnv *env, jclass cl
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_github_shadowsocks_acl_AclMatcher_build(JNIEnv *env, jclass clazz, jlong handle) {
+Java_com_github_shadowsocks_acl_AclMatcher_build(JNIEnv *env, jclass clazz, jlong handle,
+                                                 jlong memory_limit) {
     if (!handle) return env->NewStringUTF("AclMatcher closed");
     auto matcher = reinterpret_cast<AclMatcher *>(handle);
     if (matcher->bypassDomains || matcher->proxyDomains) return env->NewStringUTF("already built");
-    matcher->bypassDomains = new RE2(matcher->bypassDomainsBuilder.str());
+    RE2::Options options;
+    options.set_max_mem(memory_limit);
+    options.set_never_capture(true);
+    matcher->bypassDomains = new RE2(matcher->bypassDomainsBuilder.str(), options);
+    matcher->bypassDomainsBuilder.clear();
     if (!matcher->bypassDomains->ok()) return env->NewStringUTF(matcher->bypassDomains->error().c_str());
-    matcher->proxyDomains = new RE2(matcher->proxyDomainsBuilder.str());
+    matcher->proxyDomains = new RE2(matcher->proxyDomainsBuilder.str(), options);
+    matcher->proxyDomainsBuilder.clear();
     if (!matcher->proxyDomains->ok()) return env->NewStringUTF(matcher->proxyDomains->error().c_str());
     return nullptr;
 }
