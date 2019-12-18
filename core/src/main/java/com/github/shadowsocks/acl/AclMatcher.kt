@@ -36,8 +36,9 @@ class AclMatcher : AutoCloseable {
         @JvmStatic private external fun init(): Long
         @JvmStatic private external fun close(handle: Long)
 
-        @JvmStatic private external fun addBypassDomain(handle: Long, regex: String): String?
-        @JvmStatic private external fun addProxyDomain(handle: Long, regex: String): String?
+        @JvmStatic private external fun addBypassDomain(handle: Long, regex: String): Boolean
+        @JvmStatic private external fun addProxyDomain(handle: Long, regex: String): Boolean
+        @JvmStatic private external fun build(handle: Long): String?
         @JvmStatic private external fun matchHost(handle: Long, host: String): Int
     }
 
@@ -71,10 +72,11 @@ class AclMatcher : AutoCloseable {
         handle = init()
         val time = measureNanoTime {
             val (bypass, subnets) = Acl.parse(Acl.getFile(id).bufferedReader(), {
-                addBypassDomain(handle, it)?.fail()
+                check(addBypassDomain(handle, it))
             }, {
-                addProxyDomain(handle, it)?.fail()
+                check(addProxyDomain(handle, it))
             })
+            build(handle)
             subnetsIpv4 = subnets.asSequence().filter { it.address is Inet4Address }.dedup()
             subnetsIpv6 = subnets.asSequence().filter { it.address is Inet6Address }.dedup()
             this.bypass = bypass

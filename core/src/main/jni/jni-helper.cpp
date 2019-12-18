@@ -1,4 +1,4 @@
-#include <utility>
+#include <sstream>
 #include <vector>
 
 #include "jni.h"
@@ -7,31 +7,22 @@
 using namespace std;
 
 struct AclMatcher {
-    vector<RE2 *> bypassDomains, proxyDomains;
+    stringstream bypassDomainsBuilder, proxyDomainsBuilder;
+    RE2 *bypassDomains, *proxyDomains;
+
     ~AclMatcher() {
-        for (RE2 *re2 : bypassDomains) delete re2;
-        for (RE2 *re2 : proxyDomains) delete re2;
+        if (bypassDomains) delete bypassDomains;
+        if (proxyDomains) delete proxyDomains;
     }
 };
 
-jstring addDomain(JNIEnv *env, vector<RE2 *> &domains, jstring regex) {
+bool addDomain(JNIEnv *env, stringstream &domains, jstring regex) {
     const char *regexChars = env->GetStringUTFChars(regex, nullptr);
-    RE2 *re2 = new RE2(regexChars);
+    if (regexChars == nullptr) return false;
+    if (domains.rdbuf()->in_avail()) domains << '|';
+    domains << regexChars;
     env->ReleaseStringUTFChars(regex, regexChars);
-    if (re2->ok()) {
-        domains.push_back(re2);
-        return nullptr;
-    } else {
-        auto result = env->NewStringUTF(re2->error().c_str());
-        delete re2;
-        return result;
-    }
-}
-
-bool matches(const vector<RE2 *> &domains, const char *host) {
-    return any_of(domains.cbegin(), domains.cend(), [host](const RE2 *re){
-        return RE2::FullMatch(host, *re);
-    });
+    return true;
 }
 
 #pragma clang diagnostic push
@@ -46,18 +37,30 @@ Java_com_github_shadowsocks_acl_AclMatcher_close(JNIEnv *env, jclass clazz, jlon
     delete reinterpret_cast<AclMatcher *>(handle);
 }
 
-JNIEXPORT jstring JNICALL
+JNIEXPORT jboolean JNICALL
 Java_com_github_shadowsocks_acl_AclMatcher_addBypassDomain(JNIEnv *env, jclass clazz, jlong handle,
                                                            jstring regex) {
-    if (!handle) return env->NewStringUTF("AclMatcher closed");
-    return ::addDomain(env, reinterpret_cast<AclMatcher *>(handle)->bypassDomains, regex);
+    return static_cast<jboolean>(handle &&
+                                 ::addDomain(env, reinterpret_cast<AclMatcher *>(handle)->bypassDomainsBuilder, regex));
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_github_shadowsocks_acl_AclMatcher_addProxyDomain(JNIEnv *env, jclass clazz, jlong handle,
+                                                          jstring regex) {
+    return static_cast<jboolean>(handle &&
+                                 ::addDomain(env, reinterpret_cast<AclMatcher *>(handle)->proxyDomainsBuilder, regex));
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_github_shadowsocks_acl_AclMatcher_addProxyDomain(JNIEnv *env, jclass clazz, jlong handle,
-                                                          jstring regex) {
+Java_com_github_shadowsocks_acl_AclMatcher_build(JNIEnv *env, jclass clazz, jlong handle) {
     if (!handle) return env->NewStringUTF("AclMatcher closed");
-    return ::addDomain(env, reinterpret_cast<AclMatcher *>(handle)->proxyDomains, regex);
+    auto matcher = reinterpret_cast<AclMatcher *>(handle);
+    if (matcher->bypassDomains || matcher->proxyDomains) return env->NewStringUTF("already built");
+    matcher->bypassDomains = new RE2(matcher->bypassDomainsBuilder.str());
+    if (!matcher->bypassDomains->ok()) return env->NewStringUTF(matcher->bypassDomains->error().c_str());
+    matcher->proxyDomains = new RE2(matcher->proxyDomainsBuilder.str());
+    if (!matcher->proxyDomains->ok()) return env->NewStringUTF(matcher->proxyDomains->error().c_str());
+    return nullptr;
 }
 
 JNIEXPORT jint JNICALL
@@ -67,8 +70,8 @@ Java_com_github_shadowsocks_acl_AclMatcher_matchHost(JNIEnv *env, jclass clazz, 
     auto matcher = reinterpret_cast<const AclMatcher *>(handle);
     const char *hostChars = env->GetStringUTFChars(host, nullptr);
     jint result = 0;
-    if (::matches(matcher->bypassDomains, hostChars)) result = 1;
-    else if (::matches(matcher->proxyDomains, hostChars)) result = 2;
+    if (RE2::FullMatch(hostChars, *matcher->bypassDomains)) result = 1;
+    else if (RE2::FullMatch(hostChars, *matcher->proxyDomains)) result = 2;
     env->ReleaseStringUTFChars(host, hostChars);
     return result;
 }
