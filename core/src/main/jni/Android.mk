@@ -279,6 +279,39 @@ LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_EXECUTABLE)
 
 ########################################################
+## jni-helper
+########################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE:= jni-helper
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/re2
+
+LOCAL_CFLAGS := -std=c++17
+
+LOCAL_SRC_FILES := jni-helper.cpp \
+                   $(LOCAL_PATH)/re2/re2/bitstate.cc \
+                   $(LOCAL_PATH)/re2/re2/compile.cc \
+                   $(LOCAL_PATH)/re2/re2/dfa.cc \
+                   $(LOCAL_PATH)/re2/re2/nfa.cc \
+                   $(LOCAL_PATH)/re2/re2/onepass.cc \
+                   $(LOCAL_PATH)/re2/re2/parse.cc \
+                   $(LOCAL_PATH)/re2/re2/perl_groups.cc \
+                   $(LOCAL_PATH)/re2/re2/prog.cc \
+                   $(LOCAL_PATH)/re2/re2/re2.cc \
+                   $(LOCAL_PATH)/re2/re2/regexp.cc \
+                   $(LOCAL_PATH)/re2/re2/simplify.cc \
+                   $(LOCAL_PATH)/re2/re2/stringpiece.cc \
+                   $(LOCAL_PATH)/re2/re2/tostring.cc \
+                   $(LOCAL_PATH)/re2/re2/unicode_casefold.cc \
+                   $(LOCAL_PATH)/re2/re2/unicode_groups.cc \
+                   $(LOCAL_PATH)/re2/util/rune.cc \
+                   $(LOCAL_PATH)/re2/util/strutil.cc
+
+include $(BUILD_SHARED_LIBRARY)
+
+########################################################
 ## tun2socks
 ########################################################
 

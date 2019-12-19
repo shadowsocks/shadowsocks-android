@@ -22,7 +22,6 @@ package com.github.shadowsocks.bg
 
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.ActivityManager
 import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
@@ -30,9 +29,7 @@ import android.os.CancellationSignal
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
-import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
@@ -119,7 +116,7 @@ sealed class DnsResolverCompat {
          * See also: https://issuetracker.google.com/issues/133874590
          */
         private val unboundedIO by lazy {
-            if (app.getSystemService<ActivityManager>()!!.isLowRamDevice) Dispatchers.IO
+            if (Core.activity.isLowRamDevice) Dispatchers.IO
             else Executors.newCachedThreadPool().asCoroutineDispatcher()
         }
 
