@@ -257,6 +257,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 }.build().loadAd(AdRequest.Builder().apply {
                     addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
                     addTestDevice("7509D18EB8AF82F915874FEF53877A64")
+                    addTestDevice("F58907F28184A828DD0DB6F8E38189C6")
                 }.build())
             } else if (nativeAd != null) populateUnifiedNativeAdView(nativeAd!!, nativeAdView!!)
         }

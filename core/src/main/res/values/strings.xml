@@ -135,6 +135,12 @@
   <string name="vpn_connected">Connected, tap to check connection</string>
   <string name="not_connected">Not connected</string>
 
+  <!-- subscriptions -->
+  <string name="subscriptions">Subscriptions</string>
+  <string name="add_subscription">Add a subscription</string>
+  <string name="edit_subscription">Edit subscription</string>
+  <string name="update_subscription">Refresh servers from subscription</string>
+
   <!-- acl -->
   <string name="custom_rules">Custom rules</string>
   <string name="action_add_rule">Add rule(s)…</string>
