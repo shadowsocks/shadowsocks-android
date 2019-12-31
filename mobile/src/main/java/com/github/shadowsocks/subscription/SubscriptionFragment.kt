@@ -55,7 +55,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -247,14 +246,9 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
                 for (url in subscription.urls.asIterable()) {
                     try {
                         val connection = url.openConnection() as HttpURLConnection
+                        ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream), replace = true)
 
-                        try {
-                            ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream), replace = true)
-                        } catch (e: RuntimeException) {
-                            e.printStackTrace()
-                            activity.snackbar(e.readableMessage).show()
-                        }
-                    } catch (e: IOException) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         activity.snackbar(e.readableMessage).show()
                     }
