@@ -55,6 +55,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import me.zhanghai.android.materialprogressbar.MaterialProgressBar
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -67,7 +68,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
         private const val SELECTED_URLS = "com.github.shadowsocks.acl.subscription.SELECTED_URLS"
     }
-
 
     @Parcelize
     data class SubItem(val item: String = "") : Parcelable {
@@ -155,7 +155,8 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
         override fun onClick(v: View?) {
             if (selectedItems.isNotEmpty()) onLongClick(v)
-            else SubDialogFragment().withArg(SubItem(item.toString())).show(this@SubscriptionFragment, REQUEST_CODE_EDIT)
+            else SubDialogFragment().withArg(SubItem(item.toString()))
+                    .show(this@SubscriptionFragment, REQUEST_CODE_EDIT)
         }
 
         override fun onLongClick(v: View?): Boolean {
@@ -246,7 +247,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
                 try {
                     for (url in subscription.urls.asIterable()) {
                         val connection = url.openConnection() as HttpURLConnection
-                        ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream),replace = true)
+                        ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream), replace = true)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

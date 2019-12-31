@@ -53,10 +53,6 @@ class Subscription {
         abstract fun compareNonNull(o1: T, o2: T): Int
     }
 
-    private open class DefaultSorter<T : Comparable<T>> : BaseSorter<T>() {
-        override fun compareNonNull(o1: T, o2: T): Int = o1.compareTo(o2)
-    }
-
     private object URLSorter : BaseSorter<URL>() {
         private val ordering = compareBy<URL>({ it.host }, { it.port }, { it.file }, { it.protocol })
         override fun compareNonNull(o1: URL, o2: URL): Int = ordering.compare(o1, o2)
