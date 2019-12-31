@@ -244,18 +244,24 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             fetchJob = GlobalScope.launch {
                 val subscription = Subscription.instance
 
-                try {
-                    for (url in subscription.urls.asIterable()) {
+                for (url in subscription.urls.asIterable()) {
+                    try {
                         val connection = url.openConnection() as HttpURLConnection
-                        ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream), replace = true)
+
+                        try {
+                            ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream), replace = true)
+                        } catch (e: RuntimeException) {
+                            e.printStackTrace()
+                            activity.snackbar(e.readableMessage).show()
+                        }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        activity.snackbar(e.readableMessage).show()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    activity.snackbar(e.readableMessage).show()
-                } finally {
-                    progress.post {
-                        progress.visibility = View.INVISIBLE
-                    }
+                }
+
+                progress.post {
+                    progress.visibility = View.INVISIBLE
                 }
             }
         }

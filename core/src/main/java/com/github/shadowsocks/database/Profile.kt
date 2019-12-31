@@ -82,7 +82,8 @@ data class Profile(
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
-        fun findAllUrls(data: CharSequence?, feature: Profile? = null) = pattern.findAll(data ?: "").map {
+        fun findAllUrls(data: CharSequence?, feature: Profile? = null) = pattern.findAll(data
+                ?: "").map {
             val uri = it.value.toUri()
             try {
                 if (uri.userInfo == null) {
@@ -139,13 +140,15 @@ data class Profile(
             private val fallbackMap = mutableMapOf<Profile, Profile>()
 
             private val JsonElement?.optString get() = (this as? JsonPrimitive)?.asString
-            private val JsonElement?.optBoolean get() = // asBoolean attempts to cast everything to boolean
-                (this as? JsonPrimitive)?.run { if (isBoolean) asBoolean else null }
-            private val JsonElement?.optInt get() = try {
-                (this as? JsonPrimitive)?.asInt
-            } catch (_: NumberFormatException) {
-                null
-            }
+            private val JsonElement?.optBoolean
+                get() = // asBoolean attempts to cast everything to boolean
+                    (this as? JsonPrimitive)?.run { if (isBoolean) asBoolean else null }
+            private val JsonElement?.optInt
+                get() = try {
+                    (this as? JsonPrimitive)?.asInt
+                } catch (_: NumberFormatException) {
+                    null
+                }
 
             private fun tryParse(json: JsonObject, fallback: Boolean = false): Profile? {
                 val host = json["server"].optString
@@ -176,8 +179,11 @@ data class Profile(
                     (json["proxy_apps"] as? JsonObject)?.also {
                         proxyApps = it["enabled"].optBoolean ?: proxyApps
                         bypass = it["bypass"].optBoolean ?: bypass
-                        individual = (json["android_list"] as? JsonArray)?.asIterable()?.joinToString("\n") ?:
-                                individual
+                        individual = (it["android_list"] as? JsonArray)?.asIterable()?.joinToString("\n")
+                                ?: individual
+                        // JSONArray will return strings with "", which should be removed
+                        individual = individual.replace("\"", "")
+
                     }
                     udpdns = json["udpdns"].optBoolean ?: udpdns
                     (json["udp_fallback"] as? JsonObject)?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }
@@ -194,6 +200,7 @@ data class Profile(
                     // ignore other types
                 }
             }
+
             fun finalize(create: (Profile) -> Unit) {
                 val profiles = ProfileManager.getAllProfiles() ?: emptyList()
                 for ((profile, fallback) in fallbackMap) {
@@ -210,6 +217,7 @@ data class Profile(
                 }
             }
         }
+
         fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Unit) {
             JsonParser(feature).run {
                 process(json)
@@ -273,6 +281,7 @@ data class Profile(
         if (!name.isNullOrEmpty()) builder.fragment(name)
         return builder.build()
     }
+
     override fun toString() = toUri().toString()
 
     fun toJson(profiles: LongSparseArray<Profile>? = null): JSONObject = JSONObject().apply {

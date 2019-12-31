@@ -591,8 +591,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         profilesAdapter.deepRefreshId(profileId)
     }
 
-    override fun onDestroyView() {
+    override fun onPause() {
         undoManager.flush()
+        super.onPause()
+    }
+
+    override fun onDestroyView() {
         nativeAd?.destroy()
         super.onDestroyView()
     }
