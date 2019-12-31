@@ -21,62 +21,52 @@
 package com.github.shadowsocks.subscription
 
 import android.annotation.SuppressLint
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.EditText
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.plugin.AlertDialogFragment
+import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.parcel.Parcelize
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
-import java.net.IDN
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar
+import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
-import java.util.regex.PatternSyntaxException
-import com.github.shadowsocks.subscription.Subscription
-import com.github.shadowsocks.utils.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import java.io.ByteArrayInputStream
-import java.io.IOError
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
 
 class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
         private const val REQUEST_CODE_ADD = 1
         private const val REQUEST_CODE_EDIT = 2
 
-        private const val SELECTED_URLS = "com.github.shadowsocks.acl.subscription.SELECTED_URLS"    }
+        private const val SELECTED_URLS = "com.github.shadowsocks.acl.subscription.SELECTED_URLS"
+    }
 
 
     @Parcelize
@@ -113,19 +103,19 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             validate()
         }
 
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         override fun afterTextChanged(s: Editable) = validate(value = s)
         override fun onNothingSelected(parent: AdapterView<*>?) = check(false)
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) = validate()
 
         private fun validate(value: Editable = editText.text) {
             var message = ""
-            positive.isEnabled =  try {
-                    val url = URL(value.toString())
-                    if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
-                    true
-                } catch (e: MalformedURLException) {
+            positive.isEnabled = try {
+                val url = URL(value.toString())
+                if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
+                true
+            } catch (e: MalformedURLException) {
                 message = e.readableMessage
                 false
             }
@@ -167,6 +157,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             if (selectedItems.isNotEmpty()) onLongClick(v)
             else SubDialogFragment().withArg(SubItem(item.toString())).show(this@SubscriptionFragment, REQUEST_CODE_EDIT)
         }
+
         override fun onLongClick(v: View?): Boolean {
             if (!selectedItems.add(item)) selectedItems.remove(item)    // toggle
             itemView.isSelected = !itemView.isSelected
@@ -181,8 +172,10 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         override fun onBindViewHolder(holder: SubViewHolder, i: Int) {
             holder.bind(subscription.urls[i])
         }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = SubViewHolder(LayoutInflater
                 .from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false))
+
         override fun getItemCount(): Int = subscription.urls.size()
 
         private fun apply() {
@@ -237,30 +230,38 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
     private val selectedItems = HashSet<Any>()
     private val adapter by lazy { SubscriptionAdapter() }
     private lateinit var list: RecyclerView
+    private lateinit var progress: MaterialProgressBar
     private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<Any>
+    private var fetchJob: Job? = null
 
     private fun fetchServerFromSubscriptions() {
-        // SubscriptionSyncer.schedule()
-        val activity = activity as MainActivity
+        if (fetchJob?.isActive != true) {
+            val activity = activity as MainActivity
+            progress.visibility = View.VISIBLE
 
-        val job = GlobalScope.launch {
-            val subscription = Subscription.instance
+            fetchJob = GlobalScope.launch {
+                val subscription = Subscription.instance
 
-            try {
-                for (url in subscription.urls.asIterable()) {
-                    val connection = url.openConnection() as HttpURLConnection
-                    ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream))
+                try {
+                    for (url in subscription.urls.asIterable()) {
+                        val connection = url.openConnection() as HttpURLConnection
+                        ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream),replace = true)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    activity.snackbar(e.readableMessage).show()
+                } finally {
+                    progress.post {
+                        progress.visibility = View.INVISIBLE
+                    }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                activity.snackbar(e.readableMessage).show()
             }
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.layout_custom_rules, container, false)
+            inflater.inflate(R.layout.layout_subscriptions, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -278,13 +279,16 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
+        progress = view.findViewById(R.id.indeterminate_horizontal_progress)
         FastScrollerBuilder(list).useMd2Style().build()
         undoManager = UndoSnackbarManager(activity, adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
+
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
                     adapter.remove(viewHolder.adapterPosition)
+
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                                 target: RecyclerView.ViewHolder): Boolean = false
         }).attachToRecyclerView(list)
@@ -325,7 +329,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         when (resultCode) {
             DialogInterface.BUTTON_POSITIVE -> {
                 if (editing) adapter.remove(ret.replacing.toURL())
-                adapter.add(ret.edited.toURL())?.also { list.post { list.scrollToPosition(it) } }
+                adapter.add(ret.edited.toURL()).also { list.post { list.scrollToPosition(it) } }
             }
             DialogInterface.BUTTON_NEUTRAL -> ret.replacing.toURL().let { item ->
                 adapter.remove(item)

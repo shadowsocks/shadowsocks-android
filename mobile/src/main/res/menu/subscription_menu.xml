@@ -8,7 +8,7 @@
           app:showAsAction="always"/>
     <item android:title="@string/update_subscription"
         android:id="@+id/action_update_subscription"
-        android:icon="@drawable/ic_action_done"
+        android:icon="@drawable/ic_action_cloud_download"
         android:alphabeticShortcut="r"
         app:showAsAction="ifRoom"/>
 </menu>
