@@ -61,7 +61,7 @@ class PluginOptions : HashMap<String, String?> {
         }
     }
 
-    constructor(options: String?) : this(options, true)
+    constructor(options: String?) : this(options, false)
     constructor(id: String, options: String?) : this(options, false) {
         this.id = id
     }
