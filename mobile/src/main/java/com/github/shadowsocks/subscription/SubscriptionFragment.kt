@@ -58,14 +58,11 @@ import me.zhanghai.android.materialprogressbar.MaterialProgressBar
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.*
 
 class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     companion object {
         private const val REQUEST_CODE_ADD = 1
         private const val REQUEST_CODE_EDIT = 2
-
-        private const val SELECTED_URLS = "com.github.shadowsocks.acl.subscription.SELECTED_URLS"
     }
 
     @Parcelize
@@ -135,33 +132,24 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
     }
 
     private inner class SubViewHolder(view: View) : RecyclerView.ViewHolder(view),
-            View.OnClickListener, View.OnLongClickListener {
+            View.OnClickListener {
         lateinit var item: URL
         private val text = view.findViewById<TextView>(android.R.id.text1)
 
         init {
             view.isFocusable = true
             view.setOnClickListener(this)
-            view.setOnLongClickListener(this)
             view.setBackgroundResource(R.drawable.background_selectable)
         }
 
         fun bind(url: URL) {
             item = url
             text.text = url.toString()
-            itemView.isSelected = selectedItems.contains(url)
         }
 
         override fun onClick(v: View?) {
-            if (selectedItems.isNotEmpty()) onLongClick(v)
-            else SubDialogFragment().withArg(SubItem(item.toString()))
+            SubDialogFragment().withArg(SubItem(item.toString()))
                     .show(this@SubscriptionFragment, REQUEST_CODE_EDIT)
-        }
-
-        override fun onLongClick(v: View?): Boolean {
-            if (!selectedItems.add(item)) selectedItems.remove(item)    // toggle
-            itemView.isSelected = !itemView.isSelected
-            return true
         }
     }
 
@@ -227,7 +215,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
     private val isEnabled get() = (activity as MainActivity).state == BaseService.State.Stopped
 
-    private val selectedItems = HashSet<Any>()
     private val adapter by lazy { SubscriptionAdapter() }
     private lateinit var list: RecyclerView
     private lateinit var progress: MaterialProgressBar
@@ -242,15 +229,19 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
             fetchJob = GlobalScope.launch {
                 val subscription = Subscription.instance
+                val oldProfiles = ProfileManager.getAllProfiles()
+                var replace = true
 
                 for (url in subscription.urls.asIterable()) {
                     try {
                         val connection = url.openConnection() as HttpURLConnection
-                        ProfileManager.createProfilesFromJson(sequenceOf(connection.inputStream), replace = true)
-
+                        ProfileManager.createProfilesFromSubscription(sequenceOf(connection.inputStream),
+                                replace, oldProfiles)
                     } catch (e: Exception) {
                         e.printStackTrace()
                         activity.snackbar(e.readableMessage).show()
+                    } finally {
+                        replace = false
                     }
                 }
 
@@ -267,10 +258,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.setOnApplyWindowInsetsListener(ListHolderListener)
-        if (savedInstanceState != null) {
-            selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_URLS)?.map { URL(it) }
-                    ?: listOf())
-        }
         toolbar.setTitle(R.string.subscriptions)
         toolbar.inflateMenu(R.menu.subscription_menu)
         toolbar.setOnMenuItemClickListener(this)
@@ -285,7 +272,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         undoManager = UndoSnackbarManager(activity, adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
+                    if (isEnabled) super.getSwipeDirs(recyclerView, viewHolder) else 0
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
                     adapter.remove(viewHolder.adapterPosition)
@@ -301,11 +288,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             mode.finish()
             true
         } else super.onBackPressed()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putStringArray(SELECTED_URLS, selectedItems.filterIsInstance<URL>().map(URL::toString).toTypedArray())
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
