@@ -50,6 +50,8 @@ import java.util.*
 data class Profile(
         @PrimaryKey(autoGenerate = true)
         var id: Long = 0,
+
+        // user configurable fields
         var name: String? = "",
         var host: String = sponsored,
         var remotePort: Int = 8388,
@@ -64,11 +66,14 @@ data class Profile(
         @TargetApi(28)
         var metered: Boolean = false,
         var individual: String = "",
+        var plugin: String? = null,
+        var udpFallback: Long? = null,
+
+        // managed fields
+        var fromSubscription: Boolean = false,
         var tx: Long = 0,
         var rx: Long = 0,
         var userOrder: Long = 0,
-        var plugin: String? = null,
-        var udpFallback: Long? = null,
 
         @Ignore // not persisted in db, only used by direct boot
         var dirty: Boolean = false
