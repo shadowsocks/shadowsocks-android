@@ -1,3 +1,5 @@
+* 1.3.2:
+  * Fix first key-value pair disappearing with null value. (#2391)
 * 1.3.1:
   * New theme resource `Theme.Shadowsocks.Immersive` for better Android Q-esque translucent navigation bars.
     This is an opt-in feature.
