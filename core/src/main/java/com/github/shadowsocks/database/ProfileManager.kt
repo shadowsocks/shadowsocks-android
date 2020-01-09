@@ -70,6 +70,7 @@ object ProfileManager {
                     it.tx = tx
                     it.rx = rx
                 }
+                it.subscription = Profile.SubscriptionStatus.Active
                 createProfile(it)
             }
         }
