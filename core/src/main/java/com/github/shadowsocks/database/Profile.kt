@@ -70,7 +70,7 @@ data class Profile(
         var udpFallback: Long? = null,
 
         // managed fields
-        var fromSubscription: Boolean = false,
+        var subscription: SubscriptionStatus = SubscriptionStatus.UserConfigured,
         var tx: Long = 0,
         var rx: Long = 0,
         var userOrder: Long = 0,
@@ -78,6 +78,25 @@ data class Profile(
         @Ignore // not persisted in db, only used by direct boot
         var dirty: Boolean = false
 ) : Parcelable, Serializable {
+    enum class SubscriptionStatus(val persistedValue: Int) {
+        UserConfigured(0),
+        Active(1),
+        /**
+         * This profile is no longer present in subscriptions.
+         */
+        Obsolete(2),
+        ;
+
+        companion object {
+            @JvmStatic
+            @TypeConverter
+            fun of(value: Int) = values().single { it.persistedValue == value }
+            @JvmStatic
+            @TypeConverter
+            fun toInt(status: SubscriptionStatus) = status.persistedValue
+        }
+    }
+
     companion object {
         private const val TAG = "ShadowParser"
         private const val serialVersionUID = 1L

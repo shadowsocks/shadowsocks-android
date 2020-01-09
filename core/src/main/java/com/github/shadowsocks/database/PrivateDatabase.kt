@@ -23,6 +23,7 @@ package com.github.shadowsocks.database
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.github.shadowsocks.Core.app
@@ -32,6 +33,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @Database(entities = [Profile::class, KeyValuePair::class], version = 29)
+@TypeConverters(Profile.SubscriptionStatus::class)
 abstract class PrivateDatabase : RoomDatabase() {
     companion object {
         private val instance by lazy {
@@ -73,6 +75,7 @@ abstract class PrivateDatabase : RoomDatabase() {
     }
     object Migration29 : Migration(28, 29) {
         override fun migrate(database: SupportSQLiteDatabase) =
-                database.execSQL("ALTER TABLE `Profile` ADD COLUMN `fromSubscription` INTEGER NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE `Profile` ADD COLUMN `subscription` INTEGER NOT NULL DEFAULT " +
+                        Profile.SubscriptionStatus.UserConfigured.persistedValue)
     }
 }
