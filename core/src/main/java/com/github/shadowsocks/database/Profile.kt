@@ -82,8 +82,7 @@ data class Profile(
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
-        fun findAllUrls(data: CharSequence?, feature: Profile? = null) = pattern.findAll(data
-                ?: "").map {
+        fun findAllUrls(data: CharSequence?, feature: Profile? = null) = pattern.findAll(data ?: "").map {
             val uri = it.value.toUri()
             try {
                 if (uri.userInfo == null) {
@@ -179,10 +178,8 @@ data class Profile(
                     (json["proxy_apps"] as? JsonObject)?.also {
                         proxyApps = it["enabled"].optBoolean ?: proxyApps
                         bypass = it["bypass"].optBoolean ?: bypass
-                        individual = (it["android_list"] as? JsonArray)?.asIterable()?.joinToString("\n")
-                                ?: individual
-                        // JSONArray will return strings with "", which should be removed
-                        individual = individual.replace("\"", "")
+                        individual = (it["android_list"] as? JsonArray)?.asIterable()?.mapNotNull { it.optString }
+                                ?.joinToString("\n") ?: individual
                     }
                     udpdns = json["udpdns"].optBoolean ?: udpdns
                     (json["udp_fallback"] as? JsonObject)?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }

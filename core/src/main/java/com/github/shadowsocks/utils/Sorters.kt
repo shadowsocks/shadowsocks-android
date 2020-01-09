@@ -18,44 +18,24 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.subscription
+package com.github.shadowsocks.utils
 
 import androidx.recyclerview.widget.SortedList
-import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.URLSorter
-import com.github.shadowsocks.utils.asIterable
-import java.io.Reader
 import java.net.URL
 
-class Subscription {
-    companion object {
-        const val SUBSCRIPTION = "subscription"
+abstract class BaseSorter<T> : SortedList.Callback<T>() {
+    override fun onInserted(position: Int, count: Int) { }
+    override fun areContentsTheSame(oldItem: T?, newItem: T?): Boolean = oldItem == newItem
+    override fun onMoved(fromPosition: Int, toPosition: Int) { }
+    override fun onChanged(position: Int, count: Int) { }
+    override fun onRemoved(position: Int, count: Int) { }
+    override fun areItemsTheSame(item1: T?, item2: T?): Boolean = item1 == item2
+    override fun compare(o1: T?, o2: T?): Int =
+            if (o1 == null) if (o2 == null) 0 else 1 else if (o2 == null) -1 else compareNonNull(o1, o2)
+    abstract fun compareNonNull(o1: T, o2: T): Int
+}
 
-        var instance: Subscription
-            get() {
-                val sub = Subscription()
-                val str = DataStore.publicStore.getString(SUBSCRIPTION)
-                if (str != null) sub.fromReader(str.reader())
-                return sub
-            }
-            set(value) = DataStore.publicStore.putString(SUBSCRIPTION, value.toString())
-    }
-
-    val urls = SortedList(URL::class.java, URLSorter)
-
-    fun fromReader(reader: Reader): Subscription {
-        urls.clear()
-        reader.useLines {
-            for (line in it) {
-                urls.add(URL(line))
-            }
-        }
-        return this
-    }
-
-    override fun toString(): String {
-        val result = StringBuilder()
-        result.append(urls.asIterable().joinToString("\n"))
-        return result.toString()
-    }
+object URLSorter : BaseSorter<URL>() {
+    private val ordering = compareBy<URL>({ it.host }, { it.port }, { it.file }, { it.protocol })
+    override fun compareNonNull(o1: URL, o2: URL): Int = ordering.compare(o1, o2)
 }
