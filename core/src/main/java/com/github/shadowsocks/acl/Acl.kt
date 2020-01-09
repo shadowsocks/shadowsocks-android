@@ -28,11 +28,15 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.asIterable
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.IOException
 import java.io.Reader
 import java.net.URL
 import java.net.URLConnection
+import kotlin.coroutines.coroutineContext
 
 class Acl {
     companion object {
@@ -64,6 +68,47 @@ class Acl {
                     if ((!value.bypass || value.subnets.size() == 0) && value.bypassHostnames.size() == 0 &&
                             value.proxyHostnames.size() == 0 && value.urls.size() == 0) null else value.toString())
         fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
+
+        suspend fun <T> parse(reader: Reader, bypassHostnames: (String) -> T, proxyHostnames: (String) -> T,
+                              urls: ((URL) -> T)? = null, defaultBypass: Boolean = false): Pair<Boolean, List<Subnet>> {
+            var bypass = defaultBypass
+            val bypassSubnets = mutableListOf<Subnet>()
+            val proxySubnets = mutableListOf<Subnet>()
+            var hostnames: ((String) -> T)? = if (defaultBypass) proxyHostnames else bypassHostnames
+            var subnets: MutableList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
+            reader.useLines {
+                for (line in it) {
+                    coroutineContext[Job]!!.ensureActive()
+                    val input = (if (urls == null) line else {
+                        val blocks = line.split('#', limit = 2)
+                        val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
+                        if (url != null) urls(URL(url))
+                        blocks[0]
+                    }).trim()
+                    if (input.getOrNull(0) == '[') when (input) {
+                        "[outbound_block_list]" -> {
+                            hostnames = null
+                            subnets = null
+                        }
+                        "[black_list]", "[bypass_list]" -> {
+                            hostnames = bypassHostnames
+                            subnets = bypassSubnets
+                        }
+                        "[white_list]", "[proxy_list]" -> {
+                            hostnames = proxyHostnames
+                            subnets = proxySubnets
+                        }
+                        "[reject_all]", "[bypass_all]" -> bypass = true
+                        "[accept_all]", "[proxy_all]" -> bypass = false
+                        else -> error("Unrecognized block: $input")
+                    } else if (subnets != null && input.isNotEmpty()) {
+                        val subnet = Subnet.fromString(input)
+                        if (subnet == null) hostnames!!(input) else subnets!!.add(subnet)
+                    }
+                }
+            }
+            return bypass to if (bypass) proxySubnets else bypassSubnets
+        }
     }
 
     private abstract class BaseSorter<T> : SortedList.Callback<T>() {
@@ -110,39 +155,11 @@ class Acl {
         proxyHostnames.clear()
         subnets.clear()
         urls.clear()
-        bypass = defaultBypass
-        val bypassSubnets by lazy { SortedList(Subnet::class.java, SubnetSorter) }
-        val proxySubnets by lazy { SortedList(Subnet::class.java, SubnetSorter) }
-        var hostnames: SortedList<String>? = if (defaultBypass) proxyHostnames else bypassHostnames
-        var subnets: SortedList<Subnet>? = if (defaultBypass) proxySubnets else bypassSubnets
-        reader.useLines {
-            for (line in it) {
-                val blocks = line.split('#', limit = 2)
-                val url = networkAclParser.matchEntire(blocks.getOrElse(1) { "" })?.groupValues?.getOrNull(1)
-                if (url != null) urls.add(URL(url))
-                when (val input = blocks[0].trim()) {
-                    "[outbound_block_list]" -> {
-                        hostnames = null
-                        subnets = null
-                    }
-                    "[black_list]", "[bypass_list]" -> {
-                        hostnames = bypassHostnames
-                        subnets = bypassSubnets
-                    }
-                    "[white_list]", "[proxy_list]" -> {
-                        hostnames = proxyHostnames
-                        subnets = proxySubnets
-                    }
-                    "[reject_all]", "[bypass_all]" -> bypass = true
-                    "[accept_all]", "[proxy_all]" -> bypass = false
-                    else -> if (subnets != null && input.isNotEmpty()) {
-                        val subnet = Subnet.fromString(input)
-                        if (subnet == null) hostnames!!.add(input) else subnets!!.add(subnet)
-                    }
-                }
-            }
+        val (bypass, subnets) = runBlocking {
+            parse(reader, bypassHostnames::add, proxyHostnames::add, urls::add, defaultBypass)
         }
-        for (item in (if (bypass) proxySubnets else bypassSubnets).asIterable()) this.subnets.add(item)
+        this.bypass = bypass
+        for (item in subnets) this.subnets.add(item)
         return this
     }
 

@@ -99,7 +99,7 @@ def generate_acl(domains):
             ip_content += (domain + "\n")
         except socket.error:
             domain = domain.replace('.', '\.')
-            proxy_content += ('(^|\.)' + domain + '$\n')
+            proxy_content += ('(?:^|\.)' + domain + '$\n')
 
     proxy_content = header + ip_content + proxy_content
 

@@ -20,10 +20,7 @@
 
 package com.github.shadowsocks
 
-import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
@@ -62,6 +59,7 @@ object Core {
 
     lateinit var app: Application
     lateinit var configureIntent: (Context) -> PendingIntent
+    val activity by lazy { app.getSystemService<ActivityManager>()!! }
     val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }

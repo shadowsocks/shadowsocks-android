@@ -30,3 +30,6 @@
 [submodule "core/src/main/jni/libev"]
 	path = core/src/main/jni/libev
 	url = https://git.lighttpd.net/libev.git
+[submodule "core/src/main/jni/re2"]
+	path = core/src/main/jni/re2
+	url = https://github.com/google/re2.git
