@@ -183,7 +183,6 @@ data class Profile(
                                 ?: individual
                         // JSONArray will return strings with "", which should be removed
                         individual = individual.replace("\"", "")
-
                     }
                     udpdns = json["udpdns"].optBoolean ?: udpdns
                     (json["udp_fallback"] as? JsonObject)?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }
