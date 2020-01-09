@@ -26,7 +26,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isGone
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.printLog
 
 class AutoCollapseTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
