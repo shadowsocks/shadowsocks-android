@@ -1,6 +1,7 @@
 * 1.3.2:
   * Fix first key-value pair disappearing with null value. (#2391)
   * Dependency updates:
+    - `androidx.core:core-ktx:1.1.0`;
     - `com.google.android.material:material:1.1.0-rc01`;
     - `org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.61`.
 * 1.3.1:
