@@ -139,13 +139,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 rx += rxTotal
             }
             text1.text = item.formattedName
-            text2.text = ArrayList<String>().apply {
-                if (item.url_group.isNotEmpty()) this += item.url_group
-                if (item.elapsed > 0) this += String.format("%d ms", item.elapsed)
-            }.joinToString("\n")
+            text2.text = item.url_group
             val context = requireContext()
-            traffic.text = if (tx <= 0 && rx <= 0) null else getString(R.string.traffic,
-                    Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
+            traffic.text =ArrayList<String>().apply {
+                if (item.elapsed > 0) this += String.format("%dms", item.elapsed)
+                if (tx > 0 || rx > 0) this +=  getString(R.string.traffic,
+                        Formatter.formatFileSize(context, tx), Formatter.formatFileSize(context, rx))
+            }.joinToString(" \t")
 
             if (item.id == DataStore.profileId) {
                 itemView.isSelected = true
