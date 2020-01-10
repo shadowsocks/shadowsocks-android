@@ -36,15 +36,18 @@ class UndoSnackbarManager<in T>(private val activity: MainActivity, private val 
     private val recycleBin = ArrayList<Pair<Int, T>>()
     private val removedCallback = object : Snackbar.Callback() {
         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-            when (event) {
-                DISMISS_EVENT_SWIPE, DISMISS_EVENT_MANUAL, DISMISS_EVENT_TIMEOUT -> {
-                    commit?.invoke(recycleBin)
-                    recycleBin.clear()
+            if (last != null) {
+                when (event) {
+                    DISMISS_EVENT_SWIPE, DISMISS_EVENT_MANUAL, DISMISS_EVENT_TIMEOUT -> {
+                        commit?.invoke(recycleBin)
+                        recycleBin.clear()
+                    }
                 }
             }
             last = null
         }
     }
+
     private var last: Snackbar? = null
 
     fun remove(items: Collection<Pair<Int, T>>) {
@@ -59,6 +62,7 @@ class UndoSnackbarManager<in T>(private val activity: MainActivity, private val 
             show()
         }
     }
+
     fun remove(vararg items: Pair<Int, T>) = remove(items.toList())
 
     fun flush() {

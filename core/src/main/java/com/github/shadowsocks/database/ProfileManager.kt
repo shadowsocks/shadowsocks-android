@@ -65,10 +65,20 @@ object ProfileManager {
                 if (replace) {
                     lazyClear.value
                 }
-                // if two profiles has the same address, treat them as the same profile and copy stats over
+                // if two profiles has the same address, treat them as the same profile and copy settings over
                 profiles?.get(it.formattedAddress)?.apply {
                     it.tx = tx
                     it.rx = rx
+
+                    it.individual = individual
+                    it.route = route
+                    it.bypass = bypass
+                    it.ipv6 = ipv6
+                    it.metered = metered
+                    it.proxyApps = proxyApps
+                    it.remoteDns = remoteDns
+                    it.udpdns = udpdns
+                    it.udpFallback = udpFallback
                 }
                 it.subscription = Profile.SubscriptionStatus.Active
                 createProfile(it)

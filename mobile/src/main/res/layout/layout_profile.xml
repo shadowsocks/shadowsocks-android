@@ -19,6 +19,19 @@
         android:layout_marginLeft="16dp"
         >
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/subscription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/subscriptions"
+            android:focusable="true"
+            android:paddingTop="15dp"
+            android:paddingEnd="4dp"
+            android:visibility="visible"
+            app:srcCompat="@drawable/ic_cloud_queue"/>
+
         <TextView
             android:id="@android:id/text1"
             android:layout_width="0dp"
@@ -34,6 +47,17 @@
             tools:text="@string/profile_name"/>
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/edit"
+            android:focusable="true"
+            android:padding="12dp"
+            app:srcCompat="@drawable/ic_image_edit"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/share"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -44,17 +68,6 @@
             android:nextFocusLeft="@+id/container"
             android:padding="12dp"
             app:srcCompat="@drawable/ic_social_share"/>
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/edit"
-            android:focusable="true"
-            android:padding="12dp"
-            app:srcCompat="@drawable/ic_image_edit"/>
     </LinearLayout>
 
     <RelativeLayout

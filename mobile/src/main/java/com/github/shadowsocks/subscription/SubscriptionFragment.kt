@@ -46,6 +46,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.useCancellable
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
@@ -236,8 +237,10 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
                 for (url in subscription.urls.asIterable()) {
                     try {
                         val connection = url.openConnection() as HttpURLConnection
-                        ProfileManager.createProfilesFromSubscription(sequenceOf(connection.inputStream),
-                                replace, oldProfiles)
+                        connection.useCancellable {
+                            ProfileManager.createProfilesFromSubscription(sequenceOf(connection.inputStream),
+                                    replace, oldProfiles)
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                         activity.snackbar(e.readableMessage).show()
@@ -259,6 +262,11 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        fetchJob?.cancel()
+        super.onPause()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
