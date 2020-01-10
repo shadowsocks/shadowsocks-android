@@ -42,6 +42,7 @@ android {
     aaptOptions {
         additionalParameters "--preferred-density", "xxxhdpi"
     }
+    lintOptions.checkReleaseBuilds false
 }
 
 androidExtensions {
@@ -50,8 +51,8 @@ androidExtensions {
 
 dependencies {
     implementation project(':core')
-    implementation 'androidx.browser:browser:1.2.0-rc01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta3'
+    implementation 'androidx.browser:browser:1.3.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-rc03'
     implementation 'com.google.zxing:core:3.4.0'
     implementation 'com.takisoft.preferencex:preferencex-simplemenu:1.1.0'
