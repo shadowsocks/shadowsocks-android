@@ -19,19 +19,6 @@
         android:layout_marginLeft="16dp"
         >
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/subscription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/subscriptions"
-            android:focusable="true"
-            android:paddingTop="15dp"
-            android:paddingEnd="4dp"
-            android:visibility="visible"
-            app:srcCompat="@drawable/ic_cloud_queue"/>
-
         <TextView
             android:id="@android:id/text1"
             android:layout_width="0dp"
@@ -45,6 +32,18 @@
             android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold"
             tools:text="@string/profile_name"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/subscription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/subscriptions"
+            android:focusable="true"
+            android:padding="12dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_cloud_queue"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/edit"
