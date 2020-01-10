@@ -27,3 +27,6 @@
 	path = core/src/main/jni/libsodium
 	url = https://github.com/jedisct1/libsodium.git
 	branch = stable
+[submodule "core/src/main/jni/re2"]
+	path = core/src/main/jni/re2
+	url = https://github.com/google/re2.git

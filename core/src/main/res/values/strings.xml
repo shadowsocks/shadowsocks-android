@@ -26,17 +26,17 @@
   <string name="connection_test_fail">Internet Unavailable</string>
   <string name="connection_test_error_status_code">Error code: #%d</string>
 
-    <!-- proxy category -->
-    <string name="group_name">Group Name</string>
-    <string name="profile_name">Profile Name</string>
-    <string name="proxy">Server</string>
-    <string name="remote_port">Remote Port</string>
-    <string name="sitekey">Password</string>
-    <string name="enc_method">Encrypt Method</string>
-    <string name="ssr_protocol">Protocol</string>
-    <string name="ssr_protocol_param">Protocol Param</string>
-    <string name="ssr_obfs">Obfs</string>
-    <string name="ssr_obfs_param">Obfs Param</string>
+  <!-- proxy category -->
+  <string name="group_name">Group Name</string>
+  <string name="profile_name">Profile Name</string>
+  <string name="proxy">Server</string>
+  <string name="remote_port">Remote Port</string>
+  <string name="sitekey">Password</string>
+  <string name="enc_method">Encrypt Method</string>
+  <string name="ssr_protocol">Protocol</string>
+  <string name="ssr_protocol_param">Protocol Param</string>
+  <string name="ssr_obfs">Obfs</string>
+  <string name="ssr_obfs_param">Obfs Param</string>
 
   <!-- feature category -->
   <string name="ipv6">IPv6 Route</string>

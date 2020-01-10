@@ -22,6 +22,8 @@ package com.github.shadowsocks.net
 
 import com.github.shadowsocks.utils.computeIfAbsentCompat
 import com.github.shadowsocks.utils.parseNumericAddress
+import java.net.Inet4Address
+import java.net.Inet6Address
 import java.net.InetAddress
 
 class HostsFile(input: String = "") {
@@ -35,5 +37,9 @@ class HostsFile(input: String = "") {
     }
 
     val configuredHostnames get() = map.size
-    fun resolve(hostname: String) = map[hostname]?.shuffled() ?: emptyList()
+    fun resolve(hostname: String, isIpv6: Boolean): List<InetAddress> {
+        return (map[hostname] ?: return emptyList()).run {
+            if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
+        }.shuffled()
+    }
 }

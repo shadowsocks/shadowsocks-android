@@ -29,7 +29,6 @@ import android.net.Network
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
-import android.system.Os
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
@@ -40,11 +39,12 @@ import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.use
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.Closeable
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
@@ -59,32 +59,26 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         private const val PRIVATE_VLAN4_ROUTER = "172.19.0.2"
         private const val PRIVATE_VLAN6_CLIENT = "fdfe:dcba:9876::1"
         private const val PRIVATE_VLAN6_ROUTER = "fdfe:dcba:9876::2"
-
-        /**
-         * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
-         */
-        private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
-    }
-
-    class CloseableFd(val fd: FileDescriptor) : Closeable {
-        override fun close() = Os.close(fd)
     }
 
     private inner class ProtectWorker : ConcurrentLocalSocketListener("ShadowsocksVpnThread",
             File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
         override fun acceptInternal(socket: LocalSocket) {
             socket.inputStream.read()
-            val fd = socket.ancillaryFileDescriptors!!.single()!!
-            CloseableFd(fd).use {
+            socket.ancillaryFileDescriptors!!.single()!!.use { fd ->
                 socket.outputStream.write(if (underlyingNetwork.let { network ->
-                            if (network != null && Build.VERSION.SDK_INT >= 23) try {
-                                network.bindSocket(fd)
-                                true
+                            if (network != null) try {
+                                DnsResolverCompat.bindSocket(network, fd)
+                                return@let true
                             } catch (e: IOException) {
                                 // suppress ENONET (Machine is not on the network)
                                 if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
-                                false
-                            } else protect(getInt.invoke(fd) as Int)
+                                return@let false
+                            } catch (e: ReflectiveOperationException) {
+                                check(Build.VERSION.SDK_INT < 23)
+                                printLog(e)
+                            }
+                            protect(fd.int)
                         }) 0 else 1)
             }
         }
@@ -140,6 +134,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     }
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
+    override suspend fun getActiveNetwork() = DefaultNetworkListener.get()
     override suspend fun resolver(host: String) = DnsResolverCompat.resolve(DefaultNetworkListener.get(), host)
     override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
 
