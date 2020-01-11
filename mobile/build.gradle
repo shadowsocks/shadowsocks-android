@@ -60,8 +60,8 @@ androidExtensions {
 
 dependencies {
     implementation project(':core')
-    implementation 'androidx.browser:browser:1.2.0-rc01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta3'
+    implementation 'androidx.browser:browser:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
     implementation 'com.google.android.gms:play-services-vision:19.0.0'
     implementation 'com.google.firebase:firebase-ads:18.3.0'

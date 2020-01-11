@@ -30,7 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
  */
 abstract class OptionsCapableActivity : AppCompatActivity() {
     protected fun pluginOptions(intent: Intent = this.intent) = try {
-        PluginOptions(intent.getStringExtra(PluginContract.EXTRA_OPTIONS))
+        PluginOptions("", intent.getStringExtra(PluginContract.EXTRA_OPTIONS))
     } catch (exc: IllegalArgumentException) {
         Toast.makeText(this, exc.message, Toast.LENGTH_SHORT).show()
         PluginOptions()

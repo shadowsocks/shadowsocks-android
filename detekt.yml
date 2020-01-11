@@ -1,4 +1,4 @@
-# https://github.com/arturbosch/detekt/blob/1.1.1/detekt-cli/src/main/resources/default-detekt-config.yml
+# https://github.com/arturbosch/detekt/blob/1.3.1/detekt-cli/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -14,9 +14,11 @@ complexity:
     includeStaticDeclarations: false
   ComplexMethod:
     active: true
-    threshold: 10
+    threshold: 15
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
+    ignoreNestingFunctions: false
+    nestingFunctions: run,let,apply,with,also,use,forEach,isNotNull,ifNull
   LabeledExpression:
     active: false
     ignoredLabels: ""
@@ -245,6 +247,7 @@ naming:
     parameterPattern: '[a-z][A-Za-z0-9]*'
     privateParameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
+    ignoreOverridden: true
   EnumNaming:
     active: true
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
@@ -337,6 +340,8 @@ potential-bugs:
     active: true
   HasPlatformType:
     active: true
+  ImplicitDefaultLocale:
+    active: true
   InvalidRange:
     active: true
   IteratorHasNextCallsNextMethod:
@@ -345,6 +350,8 @@ potential-bugs:
     active: true
   LateinitUsage:
     active: false
+  MapGetWithNotNullAssertionOperator:
+    active: true
   MissingWhenCase:
     active: false
   RedundantElseInWhen:
@@ -354,7 +361,7 @@ potential-bugs:
   UnreachableCode:
     active: true
   UnsafeCallOnNullableType:
-    active: false
+    active: true
   UnsafeCast:
     active: false
   UselessPostfixExpression:
@@ -387,6 +394,12 @@ style:
     active: true
     imports: ''
     forbiddenPatterns: ""
+  ForbiddenMethodCall:
+    active: true
+    methods: ''
+  ForbiddenPublicDataClass:
+    active: true
+    ignorePackages: '*.internal,*.internal.*'
   ForbiddenVoid:
     active: true
     ignoreOverridden: true
@@ -453,6 +466,8 @@ style:
   UnnecessaryAbstractClass:
     active: true
     excludeAnnotatedClasses: "dagger.Module"
+  UnnecessaryAnnotationUseSiteTarget:
+    active: true
   UnnecessaryApply:
     active: true
   UnnecessaryInheritance:
