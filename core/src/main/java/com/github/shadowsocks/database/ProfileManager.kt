@@ -55,13 +55,13 @@ object ProfileManager {
     fun createProfilesFromSubscription(jsons: Sequence<InputStream>) {
         val currentId = DataStore.profileId
         val profiles = getAllProfiles()
-        val subscriptions = mutableMapOf<String, Profile>()
+        val subscriptions = mutableMapOf<Pair<String?, String>, Profile>()
         val toUpdate = mutableSetOf<Long>()
         var feature: Profile? = null
         profiles?.forEach { profile ->  // preprocessing phase
             if (currentId == profile.id) feature = profile
             if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
-            if (subscriptions.putIfAbsentCompat(profile.formattedAddress, profile) != null) {
+            if (subscriptions.putIfAbsentCompat(profile.name to profile.formattedAddress, profile) != null) {
                 delProfile(profile.id)
                 if (currentId == profile.id) DataStore.profileId = 0
             } else if (profile.subscription == Profile.SubscriptionStatus.Active) {
@@ -72,18 +72,19 @@ object ProfileManager {
 
         jsons.asIterable().forEachTry { json ->
             Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
-                val oldProfile = subscriptions[it.formattedAddress]
-                when (oldProfile?.subscription) {
-                    Profile.SubscriptionStatus.Active -> { }    // skip dup subscription
-                    Profile.SubscriptionStatus.Obsolete -> {
-                        oldProfile.password = it.password
-                        oldProfile.method = it.method
-                        oldProfile.subscription = Profile.SubscriptionStatus.Active
+                subscriptions.computeCompat(it.name to it.formattedAddress) { _, oldProfile ->
+                    when (oldProfile?.subscription) {
+                        Profile.SubscriptionStatus.Active -> oldProfile     // skip dup subscription
+                        Profile.SubscriptionStatus.Obsolete -> {
+                            oldProfile.password = it.password
+                            oldProfile.method = it.method
+                            oldProfile.plugin = it.plugin
+                            oldProfile.udpFallback = it.udpFallback
+                            oldProfile.subscription = Profile.SubscriptionStatus.Active
+                            oldProfile
+                        }
+                        else -> createProfile(it.apply { subscription = Profile.SubscriptionStatus.Active })
                     }
-                    else -> createProfile(it.apply {
-                        subscription = Profile.SubscriptionStatus.Active
-                        subscriptions[it.formattedAddress] = it
-                    })
                 }
             }
         }
