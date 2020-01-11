@@ -24,9 +24,7 @@ import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.util.LongSparseArray
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.forEachTry
-import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.*
 import com.google.gson.JsonStreamParser
 import org.json.JSONArray
 import java.io.IOException
@@ -54,36 +52,43 @@ object ProfileManager {
         return profile
     }
 
-    fun createProfilesFromSubscription(jsons: Sequence<InputStream>, replace: Boolean,
-                                       oldProfiles: List<Profile>?) {
-        val profiles = oldProfiles?.associateBy { it.formattedAddress }
-        val feature = profiles?.values?.singleOrNull { it.id == DataStore.profileId }
-        val lazyClear = lazy { clear() }
+    fun createProfilesFromSubscription(jsons: Sequence<InputStream>) {
+        val currentId = DataStore.profileId
+        val profiles = getAllProfiles()
+        val subscriptions = mutableMapOf<String, Profile>()
+        val toUpdate = mutableSetOf<Long>()
+        var feature: Profile? = null
+        profiles?.forEach { profile ->  // preprocessing phase
+            if (currentId == profile.id) feature = profile
+            if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
+            if (subscriptions.putIfAbsentCompat(profile.formattedAddress, profile) != null) {
+                delProfile(profile.id)
+                if (currentId == profile.id) DataStore.profileId = 0
+            } else if (profile.subscription == Profile.SubscriptionStatus.Active) {
+                toUpdate.add(profile.id)
+                profile.subscription = Profile.SubscriptionStatus.Obsolete
+            }
+        }
 
         jsons.asIterable().forEachTry { json ->
             Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
-                if (replace) {
-                    lazyClear.value
+                val oldProfile = subscriptions[it.formattedAddress]
+                when (oldProfile?.subscription) {
+                    Profile.SubscriptionStatus.Active -> { }    // skip dup subscription
+                    Profile.SubscriptionStatus.Obsolete -> {
+                        oldProfile.password = it.password
+                        oldProfile.method = it.method
+                        oldProfile.subscription = Profile.SubscriptionStatus.Active
+                    }
+                    else -> createProfile(it.apply {
+                        subscription = Profile.SubscriptionStatus.Active
+                        subscriptions[it.formattedAddress] = it
+                    })
                 }
-                // if two profiles has the same address, treat them as the same profile and copy settings over
-                profiles?.get(it.formattedAddress)?.apply {
-                    it.tx = tx
-                    it.rx = rx
-
-                    it.individual = individual
-                    it.route = route
-                    it.bypass = bypass
-                    it.ipv6 = ipv6
-                    it.metered = metered
-                    it.proxyApps = proxyApps
-                    it.remoteDns = remoteDns
-                    it.udpdns = udpdns
-                    it.udpFallback = udpFallback
-                }
-                it.subscription = Profile.SubscriptionStatus.Active
-                createProfile(it)
             }
         }
+
+        profiles?.forEach { profile -> if (toUpdate.contains(profile.id)) updateProfile(profile) }
     }
 
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
@@ -107,7 +112,7 @@ object ProfileManager {
         }
     }
 
-    fun serializeToJson(profiles: List<Profile>? = getAllProfiles()): JSONArray? {
+    fun serializeToJson(profiles: List<Profile>? = getActiveProfiles()): JSONArray? {
         if (profiles == null) return null
         val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
         return JSONArray(profiles.map { it.toJson(lookup) }.toTypedArray())
@@ -160,8 +165,18 @@ object ProfileManager {
     }
 
     @Throws(IOException::class)
+    fun getActiveProfiles(): List<Profile>? = try {
+        PrivateDatabase.profileDao.listActive()
+    } catch (ex: SQLiteCantOpenDatabaseException) {
+        throw IOException(ex)
+    } catch (ex: SQLException) {
+        printLog(ex)
+        null
+    }
+
+    @Throws(IOException::class)
     fun getAllProfiles(): List<Profile>? = try {
-        PrivateDatabase.profileDao.list()
+        PrivateDatabase.profileDao.listAll()
     } catch (ex: SQLiteCantOpenDatabaseException) {
         throw IOException(ex)
     } catch (ex: SQLException) {

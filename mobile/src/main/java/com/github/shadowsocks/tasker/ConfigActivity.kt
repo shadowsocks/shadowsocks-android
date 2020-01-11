@@ -71,7 +71,7 @@ class ConfigActivity : AppCompatActivity() {
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
+        internal val profiles = ProfileManager.getActiveProfiles()?.toMutableList() ?: mutableListOf()
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
                 if (position == 0) holder.bindDefault() else holder.bind(profiles[position - 1])

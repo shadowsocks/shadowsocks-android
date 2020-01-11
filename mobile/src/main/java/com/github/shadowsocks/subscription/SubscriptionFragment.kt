@@ -41,7 +41,6 @@ import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.utils.asIterable
@@ -231,29 +230,16 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
             fetchJob = GlobalScope.launch {
                 val subscription = Subscription.instance
-                val oldProfiles = ProfileManager.getAllProfiles()
-                var replace = true
 
                 for (url in subscription.urls.asIterable()) {
                     try {
                         val connection = url.openConnection() as HttpURLConnection
                         connection.useCancellable {
-                            ProfileManager.createProfilesFromSubscription(sequenceOf(connection.inputStream),
-                                    replace, oldProfiles)
+                            ProfileManager.createProfilesFromSubscription(sequenceOf(connection.inputStream))
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
                         activity.snackbar(e.readableMessage).show()
-                    } finally {
-                        replace = false
-                    }
-                }
-
-                val userProfiles = oldProfiles?.filter { it.subscription == Profile.SubscriptionStatus.UserConfigured }
-
-                if (userProfiles != null) {
-                    for (profile in userProfiles.asIterable()) {
-                        ProfileManager.createProfile(profile)
                     }
                 }
 

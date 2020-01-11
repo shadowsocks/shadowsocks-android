@@ -53,10 +53,12 @@ data class Profile(
 
         // user configurable fields
         var name: String? = "",
+
         var host: String = sponsored,
         var remotePort: Int = 8388,
         var password: String = "u1rRWTssNv0p",
         var method: String = "aes-256-cfb",
+
         var route: String = "all",
         var remoteDns: String = "dns.google",
         var proxyApps: Boolean = false,
@@ -252,8 +254,11 @@ data class Profile(
         @Query("SELECT * FROM `Profile` WHERE `id` = :id")
         operator fun get(id: Long): Profile?
 
-        @Query("SELECT * FROM `Profile` ORDER BY `userOrder`")
-        fun list(): List<Profile>
+        @Query("SELECT * FROM `Profile` WHERE `Subscription` != 2 ORDER BY `userOrder`")
+        fun listActive(): List<Profile>
+
+        @Query("SELECT * FROM `Profile`")
+        fun listAll(): List<Profile>
 
         @Query("SELECT MAX(`userOrder`) + 1 FROM `Profile`")
         fun nextOrder(): Long?
