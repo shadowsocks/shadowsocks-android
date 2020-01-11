@@ -27,6 +27,8 @@ import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.BaseSorter
+import com.github.shadowsocks.utils.URLSorter
 import com.github.shadowsocks.utils.asIterable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
@@ -111,26 +113,11 @@ class Acl {
         }
     }
 
-    private abstract class BaseSorter<T> : SortedList.Callback<T>() {
-        override fun onInserted(position: Int, count: Int) { }
-        override fun areContentsTheSame(oldItem: T?, newItem: T?): Boolean = oldItem == newItem
-        override fun onMoved(fromPosition: Int, toPosition: Int) { }
-        override fun onChanged(position: Int, count: Int) { }
-        override fun onRemoved(position: Int, count: Int) { }
-        override fun areItemsTheSame(item1: T?, item2: T?): Boolean = item1 == item2
-        override fun compare(o1: T?, o2: T?): Int =
-                if (o1 == null) if (o2 == null) 0 else 1 else if (o2 == null) -1 else compareNonNull(o1, o2)
-        abstract fun compareNonNull(o1: T, o2: T): Int
-    }
     private open class DefaultSorter<T : Comparable<T>> : BaseSorter<T>() {
         override fun compareNonNull(o1: T, o2: T): Int = o1.compareTo(o2)
     }
     private object StringSorter : DefaultSorter<String>()
     private object SubnetSorter : DefaultSorter<Subnet>()
-    private object URLSorter : BaseSorter<URL>() {
-        private val ordering = compareBy<URL>({ it.host }, { it.port }, { it.file }, { it.protocol })
-        override fun compareNonNull(o1: URL, o2: URL): Int = ordering.compare(o1, o2)
-    }
 
     val bypassHostnames = SortedList(String::class.java, StringSorter)
     val proxyHostnames = SortedList(String::class.java, StringSorter)

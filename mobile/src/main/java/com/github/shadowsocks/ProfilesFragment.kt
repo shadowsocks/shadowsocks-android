@@ -91,6 +91,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
      * Is ProfilesFragment editable at all.
      */
     private val isEnabled get() = (activity as MainActivity).state.let { it.canStop || it == BaseService.State.Stopped }
+
     private fun isProfileEditable(id: Long) =
             (activity as MainActivity).state == BaseService.State.Stopped || id !in Core.activeProfileIds
 
@@ -161,6 +162,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         private val text2 = itemView.findViewById<TextView>(android.R.id.text2)
         private val traffic = itemView.findViewById<TextView>(R.id.traffic)
         private val edit = itemView.findViewById<View>(R.id.edit)
+        private val subscription = itemView.findViewById<View>(R.id.subscription)
         private val adContainer = itemView.findViewById<LinearLayout>(R.id.ad_container)
 
         init {
@@ -168,7 +170,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 item = ProfileManager.getProfile(item.id)!!
                 startConfig(item)
             }
+            subscription.setOnClickListener {
+                item = ProfileManager.getProfile(item.id)!!
+                startConfig(item)
+            }
             TooltipCompat.setTooltipText(edit, edit.contentDescription)
+            TooltipCompat.setTooltipText(subscription, subscription.contentDescription)
             itemView.setOnClickListener(this)
             val share = itemView.findViewById<View>(R.id.share)
             share.setOnClickListener {
@@ -257,6 +264,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 }.build().loadAd(AdRequest.Builder().apply {
                     addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
                     addTestDevice("7509D18EB8AF82F915874FEF53877A64")
+                    addTestDevice("F58907F28184A828DD0DB6F8E38189C6")
+                    addTestDevice("FE983F496D7C5C1878AA163D9420CA97")
                 }.build())
             } else if (nativeAd != null) populateUnifiedNativeAdView(nativeAd!!, nativeAdView!!)
         }
@@ -274,6 +283,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             val editable = isProfileEditable(item.id)
             edit.isEnabled = editable
             edit.alpha = if (editable) 1F else .5F
+            subscription.isEnabled = editable
+            subscription.alpha = if (editable) 1F else .5F
             var tx = item.tx
             var rx = item.rx
             statsCache[item.id]?.apply {
@@ -296,6 +307,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             } else {
                 itemView.isSelected = false
                 if (selectedItem === this) selectedItem = null
+            }
+
+            if (item.subscription == Profile.SubscriptionStatus.Active) {
+                edit.visibility = View.GONE
+                subscription.visibility = View.VISIBLE
+            } else {
+                edit.visibility = View.VISIBLE
+                subscription.visibility = View.GONE
             }
         }
 
@@ -337,6 +356,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) = holder.bind(profiles[position])
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder = ProfileViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.layout_profile, parent, false))
+
         override fun getItemCount(): Int = profiles.size
         override fun getItemId(position: Int): Long = profiles[position].id
 
@@ -365,6 +385,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             updated.add(first)
             notifyItemMoved(from, to)
         }
+
         fun commitMove() {
             updated.forEach { ProfileManager.updateProfile(it) }
             updated.clear()
@@ -374,12 +395,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             profiles.removeAt(pos)
             notifyItemRemoved(pos)
         }
+
         fun undo(actions: List<Pair<Int, Profile>>) {
             for ((index, item) in actions) {
                 profiles.add(index, item)
                 notifyItemInserted(index)
             }
         }
+
         fun commit(actions: List<Pair<Int, Profile>>) {
             for ((_, item) in actions) ProfileManager.delProfile(item.id)
         }
@@ -388,12 +411,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             val index = profiles.indexOfFirst { it.id == id }
             if (index >= 0) notifyItemChanged(index)
         }
+
         fun deepRefreshId(id: Long) {
             val index = profiles.indexOfFirst { it.id == id }
             if (index < 0) return
             profiles[index] = ProfileManager.getProfile(id)!!
             notifyItemChanged(index)
         }
+
         override fun onRemove(profileId: Long) {
             val index = profiles.indexOfFirst { it.id == profileId }
             if (index < 0) return
@@ -446,10 +471,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         ProfileManager.listener = profilesAdapter
         undoManager = UndoSnackbarManager(activity as MainActivity, profilesAdapter::undo, profilesAdapter::commit)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-        ItemTouchHelper.START or ItemTouchHelper.END) {
+                ItemTouchHelper.START or ItemTouchHelper.END) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isProfileEditable((viewHolder as ProfileViewHolder).item.id))
                         super.getSwipeDirs(recyclerView, viewHolder) else 0
+
             override fun getDragDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled) super.getDragDirs(recyclerView, viewHolder) else 0
 
@@ -458,11 +484,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 profilesAdapter.remove(index)
                 undoManager.remove(Pair(index, (viewHolder as ProfileViewHolder).item))
             }
+
             override fun onMove(recyclerView: RecyclerView,
                                 viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
                 profilesAdapter.move(viewHolder.adapterPosition, target.adapterPosition)
                 return true
             }
+
             override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
                 super.clearView(recyclerView, viewHolder)
                 profilesAdapter.commitMove()
@@ -537,7 +565,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         try {
             startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
             return
-        } catch (_: ActivityNotFoundException) { } catch (_: SecurityException) { }
+        } catch (_: ActivityNotFoundException) {
+        } catch (_: SecurityException) {
+        }
         (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
     }
 
@@ -585,6 +615,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             profilesAdapter.refreshId(profileId)
         }
     }
+
     fun onTrafficPersisted(profileId: Long) {
         statsCache.remove(profileId)
         profilesAdapter.deepRefreshId(profileId)

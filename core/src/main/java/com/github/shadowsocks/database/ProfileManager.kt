@@ -54,6 +54,38 @@ object ProfileManager {
         return profile
     }
 
+    fun createProfilesFromSubscription(jsons: Sequence<InputStream>, replace: Boolean,
+                                       oldProfiles: List<Profile>?) {
+        val profiles = oldProfiles?.associateBy { it.formattedAddress }
+        val feature = profiles?.values?.singleOrNull { it.id == DataStore.profileId }
+        val lazyClear = lazy { clear() }
+
+        jsons.asIterable().forEachTry { json ->
+            Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
+                if (replace) {
+                    lazyClear.value
+                }
+                // if two profiles has the same address, treat them as the same profile and copy settings over
+                profiles?.get(it.formattedAddress)?.apply {
+                    it.tx = tx
+                    it.rx = rx
+
+                    it.individual = individual
+                    it.route = route
+                    it.bypass = bypass
+                    it.ipv6 = ipv6
+                    it.metered = metered
+                    it.proxyApps = proxyApps
+                    it.remoteDns = remoteDns
+                    it.udpdns = udpdns
+                    it.udpFallback = udpFallback
+                }
+                it.subscription = Profile.SubscriptionStatus.Active
+                createProfile(it)
+            }
+        }
+    }
+
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
         val profiles = if (replace) getAllProfiles()?.associateBy { it.formattedAddress } else null
         val feature = if (replace) {
@@ -74,6 +106,7 @@ object ProfileManager {
             }
         }
     }
+
     fun serializeToJson(profiles: List<Profile>? = getAllProfiles()): JSONArray? {
         if (profiles == null) return null
         val lookup = LongSparseArray<Profile>(profiles.size).apply { profiles.forEach { put(it.id, it) } }
