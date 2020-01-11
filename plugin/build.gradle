@@ -3,16 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.vanniktech.maven.publish'
 
-@SuppressWarnings("GroovyUnusedDeclaration")
-def getRepositoryUsername() {
-    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
-}
-
-@SuppressWarnings("GroovyUnusedDeclaration")
-def getRepositoryPassword() {
-    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
-}
-
 android {
     compileSdkVersion rootProject.compileSdkVersion
 
@@ -44,12 +34,13 @@ androidExtensions {
 }
 
 mavenPublish {
+
     targets {
         uploadArchives {
             releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            repositoryUsername = getRepositoryUsername()
-            repositoryPassword = getRepositoryPassword()
+            repositoryUsername = findProperty('NEXUS_USERNAME') ?: ''
+            repositoryPassword = findProperty('NEXUS_PASSWORD') ?: ''
         }
     }
 }

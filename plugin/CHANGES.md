@@ -1,3 +1,5 @@
+* 1.3.3:
+  * Fix a build script issue.
 * 1.3.2:
   * Fix first key-value pair disappearing with null value. (#2391)
   * Dependency updates:
