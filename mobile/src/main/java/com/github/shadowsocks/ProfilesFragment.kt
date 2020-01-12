@@ -431,6 +431,12 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             profiles.clear()
             notifyDataSetChanged()
         }
+
+        override fun reloadProfiles() {
+            profiles.clear()
+            ProfileManager.getActiveProfiles()?.let { profiles.addAll(it) }
+            notifyDataSetChanged()
+        }
     }
 
     private var selectedItem: ProfileViewHolder? = null

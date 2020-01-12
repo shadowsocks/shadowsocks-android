@@ -25,6 +25,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -154,7 +155,11 @@ class SubscriptionService : Service() {
             Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
                 subscriptions.computeCompat(it.name to it.formattedAddress) { _, oldProfile ->
                     when (oldProfile?.subscription) {
-                        Profile.SubscriptionStatus.Active -> oldProfile     // skip dup subscription
+                        Profile.SubscriptionStatus.Active -> {
+                            Log.w("SubscriptionService", "Duplicate profiles detected. Please use different profile " +
+                                    "names and/or address:port for better subscription support.")
+                            oldProfile
+                        }
                         Profile.SubscriptionStatus.Obsolete -> {
                             oldProfile.password = it.password
                             oldProfile.method = it.method
@@ -175,6 +180,7 @@ class SubscriptionService : Service() {
         }
 
         profiles?.forEach { profile -> if (toUpdate.contains(profile.id)) ProfileManager.updateProfile(profile) }
+        ProfileManager.listener?.reloadProfiles()
     }
 
     override fun onDestroy() {

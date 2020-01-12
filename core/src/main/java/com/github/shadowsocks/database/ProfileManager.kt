@@ -42,6 +42,7 @@ object ProfileManager {
         fun onAdd(profile: Profile)
         fun onRemove(profileId: Long)
         fun onCleared()
+        fun reloadProfiles()
     }
     var listener: Listener? = null
 
