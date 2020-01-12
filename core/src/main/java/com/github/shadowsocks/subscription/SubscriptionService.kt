@@ -43,6 +43,7 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
+import java.net.URL
 
 class SubscriptionService : Service() {
     companion object {
@@ -74,29 +75,9 @@ class SubscriptionService : Service() {
                     setWhen(0)
                 }
                 Core.notification.notify(NOTIFICATION_ID, notification.build())
-                var counter = 0
+                counter = 0
                 val workers = urls.asIterable().map { url ->
-                    async(Dispatchers.IO) {
-                        val tempFile = File.createTempFile("subscription-", ".json", cacheDir)
-                        try {
-                            (url.openConnection() as HttpURLConnection).useCancellable {
-                                tempFile.outputStream().use { out -> inputStream.copyTo(out) }
-                            }
-                            tempFile
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                            Toast.makeText(this@SubscriptionService, e.readableMessage, Toast.LENGTH_LONG).show()
-                            if (!tempFile.delete()) tempFile.deleteOnExit()
-                            null
-                        } finally {
-                            withContext(Dispatchers.Main) {
-                                counter += 1
-                                Core.notification.notify(NOTIFICATION_ID, notification.apply {
-                                    setProgress(urls.size(), counter, false)
-                                }.build())
-                            }
-                        }
-                    }
+                    async(Dispatchers.IO) { work(url, urls.size(), notification) }
                 }
                 try {
                     val localJsons = workers.awaitAll()
@@ -124,6 +105,31 @@ class SubscriptionService : Service() {
             }
         } else stopSelf(startId)
         return START_NOT_STICKY
+    }
+
+    private var counter = 0
+    private suspend fun work(url: URL, max: Int, notification: NotificationCompat.Builder): File? {
+        val tempFile = File.createTempFile("subscription-", ".json", cacheDir)
+        try {
+            (url.openConnection() as HttpURLConnection).useCancellable {
+                tempFile.outputStream().use { out -> inputStream.copyTo(out) }
+            }
+            return tempFile
+        } catch (e: IOException) {
+            e.printStackTrace()
+            GlobalScope.launch(Dispatchers.Main) {
+                Toast.makeText(this@SubscriptionService, e.readableMessage, Toast.LENGTH_LONG).show()
+            }
+            if (!tempFile.delete()) tempFile.deleteOnExit()
+            return null
+        } finally {
+            withContext(Dispatchers.Main) {
+                counter += 1
+                Core.notification.notify(NOTIFICATION_ID, notification.apply {
+                    setProgress(max, counter, false)
+                }.build())
+            }
+        }
     }
 
     private fun createProfilesFromSubscription(jsons: Sequence<InputStream>) {
