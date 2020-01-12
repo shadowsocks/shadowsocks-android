@@ -90,7 +90,7 @@ class SubscriptionService : Service() {
                         setShowsUserInterface(false)
                     }.build())
                     setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                    setContentTitle(getString(R.string.service_subscription_working))
+                    setContentTitle(getString(R.string.service_subscription_working, 0, urls.size()))
                     setOngoing(true)
                     setProgress(urls.size(), 0, false)
                     setSmallIcon(R.drawable.ic_file_cloud_download)
@@ -148,6 +148,7 @@ class SubscriptionService : Service() {
             withContext(Dispatchers.Main) {
                 counter += 1
                 Core.notification.notify(NOTIFICATION_ID, notification.apply {
+                    setContentTitle(getString(R.string.service_subscription_working, counter, max))
                     setProgress(max, counter, false)
                 }.build())
             }
