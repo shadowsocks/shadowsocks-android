@@ -88,7 +88,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             inputLayout = view.findViewById(R.id.content_layout)
             editText.setText(arg.item)
             editText.addTextChangedListener(this@SubDialogFragment)
-            setTitle(R.string.add_subscription)
+            setTitle(R.string.edit_subscription)
             setPositiveButton(android.R.string.ok, listener)
             setNegativeButton(android.R.string.cancel, null)
             if (arg.item.isNotEmpty()) setNeutralButton(R.string.delete, listener)
