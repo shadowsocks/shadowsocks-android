@@ -22,8 +22,12 @@ package com.github.shadowsocks.subscription
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
@@ -58,16 +62,33 @@ class SubscriptionService : Service() {
                 app.getText(R.string.service_subscription), NotificationManager.IMPORTANCE_LOW)
     }
 
+    private object CancelReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            worker?.cancel()
+        }
+    }
+
+    private var counter = 0
+    private var receiverRegistered = false
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (worker == null) {
             idle.value = false
+            if (!receiverRegistered) registerReceiver(CancelReceiver, IntentFilter(Action.ABORT))
             worker = GlobalScope.launch {
                 val urls = Subscription.instance.urls
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
                     color = ContextCompat.getColor(this@SubscriptionService, R.color.material_primary_500)
                     priority = NotificationCompat.PRIORITY_LOW
+                    addAction(NotificationCompat.Action.Builder(
+                            R.drawable.ic_navigation_close,
+                            getText(R.string.stop),
+                            PendingIntent.getBroadcast(this@SubscriptionService, 0,
+                                    Intent(Action.ABORT).setPackage(packageName), 0)).apply {
+                        setShowsUserInterface(false)
+                    }.build())
                     setCategory(NotificationCompat.CATEGORY_PROGRESS)
                     setContentTitle(getString(R.string.service_subscription_working))
                     setOngoing(true)
@@ -78,12 +99,13 @@ class SubscriptionService : Service() {
                 Core.notification.notify(NOTIFICATION_ID, notification.build())
                 counter = 0
                 val workers = urls.asIterable().map { url ->
-                    async(Dispatchers.IO) { work(url, urls.size(), notification) }
+                    async(Dispatchers.IO) { fetchJson(url, urls.size(), notification) }
                 }
                 try {
                     val localJsons = workers.awaitAll()
                     withContext(Dispatchers.Main) {
                         Core.notification.notify(NOTIFICATION_ID, notification.apply {
+                            setContentTitle(getText(R.string.service_subscription_finishing))
                             setProgress(0, 0, true)
                         }.build())
                         createProfilesFromSubscription(localJsons.asSequence().filterNotNull().map { it.inputStream() })
@@ -108,8 +130,7 @@ class SubscriptionService : Service() {
         return START_NOT_STICKY
     }
 
-    private var counter = 0
-    private suspend fun work(url: URL, max: Int, notification: NotificationCompat.Builder): File? {
+    private suspend fun fetchJson(url: URL, max: Int, notification: NotificationCompat.Builder): File? {
         val tempFile = File.createTempFile("subscription-", ".json", cacheDir)
         try {
             (url.openConnection() as HttpURLConnection).useCancellable {
@@ -185,6 +206,7 @@ class SubscriptionService : Service() {
 
     override fun onDestroy() {
         worker?.cancel()
+        if (receiverRegistered) unregisterReceiver(CancelReceiver)
         super.onDestroy()
     }
 }
