@@ -76,7 +76,8 @@ class SubscriptionService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (worker == null) {
             idle.value = false
-            if (!receiverRegistered) registerReceiver(CancelReceiver, IntentFilter(Action.ABORT))
+            if (!receiverRegistered) registerReceiver(CancelReceiver, IntentFilter(Action.ABORT),
+                    "$packageName.SERVICE", null)
             worker = GlobalScope.launch {
                 val urls = Subscription.instance.urls
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
