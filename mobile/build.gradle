@@ -70,7 +70,6 @@ dependencies {
     implementation 'com.twofortyfouram:android-plugin-api-for-locale:1.0.4'
     implementation 'me.zhanghai.android.fastscroll:library:1.1.0'
     implementation 'xyz.belvi.mobilevision:barcodescanner:2.0.3'
-    implementation 'me.zhanghai.android.materialprogressbar:library:1.6.1'
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidEspressoVersion"

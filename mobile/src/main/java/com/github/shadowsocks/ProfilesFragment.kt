@@ -344,7 +344,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>(), ProfileManager.Listener {
-        internal val profiles = ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf()
+        internal val profiles = ProfileManager.getActiveProfiles()?.toMutableList() ?: mutableListOf()
         private val updated = HashSet<Profile>()
 
         init {
@@ -543,7 +543,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_clipboard -> {
-                val profiles = ProfileManager.getAllProfiles()
+                val profiles = ProfileManager.getActiveProfiles()
                 (activity as MainActivity).snackbar().setText(if (profiles != null) {
                     clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.joinToString("\n")))
                     R.string.action_export_msg

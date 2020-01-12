@@ -126,9 +126,9 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             findPreference<Preference>(Key.password)!!.isEnabled = false
             findPreference<Preference>(Key.method)!!.isEnabled = false
             findPreference<Preference>(Key.remotePort)!!.isEnabled = false
-            findPreference<Preference>(Key.plugin)!!.isEnabled = false
-            findPreference<Preference>(Key.pluginConfigure)!!.isEnabled = false
-
+            plugin.isEnabled = false
+            pluginConfigure.isEnabled = false
+            udpFallback.isEnabled = false
         }
     }
 

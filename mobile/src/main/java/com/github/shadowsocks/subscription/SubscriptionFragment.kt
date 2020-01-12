@@ -33,6 +33,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,23 +42,14 @@ import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.AlertDialogFragment
-import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.readableMessage
-import com.github.shadowsocks.utils.useCancellable
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.parcel.Parcelize
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar
-import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 
@@ -89,7 +81,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             inputLayout = view.findViewById(R.id.content_layout)
             editText.setText(arg.item)
             editText.addTextChangedListener(this@SubDialogFragment)
-            setTitle(R.string.add_subscription)
+            setTitle(R.string.edit_subscription)
             setPositiveButton(android.R.string.ok, listener)
             setNegativeButton(android.R.string.cancel, null)
             if (arg.item.isNotEmpty()) setNeutralButton(R.string.delete, listener)
@@ -219,55 +211,8 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
     private val adapter by lazy { SubscriptionAdapter() }
     private lateinit var list: RecyclerView
-    private lateinit var progress: MaterialProgressBar
     private var mode: ActionMode? = null
-    private lateinit var undoManager: UndoSnackbarManager<Any>
-    private var fetchJob: Job? = null
-
-    private fun fetchServerFromSubscriptions() {
-        if (fetchJob?.isActive != true) {
-            val activity = activity as MainActivity
-            progress.visibility = View.VISIBLE
-
-            fetchJob = GlobalScope.launch {
-                val subscription = Subscription.instance
-                val oldProfiles = ProfileManager.getAllProfiles()
-                var replace = true
-
-                for (url in subscription.urls.asIterable()) {
-                    try {
-                        val connection = url.openConnection() as HttpURLConnection
-                        connection.useCancellable {
-                            ProfileManager.createProfilesFromSubscription(sequenceOf(connection.inputStream),
-                                    replace, oldProfiles)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        activity.snackbar(e.readableMessage).show()
-                    } finally {
-                        replace = false
-                    }
-                }
-
-                val userProfiles = oldProfiles?.filter { it.subscription == Profile.SubscriptionStatus.UserConfigured }
-
-                if (userProfiles != null) {
-                    for (profile in userProfiles.asIterable()) {
-                        ProfileManager.createProfile(profile)
-                    }
-                }
-
-                progress.post {
-                    progress.visibility = View.INVISIBLE
-                }
-            }
-        }
-    }
-
-    override fun onPause() {
-        fetchJob?.cancel()
-        super.onPause()
-    }
+    private lateinit var undoManager: UndoSnackbarManager<URL>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.layout_subscriptions, container, false)
@@ -278,13 +223,15 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         toolbar.setTitle(R.string.subscriptions)
         toolbar.inflateMenu(R.menu.subscription_menu)
         toolbar.setOnMenuItemClickListener(this)
+        SubscriptionService.idle.observe(this) {
+            toolbar.menu.findItem(R.id.action_update_subscription).isEnabled = it
+        }
         val activity = activity as MainActivity
         list = view.findViewById(R.id.list)
         list.setOnApplyWindowInsetsListener(MainListListener)
         list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
-        progress = view.findViewById(R.id.indeterminate_horizontal_progress)
         FastScrollerBuilder(list).useMd2Style().build()
         undoManager = UndoSnackbarManager(activity, adapter::undo)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
@@ -313,7 +260,8 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             true
         }
         R.id.action_update_subscription -> {
-            fetchServerFromSubscriptions()
+            val context = requireContext()
+            context.startService(Intent(context, SubscriptionService::class.java))
             true
         }
         else -> false
