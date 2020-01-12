@@ -24,7 +24,9 @@ import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.util.LongSparseArray
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.forEachTry
+import com.github.shadowsocks.utils.printLog
 import com.google.gson.JsonStreamParser
 import org.json.JSONArray
 import java.io.IOException
@@ -50,46 +52,6 @@ object ProfileManager {
         profile.id = PrivateDatabase.profileDao.create(profile)
         listener?.onAdd(profile)
         return profile
-    }
-
-    fun createProfilesFromSubscription(jsons: Sequence<InputStream>) {
-        val currentId = DataStore.profileId
-        val profiles = getAllProfiles()
-        val subscriptions = mutableMapOf<Pair<String?, String>, Profile>()
-        val toUpdate = mutableSetOf<Long>()
-        var feature: Profile? = null
-        profiles?.forEach { profile ->  // preprocessing phase
-            if (currentId == profile.id) feature = profile
-            if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
-            if (subscriptions.putIfAbsentCompat(profile.name to profile.formattedAddress, profile) != null) {
-                delProfile(profile.id)
-                if (currentId == profile.id) DataStore.profileId = 0
-            } else if (profile.subscription == Profile.SubscriptionStatus.Active) {
-                toUpdate.add(profile.id)
-                profile.subscription = Profile.SubscriptionStatus.Obsolete
-            }
-        }
-
-        jsons.asIterable().forEachTry { json ->
-            Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
-                subscriptions.computeCompat(it.name to it.formattedAddress) { _, oldProfile ->
-                    when (oldProfile?.subscription) {
-                        Profile.SubscriptionStatus.Active -> oldProfile     // skip dup subscription
-                        Profile.SubscriptionStatus.Obsolete -> {
-                            oldProfile.password = it.password
-                            oldProfile.method = it.method
-                            oldProfile.plugin = it.plugin
-                            oldProfile.udpFallback = it.udpFallback
-                            oldProfile.subscription = Profile.SubscriptionStatus.Active
-                            oldProfile
-                        }
-                        else -> createProfile(it.apply { subscription = Profile.SubscriptionStatus.Active })
-                    }
-                }
-            }
-        }
-
-        profiles?.forEach { profile -> if (toUpdate.contains(profile.id)) updateProfile(profile) }
     }
 
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {

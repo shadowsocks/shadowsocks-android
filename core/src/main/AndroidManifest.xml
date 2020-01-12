@@ -61,6 +61,11 @@
             android:exported="false">
         </service>
 
+        <service
+            android:name="com.github.shadowsocks.subscription.SubscriptionService"
+            android:exported="false">
+        </service>
+
         <activity
             android:name="com.github.shadowsocks.UrlImportActivity"
             android:theme="@style/Theme.AppCompat.Translucent"

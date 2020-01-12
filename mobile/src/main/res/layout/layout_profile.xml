@@ -43,7 +43,7 @@
             android:focusable="true"
             android:padding="12dp"
             android:visibility="gone"
-            app:srcCompat="@drawable/ic_cloud_queue"/>
+            app:srcCompat="@drawable/ic_file_cloud_queue"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/edit"

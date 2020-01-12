@@ -140,6 +140,9 @@
   <string name="add_subscription">Add a subscription</string>
   <string name="edit_subscription">Edit subscription</string>
   <string name="update_subscription">Refresh servers from subscription</string>
+  <string name="service_subscription">Subscription Service</string>
+  <string name="service_subscription_working">Syncing subscriptions… (%d of %d)</string>
+  <string name="service_subscription_finishing">Finishing up…</string>
 
   <!-- acl -->
   <string name="custom_rules">Custom rules</string>
