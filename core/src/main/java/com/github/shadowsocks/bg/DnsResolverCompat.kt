@@ -26,14 +26,15 @@ import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
+import android.os.Looper
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import com.github.shadowsocks.Core
+import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.use
 import kotlinx.coroutines.*
 import java.io.FileDescriptor
 import java.io.IOException
@@ -61,12 +62,15 @@ sealed class DnsResolverCompat {
          */
         private val address4 = "8.8.8.8".parseNumericAddress()!!
         private val address6 = "2000::".parseNumericAddress()!!
-        fun haveIpv4(network: Network) = checkConnectivity(network, OsConstants.AF_INET, address4)
-        fun haveIpv6(network: Network) = checkConnectivity(network, OsConstants.AF_INET6, address6)
-        private fun checkConnectivity(network: Network, domain: Int, addr: InetAddress) = try {
-            Os.socket(domain, OsConstants.SOCK_DGRAM, OsConstants.IPPROTO_UDP).use { socket ->
+        suspend fun haveIpv4(network: Network) = checkConnectivity(network, OsConstants.AF_INET, address4)
+        suspend fun haveIpv6(network: Network) = checkConnectivity(network, OsConstants.AF_INET6, address6)
+        private suspend fun checkConnectivity(network: Network, domain: Int, addr: InetAddress) = try {
+            val socket = Os.socket(domain, OsConstants.SOCK_DGRAM, OsConstants.IPPROTO_UDP)
+            try {
                 instance.bindSocket(network, socket)
-                Os.connect(socket, addr, 0)
+                instance.connectUdp(socket, addr)
+            } finally {
+                socket.closeQuietly()
             }
             true
         } catch (_: IOException) {
@@ -93,6 +97,8 @@ sealed class DnsResolverCompat {
 
     @Throws(IOException::class)
     abstract fun bindSocket(network: Network, socket: FileDescriptor)
+    internal open suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int = 0) =
+            Os.connect(fd, address, port)
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
 
@@ -108,6 +114,12 @@ sealed class DnsResolverCompat {
             if (err == 0) return
             val message = "Binding socket to network $netId"
             throw IOException(message, ErrnoException(message, -err))
+        }
+
+        override suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int) {
+            if (Looper.getMainLooper().thread == Thread.currentThread()) withContext(Dispatchers.IO) {  // #2405
+                super.connectUdp(fd, address, port)
+            } else super.connectUdp(fd, address, port)
         }
 
         /**
