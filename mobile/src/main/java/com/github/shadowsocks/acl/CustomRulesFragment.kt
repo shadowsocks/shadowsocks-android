@@ -400,7 +400,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         list.adapter = adapter
         FastScrollerBuilder(list).useMd2Style().build()
         undoManager = UndoSnackbarManager(activity, adapter::undo)
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =

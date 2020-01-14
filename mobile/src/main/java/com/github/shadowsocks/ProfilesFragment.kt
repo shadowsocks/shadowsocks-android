@@ -477,7 +477,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         ProfileManager.listener = profilesAdapter
         undoManager = UndoSnackbarManager(activity as MainActivity, profilesAdapter::undo, profilesAdapter::commit)
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-                ItemTouchHelper.START or ItemTouchHelper.END) {
+                ItemTouchHelper.START) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isProfileEditable((viewHolder as ProfileViewHolder).item.id))
                         super.getSwipeDirs(recyclerView, viewHolder) else 0
