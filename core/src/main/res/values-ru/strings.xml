@@ -181,7 +181,7 @@
     <string name="file_manager_missing">"Установите файловый менеджер"</string>
     <string name="tcp_fastopen_failure">"Не удалось переключить"</string>
     <string name="udp_fallback">"Возврат к UDP"</string>
-    <string name="action_replace_file">"Заменить из файла..."</string>
+    <string name="action_replace_file">"Заменить из файла…"</string>
     <string name="off">"Выкл"</string>
     <string name="proxied_apps_mode">"Режим"</string>
     <string name="metered">"Лимитное соединение"</string>
