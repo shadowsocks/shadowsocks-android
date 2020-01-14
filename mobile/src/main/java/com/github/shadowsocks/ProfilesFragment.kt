@@ -111,8 +111,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 return if (flipper) first++ else last--
             }
         }.asSequence().toList().reversed()) {
-            val viewHolder = profilesList.findViewHolderForAdapterPosition(i) as ProfileViewHolder
-            if (viewHolder.item.isSponsored) {
+            val viewHolder = profilesList.findViewHolderForAdapterPosition(i) as? ProfileViewHolder
+            if (viewHolder?.item?.isSponsored == true) {
                 viewHolder.populateUnifiedNativeAdView(nativeAd!!, nativeAdView!!)
                 // might be in the middle of a layout after scrolling, need to wait
                 withContext(Dispatchers.Main) { profilesAdapter.notifyItemChanged(i) }
