@@ -30,6 +30,7 @@ import android.os.Looper
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
@@ -52,7 +53,8 @@ sealed class DnsResolverCompat {
             when (Build.VERSION.SDK_INT) {
                 in 29..Int.MAX_VALUE -> DnsResolverCompat29
                 in 23 until 29 -> DnsResolverCompat23
-                in 21 until 23 -> DnsResolverCompat21()
+                22 -> DnsResolverCompat22
+                21 -> DnsResolverCompat21()
                 else -> error("Unsupported API level")
             }
         }
@@ -136,6 +138,25 @@ sealed class DnsResolverCompat {
                 GlobalScope.async(unboundedIO) { network.getAllByName(host) }.await()
         override suspend fun resolveOnActiveNetwork(host: String) =
                 GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
+    }
+
+    @TargetApi(22)
+    private object DnsResolverCompat22 : DnsResolverCompat21() {
+        private val bindSocketFd by lazy {
+            Network::class.java.getDeclaredMethod("bindSocketFd").apply { isAccessible = true }
+        }
+        override fun bindSocket(network: Network, socket: FileDescriptor) {
+            try {
+                bindSocketFd.invoke(network, socket)
+            } catch (e1: ReflectiveOperationException) {
+                try {
+                    super.bindSocket(network, socket)
+                    Crashlytics.logException(e1)
+                } catch (e2: ReflectiveOperationException) {
+                    throw e1.apply { addSuppressed(e2) }
+                }
+            }
+        }
     }
 
     @TargetApi(23)
