@@ -28,4 +28,6 @@
     <string name="yes">"是"</string>
     <string name="no">"否"</string>
     <string name="apply">"套用"</string>
+    <string name="file_manager_missing">"請安裝文件管理器，如 MiXplorer"</string>
+    <string name="browse">"瀏覽…"</string>
 </resources>

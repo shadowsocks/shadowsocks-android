@@ -26,14 +26,16 @@ import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
+import android.os.Looper
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
+import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.use
 import kotlinx.coroutines.*
 import java.io.FileDescriptor
 import java.io.IOException
@@ -51,7 +53,8 @@ sealed class DnsResolverCompat {
             when (Build.VERSION.SDK_INT) {
                 in 29..Int.MAX_VALUE -> DnsResolverCompat29
                 in 23 until 29 -> DnsResolverCompat23
-                in 21 until 23 -> DnsResolverCompat21()
+                22 -> DnsResolverCompat22
+                21 -> DnsResolverCompat21()
                 else -> error("Unsupported API level")
             }
         }
@@ -61,12 +64,15 @@ sealed class DnsResolverCompat {
          */
         private val address4 = "8.8.8.8".parseNumericAddress()!!
         private val address6 = "2000::".parseNumericAddress()!!
-        fun haveIpv4(network: Network) = checkConnectivity(network, OsConstants.AF_INET, address4)
-        fun haveIpv6(network: Network) = checkConnectivity(network, OsConstants.AF_INET6, address6)
-        private fun checkConnectivity(network: Network, domain: Int, addr: InetAddress) = try {
-            Os.socket(domain, OsConstants.SOCK_DGRAM, OsConstants.IPPROTO_UDP).use { socket ->
+        suspend fun haveIpv4(network: Network) = checkConnectivity(network, OsConstants.AF_INET, address4)
+        suspend fun haveIpv6(network: Network) = checkConnectivity(network, OsConstants.AF_INET6, address6)
+        private suspend fun checkConnectivity(network: Network, domain: Int, addr: InetAddress) = try {
+            val socket = Os.socket(domain, OsConstants.SOCK_DGRAM, OsConstants.IPPROTO_UDP)
+            try {
                 instance.bindSocket(network, socket)
-                Os.connect(socket, addr, 0)
+                instance.connectUdp(socket, addr)
+            } finally {
+                socket.closeQuietly()
             }
             true
         } catch (_: IOException) {
@@ -93,6 +99,8 @@ sealed class DnsResolverCompat {
 
     @Throws(IOException::class)
     abstract fun bindSocket(network: Network, socket: FileDescriptor)
+    internal open suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int = 0) =
+            Os.connect(fd, address, port)
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
 
@@ -110,6 +118,12 @@ sealed class DnsResolverCompat {
             throw IOException(message, ErrnoException(message, -err))
         }
 
+        override suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int) {
+            if (Looper.getMainLooper().thread == Thread.currentThread()) withContext(Dispatchers.IO) {  // #2405
+                super.connectUdp(fd, address, port)
+            } else super.connectUdp(fd, address, port)
+        }
+
         /**
          * This dispatcher is used for noncancellable possibly-forever-blocking operations in network IO.
          *
@@ -124,6 +138,25 @@ sealed class DnsResolverCompat {
                 GlobalScope.async(unboundedIO) { network.getAllByName(host) }.await()
         override suspend fun resolveOnActiveNetwork(host: String) =
                 GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
+    }
+
+    @TargetApi(22)
+    private object DnsResolverCompat22 : DnsResolverCompat21() {
+        private val bindSocketFd by lazy {
+            Network::class.java.getDeclaredMethod("bindSocketFd").apply { isAccessible = true }
+        }
+        override fun bindSocket(network: Network, socket: FileDescriptor) {
+            try {
+                bindSocketFd.invoke(network, socket)
+            } catch (e1: ReflectiveOperationException) {
+                try {
+                    super.bindSocket(network, socket)
+                    Crashlytics.logException(e1)
+                } catch (e2: ReflectiveOperationException) {
+                    throw e2.apply { addSuppressed(e1) }
+                }
+            }
+        }
     }
 
     @TargetApi(23)

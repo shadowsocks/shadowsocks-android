@@ -26,7 +26,7 @@
     <string name="remote_dns">"سيرفر ال DNS"</string>
     <string name="stat_summary">"ارسل: \t%3$s\t↑\t%1$s
 استقبل: \t%4$s\t↓\t%2$s"</string>
-    <string name="connection_test_testing">"اختبار الاتصال..."</string>
+    <string name="connection_test_testing">"اختبار الاتصال…"</string>
     <string name="connection_test_error">"فشل فحص اتصال الانترنت: %s"</string>
     <string name="connection_test_fail">"لا يوجد اتصال بالانترنت"</string>
     <string name="connection_test_error_status_code">"خطآ رقم: #%d"</string>

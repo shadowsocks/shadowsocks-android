@@ -73,6 +73,7 @@
     <string name="service_failed">"連線至遠端伺服器失敗"</string>
     <string name="stop">"停止"</string>
     <string name="stopping">"關閉中…"</string>
+    <string name="vpn_error">"後台服務啟動失敗：%s"</string>
     <string name="reboot_required">"VPN 服務啟動失敗。您或許需要重新啟動您的裝置。"</string>
     <string name="profile_invalid_input">"未找到有效的設定檔資料。"</string>
 
@@ -167,4 +168,39 @@
     <string name="service_transproxy">"透明代理服務"</string>
     <string name="vpn_permission_denied">"没有權限創建 VPN 服務"</string>
     <string name="auto_connect_summary_v24">"允許 Shadowsocks 隨系統啟動，建議使用始終開啟的 VPN"</string>
+    <string name="direct_boot_aware">"允許鎖屏時切換"</string>
+    <string name="direct_boot_aware_summary">"選中的配置信息會不那麼安全"</string>
+    <string name="acl_rule_online_config">"在線規則文件 URL"</string>
+    <string name="action_import_file">"從文件導入…"</string>
+    <string name="night_mode">"夜間模式"</string>
+    <string name="night_mode_system">"跟隨系統"</string>
+    <string name="night_mode_auto">"自動"</string>
+    <string name="night_mode_on">"開啟"</string>
+    <string name="night_mode_off">"關閉"</string>
+    <string name="send_email">"發送電子郵件"</string>
+    <string name="action_export_more">"導出…"</string>
+    <string name="action_export_file">"導出至文件…"</string>
+    <string name="cleartext_http_warning">"HTTP 明文流量不安全"</string>
+    <string name="share_over_lan">"通過局域網分享"</string>
+    <string name="connection_test_pending">"檢查連接"</string>
+    <string name="file_manager_missing">"請安裝文件管理器，如 MiXplorer"</string>
+    <string name="tcp_fastopen_failure">"切換失敗"</string>
+    <string name="udp_fallback">"UDP 配置"</string>
+    <string name="action_replace_file">"從文件替換…"</string>
+    <string name="off">"關"</string>
+    <string name="proxied_apps_mode">"模式"</string>
+    <string name="metered">"網絡限制"</string>
+    <string name="metered_summary">"使系統視此 VPN 為按流量計費"</string>
+    <plurals name="hosts_summary">
+        <item quantity="other">"配置了 %d 個主機名"</item>
+    </plurals>
+
+    <!-- subscriptions -->
+    <string name="subscriptions">"訂閱"</string>
+    <string name="add_subscription">"添加訂閱"</string>
+    <string name="edit_subscription">"編輯訂閱"</string>
+    <string name="update_subscription">"更新訂閱"</string>
+    <string name="service_subscription">"訂閱服務"</string>
+    <string name="service_subscription_working">"正在更新訂閱 (%d / %d)"</string>
+    <string name="service_subscription_finishing">"訂閱更新中"</string>
 </resources>

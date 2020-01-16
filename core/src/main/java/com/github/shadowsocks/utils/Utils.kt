@@ -66,13 +66,9 @@ val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
 val FileDescriptor.int get() = getInt.invoke(this) as Int
 
-fun <T> FileDescriptor.use(block: (FileDescriptor) -> T) = try {
-    block(this)
-} finally {
-    try {
-        Os.close(this)
-    } catch (_: ErrnoException) { }
-}
+fun FileDescriptor.closeQuietly() = try {
+    Os.close(this)
+} catch (_: ErrnoException) { }
 
 private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {

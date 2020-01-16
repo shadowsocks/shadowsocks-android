@@ -169,6 +169,7 @@
     <string name="service_transproxy">"トランスプロキシサービス"</string>
     <string name="vpn_permission_denied">"VPNサービス作成のアクセス許可が拒否されました"</string>
     <string name="auto_connect_summary_v24">"起動時にShadowsockを有効。 VPN常時接続の使用をお勧めします"</string>
+    <string name="direct_boot_aware">"ロック画面の切り替えを許可する"</string>
     <string name="direct_boot_aware_summary">"選択されたプロファイル情報はより少ない保護を受けることになります"</string>
     <string name="acl_rule_online_config">"オンライン設定のURL"</string>
     <string name="action_import_file">"ファイルからのインポート"</string>
@@ -188,4 +189,13 @@
     <string name="proxied_apps_mode">"モード"</string>
     <string name="metered">"従量制提示"</string>
     <string name="metered_summary">"VPNは従量制であることをシステムに知らせる"</string>
+
+    <!-- subscriptions -->
+    <string name="subscriptions">"購読する"</string>
+    <string name="add_subscription">"サブスクリプションを追加"</string>
+    <string name="edit_subscription">"サブスクリプションを編集"</string>
+    <string name="update_subscription">"サブスクリプションを更新"</string>
+    <string name="service_subscription">"サブスクリプションサービス"</string>
+    <string name="service_subscription_working">"サブスクリプションの更新（％d /％d）"</string>
+    <string name="service_subscription_finishing">"サブスクリプション更新"</string>
 </resources>

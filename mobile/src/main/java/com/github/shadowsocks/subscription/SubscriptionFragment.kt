@@ -193,8 +193,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
     }
 
-    private val isEnabled get() = (activity as MainActivity).state == BaseService.State.Stopped
-
     private val adapter by lazy { SubscriptionAdapter() }
     private lateinit var list: RecyclerView
     private var mode: ActionMode? = null
@@ -219,10 +217,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
         FastScrollerBuilder(list).useMd2Style().build()
-        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START or ItemTouchHelper.END) {
-            override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    if (isEnabled) super.getSwipeDirs(recyclerView, viewHolder) else 0
-
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
                     adapter.del(viewHolder.adapterPosition)
 

@@ -39,9 +39,9 @@ import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.printLog
-import com.github.shadowsocks.utils.use
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -65,7 +65,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
         override fun acceptInternal(socket: LocalSocket) {
             socket.inputStream.read()
-            socket.ancillaryFileDescriptors!!.single()!!.use { fd ->
+            val fd = socket.ancillaryFileDescriptors!!.single()!!
+            try {
                 socket.outputStream.write(if (underlyingNetwork.let { network ->
                             if (network != null) try {
                                 DnsResolverCompat.bindSocket(network, fd)
@@ -80,6 +81,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             }
                             protect(fd.int)
                         }) 0 else 1)
+            } finally {
+                fd.closeQuietly()
             }
         }
     }

@@ -56,9 +56,8 @@ class SubscriptionService : Service() {
 
         val idle = MutableLiveData<Boolean>(true)
 
-        val notificationChannel
-            @RequiresApi(26) get() = NotificationChannel(NOTIFICATION_CHANNEL,
-                    app.getText(R.string.service_subscription), NotificationManager.IMPORTANCE_LOW)
+        val notificationChannel @RequiresApi(26) get() = NotificationChannel(NOTIFICATION_CHANNEL,
+                app.getText(R.string.service_subscription), NotificationManager.IMPORTANCE_LOW)
     }
 
     private object CancelReceiver : BroadcastReceiver() {
@@ -154,8 +153,7 @@ class SubscriptionService : Service() {
         val subscriptions = mutableMapOf<Pair<String?, String>, Profile>()
         val toUpdate = mutableSetOf<Long>()
         var feature: Profile? = null
-        profiles?.forEach { profile ->
-            // preprocessing phase
+        profiles?.forEach { profile ->  // preprocessing phase
             if (currentId == profile.id) feature = profile
             if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
             if (subscriptions.putIfAbsentCompat(profile.name to profile.formattedAddress, profile) != null) {
