@@ -150,6 +150,9 @@
   <string name="service_subscription">Subscription Service</string>
   <string name="service_subscription_working">Syncing subscriptions… (%1$d of %2$d)</string>
   <string name="service_subscription_finishing">Finishing up…</string>
+  <string name="status_empty">"无效链接"</string>
+  <string name="status_network_error">"更新失败"</string>
+  <string name="status_name_changed">"订阅过期，重新添加"</string>
 
   <!-- acl -->
   <string name="custom_rules">Custom rules</string>
@@ -159,7 +162,7 @@
   <string name="acl_rule_templates_domain">Domain name and all its subdomain names</string>
   <string name="acl_rule_online_config">URL to online config</string>
   <string name="edit_rule">Edit rule</string>
-  <string name="cleartext_http_warning">Cleartext HTTP traffic is insecure</string>
+  <string name="cleartext_http_warning">"不允许 HTTP 明文流量"</string>
 
   <!-- plugin -->
   <string name="plugin">Plugin</string>

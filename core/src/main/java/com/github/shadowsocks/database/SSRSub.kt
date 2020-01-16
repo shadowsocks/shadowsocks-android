@@ -1,6 +1,8 @@
 package com.github.shadowsocks.database
 
+import android.content.Context
 import androidx.room.*
+import com.github.shadowsocks.core.R
 
 @Entity
 class SSRSub(
@@ -40,7 +42,15 @@ class SSRSub(
             NORMAL -> url_group
             EMPTY -> "Invalid Link($url_group)"
             NETWORK_ERROR -> "Network Error($url_group)"
-            NAME_CHANGED->"Name Changed(old name: $url_group) Stop Update"
+            NAME_CHANGED -> "Name Changed(old name: $url_group) Stop Update"
             else -> throw IllegalArgumentException("status: $status")
         }
+
+    fun getStatue(context: Context) = when (status) {
+        NORMAL -> ""
+        EMPTY -> context.getString(R.string.status_empty)
+        NETWORK_ERROR -> context.getString(R.string.status_network_error)
+        NAME_CHANGED -> context.getString(R.string.status_name_changed)
+        else -> throw IllegalArgumentException("status: $status")
+    }
 }

@@ -61,6 +61,10 @@ object ProfileManager {
         val second: Long = Core.currentProfile?.second?.id ?: -1
         profiles.forEach {
             if (it.id != first && it.id != second) delProfile(it.id)
+            else {
+                it.subscription=Profile.SubscriptionStatus.Obsolete
+                updateProfile(it)
+            }
         }
     }
 
@@ -72,7 +76,10 @@ object ProfileManager {
                 return@filter false
             }
             return@filter true
-        }.forEach { createProfile(it) }
+        }.forEach {
+            it.subscription = Profile.SubscriptionStatus.Active
+            createProfile(it)
+        }
         deletProfiles(old)
     }
 

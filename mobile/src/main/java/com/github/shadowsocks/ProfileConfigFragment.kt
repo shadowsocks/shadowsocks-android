@@ -98,12 +98,15 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), OnPreferenceDataStoreC
 
         val profile = ProfileManager.getProfile(profileId) ?: Profile()
         if (profile.subscription == Profile.SubscriptionStatus.Active) {
+            findPreference<Preference>(Key.group)!!.isEnabled = false
             findPreference<Preference>(Key.name)!!.isEnabled = false
             findPreference<Preference>(Key.host)!!.isEnabled = false
             findPreference<Preference>(Key.password)!!.isEnabled = false
             findPreference<Preference>(Key.method)!!.isEnabled = false
             findPreference<Preference>(Key.remotePort)!!.isEnabled = false
-            udpFallback.isEnabled = false
+            findPreference<Preference>(Key.protocol)!!.isEnabled = false
+            findPreference<Preference>(Key.protocol_param)!!.isEnabled = false
+            findPreference<Preference>(Key.obfs)!!.isEnabled = false
         }
     }
 

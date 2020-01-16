@@ -41,7 +41,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
-import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.SSRSub
 import com.github.shadowsocks.database.SSRSubManager
 import com.github.shadowsocks.plugin.AlertDialogFragment
@@ -82,13 +81,13 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             editText = view.findViewById(R.id.content)
             inputLayout = view.findViewById(R.id.content_layout)
             editText.setText(arg.url)
-            if (arg.url_group.isEmpty()) setTitle(R.string.edit_subscription) else setTitle(arg.url_group)
+            if (arg.url_group.isEmpty()) setTitle(R.string.add_subscription) else setTitle(arg.url_group)
             setPositiveButton(android.R.string.ok, listener)
             setNegativeButton(android.R.string.cancel, null)
             if (arg.url.isNotEmpty()) {
                 editText.keyListener = null
                 editText.setTextIsSelectable(true)
-                setNeutralButton(R.string.delete, listener)
+                setNeutralButton(R.string.ssrsub_remove_tip_delete, listener)
             } else {
                 editText.addTextChangedListener(this@SubDialogFragment)
             }
@@ -110,8 +109,10 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             var message = ""
             positive.isEnabled = try {
                 val url = URL(value.toString())
-                if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
-                true
+                if ("http".equals(url.protocol, true)) {
+                    message = getString(R.string.cleartext_http_warning)
+                    false
+                } else true
             } catch (e: MalformedURLException) {
                 message = e.readableMessage
                 false
@@ -143,13 +144,14 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             view.setBackgroundResource(R.drawable.background_selectable)
         }
 
+        @SuppressLint("SetTextI18n")
         fun bind(item: SSRSub) {
             this.item = item
-            text.text = item.displayName
+            text.text = "${item.getStatue(requireContext())}\t${item.url_group}"
         }
 
         override fun onClick(v: View?) {
-            if (item.url_group.isEmpty()) return
+            if (item.id == 0L) return
             SubDialogFragment().withArg(SubItem(adapterPosition, item.url, item.url_group))
                     .show(this@SubscriptionFragment, REQUEST_CODE_EDIT)
         }
@@ -184,7 +186,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             remove(i)
         }
 
-
         fun updateAll() {
             subscription.clear()
             subscription.addAll(SSRSubManager.getAllSSRSub())
@@ -218,8 +219,11 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         list.adapter = adapter
         FastScrollerBuilder(list).useMd2Style().build()
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.START) {
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
-                    adapter.del(viewHolder.adapterPosition)
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val index = viewHolder.adapterPosition
+                if ((viewHolder as SubViewHolder).item.id == 0L) adapter.notifyItemChanged(index)
+                else adapter.del(index)
+            }
 
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                                 target: RecyclerView.ViewHolder): Boolean = false
@@ -252,7 +256,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         when (resultCode) {
             DialogInterface.BUTTON_POSITIVE -> {
                 if (requestCode != REQUEST_CODE_ADD) return super.onActivityResult(requestCode, resultCode, data)
-                val pos = adapter.add(SSRSub(url = ret.url, url_group = "拉取中"))
+                val pos = adapter.add(SSRSub(url = ret.url, url_group = getString(R.string.service_subscription_finishing)))
                 list.post { list.scrollToPosition(pos) }
                 GlobalScope.launch(Dispatchers.IO) {
                     val new = SSRSubManager.create(ret.url)

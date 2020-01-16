@@ -107,7 +107,7 @@ class SubscriptionService : Service() {
                             setContentTitle(getText(R.string.service_subscription_finishing))
                             setProgress(0, 0, true)
                         }.build())
-                        //createProfilesFromSubscription(localJsons.asSequence().filterNotNull().map { it.inputStream() })
+                        ProfileManager.listener?.reloadProfiles()
                     }
                 } finally {
                     for (worker in workers) {
@@ -145,56 +145,6 @@ class SubscriptionService : Service() {
                 }.build())
             }
         }
-    }
-
-    private fun createProfilesFromSubscription(jsons: Sequence<InputStream>) {
-        val currentId = DataStore.profileId
-        val profiles = ProfileManager.getAllProfiles()
-        val subscriptions = mutableMapOf<Pair<String?, String>, Profile>()
-        val toUpdate = mutableSetOf<Long>()
-        var feature: Profile? = null
-        profiles?.forEach { profile ->  // preprocessing phase
-            if (currentId == profile.id) feature = profile
-            if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
-            if (subscriptions.putIfAbsentCompat(profile.name to profile.formattedAddress, profile) != null) {
-                ProfileManager.delProfile(profile.id)
-                if (currentId == profile.id) DataStore.profileId = 0
-            } else if (profile.subscription == Profile.SubscriptionStatus.Active) {
-                toUpdate.add(profile.id)
-                profile.subscription = Profile.SubscriptionStatus.Obsolete
-            }
-        }
-
-        for (json in jsons.asIterable()) try {
-            Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
-                subscriptions.computeCompat(it.name to it.formattedAddress) { _, oldProfile ->
-                    when (oldProfile?.subscription) {
-                        Profile.SubscriptionStatus.Active -> {
-                            Log.w("SubscriptionService", "Duplicate profiles detected. Please use different profile " +
-                                    "names and/or address:port for better subscription support.")
-                            oldProfile
-                        }
-                        Profile.SubscriptionStatus.Obsolete -> {
-                            oldProfile.password = it.password
-                            oldProfile.method = it.method
-                            oldProfile.plugin = it.plugin
-                            oldProfile.udpFallback = it.udpFallback
-                            oldProfile.subscription = Profile.SubscriptionStatus.Active
-                            oldProfile
-                        }
-                        else -> ProfileManager.createProfile(it.apply {
-                            subscription = Profile.SubscriptionStatus.Active
-                        })
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, e.readableMessage, Toast.LENGTH_LONG).show()
-        }
-
-        profiles?.forEach { profile -> if (toUpdate.contains(profile.id)) ProfileManager.updateProfile(profile) }
-        ProfileManager.listener?.reloadProfiles()
     }
 
     override fun onDestroy() {

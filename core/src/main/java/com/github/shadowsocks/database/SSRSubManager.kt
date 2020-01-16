@@ -113,11 +113,11 @@ object SSRSubManager {
             val response = getResponse(url)
             val profiles = Profile.findAllSSRUrls(response, Core.currentProfile?.first).toList()
             if (profiles.isNullOrEmpty() || profiles[0].url_group.isEmpty()) return null
-            val new = SSRSub(url = url, url_group = profiles[0].url_group)
+            var new = SSRSub(url = url, url_group = profiles[0].url_group)
             getAllSSRSub().forEach {
                 if (it.url_group == new.url_group) return null
             }
-            createSSRSub(new)
+            new = createSSRSub(new)
             update(new, response)
             return new
         } catch (e: Exception) {
