@@ -153,7 +153,7 @@ sealed class DnsResolverCompat {
                     super.bindSocket(network, socket)
                     Crashlytics.logException(e1)
                 } catch (e2: ReflectiveOperationException) {
-                    throw e1.apply { addSuppressed(e2) }
+                    throw e2.apply { addSuppressed(e1) }
                 }
             }
         }
