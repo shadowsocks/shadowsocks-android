@@ -233,12 +233,10 @@ data class Profile(
                 if (password.isNullOrEmpty()) return null
                 val protocol = json["protocol"].optString
                 if (protocol.isNullOrEmpty()) return null
-                val protocolParam = json["protocol_param"].optString
-                if (protocolParam.isNullOrEmpty()) return null
+                val protocolParam = json["protocol_param"].optString ?: return null
                 val obfs = json["obfs"].optString
                 if (obfs.isNullOrEmpty()) return null
-                val obfsParam = json["obfs_param"].optString
-                if (obfsParam.isNullOrEmpty()) return null
+                val obfsParam = json["obfs_param"].optString ?: return null
                 val method = json["method"].optString
                 if (method.isNullOrEmpty()) return null
                 return Profile().also {
