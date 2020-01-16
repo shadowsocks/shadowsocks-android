@@ -91,6 +91,7 @@ object Action {
     val SERVICE = app.packageName + ".SERVICE"
     val CLOSE = app.packageName + ".CLOSE"
     val RELOAD = app.packageName + ".RELOAD"
+    val ABORT = app.packageName + ".ABORT"
 
     val EXTRA_PROFILE_ID = app.packageName + "EXTRA_PROFILE_ID"
 }

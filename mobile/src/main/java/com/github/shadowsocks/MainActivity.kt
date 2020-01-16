@@ -57,6 +57,7 @@ import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
+import com.github.shadowsocks.subscription.SubscriptionFragment
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.widget.ListHolderListener
@@ -259,6 +260,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
                     launchUrl(getString(R.string.faq_url))
                     return true
                 }
+                R.id.subscriptions -> displayFragment(SubscriptionFragment())
                 else -> return false
             }
             item.isChecked = true

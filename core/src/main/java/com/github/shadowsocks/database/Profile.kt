@@ -56,6 +56,7 @@ data class Profile(
         var obfs: String = "plain",
         var obfs_param: String = "",
         var method: String = "aes-256-cfb",
+
         var route: String = "all",
         var remoteDns: String = "8.8.8.8:53",
         var proxyApps: Boolean = false,
@@ -66,16 +67,38 @@ data class Profile(
         @TargetApi(28)
         var metered: Boolean = false,
         var individual: String = "",
+        var plugin: String? = null,
+        var udpFallback: Long? = null,
+
+        // managed fields
+        var subscription: SubscriptionStatus = SubscriptionStatus.UserConfigured,
         var tx: Long = 0,
         var rx: Long = 0,
         var elapsed: Long = 0,
         var userOrder: Long = 0,
-        var plugin: String? = null,
-        var udpFallback: Long? = null,
 
         @Ignore // not persisted in db, only used by direct boot
         var dirty: Boolean = false
 ) : Parcelable, Serializable {
+    enum class SubscriptionStatus(val persistedValue: Int) {
+        UserConfigured(0),
+        Active(1),
+        /**
+         * This profile is no longer present in subscriptions.
+         */
+        Obsolete(2),
+        ;
+
+        companion object {
+            @JvmStatic
+            @TypeConverter
+            fun of(value: Int) = values().single { it.persistedValue == value }
+            @JvmStatic
+            @TypeConverter
+            fun toInt(status: SubscriptionStatus) = status.persistedValue
+        }
+    }
+
     companion object {
         private const val TAG = "ShadowParser"
         private const val serialVersionUID = 1L
@@ -238,8 +261,8 @@ data class Profile(
                     (json["proxy_apps"] as? JsonObject)?.also {
                         proxyApps = it["enabled"].optBoolean ?: proxyApps
                         bypass = it["bypass"].optBoolean ?: bypass
-                        individual = (json["android_list"] as? JsonArray)?.asIterable()?.joinToString("\n")
-                                ?: individual
+                        individual = (it["android_list"] as? JsonArray)?.asIterable()?.mapNotNull { it.optString }
+                                ?.joinToString("\n") ?: individual
                     }
                     udpdns = json["udpdns"].optBoolean ?: udpdns
                     (json["udp_fallback"] as? JsonObject)?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }
@@ -290,8 +313,11 @@ data class Profile(
         @Query("SELECT * FROM `Profile` WHERE `id` = :id")
         operator fun get(id: Long): Profile?
 
-        @Query("SELECT * FROM `Profile` ORDER BY `userOrder`")
-        fun list(): List<Profile>
+        @Query("SELECT * FROM `Profile` WHERE `Subscription` != 2 ORDER BY `userOrder`")
+        fun listActive(): List<Profile>
+
+        @Query("SELECT * FROM `Profile`")
+        fun listAll(): List<Profile>
 
         @Query("SELECT * FROM `Profile` WHERE `url_group` = :group")
         fun listByGroup(group: String): List<Profile>
@@ -354,7 +380,6 @@ data class Profile(
                         Base64.encodeToString("%s".format(Locale.ENGLISH, name).toByteArray(), flags),
                         Base64.encodeToString("%s".format(Locale.ENGLISH, url_group).toByteArray(), flags)).toByteArray(), flags)
     }
-
 
     fun toJson(profiles: LongSparseArray<Profile>? = null): JSONObject = JSONObject().apply {
         put("server", host)

@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2020 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2020 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,33 +18,24 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.plugin
+package com.github.shadowsocks.utils
 
-import android.content.Intent
-import android.os.Bundle
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.SortedList
+import java.net.URL
 
-/**
- * Activity that's capable of getting EXTRA_OPTIONS input.
- */
-abstract class OptionsCapableActivity : AppCompatActivity() {
-    protected fun pluginOptions(intent: Intent = this.intent) = try {
-        PluginOptions("", intent.getStringExtra(PluginContract.EXTRA_OPTIONS))
-    } catch (exc: IllegalArgumentException) {
-        Toast.makeText(this, exc.message, Toast.LENGTH_SHORT).show()
-        PluginOptions()
-    }
+abstract class BaseSorter<T> : SortedList.Callback<T>() {
+    override fun onInserted(position: Int, count: Int) { }
+    override fun areContentsTheSame(oldItem: T?, newItem: T?): Boolean = oldItem == newItem
+    override fun onMoved(fromPosition: Int, toPosition: Int) { }
+    override fun onChanged(position: Int, count: Int) { }
+    override fun onRemoved(position: Int, count: Int) { }
+    override fun areItemsTheSame(item1: T?, item2: T?): Boolean = item1 == item2
+    override fun compare(o1: T?, o2: T?): Int =
+            if (o1 == null) if (o2 == null) 0 else 1 else if (o2 == null) -1 else compareNonNull(o1, o2)
+    abstract fun compareNonNull(o1: T, o2: T): Int
+}
 
-    /**
-     * Populate args to your user interface.
-     *
-     * @param options PluginOptions parsed.
-     */
-    protected abstract fun onInitializePluginOptions(options: PluginOptions = pluginOptions())
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        if (savedInstanceState == null) onInitializePluginOptions()
-    }
+object URLSorter : BaseSorter<URL>() {
+    private val ordering = compareBy<URL>({ it.host }, { it.port }, { it.file }, { it.protocol })
+    override fun compareNonNull(o1: URL, o2: URL): Int = ordering.compare(o1, o2)
 }

@@ -71,7 +71,7 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        internal val profiles = (ProfileManager.getAllProfiles()?.toMutableList()
+        internal val profiles = (ProfileManager.getActiveProfiles()?.toMutableList()
                 ?: mutableListOf()).filter { it.id != editingId }
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =

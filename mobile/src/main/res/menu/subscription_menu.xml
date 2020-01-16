@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="@string/add_subscription"
+        android:id="@+id/action_manual_settings"
+          android:icon="@drawable/ic_av_playlist_add"
+          android:alphabeticShortcut="n"
+          app:showAsAction="always"/>
+    <item android:title="@string/update_subscription"
+        android:id="@+id/action_update_subscription"
+        android:icon="@drawable/ic_file_cloud_download"
+        android:alphabeticShortcut="r"
+        app:showAsAction="ifRoom"/>
+</menu>

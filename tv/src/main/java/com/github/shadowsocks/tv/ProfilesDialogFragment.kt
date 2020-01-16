@@ -52,7 +52,7 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
         }
     }
     private inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        val profiles = ProfileManager.getAllProfiles()!!
+        val profiles = ProfileManager.getActiveProfiles()!!
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ProfileViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.leanback_list_preference_item_single_2,

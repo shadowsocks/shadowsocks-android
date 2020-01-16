@@ -42,6 +42,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.work.SSRSubSyncer
+import com.github.shadowsocks.subscription.SubscriptionService
 import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.work.UpdateCheck
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
@@ -59,6 +60,7 @@ object Core {
     lateinit var configureIntent: (Context) -> PendingIntent
     val activity by lazy { app.getSystemService<ActivityManager>()!! }
     val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
+    val notification by lazy { app.getSystemService<NotificationManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
     val directBootSupported by lazy {
@@ -120,15 +122,15 @@ object Core {
 
     fun updateNotificationChannels() {
         if (Build.VERSION.SDK_INT >= O) @RequiresApi(O) {
-            val nm = app.getSystemService<NotificationManager>()!!
-            nm.createNotificationChannels(listOf(
+            notification.createNotificationChannels(listOf(
                     NotificationChannel("service-vpn", app.getText(R.string.service_vpn),
                             if (Build.VERSION.SDK_INT >= 28) NotificationManager.IMPORTANCE_MIN
                             else NotificationManager.IMPORTANCE_LOW),   // #1355
                     NotificationChannel("service-proxy", app.getText(R.string.service_proxy),
                             NotificationManager.IMPORTANCE_LOW),
                     NotificationChannel("service-transproxy", app.getText(R.string.service_transproxy),
-                            NotificationManager.IMPORTANCE_MIN),
+                            NotificationManager.IMPORTANCE_LOW),
+                    SubscriptionService.notificationChannel,
                     NotificationChannel("update", app.getText(R.string.update_channel),
                             NotificationManager.IMPORTANCE_DEFAULT)
             ).apply {
