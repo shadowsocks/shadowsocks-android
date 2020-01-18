@@ -41,7 +41,10 @@ import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.useCancellable
 import com.google.gson.JsonStreamParser
 import kotlinx.coroutines.*
 import java.io.File
@@ -165,7 +168,7 @@ class SubscriptionService : Service() {
         profiles?.forEach { profile ->  // preprocessing phase
             if (currentId == profile.id) feature = profile
             if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
-            if (subscriptions.putIfAbsentCompat(profile.name to profile.formattedAddress, profile) != null) {
+            if (subscriptions.putIfAbsent(profile.name to profile.formattedAddress, profile) != null) {
                 ProfileManager.delProfile(profile.id)
                 if (currentId == profile.id) DataStore.profileId = 0
             } else if (profile.subscription == Profile.SubscriptionStatus.Active) {
@@ -176,7 +179,7 @@ class SubscriptionService : Service() {
 
         for (json in jsons.asIterable()) try {
             Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
-                subscriptions.computeCompat(it.name to it.formattedAddress) { _, oldProfile ->
+                subscriptions.compute(it.name to it.formattedAddress) { _, oldProfile ->
                     when (oldProfile?.subscription) {
                         Profile.SubscriptionStatus.Active -> {
                             Log.w("SubscriptionService", "Duplicate profiles detected. Please use different profile " +

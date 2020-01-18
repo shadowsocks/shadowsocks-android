@@ -85,19 +85,6 @@ fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_IN
             if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress.invoke(null, this) as InetAddress
         }
 
-fun <K, V> MutableMap<K, V>.computeCompat(key: K, remappingFunction: (K, V?) -> V?) = if (Build.VERSION.SDK_INT < 24) {
-    val oldValue = get(key)
-    remappingFunction(key, oldValue).also { newValue ->
-        if (newValue != null) put(key, newValue) else if (oldValue != null || containsKey(key)) remove(key)
-    }
-} else compute(key) { k, oldValue -> remappingFunction(k, oldValue) }
-fun <K, V> MutableMap<K, V>.computeIfAbsentCompat(key: K, value: () -> V) = if (Build.VERSION.SDK_INT < 24) {
-    this[key] ?: value().also { put(key, it) }
-} else computeIfAbsent(key) { value() }
-fun <K, V> MutableMap<K, V>.putIfAbsentCompat(key: K, value: V) = if (Build.VERSION.SDK_INT < 24) {
-    this[key] ?: put(key, value)
-} else putIfAbsent(key, value)
-
 suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T): T {
     return suspendCancellableCoroutine { cont ->
         cont.invokeOnCancellation {

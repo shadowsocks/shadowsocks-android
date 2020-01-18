@@ -27,6 +27,7 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
@@ -63,12 +64,13 @@ dependencies {
     api "androidx.work:work-gcm:$workVersion"
     api 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     api 'com.google.code.gson:gson:2.8.6'
-    api 'com.google.firebase:firebase-analytics:17.2.1'
+    api 'com.google.firebase:firebase-analytics:17.2.2'
     api 'com.google.firebase:firebase-config:19.1.0'
     api 'dnsjava:dnsjava:2.1.9'
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
     api 'org.connectbot.jsocks:jsocks:1.0.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.4'
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"

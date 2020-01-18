@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks.net
 
-import com.github.shadowsocks.utils.computeIfAbsentCompat
 import com.github.shadowsocks.utils.parseNumericAddress
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -32,7 +31,7 @@ class HostsFile(input: String = "") {
         for (line in input.lineSequence()) {
             val entries = line.substringBefore('#').splitToSequence(' ', '\t').filter { it.isNotEmpty() }
             val address = entries.firstOrNull()?.parseNumericAddress() ?: continue
-            for (hostname in entries.drop(1)) map.computeIfAbsentCompat(hostname) { LinkedHashSet(1) }.add(address)
+            for (hostname in entries.drop(1)) map.computeIfAbsent(hostname) { LinkedHashSet(1) }.add(address)
         }
     }
 
