@@ -38,9 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.UnknownHostException
+import java.net.*
 import java.security.MessageDigest
 
 /**
@@ -87,16 +85,24 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
-            // if fails/null, use IPv4 only, otherwise pick a random IPv4/IPv6 address
-            val network = service.getActiveNetwork() ?: throw UnknownHostException()
-            val hasIpv4 = DnsResolverCompat.haveIpv4(network)
-            val hasIpv6 = DnsResolverCompat.haveIpv6(network)
-            if (!hasIpv4 && !hasIpv6) throw UnknownHostException()
-            profile.host = (hosts.resolve(profile.host, hasIpv6).firstOrNull() ?: try {
-                service.resolver(profile.host).firstOrNull()
-            } catch (_: IOException) {
-                null
-            })?.hostAddress ?: throw UnknownHostException()
+            profile.host = hosts.resolve(profile.host).run {
+                if (isEmpty()) try {
+                    service.resolver(profile.host).firstOrNull()
+                } catch (_: IOException) {
+                    null
+                } else {
+                    val network = service.getActiveNetwork() ?: throw UnknownHostException()
+                    val hasIpv4 = DnsResolverCompat.haveIpv4(network)
+                    val hasIpv6 = DnsResolverCompat.haveIpv6(network)
+                    firstOrNull {
+                        when (it) {
+                            is Inet4Address -> hasIpv4
+                            is Inet6Address -> hasIpv6
+                            else -> error(it)
+                        }
+                    }
+                }
+            }?.hostAddress ?: throw UnknownHostException()
         }
     }
 
