@@ -32,6 +32,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenCreated
 import androidx.preference.*
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
@@ -171,7 +172,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         super.onAttach(context)
         receiver = context.listenForPackageChanges(false) {
             lifecycleScope.launch(Dispatchers.Main) {   // wait until changes were flushed
-                lifecycleScope.launchWhenCreated { initPlugins() }
+                whenCreated { initPlugins() }
             }
         }
     }
