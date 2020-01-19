@@ -25,10 +25,9 @@ import android.text.format.Formatter
 import android.util.AttributeSet
 import android.view.View
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.observe
 import com.github.shadowsocks.MainActivity
@@ -47,7 +46,7 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
-    private val tester = ViewModelProvider(context as MainActivity).get<HttpsTest>()
+    private val tester by (context as MainActivity).viewModels<HttpsTest>()
     private lateinit var behavior: Behavior
     override fun getBehavior(): Behavior {
         if (!this::behavior.isInitialized) behavior = object : Behavior() {
