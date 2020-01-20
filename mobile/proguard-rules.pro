@@ -22,3 +22,5 @@
 #-renamesourcefileattribute SourceFile
 
 -dontwarn com.google.android.gms.internal.**
+
+-keep class com.github.shadowsocks.net.HttpsTest
