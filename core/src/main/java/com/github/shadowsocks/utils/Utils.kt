@@ -24,8 +24,13 @@ import android.annotation.SuppressLint
 import android.content.*
 import android.content.pm.PackageInfo
 import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.ImageDecoder
+import android.graphics.drawable.AdaptiveIconDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
 import android.system.ErrnoException
@@ -33,6 +38,7 @@ import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.preference.Preference
 import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
@@ -158,3 +164,19 @@ fun printLog(t: Throwable) {
 }
 
 fun Preference.remove() = parent!!.removePreference(this)
+
+fun Context.getBitmap(id: Int): Bitmap {
+    var drawable = AppCompatResources.getDrawable(this, id)!!
+    if (drawable is BitmapDrawable) return drawable.bitmap
+    if (Build.VERSION.SDK_INT >= 26 && drawable is AdaptiveIconDrawable) {
+        drawable = LayerDrawable(arrayOf(drawable.background, drawable.foreground))
+    }
+    val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth, drawable.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+    )
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, canvas.width, canvas.height)
+    drawable.draw(canvas)
+    return bitmap
+}

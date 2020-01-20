@@ -30,13 +30,14 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.getBitmap
 import android.service.quicksettings.TileService as BaseTileService
 
 @RequiresApi(24)
 class TileService : BaseTileService(), ShadowsocksConnection.Callback {
-    private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle) }
-    private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
-    private val iconConnected by lazy { Icon.createWithResource(this, R.drawable.ic_service_active) }
+    private val iconIdle by lazy { Icon.createWithBitmap(getBitmap(R.drawable.ic_service_idle)) }
+    private val iconBusy by lazy { Icon.createWithBitmap(getBitmap(R.drawable.ic_service_busy)) }
+    private val iconConnected by lazy { Icon.createWithBitmap(getBitmap(R.drawable.ic_service_active)) }
     private val keyguard by lazy { getSystemService<KeyguardManager>()!! }
     private var tapPending = false
 
