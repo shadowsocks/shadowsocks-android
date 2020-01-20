@@ -38,7 +38,6 @@ import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
@@ -78,8 +77,8 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     fun changeState(state: BaseService.State) {
         val activity = context as MainActivity
-        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch {
-            withContext(Dispatchers.Main) { activity.whenStarted { what() } }
+        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch(Dispatchers.Main) {
+            activity.whenStarted { what() }
         }
         if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
             postWhenStarted { performShow() }
