@@ -41,7 +41,6 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.work.SSRSubSyncer
 import com.github.shadowsocks.subscription.SubscriptionService
 import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.work.UpdateCheck
@@ -100,7 +99,6 @@ object Core {
             setTaskExecutor { GlobalScope.launch { it.run() } }
         }.build())
         UpdateCheck.enqueue()
-        if (DataStore.ssrSubAutoUpdate) SSRSubSyncer.enqueue()
 
         // handle data restored/crash
         if (Build.VERSION.SDK_INT >= 24 && DataStore.directBootAware &&

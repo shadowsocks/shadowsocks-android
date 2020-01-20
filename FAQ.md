@@ -1,45 +1,20 @@
-## 1.二维码扫描功能
+## 二维码扫描功能
 
 需要安装[条码扫描器](https://play.google.com/store/apps/details?id=com.google.zxing.client.android)，不内置扫描功能。
 
 无法访问Google Play可以[从GitHub下载](https://github.com/shadowsocksRb/zxing-android/releases/latest)。
 
-## 2.界面变化太大
-
-由于Scala on Android已经停止维护多年，所以基于最新的 SS Android 客户端开始修改。
-
-## 3.与SS客户端相比，修改了什么
-
-砍了gms，删除日志上报，行为分析和广告。此应用是完全自由的，没有接入第三方服务，不上传任何信息。
-
-砍了ACL编辑功能，插件功能和TV版，将服务端改成SSR。
-
-## 4.与原SSR客户端相比，有什么区别
-
-砍了Nat模式，用透明代理模式替代。请root用户自行配置防火墙，将流量转发至透明代理端口。
-
-添加了仅代理模式。适用于仅使用支持配置socks5代理的应用。
-
-砍了前置代理，批量测试。
-
-砍了China DNS，换用现客户端的新DNS解析方式，可能与SSR服务端有兼容性问题。
-
-修改颜色为水鸭青。
-
-## 5.插件栏的UDP配置是什么
+## 插件栏的UDP配置是什么
 
 将UDP改为通过此服务器转发
 
-## 6.下载地址
+## 修改混淆参数
 
-* [GitHub](https://github.com/shadowsocksRb/shadowsocksRb-android/releases)
-* [Telegram](https://t.me/ShadowsocksRb)
+来自订阅的配置文件无法编辑服务器设置部分，即使编辑，修改内容也会在更新订阅后丢失。
 
-## 7.输入订阅链接无反应
+如果想要修改，并且远程服务器配置也允许修改，选中此配置文件后点按新建菜单的手动设置项，生成此配置文件的副本。副本脱离订阅，可以随意修改。
 
-通过明文传递信息是不安全的，如果您的订阅链接是HTTP链接，它将会被静默的忽略。请要求服务提供商将订阅链接升级到HTTPS以避免节点信息泄露。
-
-## 8.想要批量修改配置文件
+## 批量修改配置文件
 
 除分应用VPN和UDP配置外，不提供批量修改功能。
 
@@ -49,32 +24,51 @@
 
 在进行批量添加前，先设置好已选中的配置文件会方便很多。
 
-## 9.需要批量测试功能
+## 需要批量测试功能
 
 参考[shadowsocks#issue2215](https://github.com/shadowsocks/shadowsocks-android/issues/2215)，目前本项目处于等待上游实现状态。
 
 确认过原SSR实现，问题太多，取消移植。
 
-## 10.项目开发方向
+## 各ROM兼容性问题
 
-保持与SS Android客户端上游同步，不动SSR协议部分。本项目不会重启SSR开发，仅仅出于原SSR客户端因Android版本升级出现问题，而开始进行必要的维护。
+转至[shadowsocks常见问题](https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md#why-is-my-rom-not-supported)查看，包括部分应用无法联网，没有流量等问题。
 
-## 11.会维护其它客户端吗
-
-其它平台相对稳定，不会因程序本身而出现兼容性问题。
-
-但欢迎开发者加入，维护其它平台。~~本项目的近期目标是将SSR插件移植到最新shadowsocks-libev。~~
-
-## 12.可以添加SSRR的新协议吗
-
-不能。shadowsocksRb永远不会触碰SSR协议部分，仅同步SS上游和作客户端兼容性维护。
-
-## 13.各ROM兼容性问题
-
-转至[shadowsocks 常见问题](https://github.com/shadowsocks/shadowsocks-android/blob/master/.github/faq.md#why-is-my-rom-not-supported)查看，包括部分应用无法联网，没有流量等问题。
-
-## 14.国内应用网速缓慢
+## 国内应用网速缓慢
 
 使用分应用VPN功能绕过对国内应用的代理。
 
-多数情况下，是由于应用的DNS智能分流，将域名分配到国外服务器，但ACL规则指示对此域名直连。
+## 界面变化太大
+
+Scala on Android已经停止维护多年，本项目基于最新SS Android客户端修改添加SSR特性，而非继续在原版SSR客户端上修补。
+
+## 与SS客户端相比，修改了什么
+
+移除gms依赖，删除日志上报，行为分析和广告。此应用没有接入第三方服务，不上传任何信息。
+
+删除ACL编辑功能，插件功能和TV版，核心替换为SSR。
+
+## 与原SSR客户端相比，有什么区别
+
+删除Nat模式，用透明代理模式替代。请root用户自行配置防火墙，将流量转发至透明代理端口。
+
+添加仅代理模式。适用于仅使用支持配置socks5代理的应用。
+
+删除前置代理，批量测试。
+
+删除China DNS，换用现客户端的新DNS解析方式，可能与SSR核心有兼容性问题。
+
+修改颜色为水鸭青。
+
+## 可以添加SSRR的新协议吗
+
+不能。本项目不会修改SSR协议部分，仅同步SS上游和作客户端兼容性维护。
+
+## 对界面有意见或建议
+
+本项目同步SS上游，非SSR专有特性的意见或建议请向上游反馈。
+
+## 下载地址
+
+* [GitHub](https://github.com/shadowsocksRb/shadowsocksRb-android/releases)
+* [Telegram](https://t.me/ShadowsocksRb)

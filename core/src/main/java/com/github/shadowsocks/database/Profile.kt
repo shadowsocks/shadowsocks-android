@@ -352,6 +352,8 @@ data class Profile(
         profile.individual = individual
         profile.udpdns = udpdns
         if (withMore) {
+            profile.name = "$name - copy"
+            profile.host = host
             profile.remotePort = remotePort
             profile.password = password
             profile.protocol = protocol

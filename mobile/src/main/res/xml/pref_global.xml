@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:initialExpandedChildrenCount="7">
+    app:initialExpandedChildrenCount="5">
     <SwitchPreference
         app:icon="@drawable/ic_communication_phonelink_ring"
         app:key="isAutoConnect"
@@ -25,16 +25,6 @@
         app:key="acl_url"
         app:title="@string/acl_url_title"
         app:useSimpleSummaryProvider="true" />
-
-    <Preference
-        app:icon="@drawable/ic_baseline_rss_feed"
-        app:key="ssrSub"
-        app:title="@string/ssrsub_manage" />
-    <SwitchPreference
-        app:icon="@drawable/ic_baseline_autorenew"
-        app:key="ssrsub_autoupdate"
-        app:summary="@string/ssrsub_autoupdate_summary"
-        app:title="@string/ssrsub_autoupdate" />
 
     <com.takisoft.preferencex.SimpleMenuPreference
         app:defaultValue="vpn"

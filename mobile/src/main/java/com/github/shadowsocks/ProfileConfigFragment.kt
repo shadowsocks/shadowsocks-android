@@ -107,7 +107,8 @@ class ProfileConfigFragment : PreferenceFragmentCompat(), OnPreferenceDataStoreC
             findPreference<Preference>(Key.protocol)!!.isEnabled = false
             findPreference<Preference>(Key.protocol_param)!!.isEnabled = false
             findPreference<Preference>(Key.obfs)!!.isEnabled = false
-        }
+            findPreference<Preference>(Key.obfs_param)!!.isEnabled = false
+        } else findPreference<Preference>(Key.group)!!.isEnabled = false
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
