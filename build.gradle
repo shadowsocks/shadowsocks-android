@@ -10,6 +10,7 @@ buildscript {
         sdkVersion = 29
         compileSdkVersion = 29
         lifecycleVersion = '2.2.0-rc03'
+        desugarLibsVersion = '1.0.4'
         junitVersion = '4.13'
         androidTestVersion = '1.2.0'
         androidEspressoVersion = '3.2.0'

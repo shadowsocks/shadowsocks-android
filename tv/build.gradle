@@ -28,7 +28,6 @@ android {
     }
     buildTypes {
         debug {
-            multiDexEnabled true
             pseudoLocalesEnabled true
         }
         release {
@@ -38,6 +37,7 @@ android {
         }
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
@@ -54,6 +54,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$desugarLibsVersion"
     implementation project(':core')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.leanback:leanback-preference:1.1.0-alpha03'

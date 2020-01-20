@@ -29,7 +29,6 @@ android {
     }
     buildTypes {
         debug {
-            multiDexEnabled true
             pseudoLocalesEnabled true
         }
         release {
@@ -39,6 +38,7 @@ android {
         }
     }
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility javaVersion
         targetCompatibility javaVersion
     }
@@ -59,6 +59,7 @@ androidExtensions {
 }
 
 dependencies {
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$desugarLibsVersion"
     implementation project(':core')
     implementation 'androidx.browser:browser:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'

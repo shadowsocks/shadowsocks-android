@@ -70,7 +70,7 @@ dependencies {
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
     api 'org.connectbot.jsocks:jsocks:1.0.0'
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.4'
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$desugarLibsVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
