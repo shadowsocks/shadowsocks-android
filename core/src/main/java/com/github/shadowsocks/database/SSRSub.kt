@@ -37,15 +37,6 @@ class SSRSub(
         fun getAll(): List<SSRSub>
     }
 
-    val displayName
-        get() = when (status) {
-            NORMAL -> url_group
-            EMPTY -> "Invalid Link($url_group)"
-            NETWORK_ERROR -> "Network Error($url_group)"
-            NAME_CHANGED -> "Name Changed(old name: $url_group) Stop Update"
-            else -> throw IllegalArgumentException("status: $status")
-        }
-
     fun getStatue(context: Context) = when (status) {
         NORMAL -> ""
         EMPTY -> context.getString(R.string.status_empty)

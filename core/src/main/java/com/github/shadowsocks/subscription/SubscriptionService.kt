@@ -29,7 +29,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -38,15 +37,13 @@ import androidx.lifecycle.MutableLiveData
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.core.R
-import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.database.SSRSub
 import com.github.shadowsocks.database.SSRSubManager
-import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
-import com.google.gson.JsonStreamParser
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.printLog
+import com.github.shadowsocks.utils.readableMessage
 import kotlinx.coroutines.*
-import java.io.InputStream
 
 class SubscriptionService : Service() {
     companion object {
@@ -74,8 +71,11 @@ class SubscriptionService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (worker == null) {
             idle.value = false
-            if (!receiverRegistered) registerReceiver(CancelReceiver, IntentFilter(Action.ABORT),
-                    "$packageName.SERVICE", null)
+            if (!receiverRegistered) {
+                registerReceiver(CancelReceiver, IntentFilter(Action.ABORT),
+                        "$packageName.SERVICE", null)
+                receiverRegistered = true
+            }
             worker = GlobalScope.launch {
                 val ssrsubs = SSRSubManager.getAllSSRSub()
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
