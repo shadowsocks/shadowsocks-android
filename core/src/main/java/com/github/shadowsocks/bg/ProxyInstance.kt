@@ -142,7 +142,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
     fun scheduleUpdate() {
         if (route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(route)
-        if (scheduleConfigUpdate) RemoteConfig.scheduleFetch()
+        if (scheduleConfigUpdate) RemoteConfig.fetchAsync()
     }
 
     fun shutdown(scope: CoroutineScope) {
