@@ -6,14 +6,15 @@
 
 ### 编译
 
-* OpenJDK 1.8
-* Android SDK
+* [Git](https://git-scm.com/downloads)
+* [OpenJDK 8+](https://jdk.java.net/)
+* [Android SDK](https://developer.android.com/studio#command-tools)
   - Android SDK Build-Tools 29.0.2
   - Android SDK Platform 29
-  - NDK (Side by side) 21.0.6011959-rc2
+  - NDK (Side by side) 21.0.6113669
   - Android SDK Tools
 
-```bash
+```shell script
 git clone --recurse-submodules https://github.com/shadowsocksRb/shadowsocksRb-android.git
 cd shadowsocksRb-android
 # 建议编辑 mobile/build.gradle ,修改 applicationId 以规避检测
