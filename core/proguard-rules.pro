@@ -21,4 +21,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontwarn com.google.android.gms.internal.**
+# https://issuetracker.google.com/issues/147972078#comment4
+-keepclasseswithmembers class * extends androidx.lifecycle.ViewModel {
+    <init>();
+}

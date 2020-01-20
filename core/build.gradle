@@ -12,6 +12,7 @@ android {
         versionCode rootProject.versionCode
         versionName rootProject.versionName
 
+        consumerProguardFiles 'proguard-rules.pro'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
