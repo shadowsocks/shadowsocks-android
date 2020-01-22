@@ -55,7 +55,7 @@ object SSRSubManager {
 
     fun deletProfiles(ssrSub: SSRSub) {
         val profiles = ProfileManager.getAllProfilesByGroup(ssrSub.url_group)
-        ProfileManager.deletProfiles(profiles)
+        ProfileManager.deletSSRSubProfiles(profiles)
     }
 
     suspend fun update(ssrSub: SSRSub, b: String = "") {

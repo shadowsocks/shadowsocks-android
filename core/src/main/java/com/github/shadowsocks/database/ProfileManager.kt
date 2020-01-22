@@ -56,13 +56,15 @@ object ProfileManager {
         return profile
     }
 
-    fun deletProfiles(profiles: List<Profile>) {
+    fun deletSSRSubProfiles(profiles: List<Profile>) {
+        if (profiles.isEmpty()) return
         val first: Long = Core.currentProfile?.first?.id ?: -1
         val second: Long = Core.currentProfile?.second?.id ?: -1
-        profiles.forEach {
+        profiles.plus(getObsoleteProfiles()).forEach {
             if (it.id != first && it.id != second) delProfile(it.id)
             else {
-                it.subscription=Profile.SubscriptionStatus.Obsolete
+                it.subscription = Profile.SubscriptionStatus.Obsolete
+                it.url_group = ""
                 updateProfile(it)
             }
         }
@@ -80,7 +82,7 @@ object ProfileManager {
             it.subscription = Profile.SubscriptionStatus.Active
             createProfile(it)
         }
-        deletProfiles(old)
+        deletSSRSubProfiles(old)
     }
 
     fun createProfilesFromJson(jsons: Sequence<InputStream>, replace: Boolean = false) {
@@ -164,6 +166,16 @@ object ProfileManager {
     } catch (ex: SQLException) {
         printLog(ex)
         null
+    }
+
+    @Throws(IOException::class)
+    fun getObsoleteProfiles(): List<Profile> = try {
+        PrivateDatabase.profileDao.listObsolete()
+    } catch (ex: SQLiteCantOpenDatabaseException) {
+        throw IOException(ex)
+    } catch (ex: SQLException) {
+        printLog(ex)
+        emptyList()
     }
 
     @Throws(IOException::class)

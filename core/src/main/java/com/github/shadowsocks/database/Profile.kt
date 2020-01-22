@@ -314,6 +314,9 @@ data class Profile(
         @Query("SELECT * FROM `Profile` WHERE `Subscription` != 2 ORDER BY `userOrder`")
         fun listActive(): List<Profile>
 
+        @Query("SELECT * FROM `Profile` WHERE `Subscription` == 2")
+        fun listObsolete(): List<Profile>
+
         @Query("SELECT * FROM `Profile`")
         fun listAll(): List<Profile>
 

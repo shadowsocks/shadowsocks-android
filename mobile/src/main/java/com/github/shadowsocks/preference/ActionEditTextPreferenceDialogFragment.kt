@@ -48,7 +48,7 @@ class ActionEditTextPreferenceDialogFragment : EditTextPreferenceDialogFragmentC
                         printLog(e)
                         success = false
                     }
-                    withContext(Dispatchers.Main.immediate) {
+                    withContext(Dispatchers.Main) {
                         mButtonPositive.isEnabled = true
                         mButtonNegative.isEnabled = true
 

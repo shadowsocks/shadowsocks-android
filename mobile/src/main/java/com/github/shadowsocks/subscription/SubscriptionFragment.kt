@@ -50,10 +50,7 @@ import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.parcel.Parcelize
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import java.net.MalformedURLException
 import java.net.URL
@@ -260,8 +257,8 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
                 if (requestCode != REQUEST_CODE_ADD) return super.onActivityResult(requestCode, resultCode, data)
                 val pos = adapter.add(SSRSub(url = ret.url, url_group = getString(R.string.service_subscription_finishing)))
                 list.post { list.scrollToPosition(pos) }
-                var new: SSRSub? = null
                 GlobalScope.launch(Dispatchers.IO) {
+                    var new: SSRSub? = null
                     try {
                         new = withTimeout(10000L) { return@withTimeout SSRSubManager.create(ret.url) }
                     } catch (e: Exception) {
@@ -269,10 +266,13 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
                         GlobalScope.launch(Dispatchers.Main) {
                             (activity as MainActivity).snackbar().setText(e.readableMessage).show()
                         }
+                    } finally {
+                        withContext(Dispatchers.Main) {
+                            adapter.remove(pos)
+                            if (new != null) adapter.add(new)
+                        }
                     }
                 }
-                adapter.remove(pos)
-                if (new != null) adapter.add(new!!)
             }
             DialogInterface.BUTTON_NEUTRAL -> {
                 adapter.del(ret.id, true)
