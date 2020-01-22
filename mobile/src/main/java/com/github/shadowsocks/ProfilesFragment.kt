@@ -331,8 +331,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
             R.id.action_qr_code -> {
-                parentFragmentManager.beginTransaction().add(QRCodeDialog(this.item.toString()), "")
-                        .commitAllowingStateLoss()
+                if (!parentFragmentManager.isStateSaved) {
+                    QRCodeDialog(this.item.toString()).show(parentFragmentManager, "")
+                }
                 true
             }
             R.id.action_export_clipboard -> {

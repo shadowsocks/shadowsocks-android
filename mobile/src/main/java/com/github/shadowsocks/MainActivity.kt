@@ -39,6 +39,7 @@ import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.replace
 import androidx.preference.PreferenceDataStore
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.CustomRulesFragment
@@ -167,7 +168,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         navigation.setNavigationItemSelectedListener(this)
         if (savedInstanceState == null) {
             navigation.menu.findItem(R.id.profiles).isChecked = true
-            displayFragment(ProfilesFragment())
+            displayFragment<ProfilesFragment>()
         }
 
         fab = findViewById(R.id.fab)
@@ -194,8 +195,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         }
     }
 
-    private fun displayFragment(fragment: ToolbarFragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
+    private inline fun <reified F : ToolbarFragment> displayFragment() {
+        supportFragmentManager.beginTransaction().replace<F>(R.id.fragment_holder).commitAllowingStateLoss()
         drawer.closeDrawers()
     }
 
@@ -203,20 +204,20 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         if (item.isChecked) drawer.closeDrawers() else {
             when (item.itemId) {
                 R.id.profiles -> {
-                    displayFragment(ProfilesFragment())
+                    displayFragment<ProfilesFragment>()
                     connection.bandwidthTimeout = connection.bandwidthTimeout   // request stats update
                 }
-                R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
+                R.id.globalSettings -> displayFragment<GlobalSettingsFragment>()
                 R.id.about -> {
                     Core.analytics.logEvent("about", Bundle())
-                    displayFragment(AboutFragment())
+                    displayFragment<AboutFragment>()
                 }
                 R.id.faq -> {
                     launchUrl(getString(R.string.faq_url))
                     return true
                 }
-                R.id.customRules -> displayFragment(CustomRulesFragment())
-                R.id.subscriptions -> displayFragment(SubscriptionFragment())
+                R.id.customRules -> displayFragment<CustomRulesFragment>()
+                R.id.subscriptions -> displayFragment<SubscriptionFragment>()
                 else -> return false
             }
             item.isChecked = true
@@ -235,7 +236,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
             if (!currentFragment.onBackPressed()) {
                 if (currentFragment is ProfilesFragment) super.onBackPressed() else {
                     navigation.menu.findItem(R.id.profiles).isChecked = true
-                    displayFragment(ProfilesFragment())
+                    displayFragment<ProfilesFragment>()
                 }
             }
         }

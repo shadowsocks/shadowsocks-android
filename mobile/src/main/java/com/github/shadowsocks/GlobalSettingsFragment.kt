@@ -34,10 +34,5 @@ class GlobalSettingsFragment : ToolbarFragment() {
         super.onViewCreated(view, savedInstanceState)
         view.setOnApplyWindowInsetsListener(ListHolderListener)
         toolbar.setTitle(R.string.settings)
-
-        if (savedInstanceState != null) return
-        val fm = childFragmentManager
-        fm.beginTransaction().replace(R.id.content, GlobalSettingsPreferenceFragment()).commit()
-        fm.executePendingTransactions()
     }
 }
