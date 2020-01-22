@@ -107,10 +107,16 @@
         <service android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
                  android:process=":bg"
                  android:directBootAware="true"
+                 tools:ignore="Instantiatable"
                  tools:replace="android:directBootAware"/>
         <service android:name="androidx.work.impl.background.systemjob.SystemJobService"
                  android:process=":bg"
                  android:directBootAware="true"
+                 tools:replace="android:directBootAware"/>
+        <service android:name="androidx.work.impl.foreground.SystemForegroundService"
+                 android:process=":bg"
+                 android:directBootAware="true"
+                 tools:ignore="Instantiatable"
                  tools:replace="android:directBootAware"/>
         <receiver android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
                   android:process=":bg"
@@ -145,6 +151,7 @@
         <service android:name="androidx.work.impl.background.gcm.WorkManagerGcmService"
                  android:process=":bg"
                  android:directBootAware="true"
+                 tools:ignore="Instantiatable"
                  tools:replace="android:directBootAware"/>
     </application>
 </manifest>
