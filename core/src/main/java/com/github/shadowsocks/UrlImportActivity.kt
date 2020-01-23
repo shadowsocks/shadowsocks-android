@@ -31,6 +31,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.plugin.Empty
+import com.github.shadowsocks.plugin.showAllowingStateLoss
 import kotlinx.android.parcel.Parcelize
 
 class UrlImportActivity : AppCompatActivity() {
@@ -61,7 +62,7 @@ class UrlImportActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.profile_invalid_input, Toast.LENGTH_SHORT).show()
                 finish()
             }
-            else -> dialog.show(supportFragmentManager, null)
+            else -> dialog.showAllowingStateLoss(supportFragmentManager)
         }
     }
 

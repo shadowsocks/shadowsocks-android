@@ -28,7 +28,6 @@ import android.os.Parcelable
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.Fragment
-import kotlinx.android.parcel.Parcelize
 
 /**
  * Based on: https://android.googlesource.com/platform/packages/apps/ExactCalculator/+/8c43f06/src/com/android/calculator2/AlertDialogFragment.java
@@ -62,9 +61,6 @@ abstract class AlertDialogFragment<Arg : Parcelable, Ret : Parcelable> :
 
     fun show(target: Fragment, requestCode: Int = 0, tag: String = javaClass.simpleName) {
         setTargetFragment(target, requestCode)
-        show(target.fragmentManager ?: return, tag)
+        showAllowingStateLoss(target.fragmentManager ?: return, tag)
     }
 }
-
-@Parcelize
-class Empty : Parcelable

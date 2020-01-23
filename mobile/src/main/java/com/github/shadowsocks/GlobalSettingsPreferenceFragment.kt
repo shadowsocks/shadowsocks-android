@@ -34,6 +34,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.net.TcpFastOpen
+import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.BrowsableEditTextPreferenceDialogFragment
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.HostsSummaryProvider
@@ -126,7 +127,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         if (preference == hosts) BrowsableEditTextPreferenceDialogFragment().apply {
             setKey(hosts.key)
             setTargetFragment(this@GlobalSettingsPreferenceFragment, REQUEST_BROWSE)
-        }.show(parentFragmentManager, hosts.key) else super.onDisplayPreferenceDialog(preference)
+        }.showAllowingStateLoss(parentFragmentManager, hosts.key) else super.onDisplayPreferenceDialog(preference)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
