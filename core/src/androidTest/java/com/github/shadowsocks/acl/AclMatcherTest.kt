@@ -41,9 +41,9 @@ class AclMatcherTest {
     fun emptyFile() {
         runBlocking {
             AclMatcher().apply {
-                init("".reader())
-                Assert.assertFalse(shouldBypassIpv4(ByteArray(4)))
-                Assert.assertFalse(shouldBypassIpv6(ByteArray(16)))
+                init(AclTest.BYPASS_BASE.reader())
+                Assert.assertTrue(shouldBypassIpv4(ByteArray(4)))
+                Assert.assertTrue(shouldBypassIpv6(ByteArray(16)))
                 Assert.assertNull(shouldBypass("www.google.com"))
             }
         }
@@ -54,14 +54,30 @@ class AclMatcherTest {
         runBlocking {
             AclMatcher().apply {
                 init(AclTest.INPUT1.reader())
+                Assert.assertTrue(shouldBypassIpv4("0.1.2.3".parseNumericAddress()!!.address))
+                Assert.assertFalse(shouldBypassIpv4("1.0.1.2".parseNumericAddress()!!.address))
+                Assert.assertTrue(shouldBypassIpv4("1.0.3.2".parseNumericAddress()!!.address))
+                Assert.assertTrue(shouldBypassIpv6("::".parseNumericAddress()!!.address))
+                Assert.assertFalse(shouldBypassIpv6("2020::2020".parseNumericAddress()!!.address))
+                Assert.assertTrue(shouldBypassIpv6("fe80::2020".parseNumericAddress()!!.address))
+                Assert.assertTrue(shouldBypass("4tern.com") == false)
+                Assert.assertTrue(shouldBypass("www.4tern.com") == false)
+                Assert.assertNull(shouldBypass("www.google.com"))
+            }
+        }
+    }
+
+    @Test
+    fun bypassList() {
+        runBlocking {
+            AclMatcher().apply {
+                init(AclTest.INPUT2.reader())
                 Assert.assertFalse(shouldBypassIpv4("0.1.2.3".parseNumericAddress()!!.address))
-                Assert.assertTrue(shouldBypassIpv4("1.0.1.2".parseNumericAddress()!!.address))
-                Assert.assertFalse(shouldBypassIpv4("1.0.3.2".parseNumericAddress()!!.address))
-                Assert.assertFalse(shouldBypassIpv6("::".parseNumericAddress()!!.address))
-                Assert.assertTrue(shouldBypassIpv6("2020::2020".parseNumericAddress()!!.address))
-                Assert.assertFalse(shouldBypassIpv6("fe80::2020".parseNumericAddress()!!.address))
-                Assert.assertTrue(shouldBypass("4tern.com") == true)
-                Assert.assertTrue(shouldBypass("www.4tern.com") == true)
+                Assert.assertTrue(shouldBypassIpv4("10.0.1.2".parseNumericAddress()!!.address))
+                Assert.assertTrue(shouldBypassIpv4("10.10.1.2".parseNumericAddress()!!.address))
+                Assert.assertFalse(shouldBypassIpv4("11.0.1.2".parseNumericAddress()!!.address))
+                Assert.assertTrue(shouldBypass("chrome.com") == true)
+                Assert.assertTrue(shouldBypass("about.google") == false)
                 Assert.assertNull(shouldBypass("www.google.com"))
             }
         }
