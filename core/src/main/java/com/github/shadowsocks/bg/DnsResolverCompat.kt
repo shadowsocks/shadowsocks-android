@@ -82,7 +82,7 @@ sealed class DnsResolverCompat {
             printLog(e)
             val addresses = Core.connectivity.getLinkProperties(network)?.linkAddresses
             true == when (addr) {
-                is Inet4Address -> addresses?.any { it.address is Inet4Address }
+                is Inet4Address -> addresses?.any { it.address is Inet4Address && !it.address.isLinkLocalAddress }
                 is Inet6Address -> addresses?.any {
                     it.address.run { this is Inet6Address && !isLinkLocalAddress && !isIPv4CompatibleAddress }
                 }
