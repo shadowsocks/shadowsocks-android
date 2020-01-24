@@ -53,6 +53,7 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
 class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
         OnPreferenceDataStoreChangeListener {
@@ -265,6 +266,10 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
         Key.about -> {
             Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
+            true
+        }
+        Key.aboutOss -> {
+            startActivity(Intent(context, OssLicensesMenuActivity::class.java))
             true
         }
         else -> super.onPreferenceTreeClick(preference)
