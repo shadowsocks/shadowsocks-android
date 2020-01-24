@@ -25,9 +25,10 @@ import org.junit.Test
 
 class AclTest {
     companion object {
-        private const val INPUT1 = """[proxy_all]
+        const val INPUT1 = """[proxy_all]
 [bypass_list]
 1.0.1.0/24
+2000::/8
 (?:^|\.)4tern\.com${'$'}
 """
     }
