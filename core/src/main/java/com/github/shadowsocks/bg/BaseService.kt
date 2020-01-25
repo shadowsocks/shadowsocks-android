@@ -31,6 +31,7 @@ import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
+import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
@@ -40,6 +41,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
 import kotlinx.coroutines.*
 import java.io.File
+import java.io.IOException
 import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
@@ -342,6 +344,13 @@ object BaseService {
                     val hosts = HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")
                     proxy.init(this@Interface, hosts)
                     data.udpFallback?.init(this@Interface, hosts)
+                    if (profile.route == Acl.CUSTOM_RULES) try {
+                        withContext(Dispatchers.IO) {
+                            Acl.createCustom(this@Interface::openConnection)
+                        }
+                    } catch (e: IOException) {
+                        throw ExpectedExceptionWrapper(e)
+                    }
 
                     data.processes = GuardedProcessPool {
                         printLog(it)
