@@ -65,7 +65,8 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
                 if (a[i] != b[i]) return false
                 ++i
             }
-            return i * 8 == prefixSize || a[i].toInt() == b[i].toInt() and 256 - (1 shl i * 8 + 8 - prefixSize)
+            val mask = 256 - (1 shl i * 8 + 8 - prefixSize)
+            return i * 8 == prefixSize || a[i].toInt() and mask == b[i].toInt() and mask
         }
     }
     fun toImmutable() = Immutable(address.address.also {

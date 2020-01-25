@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2020 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2020 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,21 +18,19 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks
+@file:JvmName("Utils")
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import com.github.shadowsocks.widget.ListHolderListener
+package com.github.shadowsocks.plugin
 
-class GlobalSettingsFragment : ToolbarFragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.layout_global_settings, container, false)
+import android.os.Parcelable
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
+import kotlinx.android.parcel.Parcelize
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        view.setOnApplyWindowInsetsListener(ListHolderListener)
-        toolbar.setTitle(R.string.settings)
-    }
+@Parcelize
+class Empty : Parcelable
+
+@JvmOverloads
+fun DialogFragment.showAllowingStateLoss(fragmentManager: FragmentManager, tag: String? = null) {
+    if (!fragmentManager.isStateSaved) show(fragmentManager, tag)
 }

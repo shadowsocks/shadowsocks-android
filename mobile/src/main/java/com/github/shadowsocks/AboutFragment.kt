@@ -61,13 +61,14 @@ class AboutFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                     .parseAsHtml(HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
                 for (span in getSpans(0, length, URLSpan::class.java)) {
                     setSpan(object : ClickableSpan() {
-                        override fun onClick(view: View) {
-                            if (span.url.startsWith("mailto:")) {
+                        override fun onClick(view: View) = when {
+                            span.url.startsWith("mailto:") -> {
                                 startActivity(Intent.createChooser(Intent().apply {
                                     action = Intent.ACTION_SENDTO
                                     data = span.url.toUri()
                                 }, getString(R.string.send_email)))
-                            } else (activity as MainActivity).launchUrl(span.url)
+                            }
+                            else -> (activity as MainActivity).launchUrl(span.url)
                         }
                     }, getSpanStart(span), getSpanEnd(span), getSpanFlags(span))
                     removeSpan(span)

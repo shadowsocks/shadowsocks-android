@@ -50,6 +50,7 @@ import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.datas
@@ -205,8 +206,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
 
         override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
             R.id.action_qr_code -> {
-                parentFragmentManager.beginTransaction().add(QRCodeDialog(this.item.toString()), "")
-                        .commitAllowingStateLoss()
+                QRCodeDialog(this.item.toString()).showAllowingStateLoss(parentFragmentManager)
                 true
             }
             R.id.action_export_clipboard -> {

@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.github.shadowsocks.core"
     android:installLocation="internalOnly">
@@ -54,8 +55,7 @@
 
         <service
             android:name="com.github.shadowsocks.subscription.SubscriptionService"
-            android:exported="false">
-        </service>
+            android:exported="false" />
 
         <activity
             android:name="com.github.shadowsocks.UrlImportActivity"
@@ -96,14 +96,25 @@
             tools:node="remove" />
 
         <service
+            android:name="androidx.room.MultiInstanceInvalidationService"
+            android:directBootAware="true"
+            android:process=":bg" />
+        <service
             android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
             android:directBootAware="true"
             android:process=":bg"
+            tools:ignore="Instantiatable"
             tools:replace="android:directBootAware" />
         <service
             android:name="androidx.work.impl.background.systemjob.SystemJobService"
             android:directBootAware="true"
             android:process=":bg"
+            tools:replace="android:directBootAware" />
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:directBootAware="true"
+            android:process=":bg"
+            tools:ignore="Instantiatable"
             tools:replace="android:directBootAware" />
 
         <receiver

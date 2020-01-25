@@ -31,6 +31,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.TcpFastOpen
+import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.*
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
@@ -125,11 +126,11 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             hosts -> BrowsableEditTextPreferenceDialogFragment().apply {
                 setKey(hosts.key)
                 setTargetFragment(this@GlobalSettingsPreferenceFragment, REQUEST_BROWSE)
-            }.show(parentFragmentManager, hosts.key)
+            }.showAllowingStateLoss(parentFragmentManager, hosts.key)
             acl -> ActionEditTextPreferenceDialogFragment().apply {
                 setKey(acl.key)
                 setTargetFragment(this@GlobalSettingsPreferenceFragment, 0)
-            }.show(parentFragmentManager, acl.key)
+            }.showAllowingStateLoss(parentFragmentManager, acl.key)
             else -> super.onDisplayPreferenceDialog(preference)
         }
     }

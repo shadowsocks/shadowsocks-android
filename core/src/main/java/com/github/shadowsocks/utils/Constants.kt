@@ -80,10 +80,6 @@ object Key {
     const val controlImport = "control.import"
     const val controlExport = "control.export"
     const val about = "about"
-
-    const val ssrSub = "ssrSub"
-    const val ssrSubAutoUpdate = "ssrsub_autoupdate"
-
     const val aclUrl = "acl_url"
 }
 

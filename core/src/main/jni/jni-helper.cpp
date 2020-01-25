@@ -44,6 +44,18 @@ bool addDomain(JNIEnv *env, stringstream &domains, jstring regex) {
     return true;
 }
 
+const char *buildRE2(stringstream &domains, RE2 *&out, const RE2::Options &options) {
+    if (domains.rdbuf()->in_avail()) {
+        out = new RE2(domains.str(), options);
+        domains.clear();
+        if (!out->ok()) return out->error().c_str();
+    } else {
+        delete out;
+        out = nullptr;
+    }
+    return nullptr;
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 extern "C" {
@@ -75,16 +87,13 @@ Java_com_github_shadowsocks_acl_AclMatcher_build(JNIEnv *env, jclass clazz, jlon
                                                  jlong memory_limit) {
     if (!handle) return env->NewStringUTF("AclMatcher closed");
     auto matcher = reinterpret_cast<AclMatcher *>(handle);
-    if (matcher->bypassDomains || matcher->proxyDomains) return env->NewStringUTF("already built");
     RE2::Options options;
     options.set_max_mem(memory_limit);
     options.set_never_capture(true);
-    matcher->bypassDomains = new RE2(matcher->bypassDomainsBuilder.str(), options);
-    matcher->bypassDomainsBuilder.clear();
-    if (!matcher->bypassDomains->ok()) return env->NewStringUTF(matcher->bypassDomains->error().c_str());
-    matcher->proxyDomains = new RE2(matcher->proxyDomainsBuilder.str(), options);
-    matcher->proxyDomainsBuilder.clear();
-    if (!matcher->proxyDomains->ok()) return env->NewStringUTF(matcher->proxyDomains->error().c_str());
+    const char *e = ::buildRE2(matcher->bypassDomainsBuilder, matcher->bypassDomains, options);
+    if (e) return env->NewStringUTF(e);
+    e = ::buildRE2(matcher->proxyDomainsBuilder, matcher->proxyDomains, options);
+    if (e) return env->NewStringUTF(e);
     return nullptr;
 }
 
@@ -95,8 +104,8 @@ Java_com_github_shadowsocks_acl_AclMatcher_matchHost(JNIEnv *env, jclass clazz, 
     auto matcher = reinterpret_cast<const AclMatcher *>(handle);
     const char *hostChars = env->GetStringUTFChars(host, nullptr);
     jint result = 0;
-    if (RE2::FullMatch(hostChars, *matcher->bypassDomains)) result = 1;
-    else if (RE2::FullMatch(hostChars, *matcher->proxyDomains)) result = 2;
+    if (matcher->bypassDomains && RE2::PartialMatch(hostChars, *matcher->bypassDomains)) result = 1;
+    else if (matcher->proxyDomains && RE2::PartialMatch(hostChars, *matcher->proxyDomains)) result = 2;
     env->ReleaseStringUTFChars(host, hostChars);
     return result;
 }

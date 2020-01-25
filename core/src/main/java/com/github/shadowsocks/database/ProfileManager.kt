@@ -44,7 +44,6 @@ object ProfileManager {
         fun onCleared()
         fun reloadProfiles()
     }
-
     var listener: Listener? = null
 
     @Throws(SQLException::class)

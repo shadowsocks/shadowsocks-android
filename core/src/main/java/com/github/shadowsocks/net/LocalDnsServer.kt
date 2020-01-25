@@ -124,10 +124,12 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                     else -> return@supervisorScope remote.await()
                 }
                 val host = question.name.canonicalize().toString(true)
-                val hostsResults = hosts.resolve(host, isIpv6)
+                val hostsResults = hosts.resolve(host)
                 if (hostsResults.isNotEmpty()) {
                     remote.cancel()
-                    return@supervisorScope cookDnsResponse(request, hostsResults)
+                    return@supervisorScope cookDnsResponse(request, hostsResults.run {
+                        if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
+                    })
                 }
                 val acl = acl?.await() ?: return@supervisorScope remote.await()
                 val useLocal = when (acl.shouldBypass(host)) {

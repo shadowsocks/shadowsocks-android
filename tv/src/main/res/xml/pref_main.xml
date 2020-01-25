@@ -60,5 +60,9 @@
     <Preference
         app:key="about"
         app:title="@string/about"/>
+    <Preference
+        app:key="about.ossLicenses"
+        app:title="@string/oss_license_title"
+        app:summary="@string/preferences_license_summary"/>
 
 </PreferenceScreen>

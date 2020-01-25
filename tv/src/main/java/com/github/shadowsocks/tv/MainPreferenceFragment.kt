@@ -31,9 +31,8 @@ import android.os.RemoteException
 import android.text.format.Formatter
 import android.util.Log
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.get
 import androidx.lifecycle.observe
 import androidx.preference.*
 import com.crashlytics.android.Crashlytics
@@ -54,6 +53,7 @@ import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
 class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
         OnPreferenceDataStoreChangeListener {
@@ -87,7 +87,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         portTransproxy.isEnabled = enabledTransproxy
         true
     }
-    private lateinit var tester: HttpsTest
+    private val tester by viewModels<HttpsTest>()
 
     // service
     var state = BaseService.State.Idle
@@ -191,7 +191,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         serviceMode.onPreferenceChangeListener = onServiceModeChange
         findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
 
-        tester = ViewModelProvider(this).get()
         changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(requireContext(), this)
         DataStore.publicStore.registerChangeListener(this)
@@ -267,6 +266,10 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
         Key.about -> {
             Toast.makeText(requireContext(), "https://shadowsocks.org/android", Toast.LENGTH_SHORT).show()
+            true
+        }
+        Key.aboutOss -> {
+            startActivity(Intent(context, OssLicensesMenuActivity::class.java))
             true
         }
         else -> super.onPreferenceTreeClick(preference)

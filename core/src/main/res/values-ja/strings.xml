@@ -176,6 +176,8 @@
     <string name="night_mode">"夜間モード"</string>
     <string name="night_mode_system">"システムに基づく"</string>
     <string name="night_mode_auto">"オート"</string>
+    <string name="night_mode_on">"開く"</string>
+    <string name="night_mode_off">"閉じる"</string>
     <string name="send_email">"電子メール送信"</string>
     <string name="action_export_more">"エクスポート"</string>
     <string name="action_export_file">"ファイルへエクスポート"</string>
@@ -186,9 +188,13 @@
     <string name="tcp_fastopen_failure">"切り替え失敗"</string>
     <string name="udp_fallback">"UDPフォールバック"</string>
     <string name="action_replace_file">"ファイルから置き換え"</string>
+    <string name="off">"オフ"</string>
     <string name="proxied_apps_mode">"モード"</string>
     <string name="metered">"従量制提示"</string>
     <string name="metered_summary">"VPNは従量制であることをシステムに知らせる"</string>
+    <plurals name="hosts_summary">
+        <item quantity="other">"設定された%dホスト名"</item>
+    </plurals>
 
     <!-- subscriptions -->
     <string name="subscriptions">"購読する"</string>
@@ -196,6 +202,6 @@
     <string name="edit_subscription">"サブスクリプションを編集"</string>
     <string name="update_subscription">"サブスクリプションを更新"</string>
     <string name="service_subscription">"サブスクリプションサービス"</string>
-    <string name="service_subscription_working">"サブスクリプションの更新（％d /％d）"</string>
+    <string name="service_subscription_working">"サブスクリプションの更新（%d / %d）"</string>
     <string name="service_subscription_finishing">"サブスクリプション更新"</string>
 </resources>
