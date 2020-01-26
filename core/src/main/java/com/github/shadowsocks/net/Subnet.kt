@@ -57,6 +57,8 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
             }
         }
 
+        fun Byte.toPositiveInt() = toInt() and 0xFF
+
         fun matches(b: Immutable) = matches(b.a)
         fun matches(b: ByteArray): Boolean {
             if (a.size != b.size) return false
@@ -66,7 +68,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
                 ++i
             }
             val mask = 256 - (1 shl i * 8 + 8 - prefixSize)
-            return i * 8 == prefixSize || a[i].toInt() and mask == b[i].toInt() and mask
+            return i * 8 == prefixSize || a[i].toPositiveInt() == b[i].toPositiveInt() and mask
         }
     }
     fun toImmutable() = Immutable(address.address.also {

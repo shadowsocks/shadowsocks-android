@@ -28,10 +28,18 @@ class SubnetTest {
     }
 
     @Test
-    fun matching() {
+    fun matching1() {
         val matcher = Subnet.fromString("1.10.11.12/25")!!.toImmutable()
         Assert.assertFalse(matcher.matches(parseNumericAddress("1.10.10.12").address))
         Assert.assertTrue(matcher.matches(parseNumericAddress("1.10.11.13").address))
+        Assert.assertFalse(matcher.matches(parseNumericAddress("1.10.11.212").address))
+    }
+
+    @Test
+    fun matching2() {
+        val matcher = Subnet.fromString("14.208.0.0/12")!!.toImmutable()
+        Assert.assertTrue(matcher.matches(parseNumericAddress("14.215.178.36").address))
+        Assert.assertTrue(matcher.matches(parseNumericAddress("14.215.178.37").address))
         Assert.assertFalse(matcher.matches(parseNumericAddress("1.10.11.212").address))
     }
 }
