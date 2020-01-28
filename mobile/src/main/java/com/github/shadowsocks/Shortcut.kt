@@ -31,6 +31,7 @@ import androidx.core.content.getSystemService
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.net.toUri
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.bg.BaseService
@@ -62,6 +63,7 @@ class Shortcut : Activity(), ShadowsocksConnection.Callback {
                     intent.putExtra("SCAN_MODE", "QR_CODE_MODE")
                     startActivityForResult(intent, REQUEST_SCAN)
                 } catch (_: ActivityNotFoundException) {
+                    startActivity(Intent(Intent.ACTION_VIEW).setData(getString(R.string.faq_url).toUri()))
                 }
                 if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed(SHORTCUT_SCAN)
             }

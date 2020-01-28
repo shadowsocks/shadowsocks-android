@@ -1,6 +1,6 @@
 ## 二维码扫描功能
 
-需要安装[条码扫描器](https://play.google.com/store/apps/details?id=com.google.zxing.client.android)，不内置扫描功能。
+依最小权限原则，删除非核心功能的QR码扫描。改为使用外部工具处理，需要安装[条码扫描器](https://play.google.com/store/apps/details?id=com.google.zxing.client.android)。
 
 无法访问Google Play可以[从GitHub下载](https://github.com/shadowsocksRb/zxing-android/releases/latest)。
 
