@@ -1,4 +1,5 @@
 * 1.3.4:
+  * Please use `android:path` instead of `android:pathPrefix`, sample code in documentations have been updated to reflect this recommendation.
   * Fix occasional crash in `AlertDialogFragment`.
   * Translation updates.
   * Dependency updates:

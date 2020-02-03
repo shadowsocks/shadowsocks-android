@@ -164,7 +164,7 @@ This corresponds to `com.github.shadowsocks.plugin.NativePluginProvider` in the 
                 <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
                 <data android:scheme="plugin"
                       android:host="com.github.shadowsocks"
-                      android:pathPrefix="/$PLUGIN_ID"/>
+                      android:path="/$PLUGIN_ID"/>
             </intent-filter>
             <meta-data android:name="com.github.shadowsocks.plugin.id"
                        android:value="$PLUGIN_ID"/>
@@ -202,6 +202,7 @@ This allows the host app to launch your plugin without ever launching your app.
 ## JVM mode
 
 This feature hasn't been implemented yet.
+Please open an issue if you need this.
 
 # Plugin security
 
