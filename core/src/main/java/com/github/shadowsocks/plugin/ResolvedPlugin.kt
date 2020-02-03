@@ -20,21 +20,25 @@
 
 package com.github.shadowsocks.plugin
 
+import android.content.pm.ComponentInfo
 import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
-import android.os.Bundle
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
+import com.github.shadowsocks.plugin.PluginManager.loadString
 import com.github.shadowsocks.utils.signaturesCompat
 
 abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin() {
-    protected abstract val metaData: Bundle
+    protected abstract val componentInfo: ComponentInfo
+    private val resources by lazy { app.packageManager.getResourcesForApplication(componentInfo.applicationInfo) }
 
-    override val id: String by lazy { metaData.getString(PluginContract.METADATA_KEY_ID)!! }
+    override val id by lazy { componentInfo.metaData.loadString(PluginContract.METADATA_KEY_ID) { resources }!! }
     override val label: CharSequence by lazy { resolveInfo.loadLabel(app.packageManager) }
     override val icon: Drawable by lazy { resolveInfo.loadIcon(app.packageManager) }
-    override val defaultConfig: String? by lazy { metaData.getString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
-    override val packageName: String get() = resolveInfo.resolvePackageName
+    override val defaultConfig by lazy {
+        componentInfo.metaData.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) { resources }
+    }
+    override val packageName: String get() = componentInfo.packageName
     override val trusted by lazy {
         Core.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)
     }

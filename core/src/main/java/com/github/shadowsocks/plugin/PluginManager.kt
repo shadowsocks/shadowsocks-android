@@ -27,8 +27,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ProviderInfo
 import android.content.pm.Signature
+import android.content.res.Resources
 import android.database.Cursor
 import android.net.Uri
+import android.os.Bundle
 import android.system.Os
 import android.util.Base64
 import android.util.Log
@@ -176,7 +178,9 @@ object PluginManager {
     }
 
     private fun initNativeFaster(provider: ProviderInfo): String? {
-        return provider.metaData.getString(PluginContract.METADATA_KEY_EXECUTABLE_PATH)?.let { relativePath ->
+        return provider.metaData.loadString(PluginContract.METADATA_KEY_EXECUTABLE_PATH) {
+            app.packageManager.getResourcesForApplication(provider.applicationInfo)
+        }?.let { relativePath ->
             File(provider.applicationInfo.nativeLibraryDir).resolve(relativePath).apply {
                 check(canExecute())
             }.absolutePath
@@ -218,5 +222,12 @@ object PluginManager {
         }
         if (!initialized) entryNotFound()
         return File(pluginDir, options.id).absolutePath
+    }
+
+    fun Bundle.loadString(key: String, resources: () -> Resources) = when (val value = get(key)) {
+        is String -> value
+        is Int -> resources().getString(value)
+        null -> null
+        else -> error("meta-data $key has invalid type ${value.javaClass}")
     }
 }
