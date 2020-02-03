@@ -1,3 +1,8 @@
+* 1.3.4:
+  * Fix occasional crash in `AlertDialogFragment`.
+  * Translation updates.
+  * Dependency updates:
+    - `com.google.android.material:material:1.1.0-rc02`.
 * 1.3.3:
   * Fix a build script issue.
 * 1.3.2:
