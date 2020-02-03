@@ -66,7 +66,7 @@ dependencies {
     api 'com.google.android.gms:play-services-oss-licenses:17.0.0'
     api 'com.google.code.gson:gson:2.8.6'
     api 'com.google.firebase:firebase-analytics:17.2.2'
-    api 'com.google.firebase:firebase-config:19.1.0'
+    api 'com.google.firebase:firebase-config:19.1.1'
     api 'dnsjava:dnsjava:2.1.9'
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
