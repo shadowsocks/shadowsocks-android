@@ -30,9 +30,8 @@ import com.github.shadowsocks.plugin.PluginManager
 
 class PluginPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
     companion object FallbackProvider : SummaryProvider<PluginPreference> {
-        override fun provideSummary(preference: PluginPreference): CharSequence? {
-            return preference.selectedEntry?.label ?: preference.unknownValueSummary.format(preference.value)
-        }
+        override fun provideSummary(preference: PluginPreference) =
+                preference.selectedEntry?.label ?: preference.unknownValueSummary.format(preference.value)
     }
 
     lateinit var plugins: PluginList
