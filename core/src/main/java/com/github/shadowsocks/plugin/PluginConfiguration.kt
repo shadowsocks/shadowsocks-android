@@ -51,7 +51,7 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
     })
 
     fun getOptions(id: String): PluginOptions = if (id.isEmpty()) PluginOptions() else
-        pluginsOptions[id] ?: PluginOptions(id, PluginManager.fetchPlugins()[id]?.defaultConfig)
+        pluginsOptions[id] ?: PluginOptions(id, PluginManager.fetchPlugins().lookup[id]?.defaultConfig)
     val selectedOptions: PluginOptions get() = getOptions(selected)
 
     override fun toString(): String {

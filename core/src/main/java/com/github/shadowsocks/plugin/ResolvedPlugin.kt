@@ -33,6 +33,17 @@ abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin()
     private val resources by lazy { app.packageManager.getResourcesForApplication(componentInfo.applicationInfo) }
 
     override val id by lazy { componentInfo.metaData.loadString(PluginContract.METADATA_KEY_ID) { resources }!! }
+    override val idAliases: Array<String> by lazy {
+        when (val value = componentInfo.metaData.get(PluginContract.METADATA_KEY_ID_ALIASES)) {
+            is String -> arrayOf(value)
+            is Int -> when (resources.getResourceTypeName(value)) {
+                "string" -> arrayOf(resources.getString(value))
+                else -> resources.getStringArray(value)
+            }
+            null -> emptyArray()
+            else -> error("unknown type for plugin meta-data idAliases")
+        }
+    }
     override val label: CharSequence by lazy { resolveInfo.loadLabel(app.packageManager) }
     override val icon: Drawable by lazy { resolveInfo.loadIcon(app.packageManager) }
     override val defaultConfig by lazy {

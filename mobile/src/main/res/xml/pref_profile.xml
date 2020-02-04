@@ -77,7 +77,7 @@
     <PreferenceCategory
             app:title="@string/plugin">
 
-        <com.github.shadowsocks.preference.IconListPreference
+        <com.github.shadowsocks.preference.PluginPreference
                 app:key="plugin"
                 app:persistent="false"
                 app:title="@string/plugin"

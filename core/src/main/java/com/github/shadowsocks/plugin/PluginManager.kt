@@ -102,19 +102,15 @@ object PluginManager {
     }
 
     private var receiver: BroadcastReceiver? = null
-    private var cachedPlugins: Map<String, Plugin>? = null
-    fun fetchPlugins(): Map<String, Plugin> = synchronized(this) {
+    private var cachedPlugins: PluginList? = null
+    fun fetchPlugins() = synchronized(this) {
         if (receiver == null) receiver = app.listenForPackageChanges {
             synchronized(this) {
                 receiver = null
                 cachedPlugins = null
             }
         }
-        if (cachedPlugins == null) {
-            val pm = app.packageManager
-            cachedPlugins = (pm.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN),
-                    PackageManager.GET_META_DATA).map { NativePlugin(it) } + NoPlugin).associateBy { it.id }
-        }
+        if (cachedPlugins == null) cachedPlugins = PluginList()
         cachedPlugins!!
     }
 

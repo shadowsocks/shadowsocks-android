@@ -242,6 +242,49 @@ Plugin app must include this in their application tag: (which should be automati
            android:value="1.0.0"/>
 ```
 
+# Plugin ID Aliasing
+
+To implement plugin ID aliasing, you:
+
+* MUST define meta-data `com.github.shadowsocks.plugin.id.aliases` in your plugin content provider with `android:value="alias"`,
+  or use `android:resources` to specify a string resource or string array resource for multiple aliases.
+* MUST be able to be matched by `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN` when invoked on alias.
+  To do this, you SHOULD use multiple `intent-filter` and use a different `android:path` for each alias.
+  Alternatively, you MAY also use a single `intent-filter` and use `android:pathPattern` to match all your aliases at once.
+  You MUST NOT use `android:pathPrefix` or allow `android:pathPattern` to match undeclared plugin ID/alias as it might create a conflict with other plugins.
+* SHOULD NOT add or change `intent-filter` for activities to include your aliases -- your plugin ID will always be used.
+
+For example:
+```xml
+<manifest>
+    ...
+    <application>
+        ...
+        <provider>
+            ...
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
+                <data android:scheme="plugin"
+                      android:host="com.github.shadowsocks"
+                      android:path="/$PLUGIN_ID"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
+                <data android:scheme="plugin"
+                      android:host="com.github.shadowsocks"
+                      android:path="/$PLUGIN_ALIAS"/>
+            </intent-filter>
+            <meta-data android:name="com.github.shadowsocks.plugin.id"
+                       android:value="$PLUGIN_ID"/>
+            <meta-data android:name="com.github.shadowsocks.plugin.aliases"
+                       android:value="$PLUGIN_ALIAS"/>
+            ...
+        </provider>
+        ...
+    </application>
+</manifest>
+```
+
 # Android TV
 
 Android TV client does not invoke configuration activities. Therefore your plugins should automatically work with them.

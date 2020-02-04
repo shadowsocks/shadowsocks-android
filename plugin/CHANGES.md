@@ -1,4 +1,6 @@
 * 1.3.4:
+  * Optional new metadata `com.github.shadowsocks.plugin.id.aliases` for plugin ID aliases;
+    (see doc for `PluginContract.METADATA_KEY_ID_ALIASES` and main documentation "Plugin ID Aliasing" for more information)
   * Please use `android:path` instead of `android:pathPrefix`, sample code in documentations have been updated to reflect this recommendation.
   * Fix occasional crash in `AlertDialogFragment`.
   * Translation updates.
