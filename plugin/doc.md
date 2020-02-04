@@ -128,11 +128,10 @@ Every native mode plugin MUST have a content provider to provide the native exec
 * MUST have `android:label` and `android:icon`; (may be configured by its parent `application`)
 * MUST have an intent filter with action `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN`;
   (used for discovering plugins)
-* MUST have meta-data `com.github.shadowsocks.plugin.id` with string value `$PLUGIN_ID`;
+* MUST have meta-data `com.github.shadowsocks.plugin.id` with string value `$PLUGIN_ID` or a string resource;
 * MUST have an intent filter with action `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN` and
   data `plugin://com.github.shadowsocks/$PLUGIN_ID`; (used for configuring plugin)
-* CAN have meta-data `com.github.shadowsocks.plugin.default_config` with string value, default is
-  empty;
+* CAN have meta-data `com.github.shadowsocks.plugin.default_config` with string value or a string resource, default is empty;
 * MUST implement `query` that returns the file list which MUST include `$PLUGIN_ID` when having
   these as arguments:
   - `uri = "content://$authority_of_your_provider`;
