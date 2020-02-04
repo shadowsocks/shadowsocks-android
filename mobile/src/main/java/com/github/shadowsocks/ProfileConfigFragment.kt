@@ -132,7 +132,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         plugin.value = pluginConfiguration.selected
         plugin.init()
         pluginConfigure.isEnabled = pluginConfiguration.selected.isNotEmpty()
-        pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
+        pluginConfigure.text = pluginConfiguration.getOptions().toString()
     }
 
     private fun showPluginEditor() {
@@ -196,7 +196,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
                         PluginContract.ACTION_CONFIGURE)
                 if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else {
                     startActivityForResult(intent
-                            .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.selectedOptions.toString()),
+                            .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.getOptions().toString()),
                             REQUEST_CODE_PLUGIN_CONFIGURE)
                 }
             }
@@ -216,7 +216,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
                 DataStore.plugin = pluginConfiguration.toString()
                 DataStore.dirty = true
                 pluginConfigure.isEnabled = selected !is NoPlugin
-                pluginConfigure.text = pluginConfiguration.selectedOptions.toString()
+                pluginConfigure.text = pluginConfiguration.getOptions().toString()
                 if (!selected.trusted) Snackbar.make(view!!, R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
             }
             REQUEST_CODE_PLUGIN_CONFIGURE -> when (resultCode) {

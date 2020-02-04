@@ -301,7 +301,7 @@ data class Profile(
                 .encodedAuthority("$auth@$wrappedHost:$remotePort")
         val configuration = PluginConfiguration(plugin ?: "")
         if (configuration.selected.isNotEmpty()) {
-            builder.appendQueryParameter(Key.plugin, configuration.selectedOptions.toString(false))
+            builder.appendQueryParameter(Key.plugin, configuration.getOptions().toString(false))
         }
         if (!name.isNullOrEmpty()) builder.fragment(name)
         return builder.build()
@@ -315,7 +315,7 @@ data class Profile(
         put("password", password)
         put("method", method)
         if (profiles == null) return@apply
-        PluginConfiguration(plugin ?: "").selectedOptions.also {
+        PluginConfiguration(plugin ?: "").getOptions().also {
             if (it.id.isNotEmpty()) {
                 put("plugin", it.id)
                 put("plugin_opts", it.toString())

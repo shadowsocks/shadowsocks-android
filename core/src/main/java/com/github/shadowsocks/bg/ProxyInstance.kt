@@ -47,8 +47,7 @@ import java.security.MessageDigest
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
-    private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
-    val pluginPath by lazy { PluginManager.init(plugin) }
+    val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
     private var scheduleConfigUpdate = false
 
     suspend fun init(service: BaseService.Interface, hosts: HostsFile) {
@@ -115,7 +114,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         this.configFile = configFile
         val config = profile.toJson()
-        if (pluginPath != null) config.put("plugin", pluginPath).put("plugin_opts", plugin.toString())
+        plugin?.let { (path, opts) -> config.put("plugin", path).put("plugin_opts", opts.toString()) }
         configFile.writeText(config.toString())
 
         val cmd = service.buildAdditionalArguments(arrayListOf(
