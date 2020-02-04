@@ -63,11 +63,11 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         fun bind(plugin: Plugin, selected: Boolean = false) {
             this.plugin = plugin
             text1.text = plugin.label
-            text2.text = plugin.packageName
+            text2.text = plugin.id
             val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
             text1.setTypeface(null, typeface)
             text2.setTypeface(null, typeface)
-            text2.isVisible = plugin.packageName.isNotEmpty() && plugin.label != plugin.packageName
+            text2.isVisible = plugin.id.isNotEmpty() && plugin.label != plugin.id
             icon.setImageDrawable(plugin.icon)
         }
 
