@@ -44,8 +44,8 @@ abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin()
             else -> error("unknown type for plugin meta-data idAliases")
         }
     }
-    override val label: CharSequence by lazy { resolveInfo.loadLabel(app.packageManager) }
-    override val icon: Drawable by lazy { resolveInfo.loadIcon(app.packageManager) }
+    override val label: CharSequence get() = resolveInfo.loadLabel(app.packageManager)
+    override val icon: Drawable get() = resolveInfo.loadIcon(app.packageManager)
     override val defaultConfig by lazy {
         componentInfo.metaData.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) { resources }
     }
