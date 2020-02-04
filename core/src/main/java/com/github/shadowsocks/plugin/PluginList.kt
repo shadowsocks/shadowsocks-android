@@ -31,10 +31,11 @@ class PluginList : ArrayList<Plugin>() {
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN), PackageManager.GET_META_DATA).map { NativePlugin(it) })
     }
 
-    val lookup = flatMap { plugin ->
-        sequence {
-            yield(plugin.id to plugin)
-            for (alias in plugin.idAliases) yield(alias to plugin)
-        }.asIterable()
-    }.associate { it }
+    val lookup = mutableMapOf<String, Plugin>().apply {
+        for (plugin in this@PluginList) {
+            fun check(old: Plugin?) = check(old == null || old === plugin)
+            check(put(plugin.id, plugin))
+            for (alias in plugin.idAliases) check(put(alias, plugin))
+        }
+    }
 }
