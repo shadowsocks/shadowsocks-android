@@ -23,6 +23,7 @@ package com.github.shadowsocks.plugin
 import android.content.pm.ComponentInfo
 import android.content.pm.ResolveInfo
 import android.graphics.drawable.Drawable
+import android.os.Build
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.plugin.PluginManager.loadString
@@ -52,4 +53,5 @@ abstract class ResolvedPlugin(protected val resolveInfo: ResolveInfo) : Plugin()
     override val trusted by lazy {
         Core.getPackageInfo(packageName).signaturesCompat.any(PluginManager.trustedSignatures::contains)
     }
+    override val directBootAware get() = Build.VERSION.SDK_INT < 24 || componentInfo.directBootAware
 }

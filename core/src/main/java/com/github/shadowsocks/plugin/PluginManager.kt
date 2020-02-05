@@ -139,8 +139,11 @@ object PluginManager {
     }
 
     private fun initNative(configuration: PluginConfiguration): Pair<String, PluginOptions>? {
-        val providers = app.packageManager.queryIntentContentProviders(Intent(PluginContract.ACTION_NATIVE_PLUGIN,
-                buildUri(configuration.selected)), PackageManager.GET_META_DATA)
+        val providers = app.packageManager.queryIntentContentProviders(
+                Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(configuration.selected)),
+                PackageManager.GET_META_DATA or
+                        PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
+        )
         if (providers.isEmpty()) return null
         val provider = providers.single().providerInfo
         val options = configuration.getOptions { provider.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }

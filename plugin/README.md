@@ -84,6 +84,7 @@ Then add it to your manifest:
         ...
         <provider android:name=".BinaryProvider"
                   android:exported="true"
+                  android:directBootAware="true"
                   android:authorities="$FULLY_QUALIFIED_NAME_OF_YOUR_CONTENTPROVIDER">
             <intent-filter>
                 <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>

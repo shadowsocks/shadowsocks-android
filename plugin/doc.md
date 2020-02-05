@@ -125,7 +125,8 @@ In native mode, plugins are provided as native executables and `shadowsocks-libe
 Every native mode plugin MUST have a content provider to provide the native executables (since they
  can exceed 1M which is the limit of Intent size) that:
 
-* MUST have `android:label` and `android:icon`; (may be configured by its parent `application`)
+* MUST have `android:label` and `android:icon`; (may be inherited from parent `application`)
+* SHOULD have `android:directBootAware="true"` with proper support if possible;
 * MUST have an intent filter with action `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN`;
   (used for discovering plugins)
 * MUST have meta-data `com.github.shadowsocks.plugin.id` with string value `$PLUGIN_ID` or a string resource;
@@ -154,6 +155,7 @@ This corresponds to `com.github.shadowsocks.plugin.NativePluginProvider` in the 
         ...
         <provider android:name=".BinaryProvider"
                   android:exported="true"
+                  android:directBootAware="true"
                   android:authorities="$FULLY_QUALIFIED_NAME_OF_YOUR_CONTENTPROVIDER"
                   tools:ignore="ExportedContentProvider">
             <intent-filter>

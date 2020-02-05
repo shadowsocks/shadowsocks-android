@@ -33,7 +33,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -54,6 +56,9 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         private val text1 = view.findViewById<TextView>(android.R.id.text1)
         private val text2 = view.findViewById<TextView>(android.R.id.text2)
         private val icon = view.findViewById<ImageView>(android.R.id.icon)
+        private val unlock = view.findViewById<View>(R.id.unlock).apply {
+            TooltipCompat.setTooltipText(this, getText(R.string.plugin_auto_connect_unlock_only))
+        }
 
         init {
             view.setOnClickListener(this)
@@ -70,6 +75,7 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
             text2.setTypeface(null, typeface)
             text2.isVisible = plugin.id.isNotEmpty() && label != plugin.id
             icon.setImageDrawable(plugin.icon)
+            unlock.isGone = plugin.directBootAware || !DataStore.persistAcrossReboot
         }
 
         override fun onClick(v: View?) {
