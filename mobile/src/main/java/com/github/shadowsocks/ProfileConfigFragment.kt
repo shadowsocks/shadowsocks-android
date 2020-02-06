@@ -105,6 +105,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         pluginConfigure = findPreference(Key.pluginConfigure)!!
         pluginConfigure.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
         pluginConfigure.onPreferenceChangeListener = this
+        pluginConfiguration = PluginConfiguration(DataStore.plugin)
         initPlugins()
         udpFallback = findPreference(Key.udpFallback)!!
         DataStore.privateStore.registerChangeListener(this)
@@ -128,7 +129,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     }
 
     private fun initPlugins() {
-        pluginConfiguration = PluginConfiguration(DataStore.plugin)
         plugin.value = pluginConfiguration.selected
         plugin.init()
         pluginConfigure.isEnabled = pluginConfiguration.selected.isNotEmpty()
@@ -215,6 +215,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
                 pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, override ?: selected.id)
                 DataStore.plugin = pluginConfiguration.toString()
                 DataStore.dirty = true
+                plugin.value = pluginConfiguration.selected
                 pluginConfigure.isEnabled = selected !is NoPlugin
                 pluginConfigure.text = pluginConfiguration.getOptions().toString()
                 if (!selected.trusted) Snackbar.make(view!!, R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
