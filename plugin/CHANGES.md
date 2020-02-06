@@ -8,6 +8,7 @@
   * Fix occasional crash in `AlertDialogFragment`.
   * Translation updates.
   * Dependency updates:
+    - `androidx.core:core-ktx:1.2.0`;
     - `com.google.android.material:material:1.1.0`.
 * 1.3.3:
   * Fix a build script issue.
