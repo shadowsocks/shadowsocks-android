@@ -29,6 +29,7 @@ import android.net.Network
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
+import android.system.OsConstants
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
@@ -72,8 +73,11 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                                 DnsResolverCompat.bindSocket(network, fd)
                                 return@let true
                             } catch (e: IOException) {
-                                // suppress ENONET (Machine is not on the network)
-                                if ((e.cause as? ErrnoException)?.errno != 64) printLog(e)
+                                when ((e.cause as? ErrnoException)?.errno) {
+                                    // also suppress ENONET (Machine is not on the network)
+                                    OsConstants.EPERM, 64 -> e.printStackTrace()
+                                    else -> printLog(e)
+                                }
                                 return@let false
                             } catch (e: ReflectiveOperationException) {
                                 check(Build.VERSION.SDK_INT < 23)
