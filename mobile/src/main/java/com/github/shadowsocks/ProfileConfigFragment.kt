@@ -131,7 +131,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     private fun initPlugins() {
         plugin.value = pluginConfiguration.selected
         plugin.init()
-        pluginConfigure.isEnabled = pluginConfiguration.selected.isNotEmpty()
+        pluginConfigure.isEnabled = plugin.selectedEntry?.let { it is NoPlugin } == false
         pluginConfigure.text = pluginConfiguration.getOptions().toString()
     }
 
@@ -192,8 +192,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
                 setTargetFragment(this@ProfileConfigFragment, REQUEST_PICK_PLUGIN)
             }.showAllowingStateLoss(parentFragmentManager, Key.plugin)
             Key.pluginConfigure -> {
-                val intent = PluginManager.buildIntent(plugin.plugins.lookup.getValue(pluginConfiguration.selected).id,
-                        PluginContract.ACTION_CONFIGURE)
+                val intent = PluginManager.buildIntent(plugin.selectedEntry!!.id, PluginContract.ACTION_CONFIGURE)
                 if (intent.resolveActivity(requireContext().packageManager) == null) showPluginEditor() else {
                     startActivityForResult(intent
                             .putExtra(PluginContract.EXTRA_OPTIONS, pluginConfiguration.getOptions().toString()),
