@@ -46,9 +46,9 @@ class Subscription {
     fun fromReader(reader: Reader): Subscription {
         urls.clear()
         reader.useLines {
-            for (line in it) {
+            for (line in it) try {
                 urls.add(URL(line))
-            }
+            } catch (_: Exception) { }
         }
         return this
     }
