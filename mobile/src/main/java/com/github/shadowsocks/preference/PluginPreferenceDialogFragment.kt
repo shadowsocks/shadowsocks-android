@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.preference
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -32,68 +33,76 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.R
+import com.github.shadowsocks.plugin.Plugin
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
-class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
+class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
+    companion object {
+        const val KEY_SELECTED_ID = "id"
+    }
+
     private inner class IconListViewHolder(val dialog: BottomSheetDialog, view: View) : RecyclerView.ViewHolder(view),
             View.OnClickListener, View.OnLongClickListener {
-        private var index = 0
+        private lateinit var plugin: Plugin
         private val text1 = view.findViewById<TextView>(android.R.id.text1)
         private val text2 = view.findViewById<TextView>(android.R.id.text2)
         private val icon = view.findViewById<ImageView>(android.R.id.icon)
+        private val unlock = view.findViewById<View>(R.id.unlock).apply {
+            TooltipCompat.setTooltipText(this, getText(R.string.plugin_auto_connect_unlock_only))
+        }
 
         init {
             view.setOnClickListener(this)
             view.setOnLongClickListener(this)
         }
 
-        fun bind(i: Int, selected: Boolean = false) {
-            text1.text = preference.entries[i]
-            text2.text = preference.entryValues[i]
+        fun bind(plugin: Plugin, selected: Boolean = false) {
+            this.plugin = plugin
+            val label = plugin.label
+            text1.text = label
+            text2.text = plugin.id
             val typeface = if (selected) Typeface.BOLD else Typeface.NORMAL
             text1.setTypeface(null, typeface)
             text2.setTypeface(null, typeface)
-            text2.isVisible = preference.entryValues[i].isNotEmpty() &&
-                    preference.entries[i] != preference.entryValues[i]
-            icon.setImageDrawable(preference.entryIcons?.get(i))
-            index = i
+            text2.isVisible = plugin.id.isNotEmpty() && label != plugin.id
+            icon.setImageDrawable(plugin.icon)
+            unlock.isGone = plugin.directBootAware || !DataStore.persistAcrossReboot
         }
 
-        override fun onClick(p0: View?) {
-            clickedIndex = index
+        override fun onClick(v: View?) {
+            clicked = plugin
             dialog.dismiss()
         }
 
-        override fun onLongClick(p0: View?): Boolean {
-            val pn = preference.entryPackageNames?.get(index) ?: return false
-            return try {
-                startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.Builder()
-                        .scheme("package")
-                        .opaquePart(pn)
-                        .build()))
-                true
-            } catch (_: ActivityNotFoundException) {
-                false
-            }
+        override fun onLongClick(v: View?) = try {
+            startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.Builder()
+                    .scheme("package")
+                    .opaquePart(plugin.packageName)
+                    .build()))
+            true
+        } catch (_: ActivityNotFoundException) {
+            false
         }
     }
     private inner class IconListAdapter(private val dialog: BottomSheetDialog) :
             RecyclerView.Adapter<IconListViewHolder>() {
-        override fun getItemCount(): Int = preference.entries.size
+        override fun getItemCount(): Int = preference.plugins.size
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = IconListViewHolder(dialog,
                 LayoutInflater.from(parent.context).inflate(R.layout.icon_list_item_2, parent, false))
         override fun onBindViewHolder(holder: IconListViewHolder, position: Int) {
-            if (preference.selectedEntry < 0) holder.bind(position) else when (position) {
-                0 -> holder.bind(preference.selectedEntry, true)
-                in preference.selectedEntry + 1..Int.MAX_VALUE -> holder.bind(position)
-                else -> holder.bind(position - 1)
+            if (selected < 0) holder.bind(preference.plugins[position]) else when (position) {
+                0 -> holder.bind(preference.selectedEntry!!, true)
+                in selected + 1..Int.MAX_VALUE -> holder.bind(preference.plugins[position])
+                else -> holder.bind(preference.plugins[position - 1])
             }
         }
     }
@@ -102,8 +111,9 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         arguments = bundleOf(ARG_KEY to key)
     }
 
-    private val preference by lazy { getPreference() as IconListPreference }
-    private var clickedIndex = -1
+    private val preference by lazy { getPreference() as PluginPreference }
+    private val selected by lazy { preference.plugins.indexOf(preference.selectedEntry) }
+    private var clicked: Plugin? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val activity = requireActivity()
@@ -123,9 +133,10 @@ class BottomSheetPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     }
 
     override fun onDialogClosed(positiveResult: Boolean) {
-        if (clickedIndex >= 0 && clickedIndex != preference.selectedEntry) {
-            val value = preference.entryValues[clickedIndex].toString()
-            if (preference.callChangeListener(value)) preference.value = value
-        }
+        val clicked = clicked
+        if (clicked != null && clicked != preference.selectedEntry) {
+            targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_OK,
+                    Intent().putExtra(KEY_SELECTED_ID, clicked.id))
+        } else targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_CANCELED, null)
     }
 }

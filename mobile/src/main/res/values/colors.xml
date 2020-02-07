@@ -2,4 +2,5 @@
 <resources>
     <color name="background_selected">@color/material_primary_100</color>
     <color name="background_stat">@color/material_primary_300</color>
+    <color name="material_amber_a700">#ffab00</color>
 </resources>

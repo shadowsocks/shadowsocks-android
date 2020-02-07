@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2017 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2017 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2020 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2020 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -20,22 +20,22 @@
 
 package com.github.shadowsocks.plugin
 
-import android.graphics.drawable.Drawable
+import android.content.Intent
+import android.content.pm.PackageManager
+import com.github.shadowsocks.Core.app
 
-abstract class Plugin {
-    abstract val id: String
-    open val idAliases get() = emptyArray<String>()
-    abstract val label: CharSequence
-    open val icon: Drawable? get() = null
-    open val defaultConfig: String? get() = null
-    open val packageName: String get() = ""
-    open val trusted: Boolean get() = true
-    open val directBootAware: Boolean get() = true
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        return id == (other as Plugin).id
+class PluginList : ArrayList<Plugin>() {
+    init {
+        add(NoPlugin)
+        addAll(app.packageManager.queryIntentContentProviders(
+                Intent(PluginContract.ACTION_NATIVE_PLUGIN), PackageManager.GET_META_DATA).map { NativePlugin(it) })
     }
-    override fun hashCode() = id.hashCode()
+
+    val lookup = mutableMapOf<String, Plugin>().apply {
+        for (plugin in this@PluginList) {
+            fun check(old: Plugin?) = check(old == null || old === plugin)
+            check(put(plugin.id, plugin))
+            for (alias in plugin.idAliases) check(put(alias, plugin))
+        }
+    }
 }

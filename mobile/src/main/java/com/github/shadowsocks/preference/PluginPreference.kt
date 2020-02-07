@@ -24,27 +24,20 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.preference.ListPreference
+import com.github.shadowsocks.R
+import com.github.shadowsocks.plugin.PluginList
+import com.github.shadowsocks.plugin.PluginManager
 
-class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
-    companion object FallbackProvider : SummaryProvider<IconListPreference> {
-        override fun provideSummary(preference: IconListPreference?): CharSequence? {
-            val i = preference?.selectedEntry
-            return if (i != null && i < 0) preference.unknownValueSummary?.format(preference.value) else
-                preference?.entry
-        }
+class PluginPreference(context: Context, attrs: AttributeSet? = null) : ListPreference(context, attrs) {
+    companion object FallbackProvider : SummaryProvider<PluginPreference> {
+        override fun provideSummary(preference: PluginPreference) =
+                preference.selectedEntry?.label ?: preference.unknownValueSummary.format(preference.value)
     }
 
-    var entryIcons: Array<Drawable?>? = null
-    val selectedEntry: Int get() = entryValues.indexOf(value)
-    val entryIcon: Drawable? get() = entryIcons?.getOrNull(selectedEntry)
-//    fun setEntryIcons(@ArrayRes entryIconsResId: Int) {
-//        val array = getContext().getResources().obtainTypedArray(entryIconsResId)
-//        entryIcons = Array(array.length(), { i -> array.getDrawable(i) })
-//        array.recycle()
-//    }
-
-    var unknownValueSummary: String? = null
-    var entryPackageNames: Array<String>? = null
+    lateinit var plugins: PluginList
+    val selectedEntry get() = plugins.lookup[value]
+    private val entryIcon: Drawable? get() = selectedEntry?.icon
+    private val unknownValueSummary = context.getString(R.string.plugin_unknown)
 
     private var listener: OnPreferenceChangeListener? = null
     override fun getOnPreferenceChangeListener(): OnPreferenceChangeListener? = listener
@@ -57,17 +50,15 @@ class IconListPreference(context: Context, attrs: AttributeSet? = null) : ListPr
             val listener = listener
             if (listener == null || listener.onPreferenceChange(preference, newValue)) {
                 value = newValue.toString()
-                if (entryIcons != null) icon = entryIcon
+                icon = entryIcon
                 true
             } else false
         }
-//        val a = context.obtainStyledAttributes(attrs, R.styleable.IconListPreference)
-//        val entryIconsResId: Int = a.getResourceId(R.styleable.IconListPreference_entryIcons, -1)
-//        if (entryIconsResId != -1) entryIcons = entryIconsResId
-//        a.recycle()
     }
 
     fun init() {
+        plugins = PluginManager.fetchPlugins()
+        entryValues = plugins.lookup.map { it.key }.toTypedArray()
         icon = entryIcon
         summaryProvider = FallbackProvider
     }
