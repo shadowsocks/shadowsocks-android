@@ -1,4 +1,4 @@
-# https://github.com/arturbosch/detekt/blob/1.3.1/detekt-cli/src/main/resources/default-detekt-config.yml
+# https://github.com/arturbosch/detekt/blob/1.5.0/detekt-cli/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -56,6 +56,13 @@ complexity:
     ignorePrivate: false
     ignoreOverridden: true
 
+coroutines:
+  active: true
+  GlobalCoroutineUsage:
+    active: false
+  RedundantSuspendModifier:
+    active: true
+
 empty-blocks:
   active: true
   EmptyCatchBlock:
@@ -75,7 +82,7 @@ empty-blocks:
     active: true
   EmptyFunctionBlock:
     active: true
-    ignoreOverriddenFunctions: true
+    ignoreOverridden: true
   EmptyIfBlock:
     active: true
   EmptyInitBlock:
@@ -122,22 +129,22 @@ exceptions:
     active: true
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
     exceptionNames:
-     - ArrayIndexOutOfBoundsException
-     - Error
-     - Exception
-     - IllegalMonitorStateException
-     - NullPointerException
-     - IndexOutOfBoundsException
-     - RuntimeException
-     - Throwable
+      - ArrayIndexOutOfBoundsException
+      - Error
+      - Exception
+      - IllegalMonitorStateException
+      - NullPointerException
+      - IndexOutOfBoundsException
+      - RuntimeException
+      - Throwable
     allowedExceptionNameRegex: "^(_|(ignore|expected).*)"
   TooGenericExceptionThrown:
     active: true
     exceptionNames:
-     - Error
-     - Exception
-     - Throwable
-     - RuntimeException
+      - Error
+      - Exception
+      - Throwable
+      - RuntimeException
 
 formatting:
   active: true
@@ -151,6 +158,9 @@ formatting:
     autoCorrect: true
   CommentSpacing:
     active: false
+  EnumEntryNameCase:
+    active: true
+    autoCorrect: false
   Filename:
     active: true
   FinalNewline:
@@ -178,6 +188,9 @@ formatting:
     active: true
     autoCorrect: true
   NoEmptyClassBody:
+    active: true
+    autoCorrect: true
+  NoEmptyFirstLineInMethodBlock:
     active: true
     autoCorrect: true
   NoLineBreakAfterElse:
@@ -261,9 +274,7 @@ naming:
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
     maximumFunctionNameLength: 30
   FunctionMinLength:
-    active: true
-    excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
-    minimumFunctionNameLength: 3
+    active: false
   FunctionNaming:
     active: true
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
@@ -275,7 +286,7 @@ naming:
     excludes: "**/test/**,**/androidTest/**,**/*.Test.kt,**/*.Spec.kt,**/*.Spek.kt"
     parameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
-    ignoreOverriddenFunctions: true
+    ignoreOverridden: true
   InvalidPackageDeclaration:
     active: true
     rootPackage: ''
@@ -380,6 +391,8 @@ style:
   EqualsNullCall:
     active: true
   EqualsOnSignatureLine:
+    active: true
+  ExplicitCollectionElementAccessMethod:
     active: true
   ExplicitItLambdaParameter:
     active: true
