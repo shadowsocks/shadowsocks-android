@@ -35,16 +35,14 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.MutableLiveData
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.asIterable
-import com.github.shadowsocks.utils.readableMessage
-import com.github.shadowsocks.utils.useCancellable
+import com.github.shadowsocks.utils.*
 import com.google.gson.JsonStreamParser
 import kotlinx.coroutines.*
 import java.io.File
@@ -53,11 +51,10 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-class SubscriptionService : Service() {
+class SubscriptionService : Service(), CoroutineScope {
     companion object {
         private const val NOTIFICATION_CHANNEL = "service-subscription"
         private const val NOTIFICATION_ID = 2
-        private var worker: Job? = null
 
         val idle = MutableLiveData<Boolean>(true)
 
@@ -65,12 +62,9 @@ class SubscriptionService : Service() {
                 app.getText(R.string.service_subscription), NotificationManager.IMPORTANCE_LOW)
     }
 
-    private object CancelReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            worker?.cancel()
-        }
-    }
-
+    override val coroutineContext = SupervisorJob() + CoroutineExceptionHandler { _, t -> printLog(t) }
+    private var worker: Job? = null
+    private val cancelReceiver = broadcastReceiver { _, _ -> worker?.cancel() }
     private var counter = 0
     private var receiverRegistered = false
 
@@ -80,10 +74,10 @@ class SubscriptionService : Service() {
         if (worker == null) {
             idle.value = false
             if (!receiverRegistered) {
-                registerReceiver(CancelReceiver, IntentFilter(Action.ABORT), "$packageName.SERVICE", null)
+                registerReceiver(cancelReceiver, IntentFilter(Action.ABORT), "$packageName.SERVICE", null)
                 receiverRegistered = true
             }
-            worker = GlobalScope.launch {
+            worker = launch {
                 val urls = Subscription.instance.urls
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
                     color = ContextCompat.getColor(this@SubscriptionService, R.color.material_primary_500)
@@ -145,7 +139,7 @@ class SubscriptionService : Service() {
             return tempFile
         } catch (e: IOException) {
             e.printStackTrace()
-            GlobalScope.launch(Dispatchers.Main) {
+            launch(Dispatchers.Main) {
                 Toast.makeText(this@SubscriptionService, e.readableMessage, Toast.LENGTH_LONG).show()
             }
             if (!tempFile.delete()) tempFile.deleteOnExit()
@@ -212,8 +206,8 @@ class SubscriptionService : Service() {
     }
 
     override fun onDestroy() {
-        worker?.cancel()
-        if (receiverRegistered) unregisterReceiver(CancelReceiver)
+        cancel()
+        if (receiverRegistered) unregisterReceiver(cancelReceiver)
         super.onDestroy()
     }
 }
