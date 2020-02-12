@@ -194,7 +194,7 @@ class SubscriptionService : Service(), CoroutineScope {
                             subscription = Profile.SubscriptionStatus.Active
                         })
                     }
-                }
+                }!!
             }
         } catch (e: Exception) {
             e.printStackTrace()

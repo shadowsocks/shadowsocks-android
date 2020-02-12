@@ -162,7 +162,7 @@ data class Profile(
         }.filterNotNull()
 
         private class JsonParser(private val feature: Profile? = null) : ArrayList<Profile>() {
-            private val fallbackMap = mutableMapOf<Profile, Profile>()
+            val fallbackMap = mutableMapOf<Profile, Profile>()
 
             private val JsonElement?.optString get() = (this as? JsonPrimitive)?.asString
             private val JsonElement?.optBoolean
@@ -223,7 +223,7 @@ data class Profile(
                 }
             }
 
-            fun finalize(create: (Profile) -> Unit) {
+            fun finalize(create: (Profile) -> Profile) {
                 val profiles = ProfileManager.getAllProfiles() ?: emptyList()
                 for ((profile, fallback) in fallbackMap) {
                     val match = profiles.firstOrNull {
@@ -231,19 +231,20 @@ data class Profile(
                                 fallback.password == it.password && fallback.method == it.method &&
                                 it.plugin.isNullOrEmpty()
                     }
-                    profile.udpFallback = if (match == null) {
-                        create(fallback)
-                        fallback.id
-                    } else match.id
+                    profile.udpFallback = (match ?: create(fallback)).id
                     ProfileManager.updateProfile(profile)
                 }
             }
         }
 
-        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Unit) {
+        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Profile) {
             JsonParser(feature).run {
                 process(json)
-                for (profile in this) create(profile)
+                for (i in indices) {
+                    val fallback = fallbackMap.remove(this[i])
+                    this[i] = create(this[i])
+                    fallback?.also { fallbackMap[this[i]] = it }
+                }
                 finalize(create)
             }
         }
