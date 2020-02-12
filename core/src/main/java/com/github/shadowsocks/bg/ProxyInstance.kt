@@ -132,7 +132,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }
 
         // for UDP profile, it's only going to operate in UDP relay mode-only so this flag has no effect
-        if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_LAN) cmd += "-D"
+        if (profile.route == Acl.ALL) cmd += "-D"
 
         if (DataStore.tcpFastOpen) cmd += "--fast-open"
 
