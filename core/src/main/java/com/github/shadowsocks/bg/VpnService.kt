@@ -165,10 +165,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                 .addAddress(PRIVATE_VLAN4_CLIENT, 30)
                 .addDnsServer(PRIVATE_VLAN4_ROUTER)
 
-        if (profile.ipv6) {
-            builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
-            builder.addRoute("::", 0)
-        }
+        if (profile.ipv6) builder.addAddress(PRIVATE_VLAN6_CLIENT, 126)
 
         if (profile.proxyApps) {
             val me = packageName
@@ -186,13 +183,18 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         }
 
         when (profile.route) {
-            Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> builder.addRoute("0.0.0.0", 0)
+            Acl.ALL, Acl.BYPASS_CHN, Acl.CUSTOM_RULES -> {
+                builder.addRoute("0.0.0.0", 0)
+                if (profile.ipv6) builder.addRoute("::", 0)
+            }
             else -> {
                 resources.getStringArray(R.array.bypass_private_route).forEach {
                     val subnet = Subnet.fromString(it)!!
                     builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
                 }
                 builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
+                // https://issuetracker.google.com/issues/149636790
+                if (profile.ipv6) builder.addRoute("2000::", 3)
             }
         }
 
