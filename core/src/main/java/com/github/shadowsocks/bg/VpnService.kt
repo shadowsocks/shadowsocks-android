@@ -193,6 +193,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                     builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
                 }
                 builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
+                // https://issuetracker.google.com/issues/149636790
                 if (profile.ipv6) builder.addRoute("2000::", 3)
             }
         }
