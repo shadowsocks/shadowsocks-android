@@ -53,10 +53,11 @@ androidExtensions {
 
 cargo {
     module  = 'shadowsocks-rust'
-    libname = 'shadowsocks-rust'
+    libname = 'shadowsocks'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
+    profile = 'release'
     features {
-        noDefaultBut "sodium", "trust-dns"
+        noDefaultBut "sodium"
     }
 }
 
