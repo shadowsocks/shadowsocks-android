@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -48,6 +49,15 @@ android {
 
 androidExtensions {
     experimental = true
+}
+
+cargo {
+    module  = 'shadowsocks-rust'
+    libname = 'shadowsocks-rust'
+    targets = ['arm', 'arm64', 'x86', 'x86_64']
+    features {
+        noDefaultBut "sodium", "trust-dns"
+    }
 }
 
 def coroutinesVersion = '1.3.3'

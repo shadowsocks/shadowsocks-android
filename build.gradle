@@ -25,9 +25,13 @@ buildscript {
         maven {
             url 'https://maven.fabric.io/public'
         }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
 
     dependencies {
+        classpath 'gradle.plugin.org.mozilla.rust-android-gradle:plugin:0.8.3'
         classpath 'com.android.tools.build:gradle:4.0.0-alpha09'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.27.0'
         classpath 'com.google.android.gms:oss-licenses-plugin:0.9.5'

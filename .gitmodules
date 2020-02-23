@@ -33,3 +33,6 @@
 [submodule "core/src/main/jni/re2"]
 	path = core/src/main/jni/re2
 	url = https://github.com/google/re2.git
+[submodule "core/shadowsocks-rust"]
+	path = core/shadowsocks-rust
+	url = https://github.com/madeye/shadowsocks-rust
