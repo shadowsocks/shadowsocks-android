@@ -53,13 +53,16 @@ androidExtensions {
 
 cargo {
     module  = 'shadowsocks-rust'
-    libname = 'shadowsocks'
+    libname = 'sslocal'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
     profile = 'release'
-    targetIncludes = ['sslocal']
+    targetIncludes = ['libsslocal.so']
     extraCargoBuildArguments = ['--bin', 'sslocal']
     features {
         noDefaultBut "sodium"
+    }
+    exec { spec, toolchain ->
+        spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/release/libsslocal.so")
     }
 }
 
