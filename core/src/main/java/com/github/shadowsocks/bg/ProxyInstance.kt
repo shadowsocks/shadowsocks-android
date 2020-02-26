@@ -115,13 +115,12 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         this.configFile = configFile
         val config = profile.toJson()
         plugin?.let { (path, opts) -> config.put("plugin", path).put("plugin_opts", opts.toString()) }
+        config.put("local_addr", DataStore.listenAddress)
+        config.put("local_port", DataStore.portProxy)
         configFile.writeText(config.toString())
 
         val cmd = service.buildAdditionalArguments(arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "-b", DataStore.listenAddress,
-                "-l", DataStore.portProxy.toString(),
-                "-t", "600",
                 "-S", stat.absolutePath,
                 "-c", configFile.absolutePath))
         if (extraFlag != null) cmd.add(extraFlag)

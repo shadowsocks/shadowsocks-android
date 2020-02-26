@@ -45,6 +45,8 @@ android {
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
+
+    ndkVersion rootProject.ndkVersion
 }
 
 androidExtensions {
@@ -52,7 +54,7 @@ androidExtensions {
 }
 
 cargo {
-    module  = 'shadowsocks-rust'
+    module  = 'src/main/rust'
     libname = 'sslocal'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
     profile = 'release'
@@ -65,8 +67,6 @@ cargo {
         spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/release/libsslocal.so")
     }
 }
-
-preBuild.dependsOn "cargoBuild"
 
 def coroutinesVersion = '1.3.3'
 def roomVersion = '2.2.3'
