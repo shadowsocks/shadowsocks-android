@@ -66,6 +66,8 @@ cargo {
     }
 }
 
+preBuild.dependsOn "cargoBuild"
+
 def coroutinesVersion = '1.3.3'
 def roomVersion = '2.2.3'
 def workVersion = '2.3.1'
