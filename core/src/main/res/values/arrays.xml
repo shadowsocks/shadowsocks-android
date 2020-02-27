@@ -3,7 +3,6 @@
     <string-array name="enc_method_entry" translatable="false">
         <item>PLAIN</item>
         <item>AES-128-GCM</item>
-        <item>AES-192-GCM</item>
         <item>AES-256-GCM</item>
         <item>CHACHA20-IETF-POLY1305</item>
         <item>XCHACHA20-IETF-POLY1305</item>
@@ -12,7 +11,6 @@
     <string-array name="enc_method_value" translatable="false">
         <item>plain</item>
         <item>aes-128-gcm</item>
-        <item>aes-192-gcm</item>
         <item>aes-256-gcm</item>
         <item>chacha20-ietf-poly1305</item>
         <item>xchacha20-ietf-poly1305</item>
