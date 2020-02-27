@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="enc_method_entry" translatable="false">
+        <item>PLAIN</item>
         <item>AES-128-GCM</item>
         <item>AES-192-GCM</item>
         <item>AES-256-GCM</item>
@@ -9,6 +10,7 @@
     </string-array>
 
     <string-array name="enc_method_value" translatable="false">
+        <item>plain</item>
         <item>aes-128-gcm</item>
         <item>aes-192-gcm</item>
         <item>aes-256-gcm</item>
