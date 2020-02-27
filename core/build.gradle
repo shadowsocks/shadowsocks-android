@@ -57,14 +57,14 @@ cargo {
     module  = 'src/main/rust'
     libname = 'sslocal'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
-    profile = 'release'
+    profile = 'debug'
     targetIncludes = ['libsslocal.so']
     extraCargoBuildArguments = ['--bin', 'sslocal']
     features {
-        noDefaultBut "sodium"
+        noDefaultBut "sodium", "android"
     }
     exec { spec, toolchain ->
-        spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/release/libsslocal.so")
+        spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/${profile}/libsslocal.so")
     }
 }
 
