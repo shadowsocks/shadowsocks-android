@@ -120,10 +120,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         config.put("local_port", DataStore.portProxy)
         configFile.writeText(config.toString())
 
-        val cmd = (arrayListOf(
+        val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                 "--stat-path", stat.absolutePath,
-                "-c", configFile.absolutePath))
+                "-c", configFile.absolutePath)
         if (service.isVpnService()) cmd += arrayListOf("--protect-path", "protect_path")
         if (extraFlag != null) cmd.add(extraFlag)
 
