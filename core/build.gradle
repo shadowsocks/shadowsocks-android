@@ -61,7 +61,7 @@ cargo {
     targetIncludes = ['libsslocal.so']
     extraCargoBuildArguments = ['--bin', 'sslocal']
     features {
-        noDefaultBut "sodium", "android"
+        noDefaultBut "sodium", "android", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored"
     }
     exec { spec, toolchain ->
         spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/${profile}/libsslocal.so")
