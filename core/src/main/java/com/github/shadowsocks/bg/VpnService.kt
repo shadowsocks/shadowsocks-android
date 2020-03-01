@@ -94,32 +94,29 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
             launch {
                 socket.use {
                     val input = DataInputStream(socket.inputStream)
-                    while (true) {
-                        val length = try {
-                            input.readUnsignedShort()
-                        } catch (_: EOFException) {
-                            break
+                    val query = ByteArray(input.readUnsignedShort())
+                    input.read(query)
+                    try {
+                        DnsResolverCompat.resolveRaw(underlyingNetwork ?: throw IOException("no network"), query)
+                    } catch (e: Exception) {
+                        when (e) {
+                            is TimeoutCancellationException -> Crashlytics.log(Log.WARN, name, "Resolving timed out")
+                            is CancellationException -> { } // ignore
+                            is IOException -> Crashlytics.log(Log.WARN, name, e.message)
+                            else -> printLog(e)
                         }
-                        val query = ByteArray(length)
-                        input.read(query)
                         try {
-                            DnsResolverCompat.resolveRaw(underlyingNetwork ?: throw IOException("no network"), query)
+                            LocalDnsServer.prepareDnsResponse(Message(query)).apply {
+                                header.rcode = Rcode.SERVFAIL
+                            }.toWire()
                         } catch (e: Exception) {
-                            when (e) {
-                                is TimeoutCancellationException -> Crashlytics.log(Log.WARN, name, "Resolving timed out")
-                                is CancellationException -> { } // ignore
-                                is IOException -> Crashlytics.log(Log.WARN, name, e.message)
-                                else -> printLog(e)
-                            }
-                            try {
-                                LocalDnsServer.prepareDnsResponse(Message(query)).apply {
-                                    header.rcode = Rcode.SERVFAIL
-                                }.toWire()
-                            } catch (e: Exception) {
-                                printLog(e)
-                                null
-                            }
-                        }?.let { response -> socket.outputStream.write(response) }
+                            printLog(e)
+                            null
+                        }
+                    }?.let { response ->
+                        val output = DataOutputStream(socket.outputStream)
+                        output.writeShort(response.size)
+                        output.write(response)
                     }
                 }
             }
