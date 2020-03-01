@@ -13,8 +13,8 @@
 [submodule "core/src/main/jni/re2"]
 	path = core/src/main/jni/re2
 	url = https://github.com/google/re2.git
-[submodule "core/src/main/rust"]
-	path = core/src/main/rust
+[submodule "core/src/main/rust/shadowsocks-rust"]
+	path = core/src/main/rust/shadowsocks-rust
 	url = https://github.com/madeye/shadowsocks-rust
 [submodule "core/src/main/jni/libancillary"]
 	path = core/src/main/jni/libancillary

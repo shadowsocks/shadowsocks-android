@@ -54,26 +54,28 @@ androidExtensions {
 }
 
 cargo {
-    module  = 'src/main/rust'
+    module = 'src/main/rust/shadowsocks-rust'
     libname = 'sslocal'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
     profile = 'debug'
-    targetIncludes = ['libsslocal.so']
+    targetIncludes = ["lib${libname}.so"]
     extraCargoBuildArguments = ['--bin', 'sslocal']
     features {
         noDefaultBut "sodium", "android", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored"
     }
     exec { spec, toolchain ->
-        spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/${profile}/libsslocal.so")
+        spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib${libname}.so")
     }
 }
 
+preBuild.dependsOn "cargoBuild"
+
 def coroutinesVersion = '1.3.3'
-def roomVersion = '2.2.3'
-def workVersion = '2.3.1'
+def roomVersion = '2.2.4'
+def workVersion = '2.3.2'
 dependencies {
     api project(':plugin')
-    api 'androidx.fragment:fragment-ktx:1.2.1'
+    api 'androidx.fragment:fragment-ktx:1.2.2'
     api "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
     api "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
     api 'androidx.preference:preference:1.1.0'
@@ -83,9 +85,9 @@ dependencies {
     api 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     api 'com.google.android.gms:play-services-oss-licenses:17.0.0'
     api 'com.google.code.gson:gson:2.8.6'
-    api 'com.google.firebase:firebase-analytics:17.2.2'
-    api 'com.google.firebase:firebase-config:19.1.1'
-    api 'dnsjava:dnsjava:2.1.9'
+    api 'com.google.firebase:firebase-analytics:17.2.3'
+    api 'com.google.firebase:firebase-config:19.1.2'
+    api 'dnsjava:dnsjava:3.0.0'
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion"
     api 'org.connectbot.jsocks:jsocks:1.0.0'
