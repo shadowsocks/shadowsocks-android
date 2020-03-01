@@ -62,21 +62,20 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
 
-        private fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
+        fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
             header.setFlag(Flags.QR.toInt())    // this is a response
             if (request.header.getFlag(Flags.RD.toInt())) header.setFlag(Flags.RD.toInt())
             request.question?.also { addRecord(it, Section.QUESTION) }
         }
 
-        private fun cookDnsResponse(request: Message, results: Iterable<InetAddress>) =
-                ByteBuffer.wrap(prepareDnsResponse(request).apply {
-                    header.setFlag(Flags.RA.toInt())   // recursion available
-                    for (address in results) addRecord(when (address) {
-                        is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
-                        is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
-                        else -> error("Unsupported address $address")
-                    }, Section.ANSWER)
-                }.toWire())
+        fun cookDnsResponse(request: Message, results: Iterable<InetAddress>) = prepareDnsResponse(request).apply {
+            header.setFlag(Flags.RA.toInt())   // recursion available
+            for (address in results) addRecord(when (address) {
+                is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
+                is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
+                else -> error("Unsupported address $address")
+            }, Section.ANSWER)
+        }.toWire()
     }
 
     private val monitor = ChannelMonitor()
@@ -127,9 +126,9 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 val hostsResults = hosts.resolve(host)
                 if (hostsResults.isNotEmpty()) {
                     remote.cancel()
-                    return@supervisorScope cookDnsResponse(request, hostsResults.run {
+                    return@supervisorScope ByteBuffer.wrap(cookDnsResponse(request, hostsResults.run {
                         if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
-                    })
+                    }))
                 }
                 val acl = acl?.await() ?: return@supervisorScope remote.await()
                 val useLocal = when (acl.shouldBypass(host)) {
@@ -147,17 +146,17 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
                 }
                 if (isIpv6) {
                     val filtered = localResults.filterIsInstance<Inet6Address>()
-                    if (useLocal) return@supervisorScope cookDnsResponse(request, filtered)
+                    if (useLocal) return@supervisorScope ByteBuffer.wrap(cookDnsResponse(request, filtered))
                     if (filtered.any { acl.shouldBypassIpv6(it.address) }) {
                         remote.cancel()
-                        cookDnsResponse(request, filtered)
+                        ByteBuffer.wrap(cookDnsResponse(request, filtered))
                     } else remote.await()
                 } else {
                     val filtered = localResults.filterIsInstance<Inet4Address>()
-                    if (useLocal) return@supervisorScope cookDnsResponse(request, filtered)
+                    if (useLocal) return@supervisorScope ByteBuffer.wrap(cookDnsResponse(request, filtered))
                     if (filtered.any { acl.shouldBypassIpv4(it.address) }) {
                         remote.cancel()
-                        cookDnsResponse(request, filtered)
+                        ByteBuffer.wrap(cookDnsResponse(request, filtered))
                     } else remote.await()
                 }
             } catch (e: Exception) {

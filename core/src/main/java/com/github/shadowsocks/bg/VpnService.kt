@@ -30,27 +30,23 @@ import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.OsConstants
+import android.util.Log
+import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
-import com.github.shadowsocks.net.ConcurrentLocalSocketListener
-import com.github.shadowsocks.net.DefaultNetworkListener
-import com.github.shadowsocks.net.HostsFile
-import com.github.shadowsocks.net.Subnet
+import com.github.shadowsocks.net.*
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.printLog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileDescriptor
-import java.io.IOException
+import kotlinx.coroutines.*
+import org.xbill.DNS.Message
+import org.xbill.DNS.Rcode
+import java.io.*
 import java.net.URL
-import java.util.*
 import android.net.VpnService as BaseVpnService
 
 class VpnService : BaseVpnService(), LocalDnsService.Interface {
@@ -91,6 +87,45 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         }
     }
 
+    private inner class LocalDnsWorker : ConcurrentLocalSocketListener("LocalDnsThread",
+            File(Core.deviceStorage.noBackupFilesDir, "local_dns_path")), CoroutineScope {
+        override fun acceptInternal(socket: LocalSocket) = error("big no no")
+        override fun accept(socket: LocalSocket) {
+            launch {
+                socket.use {
+                    val input = DataInputStream(socket.inputStream)
+                    while (true) {
+                        val length = try {
+                            input.readUnsignedShort()
+                        } catch (_: EOFException) {
+                            break
+                        }
+                        val query = ByteArray(length)
+                        input.read(query)
+                        try {
+                            DnsResolverCompat.resolveRaw(underlyingNetwork ?: throw IOException("no network"), query)
+                        } catch (e: Exception) {
+                            when (e) {
+                                is TimeoutCancellationException -> Crashlytics.log(Log.WARN, name, "Resolving timed out")
+                                is CancellationException -> { } // ignore
+                                is IOException -> Crashlytics.log(Log.WARN, name, e.message)
+                                else -> printLog(e)
+                            }
+                            try {
+                                LocalDnsServer.prepareDnsResponse(Message(query)).apply {
+                                    header.rcode = Rcode.SERVFAIL
+                                }.toWire()
+                            } catch (e: Exception) {
+                                printLog(e)
+                                null
+                            }
+                        }?.let { response -> socket.outputStream.write(response) }
+                    }
+                }
+            }
+        }
+    }
+
     inner class NullConnectionException : NullPointerException(), BaseService.ExpectedException {
         override fun getLocalizedMessage() = getString(R.string.reboot_required)
     }
@@ -102,6 +137,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     private var conn: ParcelFileDescriptor? = null
     private var worker: ProtectWorker? = null
+    private var localDns: LocalDnsWorker? = null
     private var active = false
     private var metered = false
     private var underlyingNetwork: Network? = null
@@ -126,6 +162,8 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         scope.launch { DefaultNetworkListener.stop(this) }
         worker?.shutdown(scope)
         worker = null
+        localDns?.shutdown(scope)
+        localDns = null
         conn?.close()
         conn = null
     }
@@ -147,6 +185,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override suspend fun startProcesses(hosts: HostsFile) {
         worker = ProtectWorker().apply { start() }
+        localDns = LocalDnsWorker().apply { start() }
         super.startProcesses(hosts)
         sendFd(startVpn())
     }
