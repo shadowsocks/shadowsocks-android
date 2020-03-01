@@ -64,7 +64,7 @@ cargo {
         noDefaultBut "sodium", "android", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored"
     }
     exec { spec, toolchain ->
-        spec.environment("RUSTFLAGS", "-C lto=thin -C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib${libname}.so")
+        spec.environment("RUSTFLAGS", "-C lto=no -C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib${libname}.so")
     }
 }
 
