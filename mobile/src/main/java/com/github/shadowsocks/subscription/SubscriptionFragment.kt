@@ -220,7 +220,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         toolbar.setTitle(R.string.subscriptions)
         toolbar.inflateMenu(R.menu.subscription_menu)
         toolbar.setOnMenuItemClickListener(this)
-        SubscriptionService.idle.observe(this) {
+        SubscriptionService.idle.observe(viewLifecycleOwner) {
             toolbar.menu.findItem(R.id.action_update_subscription).isEnabled = it
         }
         val activity = activity as MainActivity

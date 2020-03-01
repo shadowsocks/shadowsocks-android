@@ -47,6 +47,10 @@ android {
     }
 
     ndkVersion rootProject.ndkVersion
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
 }
 
 androidExtensions {
