@@ -114,7 +114,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         this.configFile = configFile
         val config = profile.toJson()
-        val vpnFlags = if (service.isVpnService()) ";V" else ""
+        val vpnFlags = if (service.isVpnService) ";V" else ""
         plugin?.let { (path, opts) -> config.put("plugin", path).put("plugin_opts", opts.toString() + vpnFlags) }
         config.put("local_address", DataStore.listenAddress)
         config.put("local_port", DataStore.portProxy)
@@ -122,9 +122,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "--stat-path", stat.absolutePath,
                 "-c", configFile.absolutePath)
-        if (service.isVpnService()) cmd += arrayListOf("--protect-path", "protect_path")
+        if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
 
         if (route != Acl.ALL) {

@@ -232,7 +232,7 @@ object BaseService {
             }
         }
 
-        fun isVpnService(): Boolean = false
+        val isVpnService get() = false
 
         suspend fun startProcesses(hosts: HostsFile) {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
