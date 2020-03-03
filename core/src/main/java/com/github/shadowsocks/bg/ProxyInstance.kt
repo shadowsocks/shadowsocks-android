@@ -122,6 +122,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
+                "--stat-path", stat.absolutePath,
                 "-c", configFile.absolutePath)
         if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
