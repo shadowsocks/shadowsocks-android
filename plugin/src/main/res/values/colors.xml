@@ -28,5 +28,6 @@
   <color name="color_primary">@color/light_color_primary</color>
   <color name="color_primary_dark">@color/light_color_primary_dark</color>
   <color name="color_primary_text">@color/light_color_primary_text</color>
-  
+
+  <color name="color_background_dialog">@android:color/background_light</color>
 </resources>

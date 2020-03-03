@@ -8,7 +8,7 @@
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="windowActionModeOverlay">true</item>
-        <item name="alertDialogTheme">@style/Theme.MaterialComponents.DayNight.Dialog.Alert</item>
+        <item name="alertDialogTheme">@style/AlertDialogTheme</item>
     </style>
     <style name="Theme.Shadowsocks.Immersive">
         <item name="android:navigationBarColor">#6000</item>
@@ -23,5 +23,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowCloseOnTouchOutside">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+    <style name="AlertDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/background_dialog</item>
     </style>
 </resources>
