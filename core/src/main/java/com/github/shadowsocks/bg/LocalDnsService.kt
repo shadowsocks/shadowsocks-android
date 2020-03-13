@@ -38,22 +38,9 @@ object LocalDnsService {
     interface Interface : BaseService.Interface {
         override suspend fun startProcesses(hosts: HostsFile) {
             super.startProcesses(hosts)
-            val profile = data.proxy!!.profile
-            val dns = try {
-                URI("dns://${profile.remoteDns}")
-            } catch (e: URISyntaxException) {
-                throw BaseService.ExpectedExceptionWrapper(e)
-            }
-            LocalDnsServer(this::resolver,
-                    Socks5Endpoint(dns.host, if (dns.port < 0) 53 else dns.port),
-                    DataStore.proxyAddress,
-                    hosts,
-                    !profile.udpdns,
-                    if (profile.route == Acl.ALL) null else object {
-                        suspend fun createAcl() = AclMatcher().apply { init(profile.route) }
-                    }::createAcl).also {
+            LocalDnsServer(this::resolver, hosts).also {
                 servers[this] = it
-            }.start(InetSocketAddress(DataStore.listenAddress, DataStore.portLocalDns))
+            }.start(InetSocketAddress(DataStore.listenAddress, 8153))
         }
 
         override fun killProcesses(scope: CoroutineScope) {

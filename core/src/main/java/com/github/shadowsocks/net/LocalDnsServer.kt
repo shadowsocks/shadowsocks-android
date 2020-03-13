@@ -44,14 +44,7 @@ import java.nio.channels.SocketChannel
  *   https://github.com/shadowsocks/overture/tree/874f22613c334a3b78e40155a55479b7b69fee04
  */
 class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAddress>,
-                     private val remoteDns: Socks5Endpoint,
-                     private val proxy: SocketAddress,
-                     private val hosts: HostsFile,
-                     /**
-                      * Forward UDP queries to TCP.
-                      */
-                     private val tcp: Boolean = false,
-                     aclSpawn: (suspend () -> AclMatcher)? = null) : CoroutineScope {
+                     private val hosts: HostsFile) : CoroutineScope {
     companion object {
         private const val TAG = "LocalDnsServer"
         private const val TIMEOUT = 10_000L
@@ -61,6 +54,10 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
          */
         private const val TTL = 120L
         private const val UDP_PACKET_SIZE = 512
+
+        fun emptyDnsResponse() = Message().apply {
+            header.setFlag(Flags.QR.toInt())    // this is a response
+        }
 
         fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
             header.setFlag(Flags.QR.toInt())    // this is a response
@@ -83,7 +80,6 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
     override val coroutineContext = SupervisorJob() + CoroutineExceptionHandler { _, t ->
         if (t is IOException) Crashlytics.log(Log.WARN, TAG, t.message) else printLog(t)
     }
-    private val acl = aclSpawn?.let { async { it() } }
 
     suspend fun start(listen: SocketAddress) = DatagramChannel.open().run {
         configureBlocking(false)
@@ -110,95 +106,50 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
             Message(packet)
         } catch (e: IOException) {  // we cannot parse the message, do not attempt to handle it at all
             Crashlytics.log(Log.WARN, TAG, e.message)
-            return forward(packet)
+            return ByteBuffer.wrap(emptyDnsResponse().apply {
+                header.rcode = Rcode.SERVFAIL
+            }.toWire())
         }
-        return supervisorScope {
-            val remote = async { withTimeout(TIMEOUT) { forward(packet) } }
-            try {
-                if (request.header.opcode != Opcode.QUERY) return@supervisorScope remote.await()
-                val question = request.question
-                val isIpv6 = when (question?.type) {
-                    Type.A -> false
-                    Type.AAAA -> true
-                    else -> return@supervisorScope remote.await()
-                }
-                val host = question.name.canonicalize().toString(true)
-                val hostsResults = hosts.resolve(host)
-                if (hostsResults.isNotEmpty()) {
-                    remote.cancel()
-                    return@supervisorScope ByteBuffer.wrap(cookDnsResponse(request, hostsResults.run {
-                        if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
-                    }))
-                }
-                val acl = acl?.await() ?: return@supervisorScope remote.await()
-                val useLocal = when (acl.shouldBypass(host)) {
-                    true -> true.also { remote.cancel() }
-                    false -> return@supervisorScope remote.await()
-                    null -> false
-                }
-                val localResults = try {
-                    withTimeout(TIMEOUT) { localResolver(host) }
-                } catch (_: TimeoutCancellationException) {
-                    Crashlytics.log(Log.WARN, TAG, "Local resolving timed out, falling back to remote resolving")
-                    return@supervisorScope remote.await()
-                } catch (_: UnknownHostException) {
-                    return@supervisorScope remote.await()
-                }
-                if (isIpv6) {
-                    val filtered = localResults.filterIsInstance<Inet6Address>()
-                    if (useLocal) return@supervisorScope ByteBuffer.wrap(cookDnsResponse(request, filtered))
-                    if (filtered.any { acl.shouldBypassIpv6(it.address) }) {
-                        remote.cancel()
-                        ByteBuffer.wrap(cookDnsResponse(request, filtered))
-                    } else remote.await()
-                } else {
-                    val filtered = localResults.filterIsInstance<Inet4Address>()
-                    if (useLocal) return@supervisorScope ByteBuffer.wrap(cookDnsResponse(request, filtered))
-                    if (filtered.any { acl.shouldBypassIpv4(it.address) }) {
-                        remote.cancel()
-                        ByteBuffer.wrap(cookDnsResponse(request, filtered))
-                    } else remote.await()
-                }
-            } catch (e: Exception) {
-                remote.cancel()
-                when (e) {
-                    is TimeoutCancellationException -> Crashlytics.log(Log.WARN, TAG, "Remote resolving timed out")
-                    is CancellationException -> { } // ignore
-                    is IOException -> Crashlytics.log(Log.WARN, TAG, e.message)
-                    else -> printLog(e)
-                }
-                ByteBuffer.wrap(prepareDnsResponse(request).apply {
-                    header.rcode = Rcode.SERVFAIL
-                }.toWire())
-            }
-        }
-    }
 
-    private suspend fun forward(packet: ByteBuffer): ByteBuffer {
-        packet.position(0)  // the packet might have been parsed, reset to beginning
-        return if (tcp) SocketChannel.open().use { channel ->
-            channel.configureBlocking(false)
-            channel.connect(proxy)
-            val wrapped = remoteDns.tcpWrap(packet)
-            while (!channel.finishConnect()) monitor.wait(channel, SelectionKey.OP_CONNECT)
-            while (channel.write(wrapped) >= 0 && wrapped.hasRemaining()) monitor.wait(channel, SelectionKey.OP_WRITE)
-            val result = remoteDns.tcpReceiveBuffer(UDP_PACKET_SIZE)
-            remoteDns.tcpUnwrap(result, channel::read) { monitor.wait(channel, SelectionKey.OP_READ) }
-            result
-        } else DatagramChannel.open().use { channel ->
-            channel.configureBlocking(false)
-            monitor.wait(channel, SelectionKey.OP_WRITE)
-            check(channel.send(remoteDns.udpWrap(packet), proxy) > 0)
-            val result = remoteDns.udpReceiveBuffer(UDP_PACKET_SIZE)
-            while (isActive) {
-                monitor.wait(channel, SelectionKey.OP_READ)
-                if (channel.receive(result) == proxy) break
-                result.clear()
-            }
-            result.flip()
-            remoteDns.udpUnwrap(result)
-            result
+        val question = request.question
+        val isIpv6 = when (question?.type) {
+            Type.A -> false
+            Type.AAAA -> true
+            else -> return ByteBuffer.wrap(prepareDnsResponse(request).apply {
+                header.rcode = Rcode.SERVFAIL
+            }.toWire())
         }
+        val host = question.name.canonicalize().toString(true)
+        val hostsResults = hosts.resolve(host)
+        if (hostsResults.isNotEmpty()) {
+            return ByteBuffer.wrap(cookDnsResponse(request, hostsResults.run {
+                if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
+            }))
+        }
+
+        Log.d("dns", "host: " + host)
+
+        val localResults = try {
+            withTimeout(TIMEOUT) { localResolver(host) }
+        } catch (e: java.lang.Exception) {
+            when (e) {
+                is TimeoutCancellationException -> Crashlytics.log(Log.WARN, TAG, "Remote resolving timed out")
+                is CancellationException -> { } // ignore
+                is IOException -> Crashlytics.log(Log.WARN, TAG, e.message)
+                else -> printLog(e)
+            }
+            return ByteBuffer.wrap(prepareDnsResponse(request).apply {
+                header.rcode = Rcode.SERVFAIL
+            }.toWire())
+        }
+
+        val filtered = if (isIpv6) {
+            localResults.filterIsInstance<Inet6Address>()
+        } else {
+            localResults.filterIsInstance<Inet4Address>()
+        }
+
+        return ByteBuffer.wrap(cookDnsResponse(request, filtered))
     }
 
     fun shutdown(scope: CoroutineScope) {
@@ -206,7 +157,6 @@ class LocalDnsServer(private val localResolver: suspend (String) -> Array<InetAd
         monitor.close(scope)
         scope.launch {
             this@LocalDnsServer.coroutineContext[Job]!!.join()
-            acl?.also { it.await().close() }
         }
     }
 }

@@ -120,9 +120,18 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         config.put("local_port", DataStore.portProxy)
         configFile.writeText(config.toString())
 
+        val dns = try {
+            URI("dns://${profile.remoteDns}")
+        } catch (e: URISyntaxException) {
+            throw BaseService.ExpectedExceptionWrapper(e)
+        }
+
         val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                 "--stat-path", stat.absolutePath,
+                "--dns-relay", "127.0.0.1:${DataStore.portLocalDns}",
+                "--remote-dns", "${dns.host}:${if (dns.port < 0) 53 else dns.port}",
+                "--local-dns", "127.0.0.1:8153",
                 "-c", configFile.absolutePath)
         if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
