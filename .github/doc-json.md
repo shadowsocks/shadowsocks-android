@@ -36,16 +36,20 @@ The following optional fields are "Feature Settings" in shadowsocks-android, if 
   - `android_list`: An array of strings, specifying a list of Android app [package names](https://developer.android.com/studio/build/application-id).
 * `udpdns`: "Send DNS over UDP", Boolean.
 
+`Profile` objects can have additional fields, which will be ignored by shadowsocks-android.
+
 
 ## Parsing/Importing JSON
 
-shadowsocks-android imports JSON using the following logic, which should support all reasonable formats of JSON files containing `Profile`s, including gui-config.json used by shadowsocks-windows.
+shadowsocks-android imports JSON using the following logic, which should support all reasonable formats of JSON files containing `Profile`s, including `gui-config.json` used by shadowsocks-windows.
 
 1. On input a JSON file, try to recognize it as a `Profile`.
 2. If input is an object and all the required fields of a `Profile` is present, return the parsed `Profile`.
 3. Otherwise if input is an object, recursively search for `Profile`s in each field and return all found `Profile`s.
 4. Otherwise if input is an array, recursively search for `Profile`s for each element and return all found `Profile`s.
 5. Conclude that there is no `Profile` in input.
+
+In general, subscription JSON file can be in any structure, as long as they contain the `Profile` JSON objects recognized by the above procedure.
 
 
 ## Exporting JSON
