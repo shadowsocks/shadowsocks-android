@@ -57,6 +57,20 @@ In general, subscription JSON file can be in any structure, as long as they cont
 The easiest way to write JSON files is to configure them in shadowsocks-android and export the JSON file using the app.
 The output will be a JSON file consisting of a JSON array with all the `Profile`s.
 
+
+## Subscription update behavior
+
+In shadowsocks-android, `Profile` is indexed by the triple `(server, server_port, remarks)`.
+If two `Profile`s share the exact same triple, they will be treated as the exact same `Profile`, despite possibly having different plugins, passwords, or even encryption methods.
+
+When doing subscription updates,
+
+* If an old `Profile` shares the same triple as a new `Profile`, the following field in the old `Profile` will be updated: `password`, `method`, `plugin`, `plugin_opts`, `udp_fallback`.
+  This ensures that user configured feature settings and traffic stats are preserved.
+* If two `Profile` across all the subscriptions share the exact same triple, the behavior is undefined.
+  Please avoid this if possible.
+
+
 ## Appendix: Sample exported JSON file
 
 ```json
