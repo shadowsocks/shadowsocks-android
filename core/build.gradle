@@ -65,7 +65,7 @@ cargo {
     targetIncludes = ["lib${libname}.so"]
     extraCargoBuildArguments = ['--bin', 'sslocal']
     features {
-        noDefaultBut "sodium", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored"
+        noDefaultBut "sodium", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored", "local-flow-stat", "local-dns-relay"
     }
     exec { spec, toolchain ->
         spec.environment("RUSTFLAGS", "-C lto=no -C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib${libname}.so")
