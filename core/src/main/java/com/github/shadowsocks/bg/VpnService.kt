@@ -105,18 +105,9 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                             is IOException -> Crashlytics.log(Log.WARN, name, e.message)
                             else -> printLog(e)
                         }
-                        try {
-                            LocalDnsServer.prepareDnsResponse(Message(query)).apply {
-                                header.rcode = Rcode.SERVFAIL
-                            }.toWire()
-                        } catch (e: Exception) {
-                            when (e) {
-                                is CancellationException -> { } // ignore
-                                is IOException -> Crashlytics.log(Log.WARN, name, e.message)
-                                else -> printLog(e)
-                            }
-                            null
-                        }
+                        LocalDnsServer.prepareDnsResponse(Message(query)).apply {
+                            header.rcode = Rcode.SERVFAIL
+                        }.toWire()
                     }?.let { response ->
                         val output = DataOutputStream(socket.outputStream)
                         output.writeShort(response.size)
