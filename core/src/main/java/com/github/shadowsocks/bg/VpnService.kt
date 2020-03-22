@@ -49,7 +49,7 @@ import java.io.*
 import java.net.URL
 import android.net.VpnService as BaseVpnService
 
-class VpnService : BaseVpnService(), LocalDnsService.Interface {
+class VpnService : BaseVpnService(), BaseService.Interface {
     companion object {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
@@ -148,7 +148,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
-        else -> super<LocalDnsService.Interface>.onBind(intent)
+        else -> super<BaseService.Interface>.onBind(intent)
     }
 
     override fun onRevoke() = stopRunner()
@@ -169,7 +169,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         if (DataStore.serviceMode == Key.modeVpn) {
             if (prepare(this) != null) {
                 startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
+            } else return super<BaseService.Interface>.onStartCommand(intent, flags, startId)
         }
         stopRunner()
         return Service.START_NOT_STICKY
