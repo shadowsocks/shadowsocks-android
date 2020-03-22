@@ -110,7 +110,11 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                                 header.rcode = Rcode.SERVFAIL
                             }.toWire()
                         } catch (e: Exception) {
-                            printLog(e)
+                            when (e) {
+                                is CancellationException -> { } // ignore
+                                is IOException -> Crashlytics.log(Log.WARN, name, e.message)
+                                else -> printLog(e)
+                            }
                             null
                         }
                     }?.let { response ->

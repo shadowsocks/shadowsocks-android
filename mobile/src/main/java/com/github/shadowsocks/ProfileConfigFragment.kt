@@ -217,7 +217,9 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
                 plugin.value = pluginConfiguration.selected
                 pluginConfigure.isEnabled = selected !is NoPlugin
                 pluginConfigure.text = pluginConfiguration.getOptions().toString()
-                if (!selected.trusted) Snackbar.make(requireView(), R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
+                if (!selected.trusted) {
+                    Snackbar.make(requireView(), R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
+                }
             }
             REQUEST_CODE_PLUGIN_CONFIGURE -> when (resultCode) {
                 Activity.RESULT_OK -> {
