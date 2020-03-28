@@ -183,6 +183,7 @@ class SubscriptionService : Service(), CoroutineScope {
                             oldProfile
                         }
                         Profile.SubscriptionStatus.Obsolete -> {
+                            toUpdate.add(oldProfile.id)
                             oldProfile.password = it.password
                             oldProfile.method = it.method
                             oldProfile.plugin = it.plugin
