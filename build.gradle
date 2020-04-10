@@ -17,6 +17,7 @@ buildscript {
         versionCode = 5000650
         versionName = '5.0.6-nightly'
         resConfigs = ['ar', 'es', 'fa', 'fr', 'ja', 'ko', 'ru', 'tr', 'zh-rCN', 'zh-rTW']
+        ndkVersion = "21.1.6210238"
     }
 
     repositories {
