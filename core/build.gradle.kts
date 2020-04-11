@@ -38,6 +38,11 @@ android {
     }
     kotlinOptions {
         jvmTarget = javaVersion.toString()
+        freeCompilerArgs = freeCompilerArgs + listOf(
+                "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes",
+                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi",
+                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        )
     }
     externalNativeBuild {
         ndkBuild { 

@@ -109,6 +109,7 @@ class ChannelMonitor : Thread("ChannelMonitor") {
             while (iterator.hasNext()) {
                 val key = iterator.next()
                 iterator.remove()
+                @Suppress("UNCHECKED_CAST")
                 (key.attachment() as (SelectionKey) -> Unit)(key)
             }
         }

@@ -21,6 +21,7 @@ object DirectBoot : BroadcastReceiver() {
     private val file = File(Core.deviceStorage.noBackupFilesDir, "directBootProfile")
     private var registered = false
 
+    @Suppress("UNCHECKED_CAST")
     fun getDeviceProfile(): Pair<Profile, Profile?>? = try {
         ObjectInputStream(file.inputStream()).use { it.readObject() as? Pair<Profile, Profile?> }
     } catch (_: IOException) { null }
