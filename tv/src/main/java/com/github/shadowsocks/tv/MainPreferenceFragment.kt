@@ -77,9 +77,9 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var portTransproxy: EditTextPreference
     private val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
         val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
-            Key.modeProxy -> Pair(false, false)
-            Key.modeVpn -> Pair(true, false)
-            Key.modeTransproxy -> Pair(true, true)
+            Key.modeProxy -> Pair(first = false, second = false)
+            Key.modeVpn -> Pair(first = true, second = false)
+            Key.modeTransproxy -> Pair(first = true, second = true)
             else -> throw IllegalArgumentException("newValue: $newValue")
         }
         hosts.isEnabled = enabledLocalDns

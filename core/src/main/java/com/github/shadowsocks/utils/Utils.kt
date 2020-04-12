@@ -40,6 +40,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.FileDescriptor
+import java.lang.reflect.Method
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import kotlin.coroutines.resume
@@ -63,6 +64,7 @@ val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 /**
  * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
  */
+@SuppressLint("DiscouragedPrivateApi")
 private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
 val FileDescriptor.int get() = getInt.invoke(this) as Int
 
@@ -70,11 +72,19 @@ fun FileDescriptor.closeQuietly() = try {
     Os.close(this)
 } catch (_: ErrnoException) { }
 
-private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
-    InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
-        isAccessible = true
-    }
+@SuppressLint("DiscouragedPrivateApi")
+private fun createParseNumericAddress(): Method? {
+    return if (Build.VERSION.SDK_INT < 29)
+        InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
+            isAccessible = true
+        }
+    else null
 }
+
+private val parseNumericAddress by lazy {
+    createParseNumericAddress()
+}
+
 /**
  * A slightly more performant variant of parseNumericAddress.
  *
@@ -82,7 +92,7 @@ private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
  */
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let {
-            if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress.invoke(null, this) as InetAddress
+            if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress?.invoke(null, this) as? InetAddress
         }
 
 suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T): T {

@@ -30,6 +30,7 @@ import android.content.pm.ProviderInfo
 import android.content.pm.Signature
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.system.Os
 import android.util.Base64
 import android.util.Log
@@ -141,8 +142,11 @@ object PluginManager {
     private fun initNative(configuration: PluginConfiguration): Pair<String, PluginOptions>? {
         val providers = app.packageManager.queryIntentContentProviders(
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(configuration.selected)),
-                PackageManager.GET_META_DATA or
-                        PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N)
+                    PackageManager.GET_META_DATA
+                else
+                    PackageManager.GET_META_DATA or PackageManager.MATCH_DIRECT_BOOT_UNAWARE or
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
         )
         if (providers.isEmpty()) return null
         val provider = providers.single().providerInfo
