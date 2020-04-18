@@ -5,7 +5,7 @@ apply plugin: 'com.github.ben-manes.versions'
 buildscript {
     ext {
         javaVersion = JavaVersion.VERSION_1_8
-        kotlinVersion = '1.3.70'
+        kotlinVersion = '1.3.72'
         minSdkVersion = 21
         sdkVersion = 29
         compileSdkVersion = 29
@@ -17,7 +17,6 @@ buildscript {
         versionCode = 5000650
         versionName = '5.0.6-nightly'
         resConfigs = ['ar', 'es', 'fa', 'fr', 'ja', 'ko', 'ru', 'tr', 'zh-rCN', 'zh-rTW']
-        ndkVersion = "21.1.6210238"
     }
 
     repositories {
@@ -32,11 +31,11 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0-beta02'
+        classpath 'com.android.tools.build:gradle:4.0.0-beta04'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.28.0'
         classpath 'com.google.android.gms:oss-licenses-plugin:0.10.2'
         classpath 'com.google.gms:google-services:4.3.3'
-        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.9.0'
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.11.1'
         classpath 'gradle.plugin.org.mozilla.rust-android-gradle:plugin:0.8.3'
         classpath 'io.fabric.tools:gradle:1.31.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
