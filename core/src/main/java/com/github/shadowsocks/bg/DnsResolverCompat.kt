@@ -101,6 +101,7 @@ sealed class DnsResolverCompat {
         override suspend fun resolve(network: Network, host: String) = instance.resolve(network, host)
         override suspend fun resolveOnActiveNetwork(host: String) = instance.resolveOnActiveNetwork(host)
         override suspend fun resolveRaw(network: Network, query: ByteArray) = instance.resolveRaw(network, query)
+        override suspend fun resolveRawOnActiveNetwork(query: ByteArray) = instance.resolveRawOnActiveNetwork(query)
     }
 
     @Throws(IOException::class)
@@ -110,6 +111,7 @@ sealed class DnsResolverCompat {
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
     abstract suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray
+    abstract suspend fun resolveRawOnActiveNetwork(query: ByteArray): ByteArray
 
     @SuppressLint("PrivateApi")
     private open class DnsResolverCompat21 : DnsResolverCompat() {
@@ -147,7 +149,8 @@ sealed class DnsResolverCompat {
         override suspend fun resolveOnActiveNetwork(host: String) =
                 GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
 
-        override suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray {
+        private suspend fun resolveRaw(query: ByteArray,
+                                       hostResolver: suspend (String) -> Array<InetAddress>): ByteArray {
             val request = try {
                 Message(query)
             } catch (e: IOException) {
@@ -164,10 +167,14 @@ sealed class DnsResolverCompat {
                 else -> throw UnsupportedOperationException("Unsupported query type $type")
             }
             val host = question.name.canonicalize().toString(true)
-            return LocalDnsServer.cookDnsResponse(request, resolve(network, host).asIterable().run {
+            return LocalDnsServer.cookDnsResponse(request, hostResolver(host).asIterable().run {
                 if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
             })
         }
+        override suspend fun resolveRaw(network: Network, query: ByteArray) =
+                resolveRaw(query) { resolve(network, it) }
+        override suspend fun resolveRawOnActiveNetwork(query: ByteArray) =
+                resolveRaw(query, this::resolveOnActiveNetwork)
     }
 
     @TargetApi(23)
@@ -184,6 +191,8 @@ sealed class DnsResolverCompat {
 
         override fun bindSocket(network: Network, socket: FileDescriptor) = network.bindSocket(socket)
 
+        private val activeNetwork get() = Core.connectivity.activeNetwork ?: throw IOException("no network")
+
         override suspend fun resolve(network: Network, host: String): Array<InetAddress> {
             return suspendCancellableCoroutine { cont ->
                 val signal = CancellationSignal()
@@ -197,10 +206,7 @@ sealed class DnsResolverCompat {
                 })
             }
         }
-
-        override suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress> {
-            return resolve(Core.connectivity.activeNetwork ?: return emptyArray(), host)
-        }
+        override suspend fun resolveOnActiveNetwork(host: String) = resolve(activeNetwork, host)
 
         override suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray {
             return suspendCancellableCoroutine { cont ->
@@ -213,5 +219,6 @@ sealed class DnsResolverCompat {
                 })
             }
         }
+        override suspend fun resolveRawOnActiveNetwork(query: ByteArray) = resolveRaw(activeNetwork, query)
     }
 }

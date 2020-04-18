@@ -46,7 +46,6 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.net.UnknownHostException
-import java.util.*
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -74,6 +73,7 @@ object BaseService {
         var processes: GuardedProcessPool? = null
         var proxy: ProxyInstance? = null
         var udpFallback: ProxyInstance? = null
+        var localDns: LocalDnsWorker? = null
 
         var notification: ServiceNotification? = null
         val closeReceiver = broadcastReceiver { _, intent ->
@@ -247,6 +247,7 @@ object BaseService {
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
                     "-u")
+            data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
         fun startRunner() {
@@ -260,6 +261,8 @@ object BaseService {
                 close(scope)
                 data.processes = null
             }
+            data.localDns?.shutdown(scope)
+            data.localDns = null
         }
 
         fun stopRunner(restart: Boolean = false, msg: String? = null) {
@@ -309,6 +312,7 @@ object BaseService {
         suspend fun preInit() { }
         suspend fun getActiveNetwork() = if (Build.VERSION.SDK_INT >= 23) Core.connectivity.activeNetwork else null
         suspend fun resolver(host: String) = DnsResolverCompat.resolveOnActiveNetwork(host)
+        suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
         suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
