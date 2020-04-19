@@ -55,7 +55,7 @@ cargo {
     module = 'src/main/rust/shadowsocks-rust'
     libname = 'sslocal'
     targets = ['arm', 'arm64', 'x86', 'x86_64']
-    profile = 'release'
+    profile = findProperty('CARGO_PROFILE') ?: 'release'
     targetIncludes = ["lib${libname}.so"]
     extraCargoBuildArguments = ['--bin', 'sslocal']
     features {
