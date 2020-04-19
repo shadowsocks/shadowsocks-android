@@ -41,7 +41,7 @@ abstract class AlertDialogFragment<Arg : Parcelable, Ret : Parcelable> :
     }
     protected abstract fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener)
 
-    protected val arg by lazy { arguments!!.getParcelable<Arg>(KEY_ARG)!! }
+    protected val arg by lazy { requireArguments().getParcelable<Arg>(KEY_ARG)!! }
     protected open fun ret(which: Int): Ret? = null
     fun withArg(arg: Arg) = apply { arguments = Bundle().apply { putParcelable(KEY_ARG, arg) } }
 

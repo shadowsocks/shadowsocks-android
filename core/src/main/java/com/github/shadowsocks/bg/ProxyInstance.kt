@@ -110,7 +110,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null,
+              dnsRelay: Boolean = true) {
         trafficMonitor = TrafficMonitor(stat)
 
         this.configFile = configFile
@@ -130,11 +131,12 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                 "--stat-path", stat.absolutePath,
-                "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
-                "--remote-dns", "${dns.host}:${if (dns.port < 0) 53 else dns.port}",
                 "-c", configFile.absolutePath)
         if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
+        if (dnsRelay) cmd += arrayListOf(
+                "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
+                "--remote-dns", "${dns.host}:${if (dns.port < 0) 53 else dns.port}")
 
         if (route != Acl.ALL) {
             cmd += "--acl"

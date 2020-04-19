@@ -247,7 +247,7 @@ object BaseService {
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
-                    "-u")
+                    "-u", false)
             data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
