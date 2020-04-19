@@ -44,9 +44,11 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray) : C
                         byteArrayOf()   // return empty if cannot parse packet
                     }
                 }?.let { response ->
-                    val output = DataOutputStream(socket.outputStream)
-                    output.writeShort(response.size)
-                    output.write(response)
+                    try {
+                        val output = DataOutputStream(socket.outputStream)
+                        output.writeShort(response.size)
+                        output.write(response)
+                    } catch (_: IOException) { }    // connection early close possibly due to resolving timeout
                 }
             }
         }
