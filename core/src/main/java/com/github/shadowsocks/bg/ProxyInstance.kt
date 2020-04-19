@@ -26,6 +26,7 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager

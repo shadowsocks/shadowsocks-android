@@ -5,6 +5,7 @@ import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.ConcurrentLocalSocketListener
+import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
