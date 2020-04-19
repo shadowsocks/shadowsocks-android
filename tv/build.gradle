@@ -53,9 +53,6 @@ android {
     }
     sourceSets.main.jniLibs.srcDirs +=
             new File(project(':core').buildDir, "intermediates/bundles/${getCurrentFlavor()}/jni")
-    lintOptions {
-        disable 'InvalidPackage'
-    }
 }
 
 dependencies {

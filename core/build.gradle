@@ -47,10 +47,6 @@ android {
     }
 
     ndkVersion '21.1.6210238'
-
-    lintOptions {
-        disable 'InvalidPackage'
-    }
 }
 
 androidExtensions {
