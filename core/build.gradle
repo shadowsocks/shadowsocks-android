@@ -45,8 +45,6 @@ android {
     sourceSets {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
-
-    ndkVersion '21.1.6210238'
 }
 
 androidExtensions {
