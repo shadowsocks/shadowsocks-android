@@ -5,7 +5,6 @@ import android.util.Log
 import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.ConcurrentLocalSocketListener
-import com.github.shadowsocks.net.LocalDnsServer
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +36,7 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray) : C
                         else -> printLog(e)
                     }
                     try {
-                        LocalDnsServer.prepareDnsResponse(Message(query)).apply {
+                        DnsResolverCompat.prepareDnsResponse(Message(query)).apply {
                             header.rcode = Rcode.SERVFAIL
                         }.toWire()
                     } catch (_: IOException) {

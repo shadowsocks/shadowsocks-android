@@ -31,15 +31,12 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.net.LocalDnsServer
 import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
-import org.xbill.DNS.Message
-import org.xbill.DNS.Opcode
-import org.xbill.DNS.Type
+import org.xbill.DNS.*
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.Inet4Address
@@ -102,6 +99,20 @@ sealed class DnsResolverCompat {
         override suspend fun resolveOnActiveNetwork(host: String) = instance.resolveOnActiveNetwork(host)
         override suspend fun resolveRaw(network: Network, query: ByteArray) = instance.resolveRaw(network, query)
         override suspend fun resolveRawOnActiveNetwork(query: ByteArray) = instance.resolveRawOnActiveNetwork(query)
+
+        // additional platform-independent DNS helpers
+
+        /**
+         * TTL returned from localResolver is set to 120. Android API does not provide TTL,
+         * so we suppose Android apps should not care about TTL either.
+         */
+        private const val TTL = 120L
+
+        fun prepareDnsResponse(request: Message) = Message(request.header.id).apply {
+            header.setFlag(Flags.QR.toInt())    // this is a response
+            if (request.header.getFlag(Flags.RD.toInt())) header.setFlag(Flags.RD.toInt())
+            request.question?.also { addRecord(it, Section.QUESTION) }
+        }
     }
 
     @Throws(IOException::class)
@@ -167,9 +178,16 @@ sealed class DnsResolverCompat {
                 else -> throw UnsupportedOperationException("Unsupported query type $type")
             }
             val host = question.name.canonicalize().toString(true)
-            return LocalDnsServer.cookDnsResponse(request, hostResolver(host).asIterable().run {
-                if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
-            })
+            return prepareDnsResponse(request).apply {
+                header.setFlag(Flags.RA.toInt())   // recursion available
+                for (address in hostResolver(host).asIterable().run {
+                    if (isIpv6) filterIsInstance<Inet6Address>() else filterIsInstance<Inet4Address>()
+                }) addRecord(when (address) {
+                    is Inet4Address -> ARecord(question.name, DClass.IN, TTL, address)
+                    is Inet6Address -> AAAARecord(question.name, DClass.IN, TTL, address)
+                    else -> error("Unsupported address $address")
+                }, Section.ANSWER)
+            }.toWire()
         }
         override suspend fun resolveRaw(network: Network, query: ByteArray) =
                 resolveRaw(query) { resolve(network, it) }

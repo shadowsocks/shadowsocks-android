@@ -2,6 +2,9 @@
 	path = core/src/main/jni/badvpn
 	url = https://github.com/shadowsocks/badvpn.git
 	branch = shadowsocks-android
+[submodule "core/src/main/jni/libancillary"]
+	path = core/src/main/jni/libancillary
+	url = https://github.com/shadowsocks/libancillary.git
 [submodule "core/src/main/jni/libevent"]
 	path = core/src/main/jni/libevent
 	url = https://github.com/shadowsocks/libevent.git
@@ -10,12 +13,6 @@
 	path = core/src/main/jni/redsocks
 	url = https://github.com/shadowsocks/redsocks.git
 	branch = shadowsocks-android
-[submodule "core/src/main/jni/re2"]
-	path = core/src/main/jni/re2
-	url = https://github.com/google/re2.git
 [submodule "core/src/main/rust/shadowsocks-rust"]
 	path = core/src/main/rust/shadowsocks-rust
 	url = https://github.com/madeye/shadowsocks-rust
-[submodule "core/src/main/jni/libancillary"]
-	path = core/src/main/jni/libancillary
-	url = https://github.com/shadowsocks/libancillary.git
