@@ -25,10 +25,6 @@
             app:key="isAutoConnect"
             app:summary="@string/auto_connect_summary"
             app:title="@string/auto_connect"/>
-        <SwitchPreference
-            app:key="tcp_fastopen"
-            app:summary="@string/tcp_fastopen_summary"
-            app:title="TCP Fast Open"/>
         <EditTextPreference
             app:key="hosts"
             app:title="hosts"/>

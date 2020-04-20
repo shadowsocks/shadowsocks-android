@@ -11,11 +11,6 @@
         app:icon="@drawable/ic_action_lock"
         app:summary="@string/direct_boot_aware_summary"
         app:title="@string/direct_boot_aware"/>
-    <SwitchPreference
-        app:key="tcp_fastopen"
-        app:icon="@drawable/ic_action_offline_bolt"
-        app:summary="@string/tcp_fastopen_summary"
-        app:title="TCP Fast Open"/>
     <EditTextPreference
         app:key="hosts"
         app:icon="@drawable/ic_maps_menu_book"
