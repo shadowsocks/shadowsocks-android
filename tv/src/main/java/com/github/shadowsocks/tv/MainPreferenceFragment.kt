@@ -44,7 +44,6 @@ import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.HttpsTest
-import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.HostsSummaryProvider
@@ -70,7 +69,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var controlImport: Preference
     private lateinit var hosts: EditTextPreference
     private lateinit var serviceMode: Preference
-    private lateinit var tfo: SwitchPreference
     private lateinit var shareOverLan: Preference
     private lateinit var portProxy: EditTextPreference
     private lateinit var portLocalDns: EditTextPreference
@@ -116,7 +114,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         this.state = state
         val stopped = state == BaseService.State.Stopped
         controlImport.isEnabled = stopped
-        tfo.isEnabled = stopped
         hosts.isEnabled = stopped
         serviceMode.isEnabled = stopped
         shareOverLan.isEnabled = stopped
@@ -152,23 +149,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         findPreference<SwitchPreference>(Key.persistAcrossReboot)!!.setOnPreferenceChangeListener { _, value ->
             BootReceiver.enabled = value as Boolean
             true
-        }
-
-        tfo = findPreference(Key.tfo)!!
-        tfo.isChecked = DataStore.tcpFastOpen
-        tfo.setOnPreferenceChangeListener { _, value ->
-            if (value as Boolean && !TcpFastOpen.sendEnabled) {
-                val result = TcpFastOpen.enable()?.trim()
-                if (TcpFastOpen.sendEnabled) true else {
-                    Toast.makeText(requireContext(), if (result.isNullOrEmpty())
-                        getText(R.string.tcp_fastopen_failure) else result, Toast.LENGTH_SHORT).show()
-                    false
-                }
-            } else true
-        }
-        if (!TcpFastOpen.supported) {
-            tfo.isEnabled = false
-            tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
         }
 
         hosts = findPreference(Key.hosts)!!
