@@ -20,7 +20,7 @@
     <PreferenceCategory
         app:key="settings"
         app:title="@string/settings"
-        app:initialExpandedChildrenCount="3">
+        app:initialExpandedChildrenCount="2">
         <SwitchPreference
             app:key="isAutoConnect"
             app:summary="@string/auto_connect_summary"
