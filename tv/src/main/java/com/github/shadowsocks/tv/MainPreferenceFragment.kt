@@ -76,15 +76,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var portLocalDns: EditTextPreference
     private lateinit var portTransproxy: EditTextPreference
     private val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
-        val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
-            Key.modeProxy -> Pair(false, false)
-            Key.modeVpn -> Pair(true, false)
-            Key.modeTransproxy -> Pair(true, true)
-            else -> throw IllegalArgumentException("newValue: $newValue")
-        }
-        hosts.isEnabled = enabledLocalDns
-        portLocalDns.isEnabled = enabledLocalDns
-        portTransproxy.isEnabled = enabledTransproxy
+        portTransproxy.isEnabled = newValue as String? == Key.modeTransproxy
         true
     }
     private val tester by viewModels<HttpsTest>()
@@ -125,11 +117,12 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         val stopped = state == BaseService.State.Stopped
         controlImport.isEnabled = stopped
         tfo.isEnabled = stopped
+        hosts.isEnabled = stopped
         serviceMode.isEnabled = stopped
         shareOverLan.isEnabled = stopped
         portProxy.isEnabled = stopped
+        portLocalDns.isEnabled = stopped
         if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
-            portLocalDns.isEnabled = false
             portTransproxy.isEnabled = false
         }
     }

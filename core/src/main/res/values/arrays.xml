@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="enc_method_entry" translatable="false">
+        <item>PLAIN</item>
         <item>RC4-MD5</item>
         <item>AES-128-CFB</item>
         <item>AES-192-CFB</item>
@@ -23,6 +24,7 @@
     </string-array>
 
     <string-array name="enc_method_value" translatable="false">
+        <item>plain</item>
         <item>rc4-md5</item>
         <item>aes-128-cfb</item>
         <item>aes-192-cfb</item>

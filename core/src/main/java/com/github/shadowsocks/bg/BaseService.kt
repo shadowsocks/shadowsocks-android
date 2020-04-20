@@ -37,6 +37,7 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.*
@@ -46,7 +47,6 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.net.UnknownHostException
-import java.util.*
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -74,6 +74,7 @@ object BaseService {
         var processes: GuardedProcessPool? = null
         var proxy: ProxyInstance? = null
         var udpFallback: ProxyInstance? = null
+        var localDns: LocalDnsWorker? = null
 
         var notification: ServiceNotification? = null
         val closeReceiver = broadcastReceiver { _, intent ->
@@ -232,7 +233,7 @@ object BaseService {
             }
         }
 
-        fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> = cmd
+        val isVpnService get() = false
 
         suspend fun startProcesses(hosts: HostsFile) {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
@@ -241,12 +242,13 @@ object BaseService {
             data.proxy!!.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
-                    if (udpFallback == null) "-u" else null)
+                    if (udpFallback == null) "-U" else null)
             check(udpFallback?.plugin == null) { "UDP fallback cannot have plugins" }
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
-                    "-U")
+                    "-u", false)
+            data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
         fun startRunner() {
@@ -260,6 +262,8 @@ object BaseService {
                 close(scope)
                 data.processes = null
             }
+            data.localDns?.shutdown(scope)
+            data.localDns = null
         }
 
         fun stopRunner(restart: Boolean = false, msg: String? = null) {
@@ -309,6 +313,7 @@ object BaseService {
         suspend fun preInit() { }
         suspend fun getActiveNetwork() = if (Build.VERSION.SDK_INT >= 23) Core.connectivity.activeNetwork else null
         suspend fun resolver(host: String) = DnsResolverCompat.resolveOnActiveNetwork(host)
+        suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
         suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

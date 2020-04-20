@@ -103,7 +103,6 @@
         <provider android:name="com.google.firebase.provider.FirebaseInitProvider"
                   tools:node="remove"/>
         <service android:name="androidx.room.MultiInstanceInvalidationService"
-                 android:directBootAware="true"
                  android:process=":bg"/>
         <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
         <provider android:name="androidx.work.impl.WorkManagerInitializer"

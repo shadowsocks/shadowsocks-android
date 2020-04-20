@@ -26,6 +26,7 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
+import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
@@ -109,32 +110,40 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null,
+              dnsRelay: Boolean = true) {
         trafficMonitor = TrafficMonitor(stat)
 
         this.configFile = configFile
         val config = profile.toJson()
-        plugin?.let { (path, opts) -> config.put("plugin", path).put("plugin_opts", opts.toString()) }
+        val vpnFlags = if (service.isVpnService) ";V" else ""
+        plugin?.let { (path, opts) -> config.put("plugin", path).put("plugin_opts", opts.toString() + vpnFlags) }
+        config.put("local_address", DataStore.listenAddress)
+        config.put("local_port", DataStore.portProxy)
         configFile.writeText(config.toString())
 
-        val cmd = service.buildAdditionalArguments(arrayListOf(
+        val dns = try {
+            URI("dns://${profile.remoteDns}")
+        } catch (e: URISyntaxException) {
+            throw BaseService.ExpectedExceptionWrapper(e)
+        }
+
+        val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "-b", DataStore.listenAddress,
-                "-l", DataStore.portProxy.toString(),
-                "-t", "600",
-                "-S", stat.absolutePath,
-                "-c", configFile.absolutePath))
+                "--stat-path", stat.absolutePath,
+                "-c", configFile.absolutePath)
+        if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
+        if (dnsRelay) cmd += arrayListOf(
+                "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
+                "--remote-dns", "${dns.host}:${if (dns.port < 0) 53 else dns.port}")
 
         if (route != Acl.ALL) {
             cmd += "--acl"
             cmd += Acl.getFile(route).absolutePath
         }
 
-        // for UDP profile, it's only going to operate in UDP relay mode-only so this flag has no effect
-        if (profile.route == Acl.ALL) cmd += "-D"
-
-        if (DataStore.tcpFastOpen) cmd += "--fast-open"
+        // if (DataStore.tcpFastOpen) cmd += "--fast-open"
 
         service.data.processes!!.start(cmd)
     }

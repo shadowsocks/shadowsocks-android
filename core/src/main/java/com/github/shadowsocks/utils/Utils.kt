@@ -70,7 +70,7 @@ fun FileDescriptor.closeQuietly() = try {
     Os.close(this)
 } catch (_: ErrnoException) { }
 
-private val parseNumericAddress by lazy @SuppressLint("DiscouragedPrivateApi") {
+private val parseNumericAddress by lazy @SuppressLint("SoonBlockedPrivateApi") {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
         isAccessible = true
     }

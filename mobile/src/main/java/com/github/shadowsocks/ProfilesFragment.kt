@@ -59,8 +59,6 @@ import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.google.android.gms.ads.AdLoader
-import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.VideoOptions
 import com.google.android.gms.ads.formats.NativeAdOptions
 import com.google.android.gms.ads.formats.UnifiedNativeAd
@@ -249,7 +247,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             if (adHost != null || !item.isSponsored) return
             if (nativeAdView == null) {
                 nativeAdView = layoutInflater.inflate(R.layout.ad_unified, adContainer, false) as UnifiedNativeAdView
-                AdLoader.Builder(context, "ca-app-pub-3283768469187309/8632513739").apply {
+                AdsManager.load(context) {
                     forUnifiedNativeAd { unifiedNativeAd ->
                         // You must call destroy on old ads when you are done with them,
                         // otherwise you will have a memory leak.
@@ -262,12 +260,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                             setStartMuted(true)
                         }.build())
                     }.build())
-                }.build().loadAd(AdRequest.Builder().apply {
-                    addTestDevice("B08FC1764A7B250E91EA9D0D5EBEB208")
-                    addTestDevice("7509D18EB8AF82F915874FEF53877A64")
-                    addTestDevice("F58907F28184A828DD0DB6F8E38189C6")
-                    addTestDevice("FE983F496D7C5C1878AA163D9420CA97")
-                }.build())
+                }
             } else if (nativeAd != null) populateUnifiedNativeAdView(nativeAd!!, nativeAdView!!)
         }
 
