@@ -64,7 +64,6 @@ object Key {
 
     const val dirty = "profileDirty"
 
-    const val hosts = "hosts"
     const val assetUpdateTime = "assetUpdateTime"
 
     // TV specific values

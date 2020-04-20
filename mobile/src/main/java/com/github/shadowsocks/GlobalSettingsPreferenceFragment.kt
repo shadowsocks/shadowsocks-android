@@ -20,8 +20,6 @@
 
 package com.github.shadowsocks
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -30,24 +28,14 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.plugin.showAllowingStateLoss
-import com.github.shadowsocks.preference.BrowsableEditTextPreferenceDialogFragment
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
-import com.github.shadowsocks.preference.HostsSummaryProvider
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.remove
 import com.github.shadowsocks.widget.MainListListener
 
 class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
-    companion object {
-        private const val REQUEST_BROWSE = 1
-    }
-
-    private val hosts by lazy { findPreference<EditTextPreference>(Key.hosts)!! }
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
@@ -63,8 +51,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         } else canToggleLocked.remove()
 
-        hosts.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
-        hosts.summaryProvider = HostsSummaryProvider
         val serviceMode = findPreference<Preference>(Key.serviceMode)!!
         val portProxy = findPreference<EditTextPreference>(Key.portProxy)!!
         portProxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
@@ -78,7 +64,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
         val listener: (BaseService.State) -> Unit = {
             val stopped = it == BaseService.State.Stopped
-            hosts.isEnabled = stopped
             serviceMode.isEnabled = stopped
             portProxy.isEnabled = stopped
             portLocalDns.isEnabled = stopped
@@ -94,29 +79,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         listView.setOnApplyWindowInsetsListener(MainListListener)
-    }
-
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
-        if (preference == hosts) BrowsableEditTextPreferenceDialogFragment().apply {
-            setKey(hosts.key)
-            setTargetFragment(this@GlobalSettingsPreferenceFragment, REQUEST_BROWSE)
-        }.showAllowingStateLoss(parentFragmentManager, hosts.key) else super.onDisplayPreferenceDialog(preference)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            REQUEST_BROWSE -> {
-                if (resultCode != Activity.RESULT_OK) return
-                val activity = activity as MainActivity
-                try {
-                    // we read and persist all its content here to avoid content URL permission issues
-                    hosts.text = activity.contentResolver.openInputStream(data!!.data!!)!!.bufferedReader().readText()
-                } catch (e: Exception) {
-                    activity.snackbar(e.readableMessage).show()
-                }
-            }
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
     }
 
     override fun onDestroy() {

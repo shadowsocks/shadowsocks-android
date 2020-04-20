@@ -34,7 +34,10 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
-import com.github.shadowsocks.net.*
+import com.github.shadowsocks.net.ConcurrentLocalSocketListener
+import com.github.shadowsocks.net.DefaultNetworkListener
+import com.github.shadowsocks.net.DnsResolverCompat
+import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.closeQuietly
@@ -137,7 +140,6 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     }
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
-    override suspend fun getActiveNetwork() = DefaultNetworkListener.get()
     override suspend fun resolver(host: String) = DnsResolverCompat.resolve(DefaultNetworkListener.get(), host)
     override suspend fun rawResolver(query: ByteArray) =
             // no need to listen for network here as this is only used for forwarding local DNS queries.
@@ -145,9 +147,9 @@ class VpnService : BaseVpnService(), BaseService.Interface {
             DnsResolverCompat.resolveRaw(underlyingNetwork ?: throw IOException("no network"), query)
     override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
 
-    override suspend fun startProcesses(hosts: HostsFile) {
+    override suspend fun startProcesses() {
         worker = ProtectWorker().apply { start() }
-        super.startProcesses(hosts)
+        super.startProcesses()
         sendFd(startVpn())
     }
 

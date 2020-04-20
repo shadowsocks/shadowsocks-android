@@ -26,8 +26,6 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.net.DnsResolverCompat
-import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
@@ -52,7 +50,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
     private var scheduleConfigUpdate = false
 
-    suspend fun init(service: BaseService.Interface, hosts: HostsFile) {
+    suspend fun init(service: BaseService.Interface) {
         if (profile.isSponsored) {
             scheduleConfigUpdate = true
             val mdg = MessageDigest.getInstance("SHA-1")
@@ -86,23 +84,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // it's hard to resolve DNS on a specific interface so we'll do it here
         if (profile.host.parseNumericAddress() == null) {
-            profile.host = hosts.resolve(profile.host).run {
-                if (isEmpty()) try {
-                    service.resolver(profile.host).firstOrNull()
-                } catch (_: IOException) {
-                    null
-                } else {
-                    val network = service.getActiveNetwork() ?: throw UnknownHostException()
-                    val hasIpv4 = DnsResolverCompat.haveIpv4(network)
-                    val hasIpv6 = DnsResolverCompat.haveIpv6(network)
-                    firstOrNull {
-                        when (it) {
-                            is Inet4Address -> hasIpv4
-                            is Inet6Address -> hasIpv6
-                            else -> error(it)
-                        }
-                    }
-                }
+            profile.host = try {
+                service.resolver(profile.host).firstOrNull()
+            } catch (_: IOException) {
+                null
             }?.hostAddress ?: throw UnknownHostException()
         }
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-                  app:initialExpandedChildrenCount="3">
+                  app:initialExpandedChildrenCount="2">
     <SwitchPreference
         app:key="isAutoConnect"
         app:icon="@drawable/ic_communication_phonelink_ring"
@@ -11,10 +11,6 @@
         app:icon="@drawable/ic_action_lock"
         app:summary="@string/direct_boot_aware_summary"
         app:title="@string/direct_boot_aware"/>
-    <EditTextPreference
-        app:key="hosts"
-        app:icon="@drawable/ic_maps_menu_book"
-        app:title="hosts"/>
 
     <com.takisoft.preferencex.SimpleMenuPreference
         app:key="serviceMode"
