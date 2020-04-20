@@ -29,7 +29,7 @@ import java.net.URL
 
 class Subscription {
     companion object {
-        const val SUBSCRIPTION = "subscription"
+        private const val SUBSCRIPTION = "subscription"
 
         var instance: Subscription
             get() {

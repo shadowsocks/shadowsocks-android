@@ -49,7 +49,7 @@ class Acl {
         const val CHINALIST = "china-list"
         const val CUSTOM_RULES = "custom-rules"
 
-        val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
+        private val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
         fun getFile(id: String, context: Context = Core.deviceStorage) = File(context.noBackupFilesDir, "$id.acl")
 

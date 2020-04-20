@@ -53,7 +53,7 @@ class SubscriptionService : Service(), CoroutineScope {
         private const val NOTIFICATION_CHANNEL = "service-subscription"
         private const val NOTIFICATION_ID = 2
 
-        val idle = MutableLiveData<Boolean>(true)
+        val idle = MutableLiveData(true)
 
         val notificationChannel @RequiresApi(26) get() = NotificationChannel(NOTIFICATION_CHANNEL,
                 app.getText(R.string.service_subscription), NotificationManager.IMPORTANCE_LOW)
