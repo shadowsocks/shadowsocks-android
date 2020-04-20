@@ -143,8 +143,6 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             cmd += Acl.getFile(route).absolutePath
         }
 
-        // if (DataStore.tcpFastOpen) cmd += "--fast-open"
-
         service.data.processes!!.start(cmd)
     }
 

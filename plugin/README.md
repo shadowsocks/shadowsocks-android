@@ -50,8 +50,7 @@ In addition to functionalities of a normal plugin, it has to support these addit
 
 * `-V`: VPN mode. In this case, the plugin should pass all file descriptors that needs protecting
   from VPN connections (i.e. its traffic will not be forwarded through the VPN) through an
-  ancillary message to `./protect_path`;
-* `--fast-open`: TCP fast open enabled.
+  ancillary message to `./protect_path`.
 
 ### Implement a binary provider
 
