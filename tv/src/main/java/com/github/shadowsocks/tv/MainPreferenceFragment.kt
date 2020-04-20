@@ -29,13 +29,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.RemoteException
 import android.text.format.Formatter
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
 import androidx.lifecycle.observe
 import androidx.preference.*
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
@@ -50,9 +48,9 @@ import com.github.shadowsocks.preference.HostsSummaryProvider
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
-import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import timber.log.Timber
 
 class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksConnection.Callback,
         OnPreferenceDataStoreChangeListener {
@@ -61,7 +59,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         private const val REQUEST_REPLACE_PROFILES = 2
         private const val REQUEST_EXPORT_PROFILES = 3
         private const val REQUEST_HOSTS = 4
-        private const val TAG = "MainPreferenceFragment"
     }
 
     private lateinit var fab: ListPreference
@@ -266,7 +263,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         when (requestCode) {
             REQUEST_CONNECT -> if (resultCode == Activity.RESULT_OK) Core.startService() else {
                 Toast.makeText(requireContext(), R.string.vpn_permission_denied, Toast.LENGTH_SHORT).show()
-                Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+                Timber.e("Failed to start VpnService from onActivityResult: $data")
             }
             REQUEST_REPLACE_PROFILES -> {
                 if (resultCode != Activity.RESULT_OK) return
@@ -276,7 +273,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                         context.contentResolver.openInputStream(it)
                     }.filterNotNull(), true)
                 } catch (e: Exception) {
-                    printLog(e)
+                    Timber.w(e)
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
                 populateProfiles()
@@ -290,7 +287,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                         it.write(profiles.toString(2))
                     }
                 } catch (e: Exception) {
-                    printLog(e)
+                    Timber.w(e)
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
             }

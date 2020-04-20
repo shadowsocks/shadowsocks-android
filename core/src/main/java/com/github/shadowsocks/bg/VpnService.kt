@@ -39,9 +39,13 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
-import com.github.shadowsocks.utils.printLog
-import kotlinx.coroutines.*
-import java.io.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.io.File
+import java.io.FileDescriptor
+import java.io.IOException
 import java.net.URL
 import android.net.VpnService as BaseVpnService
 
@@ -67,13 +71,13 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                             } catch (e: IOException) {
                                 when ((e.cause as? ErrnoException)?.errno) {
                                     // also suppress ENONET (Machine is not on the network)
-                                    OsConstants.EPERM, 64 -> e.printStackTrace()
-                                    else -> printLog(e)
+                                    OsConstants.EPERM, 64 -> Timber.d(e)
+                                    else -> Timber.w(e)
                                 }
                                 return@let false
                             } catch (e: ReflectiveOperationException) {
                                 check(Build.VERSION.SDK_INT < 23)
-                                printLog(e)
+                                Timber.w(e)
                             }
                             protect(fd.int)
                         }) 0 else 1)
@@ -169,7 +173,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                             if (profile.bypass) builder.addDisallowedApplication(it)
                             else builder.addAllowedApplication(it)
                         } catch (ex: PackageManager.NameNotFoundException) {
-                            printLog(ex)
+                            Timber.w(ex)
                         }
                     }
             if (!profile.bypass) builder.addAllowedApplication(me)

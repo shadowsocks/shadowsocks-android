@@ -34,11 +34,11 @@ import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
-import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import timber.log.Timber
 import java.io.FileDescriptor
 import java.net.HttpURLConnection
 import java.net.InetAddress
@@ -53,7 +53,7 @@ fun <T> Iterable<T>.forEachTry(action: (T) -> Unit) {
         if (result == null) result = e else result.addSuppressed(e)
     }
     if (result != null) {
-        result.printStackTrace()
+        Timber.d(result)
         throw result
     }
 }
@@ -139,10 +139,5 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
 }
 
 val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNull { it.uri } ?: emptyList())
-
-fun printLog(t: Throwable) {
-    Crashlytics.logException(t)
-    t.printStackTrace()
-}
 
 fun Preference.remove() = parent!!.removePreference(this)

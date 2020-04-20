@@ -26,7 +26,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.view.isGone
-import com.github.shadowsocks.utils.printLog
+import timber.log.Timber
 
 class AutoCollapseTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                                      defStyleAttr: Int = 0) :
@@ -40,13 +40,13 @@ class AutoCollapseTextView @JvmOverloads constructor(context: Context, attrs: At
     override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) = try {
         super.onFocusChanged(focused, direction, previouslyFocusedRect)
     } catch (e: IndexOutOfBoundsException) {
-        printLog(e)
+        Timber.w(e)
     }
 
     override fun onTouchEvent(event: MotionEvent?) = try {
         super.onTouchEvent(event)
     } catch (e: IndexOutOfBoundsException) {
-        printLog(e)
+        Timber.w(e)
         false
     }
 }

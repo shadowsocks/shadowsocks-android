@@ -29,35 +29,38 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.UserManager
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.work.Configuration
 import androidx.work.WorkManager
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
+import com.github.shadowsocks.core.BuildConfig
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.subscription.SubscriptionService
-import com.github.shadowsocks.utils.*
-import com.google.firebase.FirebaseApp
-import com.google.firebase.analytics.FirebaseAnalytics
-import io.fabric.sdk.android.Fabric
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.DeviceStorageApp
+import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.Key
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import kotlin.reflect.KClass
 
 object Core {
-    const val TAG = "Core"
-
     lateinit var app: Application
         @VisibleForTesting set
     lateinit var configureIntent: (Context) -> PendingIntent
@@ -66,7 +69,6 @@ object Core {
     val notification by lazy { app.getSystemService<NotificationManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
     val deviceStorage by lazy { if (Build.VERSION.SDK_INT < 24) app else DeviceStorageApp(app) }
-    val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(deviceStorage) }
     val directBootSupported by lazy {
         Build.VERSION.SDK_INT >= 24 && app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus ==
                 DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
@@ -104,8 +106,18 @@ object Core {
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
-        Fabric.with(deviceStorage, Crashlytics())   // multiple processes needs manual set-up
-        FirebaseApp.initializeApp(deviceStorage)
+        Firebase.initialize(deviceStorage)  // multiple processes needs manual set-up
+        Timber.plant(object : Timber.DebugTree() {
+            override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                if (t == null) {
+                    if (priority != Log.DEBUG || BuildConfig.DEBUG) Log.println(priority, tag, message)
+                    FirebaseCrashlytics.getInstance().log("${"XXVDIWEF".getOrElse(priority) { 'X' }}/$tag: $message")
+                } else {
+                    if (priority >= Log.WARN || priority == Log.DEBUG) Log.println(priority, tag, message)
+                    if (priority >= Log.INFO) FirebaseCrashlytics.getInstance().recordException(t)
+                }
+            }
+        })
         WorkManager.initialize(deviceStorage, Configuration.Builder().apply {
             setExecutor { GlobalScope.launch { it.run() } }
             setTaskExecutor { GlobalScope.launch { it.run() } }
@@ -121,7 +133,7 @@ object Core {
                     File(deviceStorage.noBackupFilesDir, file).outputStream().use { output -> input.copyTo(output) }
                 }
             } catch (e: IOException) {
-                printLog(e)
+                Timber.w(e)
             }
             DataStore.publicStore.putLong(Key.assetUpdateTime, packageInfo.lastUpdateTime)
         }

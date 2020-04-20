@@ -25,10 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.*
-import android.util.Log
 import androidx.core.content.getSystemService
-import androidx.core.os.bundleOf
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -40,9 +37,16 @@ import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.readableMessage
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.net.URL
@@ -122,7 +126,7 @@ object BaseService {
                         work(callbacks.getBroadcastItem(it))
                     } catch (_: RemoteException) {
                     } catch (e: Exception) {
-                        printLog(e)
+                        Timber.w(e)
                     }
                 }
             } finally {
@@ -229,7 +233,7 @@ object BaseService {
             when {
                 s == State.Stopped -> startRunner()
                 s.canStop -> stopRunner(true)
-                else -> Crashlytics.log(Log.WARN, tag, "Illegal state when invoking use: $s")
+                else -> Timber.w("Illegal state $s when invoking use")
             }
         }
 
@@ -271,7 +275,7 @@ object BaseService {
             // channge the state
             data.changeState(State.Stopping)
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
+                Firebase.analytics.logEvent("stop") { param(FirebaseAnalytics.Param.METHOD, tag) }
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
                 // we use a coroutineScope here to allow clean-up in parallel
@@ -344,7 +348,7 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-            Core.analytics.logEvent("start", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
+            Firebase.analytics.logEvent("start") { param(FirebaseAnalytics.Param.METHOD, tag) }
 
             data.changeState(State.Connecting)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
@@ -365,7 +369,7 @@ object BaseService {
                     }
 
                     data.processes = GuardedProcessPool {
-                        printLog(it)
+                        Timber.w(it)
                         stopRunner(false, it.readableMessage)
                     }
                     startProcesses(hosts)
@@ -379,7 +383,7 @@ object BaseService {
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {
-                    if (exc is ExpectedException) exc.printStackTrace() else printLog(exc)
+                    if (exc is ExpectedException) Timber.d(exc) else Timber.w(exc)
                     stopRunner(false, "${getString(R.string.service_failed)}: ${exc.readableMessage}")
                 } finally {
                     data.connectingJob = null

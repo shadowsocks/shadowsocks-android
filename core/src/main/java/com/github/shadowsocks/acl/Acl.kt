@@ -21,9 +21,7 @@
 package com.github.shadowsocks.acl
 
 import android.content.Context
-import android.util.Log
 import androidx.recyclerview.widget.SortedList
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
@@ -33,6 +31,7 @@ import com.github.shadowsocks.utils.asIterable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.Reader
@@ -42,7 +41,6 @@ import kotlin.coroutines.coroutineContext
 
 class Acl {
     companion object {
-        const val TAG = "Acl"
         const val ALL = "all"
         const val BYPASS_LAN = "bypass-lan"
         const val BYPASS_CHN = "bypass-china"
@@ -159,7 +157,7 @@ class Acl {
             val child = Acl().fromReader(connect(url).getInputStream().bufferedReader(), bypass)
             child.flatten(depth - 1, connect)
             if (bypass != child.bypass) {
-                Crashlytics.log(Log.WARN, TAG, "Imported network ACL has a conflicting mode set. " +
+                Timber.w("Imported network ACL has a conflicting mode set. " +
                         "This will probably not work as intended. URL: $url")
                 child.subnets.clear() // subnets for the different mode are discarded
                 child.bypass = bypass

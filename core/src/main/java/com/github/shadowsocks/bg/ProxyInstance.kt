@@ -34,6 +34,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.signaturesCompat
 import com.github.shadowsocks.utils.useCancellable
+import com.google.firebase.remoteconfig.ktx.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -60,7 +61,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             scheduleConfigUpdate = !success
             val conn = withContext(Dispatchers.IO) {
                 // Network.openConnection might use networking, see https://issuetracker.google.com/issues/135242093
-                service.openConnection(URL(config.getString("proxy_url"))) as HttpURLConnection
+                service.openConnection(URL(config["proxy_url"].asString())) as HttpURLConnection
             }
             conn.requestMethod = "POST"
             conn.doOutput = true

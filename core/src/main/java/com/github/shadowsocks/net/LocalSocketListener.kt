@@ -26,11 +26,11 @@ import android.net.LocalSocketAddress
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
-import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
@@ -55,7 +55,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 try {
                     accept(serverSocket.accept())
                 } catch (e: IOException) {
-                    if (running) printLog(e)
+                    if (running) Timber.w(e)
                     continue
                 }
             }

@@ -24,6 +24,7 @@ import android.content.Context
 import androidx.work.*
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.useCancellable
+import timber.log.Timber
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -52,7 +53,7 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
         Acl.getFile(route).printWriter().use { it.write(acl) }
         Result.success()
     } catch (e: IOException) {
-        e.printStackTrace()
+        Timber.d(e)
         if (runAttemptCount > 5) Result.failure() else Result.retry()
     }
 }

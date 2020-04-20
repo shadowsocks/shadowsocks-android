@@ -27,12 +27,12 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import java.net.UnknownHostException
 
 object DefaultNetworkListener {
@@ -124,7 +124,7 @@ object DefaultNetworkListener {
             Core.connectivity.requestNetwork(request, Callback)
         } catch (e: SecurityException) {
             // known bug: https://stackoverflow.com/a/33509180/2245107
-            if (Build.VERSION.SDK_INT != 23) printLog(e)
+            if (Build.VERSION.SDK_INT != 23) Timber.w(e)
             fallback = true
         }
     }

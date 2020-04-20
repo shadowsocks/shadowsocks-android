@@ -34,9 +34,9 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
 import com.github.shadowsocks.utils.parseNumericAddress
-import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
+import timber.log.Timber
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.Inet4Address
@@ -80,7 +80,7 @@ sealed class DnsResolverCompat {
             false
         } catch (e: ReflectiveOperationException) {
             check(Build.VERSION.SDK_INT < 23)
-            printLog(e)
+            Timber.w(e)
             checkConnectivity(network, addr)
         }
         private fun checkConnectivity(network: Network, addr: InetAddress): Boolean {
@@ -88,7 +88,7 @@ sealed class DnsResolverCompat {
                 try {
                     it.matches(addr)
                 } catch (e: RuntimeException) {
-                    printLog(e)
+                    Timber.w(e)
                     false
                 }
             } == true

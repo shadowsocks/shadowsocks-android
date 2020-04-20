@@ -26,9 +26,9 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.forEachTry
-import com.github.shadowsocks.utils.printLog
 import com.google.gson.JsonStreamParser
 import org.json.JSONArray
+import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
 import java.sql.SQLException
@@ -94,7 +94,7 @@ object ProfileManager {
     } catch (ex: SQLiteCantOpenDatabaseException) {
         throw IOException(ex)
     } catch (ex: SQLException) {
-        printLog(ex)
+        Timber.w(ex)
         null
     }
 
@@ -122,7 +122,7 @@ object ProfileManager {
         } catch (ex: SQLiteCantOpenDatabaseException) {
             throw IOException(ex)
         } catch (ex: SQLException) {
-            printLog(ex)
+            Timber.w(ex)
             false
         }
         if (!nonEmpty) DataStore.profileId = createProfile().id
@@ -134,7 +134,7 @@ object ProfileManager {
     } catch (ex: SQLiteCantOpenDatabaseException) {
         throw IOException(ex)
     } catch (ex: SQLException) {
-        printLog(ex)
+        Timber.w(ex)
         null
     }
 
@@ -144,7 +144,7 @@ object ProfileManager {
     } catch (ex: SQLiteCantOpenDatabaseException) {
         throw IOException(ex)
     } catch (ex: SQLException) {
-        printLog(ex)
+        Timber.w(ex)
         null
     }
 }

@@ -32,7 +32,10 @@ import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -57,6 +60,7 @@ import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.parcel.Parcelize
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
+import timber.log.Timber
 import java.net.IDN
 import java.net.MalformedURLException
 import java.net.URL
@@ -449,7 +453,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 check(adapter.addToProxy(clipboard.primaryClip!!.getItemAt(0).text.toString()) != null)
             } catch (exc: Exception) {
                 (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
-                exc.printStackTrace()
+                Timber.d(exc)
             }
             true
         }

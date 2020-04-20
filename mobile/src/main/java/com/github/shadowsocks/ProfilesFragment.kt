@@ -44,7 +44,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -54,7 +53,6 @@ import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.datas
-import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
@@ -69,6 +67,7 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.nio.charset.StandardCharsets
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
@@ -146,7 +145,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 })
             }
         } catch (e: WriterException) {
-            Crashlytics.logException(e)
+            Timber.w(e)
             (activity as MainActivity).snackbar().setText(e.readableMessage).show()
             dismiss()
             null
@@ -515,7 +514,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                         return true
                     }
                 } catch (exc: Exception) {
-                    exc.printStackTrace()
+                    Timber.d(exc)
                 }
                 (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
                 true
@@ -600,7 +599,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                         it.write(profiles.toString(2))
                     }
                 } catch (e: Exception) {
-                    printLog(e)
+                    Timber.w(e)
                     (activity as MainActivity).snackbar(e.readableMessage).show()
                 }
             }

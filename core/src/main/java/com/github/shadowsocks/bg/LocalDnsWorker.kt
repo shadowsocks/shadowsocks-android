@@ -1,18 +1,16 @@
 package com.github.shadowsocks.bg
 
 import android.net.LocalSocket
-import android.util.Log
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.ConcurrentLocalSocketListener
 import com.github.shadowsocks.net.DnsResolverCompat
-import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.launch
 import org.xbill.DNS.Message
 import org.xbill.DNS.Rcode
+import timber.log.Timber
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -31,10 +29,10 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray) : C
                     resolver(query)
                 } catch (e: Exception) {
                     when (e) {
-                        is TimeoutCancellationException -> Crashlytics.log(Log.WARN, name, "Resolving timed out")
+                        is TimeoutCancellationException -> Timber.w("Resolving timed out")
                         is CancellationException -> { } // ignore
-                        is IOException -> Crashlytics.log(Log.WARN, name, e.message)
-                        else -> printLog(e)
+                        is IOException -> Timber.d(e)
+                        else -> Timber.w(e)
                     }
                     try {
                         DnsResolverCompat.prepareDnsResponse(Message(query)).apply {
