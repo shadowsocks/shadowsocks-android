@@ -20,19 +20,20 @@
 
 package com.github.shadowsocks.bg
 
-import android.util.Log
-import androidx.core.os.bundleOf
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.core.R
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 
 object RemoteConfig {
     private val config = GlobalScope.async(Dispatchers.Main.immediate) {
-        FirebaseRemoteConfig.getInstance().apply { setDefaultsAsync(R.xml.default_configs).await() }
+        Firebase.remoteConfig.apply { setDefaultsAsync(R.xml.default_configs).await() }
     }
 
     fun fetchAsync() = GlobalScope.async(Dispatchers.Main.immediate) { fetch() }
@@ -42,8 +43,8 @@ object RemoteConfig {
             fetch().await()
             this to true
         } catch (e: Exception) {
-            Log.w("RemoteConfig", e)
-            Core.analytics.logEvent("femote_config_failure", bundleOf(Pair(javaClass.simpleName, e.message)))
+            Timber.d(e)
+            Firebase.analytics.logEvent("femote_config_failure") { param("message", e.toString()) }
             this to false
         }
     }

@@ -24,7 +24,6 @@ import android.annotation.TargetApi
 import android.net.Uri
 import android.os.Parcelable
 import android.util.Base64
-import android.util.Log
 import android.util.LongSparseArray
 import androidx.core.net.toUri
 import androidx.room.*
@@ -40,6 +39,7 @@ import com.google.gson.JsonPrimitive
 import kotlinx.android.parcel.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
+import timber.log.Timber
 import java.io.Serializable
 import java.net.URI
 import java.net.URISyntaxException
@@ -100,7 +100,6 @@ data class Profile(
     }
 
     companion object {
-        private const val TAG = "ShadowParser"
         private const val serialVersionUID = 1L
         private const val sponsored = "198.199.101.152"
         private val pattern =
@@ -124,7 +123,7 @@ data class Profile(
                         profile.name = uri.fragment
                         profile
                     } else {
-                        Log.e(TAG, "Unrecognized URI: ${it.value}")
+                        Timber.e("Unrecognized URI: ${it.value}")
                         null
                     }
                 } else {
@@ -147,16 +146,16 @@ data class Profile(
                             profile.name = uri.fragment ?: ""
                             profile
                         } catch (e: URISyntaxException) {
-                            Log.e(TAG, "Invalid URI: ${it.value}")
+                            Timber.e("Invalid URI: ${it.value}")
                             null
                         }
                     } else {
-                        Log.e(TAG, "Unknown user info: ${it.value}")
+                        Timber.e("Unknown user info: ${it.value}")
                         null
                     }
                 }
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Invalid base64 detected: ${it.value}")
+                Timber.e("Invalid base64 detected: ${it.value}")
                 null
             }
         }.filterNotNull()

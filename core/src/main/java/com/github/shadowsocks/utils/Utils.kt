@@ -34,13 +34,12 @@ import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
-import com.crashlytics.android.Crashlytics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import timber.log.Timber
 import java.io.FileDescriptor
-import java.lang.reflect.Method
 import java.net.HttpURLConnection
 import java.net.InetAddress
 import kotlin.coroutines.resume
@@ -54,7 +53,7 @@ fun <T> Iterable<T>.forEachTry(action: (T) -> Unit) {
         if (result == null) result = e else result.addSuppressed(e)
     }
     if (result != null) {
-        result.printStackTrace()
+        Timber.d(result)
         throw result
     }
 }
@@ -72,17 +71,10 @@ fun FileDescriptor.closeQuietly() = try {
     Os.close(this)
 } catch (_: ErrnoException) { }
 
-@SuppressLint("DiscouragedPrivateApi")
-private fun createParseNumericAddress(): Method? {
-    return if (Build.VERSION.SDK_INT < 29)
-        InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
-            isAccessible = true
-        }
-    else null
-}
-
-private val parseNumericAddress by lazy {
-    createParseNumericAddress()
+private val parseNumericAddress by lazy @SuppressLint("SoonBlockedPrivateApi") {
+    InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
+        isAccessible = true
+    }
 }
 
 /**
@@ -92,7 +84,7 @@ private val parseNumericAddress by lazy {
  */
 fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_INET, this)
         ?: Os.inet_pton(OsConstants.AF_INET6, this)?.let {
-            if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress?.invoke(null, this) as? InetAddress
+            if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress.invoke(null, this) as? InetAddress
         }
 
 suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T): T {
@@ -149,10 +141,5 @@ fun Resources.Theme.resolveResourceId(@AttrRes resId: Int): Int {
 }
 
 val Intent.datas get() = listOfNotNull(data) + (clipData?.asIterable()?.mapNotNull { it.uri } ?: emptyList())
-
-fun printLog(t: Throwable) {
-    Crashlytics.logException(t)
-    t.printStackTrace()
-}
 
 fun Preference.remove() = parent!!.removePreference(this)

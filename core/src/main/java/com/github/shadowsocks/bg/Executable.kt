@@ -24,14 +24,13 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.text.TextUtils
-import android.util.Log
-import com.crashlytics.android.Crashlytics
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 
 object Executable {
     const val REDSOCKS = "libredsocks.so"
-    const val SS_LOCAL = "libss-local.so"
+    const val SS_LOCAL = "libsslocal.so"
     const val TUN2SOCKS = "libtun2socks.so"
 
     private val EXECUTABLES = setOf(SS_LOCAL, REDSOCKS, TUN2SOCKS)
@@ -47,9 +46,8 @@ object Executable {
                 Os.kill(process.name.toInt(), OsConstants.SIGKILL)
             } catch (e: ErrnoException) {
                 if (e.errno != OsConstants.ESRCH) {
-                    e.printStackTrace()
-                    Crashlytics.log(Log.WARN, "kill", "SIGKILL ${exe.absolutePath} (${process.name}) failed")
-                    Crashlytics.logException(e)
+                    Timber.w("SIGKILL ${exe.absolutePath} (${process.name}) failed")
+                    Timber.w(e)
                 }
             }
         }

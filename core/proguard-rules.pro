@@ -20,8 +20,3 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
-# https://issuetracker.google.com/issues/147972078#comment4
--keepclasseswithmembers class * extends androidx.lifecycle.ViewModel {
-    <init>();
-}

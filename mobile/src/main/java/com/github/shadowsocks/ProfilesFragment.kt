@@ -44,7 +44,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -54,12 +53,11 @@ import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.datas
-import com.github.shadowsocks.utils.printLog
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
-import com.google.android.gms.ads.*
+import com.google.android.gms.ads.VideoOptions
 import com.google.android.gms.ads.formats.NativeAdOptions
 import com.google.android.gms.ads.formats.UnifiedNativeAd
 import com.google.android.gms.ads.formats.UnifiedNativeAdView
@@ -69,6 +67,7 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.nio.charset.StandardCharsets
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
@@ -146,7 +145,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 })
             }
         } catch (e: WriterException) {
-            Crashlytics.logException(e)
+            Timber.w(e)
             (activity as MainActivity).snackbar().setText(e.readableMessage).show()
             dismiss()
             null
@@ -247,12 +246,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             if (adHost != null || !item.isSponsored) return
             if (nativeAdView == null) {
                 nativeAdView = layoutInflater.inflate(R.layout.ad_unified, adContainer, false) as UnifiedNativeAdView
-                MobileAds.setRequestConfiguration(RequestConfiguration.Builder()
-                        .setTestDeviceIds(
-                                listOf("B08FC1764A7B250E91EA9D0D5EBEB208", "7509D18EB8AF82F915874FEF53877A64",
-                                "F58907F28184A828DD0DB6F8E38189C6", "FE983F496D7C5C1878AA163D9420CA97")
-                        ).build())
-                AdLoader.Builder(context, "ca-app-pub-3283768469187309/8632513739").apply {
+                AdsManager.load(context) {
                     forUnifiedNativeAd { unifiedNativeAd ->
                         // You must call destroy on old ads when you are done with them,
                         // otherwise you will have a memory leak.
@@ -265,7 +259,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                             setStartMuted(true)
                         }.build())
                     }.build())
-                }.build().loadAd(AdRequest.Builder().build())
+                }
             } else if (nativeAd != null) populateUnifiedNativeAdView(nativeAd!!, nativeAdView!!)
         }
 
@@ -520,7 +514,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                         return true
                     }
                 } catch (exc: Exception) {
-                    exc.printStackTrace()
+                    Timber.d(exc)
                 }
                 (activity as MainActivity).snackbar().setText(R.string.action_import_err).show()
                 true
@@ -605,7 +599,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                         it.write(profiles.toString(2))
                     }
                 } catch (e: Exception) {
-                    printLog(e)
+                    Timber.w(e)
                     (activity as MainActivity).snackbar(e.readableMessage).show()
                 }
             }

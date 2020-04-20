@@ -20,9 +20,8 @@
 
 package com.github.shadowsocks.plugin
 
-import android.util.Log
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.Commandline
+import timber.log.Timber
 import java.util.*
 
 class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val selected: String) {
@@ -44,7 +43,7 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
                     }
                 }
             } catch (exc: Exception) {
-                Crashlytics.log(Log.WARN, "PluginConfiguration", exc.message)
+                Timber.w(exc)
             }
             opt
         } else PluginOptions(line)

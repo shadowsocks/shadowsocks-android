@@ -1,7 +1,7 @@
 /*******************************************************************************
  *                                                                             *
- *  Copyright (C) 2018 by Max Lv <max.c.lv@gmail.com>                          *
- *  Copyright (C) 2018 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *  Copyright (C) 2020 by Max Lv <max.c.lv@gmail.com>                          *
+ *  Copyright (C) 2020 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
  *                                                                             *
  *  This program is free software: you can redistribute it and/or modify       *
  *  it under the terms of the GNU General Public License as published by       *
@@ -18,35 +18,24 @@
  *                                                                             *
  *******************************************************************************/
 
-package com.github.shadowsocks.widget
+package com.github.shadowsocks
 
 import android.content.Context
-import android.graphics.Rect
-import android.util.AttributeSet
-import android.view.MotionEvent
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.view.isGone
-import timber.log.Timber
+import com.google.android.gms.ads.AdLoader
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 
-class AutoCollapseTextView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
-                                                     defStyleAttr: Int = 0) :
-        AppCompatTextView(context, attrs, defStyleAttr) {
-    override fun onTextChanged(text: CharSequence?, start: Int, lengthBefore: Int, lengthAfter: Int) {
-        super.onTextChanged(text, start, lengthBefore, lengthAfter)
-        isGone = text.isNullOrEmpty()
+internal object AdsManager {
+    init {
+        MobileAds.setRequestConfiguration(RequestConfiguration.Builder().apply {
+            setTestDeviceIds(listOf(
+                    "B08FC1764A7B250E91EA9D0D5EBEB208", "7509D18EB8AF82F915874FEF53877A64",
+                    "F58907F28184A828DD0DB6F8E38189C6", "FE983F496D7C5C1878AA163D9420CA97"))
+        }.build())
     }
 
-    // #1874
-    override fun onFocusChanged(focused: Boolean, direction: Int, previouslyFocusedRect: Rect?) = try {
-        super.onFocusChanged(focused, direction, previouslyFocusedRect)
-    } catch (e: IndexOutOfBoundsException) {
-        Timber.w(e)
-    }
-
-    override fun onTouchEvent(event: MotionEvent?) = try {
-        super.onTouchEvent(event)
-    } catch (e: IndexOutOfBoundsException) {
-        Timber.w(e)
-        false
-    }
+    fun load(context: Context?, setup: AdLoader.Builder.() -> Unit) =
+            AdLoader.Builder(context, "ca-app-pub-3283768469187309/8632513739").apply(setup).build()
+                    .loadAd(AdRequest.Builder().build())
 }

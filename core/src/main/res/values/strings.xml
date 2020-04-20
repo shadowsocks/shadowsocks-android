@@ -56,9 +56,6 @@
   <string name="auto_connect_summary">Enable Shadowsocks on startup/app update if it was running before</string>
   <string name="direct_boot_aware">Allow Toggling in Lock Screen</string>
   <string name="direct_boot_aware_summary">Your selected profile information will be less protected</string>
-  <string name="tcp_fastopen_summary">Toggling might require ROOT permission</string>
-  <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
-  <string name="tcp_fastopen_failure">Toggle failed</string>
   <plurals name="hosts_summary">
     <item quantity="one">1 hostname configured</item>
     <item quantity="other">%d hostnames configured</item>

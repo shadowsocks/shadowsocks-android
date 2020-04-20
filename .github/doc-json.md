@@ -104,6 +104,6 @@ When doing subscription updates,
       ]
     },
     "udpdns": false
-  },
+  }
 ]
 ```

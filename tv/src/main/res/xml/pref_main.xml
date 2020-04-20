@@ -20,15 +20,11 @@
     <PreferenceCategory
         app:key="settings"
         app:title="@string/settings"
-        app:initialExpandedChildrenCount="3">
+        app:initialExpandedChildrenCount="2">
         <SwitchPreference
             app:key="isAutoConnect"
             app:summary="@string/auto_connect_summary"
             app:title="@string/auto_connect"/>
-        <SwitchPreference
-            app:key="tcp_fastopen"
-            app:summary="@string/tcp_fastopen_summary"
-            app:title="TCP Fast Open"/>
         <EditTextPreference
             app:key="hosts"
             app:title="hosts"/>

@@ -21,13 +21,13 @@
 package com.github.shadowsocks.net
 
 import android.net.LocalSocket
-import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.*
+import timber.log.Timber
 import java.io.File
 
 abstract class ConcurrentLocalSocketListener(name: String, socketFile: File) : LocalSocketListener(name, socketFile),
         CoroutineScope {
-    override val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { _, t -> printLog(t) }
+    override val coroutineContext = Dispatchers.IO + SupervisorJob() + CoroutineExceptionHandler { _, t -> Timber.w(t) }
 
     override fun accept(socket: LocalSocket) {
         launch { super.accept(socket) }

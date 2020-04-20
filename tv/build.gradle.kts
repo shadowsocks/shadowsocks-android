@@ -7,7 +7,7 @@ plugins {
     kotlin("kapt")
     id("com.google.android.gms.oss-licenses-plugin")
     id("com.google.gms.google-services")
-    id("io.fabric")
+    id("com.google.firebase.crashlytics")
 }
 
 fun getCurrentFlavor(): String {

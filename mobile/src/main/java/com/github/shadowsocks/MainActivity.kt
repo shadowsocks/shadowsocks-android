@@ -28,7 +28,6 @@ import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
 import android.os.RemoteException
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
@@ -40,7 +39,6 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -56,11 +54,14 @@ import com.github.shadowsocks.widget.ServiceButton
 import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
     companion object {
-        private const val TAG = "ShadowsocksMainActivity"
         private const val REQUEST_CONNECT = 1
 
         var stateListener: ((BaseService.State) -> Unit)? = null
@@ -148,7 +149,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
             resultCode == Activity.RESULT_OK -> Core.startService()
             else -> {
                 snackbar().setText(R.string.vpn_permission_denied).show()
-                Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
+                Timber.e("Failed to start VpnService from onActivityResult: $data")
             }
         }
     }
@@ -208,7 +209,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
                 }
                 R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
                 R.id.about -> {
-                    Core.analytics.logEvent("about", Bundle())
+                    Firebase.analytics.logEvent("about") { }
                     displayFragment(AboutFragment())
                 }
                 R.id.faq -> {

@@ -25,10 +25,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.*
-import android.util.Log
 import androidx.core.content.getSystemService
-import androidx.core.os.bundleOf
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -37,16 +34,23 @@ import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
+import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.readableMessage
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.*
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.net.UnknownHostException
-import java.util.*
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -74,6 +78,7 @@ object BaseService {
         var processes: GuardedProcessPool? = null
         var proxy: ProxyInstance? = null
         var udpFallback: ProxyInstance? = null
+        var localDns: LocalDnsWorker? = null
 
         var notification: ServiceNotification? = null
         val closeReceiver = broadcastReceiver { _, intent ->
@@ -121,7 +126,7 @@ object BaseService {
                         work(callbacks.getBroadcastItem(it))
                     } catch (_: RemoteException) {
                     } catch (e: Exception) {
-                        printLog(e)
+                        Timber.w(e)
                     }
                 }
             } finally {
@@ -228,11 +233,11 @@ object BaseService {
             when {
                 s == State.Stopped -> startRunner()
                 s.canStop -> stopRunner(true)
-                else -> Crashlytics.log(Log.WARN, tag, "Illegal state when invoking use: $s")
+                else -> Timber.w("Illegal state $s when invoking use")
             }
         }
 
-        fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> = cmd
+        val isVpnService get() = false
 
         suspend fun startProcesses(hosts: HostsFile) {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
@@ -241,12 +246,13 @@ object BaseService {
             data.proxy!!.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
-                    if (udpFallback == null) "-u" else null)
+                    if (udpFallback == null) "-U" else null)
             check(udpFallback?.plugin == null) { "UDP fallback cannot have plugins" }
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
-                    "-U")
+                    "-u", false)
+            data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
         fun startRunner() {
@@ -260,6 +266,8 @@ object BaseService {
                 close(scope)
                 data.processes = null
             }
+            data.localDns?.shutdown(scope)
+            data.localDns = null
         }
 
         fun stopRunner(restart: Boolean = false, msg: String? = null) {
@@ -267,7 +275,7 @@ object BaseService {
             // channge the state
             data.changeState(State.Stopping)
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                Core.analytics.logEvent("stop", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
+                Firebase.analytics.logEvent("stop") { param(FirebaseAnalytics.Param.METHOD, tag) }
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
                 // we use a coroutineScope here to allow clean-up in parallel
@@ -309,6 +317,7 @@ object BaseService {
         suspend fun preInit() { }
         suspend fun getActiveNetwork() = if (Build.VERSION.SDK_INT >= 23) Core.connectivity.activeNetwork else null
         suspend fun resolver(host: String) = DnsResolverCompat.resolveOnActiveNetwork(host)
+        suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
         suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -339,7 +348,7 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-            Core.analytics.logEvent("start", bundleOf(Pair(FirebaseAnalytics.Param.METHOD, tag)))
+            Firebase.analytics.logEvent("start") { param(FirebaseAnalytics.Param.METHOD, tag) }
 
             data.changeState(State.Connecting)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
@@ -360,7 +369,7 @@ object BaseService {
                     }
 
                     data.processes = GuardedProcessPool {
-                        printLog(it)
+                        Timber.w(it)
                         stopRunner(false, it.readableMessage)
                     }
                     startProcesses(hosts)
@@ -374,7 +383,7 @@ object BaseService {
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {
-                    if (exc is ExpectedException) exc.printStackTrace() else printLog(exc)
+                    if (exc is ExpectedException) Timber.d(exc) else Timber.w(exc)
                     stopRunner(false, "${getString(R.string.service_failed)}: ${exc.readableMessage}")
                 } finally {
                     data.connectingJob = null

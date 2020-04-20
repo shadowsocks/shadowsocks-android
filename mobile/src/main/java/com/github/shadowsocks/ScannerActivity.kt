@@ -29,7 +29,6 @@ import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
@@ -37,21 +36,23 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import androidx.core.util.forEach
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.utils.datas
+import com.github.shadowsocks.utils.forEachTry
+import com.github.shadowsocks.utils.openBitmap
+import com.github.shadowsocks.utils.readableMessage
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture
 import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic
 import com.google.android.gms.vision.Frame
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import timber.log.Timber
 import xyz.belvi.mobilevisionbarcodescanner.BarcodeRetriever
 
 class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     companion object {
-        private const val TAG = "ScannerActivity"
         private const val REQUEST_IMPORT = 2
         private const val REQUEST_IMPORT_OR_FINISH = 3
         private const val REQUEST_GOOGLE_API = 4
@@ -109,7 +110,7 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     }
     override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
     override fun onBitmapScanned(sparseArray: SparseArray<Barcode>?) { }
-    override fun onRetrievedFailed(reason: String?) = Crashlytics.log(Log.WARN, TAG, reason)
+    override fun onRetrievedFailed(reason: String?) = Timber.w(reason)
     override fun onPermissionRequestDenied() {
         Toast.makeText(this, R.string.add_profile_scanner_permission_required, Toast.LENGTH_SHORT).show()
         startImport()

@@ -30,14 +30,13 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.net.TcpFastOpen
 import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.BrowsableEditTextPreferenceDialogFragment
+import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
 import com.github.shadowsocks.preference.HostsSummaryProvider
+import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.remove
 import com.github.shadowsocks.widget.MainListListener
@@ -64,23 +63,6 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             true
         } else canToggleLocked.remove()
 
-        val tfo = findPreference<SwitchPreference>(Key.tfo)!!
-        tfo.isChecked = DataStore.tcpFastOpen
-        tfo.setOnPreferenceChangeListener { _, value ->
-            if (value as Boolean && !TcpFastOpen.sendEnabled) {
-                val result = TcpFastOpen.enable()?.trim()
-                if (TcpFastOpen.sendEnabled) true else {
-                    (activity as MainActivity).snackbar(
-                            if (result.isNullOrEmpty()) getText(R.string.tcp_fastopen_failure) else result).show()
-                    false
-                }
-            } else true
-        }
-        if (!TcpFastOpen.supported) {
-            tfo.isEnabled = false
-            tfo.summary = getString(R.string.tcp_fastopen_summary_unsupported, System.getProperty("os.version"))
-        }
-
         hosts.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
         hosts.summaryProvider = HostsSummaryProvider
         val serviceMode = findPreference<Preference>(Key.serviceMode)!!
@@ -91,25 +73,16 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)!!
         portTransproxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
-            val (enabledLocalDns, enabledTransproxy) = when (newValue as String?) {
-                Key.modeProxy -> Pair(false, false)
-                Key.modeVpn -> Pair(true, false)
-                Key.modeTransproxy -> Pair(true, true)
-                else -> throw IllegalArgumentException("newValue: $newValue")
-            }
-            hosts.isEnabled = enabledLocalDns
-            portLocalDns.isEnabled = enabledLocalDns
-            portTransproxy.isEnabled = enabledTransproxy
+            portTransproxy.isEnabled = newValue as String? == Key.modeTransproxy
             true
         }
         val listener: (BaseService.State) -> Unit = {
             val stopped = it == BaseService.State.Stopped
-            tfo.isEnabled = stopped
+            hosts.isEnabled = stopped
             serviceMode.isEnabled = stopped
             portProxy.isEnabled = stopped
+            portLocalDns.isEnabled = stopped
             if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
-                hosts.isEnabled = false
-                portLocalDns.isEnabled = false
                 portTransproxy.isEnabled = false
             }
         }

@@ -34,26 +34,22 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
-import com.github.shadowsocks.net.ConcurrentLocalSocketListener
-import com.github.shadowsocks.net.DefaultNetworkListener
-import com.github.shadowsocks.net.HostsFile
-import com.github.shadowsocks.net.Subnet
+import com.github.shadowsocks.net.*
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
-import com.github.shadowsocks.utils.printLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.File
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.URL
-import java.util.*
 import android.net.VpnService as BaseVpnService
 
-class VpnService : BaseVpnService(), LocalDnsService.Interface {
+class VpnService : BaseVpnService(), BaseService.Interface {
     companion object {
         private const val VPN_MTU = 1500
         private const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
@@ -75,13 +71,13 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             } catch (e: IOException) {
                                 when ((e.cause as? ErrnoException)?.errno) {
                                     // also suppress ENONET (Machine is not on the network)
-                                    OsConstants.EPERM, 64 -> e.printStackTrace()
-                                    else -> printLog(e)
+                                    OsConstants.EPERM, 64 -> Timber.d(e)
+                                    else -> Timber.w(e)
                                 }
                                 return@let false
                             } catch (e: ReflectiveOperationException) {
                                 check(Build.VERSION.SDK_INT < 23)
-                                printLog(e)
+                                Timber.w(e)
                             }
                             protect(fd.int)
                         }) 0 else 1)
@@ -115,7 +111,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
 
     override fun onBind(intent: Intent) = when (intent.action) {
         SERVICE_INTERFACE -> super<BaseVpnService>.onBind(intent)
-        else -> super<LocalDnsService.Interface>.onBind(intent)
+        else -> super<BaseService.Interface>.onBind(intent)
     }
 
     override fun onRevoke() = stopRunner()
@@ -134,7 +130,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         if (DataStore.serviceMode == Key.modeVpn) {
             if (prepare(this) != null) {
                 startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } else return super<LocalDnsService.Interface>.onStartCommand(intent, flags, startId)
+            } else return super<BaseService.Interface>.onStartCommand(intent, flags, startId)
         }
         stopRunner()
         return Service.START_NOT_STICKY
@@ -143,6 +139,10 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
     override suspend fun getActiveNetwork() = DefaultNetworkListener.get()
     override suspend fun resolver(host: String) = DnsResolverCompat.resolve(DefaultNetworkListener.get(), host)
+    override suspend fun rawResolver(query: ByteArray) =
+            // no need to listen for network here as this is only used for forwarding local DNS queries.
+            // retries should be attempted by client.
+            DnsResolverCompat.resolveRaw(underlyingNetwork ?: throw IOException("no network"), query)
     override suspend fun openConnection(url: URL) = DefaultNetworkListener.get().openConnection(url)
 
     override suspend fun startProcesses(hosts: HostsFile) {
@@ -151,10 +151,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
         sendFd(startVpn())
     }
 
-    override fun buildAdditionalArguments(cmd: ArrayList<String>): ArrayList<String> {
-        cmd += "-V"
-        return cmd
-    }
+    override val isVpnService get() = true
 
     private suspend fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
@@ -176,7 +173,7 @@ class VpnService : BaseVpnService(), LocalDnsService.Interface {
                             if (profile.bypass) builder.addDisallowedApplication(it)
                             else builder.addAllowedApplication(it)
                         } catch (ex: PackageManager.NameNotFoundException) {
-                            printLog(ex)
+                            Timber.w(ex)
                         }
                     }
             if (!profile.bypass) builder.addAllowedApplication(me)
