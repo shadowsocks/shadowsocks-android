@@ -23,13 +23,11 @@ android {
         )
     }
 
-    externalNativeBuild {
-        ndkBuild { 
-            path("src/main/jni/Android.mk")
-        }
-    }
+    externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
 
-    sourceSets.getByName("androidTest").assets.srcDirs.plus(files("$projectDir/schemas"))
+    sourceSets.getByName("androidTest") {
+        assets.setSrcDirs(assets.srcDirs + files("$projectDir/schemas"))
+    }
 }
 
 androidExtensions.isExperimental = true
