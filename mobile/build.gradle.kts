@@ -47,7 +47,7 @@ android {
     }
     val javaVersion = rootExt.get("java_version") as JavaVersion
     compileOptions {
-        coreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
