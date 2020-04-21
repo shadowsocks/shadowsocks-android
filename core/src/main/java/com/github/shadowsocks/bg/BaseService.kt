@@ -35,10 +35,8 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.DnsResolverCompat
-import com.github.shadowsocks.net.HostsFile
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.readableMessage
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -239,7 +237,7 @@ object BaseService {
 
         val isVpnService get() = false
 
-        suspend fun startProcesses(hosts: HostsFile) {
+        suspend fun startProcesses() {
             val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
                             ?.isUserUnlocked != false) app else Core.deviceStorage).noBackupFilesDir
             val udpFallback = data.udpFallback
@@ -315,7 +313,6 @@ object BaseService {
                 listOfNotNull(data.proxy, data.udpFallback).forEach { it.trafficMonitor?.persistStats(it.profile.id) }
 
         suspend fun preInit() { }
-        suspend fun getActiveNetwork() = if (Build.VERSION.SDK_INT >= 23) Core.connectivity.activeNetwork else null
         suspend fun resolver(host: String) = DnsResolverCompat.resolveOnActiveNetwork(host)
         suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
         suspend fun openConnection(url: URL) = url.openConnection()
@@ -355,9 +352,8 @@ object BaseService {
                 try {
                     Executable.killAll()    // clean up old processes
                     preInit()
-                    val hosts = HostsFile(DataStore.publicStore.getString(Key.hosts) ?: "")
-                    proxy.init(this@Interface, hosts)
-                    data.udpFallback?.init(this@Interface, hosts)
+                    proxy.init(this@Interface)
+                    data.udpFallback?.init(this@Interface)
                     if (profile.route == Acl.CUSTOM_RULES) try {
                         withContext(Dispatchers.IO) {
                             Acl.customRules.flatten(10, this@Interface::openConnection).also {
@@ -372,7 +368,7 @@ object BaseService {
                         Timber.w(it)
                         stopRunner(false, it.readableMessage)
                     }
-                    startProcesses(hosts)
+                    startProcesses()
 
                     proxy.scheduleUpdate()
                     data.udpFallback?.scheduleUpdate()

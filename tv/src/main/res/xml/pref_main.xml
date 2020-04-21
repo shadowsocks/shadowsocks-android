@@ -20,14 +20,11 @@
     <PreferenceCategory
         app:key="settings"
         app:title="@string/settings"
-        app:initialExpandedChildrenCount="2">
+        app:initialExpandedChildrenCount="1">
         <SwitchPreference
             app:key="isAutoConnect"
             app:summary="@string/auto_connect_summary"
             app:title="@string/auto_connect"/>
-        <EditTextPreference
-            app:key="hosts"
-            app:title="hosts"/>
 
         <ListPreference
             app:key="serviceMode"

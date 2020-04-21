@@ -29,14 +29,10 @@ import android.os.CancellationSignal
 import android.os.Looper
 import android.system.ErrnoException
 import android.system.Os
-import android.system.OsConstants
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.utils.closeQuietly
 import com.github.shadowsocks.utils.int
-import com.github.shadowsocks.utils.parseNumericAddress
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
-import timber.log.Timber
 import java.io.FileDescriptor
 import java.io.IOException
 import java.net.Inet4Address
@@ -56,42 +52,6 @@ sealed class DnsResolverCompat {
                 in 21 until 23 -> DnsResolverCompat21()
                 else -> error("Unsupported API level")
             }
-        }
-
-        /**
-         * Based on: https://android.googlesource.com/platform/frameworks/base/+/9f97f97/core/java/android/net/util/DnsUtils.java#341
-         */
-        private val address4 = "8.8.8.8".parseNumericAddress()!!
-        private val address6 = "2000::".parseNumericAddress()!!
-        suspend fun haveIpv4(network: Network) = checkConnectivity(network, OsConstants.AF_INET, address4)
-        suspend fun haveIpv6(network: Network) = checkConnectivity(network, OsConstants.AF_INET6, address6)
-        private suspend fun checkConnectivity(network: Network, domain: Int, addr: InetAddress) = try {
-            val socket = Os.socket(domain, OsConstants.SOCK_DGRAM, OsConstants.IPPROTO_UDP)
-            try {
-                instance.bindSocket(network, socket)
-                instance.connectUdp(socket, addr)
-            } finally {
-                socket.closeQuietly()
-            }
-            true
-        } catch (e: IOException) {
-            if ((e.cause as? ErrnoException)?.errno == OsConstants.EPERM) checkConnectivity(network, addr) else false
-        } catch (_: ErrnoException) {
-            false
-        } catch (e: ReflectiveOperationException) {
-            check(Build.VERSION.SDK_INT < 23)
-            Timber.w(e)
-            checkConnectivity(network, addr)
-        }
-        private fun checkConnectivity(network: Network, addr: InetAddress): Boolean {
-            return Core.connectivity.getLinkProperties(network)?.routes?.any {
-                try {
-                    it.matches(addr)
-                } catch (e: RuntimeException) {
-                    Timber.w(e)
-                    false
-                }
-            } == true
         }
 
         override fun bindSocket(network: Network, socket: FileDescriptor) = instance.bindSocket(network, socket)

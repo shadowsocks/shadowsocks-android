@@ -44,7 +44,6 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.EditTextPreferenceModifiers
-import com.github.shadowsocks.preference.HostsSummaryProvider
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.datas
@@ -58,13 +57,11 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         private const val REQUEST_CONNECT = 1
         private const val REQUEST_REPLACE_PROFILES = 2
         private const val REQUEST_EXPORT_PROFILES = 3
-        private const val REQUEST_HOSTS = 4
     }
 
     private lateinit var fab: ListPreference
     private lateinit var stats: Preference
     private lateinit var controlImport: Preference
-    private lateinit var hosts: EditTextPreference
     private lateinit var serviceMode: Preference
     private lateinit var shareOverLan: Preference
     private lateinit var portProxy: EditTextPreference
@@ -111,7 +108,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         this.state = state
         val stopped = state == BaseService.State.Stopped
         controlImport.isEnabled = stopped
-        hosts.isEnabled = stopped
         serviceMode.isEnabled = stopped
         shareOverLan.isEnabled = stopped
         portProxy.isEnabled = stopped
@@ -148,8 +144,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
             true
         }
 
-        hosts = findPreference(Key.hosts)!!
-        hosts.summaryProvider = HostsSummaryProvider
         serviceMode = findPreference(Key.serviceMode)!!
         shareOverLan = findPreference(Key.shareOverLan)!!
         portProxy = findPreference(Key.portProxy)!!
@@ -245,11 +239,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         else -> super.onPreferenceTreeClick(preference)
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
-        if (preference != hosts || startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).setType("*/*"), REQUEST_HOSTS))
-            super.onDisplayPreferenceDialog(preference)
-    }
-
     private fun startFilesForResult(intent: Intent, requestCode: Int): Boolean {
         try {
             startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
@@ -288,16 +277,6 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                     }
                 } catch (e: Exception) {
                     Timber.w(e)
-                    Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
-                }
-            }
-            REQUEST_HOSTS -> {
-                if (resultCode != Activity.RESULT_OK) return
-                val context = requireContext()
-                try {
-                    // we read and persist all its content here to avoid content URL permission issues
-                    hosts.text = context.contentResolver.openInputStream(data!!.data!!)!!.bufferedReader().readText()
-                } catch (e: Exception) {
                     Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
                 }
             }
