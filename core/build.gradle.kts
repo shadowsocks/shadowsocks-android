@@ -1,5 +1,6 @@
 plugins {
     id("com.android.library")
+    id("org.mozilla.rust-android-gradle.rust-android")
     kotlin("android")
     kotlin("android.extensions")
     kotlin("kapt")
@@ -36,14 +37,7 @@ android {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-    kotlinOptions {
-        jvmTarget = javaVersion.toString()
-        freeCompilerArgs = freeCompilerArgs + listOf(
-                "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes",
-                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi",
-                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        )
-    }
+    kotlinOptions.jvmTarget = javaVersion.toString()
     externalNativeBuild {
         ndkBuild { 
             path("src/main/jni/Android.mk")
@@ -55,6 +49,27 @@ android {
 }
 
 androidExtensions.isExperimental = true
+
+cargo {
+    module = "src/main/rust/shadowsocks-rust"
+    libname = "sslocal"
+    targets = listOf("arm", "arm64", "x86", "x86_64")
+    profile = findProperty("CARGO_PROFILE")?.toString() ?: "release"
+    targetIncludes = arrayOf("lib$libname.so")
+    extraCargoBuildArguments = listOf("--bin", "sslocal")
+    features {
+        noDefaultBut(arrayOf("sodium", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored", "local-flow-stat", "local-dns-relay"))
+    }
+    exec = { spec, toolchain ->
+        spec.environment("RUSTFLAGS", "-C lto=no -C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib$libname.so")
+    }
+}
+
+tasks.whenTaskAdded {
+    when (name) {
+        "javaPreCompileDebug", "javaPreCompileRelease" -> dependsOn("cargoBuild")
+    }
+}
 
 dependencies {
     val coroutinesVersion = "1.3.5"
@@ -70,14 +85,13 @@ dependencies {
     api("androidx.fragment:fragment-ktx:1.2.4")
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
-    api("androidx.preference:preference:1.1.0")
+    api("androidx.preference:preference:1.1.1")
     api("androidx.room:room-runtime:$roomVersion")
     api("androidx.work:work-runtime-ktx:$workVersion")
     api("androidx.work:work-gcm:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.8.6")
     api("com.google.firebase:firebase-analytics-ktx:17.3.0")
-    api("com.google.firebase:firebase-config:19.1.3")
     api("com.google.firebase:firebase-config-ktx:19.1.3")
     api("com.google.firebase:firebase-crashlytics:17.0.0-beta04")
     api("com.jakewharton.timber:timber:4.7.1")
