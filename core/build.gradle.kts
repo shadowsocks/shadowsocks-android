@@ -6,46 +6,30 @@ plugins {
     kotlin("kapt")
 }
 
-val rootExt = rootProject.extra
+setupCore()
 
 android {
-    compileSdkVersion(rootExt.get("compile_sdk_version") as Int)
     defaultConfig {
-        minSdkVersion(rootExt.get("min_sdk_version") as Int)
-        targetSdkVersion(rootExt.get("sdk_version") as Int)
-        versionCode = rootExt.get("version_code") as Int
-        versionName = rootExt.get("version_name") as String
         consumerProguardFiles("proguard-rules.pro")
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        externalNativeBuild {
-            ndkBuild {
-                abiFilters("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-                arguments("-j${Runtime.getRuntime().availableProcessors()}")
-            }
+        externalNativeBuild.ndkBuild {
+            abiFilters("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            arguments("-j${Runtime.getRuntime().availableProcessors()}")
         }
-        javaCompileOptions.annotationProcessorOptions {
-            arguments = mapOf(
-                    "room.incremental" to "true",
-                    "room.schemaLocation" to "$projectDir/schemas"
-            )
-        }
+
+        javaCompileOptions.annotationProcessorOptions.arguments = mapOf(
+                "room.incremental" to "true",
+                "room.schemaLocation" to "$projectDir/schemas"
+        )
     }
-    val javaVersion = rootExt.get("java_version") as JavaVersion
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-    }
-    kotlinOptions.jvmTarget = javaVersion.toString()
+
     externalNativeBuild {
         ndkBuild { 
             path("src/main/jni/Android.mk")
         }
     }
-    sourceSets {
-        getByName("androidTest").assets.srcDirs.plus(files("$projectDir/schemas"))
-    }
+
+    sourceSets.getByName("androidTest").assets.srcDirs.plus(files("$projectDir/schemas"))
 }
 
 androidExtensions.isExperimental = true
@@ -58,10 +42,19 @@ cargo {
     targetIncludes = arrayOf("lib$libname.so")
     extraCargoBuildArguments = listOf("--bin", "sslocal")
     features {
-        noDefaultBut(arrayOf("sodium", "rc4", "aes-cfb", "aes-ctr", "camellia-cfb", "openssl-vendored", "local-flow-stat", "local-dns-relay"))
+        noDefaultBut(arrayOf(
+                "sodium",
+                "rc4",
+                "aes-cfb",
+                "aes-ctr",
+                "camellia-cfb",
+                "openssl-vendored",
+                "local-flow-stat",
+                "local-dns-relay"))
     }
     exec = { spec, toolchain ->
-        spec.environment("RUSTFLAGS", "-C lto=no -C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib$libname.so")
+        spec.environment("RUSTFLAGS",
+                "-C lto=no -C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib$libname.so")
     }
 }
 
@@ -75,11 +68,6 @@ dependencies {
     val coroutinesVersion = "1.3.5"
     val roomVersion = "2.2.5"
     val workVersion = "2.3.4"
-    val lifecycleVersion = rootExt.get("lifecycle_version") as String
-    val desugarLibsVersion = rootExt.get("desugar_libs_version") as String
-    val junitVersion = rootExt.get("junit_version") as String
-    val androidTestVersion = rootExt.get("android_test_version") as String
-    val androidEspressoVersion = rootExt.get("android_espresso_version") as String
 
     api(project(":plugin"))
     api("androidx.fragment:fragment-ktx:1.2.4")
@@ -99,11 +87,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     api("org.connectbot.jsocks:jsocks:1.0.0")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:$desugarLibsVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
-    testImplementation("junit:junit:$junitVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
-    androidTestImplementation("androidx.test:runner:$androidTestVersion")
-    androidTestImplementation("androidx.test.espresso:espresso-core:$androidEspressoVersion")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.1")
 }

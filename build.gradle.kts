@@ -5,20 +5,7 @@ plugins {
 }
 
 buildscript {
-    extra.apply {
-        set("java_version", JavaVersion.VERSION_1_8)
-        set("min_sdk_version", 21)
-        set("sdk_version", 29)
-        set("compile_sdk_version", 29)
-        set("lifecycle_version", "2.2.0")
-        set("desugar_libs_version", "1.0.5")
-        set("junit_version", "4.13")
-        set("android_test_version", "1.2.0")
-        set("android_espresso_version", "3.2.0")
-        set("version_code", 5000650)
-        set("version_name", "5.0.6-nightly")
-        set("res_configs", listOf("ar", "es", "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"))
-    }
+    apply(from = "repositories.gradle.kts")
 
     repositories {
         google()
@@ -27,8 +14,8 @@ buildscript {
     }
 
     dependencies {
-        classpath(kotlin("gradle-plugin", "1.3.72"))
-        classpath("com.android.tools.build:gradle:4.1.0-alpha06")
+        classpath(rootProject.extra.get("androidPlugin").toString())
+        classpath(kotlin("gradle-plugin", rootProject.extra.get("kotlinVersion").toString()))
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.2")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.0.0-beta04")
         classpath("com.google.gms:google-services:4.3.3")
@@ -38,10 +25,7 @@ buildscript {
 }
 
 allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
+    apply(from = "${rootProject.projectDir}/repositories.gradle.kts")
 }
 
 tasks.register("clean", Delete::class) {
