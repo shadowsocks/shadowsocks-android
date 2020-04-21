@@ -75,6 +75,8 @@ private val parseNumericAddress by lazy @SuppressLint("SoonBlockedPrivateApi") {
         isAccessible = true
     }
 }
+/**
+ * A slightly more performant variant of parseNumericAddress.
  *
  * Bug in Android 9.0 and lower: https://issuetracker.google.com/issues/123456213
  */
