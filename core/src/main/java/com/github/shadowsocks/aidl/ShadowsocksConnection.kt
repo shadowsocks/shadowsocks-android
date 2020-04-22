@@ -26,6 +26,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.RemoteException
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.ProxyService
@@ -38,7 +39,7 @@ import com.github.shadowsocks.utils.Key
 /**
  * This object should be compact as it will not get GC-ed.
  */
-class ShadowsocksConnection(private val handler: Handler = Handler(),
+class ShadowsocksConnection(private val handler: Handler = Handler(Looper.getMainLooper()),
                             private var listenForDeath: Boolean = false) :
         ServiceConnection, IBinder.DeathRecipient {
     companion object {

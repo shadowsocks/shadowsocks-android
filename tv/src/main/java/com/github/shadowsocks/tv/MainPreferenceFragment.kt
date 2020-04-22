@@ -27,6 +27,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.RemoteException
 import android.text.format.Formatter
 import android.widget.Toast
@@ -117,7 +118,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
     }
 
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     private val connection = ShadowsocksConnection(handler, true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.values()[service.state]
