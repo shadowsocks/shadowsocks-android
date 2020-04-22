@@ -19,6 +19,12 @@
     <uses-feature android:name="android.software.leanback"
                   android:required="false"/>
 
+    <queries>
+        <intent>
+            <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN" />
+        </intent>
+    </queries>
+
     <application
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"

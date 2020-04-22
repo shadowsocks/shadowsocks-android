@@ -4,6 +4,7 @@
           tools:ignore="MissingLeanbackSupport">
 
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
+<!--    <uses-permission-sdk-23 android:name="android.permission.QUERY_ALL_PACKAGES" />-->
 
     <uses-feature android:name="android.hardware.touchscreen"
                   android:required="false"/>
