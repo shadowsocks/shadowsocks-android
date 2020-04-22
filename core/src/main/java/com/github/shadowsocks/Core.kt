@@ -97,9 +97,9 @@ object Core {
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
             deviceStorage.moveDatabaseFrom(app, Key.DB_PUBLIC)
-            val old = Acl.getFile(Acl.CUSTOM_RULES, app)
+            val old = Acl.getFile(Acl.CUSTOM_RULES_USER, app)
             if (old.canRead()) {
-                Acl.getFile(Acl.CUSTOM_RULES).writeText(old.readText())
+                Acl.getFile(Acl.CUSTOM_RULES_USER).writeText(old.readText())
                 old.delete()
             }
         }

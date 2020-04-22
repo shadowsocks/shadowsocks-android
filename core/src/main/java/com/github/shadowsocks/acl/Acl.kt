@@ -24,7 +24,6 @@ import android.content.Context
 import androidx.recyclerview.widget.SortedList
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.Subnet
-import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.BaseSorter
 import com.github.shadowsocks.utils.URLSorter
 import com.github.shadowsocks.utils.asIterable
@@ -48,6 +47,7 @@ class Acl {
         const val GFWLIST = "gfwlist"
         const val CHINALIST = "china-list"
         const val CUSTOM_RULES = "custom-rules"
+        const val CUSTOM_RULES_USER = "custom-rules-user"
 
         private val networkAclParser = "^IMPORT_URL\\s*<(.+)>\\s*$".toRegex()
 
@@ -56,17 +56,15 @@ class Acl {
         var customRules: Acl
             get() {
                 val acl = Acl()
-                val str = DataStore.publicStore.getString(CUSTOM_RULES)
-                if (str != null) acl.fromReader(str.reader(), true)
+                val file = getFile(CUSTOM_RULES_USER)
+                if (file.canRead()) acl.fromReader(file.reader(), true)
                 if (!acl.bypass) {
                     acl.bypass = true
                     acl.subnets.clear()
                 }
                 return acl
             }
-            set(value) = DataStore.publicStore.putString(CUSTOM_RULES,
-                    if ((!value.bypass || value.subnets.size() == 0) && value.bypassHostnames.size() == 0 &&
-                            value.proxyHostnames.size() == 0 && value.urls.size() == 0) null else value.toString())
+            set(value) = getFile(CUSTOM_RULES_USER).writeText(value.toString())
         fun save(id: String, acl: Acl) = getFile(id).writeText(acl.toString())
 
         suspend fun <T> parse(reader: Reader, bypassHostnames: (String) -> T, proxyHostnames: (String) -> T,
