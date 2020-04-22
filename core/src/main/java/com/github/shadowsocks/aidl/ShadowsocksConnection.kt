@@ -142,7 +142,9 @@ class ShadowsocksConnection(private val handler: Handler = Handler(),
             context.unbindService(this)
         } catch (_: IllegalArgumentException) { }   // ignore
         connectionActive = false
-        if (listenForDeath) binder?.unlinkToDeath(this, 0)
+        if (listenForDeath) try {
+            binder?.unlinkToDeath(this, 0)
+        } catch (_: NoSuchElementException) { }
         binder = null
         try {
             service?.stopListeningForBandwidth(serviceCallback)
