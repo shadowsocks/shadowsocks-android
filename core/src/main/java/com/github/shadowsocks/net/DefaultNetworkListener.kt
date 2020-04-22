@@ -93,7 +93,7 @@ object DefaultNetworkListener {
     // NB: this runs in ConnectivityThread, and this behavior cannot be changed until API 26
     private object Callback : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) = runBlocking { networkActor.send(NetworkMessage.Put(network)) }
-        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities?) {
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
             // it's a good idea to refresh capabilities
             runBlocking { networkActor.send(NetworkMessage.Update(network)) }
         }
