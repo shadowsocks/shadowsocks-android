@@ -361,7 +361,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
     }
 
-    private val isEnabled get() = (activity as MainActivity).state == BaseService.State.Stopped ||
+    private val isEnabled get() = (activity as? MainActivity)?.state == BaseService.State.Stopped ||
             Core.currentProfile?.first?.route != Acl.CUSTOM_RULES
 
     private val selectedItems = HashSet<Any>()
