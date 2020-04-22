@@ -22,6 +22,8 @@ package com.github.shadowsocks
 
 import android.app.*
 import android.app.admin.DevicePolicyManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
@@ -65,6 +67,7 @@ object Core {
         @VisibleForTesting set
     lateinit var configureIntent: (Context) -> PendingIntent
     val activity by lazy { app.getSystemService<ActivityManager>()!! }
+    val clipboard by lazy { app.getSystemService<ClipboardManager>()!! }
     val connectivity by lazy { app.getSystemService<ConnectivityManager>()!! }
     val notification by lazy { app.getSystemService<NotificationManager>()!! }
     val packageInfo: PackageInfo by lazy { getPackageInfo(app.packageName) }
@@ -158,6 +161,14 @@ object Core {
     fun getPackageInfo(packageName: String) = app.packageManager.getPackageInfo(packageName,
             if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
             else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
+
+    fun trySetPrimaryClip(clip: String) = try {
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, clip))
+        true
+    } catch (e: RuntimeException) {
+        Timber.d(e)
+        false
+    }
 
     fun startService() = ContextCompat.startForegroundService(app, Intent(app, ShadowsocksConnection.serviceClass))
     fun reloadService() = app.sendBroadcast(Intent(Action.RELOAD).setPackage(app.packageName))

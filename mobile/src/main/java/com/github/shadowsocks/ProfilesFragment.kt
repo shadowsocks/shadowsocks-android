@@ -23,8 +23,6 @@ package com.github.shadowsocks
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -39,7 +37,6 @@ import android.widget.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.widget.TooltipCompat
-import androidx.core.content.getSystemService
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
@@ -328,7 +325,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_clipboard -> {
-                clipboard.setPrimaryClip(ClipData.newPlainText(null, this.item.toString()))
+                (activity as MainActivity).snackbar().setText(if (Core.trySetPrimaryClip(this.item.toString()))
+                    R.string.action_export_msg else R.string.action_export_err).show()
                 true
             }
             else -> false
@@ -439,8 +437,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
     private lateinit var undoManager: UndoSnackbarManager<Profile>
     private val statsCache = LongSparseArray<TrafficStats>()
 
-    private val clipboard by lazy { requireContext().getSystemService<ClipboardManager>()!! }
-
     private fun startConfig(profile: Profile) {
         profile.serialize()
         startActivity(Intent(context, ProfileConfigActivity::class.java).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
@@ -505,7 +501,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             R.id.action_import_clipboard -> {
                 try {
                     val profiles = Profile.findAllUrls(
-                            clipboard.primaryClip!!.getItemAt(0).text,
+                            Core.clipboard.primaryClip!!.getItemAt(0).text,
                             Core.currentProfile?.first
                     ).toList()
                     if (profiles.isNotEmpty()) {
@@ -542,10 +538,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             }
             R.id.action_export_clipboard -> {
                 val profiles = ProfileManager.getActiveProfiles()
-                (activity as MainActivity).snackbar().setText(if (profiles != null) {
-                    clipboard.setPrimaryClip(ClipData.newPlainText(null, profiles.joinToString("\n")))
-                    R.string.action_export_msg
-                } else R.string.action_export_err).show()
+                val success = profiles != null && Core.trySetPrimaryClip(profiles.joinToString("\n"))
+                (activity as MainActivity).snackbar().setText(if (success)
+                    R.string.action_export_msg else R.string.action_export_err).show()
                 true
             }
             R.id.action_export_file -> {
