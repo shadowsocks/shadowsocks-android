@@ -108,21 +108,21 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         config.put("local_port", DataStore.portProxy)
         configFile.writeText(config.toString())
 
-        val dns = try {
-            URI("dns://${profile.remoteDns}")
-        } catch (e: URISyntaxException) {
-            throw BaseService.ExpectedExceptionWrapper(e)
-        }
-
         val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                 "--stat-path", stat.absolutePath,
                 "-c", configFile.absolutePath)
         if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
-        if (dnsRelay) cmd += arrayListOf(
-                "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
-                "--remote-dns", "${dns.host}:${if (dns.port < 0) 53 else dns.port}")
+        if (dnsRelay) try {
+            URI("dns://${profile.remoteDns}")
+        } catch (e: URISyntaxException) {
+            throw BaseService.ExpectedExceptionWrapper(e)
+        }.let { dns ->
+            cmd += arrayListOf(
+                    "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
+                    "--remote-dns", "${dns.host}:${if (dns.port < 0) 53 else dns.port}")
+        }
 
         if (route != Acl.ALL) {
             cmd += "--acl"
