@@ -166,7 +166,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 startConfig(item)
             }
             subscription.setOnClickListener {
-                item = ProfileManager.getProfile(item.id)!!
+                item = ProfileManager.getProfile(item.id) ?: return@setOnClickListener
                 startConfig(item)
             }
             TooltipCompat.setTooltipText(edit, edit.contentDescription)
