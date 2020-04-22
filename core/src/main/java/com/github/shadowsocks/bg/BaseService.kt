@@ -245,7 +245,8 @@ object BaseService {
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
                     if (udpFallback == null) "-U" else null)
-            check(udpFallback?.plugin == null) { "UDP fallback cannot have plugins" }
+            if (udpFallback?.plugin != null) throw ExpectedExceptionWrapper(IllegalStateException(
+                    "UDP fallback cannot have plugins"))
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
