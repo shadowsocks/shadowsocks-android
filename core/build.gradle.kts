@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 plugins {
     id("com.android.library")
     id("org.mozilla.rust-android-gradle.rust-android")
@@ -61,6 +63,13 @@ tasks.whenTaskAdded {
         "javaPreCompileDebug", "javaPreCompileRelease" -> dependsOn("cargoBuild")
     }
 }
+
+tasks.register<Exec>("cargoClean") {
+    executable("cargo")     // cargo.cargoCommand
+    args("clean")
+    workingDir("$projectDir/${cargo.module}")
+}
+tasks.clean.dependsOn("cargoClean")
 
 dependencies {
     val coroutinesVersion = "1.3.5"
