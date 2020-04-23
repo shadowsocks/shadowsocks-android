@@ -18,21 +18,20 @@ for Android TV ([beta](https://play.google.com/apps/testing/com.github.shadowsoc
 * JDK 1.8
 * Android SDK
   - Android NDK
+* Rust with targets `armv7-linux-androideabi`, `aarch64-linux-android`, `i686-linux-android`, `x86_64-linux-android`
 
 ### BUILD
 
 You can check whether the latest commit builds under UNIX environment by checking Travis status.
 
+* Install prerequisites
 * Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
 * Build it using Android Studio or gradle script
 
 ### BUILD WITH DOCKER
 
-```bash
-mkdir build
-sudo chown 3434:3434 build
-docker run --rm -v ${PWD}/build:/build circleci/android:api-28-ndk bash -c "cd /build; git clone https://github.com/shadowsocks/shadowsocks-android; cd shadowsocks-android; git submodule update --init --recursive; ./gradlew assembleDebug"
-```
+* Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
+* Run `docker run --rm -v ${PWD}:/build -w /build shadowsocks/android-ndk-go bash -c "./gradlew assembleDebug"`
 
 ### CONTRIBUTING
 
