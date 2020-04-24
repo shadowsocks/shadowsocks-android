@@ -53,7 +53,7 @@ cargo {
                 "local-dns-relay"))
     }
     exec = { spec, toolchain ->
-        spec.environment("RUSTFLAGS", "-C link-arg=-o -C link-arg=target/${toolchain.target}/$profile/lib$libname.so")
+        spec.environment("RUST_ANDROID_GRADLE_CC_LINK_ARG", "-o,target/${toolchain.target}/$profile/lib$libname.so")
     }
 }
 
