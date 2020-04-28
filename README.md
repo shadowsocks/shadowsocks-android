@@ -18,7 +18,8 @@ for Android TV ([beta](https://play.google.com/apps/testing/com.github.shadowsoc
 * JDK 1.8
 * Android SDK
   - Android NDK
-* Rust with targets `armv7-linux-androideabi`, `aarch64-linux-android`, `i686-linux-android`, `x86_64-linux-android`
+* Rust with Android targets installed  
+  `$ rustup target install armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 
 ### BUILD
 

@@ -39,19 +39,16 @@ cargo {
     libname = "sslocal"
     targets = listOf("arm", "arm64", "x86", "x86_64")
     profile = findProperty("CARGO_PROFILE")?.toString() ?: "release"
-    targetIncludes = arrayOf("lib$libname.so")
-    extraCargoBuildArguments = listOf("--bin", "sslocal")
-    features {
-        noDefaultBut(arrayOf(
-                "sodium",
-                "rc4",
-                "aes-cfb",
-                "aes-ctr",
-                "camellia-cfb",
-                "openssl-vendored",
-                "local-flow-stat",
-                "local-dns-relay"))
-    }
+    extraCargoBuildArguments = listOf("--bin", libname!!)
+    featureSpec.noDefaultBut(arrayOf(
+            "sodium",
+            "rc4",
+            "aes-cfb",
+            "aes-ctr",
+            "camellia-cfb",
+            "openssl-vendored",
+            "local-flow-stat",
+            "local-dns-relay"))
     exec = { spec, toolchain ->
         spec.environment("RUST_ANDROID_GRADLE_CC_LINK_ARG", "-o,target/${toolchain.target}/$profile/lib$libname.so")
     }
