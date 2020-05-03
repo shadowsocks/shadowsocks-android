@@ -26,6 +26,7 @@ android {
     }
 
     externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
+    ndkVersion = "21.1.6352462"
 
     sourceSets.getByName("androidTest") {
         assets.setSrcDirs(assets.srcDirs + files("$projectDir/schemas"))

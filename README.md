@@ -32,7 +32,7 @@ You can check whether the latest commit builds under UNIX environment by checkin
 ### BUILD WITH DOCKER
 
 * Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
-* Run `docker run --rm -v ${PWD}:/build -w /build shadowsocks/android-ndk-go bash -c "./gradlew assembleDebug"`
+* Run `docker run --rm -v ${PWD}:/build -w /build shadowsocks/android-ndk-go ./gradlew assembleDebug`
 
 ### CONTRIBUTING
 
