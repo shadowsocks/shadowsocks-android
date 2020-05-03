@@ -16,4 +16,4 @@
 	branch = shadowsocks-android
 [submodule "core/src/main/rust/shadowsocks-rust"]
 	path = core/src/main/rust/shadowsocks-rust
-	url = https://github.com/madeye/shadowsocks-rust
+	url = https://github.com/shadowsocks/shadowsocks-rust.git

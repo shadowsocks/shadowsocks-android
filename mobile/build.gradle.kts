@@ -21,6 +21,6 @@ dependencies {
     implementation("com.google.zxing:core:3.4.0")
     implementation("com.takisoft.preferencex:preferencex-simplemenu:1.1.0")
     implementation("com.twofortyfouram:android-plugin-api-for-locale:1.0.4")
-    implementation("me.zhanghai.android.fastscroll:library:1.1.2")
+    implementation("me.zhanghai.android.fastscroll:library:1.1.3")
     implementation("xyz.belvi.mobilevision:barcodescanner:2.0.3")
 }

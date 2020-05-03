@@ -50,7 +50,8 @@ cargo {
             "local-flow-stat",
             "local-dns-relay"))
     exec = { spec, toolchain ->
-        spec.environment("RUST_ANDROID_GRADLE_CC_LINK_ARG", "-o,target/${toolchain.target}/$profile/lib$libname.so")
+        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
+        spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
     }
 }
 
