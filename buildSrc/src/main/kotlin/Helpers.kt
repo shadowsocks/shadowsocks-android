@@ -50,8 +50,8 @@ fun Project.setupCore() {
     setupCommon()
     android.apply {
         defaultConfig {
-            versionCode = 5000650
-            versionName = "5.0.6-nightly"
+            versionCode = 5010050
+            versionName = "5.1.0-nightly"
         }
         compileOptions.isCoreLibraryDesugaringEnabled = true
         ndkVersion = "21.1.6352462"
