@@ -96,7 +96,7 @@ sealed class DnsResolverCompat {
             val err = bindSocketToNetwork.invoke(null, socket.int, netId) as Int
             if (err == 0) return
             val message = "Binding socket to network $netId"
-            throw IOException(message, ErrnoException(message, -err))
+            throw ErrnoException(message, -err).rethrowAsSocketException()
         }
 
         override suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int) {

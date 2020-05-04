@@ -71,7 +71,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 Os.shutdown(this, OsConstants.SHUT_RDWR)
             } catch (e: ErrnoException) {
                 // suppress fd inactive or already closed
-                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw IOException(e)
+                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw e.rethrowAsSocketException()
             }
         }
         scope.launch { closeChannel.receive() }
