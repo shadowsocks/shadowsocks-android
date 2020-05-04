@@ -15,7 +15,7 @@ const val lifecycleVersion = "2.2.0"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 
-private val flavorRegex = "(assemble|generate)\\w*(Release|Debug)".toRegex()
+private val flavorRegex = ".*(assemble|generate)\\w*(Release|Debug).*".toRegex()
 val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().let { task ->
     flavorRegex.matchEntire(task)?.groupValues?.get(2)?.toLowerCase(Locale.ROOT) ?: "debug".also {
         println("Warning: No match found for $task")

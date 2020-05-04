@@ -31,3 +31,12 @@ allprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.buildDir)
 }
+
+// skip uploading the mapping to Crashlytics
+subprojects {
+    tasks.whenTaskAdded {
+        if(name.contains("uploadCrashlyticsMappingFileRelease")) {
+            enabled = false
+        }
+    }
+}

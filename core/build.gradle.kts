@@ -38,7 +38,7 @@ cargo {
     module = "src/main/rust/shadowsocks-rust"
     libname = "sslocal"
     targets = listOf("arm", "arm64", "x86", "x86_64")
-    profile = findProperty("CARGO_PROFILE")?.toString() ?: "release"
+    profile = findProperty("CARGO_PROFILE")?.toString() ?: currentFlavor
     extraCargoBuildArguments = listOf("--bin", libname!!)
     featureSpec.noDefaultBut(arrayOf(
             "sodium",
