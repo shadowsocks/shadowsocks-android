@@ -129,7 +129,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             cmd += Acl.getFile(route).absolutePath
         }
 
-        service.data.processes!!.start(cmd)
+        service.data.processes!!.start(cmd, mapOf("RUST_BACKTRACE" to "1"))
     }
 
     fun scheduleUpdate() {
