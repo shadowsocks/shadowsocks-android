@@ -54,6 +54,7 @@ fun Project.setupCore() {
             versionName = "5.0.6-nightly"
         }
         compileOptions.isCoreLibraryDesugaringEnabled = true
+        ndkVersion = "21.1.6352462"
     }
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.0.5")
 }

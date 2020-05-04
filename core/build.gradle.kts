@@ -26,7 +26,6 @@ android {
     }
 
     externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
-    ndkVersion = "21.1.6352462"
 
     sourceSets.getByName("androidTest") {
         assets.setSrcDirs(assets.srcDirs + files("$projectDir/schemas"))
@@ -58,7 +57,7 @@ cargo {
 
 tasks.whenTaskAdded {
     when (name) {
-        "javaPreCompileDebug", "javaPreCompileRelease" -> dependsOn("cargoBuild")
+        "mergeDebugJniLibFolders", "mergeReleaseJniLibFolders" -> dependsOn("cargoBuild")
     }
 }
 
