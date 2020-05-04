@@ -28,7 +28,6 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import android.util.TypedValue
@@ -65,10 +64,6 @@ val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
  */
 private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
 val FileDescriptor.int get() = getInt.invoke(this) as Int
-
-fun FileDescriptor.closeQuietly() = try {
-    Os.close(this)
-} catch (_: ErrnoException) { }
 
 private val parseNumericAddress by lazy @SuppressLint("SoonBlockedPrivateApi") {
     InetAddress::class.java.getDeclaredMethod("parseNumericAddress", String::class.java).apply {
