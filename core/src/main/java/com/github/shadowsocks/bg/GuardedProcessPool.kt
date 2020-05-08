@@ -43,7 +43,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         }
     }
 
-    private inner class Guard(private val cmd: List<String>, private val environment: Map<String, String>) {
+    private inner class Guard(private val cmd: List<String>) {
         private lateinit var process: Process
 
         private fun streamLogger(input: InputStream, logger: (String) -> Unit) = try {
@@ -51,10 +51,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         } catch (_: IOException) { }    // ignore
 
         fun start() {
-            process = ProcessBuilder(cmd).apply {
-                directory(Core.deviceStorage.noBackupFilesDir)
-                environment().putAll(environment)
-            }.start()
+            process = ProcessBuilder(cmd).directory(Core.deviceStorage.noBackupFilesDir).start()
         }
 
         suspend fun looper(onRestartCallback: (suspend () -> Unit)?) {
@@ -114,10 +111,9 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
     override val coroutineContext = Dispatchers.Main.immediate + Job()
 
     @MainThread
-    fun start(cmd: List<String>, environment: Map<String, String> = emptyMap(),
-              onRestartCallback: (suspend () -> Unit)? = null) {
+    fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
         Timber.i("start process: ${Commandline.toString(cmd)}")
-        Guard(cmd, environment).apply {
+        Guard(cmd).apply {
             start() // if start fails, IOException will be thrown directly
             launch { looper(onRestartCallback) }
         }
