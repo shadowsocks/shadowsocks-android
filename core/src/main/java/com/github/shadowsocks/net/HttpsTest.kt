@@ -84,10 +84,7 @@ class HttpsTest : ViewModel() {
     fun testConnection() {
         cancelTest()
         status.value = Status.Testing
-        val url = URL("https", when ((Core.currentProfile ?: return).first.route) {
-            Acl.CHINALIST -> "www.qualcomm.cn"
-            else -> "www.google.com"
-        }, "/generate_204")
+        val url = URL("https://cp.cloudflare.com")
         val conn = (if (DataStore.serviceMode != Key.modeVpn) {
             url.openConnection(Proxy(Proxy.Type.SOCKS, DataStore.proxyAddress))
         } else url.openConnection()) as HttpURLConnection
