@@ -69,7 +69,7 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.3.5"
+    val coroutinesVersion = "1.3.6"
     val roomVersion = "2.2.5"
     val workVersion = "2.3.4"
 
@@ -83,7 +83,7 @@ dependencies {
     api("androidx.work:work-gcm:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.8.6")
-    api("com.google.firebase:firebase-analytics-ktx:17.4.0")
+    api("com.google.firebase:firebase-analytics-ktx:17.4.1")
     api("com.google.firebase:firebase-config-ktx:19.1.4")
     api("com.google.firebase:firebase-crashlytics:17.0.0")
     api("com.jakewharton.timber:timber:4.7.1")
