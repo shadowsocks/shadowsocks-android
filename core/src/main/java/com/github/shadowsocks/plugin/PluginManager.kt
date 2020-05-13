@@ -33,6 +33,7 @@ import android.net.Uri
 import android.os.Build
 import android.system.Os
 import android.util.Base64
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -143,6 +144,11 @@ object PluginManager {
         val providers = app.packageManager.queryIntentContentProviders(
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(configuration.selected)), flags)
         if (providers.isEmpty()) return null
+        if (providers.size > 1) {
+            Toast.makeText(app,
+                    "Conflicting plugins found from: ${providers.joinToString { it.providerInfo.packageName }}",
+                    Toast.LENGTH_LONG).show()
+        }
         val provider = providers.single().providerInfo
         val options = configuration.getOptions { provider.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
         var failure: Throwable? = null
