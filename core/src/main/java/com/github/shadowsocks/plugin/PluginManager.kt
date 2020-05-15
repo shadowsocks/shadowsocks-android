@@ -145,9 +145,9 @@ object PluginManager {
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(configuration.selected)), flags)
         if (providers.isEmpty()) return null
         if (providers.size > 1) {
-            Toast.makeText(app,
-                    "Conflicting plugins found from: ${providers.joinToString { it.providerInfo.packageName }}",
-                    Toast.LENGTH_LONG).show()
+            val message = "Conflicting plugins found from: ${providers.joinToString { it.providerInfo.packageName }}"
+            Toast.makeText(app, message, Toast.LENGTH_LONG).show()
+            throw IllegalStateException(message)
         }
         val provider = providers.single().providerInfo
         val options = configuration.getOptions { provider.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
