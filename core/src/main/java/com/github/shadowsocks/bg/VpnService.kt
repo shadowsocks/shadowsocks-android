@@ -81,7 +81,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                     } catch (e: IOException) {
                         when ((e.cause as? ErrnoException)?.errno) {
                             // also suppress ENONET (Machine is not on the network)
-                            OsConstants.EPERM, 64 -> Timber.d(e)
+                            OsConstants.EPERM, OsConstants.EACCES, 64 -> Timber.d(e)
                             else -> Timber.w(e)
                         }
                         return@let false
