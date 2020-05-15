@@ -138,7 +138,7 @@ sealed class DnsResolverCompat {
                 Type.AAAA -> true
                 Type.PTR -> {
                     // Android does not provide a PTR lookup API for Network prior to Android 10
-                    if (networkSpecified) throw UnsupportedOperationException()
+                    if (networkSpecified) throw IOException(UnsupportedOperationException("Network unspecified"))
                     val ip = try {
                         ReverseMap.fromName(question.name)
                     } catch (e: IOException) {
