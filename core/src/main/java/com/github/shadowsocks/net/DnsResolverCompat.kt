@@ -121,7 +121,7 @@ sealed class DnsResolverCompat {
         override suspend fun resolveOnActiveNetwork(host: String) =
                 GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
 
-        private suspend fun resolveRaw(query: ByteArray,
+        private suspend fun resolveRaw(query: ByteArray, networkSpecified: Boolean = true,
                                        hostResolver: suspend (String) -> Array<InetAddress>): ByteArray {
             val request = try {
                 Message(query)
@@ -137,12 +137,13 @@ sealed class DnsResolverCompat {
                 Type.A -> false
                 Type.AAAA -> true
                 Type.PTR -> {
+                    // Android does not provide a PTR lookup API for Network prior to Android 10
+                    if (networkSpecified) throw UnsupportedOperationException()
                     val ip = try {
                         ReverseMap.fromName(question.name)
                     } catch (e: IOException) {
                         throw UnsupportedOperationException(e)  // unrecognized PTR name
                     }
-                    // Android does not provide a PTR lookup API for Network prior to Android 10
                     val hostname = Name.fromString(GlobalScope.async(unboundedIO) { ip.hostName }.await())
                     return prepareDnsResponse(request).apply {
                         addRecord(PTRRecord(question.name, DClass.IN, TTL, hostname), Section.ANSWER)
@@ -164,7 +165,7 @@ sealed class DnsResolverCompat {
         override suspend fun resolveRaw(network: Network, query: ByteArray) =
                 resolveRaw(query) { resolve(network, it) }
         override suspend fun resolveRawOnActiveNetwork(query: ByteArray) =
-                resolveRaw(query, this::resolveOnActiveNetwork)
+                resolveRaw(query, false, this::resolveOnActiveNetwork)
     }
 
     @TargetApi(23)
