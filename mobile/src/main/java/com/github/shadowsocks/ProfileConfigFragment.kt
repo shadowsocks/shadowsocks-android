@@ -99,7 +99,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         findPreference<Preference>(Key.metered)!!.apply {
             if (Build.VERSION.SDK_INT >= 28) isEnabled = serviceMode == Key.modeVpn else remove()
         }
-        findPreference<Preference>(Key.udpdns)!!.isEnabled = serviceMode != Key.modeProxy
         plugin = findPreference(Key.plugin)!!
         pluginConfigure = findPreference(Key.pluginConfigure)!!
         pluginConfigure.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
