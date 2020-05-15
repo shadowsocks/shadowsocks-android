@@ -87,7 +87,7 @@ dependencies {
     api("com.google.firebase:firebase-config-ktx:19.1.4")
     api("com.google.firebase:firebase-crashlytics:17.0.0")
     api("com.jakewharton.timber:timber:4.7.1")
-    api("dnsjava:dnsjava:3.0.2")
+    api("dnsjava:dnsjava:3.1.0")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
