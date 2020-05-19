@@ -26,9 +26,7 @@ import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
-import android.os.Looper
 import android.system.ErrnoException
-import android.system.Os
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.int
 import kotlinx.coroutines.*
@@ -78,8 +76,6 @@ sealed class DnsResolverCompat {
 
     @Throws(IOException::class)
     abstract fun bindSocket(network: Network, socket: FileDescriptor)
-    internal open suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int = 0) =
-            Os.connect(fd, address, port)
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
     abstract suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray
@@ -98,12 +94,6 @@ sealed class DnsResolverCompat {
             if (err == 0) return
             val message = "Binding socket to network $netId"
             throw IOException(message, ErrnoException(message, -err))
-        }
-
-        override suspend fun connectUdp(fd: FileDescriptor, address: InetAddress, port: Int) {
-            if (Looper.getMainLooper().thread == Thread.currentThread()) withContext(Dispatchers.IO) {  // #2405
-                super.connectUdp(fd, address, port)
-            } else super.connectUdp(fd, address, port)
         }
 
         /**
