@@ -86,8 +86,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (profile.host.parseNumericAddress() == null) {
             profile.host = try {
                 service.resolver(profile.host).firstOrNull()
-            } catch (_: IOException) {
-                null
+            } catch (e: IOException) {
+                throw UnknownHostException().initCause(e)
             }?.hostAddress ?: throw UnknownHostException()
         }
     }
