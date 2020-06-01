@@ -244,7 +244,7 @@ object BaseService {
             data.proxy!!.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
-                    if (udpFallback == null) "-U" else null)
+                    if (udpFallback == null && data.proxy?.plugin == null) "-U" else null)
             if (udpFallback?.plugin != null) throw ExpectedExceptionWrapper(IllegalStateException(
                     "UDP fallback cannot have plugins"))
             udpFallback?.start(this,
