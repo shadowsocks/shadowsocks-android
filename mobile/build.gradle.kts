@@ -10,7 +10,6 @@ plugins {
 setupApp()
 
 android.defaultConfig.applicationId = "com.github.shadowsocks"
-androidExtensions.isExperimental = true
 
 dependencies {
     implementation("androidx.browser:browser:1.2.0")

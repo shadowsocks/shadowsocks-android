@@ -32,8 +32,6 @@ android {
     }
 }
 
-androidExtensions.isExperimental = true
-
 cargo {
     module = "src/main/rust/shadowsocks-rust"
     libname = "sslocal"
