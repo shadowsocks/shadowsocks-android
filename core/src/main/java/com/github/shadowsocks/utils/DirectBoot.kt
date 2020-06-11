@@ -21,8 +21,8 @@ object DirectBoot : BroadcastReceiver() {
     private val file = File(Core.deviceStorage.noBackupFilesDir, "directBootProfile")
     private var registered = false
 
-    fun getDeviceProfile(): Pair<Profile, Profile?>? = try {
-        ObjectInputStream(file.inputStream()).use { it.readObject() as? Pair<Profile, Profile?> }
+    fun getDeviceProfile(): ProfileManager.ExpandedProfile? = try {
+        ObjectInputStream(file.inputStream()).use { it.readObject() as? ProfileManager.ExpandedProfile }
     } catch (_: IOException) { null }
 
     fun clean() {

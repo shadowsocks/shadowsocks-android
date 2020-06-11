@@ -321,15 +321,15 @@ object BaseService {
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
-            val profilePair = Core.currentProfile
+            val expanded = Core.currentProfile
             this as Context
-            if (profilePair == null) {
+            if (expanded == null) {
                 // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
                 data.notification = createNotification("")
                 stopRunner(false, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
-            val (profile, fallback) = profilePair
+            val (profile, fallback) = expanded
             profile.name = profile.formattedName    // save name for later queries
             val proxy = ProxyInstance(profile)
             data.proxy = proxy

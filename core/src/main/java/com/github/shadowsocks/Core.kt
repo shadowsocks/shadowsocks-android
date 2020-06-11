@@ -80,7 +80,7 @@ object Core {
     val activeProfileIds get() = ProfileManager.getProfile(DataStore.profileId).let {
         if (it == null) emptyList() else listOfNotNull(it.id, it.udpFallback)
     }
-    val currentProfile: Pair<Profile, Profile?>? get() {
+    val currentProfile: ProfileManager.ExpandedProfile? get() {
         if (DataStore.directBootAware) DirectBoot.getDeviceProfile()?.apply { return this }
         return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
     }

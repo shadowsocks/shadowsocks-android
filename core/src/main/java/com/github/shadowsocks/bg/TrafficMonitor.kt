@@ -96,7 +96,7 @@ class TrafficMonitor(statFile: File) {
             ProfileManager.updateProfile(profile)
         } catch (e: IOException) {
             if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
-            val profile = DirectBoot.getDeviceProfile()!!.toList().filterNotNull().single { it.id == id }
+            val profile = DirectBoot.getDeviceProfile()!!.toList().single { it.id == id }
             profile.tx += current.txTotal
             profile.rx += current.rxTotal
             profile.dirty = true
