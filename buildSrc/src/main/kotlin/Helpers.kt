@@ -75,6 +75,7 @@ fun Project.setupApp() {
                 proguardFile(getDefaultProguardFile("proguard-android.txt"))
             }
         }
+        lintOptions.disable("RemoveWorkManagerInitializer")
         packagingOptions {
             exclude("**/*.kotlin_*")
         }
