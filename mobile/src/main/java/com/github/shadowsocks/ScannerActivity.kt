@@ -120,7 +120,7 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
         menuInflater.inflate(R.menu.scanner_menu, menu)
         return true
     }
-    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_import_clipboard -> {
             startImport(true)
             true

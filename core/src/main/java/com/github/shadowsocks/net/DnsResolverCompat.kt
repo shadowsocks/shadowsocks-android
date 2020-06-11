@@ -88,12 +88,13 @@ sealed class DnsResolverCompat {
                     "bindSocketToNetwork", Int::class.java, Int::class.java)
         }
         private val netId by lazy { Network::class.java.getDeclaredField("netId") }
+        @SuppressLint("NewApi")
         override fun bindSocket(network: Network, socket: FileDescriptor) {
             val netId = netId.get(network)!!
             val err = bindSocketToNetwork.invoke(null, socket.int, netId) as Int
             if (err == 0) return
             val message = "Binding socket to network $netId"
-            throw IOException(message, ErrnoException(message, -err))
+            throw ErrnoException(message, -err).rethrowAsSocketException()
         }
 
         /**

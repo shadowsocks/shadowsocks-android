@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.net
 
+import android.annotation.SuppressLint
 import android.net.LocalServerSocket
 import android.net.LocalSocket
 import android.net.LocalSocketAddress
@@ -63,6 +64,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
         closeChannel.sendBlocking(Unit)
     }
 
+    @SuppressLint("NewApi")
     open fun shutdown(scope: CoroutineScope) {
         running = false
         localSocket.fileDescriptor?.apply {
@@ -71,7 +73,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 Os.shutdown(this, OsConstants.SHUT_RDWR)
             } catch (e: ErrnoException) {
                 // suppress fd inactive or already closed
-                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw IOException(e)
+                if (e.errno != OsConstants.EBADF && e.errno != OsConstants.ENOTCONN) throw e.rethrowAsSocketException()
             }
         }
         scope.launch { closeChannel.receive() }
