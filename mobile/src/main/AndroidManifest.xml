@@ -3,8 +3,9 @@
           package="com.github.shadowsocks"
           tools:ignore="MissingLeanbackSupport">
 
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
-<!--    <uses-permission-sdk-23 android:name="android.permission.QUERY_ALL_PACKAGES" />-->
 
     <uses-feature android:name="android.hardware.touchscreen"
                   android:required="false"/>
