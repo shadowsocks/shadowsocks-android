@@ -17,7 +17,7 @@ private val Project.android get() = extensions.getByName<BaseExtension>("android
 
 private val flavorRegex = "(assemble|generate)\\w*(Release|Debug)".toRegex()
 val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().let { task ->
-    flavorRegex.matchEntire(task)?.groupValues?.get(2)?.toLowerCase(Locale.ROOT) ?: "debug".also {
+    flavorRegex.find(task)?.groupValues?.get(2)?.toLowerCase(Locale.ROOT) ?: "debug".also {
         println("Warning: No match found for $task")
     }
 }
@@ -50,10 +50,11 @@ fun Project.setupCore() {
     setupCommon()
     android.apply {
         defaultConfig {
-            versionCode = 5000650
-            versionName = "5.0.6-nightly"
+            versionCode = 5010150
+            versionName = "5.1.1-nightly"
         }
         compileOptions.isCoreLibraryDesugaringEnabled = true
+        ndkVersion = "21.3.6528147"
     }
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.0.5")
 }
@@ -74,6 +75,7 @@ fun Project.setupApp() {
                 proguardFile(getDefaultProguardFile("proguard-android.txt"))
             }
         }
+        lintOptions.disable("RemoveWorkManagerInitializer")
         packagingOptions {
             exclude("**/*.kotlin_*")
         }

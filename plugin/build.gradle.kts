@@ -14,8 +14,6 @@ android {
     }
 }
 
-androidExtensions.isExperimental = true
-
 mavenPublish.targets.getByName("uploadArchives") {
     releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
     snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -27,6 +25,6 @@ dependencies {
     api(kotlin("stdlib-jdk8", rootProject.extra.get("kotlinVersion").toString()))
     api("androidx.core:core-ktx:1.2.0")
     // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
-    api("androidx.drawerlayout:drawerlayout:1.1.0-beta01")
+    api("androidx.drawerlayout:drawerlayout:1.1.0-rc01")
     api("com.google.android.material:material:1.1.0")
 }

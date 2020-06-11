@@ -4,6 +4,7 @@ import android.net.LocalSocket
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.net.ConcurrentLocalSocketListener
 import com.github.shadowsocks.net.DnsResolverCompat
+import com.github.shadowsocks.utils.readableMessage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
@@ -23,8 +24,11 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray) : C
         launch {
             socket.use {
                 val input = DataInputStream(socket.inputStream)
-                val query = ByteArray(input.readUnsignedShort())
-                input.read(query)
+                val query = try {
+                    ByteArray(input.readUnsignedShort()).also { input.read(it) }
+                } catch (e: IOException) {  // connection early close possibly due to resolving timeout
+                    return@use Timber.d(e)
+                }
                 try {
                     resolver(query)
                 } catch (e: Exception) {
@@ -46,7 +50,9 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray) : C
                         val output = DataOutputStream(socket.outputStream)
                         output.writeShort(response.size)
                         output.write(response)
-                    } catch (_: IOException) { }    // connection early close possibly due to resolving timeout
+                    } catch (e: IOException) {
+                        Timber.d(e.readableMessage)
+                    }
                 }
             }
         }

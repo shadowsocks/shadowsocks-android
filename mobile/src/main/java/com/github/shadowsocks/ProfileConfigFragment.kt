@@ -88,7 +88,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         findPreference<EditTextPreference>(Key.remotePort)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
         val serviceMode = DataStore.serviceMode
-        findPreference<Preference>(Key.remoteDns)!!.isEnabled = serviceMode != Key.modeProxy
         findPreference<Preference>(Key.ipv6)!!.isEnabled = serviceMode == Key.modeVpn
         isProxyApps = findPreference(Key.proxyApps)!!
         isProxyApps.isEnabled = serviceMode == Key.modeVpn
@@ -100,7 +99,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         findPreference<Preference>(Key.metered)!!.apply {
             if (Build.VERSION.SDK_INT >= 28) isEnabled = serviceMode == Key.modeVpn else remove()
         }
-        findPreference<Preference>(Key.udpdns)!!.isEnabled = serviceMode != Key.modeProxy
         plugin = findPreference(Key.plugin)!!
         pluginConfigure = findPreference(Key.pluginConfigure)!!
         pluginConfigure.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)

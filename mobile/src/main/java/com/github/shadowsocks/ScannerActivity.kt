@@ -105,7 +105,7 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     }
 
     override fun onRetrieved(barcode: Barcode) = runOnUiThread {
-        Profile.findAllUrls(barcode.rawValue, Core.currentProfile?.first).forEach { ProfileManager.createProfile(it) }
+        Profile.findAllUrls(barcode.rawValue, Core.currentProfile?.main).forEach { ProfileManager.createProfile(it) }
         onSupportNavigateUp()
     }
     override fun onRetrievedMultiple(closetToClick: Barcode?, barcode: MutableList<BarcodeGraphic>?) = check(false)
@@ -141,7 +141,7 @@ class ScannerActivity : AppCompatActivity(), BarcodeRetriever {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> if (resultCode == Activity.RESULT_OK) {
-                val feature = Core.currentProfile?.first
+                val feature = Core.currentProfile?.main
                 try {
                     var success = false
                     data!!.datas.forEachTry { uri ->

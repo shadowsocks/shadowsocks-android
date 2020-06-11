@@ -86,8 +86,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         if (profile.host.parseNumericAddress() == null) {
             profile.host = try {
                 service.resolver(profile.host).firstOrNull()
-            } catch (_: IOException) {
-                null
+            } catch (e: IOException) {
+                throw UnknownHostException().initCause(e)
             }?.hostAddress ?: throw UnknownHostException()
         }
     }
@@ -121,7 +121,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }.let { dns ->
             cmd += arrayListOf(
                     "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
-                    "--remote-dns", "${dns.host!!}:${if (dns.port < 0) 53 else dns.port}")
+                    "--remote-dns", "${dns.host ?: "0.0.0.0"}:${if (dns.port < 0) 53 else dns.port}")
         }
 
         if (route != Acl.ALL) {
