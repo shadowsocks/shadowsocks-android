@@ -68,7 +68,7 @@ tasks.clean.dependsOn("cargoClean")
 dependencies {
     val coroutinesVersion = "1.3.6"
     val roomVersion = "2.2.5"
-    val workVersion = "2.3.4"
+    val workVersion = "2.4.0-beta01"
 
     api(project(":plugin"))
     api("androidx.fragment:fragment-ktx:1.2.4")

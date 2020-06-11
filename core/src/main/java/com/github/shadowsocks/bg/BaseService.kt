@@ -24,8 +24,10 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.*
-import androidx.core.content.getSystemService
+import android.os.Build
+import android.os.IBinder
+import android.os.RemoteCallbackList
+import android.os.RemoteException
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -238,8 +240,8 @@ object BaseService {
         val isVpnService get() = false
 
         suspend fun startProcesses() {
-            val configRoot = (if (Build.VERSION.SDK_INT < 24 || app.getSystemService<UserManager>()
-                            ?.isUserUnlocked != false) app else Core.deviceStorage).noBackupFilesDir
+            val context = if (Build.VERSION.SDK_INT < 24 || Core.user.isUserUnlocked) app else Core.deviceStorage
+            val configRoot = context.noBackupFilesDir
             val udpFallback = data.udpFallback
             data.proxy!!.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
