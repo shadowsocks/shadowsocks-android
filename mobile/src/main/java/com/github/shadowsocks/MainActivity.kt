@@ -26,8 +26,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.RemoteException
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
@@ -131,8 +129,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         else -> Core.startService()
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val connection = ShadowsocksConnection(handler, true)
+    private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.values()[service.state]
     } catch (_: RemoteException) {
@@ -189,7 +186,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
-            Key.serviceMode -> handler.post {
+            Key.serviceMode -> {
                 connection.disconnect(this)
                 connection.connect(this, this)
             }
@@ -268,6 +265,5 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect(this)
         BackupManager(this).dataChanged()
-        handler.removeCallbacksAndMessages(null)
     }
 }

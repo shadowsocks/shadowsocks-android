@@ -24,9 +24,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.os.RemoteException
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.bg.ProxyService
@@ -35,13 +33,14 @@ import com.github.shadowsocks.bg.VpnService
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.Key
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * This object should be compact as it will not get GC-ed.
  */
-class ShadowsocksConnection(private val handler: Handler = Handler(Looper.getMainLooper()),
-                            private var listenForDeath: Boolean = false) :
-        ServiceConnection, IBinder.DeathRecipient {
+class ShadowsocksConnection(private var listenForDeath: Boolean = false) : ServiceConnection, IBinder.DeathRecipient {
     companion object {
         val serviceClass get() = when (DataStore.serviceMode) {
             Key.modeProxy -> ProxyService::class
@@ -70,15 +69,17 @@ class ShadowsocksConnection(private val handler: Handler = Handler(Looper.getMai
     private val serviceCallback = object : IShadowsocksServiceCallback.Stub() {
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
             val callback = callback ?: return
-            handler.post { callback.stateChanged(BaseService.State.values()[state], profileName, msg) }
+            GlobalScope.launch(Dispatchers.Main.immediate) {
+                callback.stateChanged(BaseService.State.values()[state], profileName, msg)
+            }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
             val callback = callback ?: return
-            handler.post { callback.trafficUpdated(profileId, stats) }
+            GlobalScope.launch(Dispatchers.Main.immediate) { callback.trafficUpdated(profileId, stats) }
         }
         override fun trafficPersisted(profileId: Long) {
             val callback = callback ?: return
-            handler.post { callback.trafficPersisted(profileId) }
+            GlobalScope.launch(Dispatchers.Main.immediate) { callback.trafficPersisted(profileId) }
         }
     }
     private var binder: IBinder? = null
@@ -117,7 +118,7 @@ class ShadowsocksConnection(private val handler: Handler = Handler(Looper.getMai
     override fun binderDied() {
         service = null
         callbackRegistered = false
-        callback?.also { handler.post(it::onBinderDied) }
+        callback?.also { GlobalScope.launch(Dispatchers.Main.immediate) { it.onBinderDied() } }
     }
 
     private fun unregisterCallback() {

@@ -26,8 +26,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.RemoteException
 import android.text.format.Formatter
 import android.widget.Toast
@@ -118,8 +116,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private val connection = ShadowsocksConnection(handler, true)
+    private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.values()[service.state]
     } catch (_: RemoteException) {
@@ -193,7 +190,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
-            Key.serviceMode -> handler.post {
+            Key.serviceMode -> {
                 connection.disconnect(requireContext())
                 connection.connect(requireContext(), this)
             }
