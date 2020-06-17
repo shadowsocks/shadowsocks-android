@@ -103,7 +103,7 @@ data class Profile(
         private const val serialVersionUID = 1L
         private const val sponsored = "198.199.101.152"
         private val pattern =
-                """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()
+                """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;_\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
