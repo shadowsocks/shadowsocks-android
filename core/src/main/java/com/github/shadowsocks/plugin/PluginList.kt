@@ -29,7 +29,8 @@ class PluginList : ArrayList<Plugin>() {
     init {
         add(NoPlugin)
         addAll(app.packageManager.queryIntentContentProviders(
-                Intent(PluginContract.ACTION_NATIVE_PLUGIN), PackageManager.GET_META_DATA).map { NativePlugin(it) })
+                Intent(PluginContract.ACTION_NATIVE_PLUGIN), PackageManager.GET_META_DATA)
+                .filter { it.providerInfo.exported }.map { NativePlugin(it) })
     }
 
     val lookup = mutableMapOf<String, Plugin>().apply {

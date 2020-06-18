@@ -143,6 +143,7 @@ object PluginManager {
         }
         val providers = app.packageManager.queryIntentContentProviders(
                 Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(configuration.selected)), flags)
+                .filter { it.providerInfo.exported }
         if (providers.isEmpty()) return null
         if (providers.size > 1) {
             val message = "Conflicting plugins found from: ${providers.joinToString { it.providerInfo.packageName }}"
