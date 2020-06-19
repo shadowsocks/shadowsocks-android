@@ -13,10 +13,10 @@ android.defaultConfig.applicationId = "com.github.shadowsocks"
 
 dependencies {
     implementation("androidx.browser:browser:1.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta6")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta7")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("com.google.android.gms:play-services-vision:20.1.0")
-    implementation("com.google.firebase:firebase-ads:19.1.0")
+    implementation("com.google.firebase:firebase-ads:19.2.0")
     implementation("com.google.zxing:core:3.4.0")
     implementation("com.takisoft.preferencex:preferencex-simplemenu:1.1.0")
     implementation("com.twofortyfouram:android-plugin-api-for-locale:1.0.4")
