@@ -68,7 +68,7 @@ tasks.clean.dependsOn("cargoClean")
 dependencies {
     val coroutinesVersion = "1.3.6"
     val roomVersion = "2.2.5"
-    val workVersion = "2.4.0-beta01"
+    val workVersion = "2.4.0-rc01"
 
     api(project(":plugin"))
     api("androidx.fragment:fragment-ktx:1.2.5")
@@ -84,7 +84,7 @@ dependencies {
     api("com.google.firebase:firebase-config-ktx:19.1.4")
     api("com.google.firebase:firebase-crashlytics:17.1.0")
     api("com.jakewharton.timber:timber:4.7.1")
-    api("dnsjava:dnsjava:3.1.0")
+    api("dnsjava:dnsjava:3.2.1")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
