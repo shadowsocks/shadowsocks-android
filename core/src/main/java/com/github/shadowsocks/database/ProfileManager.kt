@@ -48,6 +48,10 @@ object ProfileManager {
     var listener: Listener? = null
 
     data class ExpandedProfile(val main: Profile, val udpFallback: Profile?) : Serializable {
+        companion object {
+            private const val serialVersionUID = 1L
+        }
+
         fun toList() = listOfNotNull(main, udpFallback)
     }
 
