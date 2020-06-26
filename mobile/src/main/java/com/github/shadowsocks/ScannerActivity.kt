@@ -45,6 +45,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.forEachTry
 import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.widget.ListHolderListener
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -95,6 +96,7 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
                     true
                 } != false) return startImport()
         setContentView(R.layout.layout_scanner)
+        ListHolderListener.setup(this)
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         requestCamera.launch(Manifest.permission.CAMERA)

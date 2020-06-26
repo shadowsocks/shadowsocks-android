@@ -33,7 +33,7 @@ object ListHolderListener : View.OnApplyWindowInsetsListener {
         return insets.replaceSystemWindowInsets(0, 0, 0, insets.systemWindowInsetBottom)
     }
 
-    fun setup(activity: AppCompatActivity) = activity.findViewById<View>(android.R.id.content).apply {
+    fun setup(activity: AppCompatActivity) = activity.findViewById<View>(android.R.id.content).run {
         setOnApplyWindowInsetsListener(ListHolderListener)
         systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     }
