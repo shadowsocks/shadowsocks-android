@@ -44,7 +44,7 @@ import java.net.InetAddress
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-fun <T> Iterable<T>.forEachTry(action: (T) -> Unit) {
+inline fun <T> Iterable<T>.forEachTry(action: (T) -> Unit) {
     var result: Exception? = null
     for (element in this) try {
         action(element)
