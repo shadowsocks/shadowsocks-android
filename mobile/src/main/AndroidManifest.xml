@@ -57,6 +57,7 @@
             android:label="@string/add_profile_methods_scan_qr_code"
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive"
+            android:screenOrientation="locked"
             android:excludeFromRecents="true"/>
 
         <activity android:name=".tasker.ConfigActivity"
