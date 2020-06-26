@@ -21,11 +21,11 @@
 package com.github.shadowsocks
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.ShortcutManager
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -42,7 +42,6 @@ import androidx.work.await
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.utils.datas
 import com.github.shadowsocks.utils.forEachTry
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
@@ -55,11 +54,6 @@ import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
 class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
-    companion object {
-        private const val REQUEST_IMPORT = 2
-        private const val REQUEST_IMPORT_OR_FINISH = 3
-    }
-
     private val scanner = BarcodeScanning.getClient(BarcodeScannerOptions.Builder().apply {
         setBarcodeFormats(Barcode.FORMAT_QR_CODE)
     }.build())
@@ -152,31 +146,25 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
         return super.onSupportNavigateUp()
     }
 
-    private fun startImport(manual: Boolean = false) = startActivityForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-        addCategory(Intent.CATEGORY_OPENABLE)
-        type = "image/*"
-        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-    }, if (manual) REQUEST_IMPORT else REQUEST_IMPORT_OR_FINISH)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            REQUEST_IMPORT, REQUEST_IMPORT_OR_FINISH -> when {
-                resultCode == Activity.RESULT_OK -> GlobalScope.launch(Dispatchers.Main.immediate) {
-                    onSupportNavigateUp()
-                    val feature = Core.currentProfile?.main
-                    try {
-                        var success = false
-                        data!!.datas.forEachTry { uri ->
-                            if (process(feature) { InputImage.fromFilePath(app, uri) }) success = true
-                        }
-                        Toast.makeText(app, if (success) R.string.action_import_msg else R.string.action_import_err,
-                                Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(app, e.readableMessage, Toast.LENGTH_LONG).show()
-                    }
+    private fun startImport(manual: Boolean = false) = (if (manual) import else importFinish).launch("image/*")
+    private val import = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { importOrFinish(it) }
+    private val importFinish = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) {
+        importOrFinish(it, true)
+    }
+    private fun importOrFinish(dataUris: List<Uri>, finish: Boolean = false) {
+        if (dataUris.isNotEmpty()) GlobalScope.launch(Dispatchers.Main.immediate) {
+            onSupportNavigateUp()
+            val feature = Core.currentProfile?.main
+            try {
+                var success = false
+                dataUris.forEachTry { uri ->
+                    if (process(feature) { InputImage.fromFilePath(app, uri) }) success = true
                 }
-                requestCode == REQUEST_IMPORT_OR_FINISH -> onSupportNavigateUp()
+                Toast.makeText(app, if (success) R.string.action_import_msg else R.string.action_import_err,
+                        Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(app, e.readableMessage, Toast.LENGTH_LONG).show()
             }
-            else -> super.onActivityResult(requestCode, resultCode, data)
-        }
+        } else if (finish) onSupportNavigateUp()
     }
 }

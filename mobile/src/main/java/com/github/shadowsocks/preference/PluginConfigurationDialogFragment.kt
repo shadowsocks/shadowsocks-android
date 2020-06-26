@@ -46,10 +46,9 @@ class PluginConfigurationDialogFragment : EditTextPreferenceDialogFragmentCompat
         super.onPrepareDialogBuilder(builder)
         val intent = PluginManager.buildIntent(arguments?.getString(PLUGIN_ID_FRAGMENT_TAG)!!,
                 PluginContract.ACTION_HELP)
-        val activity = requireActivity()
+        val activity = activity as ProfileConfigActivity
         if (intent.resolveActivity(activity.packageManager) != null) builder.setNeutralButton("?") { _, _ ->
-            activity.startActivityForResult(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.text.toString()),
-                    ProfileConfigActivity.REQUEST_CODE_PLUGIN_HELP)
+            activity.pluginHelp.launch(intent.putExtra(PluginContract.EXTRA_OPTIONS, editText.text.toString()))
         }
     }
 

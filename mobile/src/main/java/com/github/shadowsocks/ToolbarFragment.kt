@@ -26,9 +26,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 
-/**
- * @author Mygod
- */
 open class ToolbarFragment : Fragment() {
     lateinit var toolbar: Toolbar
 

@@ -21,11 +21,11 @@
 package com.github.shadowsocks
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.format.Formatter
 import android.util.LongSparseArray
@@ -34,6 +34,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.widget.TooltipCompat
@@ -49,7 +50,8 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.showAllowingStateLoss
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.datas
+import com.github.shadowsocks.utils.OpenJson
+import com.github.shadowsocks.utils.SaveJson
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
@@ -75,9 +77,6 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         var instance: ProfilesFragment? = null
 
         private const val KEY_URL = "com.github.shadowsocks.QRCodeDialog.KEY_URL"
-        private const val REQUEST_IMPORT_PROFILES = 1
-        private const val REQUEST_REPLACE_PROFILES = 3
-        private const val REQUEST_EXPORT_PROFILES = 2
 
         private val iso88591 = StandardCharsets.ISO_8859_1.newEncoder()
     }
@@ -516,19 +515,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_import_file -> {
-                startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "application/*"
-                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
-                }, REQUEST_IMPORT_PROFILES)
+                startFilesForResult(importProfiles)
                 true
             }
             R.id.action_replace_file -> {
-                startFilesForResult(Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = "application/*"
-                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/*", "text/*"))
-                }, REQUEST_REPLACE_PROFILES)
+                startFilesForResult(replaceProfiles)
                 true
             }
             R.id.action_manual_settings -> {
@@ -544,61 +535,46 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_file -> {
-                startFilesForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    type = "application/json"
-                    putExtra(Intent.EXTRA_TITLE, "profiles.json")   // optional title that can be edited
-                }, REQUEST_EXPORT_PROFILES)
+                startFilesForResult(exportProfiles)
                 true
             }
             else -> false
         }
     }
 
-    private fun startFilesForResult(intent: Intent, requestCode: Int) {
+    private fun startFilesForResult(launcher: ActivityResultLauncher<String>) {
         try {
-            startActivityForResult(intent.addCategory(Intent.CATEGORY_OPENABLE), requestCode)
-            return
+            return launcher.launch("")
         } catch (_: ActivityNotFoundException) {
         } catch (_: SecurityException) {
         }
         (activity as MainActivity).snackbar(getString(R.string.file_manager_missing)).show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode != Activity.RESULT_OK) super.onActivityResult(requestCode, resultCode, data)
-        else when (requestCode) {
-            REQUEST_IMPORT_PROFILES -> {
-                val activity = activity as MainActivity
-                try {
-                    ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
-                        activity.contentResolver.openInputStream(it)
-                    }.filterNotNull())
-                } catch (e: Exception) {
-                    activity.snackbar(e.readableMessage).show()
+    private fun importOrReplaceProfiles(dataUris: List<Uri>, replace: Boolean = false) {
+        if (dataUris.isEmpty()) return
+        val activity = activity as MainActivity
+        try {
+            ProfileManager.createProfilesFromJson(dataUris.asSequence().map {
+                activity.contentResolver.openInputStream(it)
+            }.filterNotNull(), replace)
+        } catch (e: Exception) {
+            activity.snackbar(e.readableMessage).show()
+        }
+    }
+    private val importProfiles = registerForActivityResult(OpenJson()) { importOrReplaceProfiles(it) }
+    private val replaceProfiles = registerForActivityResult(OpenJson()) { importOrReplaceProfiles(it, true) }
+    private val exportProfiles = registerForActivityResult(SaveJson()) { data ->
+        if (data != null) ProfileManager.serializeToJson()?.let { profiles ->
+            val activity = activity as MainActivity
+            try {
+                activity.contentResolver.openOutputStream(data)!!.bufferedWriter().use {
+                    it.write(profiles.toString(2))
                 }
+            } catch (e: Exception) {
+                Timber.w(e)
+                activity.snackbar(e.readableMessage).show()
             }
-            REQUEST_REPLACE_PROFILES -> {
-                val activity = activity as MainActivity
-                try {
-                    ProfileManager.createProfilesFromJson(data!!.datas.asSequence().map {
-                        activity.contentResolver.openInputStream(it)
-                    }.filterNotNull(), true)
-                } catch (e: Exception) {
-                    activity.snackbar(e.readableMessage).show()
-                }
-            }
-            REQUEST_EXPORT_PROFILES -> {
-                val profiles = ProfileManager.serializeToJson()
-                if (profiles != null) try {
-                    requireContext().contentResolver.openOutputStream(data?.data!!)!!.bufferedWriter().use {
-                        it.write(profiles.toString(2))
-                    }
-                } catch (e: Exception) {
-                    Timber.w(e)
-                    (activity as MainActivity).snackbar(e.readableMessage).show()
-                }
-            }
-            else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 

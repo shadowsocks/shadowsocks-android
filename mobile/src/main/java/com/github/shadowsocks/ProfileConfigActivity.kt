@@ -22,10 +22,12 @@ package com.github.shadowsocks
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.component1
+import androidx.activity.result.component2
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.github.shadowsocks.plugin.AlertDialogFragment
@@ -36,10 +38,6 @@ import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.widget.ListHolderListener
 
 class ProfileConfigActivity : AppCompatActivity() {
-    companion object {
-        const val REQUEST_CODE_PLUGIN_HELP = 1
-    }
-
     class UnsavedChangesDialogFragment : AlertDialogFragment<Empty, Empty>() {
         override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
             setTitle(R.string.unsaved_changes_prompt)
@@ -79,9 +77,9 @@ class ProfileConfigActivity : AppCompatActivity() {
         else super.onBackPressed()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != REQUEST_CODE_PLUGIN_HELP) super.onActivityResult(requestCode, resultCode, data)
-        else if (resultCode == Activity.RESULT_OK) AlertDialog.Builder(this)
+    val pluginHelp = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        (resultCode, data) ->
+        if (resultCode == Activity.RESULT_OK) AlertDialog.Builder(this)
                 .setTitle("?")
                 .setMessage(data?.getCharSequenceExtra(PluginContract.EXTRA_HELP_MESSAGE))
                 .show()

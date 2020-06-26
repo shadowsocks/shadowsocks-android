@@ -24,7 +24,6 @@ import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.VpnService
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,14 +31,10 @@ import androidx.core.content.getSystemService
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.StartService
 import com.github.shadowsocks.utils.broadcastReceiver
-import timber.log.Timber
 
 class VpnRequestActivity : AppCompatActivity() {
-    companion object {
-        private const val REQUEST_CONNECT = 1
-    }
-
     private var receiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,23 +44,13 @@ class VpnRequestActivity : AppCompatActivity() {
             return
         }
         if (getSystemService<KeyguardManager>()!!.isKeyguardLocked) {
-            receiver = broadcastReceiver { _, _ -> request() }
+            receiver = broadcastReceiver { _, _ -> connect.launch(null) }
             registerReceiver(receiver, IntentFilter(Intent.ACTION_USER_PRESENT))
-        } else request()
+        } else connect.launch(null)
     }
 
-    private fun request() {
-        val intent = VpnService.prepare(this)
-        if (intent == null) onActivityResult(REQUEST_CONNECT, RESULT_OK, null)
-        else startActivityForResult(intent, REQUEST_CONNECT)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != REQUEST_CONNECT) return super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK) Core.startService() else {
-            Toast.makeText(this, R.string.vpn_permission_denied, Toast.LENGTH_LONG).show()
-            Timber.e("Failed to start VpnService from onActivityResult: $data")
-        }
+    private val connect = registerForActivityResult(StartService()) {
+        if (it) Toast.makeText(this, R.string.vpn_permission_denied, Toast.LENGTH_LONG).show()
         finish()
     }
 
