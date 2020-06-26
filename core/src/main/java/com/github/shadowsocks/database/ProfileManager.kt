@@ -31,6 +31,7 @@ import org.json.JSONArray
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
+import java.io.Serializable
 import java.sql.SQLException
 
 /**
@@ -46,7 +47,7 @@ object ProfileManager {
     }
     var listener: Listener? = null
 
-    data class ExpandedProfile(val main: Profile, val udpFallback: Profile?) {
+    data class ExpandedProfile(val main: Profile, val udpFallback: Profile?) : Serializable {
         fun toList() = listOfNotNull(main, udpFallback)
     }
 
