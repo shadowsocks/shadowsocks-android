@@ -23,8 +23,6 @@ package com.github.shadowsocks
 import android.Manifest
 import android.content.Intent
 import android.content.pm.ShortcutManager
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CameraManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -84,25 +82,27 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT < 23) return startImport()    // we show no love to lollipop
         if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed("scan")
-        if (try {
-                    getSystemService<CameraManager>()?.cameraIdList?.isEmpty()
-                } catch (_: CameraAccessException) {
-                    true
-                } != false) return startImport()
         setContentView(R.layout.layout_scanner)
         ListHolderListener.setup(this)
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        lifecycle.addObserver(scanner)
         requestCamera.launch(Manifest.permission.CAMERA)
     }
     private val requestCamera = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) lifecycleScope.launchWhenCreated {
             val cameraProvider = ProcessCameraProvider.getInstance(this@ScannerActivity).await()
+            val selector = if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)) {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            } else CameraSelector.DEFAULT_FRONT_CAMERA
             val preview = Preview.Builder().build()
             preview.setSurfaceProvider(findViewById<PreviewView>(R.id.barcode).createSurfaceProvider())
-            cameraProvider.bindToLifecycle(this@ScannerActivity, CameraSelector.Builder().apply {
-                requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            }.build(), preview, imageAnalysis)
+            try {
+                cameraProvider.bindToLifecycle(this@ScannerActivity, selector, preview, imageAnalysis)
+            } catch (e: IllegalArgumentException) {
+                Timber.d(e)
+                startImport()
+            }
         } else permissionMissing()
     }
 
