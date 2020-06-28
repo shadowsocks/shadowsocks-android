@@ -104,6 +104,8 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
+                  android:theme="@style/Theme.Shadowsocks.ActionBar"/>
         <activity android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
                   android:theme="@style/Theme.Shadowsocks.ActionBar"/>
         <service android:name="com.google.firebase.components.ComponentDiscoveryService"
