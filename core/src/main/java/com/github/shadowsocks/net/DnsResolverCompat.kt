@@ -108,9 +108,9 @@ sealed class DnsResolverCompat {
         }
 
         override suspend fun resolve(network: Network, host: String) =
-                GlobalScope.async(unboundedIO) { network.getAllByName(host) }.await()
+                withContext(unboundedIO) { network.getAllByName(host) }
         override suspend fun resolveOnActiveNetwork(host: String) =
-                GlobalScope.async(unboundedIO) { InetAddress.getAllByName(host) }.await()
+                withContext(unboundedIO) { InetAddress.getAllByName(host) }
 
         private suspend fun resolveRaw(query: ByteArray, networkSpecified: Boolean = true,
                                        hostResolver: suspend (String) -> Array<InetAddress>): ByteArray {
@@ -128,16 +128,18 @@ sealed class DnsResolverCompat {
                 Type.A -> false
                 Type.AAAA -> true
                 Type.PTR -> {
-                    // Android does not provide a PTR lookup API for Network prior to Android 10
+                    /* Android does not provide a PTR lookup API for Network prior to Android 10 */
                     if (networkSpecified) throw IOException(UnsupportedOperationException("Network unspecified"))
                     val ip = try {
                         ReverseMap.fromName(question.name)
                     } catch (e: IOException) {
                         throw UnsupportedOperationException(e)  // unrecognized PTR name
                     }
-                    val hostname = Name.fromString(GlobalScope.async(unboundedIO) { ip.hostName }.await())
+                    val hostname = withContext(unboundedIO) { ip.hostName }.let { hostname ->
+                        if (hostname == ip.hostAddress) null else Name.fromString("$hostname.")
+                    }
                     return prepareDnsResponse(request).apply {
-                        addRecord(PTRRecord(question.name, DClass.IN, TTL, hostname), Section.ANSWER)
+                        hostname?.let { addRecord(PTRRecord(question.name, DClass.IN, TTL, it), Section.ANSWER) }
                     }.toWire()
                 }
                 else -> throw UnsupportedOperationException("Unsupported query type $type")
