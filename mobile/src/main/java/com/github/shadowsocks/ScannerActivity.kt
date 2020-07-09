@@ -69,6 +69,8 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
                 process { InputImage.fromMediaImage(mediaImage, image.imageInfo.rotationDegrees) }.also {
                     if (it) imageAnalysis.clearAnalyzer()
                 }
+            } catch (_: CancellationException) {
+                return@launchWhenCreated
             } catch (e: Exception) {
                 return@launchWhenCreated Timber.w(e)
             } finally {
