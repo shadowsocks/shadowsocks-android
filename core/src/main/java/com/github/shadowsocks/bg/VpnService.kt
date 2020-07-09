@@ -72,7 +72,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     private inner class ProtectWorker : ConcurrentLocalSocketListener("ShadowsocksVpnThread",
             File(Core.deviceStorage.noBackupFilesDir, "protect_path")) {
         override fun acceptInternal(socket: LocalSocket) {
-            socket.inputStream.read()
+            if (socket.inputStream.read() == -1) return
             val success = socket.ancillaryFileDescriptors!!.single()!!.use { fd ->
                 underlyingNetwork.let { network ->
                     if (network != null) try {
