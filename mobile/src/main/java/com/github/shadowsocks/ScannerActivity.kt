@@ -82,7 +82,6 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (Build.VERSION.SDK_INT < 23) return startImport()    // we show no love to lollipop
         if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed("scan")
         setContentView(R.layout.layout_scanner)
         ListHolderListener.setup(this)
