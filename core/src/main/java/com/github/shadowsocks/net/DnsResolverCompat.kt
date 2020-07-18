@@ -20,18 +20,14 @@
 
 package com.github.shadowsocks.net
 
-import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.net.DnsResolver
 import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
-import android.system.ErrnoException
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.utils.int
 import kotlinx.coroutines.*
 import org.xbill.DNS.*
-import java.io.FileDescriptor
 import java.io.IOException
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -47,12 +43,10 @@ sealed class DnsResolverCompat {
             when (Build.VERSION.SDK_INT) {
                 in 29..Int.MAX_VALUE -> DnsResolverCompat29
                 in 23 until 29 -> DnsResolverCompat23
-                in 21 until 23 -> DnsResolverCompat21()
                 else -> error("Unsupported API level")
             }
         }
 
-        override fun bindSocket(network: Network, socket: FileDescriptor) = instance.bindSocket(network, socket)
         override suspend fun resolve(network: Network, host: String) = instance.resolve(network, host)
         override suspend fun resolveOnActiveNetwork(host: String) = instance.resolveOnActiveNetwork(host)
         override suspend fun resolveRaw(network: Network, query: ByteArray) = instance.resolveRaw(network, query)
@@ -75,28 +69,12 @@ sealed class DnsResolverCompat {
     }
 
     @Throws(IOException::class)
-    abstract fun bindSocket(network: Network, socket: FileDescriptor)
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
     abstract suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray
     abstract suspend fun resolveRawOnActiveNetwork(query: ByteArray): ByteArray
 
-    @SuppressLint("PrivateApi")
-    private open class DnsResolverCompat21 : DnsResolverCompat() {
-        private val bindSocketToNetwork by lazy {
-            Class.forName("android.net.NetworkUtils").getDeclaredMethod(
-                    "bindSocketToNetwork", Int::class.java, Int::class.java)
-        }
-        private val netId by lazy { Network::class.java.getDeclaredField("netId") }
-        @SuppressLint("NewApi")
-        override fun bindSocket(network: Network, socket: FileDescriptor) {
-            val netId = netId.get(network)!!
-            val err = bindSocketToNetwork.invoke(null, socket.int, netId) as Int
-            if (err == 0) return
-            val message = "Binding socket to network $netId"
-            throw ErrnoException(message, -err).rethrowAsSocketException()
-        }
-
+    private object DnsResolverCompat23 : DnsResolverCompat() {
         /**
          * This dispatcher is used for noncancellable possibly-forever-blocking operations in network IO.
          *
@@ -161,19 +139,12 @@ sealed class DnsResolverCompat {
                 resolveRaw(query, false, this::resolveOnActiveNetwork)
     }
 
-    @TargetApi(23)
-    private object DnsResolverCompat23 : DnsResolverCompat21() {
-        override fun bindSocket(network: Network, socket: FileDescriptor) = network.bindSocket(socket)
-    }
-
     @TargetApi(29)
     private object DnsResolverCompat29 : DnsResolverCompat(), Executor {
         /**
          * This executor will run on its caller directly. On Q beta 3 thru 4, this results in calling in main thread.
          */
         override fun execute(command: Runnable) = command.run()
-
-        override fun bindSocket(network: Network, socket: FileDescriptor) = network.bindSocket(socket)
 
         private val activeNetwork get() = Core.connectivity.activeNetwork ?: throw IOException("no network")
 
