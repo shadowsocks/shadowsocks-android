@@ -12,15 +12,15 @@ setupApp()
 android.defaultConfig.applicationId = "com.github.shadowsocks"
 
 dependencies {
-    val cameraxVersion = "1.0.0-beta06"
+    val cameraxVersion = "1.0.0-beta07"
 
     implementation("androidx.browser:browser:1.2.0")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-    implementation("androidx.camera:camera-view:1.0.0-alpha13")
+    implementation("androidx.camera:camera-view:1.0.0-alpha14")
     implementation("androidx.constraintlayout:constraintlayout:2.0.0-beta8")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("com.google.firebase:firebase-ads:19.2.0")
+    implementation("com.google.firebase:firebase-ads:19.3.0")
     implementation("com.google.mlkit:barcode-scanning:16.0.1")
     implementation("com.google.zxing:core:3.4.0")
     implementation("com.takisoft.preferencex:preferencex-simplemenu:1.1.0")

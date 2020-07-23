@@ -68,7 +68,6 @@ sealed class DnsResolverCompat {
         }
     }
 
-    @Throws(IOException::class)
     abstract suspend fun resolve(network: Network, host: String): Array<InetAddress>
     abstract suspend fun resolveOnActiveNetwork(host: String): Array<InetAddress>
     abstract suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray
