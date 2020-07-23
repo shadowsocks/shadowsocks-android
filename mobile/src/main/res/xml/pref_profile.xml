@@ -66,11 +66,6 @@
                 app:icon="@drawable/ic_action_dns"
                 app:title="@string/remote_dns"
                 app:useSimpleSummaryProvider="true"/>
-        <SwitchPreference
-            app:key="isUdpDns"
-            app:icon="@drawable/ic_action_dns"
-            app:summary="@string/udp_dns_summary"
-            app:title="@string/udp_dns"/>
 
     </PreferenceCategory>
 
