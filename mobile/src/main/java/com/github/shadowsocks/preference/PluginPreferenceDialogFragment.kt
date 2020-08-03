@@ -128,7 +128,6 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         recycler.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         dialog.setContentView(recycler)
-        dialog.findViewById<View>(R.id.touch_outside)!!.isFocusable = false
         return dialog
     }
 
