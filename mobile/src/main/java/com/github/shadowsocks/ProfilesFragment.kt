@@ -324,8 +324,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
                 true
             }
             R.id.action_export_clipboard -> {
-                (activity as MainActivity).snackbar().setText(if (Core.trySetPrimaryClip(this.item.toString()))
-                    R.string.action_export_msg else R.string.action_export_err).show()
+                val success = Core.trySetPrimaryClip(this.item.toString())
+                (activity as MainActivity).snackbar().setText(
+                        if (success) R.string.action_export_msg else R.string.action_export_err).show()
                 true
             }
             else -> false
@@ -466,8 +467,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN,
                 ItemTouchHelper.START) {
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
-                    if (isProfileEditable((viewHolder as ProfileViewHolder).item.id))
-                        super.getSwipeDirs(recyclerView, viewHolder) else 0
+                    if (isProfileEditable((viewHolder as ProfileViewHolder).item.id)) {
+                        super.getSwipeDirs(recyclerView, viewHolder)
+                    } else 0
 
             override fun getDragDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled) super.getDragDirs(recyclerView, viewHolder) else 0
@@ -530,8 +532,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             R.id.action_export_clipboard -> {
                 val profiles = ProfileManager.getActiveProfiles()
                 val success = profiles != null && Core.trySetPrimaryClip(profiles.joinToString("\n"))
-                (activity as MainActivity).snackbar().setText(if (success)
-                    R.string.action_export_msg else R.string.action_export_err).show()
+                (activity as MainActivity).snackbar().setText(
+                        if (success) R.string.action_export_msg else R.string.action_export_err).show()
                 true
             }
             R.id.action_export_file -> {

@@ -52,8 +52,9 @@ class PluginOptions : HashMap<String, String?> {
                 if (key != null) {
                     put(key, current.toString())
                     key = null
-                } else if (current.isNotEmpty())
+                } else if (current.isNotEmpty()) {
                     if (parseId) id = current.toString() else put(current.toString(), null)
+                }
                 current.setLength(0)
                 parseId = false
             }

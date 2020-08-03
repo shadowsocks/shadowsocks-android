@@ -435,8 +435,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                 is URL -> acl.urls.add(it)
             }
         }
-        (activity as MainActivity).snackbar().setText(if (Core.trySetPrimaryClip(acl.toString()))
-            R.string.action_export_msg else R.string.action_export_err).show()
+        val success = Core.trySetPrimaryClip(acl.toString())
+        (activity as MainActivity).snackbar().setText(
+                if (success) R.string.action_export_msg else R.string.action_export_err).show()
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {

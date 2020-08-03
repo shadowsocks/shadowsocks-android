@@ -58,6 +58,7 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
     private val imageAnalysis by lazy {
         ImageAnalysis.Builder().apply {
             setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            setBackgroundExecutor(Dispatchers.Default.asExecutor())
         }.build().also { it.setAnalyzer(Dispatchers.Main.immediate.asExecutor(), this) }
     }
 
