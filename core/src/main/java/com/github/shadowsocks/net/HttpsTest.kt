@@ -77,7 +77,7 @@ class HttpsTest : ViewModel() {
     }
 
     private var running: Job? = null
-    val status = MutableLiveData<Status>().apply { value = Status.Idle }
+    val status = MutableLiveData(Status.Idle)
 
     fun testConnection() {
         cancelTest()
