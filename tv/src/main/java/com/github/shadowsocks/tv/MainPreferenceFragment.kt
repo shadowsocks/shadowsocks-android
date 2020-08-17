@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks.tv
 
-import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
@@ -256,6 +255,5 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         DataStore.publicStore.unregisterChangeListener(this)
         val context = requireContext()
         connection.disconnect(context)
-        BackupManager(context).dataChanged()
     }
 }

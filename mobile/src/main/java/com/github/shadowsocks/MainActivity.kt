@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks
 
-import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
 import android.os.Bundle
 import android.os.RemoteException
@@ -244,6 +243,5 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         super.onDestroy()
         DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect(this)
-        BackupManager(this).dataChanged()
     }
 }
