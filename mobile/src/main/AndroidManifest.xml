@@ -20,7 +20,7 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.Shadowsocks.Immersive.Navigation"
-            android:launchMode="singleTop">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -37,19 +37,22 @@
             android:name=".ProfileConfigActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive"
             android:excludeFromRecents="true"
-            android:label="@string/profile_config"/>
+            android:label="@string/profile_config"
+            android:launchMode="singleTask"/>
 
         <activity
             android:name=".AppManager"
             android:label="@string/proxied_apps"
             android:parentActivityName=".ProfileConfigActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive"
+            android:launchMode="singleTask"
             android:excludeFromRecents="true"/>
 
         <activity
             android:name=".UdpFallbackProfileActivity"
             android:label="@string/udp_fallback"
             android:theme="@style/Theme.Shadowsocks.Immersive"
+            android:launchMode="singleTask"
             android:excludeFromRecents="true"/>
 
         <activity
@@ -57,6 +60,7 @@
             android:label="@string/add_profile_methods_scan_qr_code"
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive"
+            android:launchMode="singleTask"
             android:screenOrientation="locked"
             android:excludeFromRecents="true"/>
 
@@ -71,6 +75,7 @@
             android:name=".QuickToggleShortcut"
             android:label="@string/quick_toggle"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:launchMode="singleTask"
             android:excludeFromRecents="true"
             android:taskAffinity=""
             android:process=":bg">

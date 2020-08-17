@@ -22,12 +22,10 @@ package com.github.shadowsocks.tv
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.github.shadowsocks.utils.SingleInstanceActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.activity_main)
     }
 }

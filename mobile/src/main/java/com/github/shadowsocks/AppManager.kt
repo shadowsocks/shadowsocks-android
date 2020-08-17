@@ -47,7 +47,6 @@ import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.utils.listenForPackageChanges
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.ListListener
@@ -217,7 +216,6 @@ class AppManager : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_apps)
         ListHolderListener.setup(this)
         setSupportActionBar(toolbar)

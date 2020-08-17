@@ -43,7 +43,6 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
 import com.github.shadowsocks.subscription.SubscriptionFragment
 import com.github.shadowsocks.utils.Key
-import com.github.shadowsocks.utils.SingleInstanceActivity
 import com.github.shadowsocks.utils.StartService
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.ServiceButton
@@ -133,7 +132,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SingleInstanceActivity.register(this) ?: return
         setContentView(R.layout.layout_main)
         snackbar = findViewById(R.id.snackbar)
         snackbar.setOnApplyWindowInsetsListener(ListHolderListener)
