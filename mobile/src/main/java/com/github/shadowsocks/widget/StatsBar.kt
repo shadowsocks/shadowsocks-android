@@ -29,7 +29,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import androidx.lifecycle.whenStarted
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R

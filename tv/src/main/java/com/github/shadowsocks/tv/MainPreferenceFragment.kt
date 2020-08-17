@@ -30,7 +30,6 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.viewModels
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
-import androidx.lifecycle.observe
 import androidx.preference.*
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core

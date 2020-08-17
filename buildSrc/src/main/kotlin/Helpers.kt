@@ -24,6 +24,7 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 
 fun Project.setupCommon() {
     android.apply {
+        buildToolsVersion("30.0.2")
         compileSdkVersion(30)
         defaultConfig {
             minSdkVersion(23)

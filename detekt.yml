@@ -248,10 +248,8 @@ formatting:
     autoCorrect: true
   SpacingBetweenDeclarationsWithAnnotations:
     active: false
-    autoCorrect: true
   SpacingBetweenDeclarationsWithComments:
     active: false
-    autoCorrect: true
   StringTemplate:
     active: true
     autoCorrect: true
