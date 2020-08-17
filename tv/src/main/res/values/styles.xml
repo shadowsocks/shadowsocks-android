@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Shadowsocks.TV" parent="@style/Theme.Leanback">
+    <style name="Theme.Shadowsocks.TV" parent="@style/Theme.AppCompat.Leanback">
         <item name="android:colorAccent">@color/material_accent_200</item>
         <item name="android:colorButtonNormal">@color/material_accent_200</item>
         <item name="android:colorPrimary">@color/color_primary</item>
