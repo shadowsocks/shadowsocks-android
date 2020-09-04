@@ -38,6 +38,7 @@ cargo {
     profile = findProperty("CARGO_PROFILE")?.toString() ?: currentFlavor
     extraCargoBuildArguments = listOf("--bin", libname!!)
     featureSpec.noDefaultBut(arrayOf(
+            "ring-aead-ciphers",
             "sodium",
             "rc4",
             "aes-cfb",
@@ -92,5 +93,5 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.1")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.2")
 }

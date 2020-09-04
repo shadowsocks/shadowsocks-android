@@ -47,8 +47,8 @@ fun Project.setupCommon() {
 
     dependencies {
         add("testImplementation", "junit:junit:4.13")
-        add("androidTestImplementation", "androidx.test:runner:1.2.0")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.2.0")
+        add("androidTestImplementation", "androidx.test:runner:1.3.0")
+        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.3.0")
     }
 }
 
