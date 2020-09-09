@@ -14,10 +14,11 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <FrameLayout
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/fragment_holder"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"/>
 
         <com.github.shadowsocks.widget.ServiceButton
             android:id="@+id/fab"
@@ -25,7 +26,6 @@
             android:layout_height="wrap_content"
             android:elevation="6dp"
             android:nextFocusDown="@+id/stats"
-            app:layout_dodgeInsetEdges="top"
             app:layout_anchor="@id/stats"
             app:backgroundTint="@color/background_service"
             app:fabSize="normal"
@@ -37,6 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+            android:fitsSystemWindows="true"
             android:nextFocusUp="@+id/fab"
             app:backgroundTint="@color/background_stat"
             app:contentInsetStart="0dp"
@@ -46,7 +47,7 @@
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
+                android:background="?android:attr/selectableItemBackground"
                 android:orientation="vertical"
                 android:padding="16dip">
 
@@ -106,13 +107,14 @@
                     android:id="@+id/status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ellipsize="marquee"
+                    android:maxLines="1"
                     android:textColor="?android:attr/textColorPrimary"
                     android:textSize="16sp"
                     android:layout_gravity="fill_horizontal"
                     android:layout_row="2"
                     android:layout_column="0"
                     android:layout_columnSpan="3"
+                    android:ellipsize="end"
                     tools:text="@string/connection_test_available"/>
 
             </GridLayout>
@@ -126,7 +128,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
+        app:insetForeground="@null"
         app:itemIconTint="@color/nav_item_tint"
         app:itemTextColor="@color/nav_item_tint"
         app:headerLayout="@layout/navigation_header"

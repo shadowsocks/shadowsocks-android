@@ -35,6 +35,7 @@ The exclamation mark in the Wi-Fi/cellular icon appears because the system fails
 * Related to Xposed: [#1414](https://github.com/shadowsocks/shadowsocks-android/issues/1414)
 * Samsung and/or Brevent: [#1410](https://github.com/shadowsocks/shadowsocks-android/issues/1410)
 * Another Samsung: [#1712](https://github.com/shadowsocks/shadowsocks-android/issues/1712)
+* Samsung with GMS: [#2138](https://github.com/shadowsocks/shadowsocks-android/issues/2138)
 * Don't install this app on SD card because of permission issues: [#1124 (comment)](https://github.com/shadowsocks/shadowsocks-android/issues/1124#issuecomment-307556453)
 * `INTERACT_ACROSS_USERS` permission missing: [#1184](https://github.com/shadowsocks/shadowsocks-android/issues/1184)
 

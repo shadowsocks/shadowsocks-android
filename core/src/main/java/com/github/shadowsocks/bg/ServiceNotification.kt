@@ -20,10 +20,9 @@
 
 package com.github.shadowsocks.bg
 
-import android.app.KeyguardManager
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -38,36 +37,37 @@ import com.github.shadowsocks.aidl.IShadowsocksServiceCallback
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.utils.Action
-import com.github.shadowsocks.utils.broadcastReceiver
 
 /**
- * Android < 8 VPN:     always invisible because of VPN notification/icon
- * Android < 8 other:   only invisible in (possibly unsecure) lockscreen
- * Android 8+:          always visible due to system limitations
- *                      (user can choose to hide the notification in secure lockscreen or anywhere)
+  * User can customize visibility of notification since Android 8.
+  * The default visibility:
+  *
+  * Android 8.x: always visible due to system limitations
+  * VPN:         always invisible because of VPN notification/icon
+  * Other:       always visible
+  *
+  * See also: https://github.com/aosp-mirror/platform_frameworks_base/commit/070d142993403cc2c42eca808ff3fafcee220ac4
  */
 class ServiceNotification(private val service: BaseService.Interface, profileName: String,
-                          channel: String, private val visible: Boolean = false) {
-    private val keyGuard = (service as Context).getSystemService<KeyguardManager>()!!
-    private val nm by lazy { (service as Context).getSystemService<NotificationManager>()!! }
+                          channel: String, visible: Boolean = false) : BroadcastReceiver() {
     private val callback: IShadowsocksServiceCallback by lazy {
         object : IShadowsocksServiceCallback.Stub() {
             override fun stateChanged(state: Int, profileName: String?, msg: String?) { }   // ignore
             override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
                 if (profileId != 0L) return
-                service as Context
-                val txr = service.getString(R.string.speed, Formatter.formatFileSize(service, stats.txRate))
-                val rxr = service.getString(R.string.speed, Formatter.formatFileSize(service, stats.rxRate))
-                builder.setContentText("$txr↑\t$rxr↓")
-                style.bigText(service.getString(R.string.stat_summary, txr, rxr,
-                        Formatter.formatFileSize(service, stats.txTotal),
-                        Formatter.formatFileSize(service, stats.rxTotal)))
+                builder.apply {
+                    setContentText((service as Context).getString(R.string.traffic,
+                            service.getString(R.string.speed, Formatter.formatFileSize(service, stats.txRate)),
+                            service.getString(R.string.speed, Formatter.formatFileSize(service, stats.rxRate))))
+                    setSubText(service.getString(R.string.traffic,
+                            Formatter.formatFileSize(service, stats.txTotal),
+                            Formatter.formatFileSize(service, stats.rxTotal)))
+                }
                 show()
             }
             override fun trafficPersisted(profileId: Long) { }
         }
     }
-    private val lockReceiver = broadcastReceiver { _, intent -> update(intent.action) }
     private var callbackRegistered = false
 
     private val builder = NotificationCompat.Builder(service as Context, channel)
@@ -77,59 +77,46 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
             .setContentTitle(profileName)
             .setContentIntent(Core.configureIntent(service))
             .setSmallIcon(R.drawable.ic_service_active)
-    private val style = NotificationCompat.BigTextStyle(builder).bigText("")
-    private var isVisible = true
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setPriority(if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN)
 
     init {
         service as Context
-        if (Build.VERSION.SDK_INT < 24) builder.addAction(R.drawable.ic_navigation_close,
-                service.getString(R.string.stop), PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE), 0))
-        update(if (service.getSystemService<PowerManager>()?.isInteractive != false)
-            Intent.ACTION_SCREEN_ON else Intent.ACTION_SCREEN_OFF, true)
-        service.registerReceiver(lockReceiver, IntentFilter().apply {
+        val closeAction = NotificationCompat.Action.Builder(
+                R.drawable.ic_navigation_close,
+                service.getText(R.string.stop),
+                PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE).setPackage(service.packageName), 0)).apply {
+            setShowsUserInterface(false)
+        }.build()
+        if (Build.VERSION.SDK_INT < 24) builder.addAction(closeAction) else builder.addInvisibleAction(closeAction)
+        updateCallback(service.getSystemService<PowerManager>()?.isInteractive != false)
+        service.registerReceiver(this, IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
-            if (visible && Build.VERSION.SDK_INT < 26) addAction(Intent.ACTION_USER_PRESENT)
         })
+        show()
     }
 
-    private fun update(action: String?, forceShow: Boolean = false) {
-        if (forceShow || service.data.state == BaseService.CONNECTED) when (action) {
-            Intent.ACTION_SCREEN_OFF -> {
-                setVisible(false, forceShow)
-                unregisterCallback()    // unregister callback to save battery
-            }
-            Intent.ACTION_SCREEN_ON -> {
-                setVisible(visible && !keyGuard.isKeyguardLocked, forceShow)
-                service.data.binder.registerCallback(callback)
-                service.data.binder.startListeningForBandwidth(callback, 1000)
-                callbackRegistered = true
-            }
-            Intent.ACTION_USER_PRESENT -> setVisible(true, forceShow)
-        }
+    override fun onReceive(context: Context, intent: Intent) {
+        if (service.data.state == BaseService.State.Connected) updateCallback(intent.action == Intent.ACTION_SCREEN_ON)
     }
 
-    private fun unregisterCallback() {
-        if (callbackRegistered) {
+    private fun updateCallback(screenOn: Boolean) {
+        if (screenOn) {
+            service.data.binder.registerCallback(callback)
+            service.data.binder.startListeningForBandwidth(callback, 1000)
+            callbackRegistered = true
+        } else if (callbackRegistered) {    // unregister callback to save battery
             service.data.binder.unregisterCallback(callback)
             callbackRegistered = false
         }
     }
 
-    private fun setVisible(visible: Boolean, forceShow: Boolean = false) {
-        if (isVisible != visible) {
-            isVisible = visible
-            builder.priority = if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN
-            show()
-        } else if (forceShow) show()
-    }
-
     private fun show() = (service as Service).startForeground(1, builder.build())
 
     fun destroy() {
-        (service as Service).unregisterReceiver(lockReceiver)
-        unregisterCallback()
+        (service as Service).unregisterReceiver(this)
+        updateCallback(false)
         service.stopForeground(true)
-        nm.cancel(1)
     }
 }

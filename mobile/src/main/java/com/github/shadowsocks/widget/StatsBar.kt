@@ -25,16 +25,18 @@ import android.text.format.Formatter
 import android.util.AttributeSet
 import android.view.View
 import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-import androidx.lifecycle.get
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenStarted
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
@@ -44,17 +46,19 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
     private lateinit var rxRateText: TextView
-    private val tester = ViewModelProviders.of(context as FragmentActivity).get<HttpsTest>()
-    private val behavior = object : Behavior() {
-        val threshold = context.resources.getDimensionPixelSize(R.dimen.stats_bar_scroll_threshold)
-        override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
-                                    dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int, type: Int) {
-            val dy = dyConsumed + dyUnconsumed
-            super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, if (Math.abs(dy) >= threshold) dy else 0,
-                    dxUnconsumed, 0, type)
+    private val tester by (context as MainActivity).viewModels<HttpsTest>()
+    private lateinit var behavior: Behavior
+    override fun getBehavior(): Behavior {
+        if (!this::behavior.isInitialized) behavior = object : Behavior() {
+            override fun onNestedScroll(coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
+                                        dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
+                                        type: Int, consumed: IntArray) {
+                super.onNestedScroll(coordinatorLayout, child, target, dxConsumed, dyConsumed + dyUnconsumed,
+                        dxUnconsumed, 0, type, consumed)
+            }
         }
+        return behavior
     }
-    override fun getBehavior() = behavior
 
     override fun setOnClickListener(l: OnClickListener?) {
         statusText = findViewById(R.id.status)
@@ -65,22 +69,29 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         super.setOnClickListener(l)
     }
 
-    fun changeState(state: Int) {
+    private fun setStatus(text: CharSequence) {
+        statusText.text = text
+        TooltipCompat.setTooltipText(this, text)
+    }
+
+    fun changeState(state: BaseService.State) {
         val activity = context as MainActivity
-        if (state != BaseService.CONNECTED) {
+        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch(Dispatchers.Main) {
+            activity.whenStarted { what() }
+        }
+        if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
+            postWhenStarted { performShow() }
+            tester.status.observe(activity) { it.retrieve(this::setStatus) { msg -> activity.snackbar(msg).show() } }
+        } else {
+            postWhenStarted { performHide() }
             updateTraffic(0, 0, 0, 0)
             tester.status.removeObservers(activity)
-            if (state != BaseService.IDLE) tester.invalidate()
-            statusText.setText(when (state) {
-                BaseService.CONNECTING -> R.string.connecting
-                BaseService.STOPPING -> R.string.stopping
+            if (state != BaseService.State.Idle) tester.invalidate()
+            setStatus(context.getText(when (state) {
+                BaseService.State.Connecting -> R.string.connecting
+                BaseService.State.Stopping -> R.string.stopping
                 else -> R.string.not_connected
-            })
-        } else {
-            behavior.slideUp(this)
-            tester.status.observe(activity, Observer {
-                it.retrieve(statusText::setText) { activity.snackbar(it).show() }
-            })
+            }))
         }
     }
 

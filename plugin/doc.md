@@ -125,19 +125,19 @@ In native mode, plugins are provided as native executables and `shadowsocks-libe
 Every native mode plugin MUST have a content provider to provide the native executables (since they
  can exceed 1M which is the limit of Intent size) that:
 
-* MUST have `android:label` and `android:icon`; (may be configured by its parent `application`)
+* MUST have `android:label` and `android:icon`; (may be inherited from parent `application`)
+* SHOULD have `android:directBootAware="true"` with proper support if possible;
 * MUST have an intent filter with action `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN`;
   (used for discovering plugins)
-* MUST have meta-data `com.github.shadowsocks.plugin.id` with string value `$PLUGIN_ID`;
+* MUST have meta-data `com.github.shadowsocks.plugin.id` with string value `$PLUGIN_ID` or a string resource;
 * MUST have an intent filter with action `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN` and
   data `plugin://com.github.shadowsocks/$PLUGIN_ID`; (used for configuring plugin)
-* CAN have meta-data `com.github.shadowsocks.plugin.default_config` with string value, default is
-  empty;
+* CAN have meta-data `com.github.shadowsocks.plugin.default_config` with string value or a string resource, default is empty;
 * MUST implement `query` that returns the file list which MUST include `$PLUGIN_ID` when having
   these as arguments:
   - `uri = "content://$authority_of_your_provider`;
-  - `projection = ["path", "mode"]`; (relative path, for example `obfs-local`; file mode, for
-    example `755`)
+  - `projection = ["path", "mode"]`; (relative path, for example `obfs-local`; file mode as integer, for
+    example `0b110100100`)
   - `selection = null`;
   - `selectionArgs = null`;
   - `sortOrder = null`;
@@ -155,6 +155,7 @@ This corresponds to `com.github.shadowsocks.plugin.NativePluginProvider` in the 
         ...
         <provider android:name=".BinaryProvider"
                   android:exported="true"
+                  android:directBootAware="true"
                   android:authorities="$FULLY_QUALIFIED_NAME_OF_YOUR_CONTENTPROVIDER"
                   tools:ignore="ExportedContentProvider">
             <intent-filter>
@@ -164,7 +165,7 @@ This corresponds to `com.github.shadowsocks.plugin.NativePluginProvider` in the 
                 <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
                 <data android:scheme="plugin"
                       android:host="com.github.shadowsocks"
-                      android:pathPrefix="/$PLUGIN_ID"/>
+                      android:path="/$PLUGIN_ID"/>
             </intent-filter>
             <meta-data android:name="com.github.shadowsocks.plugin.id"
                        android:value="$PLUGIN_ID"/>
@@ -186,13 +187,23 @@ If your plugin binary executable can run in place, you can support native mode w
   `com.github.shadowsocks.plugin.EXTRA_ENTRY` when having `method = "shadowsocks:getExecutable"`;
   (`com.github.shadowsocks.plugin.EXTRA_OPTIONS` is provided in extras as well just in case you
   need them)
+* SHOULD define `android:installLocation="internalOnly"` for `<manifest>` in AndroidManifest.xml;
+* SHOULD define `android:extractNativeLibs="true"` for `<application>` in AndroidManifest.xml;
 
 If you don't plan to support this mode, you can just throw `UnsupportedOperationException` when
  being invoked. It will fallback to the slow routine automatically.
 
+### Native mode without binary copying and setup
+
+Additionally, if your plugin only needs to supply the path of your executable without doing any extra setup work,
+ you can use an additional `meta-data` with name `com.github.shadowsocks.plugin.executable_path`
+ to supply executable path to your native binary.
+This allows the host app to launch your plugin without ever launching your app.
+
 ## JVM mode
 
 This feature hasn't been implemented yet.
+Please open an issue if you need this.
 
 # Plugin security
 
@@ -229,7 +240,50 @@ Plugin app must include this in their application tag: (which should be automati
 
 ```
 <meta-data android:name="com.github.shadowsocks.plugin.version"
-           android:value="0.0.2"/>
+           android:value="1.0.0"/>
+```
+
+# Plugin ID Aliasing
+
+To implement plugin ID aliasing, you:
+
+* MUST define meta-data `com.github.shadowsocks.plugin.id.aliases` in your plugin content provider with `android:value="alias"`,
+  or use `android:resources` to specify a string resource or string array resource for multiple aliases.
+* MUST be able to be matched by `com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN` when invoked on alias.
+  To do this, you SHOULD use multiple `intent-filter` and use a different `android:path` for each alias.
+  Alternatively, you MAY also use a single `intent-filter` and use `android:pathPattern` to match all your aliases at once.
+  You MUST NOT use `android:pathPrefix` or allow `android:pathPattern` to match undeclared plugin ID/alias as it might create a conflict with other plugins.
+* SHOULD NOT add or change `intent-filter` for activities to include your aliases -- your plugin ID will always be used.
+
+For example:
+```xml
+<manifest>
+    ...
+    <application>
+        ...
+        <provider>
+            ...
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
+                <data android:scheme="plugin"
+                      android:host="com.github.shadowsocks"
+                      android:path="/$PLUGIN_ID"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.github.shadowsocks.plugin.ACTION_NATIVE_PLUGIN"/>
+                <data android:scheme="plugin"
+                      android:host="com.github.shadowsocks"
+                      android:path="/$PLUGIN_ALIAS"/>
+            </intent-filter>
+            <meta-data android:name="com.github.shadowsocks.plugin.id"
+                       android:value="$PLUGIN_ID"/>
+            <meta-data android:name="com.github.shadowsocks.plugin.aliases"
+                       android:value="$PLUGIN_ALIAS"/>
+            ...
+        </provider>
+        ...
+    </application>
+</manifest>
 ```
 
 # Android TV

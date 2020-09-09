@@ -37,6 +37,12 @@ class PluginOptionsTest {
     }
 
     @Test
+    fun nullValues() {
+        val o = PluginOptions("", "a;b;c;d=3")
+        Assert.assertEquals(true, o == PluginOptions("", o.toString()))
+    }
+
+    @Test
     fun escape() {
         val options = PluginOptions("escapeTest")
         options["subject"] = "value;semicolon"

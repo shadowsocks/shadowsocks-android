@@ -41,9 +41,10 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
     private var tapPending = false
 
     private val connection = ShadowsocksConnection()
-    override fun stateChanged(state: Int, profileName: String?, msg: String?) = updateTile(state) { profileName }
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
+            updateTile(state) { profileName }
     override fun onServiceConnected(service: IShadowsocksService) {
-        updateTile(service.state) { service.profileName }
+        updateTile(BaseService.State.values()[service.state]) { service.profileName }
         if (tapPending) {
             tapPending = false
             onClick()
@@ -63,22 +64,27 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
         if (isLocked && !DataStore.canToggleLocked) unlockAndRun(this::toggle) else toggle()
     }
 
-    private fun updateTile(serviceState: Int, profileName: () -> String?) {
+    private fun updateTile(serviceState: BaseService.State, profileName: () -> String?) {
         qsTile?.apply {
             label = null
             when (serviceState) {
-                BaseService.STOPPED -> {
-                    icon = iconIdle
-                    state = Tile.STATE_INACTIVE
+                BaseService.State.Idle -> error("serviceState")
+                BaseService.State.Connecting -> {
+                    icon = iconBusy
+                    state = Tile.STATE_ACTIVE
                 }
-                BaseService.CONNECTED -> {
+                BaseService.State.Connected -> {
                     icon = iconConnected
                     if (!keyguard.isDeviceLocked) label = profileName()
                     state = Tile.STATE_ACTIVE
                 }
-                else -> {
+                BaseService.State.Stopping -> {
                     icon = iconBusy
                     state = Tile.STATE_UNAVAILABLE
+                }
+                BaseService.State.Stopped -> {
+                    icon = iconIdle
+                    state = Tile.STATE_INACTIVE
                 }
             }
             label = label ?: getString(R.string.app_name)
@@ -88,9 +94,11 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
 
     private fun toggle() {
         val service = connection.service
-        if (service == null) tapPending = true else when (service.state) {
-            BaseService.STOPPED -> Core.startService()
-            BaseService.CONNECTED -> Core.stopService()
+        if (service == null) tapPending = true else BaseService.State.values()[service.state].let { state ->
+            when {
+                state.canStop -> Core.stopService()
+                state == BaseService.State.Stopped -> Core.startService()
+            }
         }
     }
 }

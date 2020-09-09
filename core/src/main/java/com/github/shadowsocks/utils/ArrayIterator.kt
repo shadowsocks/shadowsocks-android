@@ -20,9 +20,7 @@
 
 package com.github.shadowsocks.utils
 
-import android.content.ClipData
 import androidx.recyclerview.widget.SortedList
-import org.json.JSONArray
 
 private sealed class ArrayIterator<out T> : Iterator<T> {
     abstract val size: Int
@@ -31,18 +29,6 @@ private sealed class ArrayIterator<out T> : Iterator<T> {
     override fun hasNext() = count < size
     override fun next(): T = if (hasNext()) this[count++] else throw NoSuchElementException()
 }
-
-private class ClipDataIterator(private val data: ClipData) : ArrayIterator<ClipData.Item>() {
-    override val size get() = data.itemCount
-    override fun get(index: Int) = data.getItemAt(index)
-}
-fun ClipData.asIterable() = Iterable { ClipDataIterator(this) }
-
-private class JSONArrayIterator(private val arr: JSONArray) : ArrayIterator<Any>() {
-    override val size get() = arr.length()
-    override fun get(index: Int) = arr.get(index)
-}
-fun JSONArray.asIterable() = Iterable { JSONArrayIterator(this) }
 
 private class SortedListIterator<out T>(private val list: SortedList<T>) : ArrayIterator<T>() {
     override val size get() = list.size()

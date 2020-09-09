@@ -36,6 +36,8 @@
   <!-- feature category -->
   <string name="ipv6">IPv6 Route</string>
   <string name="ipv6_summary">Redirect IPv6 traffic to remote</string>
+  <string name="metered">Metered Hint</string>
+  <string name="metered_summary">Hint system to treat VPN as metered</string>
   <string name="route_list">Route</string>
   <string name="route_entry_all">All</string>
   <string name="route_entry_bypass_lan">Bypass LAN</string>
@@ -46,17 +48,18 @@
   <string name="proxied_apps">Apps VPN mode</string>
   <string name="proxied_apps_summary">Configure VPN mode for selected apps</string>
   <string name="on">On</string>
-  <string name="bypass_apps">Bypass Mode</string>
+  <string name="off">Off</string>
+  <string name="proxied_apps_mode">Mode</string>
+  <string name="bypass_apps">Bypass</string>
   <string name="bypass_apps_summary">Enable this option to bypass selected apps</string>
   <string name="auto_connect">Auto Connect</string>
-  <string name="auto_connect_summary">Enable Shadowsocks on startup</string>
-  <string name="auto_connect_summary_v24">Enable Shadowsocks on startup. Recommended to use always-on VPN
-    instead</string>
+  <string name="auto_connect_summary">Enable Shadowsocks on startup/app update if it was running before</string>
   <string name="direct_boot_aware">Allow Toggling in Lock Screen</string>
   <string name="direct_boot_aware_summary">Your selected profile information will be less protected</string>
-  <string name="tcp_fastopen_summary">Toggling might require ROOT permission</string>
-  <string name="tcp_fastopen_summary_unsupported">Unsupported kernel version: %s &lt; 3.7.1</string>
-  <string name="tcp_fastopen_failure">Toggle failed</string>
+  <plurals name="hosts_summary">
+    <item quantity="one">1 hostname configured</item>
+    <item quantity="other">%d hostnames configured</item>
+  </plurals>
   <string name="udp_dns">Send DNS over UDP</string>
   <string name="udp_dns_summary">Requires UDP forwarding on server side</string>
   <string name="udp_fallback">UDP Fallback</string>
@@ -78,7 +81,6 @@
   <!-- alert category -->
   <string name="profile_empty">Please select a profile</string>
   <string name="proxy_empty">Proxy/Password should not be empty</string>
-  <string name="file_manager_missing">Please install a file manager like MiXplorer</string>
   <string name="connect">Connect</string>
 
   <!-- menu category -->
@@ -107,7 +109,7 @@
   <string name="profile_config">Profile config</string>
   <string name="delete">Remove</string>
   <string name="delete_confirm_prompt">Are you sure you want to remove this profile?</string>
-  <string name="share_qr_nfc">QR code/NFC</string>
+  <string name="share_qr_nfc">QR code</string>
   <string name="add_profile_dialog">Add this Shadowsocks Profile?</string>
   <string name="add_profile_methods_scan_qr_code">Scan QR code</string>
   <string name="add_profile_methods_manual_settings">Manual Settings</string>
@@ -130,6 +132,15 @@
   <string name="vpn_connected">Connected, tap to check connection</string>
   <string name="not_connected">Not connected</string>
 
+  <!-- subscriptions -->
+  <string name="subscriptions">Subscriptions</string>
+  <string name="add_subscription">Add a subscription</string>
+  <string name="edit_subscription">Edit subscription</string>
+  <string name="update_subscription">Refresh servers from subscription</string>
+  <string name="service_subscription">Subscription Service</string>
+  <string name="service_subscription_working">Syncing subscriptions… (%d of %d)</string>
+  <string name="service_subscription_finishing">Finishing up…</string>
+
   <!-- acl -->
   <string name="custom_rules">Custom rules</string>
   <string name="action_add_rule">Add rule(s)…</string>
@@ -146,4 +157,5 @@
   <string name="plugin_unknown">Unknown plugin %s</string>
   <string name="plugin_untrusted">Warning: This plugin does not seem to come from a known trusted source.</string>
   <string name="profile_plugin">Plugin: %s</string>
+  <string name="plugin_auto_connect_unlock_only">This plugin might not work with Auto Connect</string>
 </resources>

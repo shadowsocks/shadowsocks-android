@@ -20,68 +20,43 @@
 
 package com.github.shadowsocks
 
-import android.app.Activity
-import android.app.backup.BackupManager
 import android.content.ActivityNotFoundException
-import android.content.DialogInterface
-import android.content.Intent
-import android.net.VpnService
-import android.nfc.NdefMessage
-import android.nfc.NfcAdapter
 import android.os.Bundle
-import android.os.DeadObjectException
-import android.os.Handler
-import android.os.Parcelable
-import android.util.Log
-import android.view.KeyCharacterMap
-import android.view.KeyEvent
-import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
+import android.os.RemoteException
+import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.GravityCompat
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.acl.CustomRulesFragment
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
-import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.plugin.AlertDialogFragment
-import com.github.shadowsocks.plugin.Empty
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
+import com.github.shadowsocks.subscription.SubscriptionFragment
 import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.StartService
+import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.ServiceButton
 import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.parcel.Parcelize
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
     companion object {
-        private const val TAG = "ShadowsocksMainActivity"
-        private const val REQUEST_CONNECT = 1
-
-        var stateListener: ((Int) -> Unit)? = null
-    }
-
-    @Parcelize
-    data class ProfilesArg(val profiles: List<Profile>) : Parcelable
-    class ImportProfilesDialogFragment : AlertDialogFragment<ProfilesArg, Empty>() {
-        override fun AlertDialog.Builder.prepare(listener: DialogInterface.OnClickListener) {
-            setTitle(R.string.add_profile_dialog)
-            setPositiveButton(R.string.yes) { _, _ -> arg.profiles.forEach { ProfileManager.createProfile(it) } }
-            setNegativeButton(R.string.no, null)
-            setMessage(arg.profiles.joinToString("\n"))
-        }
+        var stateListener: ((BaseService.State) -> Unit)? = null
     }
 
     // UI
@@ -90,15 +65,21 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     internal lateinit var drawer: DrawerLayout
     private lateinit var navigation: NavigationView
 
-    val snackbar by lazy { findViewById<CoordinatorLayout>(R.id.snackbar) }
+    lateinit var snackbar: CoordinatorLayout private set
     fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
-        view.translationY += fab.top + fab.translationY - snackbar.measuredHeight
+        anchorView = fab
     }
 
     private val customTabsIntent by lazy {
-        CustomTabsIntent.Builder()
-                .setToolbarColor(ContextCompat.getColor(this, R.color.color_primary))
-                .build()
+        CustomTabsIntent.Builder().apply {
+            setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+            setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_LIGHT, CustomTabColorSchemeParams.Builder().apply {
+                setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.light_color_primary))
+            }.build())
+            setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, CustomTabColorSchemeParams.Builder().apply {
+                setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.dark_color_primary))
+            }.build())
+        }.build()
     }
     fun launchUrl(uri: String) = try {
         customTabsIntent.launchUrl(this, uri.toUri())
@@ -107,13 +88,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     // service
-    var state = BaseService.IDLE
-    override fun stateChanged(state: Int, profileName: String?, msg: String?) = changeState(state, msg, true)
+    var state = BaseService.State.Idle
+    override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
+            changeState(state, msg, true)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId == 0L) this@MainActivity.stats.updateTraffic(
                 stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
-        if (state != BaseService.STOPPING) {
-            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment)
+        if (state != BaseService.State.Stopping) {
+            (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ProfilesFragment)
                     ?.onTrafficUpdated(profileId, stats)
         }
     }
@@ -121,8 +103,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         ProfilesFragment.instance?.onTrafficPersisted(profileId)
     }
 
-    private fun changeState(state: Int, msg: String? = null, animate: Boolean = false) {
-        fab.changeState(state, animate)
+    private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = false) {
+        fab.changeState(state, this.state, animate)
         stats.changeState(state)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
         this.state = state
@@ -130,46 +112,33 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         stateListener?.invoke(state)
     }
 
-    private fun toggle() = when {
-        state == BaseService.CONNECTED -> Core.stopService()
-        DataStore.serviceMode == Key.modeVpn -> {
-            val intent = VpnService.prepare(this)
-            if (intent != null) startActivityForResult(intent, REQUEST_CONNECT)
-            else onActivityResult(REQUEST_CONNECT, Activity.RESULT_OK, null)
-        }
-        else -> Core.startService()
-    }
+    private fun toggle() = if (state.canStop) Core.stopService() else connect.launch(null)
 
-    private val handler = Handler()
-    private val connection = ShadowsocksConnection(handler, true)
+    private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
-        service.state
-    } catch (_: DeadObjectException) {
-        BaseService.IDLE
+        BaseService.State.values()[service.state]
+    } catch (_: RemoteException) {
+        BaseService.State.Idle
     })
-    override fun onServiceDisconnected() = changeState(BaseService.IDLE)
+    override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
     override fun onBinderDied() {
         connection.disconnect(this)
         connection.connect(this, this)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when {
-            requestCode != REQUEST_CONNECT -> super.onActivityResult(requestCode, resultCode, data)
-            resultCode == Activity.RESULT_OK -> Core.startService()
-            else -> {
-                snackbar().setText(R.string.vpn_permission_denied).show()
-                Crashlytics.log(Log.ERROR, TAG, "Failed to start VpnService from onActivityResult: $data")
-            }
-        }
+    private val connect = registerForActivityResult(StartService()) {
+        if (it) snackbar().setText(R.string.vpn_permission_denied).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_main)
+        snackbar = findViewById(R.id.snackbar)
+        snackbar.setOnApplyWindowInsetsListener(ListHolderListener)
         stats = findViewById(R.id.stats)
-        stats.setOnClickListener { if (state == BaseService.CONNECTED) stats.testConnection() }
+        stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
+        drawer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         navigation = findViewById(R.id.navigation)
         navigation.setNavigationItemSelectedListener(this)
         if (savedInstanceState == null) {
@@ -179,38 +148,22 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
         fab = findViewById(R.id.fab)
         fab.setOnClickListener { toggle() }
+        fab.setOnApplyWindowInsetsListener { view, insets ->
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.systemWindowInsetBottom +
+                        resources.getDimensionPixelOffset(R.dimen.mtrl_bottomappbar_fab_bottom_margin)
+            }
+            insets
+        }
 
-        changeState(BaseService.IDLE)   // reset everything to init state
+        changeState(BaseService.State.Idle) // reset everything to init state
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
-
-        val intent = this.intent
-        if (intent != null) handleShareIntent(intent)
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleShareIntent(intent)
-    }
-    private fun handleShareIntent(intent: Intent) {
-        val sharedStr = when (intent.action) {
-            Intent.ACTION_VIEW -> intent.data?.toString()
-            NfcAdapter.ACTION_NDEF_DISCOVERED -> {
-                val rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
-                if (rawMsgs != null && rawMsgs.isNotEmpty()) String((rawMsgs[0] as NdefMessage).records[0].payload)
-                else null
-            }
-            else -> null
-        }
-        if (sharedStr.isNullOrEmpty()) return
-        val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile?.first).toList()
-        if (profiles.isEmpty()) snackbar().setText(R.string.profile_invalid_input).show()
-        else ImportProfilesDialogFragment().withArg(ProfilesArg(profiles)).show(supportFragmentManager, null)
-    }
-
-    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String?) {
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
-            Key.serviceMode -> handler.post {
+            Key.serviceMode -> {
                 connection.disconnect(this)
                 connection.connect(this, this)
             }
@@ -225,10 +178,13 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (item.isChecked) drawer.closeDrawers() else {
             when (item.itemId) {
-                R.id.profiles -> displayFragment(ProfilesFragment())
+                R.id.profiles -> {
+                    displayFragment(ProfilesFragment())
+                    connection.bandwidthTimeout = connection.bandwidthTimeout   // request stats update
+                }
                 R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
                 R.id.about -> {
-                    Core.analytics.logEvent("about", Bundle())
+                    Firebase.analytics.logEvent("about") { }
                     displayFragment(AboutFragment())
                 }
                 R.id.faq -> {
@@ -236,6 +192,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
                     return true
                 }
                 R.id.customRules -> displayFragment(CustomRulesFragment())
+                R.id.subscriptions -> displayFragment(SubscriptionFragment())
                 else -> return false
             }
             item.isChecked = true
@@ -284,7 +241,5 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         super.onDestroy()
         DataStore.publicStore.unregisterChangeListener(this)
         connection.disconnect(this)
-        BackupManager(this).dataChanged()
-        handler.removeCallbacksAndMessages(null)
     }
 }

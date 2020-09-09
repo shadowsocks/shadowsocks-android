@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="qr_code_size">250dp</dimen>
+    <dimen name="qrcode_size">264dp</dimen>
     <dimen name="profile_padding">8dp</dimen>
+    <dimen name="main_list_padding_bottom">88dp</dimen>
     <dimen name="bottom_sheet_padding">8dp</dimen>
-    <dimen name="stats_bar_scroll_threshold">4dp</dimen>
 </resources>

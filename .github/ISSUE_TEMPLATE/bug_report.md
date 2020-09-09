@@ -1,6 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+title: ''
+labels: bug
+assignees: ''
 
 ---
 
@@ -48,7 +51,7 @@ Put an `x` inside the [ ] that applies.
 * [ ] Apps VPN mode
   * [ ] Bypass mode
 * Remote DNS: 8.8.8.8
-* [ ] DNS Forwarding
+* [ ] DNS over UDP
 * Plugin configuration (if applicable):
 * [ ] Auto Connect
 * [ ] TCP Fast Open

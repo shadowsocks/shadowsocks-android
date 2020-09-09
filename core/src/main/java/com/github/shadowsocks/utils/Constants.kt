@@ -43,13 +43,14 @@ object Key {
 
     const val route = "route"
 
-    const val isAutoConnect = "isAutoConnect"
+    const val persistAcrossReboot = "isAutoConnect"
     const val directBootAware = "directBootAware"
 
     const val proxyApps = "isProxyApps"
     const val bypass = "isBypassApps"
     const val udpdns = "isUdpDns"
     const val ipv6 = "isIpv6"
+    const val metered = "metered"
 
     const val host = "proxy"
     const val password = "sitekey"
@@ -63,7 +64,6 @@ object Key {
 
     const val dirty = "profileDirty"
 
-    const val tfo = "tcp_fastopen"
     const val assetUpdateTime = "assetUpdateTime"
 
     // TV specific values
@@ -71,12 +71,14 @@ object Key {
     const val controlImport = "control.import"
     const val controlExport = "control.export"
     const val about = "about"
+    const val aboutOss = "about.ossLicenses"
 }
 
 object Action {
     const val SERVICE = "com.github.shadowsocks.SERVICE"
     const val CLOSE = "com.github.shadowsocks.CLOSE"
     const val RELOAD = "com.github.shadowsocks.RELOAD"
+    const val ABORT = "com.github.shadowsocks.ABORT"
 
     const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
 }

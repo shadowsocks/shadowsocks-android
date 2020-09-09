@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "261400168171-pcgrp7aprh210vvfc6vut3am2n3chopq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.shadowsocks",
+            "certificate_hash": "7309a97ff2680788113c6d0ce53898b911885ff5"
+          }
+        },
+        {
           "client_id": "261400168171-sfik8o3pj7e243583olorh7s5974vab1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -33,15 +41,43 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "261400168171-g7aelv5bu012ojr7dod7lq09c9anjimh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-3283768469187309~3571758745"
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:261400168171:android:0dbac07695d93817",
+        "android_client_info": {
+          "package_name": "com.github.shadowsocks.tv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "261400168171-g7aelv5bu012ojr7dod7lq09c9anjimh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCee3fAad7nb3YsxeUO9mqqHFfAvsSCbVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "261400168171-g7aelv5bu012ojr7dod7lq09c9anjimh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <color name="color_primary">@color/material_primary_800</color>
-    <color name="color_primary_dark">@color/material_primary_900</color>
-    <color name="color_primary_text">@color/material_primary_300</color>
-
+    <color name="color_primary">@color/dark_color_primary</color>
+    <color name="color_primary_dark">@color/dark_color_primary_dark</color>
+    <color name="color_primary_text">@color/dark_color_primary_text</color>
 </resources>

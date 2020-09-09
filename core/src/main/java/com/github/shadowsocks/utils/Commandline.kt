@@ -55,24 +55,20 @@ object Commandline {
      */
     fun toString(args: Iterable<String>?): String {
         // empty path return empty string
-        if (args == null) {
-            return ""
-        }
+        args ?: return ""
         // path containing one or more elements
         val result = StringBuilder()
         for (arg in args) {
             if (result.isNotEmpty()) result.append(' ')
-            (0 until arg.length)
-                    .map { arg[it] }
-                    .forEach {
-                        when (it) {
-                            ' ', '\\', '"', '\'' -> {
-                                result.append('\\')  // intentionally no break
-                                result.append(it)
-                            }
-                            else -> result.append(it)
-                        }
+            arg.indices.map { arg[it] }.forEach {
+                when (it) {
+                    ' ', '\\', '"', '\'' -> {
+                        result.append('\\')  // intentionally no break
+                        result.append(it)
                     }
+                    else -> result.append(it)
+                }
+            }
         }
         return result.toString()
     }
@@ -115,59 +111,49 @@ object Commandline {
                 inQuote -> if ("\'" == nextTok) {
                     lastTokenHasBeenQuoted = true
                     state = normal
-                } else {
-                    current.append(nextTok)
-                }
-                inDoubleQuote -> if ("\"" == nextTok) {
-                    if (lastTokenIsSlash) {
+                } else current.append(nextTok)
+                inDoubleQuote -> when (nextTok) {
+                    "\"" -> if (lastTokenIsSlash) {
                         current.append(nextTok)
                         lastTokenIsSlash = false
                     } else {
                         lastTokenHasBeenQuoted = true
                         state = normal
                     }
-                } else if ("\\" == nextTok) {
-                    lastTokenIsSlash = if (lastTokenIsSlash) {
+                    "\\" -> lastTokenIsSlash = if (lastTokenIsSlash) {
                         current.append(nextTok)
                         false
-                    } else
-                        true
-                } else {
-                    if (lastTokenIsSlash) {
-                        current.append("\\")   // unescaped
-                        lastTokenIsSlash = false
+                    } else true
+                    else -> {
+                        if (lastTokenIsSlash) {
+                            current.append("\\")   // unescaped
+                            lastTokenIsSlash = false
+                        }
+                        current.append(nextTok)
                     }
-                    current.append(nextTok)
                 }
                 else -> {
-                    if (lastTokenIsSlash) {
-                        current.append(nextTok)
-                        lastTokenIsSlash = false
-                    } else if ("\\" == nextTok)
-                        lastTokenIsSlash = true
-                    else if ("\'" == nextTok) {
-                        state = inQuote
-                    } else if ("\"" == nextTok) {
-                        state = inDoubleQuote
-                    } else if (" " == nextTok) {
-                        if (lastTokenHasBeenQuoted || current.isNotEmpty()) {
+                    when {
+                        lastTokenIsSlash -> {
+                            current.append(nextTok)
+                            lastTokenIsSlash = false
+                        }
+                        "\\" == nextTok -> lastTokenIsSlash = true
+                        "\'" == nextTok -> state = inQuote
+                        "\"" == nextTok -> state = inDoubleQuote
+                        " " == nextTok -> if (lastTokenHasBeenQuoted || current.isNotEmpty()) {
                             result.add(current.toString())
                             current.setLength(0)
                         }
-                    } else {
-                        current.append(nextTok)
+                        else -> current.append(nextTok)
                     }
                     lastTokenHasBeenQuoted = false
                 }
             }
         }
-        if (lastTokenHasBeenQuoted || current.isNotEmpty()) {
-            result.add(current.toString())
-        }
-        if (state == inQuote || state == inDoubleQuote) {
-            throw IllegalArgumentException("unbalanced quotes in $toProcess")
-        }
-        if (lastTokenIsSlash) throw IllegalArgumentException("escape character following nothing in $toProcess")
+        if (lastTokenHasBeenQuoted || current.isNotEmpty()) result.add(current.toString())
+        require(state != inQuote && state != inDoubleQuote) { "unbalanced quotes in $toProcess" }
+        require(!lastTokenIsSlash) { "escape character following nothing in $toProcess" }
         return result.toTypedArray()
     }
 }

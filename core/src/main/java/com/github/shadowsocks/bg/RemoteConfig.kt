@@ -20,23 +20,32 @@
 
 package com.github.shadowsocks.bg
 
-import android.util.Log
-import androidx.core.os.bundleOf
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.core.R
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import java.net.URL
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.tasks.await
+import timber.log.Timber
 
 object RemoteConfig {
-    private val config = FirebaseRemoteConfig.getInstance().apply { setDefaults(R.xml.default_configs) }
+    private val config = GlobalScope.async(Dispatchers.Main.immediate) {
+        Firebase.remoteConfig.apply { setDefaultsAsync(R.xml.default_configs).await() }
+    }
 
-    val proxyUrl get() = URL(config.getString("proxy_url"))
+    fun fetchAsync() = GlobalScope.async(Dispatchers.Main.immediate) { fetch() }
 
-    fun fetch() = config.fetch().addOnCompleteListener {
-        if (it.isSuccessful) config.activateFetched() else {
-            val e = it.exception ?: return@addOnCompleteListener
-            Log.w("RemoteConfig", e)
-            Core.analytics.logEvent("femote_config_failure", bundleOf(Pair(e.javaClass.simpleName, e.message)))
+    suspend fun fetch() = config.await().run {
+        try {
+            fetch().await()
+            this to true
+        } catch (e: Exception) {
+            Timber.d(e)
+            Firebase.analytics.logEvent("femote_config_failure") { param("message", e.toString()) }
+            this to false
         }
     }
 }

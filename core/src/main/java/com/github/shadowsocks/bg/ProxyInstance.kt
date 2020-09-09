@@ -22,25 +22,23 @@ package com.github.shadowsocks.bg
 
 import android.content.Context
 import android.util.Base64
-import android.util.Log
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
-import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.DirectBoot
-import com.github.shadowsocks.utils.disconnectFromMain
 import com.github.shadowsocks.utils.parseNumericAddress
 import com.github.shadowsocks.utils.signaturesCompat
-import kotlinx.coroutines.*
+import com.github.shadowsocks.utils.useCancellable
+import com.google.firebase.remoteconfig.ktx.get
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.UnknownHostException
+import java.net.*
 import java.security.MessageDigest
 
 /**
@@ -49,28 +47,32 @@ import java.security.MessageDigest
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
-    private val plugin = PluginConfiguration(profile.plugin ?: "").selectedOptions
-    val pluginPath by lazy { PluginManager.init(plugin) }
+    val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
+    private var scheduleConfigUpdate = false
 
     suspend fun init(service: BaseService.Interface) {
-        if (profile.host == "198.199.101.152") {
+        if (profile.isSponsored) {
+            scheduleConfigUpdate = true
             val mdg = MessageDigest.getInstance("SHA-1")
             mdg.update(Core.packageInfo.signaturesCompat.first().toByteArray())
-            val conn = service.openConnection(RemoteConfig.proxyUrl) as HttpURLConnection
+            val (config, success) = RemoteConfig.fetch()
+            scheduleConfigUpdate = !success
+            val conn = withContext(Dispatchers.IO) {
+                // Network.openConnection might use networking, see https://issuetracker.google.com/issues/135242093
+                service.openConnection(URL(config["proxy_url"].asString())) as HttpURLConnection
+            }
             conn.requestMethod = "POST"
             conn.doOutput = true
 
-            val proxies = try {
-                withTimeoutOrNull(10_000) {
-                    withContext(Dispatchers.IO) {
-                        conn.outputStream.bufferedWriter().use {
-                            it.write("sig=" + Base64.encodeToString(mdg.digest(), Base64.DEFAULT))
-                        }
-                        conn.inputStream.bufferedReader().readText()
+            val proxies = conn.useCancellable {
+                try {
+                    outputStream.bufferedWriter().use {
+                        it.write("sig=" + Base64.encodeToString(mdg.digest(), Base64.DEFAULT))
                     }
-                } ?: throw UnknownHostException()
-            } finally {
-                conn.disconnectFromMain()
+                    inputStream.bufferedReader().readText()
+                } catch (e: IOException) {
+                    throw BaseService.ExpectedExceptionWrapper(e)
+                }
             }.split('|').toMutableList()
             proxies.shuffle()
             val proxy = proxies.first().split(':')
@@ -80,83 +82,67 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             profile.method = proxy[3].trim()
         }
 
-        if (route == Acl.CUSTOM_RULES) withContext(Dispatchers.IO) {
-            Acl.save(Acl.CUSTOM_RULES, Acl.customRules.flatten(10, service::openConnection))
-        }
-
         // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (profile.host.parseNumericAddress() == null) profile.host = withTimeoutOrNull(10_000) {
-            var retries = 0
-            while (isActive) try {
-                val io = GlobalScope.async(Dispatchers.IO) { service.resolver(profile.host) }
-                return@withTimeoutOrNull io.await().firstOrNull()
-            } catch (e: UnknownHostException) {
-                // retries are only needed on Chrome OS where arc0 is brought up/down during VPN changes
-                if (!DataStore.hasArc0) throw e
-                Thread.yield()
-                Crashlytics.log(Log.WARN, "ProxyInstance-resolver", "Retry resolving attempt #${++retries}")
-            }
-            null    // only here for type resolving
-        }?.hostAddress ?: throw UnknownHostException()
+        if (profile.host.parseNumericAddress() == null) {
+            profile.host = try {
+                service.resolver(profile.host).firstOrNull()
+            } catch (e: IOException) {
+                throw UnknownHostException().initCause(e)
+            }?.hostAddress ?: throw UnknownHostException()
+        }
     }
 
     /**
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null) {
+    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null,
+              dnsRelay: Boolean = true) {
         trafficMonitor = TrafficMonitor(stat)
 
         this.configFile = configFile
         val config = profile.toJson()
-        if (pluginPath != null) config.put("plugin", pluginPath).put("plugin_opts", plugin.toString())
+        plugin?.let { (path, opts) ->
+            if (service.isVpnService) opts["V"] = ""
+            config.put("plugin", path).put("plugin_opts", opts.toString())
+        }
+        config.put("local_address", DataStore.listenAddress)
+        config.put("local_port", DataStore.portProxy)
         configFile.writeText(config.toString())
 
-        val cmd = service.buildAdditionalArguments(arrayListOf(
+        val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "-b", DataStore.listenAddress,
-                "-l", DataStore.portProxy.toString(),
-                "-t", "600",
-                "-S", stat.absolutePath,
-                "-c", configFile.absolutePath))
+                "--stat-path", stat.absolutePath,
+                "-c", configFile.absolutePath)
+        if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
+        if (dnsRelay) try {
+            URI("dns://${profile.remoteDns}")
+        } catch (e: URISyntaxException) {
+            throw BaseService.ExpectedExceptionWrapper(e)
+        }.let { dns ->
+            cmd += arrayListOf(
+                    "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
+                    "--remote-dns", "${dns.host ?: "0.0.0.0"}:${if (dns.port < 0) 53 else dns.port}")
+        }
 
         if (route != Acl.ALL) {
             cmd += "--acl"
             cmd += Acl.getFile(route).absolutePath
         }
 
-        // for UDP profile, it's only going to operate in UDP relay mode-only so this flag has no effect
-        if (profile.route == Acl.ALL || profile.route == Acl.BYPASS_LAN) cmd += "-D"
-
-        if (DataStore.tcpFastOpen) cmd += "--fast-open"
-
         service.data.processes!!.start(cmd)
     }
 
     fun scheduleUpdate() {
         if (route !in arrayOf(Acl.ALL, Acl.CUSTOM_RULES)) AclSyncer.schedule(route)
+        if (scheduleConfigUpdate) RemoteConfig.fetchAsync()
     }
 
     fun shutdown(scope: CoroutineScope) {
         trafficMonitor?.apply {
             thread.shutdown(scope)
-            // Make sure update total traffic when stopping the runner
-            try {
-                // profile may have host, etc. modified and thus a re-fetch is necessary (possible race condition)
-                val profile = ProfileManager.getProfile(profile.id) ?: return
-                profile.tx += current.txTotal
-                profile.rx += current.rxTotal
-                ProfileManager.updateProfile(profile)
-            } catch (e: IOException) {
-                if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
-                val profile = DirectBoot.getDeviceProfile()!!.toList().filterNotNull().single { it.id == profile.id }
-                profile.tx += current.txTotal
-                profile.rx += current.rxTotal
-                profile.dirty = true
-                DirectBoot.update(profile)
-                DirectBoot.listenForUnlock()
-            }
+            persistStats(profile.id)    // Make sure update total traffic when stopping the runner
         }
         trafficMonitor = null
         configFile?.delete()    // remove old config possibly in device storage

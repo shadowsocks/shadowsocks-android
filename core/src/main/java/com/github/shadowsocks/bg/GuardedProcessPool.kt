@@ -25,13 +25,12 @@ import android.os.SystemClock
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
-import android.util.Log
 import androidx.annotation.MainThread
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.utils.Commandline
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -39,7 +38,6 @@ import kotlin.concurrent.thread
 
 class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : CoroutineScope {
     companion object {
-        private const val TAG = "GuardedProcessPool"
         private val pid by lazy {
             Class.forName("java.lang.ProcessManager\$ProcessImpl").getDeclaredField("pid").apply { isAccessible = true }
         }
@@ -62,26 +60,30 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
             val exitChannel = Channel<Int>()
             try {
                 while (true) {
-                    thread(name = "stderr-$cmdName") { streamLogger(process.errorStream) { Log.e(cmdName, it) } }
+                    thread(name = "stderr-$cmdName") {
+                        streamLogger(process.errorStream) { Timber.tag(cmdName).e(it) }
+                    }
                     thread(name = "stdout-$cmdName") {
-                        streamLogger(process.inputStream) { Log.i(cmdName, it) }
+                        streamLogger(process.inputStream) { Timber.tag(cmdName).v(it) }
                         // this thread also acts as a daemon thread for waitFor
                         runBlocking { exitChannel.send(process.waitFor()) }
                     }
                     val startTime = SystemClock.elapsedRealtime()
                     val exitCode = exitChannel.receive()
                     running = false
-                    if (SystemClock.elapsedRealtime() - startTime < 1000) {
-                        throw IOException("$cmdName exits too fast (exit code: $exitCode)")
+                    when {
+                        SystemClock.elapsedRealtime() - startTime < 1000 -> throw IOException(
+                                "$cmdName exits too fast (exit code: $exitCode)")
+                        exitCode == 128 + OsConstants.SIGKILL -> Timber.w("$cmdName was killed")
+                        else -> Timber.w(IOException("$cmdName unexpectedly exits with code $exitCode"))
                     }
-                    Crashlytics.log(Log.DEBUG, TAG,
-                            "restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
+                    Timber.i("restart process: ${Commandline.toString(cmd)} (last exit code: $exitCode)")
                     start()
                     running = true
                     onRestartCallback?.invoke()
                 }
             } catch (e: IOException) {
-                Crashlytics.log(Log.WARN, TAG, "error occurred. stop guard: " + Commandline.toString(cmd))
+                Timber.w("error occurred. stop guard: ${Commandline.toString(cmd)}")
                 GlobalScope.launch(Dispatchers.Main) { onFatal(e) }
             } finally {
                 if (running) withContext(NonCancellable) {  // clean-up cannot be cancelled
@@ -89,7 +91,9 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
                         try {
                             Os.kill(pid.get(process) as Int, OsConstants.SIGTERM)
                         } catch (e: ErrnoException) {
-                            if (e.errno != OsConstants.ESRCH) throw e
+                            if (e.errno != OsConstants.ESRCH) Timber.w(e)
+                        } catch (e: ReflectiveOperationException) {
+                            Timber.w(e)
                         }
                         if (withTimeoutOrNull(500) { exitChannel.receive() } != null) return@withContext
                     }
@@ -104,12 +108,11 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         }
     }
 
-    private val job = Job()
-    override val coroutineContext get() = Dispatchers.Main + job
+    override val coroutineContext = Dispatchers.Main.immediate + Job()
 
     @MainThread
     fun start(cmd: List<String>, onRestartCallback: (suspend () -> Unit)? = null) {
-        Crashlytics.log(Log.DEBUG, TAG, "start process: " + Commandline.toString(cmd))
+        Timber.i("start process: ${Commandline.toString(cmd)}")
         Guard(cmd).apply {
             start() // if start fails, IOException will be thrown directly
             launch { looper(onRestartCallback) }
@@ -118,7 +121,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
 
     @MainThread
     fun close(scope: CoroutineScope) {
-        job.cancel()
-        scope.launch { job.join() }
+        cancel()
+        coroutineContext[Job]!!.also { job -> scope.launch { job.join() } }
     }
 }

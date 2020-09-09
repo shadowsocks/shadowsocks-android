@@ -5,6 +5,9 @@
         <item android:id="@+id/profiles"
               android:title="@string/profiles"
               android:icon="@drawable/ic_action_description"/>
+        <item android:id="@+id/subscriptions"
+            android:title="@string/subscriptions"
+            android:icon="@drawable/ic_file_cloud_download"/>
         <item android:id="@+id/customRules"
               android:title="@string/custom_rules"
               android:icon="@drawable/ic_action_assignment"/>

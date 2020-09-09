@@ -40,7 +40,7 @@ open class LeanbackSingleListPreferenceDialogFragment : LeanbackListPreferenceDi
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val selected = mInitialSelection.get(this) as? String
-        val index = (mEntryValues.get(this) as? Array<CharSequence?>)?.indexOfFirst { it == selected }
+        val index = (mEntryValues.get(this) as? Array<*>)?.indexOfFirst { selected == it }
         return super.onCreateView(inflater, container, savedInstanceState)!!.also {
             if (index != null) it.findViewById<RecyclerView>(android.R.id.list).layoutManager!!.scrollToPosition(index)
         }

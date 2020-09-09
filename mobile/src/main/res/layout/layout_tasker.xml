@@ -16,9 +16,11 @@
                 android:textSize="18sp"
                 android:padding="16dp"/>
     </FrameLayout>
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/list"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            tools:itemview="@android:layout/select_dialog_singlechoice_material"
-                                            android:scrollbars="vertical"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        tools:itemview="@android:layout/select_dialog_singlechoice_material"/>
 </LinearLayout>

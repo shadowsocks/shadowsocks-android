@@ -118,8 +118,10 @@ class KeyValuePair() {
     fun put(value: Set<String>): KeyValuePair {
         valueType = TYPE_STRING_SET
         val stream = ByteArrayOutputStream()
+        val intBuffer = ByteBuffer.allocate(4)
         for (v in value) {
-            stream.write(ByteBuffer.allocate(4).putInt(v.length).array())
+            intBuffer.rewind()
+            stream.write(intBuffer.putInt(v.length).array())
             stream.write(v.toByteArray())
         }
         this.value = stream.toByteArray()

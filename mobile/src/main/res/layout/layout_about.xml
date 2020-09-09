@@ -4,7 +4,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/about_container">
+    android:id="@+id/about_container"
+    android:fitsSystemWindows="true">
     <include layout="@layout/toolbar_light_dark"/>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

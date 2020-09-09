@@ -33,8 +33,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.resolveResourceId
+import com.github.shadowsocks.widget.ListHolderListener
+import com.github.shadowsocks.widget.ListListener
 
 class UdpFallbackProfileActivity : AppCompatActivity() {
     inner class ProfileViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -60,8 +63,8 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
     }
 
     inner class ProfilesAdapter : RecyclerView.Adapter<ProfileViewHolder>() {
-        internal val profiles = (ProfileManager.getAllProfiles()?.toMutableList() ?: mutableListOf())
-                .filter { it.id != editingId && it.plugin.isNullOrEmpty() }
+        internal val profiles = (ProfileManager.getActiveProfiles()?.toMutableList() ?: mutableListOf())
+                .filter { it.id != editingId && PluginConfiguration(it.plugin ?: "").selected.isEmpty() }
 
         override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) =
                 holder.bind(if (position == 0) null else profiles[position - 1])
@@ -76,24 +79,28 @@ class UdpFallbackProfileActivity : AppCompatActivity() {
     private val profilesAdapter = ProfilesAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (editingId == null) {
             finish()
             return
         }
-        super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_udp_fallback)
+        ListHolderListener.setup(this)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.udp_fallback)
         toolbar.setNavigationIcon(R.drawable.ic_navigation_close)
         toolbar.setNavigationOnClickListener { finish() }
 
-        val profilesList = findViewById<RecyclerView>(R.id.list)
-        val lm = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        profilesList.layoutManager = lm
-        profilesList.itemAnimator = DefaultItemAnimator()
-        profilesList.adapter = profilesAdapter
-        if (DataStore.udpFallback != null)
-            lm.scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.udpFallback } + 1)
+        findViewById<RecyclerView>(R.id.list).apply {
+            setOnApplyWindowInsetsListener(ListListener)
+            itemAnimator = DefaultItemAnimator()
+            adapter = profilesAdapter
+            layoutManager = LinearLayoutManager(this@UdpFallbackProfileActivity, RecyclerView.VERTICAL, false).apply {
+                if (DataStore.udpFallback != null) {
+                    scrollToPosition(profilesAdapter.profiles.indexOfFirst { it.id == DataStore.udpFallback } + 1)
+                }
+            }
+        }
     }
 }

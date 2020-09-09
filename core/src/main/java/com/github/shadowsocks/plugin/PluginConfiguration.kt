@@ -20,14 +20,13 @@
 
 package com.github.shadowsocks.plugin
 
-import android.util.Log
-import com.crashlytics.android.Crashlytics
 import com.github.shadowsocks.utils.Commandline
+import timber.log.Timber
 import java.util.*
 
 class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val selected: String) {
     private constructor(plugins: List<PluginOptions>) : this(
-            plugins.filter { it.id.isNotEmpty() }.associate { it.id to it },
+            plugins.filter { it.id.isNotEmpty() }.associateBy { it.id },
             if (plugins.isEmpty()) "" else plugins[0].id)
     constructor(plugin: String) : this(plugin.split('\n').map { line ->
         if (line.startsWith("kcptun ")) {
@@ -44,20 +43,21 @@ class PluginConfiguration(val pluginsOptions: Map<String, PluginOptions>, val se
                     }
                 }
             } catch (exc: Exception) {
-                Crashlytics.log(Log.WARN, "PluginConfiguration", exc.message)
+                Timber.w(exc)
             }
             opt
         } else PluginOptions(line)
     })
 
-    fun getOptions(id: String): PluginOptions = if (id.isEmpty()) PluginOptions() else
-        pluginsOptions[id] ?: PluginOptions(id, PluginManager.fetchPlugins()[id]?.defaultConfig)
-    val selectedOptions: PluginOptions get() = getOptions(selected)
+    fun getOptions(
+            id: String = selected,
+            defaultConfig: () -> String? = { PluginManager.fetchPlugins().lookup[id]?.defaultConfig }
+    ) = if (id.isEmpty()) PluginOptions() else pluginsOptions[id] ?: PluginOptions(id, defaultConfig())
 
     override fun toString(): String {
         val result = LinkedList<PluginOptions>()
         for ((id, opt) in pluginsOptions) if (id == this.selected) result.addFirst(opt) else result.addLast(opt)
-        if (!pluginsOptions.contains(selected)) result.addFirst(selectedOptions)
+        if (!pluginsOptions.contains(selected)) result.addFirst(getOptions())
         return result.joinToString("\n") { it.toString(false) }
     }
 }
