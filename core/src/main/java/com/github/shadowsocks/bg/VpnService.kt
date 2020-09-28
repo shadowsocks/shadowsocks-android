@@ -215,7 +215,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                 "--socks-server-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
                 "--tunmtu", VPN_MTU.toString(),
                 "--sock-path", "sock_path",
-                "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
+                "--dnsgw", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
                 "--loglevel", "warning")
         if (profile.ipv6) {
             cmd += "--netif-ip6addr"

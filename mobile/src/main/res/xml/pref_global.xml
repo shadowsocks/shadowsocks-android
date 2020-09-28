@@ -30,6 +30,9 @@
         app:icon="@drawable/ic_action_dns"
         app:title="@string/port_local_dns"
         app:useSimpleSummaryProvider="true"/>
+    <SwitchPreference
+        app:key="shareOverLan"
+        app:title="@string/share_over_lan"/>
     <EditTextPreference
         app:key="portTransproxy"
         app:title="@string/port_transproxy"
