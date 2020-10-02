@@ -118,9 +118,15 @@ object PluginManager {
             .build()
     fun buildIntent(id: String, action: String): Intent = Intent(action, buildUri(id))
 
+    data class InitResult(
+            val path: String,
+            val options: PluginOptions,
+            val isV2: Boolean = false,
+    )
+
     // the following parts are meant to be used by :bg
     @Throws(Throwable::class)
-    fun init(configuration: PluginConfiguration): Pair<String, PluginOptions>? {
+    fun init(configuration: PluginConfiguration): InitResult? {
         if (configuration.selected.isEmpty()) return null
         var throwable: Throwable? = null
 
@@ -136,7 +142,7 @@ object PluginManager {
         throw throwable ?: PluginNotFoundException(configuration.selected)
     }
 
-    private fun initNative(configuration: PluginConfiguration): Pair<String, PluginOptions>? {
+    private fun initNative(configuration: PluginConfiguration): InitResult? {
         var flags = PackageManager.GET_META_DATA
         if (Build.VERSION.SDK_INT >= 24) {
             flags = flags or PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
@@ -152,9 +158,11 @@ object PluginManager {
         }
         val provider = providers.single().providerInfo
         val options = configuration.getOptions { provider.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
+        val isV2 = (provider.applicationInfo.metaData?.getString(PluginContract.METADATA_KEY_VERSION)
+                ?.substringBefore('.')?.toIntOrNull() ?: 0) >= 2
         var failure: Throwable? = null
         try {
-            initNativeFaster(provider)?.also { return it to options }
+            initNativeFaster(provider)?.also { return InitResult(it, options, isV2) }
         } catch (t: Throwable) {
             Timber.w("Initializing native plugin faster mode failed")
             failure = t
@@ -165,7 +173,7 @@ object PluginManager {
             authority(provider.authority)
         }.build()
         try {
-            return initNativeFast(app.contentResolver, options, uri)?.let { it to options }
+            return initNativeFast(app.contentResolver, options, uri)?.let { InitResult(it, options, isV2) }
         } catch (t: Throwable) {
             Timber.w("Initializing native plugin fast mode failed")
             failure?.also { t.addSuppressed(it) }
@@ -173,7 +181,7 @@ object PluginManager {
         }
 
         try {
-            return initNativeSlow(app.contentResolver, options, uri)?.let { it to options }
+            return initNativeSlow(app.contentResolver, options, uri)?.let { InitResult(it, options, isV2) }
         } catch (t: Throwable) {
             failure?.also { t.addSuppressed(it) }
             throw t
