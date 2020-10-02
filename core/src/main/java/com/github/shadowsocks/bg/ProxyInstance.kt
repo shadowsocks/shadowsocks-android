@@ -102,8 +102,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         this.configFile = configFile
         val config = profile.toJson()
-        plugin?.let { (path, opts) ->
-            if (service.isVpnService) opts["V"] = ""
+        plugin?.let { (path, opts, isV2) ->
+            if (service.isVpnService) opts["V"] = if (isV2) "" else "true"
             config.put("plugin", path).put("plugin_opts", opts.toString())
         }
         config.put("local_address", DataStore.listenAddress)
