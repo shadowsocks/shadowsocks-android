@@ -158,8 +158,8 @@ object PluginManager {
         }
         val provider = providers.single().providerInfo
         val options = configuration.getOptions { provider.loadString(PluginContract.METADATA_KEY_DEFAULT_CONFIG) }
-        val isV2 = (provider.applicationInfo.metaData?.getString(PluginContract.METADATA_KEY_VERSION)
-                ?.substringBefore('.')?.toIntOrNull() ?: 0) >= 2
+        val isV2 = provider.applicationInfo.metaData?.getString(PluginContract.METADATA_KEY_VERSION)
+                ?.substringBefore('.')?.toIntOrNull() ?: 0 >= 2
         var failure: Throwable? = null
         try {
             initNativeFaster(provider)?.also { return InitResult(it, options, isV2) }
