@@ -1,6 +1,6 @@
 * 2.0.0:
   * Deprecated passing `-V` and `--fast-open` to plugin.
-    Please find `V` option passed via plugin options.
+    Please find `__android_vpn` option passed via plugin options.
   * Dependency updates:
     - `androidx.core:core-ktx:1.3.2`;
     - `androidx.drawerlayout:drawerlayout:1.1.1`;
