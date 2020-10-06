@@ -72,7 +72,6 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     }
 
     private fun setStatus(text: CharSequence) {
-
         TextViewCompat.setAutoSizeTextTypeWithDefaults(statusText,
                 TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE)
         statusText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
