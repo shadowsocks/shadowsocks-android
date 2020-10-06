@@ -23,11 +23,13 @@ package com.github.shadowsocks.widget
 import android.content.Context
 import android.text.format.Formatter
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.widget.TextViewCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import com.github.shadowsocks.MainActivity
@@ -41,7 +43,7 @@ import kotlinx.coroutines.launch
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
         BottomAppBar(context, attrs, defStyleAttr) {
-    private lateinit var statusText: TextView
+    private lateinit var statusText: androidx.appcompat.widget.AppCompatTextView
     private lateinit var txText: TextView
     private lateinit var rxText: TextView
     private lateinit var txRateText: TextView
@@ -70,7 +72,16 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
     }
 
     private fun setStatus(text: CharSequence) {
+
+        TextViewCompat.setAutoSizeTextTypeWithDefaults(statusText,
+                TextViewCompat.AUTO_SIZE_TEXT_TYPE_NONE)
+        statusText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
         statusText.text = text
+        statusText.post {
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(statusText,
+                            1, 16, 1, TypedValue.COMPLEX_UNIT_SP)
+        }
+
         TooltipCompat.setTooltipText(this, text)
     }
 
