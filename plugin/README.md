@@ -45,12 +45,10 @@ First you need to get your native binary compiling on Android platform.
 * [Sample project for C](https://github.com/shadowsocks/simple-obfs-android/tree/4f82c4a4e415d666e70a7e2e60955cb0d85c1615);
 * [Sample project for Go](https://github.com/shadowsocks/v2ray-plugin-android/tree/172bd4cec0276112828614482fb646b79dbf1540).
 
-In addition to functionalities of a normal plugin, it has to support these additional flags that
- may get passed through arguments:
+In addition to functionalities of a normal plugin, it has to support these additional options:
 
-* `-V`: VPN mode. In this case, the plugin should pass all file descriptors that needs protecting
-  from VPN connections (i.e. its traffic will not be forwarded through the VPN) through an
-  ancillary message to `./protect_path`.
+* `__android_vpn`: VPN mode.
+  In this case, the plugin should pass all file descriptors that needs protecting from VPN connections (i.e. its traffic will not be forwarded through the VPN) through an ancillary message to `./protect_path`.
 
 ### Implement a binary provider
 

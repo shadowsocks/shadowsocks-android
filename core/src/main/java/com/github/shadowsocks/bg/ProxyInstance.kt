@@ -40,6 +40,7 @@ import java.io.File
 import java.io.IOException
 import java.net.*
 import java.security.MessageDigest
+import org.json.JSONArray
 
 /**
  * This class sets up environment for ss-local.
@@ -102,8 +103,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         this.configFile = configFile
         val config = profile.toJson()
-        plugin?.let { (path, opts) ->
-            if (service.isVpnService) opts["V"] = ""
+        plugin?.let { (path, opts, isV2) ->
+            if (service.isVpnService) {
+                if (isV2) opts["__android_vpn"] = "" else config.put("plugin_args", JSONArray(arrayOf("-V")))
+            }
             config.put("plugin", path).put("plugin_opts", opts.toString())
         }
         config.put("local_address", DataStore.listenAddress)
