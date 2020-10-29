@@ -1,5 +1,5 @@
 ## [Shadowsocks](https://shadowsocks.org) for Android
-### Shadowsocks is a secure [socks5](https://en.wikipedia.org/wiki/SOCKS#SOCKS5) proxy, designed to protect your Internet traffic.  It is available on multiple platforms, but this repository is for the Android platform specifically.  Before installing Shadowsocks, please read our [privacy policy](https://github.com/shadowsocks/shadowsocks-android/blob/master/privacy_policy.md).
+Shadowsocks is a secure [socks5](https://en.wikipedia.org/wiki/SOCKS#SOCKS5) proxy, designed to protect your Internet traffic.  It is available on multiple platforms, but this repository is for the Android platform specifically.  Before installing Shadowsocks, please read our [privacy policy](https://github.com/shadowsocks/shadowsocks-android/blob/master/privacy_policy.md).
 
 [![CircleCI](https://circleci.com/gh/shadowsocks/shadowsocks-android.svg?style=shield)](https://circleci.com/gh/shadowsocks/shadowsocks-android)
 [![API](https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=23)
