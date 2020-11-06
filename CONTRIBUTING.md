@@ -13,8 +13,9 @@
 ## Making Contributions
 
 * Make sure that the contribution you plan to make has been logged as an issue.
-* Fork the repo, clone it and code!  NOTE:
+* Fork the repo, clone it and code!  NOTE: 
     * Please limit fixes to the issue at hand.  Make separate pull requests for other issues.
+    * This project utilizes [Codacy](https://docs.codacy.com/) for linting. Linting issues will show in the gradle build log. Please stick to the lint guidelines as closely as possible. If a linting issue cannot be resolved, please note it in the pull request.  To see the lint parameters, please see [detekt.yaml](https://github.com/shadowsocks/shadowsocks-android/blob/master/detekt.yml).
     * Comment your code as needed for clarity.
     * Utilize descriptive variable names, single purpose functions and other clean coding practices.
     * Use descriptive commit and PR comments.
