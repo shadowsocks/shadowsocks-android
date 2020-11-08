@@ -4,13 +4,13 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.util.*
-
-const val lifecycleVersion = "2.3.0-beta01"
 
 private val flavorRegex = "(assemble|generate)\\w*(Release|Debug)".toRegex()
 val Project.currentFlavor
@@ -19,6 +19,16 @@ val Project.currentFlavor
             println("Warning: No match found for $task")
         }
     }
+
+fun DependencyHandler.api(vararg names: Any): Array<Dependency?> =
+    names.map {
+        add("api", it)
+    }.toTypedArray()
+
+fun DependencyHandler.implementation(vararg names: Any): Array<Dependency?> =
+    names.map {
+        add("implementation", it)
+    }.toTypedArray()
 
 fun Project.setupCommon(): BaseExtension {
     return extensions.getByName<BaseExtension>("android").apply {
@@ -66,7 +76,7 @@ fun Project.setupCore(): BaseExtension {
         }
         ndkVersion = "21.3.6528147"
 
-        dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.1.0")
+        dependencies.add("coreLibraryDesugaring", Libs.desugar)
     }
 }
 

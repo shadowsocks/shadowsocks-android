@@ -1,10 +1,10 @@
 plugins {
-    id("com.android.application")
+    id(Plugins.androidApplication)
+    id(Plugins.kotlinAndroid)
+    id(Plugins.kotlinKapt)
     id("com.google.android.gms.oss-licenses-plugin")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
-    kotlin("android")
-    kotlin("kapt")
 }
 
 setupApp().run {

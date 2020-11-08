@@ -1,8 +1,8 @@
 plugins {
-    id("com.android.library")
+    id(Plugins.androidLibrary)
+    id(Plugins.kotlinAndroid)
+    id(Plugins.kotlinExtensions)
     id("com.vanniktech.maven.publish")
-    kotlin("android")
-    kotlin("android.extensions")
 }
 
 setupCommon().run {
@@ -20,8 +20,7 @@ mavenPublish.targets.getByName("uploadArchives") {
 }
 
 dependencies {
-    api("androidx.core:core-ktx:1.3.2")
-    // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
-    api("androidx.drawerlayout:drawerlayout:1.1.1")
-    api("com.google.android.material:material:1.2.1")
+    api(Libs.core)
+    api(Libs.drawerLayout)
+    api(Libs.material)
 }
