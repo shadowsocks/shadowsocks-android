@@ -7,9 +7,9 @@ plugins {
     kotlin("kapt")
 }
 
-setupApp()
-
-android.defaultConfig.applicationId = "com.github.shadowsocks.tv"
+setupApp().run {
+    defaultConfig.applicationId = "com.github.shadowsocks.tv"
+}
 
 dependencies {
     implementation("androidx.leanback:leanback-preference:1.1.0-alpha05")

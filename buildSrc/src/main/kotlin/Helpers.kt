@@ -1,4 +1,3 @@
-
 import com.android.build.VariantOutput
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
@@ -13,17 +12,16 @@ import java.util.*
 
 const val lifecycleVersion = "2.3.0-beta01"
 
-private val Project.android get() = extensions.getByName<BaseExtension>("android")
-
 private val flavorRegex = "(assemble|generate)\\w*(Release|Debug)".toRegex()
-val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().let { task ->
-    flavorRegex.find(task)?.groupValues?.get(2)?.toLowerCase(Locale.ROOT) ?: "debug".also {
-        println("Warning: No match found for $task")
+val Project.currentFlavor
+    get() = gradle.startParameter.taskRequests.toString().let { task ->
+        flavorRegex.find(task)?.groupValues?.get(2)?.toLowerCase(Locale.ROOT) ?: "debug".also {
+            println("Warning: No match found for $task")
+        }
     }
-}
 
-fun Project.setupCommon() {
-    android.apply {
+fun Project.setupCommon(): BaseExtension {
+    return extensions.getByName<BaseExtension>("android").apply {
         buildToolsVersion("30.0.2")
         compileSdkVersion(30)
         defaultConfig {
@@ -41,20 +39,21 @@ fun Project.setupCommon() {
             warning("ImpliedQuantity")
             informational("MissingTranslation")
         }
-        (this as ExtensionAware).extensions.getByName<KotlinJvmOptions>("kotlinOptions").jvmTarget =
-                javaVersion.toString()
-    }
+        (this as ExtensionAware).extensions.getByName<KotlinJvmOptions>("kotlinOptions").run {
+            jvmTarget = javaVersion.toString()
+            useIR = true
+        }
 
-    dependencies {
-        add("testImplementation", "junit:junit:4.13")
-        add("androidTestImplementation", "androidx.test:runner:1.3.0")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.3.0")
+        dependencies {
+            add("testImplementation", "junit:junit:4.13")
+            add("androidTestImplementation", "androidx.test:runner:1.3.0")
+            add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.3.0")
+        }
     }
 }
 
-fun Project.setupCore() {
-    setupCommon()
-    android.apply {
+fun Project.setupCore(): BaseExtension {
+    return setupCommon().apply {
         defaultConfig {
             versionCode = 5010450
             versionName = "5.1.4-nightly"
@@ -66,16 +65,28 @@ fun Project.setupCore() {
             disable("UseAppTint")
         }
         ndkVersion = "21.3.6528147"
+
+        dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.1.0")
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.0.9")
 }
 
 private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
-fun Project.setupApp() {
-    setupCore()
-
-    android.apply {
-        defaultConfig.resConfigs(listOf("ar", "es", "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"))
+fun Project.setupApp(): BaseExtension {
+    return setupCore().apply {
+        defaultConfig.resConfigs(
+            listOf(
+                "ar",
+                "es",
+                "fa",
+                "fr",
+                "ja",
+                "ko",
+                "ru",
+                "tr",
+                "zh-rCN",
+                "zh-rTW"
+            )
+        )
         buildTypes {
             getByName("debug") {
                 isPseudoLocalesEnabled = true
@@ -94,15 +105,13 @@ fun Project.setupApp() {
             isEnable = true
             isUniversalApk = true
         }
-    }
-
-    dependencies.add("implementation", project(":core"))
-
-    if (currentFlavor == "release") (android as AbstractAppExtension).applicationVariants.all {
-        for (output in outputs) {
-            abiCodes[(output as ApkVariantOutputImpl).getFilter(VariantOutput.ABI)]?.let { offset ->
-                output.versionCodeOverride = versionCode + offset
+        if (currentFlavor == "release") (this as AbstractAppExtension).applicationVariants.all {
+            for (output in outputs) {
+                abiCodes[(output as ApkVariantOutputImpl).getFilter(VariantOutput.ABI)]?.let { offset ->
+                    output.versionCodeOverride = versionCode + offset
+                }
             }
         }
+        dependencies.add("implementation", project(":core"))
     }
 }

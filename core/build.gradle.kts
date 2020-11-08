@@ -8,9 +8,7 @@ plugins {
     kotlin("kapt")
 }
 
-setupCore()
-
-android {
+setupCore().run {
     defaultConfig {
         consumerProguardFiles("proguard-rules.pro")
 
@@ -19,9 +17,12 @@ android {
             arguments("-j${Runtime.getRuntime().availableProcessors()}")
         }
 
-        javaCompileOptions.annotationProcessorOptions.arguments(mapOf(
+        javaCompileOptions.annotationProcessorOptions.arguments(
+            mapOf(
                 "room.incremental" to "true",
-                "room.schemaLocation" to "$projectDir/schemas"))
+                "room.schemaLocation" to "$projectDir/schemas"
+            )
+        )
     }
 
     externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
@@ -67,13 +68,13 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.3.9"
+    val coroutinesVersion = "1.4.0"
     val roomVersion = "2.2.5"
     val workVersion = "2.4.0"
 
     api(project(":plugin"))
     api("androidx.appcompat:appcompat:1.2.0")
-    api("androidx.core:core-ktx:1.4.0-alpha01")
+    api("androidx.core:core-ktx:1.5.0-alpha04")
 
     api("androidx.fragment:fragment-ktx:1.3.0-beta01")
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
@@ -84,8 +85,8 @@ dependencies {
     api("androidx.work:work-gcm:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.8.6")
-    api("com.google.firebase:firebase-analytics-ktx:17.5.0")
-    api("com.google.firebase:firebase-config-ktx:19.2.0")
+    api("com.google.firebase:firebase-analytics-ktx:18.0.0")
+    api("com.google.firebase:firebase-config-ktx:20.0.0")
     api("com.google.firebase:firebase-crashlytics:17.2.2")
     api("com.jakewharton.timber:timber:4.7.1")
     api("dnsjava:dnsjava:3.3.0")

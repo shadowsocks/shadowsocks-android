@@ -5,9 +5,7 @@ plugins {
     kotlin("android.extensions")
 }
 
-setupCommon()
-
-android {
+setupCommon().run {
     defaultConfig {
         versionCode = findProperty("VERSION_CODE").toString().toInt()
         versionName = findProperty("VERSION_NAME").toString()
