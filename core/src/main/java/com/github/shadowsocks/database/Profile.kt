@@ -101,7 +101,7 @@ data class Profile(
 
     companion object {
         private const val serialVersionUID = 1L
-        private const val sponsored = "198.199.101.152"
+        private const val sponsored = "example.shadowsocks.org"
         private val pattern =
                 """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;_\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
