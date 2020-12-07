@@ -33,6 +33,7 @@ import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
+import androidx.core.view.ViewCompat
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
@@ -43,10 +44,10 @@ class AboutFragment : ToolbarFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.setOnApplyWindowInsetsListener(ListHolderListener)
+        ViewCompat.setOnApplyWindowInsetsListener(view, ListHolderListener)
         toolbar.title = getString(R.string.about_title, BuildConfig.VERSION_NAME)
         view.findViewById<TextView>(R.id.tv_about).apply {
-            setOnApplyWindowInsetsListener(MainListListener)
+            ViewCompat.setOnApplyWindowInsetsListener(this, MainListListener)
             text = SpannableStringBuilder(resources.openRawResource(R.raw.about).bufferedReader().readText()
                     .parseAsHtml(HtmlCompat.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM)).apply {
                 for (span in getSpans(0, length, URLSpan::class.java)) {

@@ -24,6 +24,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.ViewCompat
 import com.github.shadowsocks.widget.ListHolderListener
 
 class GlobalSettingsFragment : ToolbarFragment() {
@@ -32,7 +33,7 @@ class GlobalSettingsFragment : ToolbarFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.setOnApplyWindowInsetsListener(ListHolderListener)
+        ViewCompat.setOnApplyWindowInsetsListener(view, ListHolderListener)
         toolbar.setTitle(R.string.settings)
     }
 }

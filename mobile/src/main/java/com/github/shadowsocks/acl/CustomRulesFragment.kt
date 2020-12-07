@@ -36,6 +36,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -378,7 +380,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.setOnApplyWindowInsetsListener(ListHolderListener)
+        ViewCompat.setOnApplyWindowInsetsListener(view, ListHolderListener)
         if (savedInstanceState != null) {
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
                     ?.mapNotNull { Subnet.fromString(it) } ?: listOf())
@@ -393,7 +395,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         toolbar.setOnMenuItemClickListener(this)
         val activity = activity as MainActivity
         list = view.findViewById(R.id.list)
-        list.setOnApplyWindowInsetsListener(MainListListener)
+        ViewCompat.setOnApplyWindowInsetsListener(list, MainListListener)
         list.layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         list.itemAnimator = DefaultItemAnimator()
         list.adapter = adapter
@@ -496,7 +498,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         // for dark mode, it's roughly 850? (#303030)
         val colorId = if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
                 Configuration.UI_MODE_NIGHT_YES) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
             R.color.material_grey_300
         } else android.R.color.black
         window.statusBarColor = ContextCompat.getColor(activity, colorId)
@@ -530,7 +532,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         val window = activity.window
         window.statusBarColor = ContextCompat.getColor(activity,
                 activity.theme.resolveResourceId(android.R.attr.statusBarColor))
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
         toolbar.touchscreenBlocksFocus = false
         selectedItems.clear()
         onSelectedItemsUpdated()
