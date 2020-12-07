@@ -22,6 +22,7 @@ mavenPublish.targets.getByName("uploadArchives") {
 }
 
 dependencies {
+    api(kotlin("stdlib-jdk8"))
     api("androidx.core:core-ktx:1.3.2")
     // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
     api("androidx.drawerlayout:drawerlayout:1.1.1")
