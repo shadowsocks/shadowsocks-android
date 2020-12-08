@@ -21,8 +21,6 @@
 package com.github.shadowsocks.bg
 
 import android.content.Context
-import android.util.Base64
-import com.github.shadowsocks.Core
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
 import com.github.shadowsocks.database.Profile
@@ -30,16 +28,13 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.parseNumericAddress
-import com.github.shadowsocks.utils.signaturesCompat
-import com.github.shadowsocks.utils.useCancellable
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import java.io.File
 import java.io.IOException
-import java.net.*
-import java.security.MessageDigest
-import org.json.JSONArray
+import java.net.URI
+import java.net.URISyntaxException
+import java.net.UnknownHostException
 
 /**
  * This class sets up environment for ss-local.
@@ -48,7 +43,6 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
-    private var scheduleConfigUpdate = false
 
     suspend fun init(service: BaseService.Interface) {
         // it's hard to resolve DNS on a specific interface so we'll do it here

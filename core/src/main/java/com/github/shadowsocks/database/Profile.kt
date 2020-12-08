@@ -54,7 +54,7 @@ data class Profile(
         // user configurable fields
         var name: String? = "",
 
-        var host: String = sponsored,
+        var host: String = "example.shadowsocks.org",
         var remotePort: Int = 8388,
         var password: String = "u1rRWTssNv0p",
         var method: String = "aes-256-cfb",
@@ -101,7 +101,6 @@ data class Profile(
 
     companion object {
         private const val serialVersionUID = 1L
-        private const val sponsored = "example.shadowsocks.org"
         private val pattern =
                 """(?i)ss://[-a-zA-Z0-9+&@#/%?=.~*'()|!:,;_\[\]]*[-a-zA-Z0-9+&@#/%=.~*'()|\[\]]""".toRegex()
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
@@ -338,8 +337,6 @@ data class Profile(
         val fallback = profiles.get(udpFallback ?: return@apply)
         if (fallback != null && fallback.plugin.isNullOrEmpty()) fallback.toJson().also { put("udp_fallback", it) }
     }
-
-    val isSponsored get() = host == sponsored
 
     fun serialize() {
         DataStore.editingId = id
