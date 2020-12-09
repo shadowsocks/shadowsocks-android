@@ -1,4 +1,4 @@
-# https://github.com/arturbosch/detekt/blob/v1.10.0/detekt-core/src/main/resources/default-detekt-config.yml
+# https://github.com/detekt/detekt/blob/v1.14.2/detekt-core/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -39,6 +39,8 @@ complexity:
   NestedBlockDepth:
     active: true
     threshold: 4
+  ReplaceSafeCallChainWithRun:
+    active: true
   StringLiteralDuplication:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
@@ -63,6 +65,8 @@ coroutines:
   GlobalCoroutineUsage:
     active: false
   RedundantSuspendModifier:
+    active: true
+  SuspendFunWithFlowReturnType:
     active: true
 
 empty-blocks:
@@ -130,6 +134,7 @@ exceptions:
     active: true
   ThrowingExceptionsWithoutMessageOrCause:
     active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     exceptions:
       - IllegalArgumentException
       - IllegalStateException
@@ -151,6 +156,11 @@ formatting:
   android: true
   autoCorrect: true
   AnnotationOnSeparateLine:
+    active: false
+  AnnotationSpacing:
+    active: true
+    autoCorrect: true
+  ArgumentListWrapping:
     active: false
   ChainWrapping:
     active: true
@@ -302,6 +312,9 @@ naming:
     mustBeFirst: true
   MemberNameEqualsClassName:
     active: false
+  NonBooleanPropertyPrefixedWithIs:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
   ObjectPropertyNaming:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
@@ -378,6 +391,8 @@ potential-bugs:
     active: true
   MissingWhenCase:
     active: false
+  NullableToStringCall:
+    active: true
   RedundantElseInWhen:
     active: true
   UnconditionalJumpStatementInLoop:
@@ -399,6 +414,8 @@ potential-bugs:
 
 style:
   active: true
+  ClassOrdering:
+    active: false
   CollapsibleIfStatements:
     active: true
   DataClassContainsFunctions:
@@ -440,6 +457,8 @@ style:
     excludedFunctions: 'describeContents'
     excludeAnnotatedFunction: ['dagger.Provides']
   LibraryCodeMustSpecifyReturnType:
+    active: true
+  LibraryEntitiesShouldNotBePublic:
     active: true
   LoopWithTooManyJumpStatements:
     active: true
@@ -518,13 +537,19 @@ style:
     allowedNames: '(_|ignored|expected|serialVersionUID)'
   UseArrayLiteralsInAnnotations:
     active: true
+  UseCheckNotNull:
+    active: true
   UseCheckOrError:
     active: true
   UseDataClass:
     active: false
+  UseEmptyCounterpart:
+    active: true
   UseIfInsteadOfWhen:
     active: false
   UseRequire:
+    active: true
+  UseRequireNotNull:
     active: true
   UselessCallOnNotNull:
     active: true
