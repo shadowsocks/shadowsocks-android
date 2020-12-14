@@ -45,6 +45,7 @@ cargo {
             "aes-ctr",
             "camellia-cfb",
             "openssl-vendored",
+            "single-threaded",
             "local-flow-stat",
             "local-dns-relay"))
     exec = { spec, toolchain ->
