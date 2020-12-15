@@ -32,6 +32,8 @@ object ListHolderListener : OnApplyWindowInsetsListener {
         view.setPadding(statusBarInsets.left, statusBarInsets.top, statusBarInsets.right, statusBarInsets.bottom)
         return WindowInsetsCompat.Builder(insets).apply {
             setInsets(WindowInsetsCompat.Type.statusBars(), Insets.NONE)
+            setInsets(WindowInsetsCompat.Type.navigationBars(),
+                    insets.getInsets(WindowInsetsCompat.Type.navigationBars()))
         }.build()
     }
 
