@@ -20,7 +20,7 @@ dependencies {
     implementation("androidx.camera:camera-view:1.0.0-alpha19")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("com.google.mlkit:barcode-scanning:16.0.3")
+    implementation("com.google.mlkit:barcode-scanning:16.1.0")
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.takisoft.preferencex:preferencex-simplemenu:1.1.0")
     implementation("com.twofortyfouram:android-plugin-api-for-locale:1.0.4")
