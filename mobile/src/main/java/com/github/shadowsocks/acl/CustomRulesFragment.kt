@@ -23,7 +23,6 @@ package com.github.shadowsocks.acl
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -37,7 +36,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -493,15 +491,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
         val activity = requireActivity()
-        val window = activity.window
-        // In the end material_grey_100 is used for background, see AppCompatDrawableManager (very complicated)
-        // for dark mode, it's roughly 850? (#303030)
-        val colorId = if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK !=
-                Configuration.UI_MODE_NIGHT_YES) {
-            WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
-            R.color.material_grey_300
-        } else android.R.color.black
-        window.statusBarColor = ContextCompat.getColor(activity, colorId)
+        activity.window.statusBarColor = ContextCompat.getColor(activity, android.R.color.black)
         activity.menuInflater.inflate(R.menu.custom_rules_selection, menu)
         toolbar.touchscreenBlocksFocus = true
         return true
@@ -529,10 +519,8 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     }
     override fun onDestroyActionMode(mode: ActionMode) {
         val activity = requireActivity()
-        val window = activity.window
-        window.statusBarColor = ContextCompat.getColor(activity,
+        activity.window.statusBarColor = ContextCompat.getColor(activity,
                 activity.theme.resolveResourceId(android.R.attr.statusBarColor))
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
         toolbar.touchscreenBlocksFocus = false
         selectedItems.clear()
         onSelectedItemsUpdated()
