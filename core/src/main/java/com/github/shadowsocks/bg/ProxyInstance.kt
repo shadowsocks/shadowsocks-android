@@ -79,7 +79,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                 "--stat-path", stat.absolutePath,
                 "-c", configFile.absolutePath,
-                "--udp-bind-addr", "127.0.0.1:1111",
+                "--udp-bind-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
         )
         if (service.isVpnService) cmd += arrayListOf("--vpn")
         if (extraFlag != null) cmd.add(extraFlag)
