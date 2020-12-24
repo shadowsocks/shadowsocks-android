@@ -224,8 +224,8 @@ object BaseService {
         fun forceLoad() {
             val (profile, fallback) = Core.currentProfile
                     ?: return stopRunner(false, (this as Context).getString(R.string.profile_empty))
-            if (profile.host.isEmpty() || profile.password.isEmpty() ||
-                    fallback != null && (fallback.host.isEmpty() || fallback.password.isEmpty())) {
+            if (profile.host.isEmpty() || (!profile.method.equals("none") && profile.password.isEmpty()) ||
+                    fallback != null && (fallback.host.isEmpty() || (!fallback.method.equals("none") && fallback.password.isEmpty()))) {
                 stopRunner(false, (this as Context).getString(R.string.proxy_empty))
                 return
             }
