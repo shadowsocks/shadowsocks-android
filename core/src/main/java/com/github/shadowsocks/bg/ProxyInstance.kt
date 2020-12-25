@@ -90,8 +90,8 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             throw BaseService.ExpectedExceptionWrapper(e)
         }.let { dns ->
             cmd += arrayListOf(
-                    "--dns-relay", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
-                    "--remote-dns", "${dns.host ?: "0.0.0.0"}:${if (dns.port < 0) 53 else dns.port}")
+                    "--dns-addr", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
+                    "--remote-dns-addr", "${dns.host ?: "0.0.0.0"}:${if (dns.port < 0) 53 else dns.port}")
         }
 
         if (route != Acl.ALL) {
