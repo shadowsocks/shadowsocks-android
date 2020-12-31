@@ -7,11 +7,10 @@ jobs:
     environment:
       GRADLE_OPTS: -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process"
     steps:
-      - run: rustup toolchain install nightly-2020-12-20
-      - run: rustup override set nightly-2020-12-20
-      - run: rustup target install armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
       - checkout
       - run: git submodule update --init --recursive
+      - run: rustup update
+      - run: cd core/src/main/rust/shadowsocks-rust && rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
       - restore_cache:
           key: jars-{{ checksum "build.gradle.kts" }}
       - run:
