@@ -42,7 +42,7 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray, por
                 }
             }?.let { r ->
                 try {
-                    val response = ByteBuffer.allocate(1024)
+                    val response = ByteBuffer.allocate(r.size)
                     response.clear()
                     response.put(r)
                     response.flip()

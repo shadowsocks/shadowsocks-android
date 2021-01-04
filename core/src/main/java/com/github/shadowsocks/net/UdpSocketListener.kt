@@ -51,7 +51,7 @@ abstract class UdpSocketListener(name: String, val port: Int) : Thread(name) {
         udpChannel.use {
             while (running) {
                 try {
-                    val query = ByteBuffer.allocate(1024)
+                    val query = ByteBuffer.allocate(65536)
                     query.clear()
                     udpChannel.receive(query)?.let { handle(udpChannel, it, query) }
                 } catch (e: IOException) {
