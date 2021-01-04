@@ -38,7 +38,7 @@ cargo {
     profile = findProperty("CARGO_PROFILE")?.toString() ?: currentFlavor
     extraCargoBuildArguments = listOf("--bin", libname!!)
     featureSpec.noDefaultBut(arrayOf(
-            "single-threaded",
+            "logging",
             "local-flow-stat",
             "local-dns"))
     exec = { spec, toolchain ->
