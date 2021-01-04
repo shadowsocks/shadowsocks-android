@@ -253,7 +253,7 @@ object BaseService {
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
                     "-u", false)
-            data.localDns = LocalDnsWorker(this::rawResolver, DataStore.portLocalDns + 1).apply { start() }
+            data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
         fun startRunner() {
