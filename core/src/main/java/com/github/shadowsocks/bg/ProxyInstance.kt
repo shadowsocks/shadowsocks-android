@@ -91,7 +91,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }.let { dns ->
             cmd += arrayListOf(
                     "--dns-addr", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
-                    "--local-dns-addr", "127.0.0.1:${DataStore.portLocalDns + 1}",
+                    "--local-dns-addr", "local_dns_path",
                     "--remote-dns-addr", "${dns.host ?: "0.0.0.0"}:${if (dns.port < 0) 53 else dns.port}")
         }
 
