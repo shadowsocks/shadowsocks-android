@@ -4,11 +4,14 @@
         <item>NONE</item>
         <item>RC4-MD5</item>
         <item>AES-128-CFB</item>
+        <item>AES-192-CFB</item>
         <item>AES-256-CFB</item>
         <item>AES-128-CTR</item>
+        <item>AES-192-CTR</item>
         <item>AES-256-CTR</item>
         <item>BF-CFB</item>
         <item>CAMELLIA-128-CFB</item>
+        <item>CAMELLIA-192-CFB</item>
         <item>CAMELLIA-256-CFB</item>
         <item>SALSA20</item>
         <item>CHACHA20</item>
@@ -22,11 +25,14 @@
         <item>none</item>
         <item>rc4-md5</item>
         <item>aes-128-cfb</item>
+        <item>aes-192-cfb</item>
         <item>aes-256-cfb</item>
         <item>aes-128-ctr</item>
+        <item>aes-192-ctr</item>
         <item>aes-256-ctr</item>
         <item>bf-cfb</item>
         <item>camellia-128-cfb</item>
+        <item>camellia-192-cfb</item>
         <item>camellia-256-cfb</item>
         <item>salsa20</item>
         <item>chacha20</item>

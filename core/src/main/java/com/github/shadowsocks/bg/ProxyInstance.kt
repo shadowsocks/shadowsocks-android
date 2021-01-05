@@ -53,6 +53,13 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
                 throw UnknownHostException().initCause(e)
             }?.hostAddress ?: throw UnknownHostException()
         }
+        // check the crypto
+        if (profile.method == "xchacha20-ietf-poly1305") {
+            throw IllegalArgumentException("cipher xchacha20-ietf-poly1305 is deprecated.")
+        }
+        if (profile.method == "aes-192-gcm") {
+            throw IllegalArgumentException("cipher aes-192-gcm is deprecated.")
+        }
     }
 
     /**
