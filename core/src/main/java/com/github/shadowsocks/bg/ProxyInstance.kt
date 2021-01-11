@@ -46,7 +46,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
     suspend fun init(service: BaseService.Interface) {
         // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (profile.host.parseNumericAddress() == null) {
+        if (profile.host.parseNumericAddress() == null && profile.plugin != null) {
             profile.host = try {
                 service.resolver(profile.host).firstOrNull()
             } catch (e: IOException) {
@@ -54,11 +54,13 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             }?.hostAddress ?: throw UnknownHostException()
         }
         // check the crypto
-        if (profile.method == "xchacha20-ietf-poly1305") {
-            throw IllegalArgumentException("cipher xchacha20-ietf-poly1305 is deprecated.")
-        }
-        if (profile.method == "aes-192-gcm") {
-            throw IllegalArgumentException("cipher aes-192-gcm is deprecated.")
+        val deprecatedCiphers
+            = arrayOf("xchacha20-ietf-poly1305", "aes-192-gcm", "chacha20", "salsa20")
+        for (c in deprecatedCiphers)
+        {
+            if (profile.method == c) {
+                throw IllegalArgumentException("cipher $c is deprecated.")
+            }
         }
     }
 
