@@ -47,7 +47,7 @@ import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import java.net.MalformedURLException
 import java.net.URL

@@ -4,8 +4,8 @@ plugins {
     id("com.android.library")
     id("org.mozilla.rust-android-gradle.rust-android")
     kotlin("android")
-    kotlin("android.extensions")
     kotlin("kapt")
+    id("kotlin-parcelize")
 }
 
 setupCore()

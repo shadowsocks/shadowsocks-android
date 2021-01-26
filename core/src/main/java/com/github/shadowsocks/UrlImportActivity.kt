@@ -32,7 +32,7 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.AlertDialogFragment
 import com.github.shadowsocks.plugin.Empty
 import com.github.shadowsocks.plugin.showAllowingStateLoss
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 class UrlImportActivity : AppCompatActivity() {
     @Parcelize

@@ -45,9 +45,9 @@ import com.github.shadowsocks.preference.*
 import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.widget.ListListener
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 
 class ProfileConfigFragment : PreferenceFragmentCompat(),
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {

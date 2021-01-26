@@ -21,7 +21,7 @@
 package com.github.shadowsocks.aidl
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TrafficStats(
