@@ -76,7 +76,6 @@ dependencies {
     api("androidx.preference:preference:1.1.1")
     api("androidx.room:room-runtime:$roomVersion")
     api("androidx.work:work-runtime-ktx:$workVersion")
-    api("androidx.work:work-gcm:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.8.6")
     api("com.google.firebase:firebase-analytics-ktx:18.0.1")

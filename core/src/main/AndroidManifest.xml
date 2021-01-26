@@ -138,10 +138,5 @@
                   android:process=":bg"/>
         <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
                   android:process=":bg"/>
-
-        <!-- Used for API < 23. https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager-gcm/src/main/AndroidManifest.xml -->
-        <service android:name="androidx.work.impl.background.gcm.WorkManagerGcmService"
-                 android:process=":bg"
-                 tools:ignore="Instantiatable"/>
     </application>
 </manifest>
