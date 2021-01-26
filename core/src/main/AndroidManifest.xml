@@ -113,30 +113,5 @@
                   tools:node="remove"/>
         <service android:name="androidx.room.MultiInstanceInvalidationService"
                  android:process=":bg"/>
-        <!-- https://android.googlesource.com/platform/frameworks/support/+/androidx-master-dev/work/workmanager/src/main/AndroidManifest.xml -->
-        <provider android:name="androidx.work.impl.WorkManagerInitializer"
-                  tools:node="remove"/>
-        <service android:name="androidx.work.impl.background.systemalarm.SystemAlarmService"
-                 android:process=":bg"
-                 tools:ignore="Instantiatable"/>
-        <service android:name="androidx.work.impl.background.systemjob.SystemJobService"
-                 android:process=":bg"/>
-        <service android:name="androidx.work.impl.foreground.SystemForegroundService"
-                 android:process=":bg"
-                 tools:ignore="Instantiatable"/>
-        <receiver android:name="androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver"
-                  android:process=":bg"/>
-        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy"
-                  android:process=":bg"/>
-        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy"
-                  android:process=":bg"/>
-        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy"
-                  android:process=":bg"/>
-        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy"
-                  android:process=":bg"/>
-        <receiver android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
-                  android:process=":bg"/>
-        <receiver android:name="androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver"
-                  android:process=":bg"/>
     </application>
 </manifest>

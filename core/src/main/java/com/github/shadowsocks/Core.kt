@@ -141,6 +141,7 @@ object Core : Configuration.Provider {
     }
 
     override fun getWorkManagerConfiguration() = Configuration.Builder().apply {
+        setDefaultProcessName(app.packageName + ":bg")
         setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.VERBOSE else Log.INFO)
         setExecutor { GlobalScope.launch { it.run() } }
         setTaskExecutor { GlobalScope.launch { it.run() } }
