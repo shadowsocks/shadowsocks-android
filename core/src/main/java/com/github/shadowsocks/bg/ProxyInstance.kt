@@ -82,7 +82,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }
         config.put("local_address", DataStore.listenAddress)
         config.put("local_port", DataStore.portProxy)
-        config.put("udp_max_associations", 256);
+        config.put("udp_max_associations", 256)
         configFile.writeText(config.toString())
 
         val cmd = arrayListOf(
