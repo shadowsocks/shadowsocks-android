@@ -14,8 +14,8 @@ buildscript {
     }
 
     dependencies {
-        val kotlinVersion = rootProject.extra.get("kotlinVersion").toString()
-        classpath(rootProject.extra.get("androidPlugin").toString())
+        val kotlinVersion = rootProject.extra["kotlinVersion"].toString()
+        classpath(rootProject.extra["androidPlugin"].toString())
         classpath(kotlin("gradle-plugin", kotlinVersion))
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.2")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.4.1")
