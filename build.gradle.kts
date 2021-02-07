@@ -10,16 +10,16 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven("https://plugins.gradle.org/m2/")
+        gradlePluginPortal()
     }
 
     dependencies {
-        val kotlinVersion = rootProject.extra.get("kotlinVersion").toString()
-        classpath(rootProject.extra.get("androidPlugin").toString())
+        val kotlinVersion = rootProject.extra["kotlinVersion"].toString()
+        classpath(rootProject.extra["androidPlugin"].toString())
         classpath(kotlin("gradle-plugin", kotlinVersion))
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.2")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.4.1")
-        classpath("com.google.gms:google-services:4.3.4")
+        classpath("com.google.gms:google-services:4.3.5")
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.13.0")
         classpath("gradle.plugin.org.mozilla.rust-android-gradle:plugin:0.8.3")
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.20")
