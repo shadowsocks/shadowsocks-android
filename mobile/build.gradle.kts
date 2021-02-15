@@ -12,7 +12,7 @@ setupApp()
 android.defaultConfig.applicationId = "com.github.shadowsocks"
 
 dependencies {
-    val cameraxVersion = "1.0.0-rc02"
+    val cameraxVersion = "1.1.0-alpha01"
 
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")

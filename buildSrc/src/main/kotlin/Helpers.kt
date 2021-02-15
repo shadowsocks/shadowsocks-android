@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.util.*
 
-const val lifecycleVersion = "2.3.0-rc01"
+const val lifecycleVersion = "2.3.0"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 
@@ -46,7 +46,7 @@ fun Project.setupCommon() {
     }
 
     dependencies {
-        add("testImplementation", "junit:junit:4.13.1")
+        add("testImplementation", "junit:junit:4.13.2")
         add("androidTestImplementation", "androidx.test:runner:1.3.0")
         add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.3.0")
     }
