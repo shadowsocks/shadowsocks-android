@@ -37,6 +37,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.os.bundleOf
@@ -64,7 +65,7 @@ import com.google.zxing.WriterException
 import timber.log.Timber
 import java.nio.charset.StandardCharsets
 
-class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
+class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, SearchView.OnQueryTextListener {
     companion object {
         /**
          * used for callback from stateChanged from MainActivity
@@ -237,6 +238,17 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
             notifyItemInserted(pos)
         }
 
+        fun filter(name: String) {
+            val active = ProfileManager.getActiveProfiles()?.toMutableList() ?: mutableListOf()
+            profiles.clear()
+            active.forEach {
+                if (it.name?.contains(name, true) ?: false || it.host.contains(name, true)) {
+                    profiles.add(it)
+                }
+            }
+            notifyDataSetChanged()
+        }
+
         fun move(from: Int, to: Int) {
             undoManager.flush()
             val first = profiles[from]
@@ -322,6 +334,13 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         startActivity(Intent(context, ProfileConfigActivity::class.java).putExtra(Action.EXTRA_PROFILE_ID, profile.id))
     }
 
+    override fun onQueryTextChange(query: String): Boolean {
+        profilesAdapter.filter(query)
+        return false
+    }
+
+    override fun onQueryTextSubmit(query: String): Boolean = false
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.layout_list, container, false)
 
@@ -331,6 +350,10 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
         toolbar.setTitle(R.string.profiles)
         toolbar.inflateMenu(R.menu.profile_manager_menu)
         toolbar.setOnMenuItemClickListener(this)
+        val searchView = toolbar.findViewById<SearchView>(R.id.action_search)
+        searchView.setOnQueryTextListener(this)
+        searchView.setQueryHint(getString(android.R.string.search_go))
+
         ProfileManager.ensureNotEmpty()
         profilesList = view.findViewById(R.id.list)
         ViewCompat.setOnApplyWindowInsetsListener(profilesList, MainListListener)
