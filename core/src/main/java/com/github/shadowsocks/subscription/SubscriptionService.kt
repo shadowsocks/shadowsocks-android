@@ -132,7 +132,7 @@ class SubscriptionService : Service(), CoroutineScope {
                 tempFile.outputStream().use { out -> inputStream.copyTo(out) }
             }
             tempFile
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Timber.d(e)
             launch(Dispatchers.Main) {
                 Toast.makeText(this@SubscriptionService, e.readableMessage, Toast.LENGTH_LONG).show()
