@@ -30,6 +30,7 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.parseNumericAddress
 import kotlinx.coroutines.CoroutineScope
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.net.URI
@@ -68,10 +69,13 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, extraFlag: String? = null,
+    fun start(service: BaseService.Interface, stat: File, configFile: File, mode: String,
               dnsRelay: Boolean = true) {
+
+        // setup traffic monitor path
         trafficMonitor = TrafficMonitor(stat)
 
+        // init JSON config
         this.configFile = configFile
         val config = profile.toJson()
         plugin?.let { (path, opts, isV2) ->
@@ -80,29 +84,49 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             }
             config.put("plugin", path).put("plugin_opts", opts.toString())
         }
-        config.put("local_address", DataStore.listenAddress)
-        config.put("local_port", DataStore.portProxy)
         config.put("udp_max_associations", 256)
-        configFile.writeText(config.toString())
+        config.put("dns", "unix://local_dns_path")
 
-        val cmd = arrayListOf(
-                File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
-                "--stat-path", stat.absolutePath,
-                "-c", configFile.absolutePath,
-                "--udp-bind-addr", "${DataStore.listenAddress}:${DataStore.portProxy}",
-        )
-        if (service.isVpnService) cmd += arrayListOf("--vpn")
-        if (extraFlag != null) cmd.add(extraFlag)
+        // init local config array
+        val localConfigs = JSONArray()
+
+        // local SOCKS5 proxy
+        val proxyConfig = JSONObject()
+        proxyConfig.put("local_address", "${DataStore.listenAddress}")
+        proxyConfig.put("local_port", DataStore.portProxy)
+        proxyConfig.put("local_udp_address", "${DataStore.listenAddress}")
+        proxyConfig.put("local_udp_port", DataStore.portProxy)
+        proxyConfig.put("mode", mode)
+        localConfigs.put(proxyConfig)
+
+        // local DNS proxy
         if (dnsRelay) try {
             URI("dns://${profile.remoteDns}")
         } catch (e: URISyntaxException) {
             throw BaseService.ExpectedExceptionWrapper(e)
         }.let { dns ->
-            cmd += arrayListOf(
-                    "--dns-addr", "${DataStore.listenAddress}:${DataStore.portLocalDns}",
-                    "--local-dns-addr", "local_dns_path",
-                    "--remote-dns-addr", "${dns.host ?: "0.0.0.0"}:${if (dns.port < 0) 53 else dns.port}")
+            val dnsConfig = JSONObject()
+            dnsConfig.put("local_address", "${DataStore.listenAddress}")
+            dnsConfig.put("local_port", DataStore.portLocalDns)
+            dnsConfig.put("local_dns_address", "local_dns_path")
+            dnsConfig.put("remote_dns_address", "${dns.host ?: "0.0.0.0"}")
+            dnsConfig.put("remote_dns_port", if (dns.port < 0) 53 else dns.port)
+            dnsConfig.put("protocol", "dns")
+            localConfigs.put(dnsConfig)
         }
+
+        // add all the locals
+        config.put("locals", localConfigs)
+        configFile.writeText(config.toString())
+
+        // build the command line
+        val cmd = arrayListOf(
+                File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
+                "--stat-path", stat.absolutePath,
+                "-c", configFile.absolutePath,
+        )
+
+        if (service.isVpnService) cmd += arrayListOf("--vpn")
 
         if (route != Acl.ALL) {
             cmd += "--acl"

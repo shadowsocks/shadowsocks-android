@@ -246,13 +246,13 @@ object BaseService {
             data.proxy!!.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
-                    if (udpFallback == null && data.proxy?.plugin == null) "-U" else null)
+                    if (udpFallback == null && data.proxy?.plugin == null) "tcp_and_udp" else "tcp_only")
             if (udpFallback?.plugin != null) throw ExpectedExceptionWrapper(IllegalStateException(
                     "UDP fallback cannot have plugins"))
             udpFallback?.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
-                    "-u", false)
+                    "udp_only", false)
             data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
