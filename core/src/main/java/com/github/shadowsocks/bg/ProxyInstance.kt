@@ -71,7 +71,6 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      */
     fun start(service: BaseService.Interface, stat: File, configFile: File, mode: String,
               dnsRelay: Boolean = true) {
-
         // setup traffic monitor path
         trafficMonitor = TrafficMonitor(stat)
 
@@ -92,9 +91,9 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
         // local SOCKS5 proxy
         val proxyConfig = JSONObject()
-        proxyConfig.put("local_address", "${DataStore.listenAddress}")
+        proxyConfig.put("local_address", DataStore.listenAddress)
         proxyConfig.put("local_port", DataStore.portProxy)
-        proxyConfig.put("local_udp_address", "${DataStore.listenAddress}")
+        proxyConfig.put("local_udp_address", DataStore.listenAddress)
         proxyConfig.put("local_udp_port", DataStore.portProxy)
         proxyConfig.put("mode", mode)
         localConfigs.put(proxyConfig)
@@ -106,10 +105,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             throw BaseService.ExpectedExceptionWrapper(e)
         }.let { dns ->
             val dnsConfig = JSONObject()
-            dnsConfig.put("local_address", "${DataStore.listenAddress}")
+            dnsConfig.put("local_address", DataStore.listenAddress)
             dnsConfig.put("local_port", DataStore.portLocalDns)
             dnsConfig.put("local_dns_address", "local_dns_path")
-            dnsConfig.put("remote_dns_address", "${dns.host ?: "0.0.0.0"}")
+            dnsConfig.put("remote_dns_address", dns.host ?: "0.0.0.0")
             dnsConfig.put("remote_dns_port", if (dns.port < 0) 53 else dns.port)
             dnsConfig.put("protocol", "dns")
             localConfigs.put(dnsConfig)
