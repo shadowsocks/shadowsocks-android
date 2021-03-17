@@ -18,11 +18,11 @@ buildscript {
         classpath(rootProject.extra["androidPlugin"].toString())
         classpath(kotlin("gradle-plugin", kotlinVersion))
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.2")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.5.0")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.5.1")
         classpath("com.google.gms:google-services:4.3.5")
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.14.2")
         classpath("gradle.plugin.org.mozilla.rust-android-gradle:plugin:0.8.3")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.20")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.30")
     }
 }
 
