@@ -17,7 +17,7 @@ dependencies {
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-    implementation("androidx.camera:camera-view:1.0.0-alpha22")
+    implementation("androidx.camera:camera-view:1.0.0-alpha23")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("com.google.mlkit:barcode-scanning:16.1.1")
