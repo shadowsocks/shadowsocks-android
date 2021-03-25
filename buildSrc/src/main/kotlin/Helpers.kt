@@ -64,7 +64,6 @@ fun Project.setupCore() {
             disable("BadConfigurationProvider")
             warning("RestrictedApi")
             disable("UseAppTint")
-            disable("InvalidFragmentVersionForActivityResult")
         }
         ndkVersion = "21.3.6528147"
     }
