@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.gradle.plugin.KaptExtension
 
 plugins {
     id("com.android.library")
@@ -19,9 +20,10 @@ android {
             arguments("-j${Runtime.getRuntime().availableProcessors()}")
         }
 
-        javaCompileOptions.annotationProcessorOptions.arguments(mapOf(
-                "room.incremental" to "true",
-                "room.schemaLocation" to "$projectDir/schemas"))
+        extensions.getByName<KaptExtension>("kapt").arguments {
+            arg("AROUTER_MODULE_NAME", project.name)
+            arg("room.schemaLocation", "$projectDir/build")
+        }
     }
 
     externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
