@@ -1,4 +1,3 @@
-
 import com.android.build.VariantOutput
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
@@ -88,7 +87,19 @@ fun Project.setupApp() {
         }
         lintOptions.disable("RemoveWorkManagerInitializer")
         packagingOptions {
-            exclude("**/*.kotlin_*")
+            exclude("**/*.proto")
+            exclude("**/*.bin")
+            exclude("**/*.java")
+            exclude("**/*.properties")
+            exclude("**/*.version")
+            exclude("**/*.*_module")
+            exclude("META-INF/services/**")
+            exclude("META-INF/com/**")
+            exclude("com/**")
+            exclude("kotlin/**")
+            exclude("kotlinx/**")
+            exclude("okhttp3/**")
+            exclude("google/**")
         }
         splits.abi {
             isEnable = true
