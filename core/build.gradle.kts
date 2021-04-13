@@ -19,9 +19,10 @@ android {
             arguments("-j${Runtime.getRuntime().availableProcessors()}")
         }
 
-        javaCompileOptions.annotationProcessorOptions.arguments(mapOf(
-                "room.incremental" to "true",
-                "room.schemaLocation" to "$projectDir/schemas"))
+        kapt.arguments {
+            arg("room.incremental", true)
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
     }
 
     externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
