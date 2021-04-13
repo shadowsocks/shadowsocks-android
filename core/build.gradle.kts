@@ -64,14 +64,14 @@ tasks.clean.dependsOn("cargoClean")
 
 dependencies {
     val coroutinesVersion = "1.4.2"
-    val roomVersion = "2.2.6"
+    val roomVersion = "2.3.0-rc01"
     val workVersion = "2.5.0"
 
     api(project(":plugin"))
     api("androidx.appcompat:appcompat:1.2.0")
-    api("androidx.core:core-ktx:1.5.0-beta01")
+    api("androidx.core:core-ktx:1.5.0-rc01")
 
-    api("androidx.fragment:fragment-ktx:1.3.0-rc02")
+    api("androidx.fragment:fragment-ktx:1.3.2")
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
     api("androidx.preference:preference:1.1.1")
@@ -80,8 +80,8 @@ dependencies {
     api("androidx.work:work-runtime-ktx:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.8.6")
-    api("com.google.firebase:firebase-analytics-ktx:18.0.2")
-    api("com.google.firebase:firebase-crashlytics:17.3.1")
+    api("com.google.firebase:firebase-analytics-ktx:18.0.3")
+    api("com.google.firebase:firebase-crashlytics:17.4.1")
     api("com.jakewharton.timber:timber:4.7.1")
     api("dnsjava:dnsjava:3.3.1")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")

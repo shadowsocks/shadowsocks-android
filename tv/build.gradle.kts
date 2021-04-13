@@ -12,5 +12,5 @@ setupApp()
 android.defaultConfig.applicationId = "com.github.shadowsocks.tv"
 
 dependencies {
-    implementation("androidx.leanback:leanback-preference:1.1.0-beta01")
+    implementation("androidx.leanback:leanback-preference:1.1.0-rc01")
 }
