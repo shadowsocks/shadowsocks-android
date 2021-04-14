@@ -71,7 +71,6 @@ dependencies {
     api("androidx.appcompat:appcompat:1.2.0")
     api("androidx.core:core-ktx:1.5.0-rc01")
 
-    api("androidx.fragment:fragment-ktx:1.3.2")
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
     api("androidx.preference:preference:1.1.1")

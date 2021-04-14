@@ -1,3 +1,9 @@
+* 2.0.1:
+  * Moved `AlertDialogFragment` and related utilities to `fragment` package, with support for Fragment Result API from AndroidX Fragment 1.3.
+  * Dependency updates:
+    - `androidx.fragment:fragment-ktx:1.3.2`;
+    - `com.google.android.material:material:1.3.0`;
+    - `org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.32`.
 * 2.0.0:
   * Deprecated passing `-V` and `--fast-open` to plugin.
     Please find `__android_vpn` option passed via plugin options.
