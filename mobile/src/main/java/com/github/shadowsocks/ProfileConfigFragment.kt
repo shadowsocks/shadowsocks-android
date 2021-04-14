@@ -41,6 +41,9 @@ import androidx.preference.*
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.*
+import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
+import com.github.shadowsocks.plugin.fragment.Empty
+import com.github.shadowsocks.plugin.fragment.showAllowingStateLoss
 import com.github.shadowsocks.preference.*
 import com.github.shadowsocks.utils.*
 import com.github.shadowsocks.widget.ListListener
@@ -54,7 +57,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     companion object PasswordSummaryProvider : Preference.SummaryProvider<EditTextPreference> {
         override fun provideSummary(preference: EditTextPreference?) = "\u2022".repeat(preference?.text?.length ?: 0)
 
-        const val REQUEST_UNSAVED_CHANGES = 2
         private const val REQUEST_PICK_PLUGIN = 3
     }
 
@@ -127,6 +129,12 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ViewCompat.setOnApplyWindowInsetsListener(listView, ListListener)
+        AlertDialogFragment.setResultListener<ProfileConfigActivity.UnsavedChangesDialogFragment, Empty>(this) { which, ret ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> saveAndExit()
+                DialogInterface.BUTTON_NEGATIVE -> requireActivity().finish()
+            }
+        }
     }
 
     private fun initPlugins() {
@@ -216,34 +224,31 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            REQUEST_PICK_PLUGIN -> if (resultCode == Activity.RESULT_OK) {
-                val selected = plugin.plugins.lookup.getValue(
-                        data?.getStringExtra(PluginPreferenceDialogFragment.KEY_SELECTED_ID)!!)
-                val override = pluginConfiguration.pluginsOptions.keys.firstOrNull {
-                    plugin.plugins.lookup[it] == selected
-                }
-                pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, override ?: selected.id)
-                DataStore.plugin = pluginConfiguration.toString()
-                DataStore.dirty = true
-                plugin.value = pluginConfiguration.selected
-                pluginConfigure.isEnabled = selected !is NoPlugin
-                pluginConfigure.text = pluginConfiguration.getOptions().toString()
-                if (!selected.trusted) {
-                    Snackbar.make(requireView(), R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
-                }
+        if (requestCode != REQUEST_PICK_PLUGIN) super.onActivityResult(requestCode, resultCode, data)
+        else if (resultCode == Activity.RESULT_OK) {
+            val selected = plugin.plugins.lookup.getValue(
+                data?.getStringExtra(PluginPreferenceDialogFragment.KEY_SELECTED_ID)!!)
+            val override = pluginConfiguration.pluginsOptions.keys.firstOrNull {
+                plugin.plugins.lookup[it] == selected
             }
-            REQUEST_UNSAVED_CHANGES -> when (resultCode) {
-                DialogInterface.BUTTON_POSITIVE -> saveAndExit()
-                DialogInterface.BUTTON_NEGATIVE -> requireActivity().finish()
+            pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, override ?: selected.id)
+            DataStore.plugin = pluginConfiguration.toString()
+            DataStore.dirty = true
+            plugin.value = pluginConfiguration.selected
+            pluginConfigure.isEnabled = selected !is NoPlugin
+            pluginConfigure.text = pluginConfiguration.getOptions().toString()
+            if (!selected.trusted) {
+                Snackbar.make(requireView(), R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
             }
-            else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_delete -> {
-            DeleteConfirmationDialogFragment().withArg(ProfileIdArg(profileId)).show(this)
+            DeleteConfirmationDialogFragment().apply {
+                arg(ProfileIdArg(profileId))
+                key()
+            }.show(parentFragmentManager, null)
             true
         }
         R.id.action_apply -> {

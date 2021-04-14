@@ -41,7 +41,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
-import com.github.shadowsocks.plugin.AlertDialogFragment
+import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
@@ -53,18 +53,11 @@ import java.net.MalformedURLException
 import java.net.URL
 
 class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener {
-    companion object {
-        private const val REQUEST_CODE_ADD = 1
-        private const val REQUEST_CODE_EDIT = 2
-    }
+    @Parcelize
+    data class SubItem(val item: String? = null) : Parcelable
 
     @Parcelize
-    data class SubItem(val item: String = "") : Parcelable {
-        fun toURL() = URL(item)
-    }
-
-    @Parcelize
-    data class SubEditResult(val edited: SubItem, val replacing: SubItem) : Parcelable
+    data class SubEditResult(val edited: String?, val replacing: String?) : Parcelable
 
     class SubDialogFragment : AlertDialogFragment<SubItem, SubEditResult>(),
             TextWatcher, AdapterView.OnItemSelectedListener {
@@ -83,7 +76,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             setTitle(R.string.edit_subscription)
             setPositiveButton(android.R.string.ok, listener)
             setNegativeButton(android.R.string.cancel, null)
-            if (arg.item.isNotEmpty()) setNeutralButton(R.string.delete, listener)
+            if (!arg.item.isNullOrEmpty()) setNeutralButton(R.string.delete, listener)
             setView(view)
         }
 
@@ -112,10 +105,8 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         }
 
         override fun ret(which: Int) = when (which) {
-            DialogInterface.BUTTON_POSITIVE -> {
-                SubEditResult(editText.text.toString().let { text -> SubItem(text) }, arg)
-            }
-            DialogInterface.BUTTON_NEUTRAL -> SubEditResult(arg, arg)
+            DialogInterface.BUTTON_POSITIVE -> SubEditResult(editText.text.toString(), arg.item)
+            DialogInterface.BUTTON_NEUTRAL -> SubEditResult(null, arg.item)
             else -> null
         }
 
@@ -141,8 +132,10 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         }
 
         override fun onClick(v: View?) {
-            SubDialogFragment().withArg(SubItem(item.toString()))
-                    .show(this@SubscriptionFragment, REQUEST_CODE_EDIT)
+            SubDialogFragment().apply {
+                arg(SubItem(item.toString()))
+                key()
+            }.show(parentFragmentManager, null)
         }
     }
 
@@ -186,14 +179,10 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             apply()
         }
 
-        fun remove(item: Any) {
-            when (item) {
-                is URL -> {
-                    notifyItemRemoved(subscription.urls.indexOf(item))
-                    subscription.urls.remove(item)
-                    apply()
-                }
-            }
+        fun remove(item: URL) {
+            notifyItemRemoved(subscription.urls.indexOf(item))
+            subscription.urls.remove(item)
+            apply()
         }
 
         fun undo(actions: List<Pair<Int, Any>>) {
@@ -217,6 +206,15 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ViewCompat.setOnApplyWindowInsetsListener(view, ListHolderListener)
+        AlertDialogFragment.setResultListener<SubDialogFragment, SubEditResult>(this) { which, ret ->
+            val (edited, replacing) = ret ?: return@setResultListener
+            replacing?.let { item ->
+                val url = URL(item)
+                adapter.remove(url)
+                if (which == DialogInterface.BUTTON_NEUTRAL) undoManager.remove(-1 to url)
+            }
+            if (edited != null) adapter.add(URL(edited)).also { list.post { list.scrollToPosition(it) } }
+        }
         toolbar.setTitle(R.string.subscriptions)
         toolbar.inflateMenu(R.menu.subscription_menu)
         toolbar.setOnMenuItemClickListener(this)
@@ -250,7 +248,10 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_manual_settings -> {
-            SubDialogFragment().withArg(SubItem()).show(this, REQUEST_CODE_ADD)
+            SubDialogFragment().apply {
+                arg(SubItem())
+                key()
+            }.show(parentFragmentManager, null)
             true
         }
         R.id.action_update_subscription -> {
@@ -259,25 +260,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
             true
         }
         else -> false
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val editing = when (requestCode) {
-            REQUEST_CODE_ADD -> false
-            REQUEST_CODE_EDIT -> true
-            else -> return super.onActivityResult(requestCode, resultCode, data)
-        }
-        val ret by lazy { AlertDialogFragment.getRet<SubEditResult>(data!!) }
-        when (resultCode) {
-            DialogInterface.BUTTON_POSITIVE -> {
-                if (editing) adapter.remove(ret.replacing.toURL())
-                adapter.add(ret.edited.toURL()).also { list.post { list.scrollToPosition(it) } }
-            }
-            DialogInterface.BUTTON_NEUTRAL -> ret.replacing.toURL().let { item ->
-                adapter.remove(item)
-                undoManager.remove(Pair(-1, item))
-            }
-        }
     }
 
     override fun onDetach() {

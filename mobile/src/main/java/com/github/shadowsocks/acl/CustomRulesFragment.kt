@@ -22,7 +22,6 @@ package com.github.shadowsocks.acl
 
 import android.annotation.SuppressLint
 import android.content.DialogInterface
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -46,7 +45,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.Subnet
-import com.github.shadowsocks.plugin.AlertDialogFragment
+import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.utils.resolveResourceId
@@ -65,9 +64,6 @@ import java.util.regex.PatternSyntaxException
 
 class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, ActionMode.Callback {
     companion object {
-        private const val REQUEST_CODE_ADD = 1
-        private const val REQUEST_CODE_EDIT = 2
-
         private const val SELECTED_SUBNETS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_SUBNETS"
         private const val SELECTED_HOSTNAMES = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_HOSTNAMES"
         private const val SELECTED_URLS = "com.github.shadowsocks.acl.CustomRulesFragment.SELECTED_URLS"
@@ -95,8 +91,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         fun toAny() = if (isUrl) URL(item) else Subnet.fromString(item) ?: item
     }
     @Parcelize
-    data class AclEditResult(val edited: AclItem, val replacing: AclItem) : Parcelable
-    class AclRuleDialogFragment : AlertDialogFragment<AclItem, AclEditResult>(),
+    data class AclArg(val item: AclItem? = null) : Parcelable
+    @Parcelize
+    data class AclEditResult(val edited: AclItem?, val replacing: AclItem?) : Parcelable
+    class AclRuleDialogFragment : AlertDialogFragment<AclArg, AclEditResult>(),
             TextWatcher, AdapterView.OnItemSelectedListener {
         private lateinit var templateSelector: Spinner
         private lateinit var editText: EditText
@@ -111,8 +109,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             editText = view.findViewById(R.id.content)
             inputLayout = view.findViewById(R.id.content_layout)
             templateSelector.setSelection(Template.Generic.ordinal)
-            editText.setText(arg.item)
+            val arg = arg.item
+            editText.setText(arg?.item)
             when {
+                arg == null -> { }
                 arg.isUrl -> templateSelector.setSelection(Template.Url.ordinal)
                 Subnet.fromString(arg.item) == null -> {
                     val match = domainPattern.find(arg.item)
@@ -128,7 +128,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             setTitle(R.string.edit_rule)
             setPositiveButton(android.R.string.ok, listener)
             setNegativeButton(android.R.string.cancel, null)
-            if (arg.item.isNotEmpty()) setNeutralButton(R.string.delete, listener)
+            if (!arg?.item.isNullOrEmpty()) setNeutralButton(R.string.delete, listener)
             setView(view)
         }
 
@@ -183,9 +183,9 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
                                 .replace(".", "\\.").let { "(?:^|\\.)$it\$" })
                         Template.Url -> AclItem(text, true)
                     }
-                }, arg)
+                }, arg.item)
             }
-            DialogInterface.BUTTON_NEUTRAL -> AclEditResult(arg, arg)
+            DialogInterface.BUTTON_NEUTRAL -> AclEditResult(null, arg.item)
             else -> null
         }
 
@@ -223,8 +223,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }
 
         override fun onClick(v: View?) {
-            if (selectedItems.isNotEmpty()) onLongClick(v)
-            else AclRuleDialogFragment().withArg(AclItem(item)).show(this@CustomRulesFragment, REQUEST_CODE_EDIT)
+            if (selectedItems.isNotEmpty()) onLongClick(v) else AclRuleDialogFragment().apply {
+                arg(AclArg(AclItem(item)))
+                key()
+            }.show(parentFragmentManager, null)
         }
         override fun onLongClick(v: View?): Boolean {
             if (!selectedItems.add(item)) selectedItems.remove(item)    // toggle
@@ -379,6 +381,14 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ViewCompat.setOnApplyWindowInsetsListener(view, ListHolderListener)
+        AlertDialogFragment.setResultListener<AclRuleDialogFragment, AclEditResult>(this) { which, ret ->
+            val (edited, replacing) = ret ?: return@setResultListener
+            replacing?.toAny()?.let { item ->
+                adapter.remove(item)
+                if (which == DialogInterface.BUTTON_NEUTRAL) undoManager.remove(Pair(-1, item))
+            }
+            if (edited != null) adapter.add(edited.toAny())?.also { list.post { list.scrollToPosition(it) } }
+        }
         if (savedInstanceState != null) {
             selectedItems.addAll(savedInstanceState.getStringArray(SELECTED_SUBNETS)
                     ?.mapNotNull { Subnet.fromString(it) } ?: listOf())
@@ -442,7 +452,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_manual_settings -> {
-            AclRuleDialogFragment().withArg(AclItem()).show(this, REQUEST_CODE_ADD)
+            AclRuleDialogFragment().apply {
+                arg(AclArg(AclItem()))
+                key()
+            }.show(parentFragmentManager, null)
             true
         }
         R.id.action_import_clipboard -> {
@@ -462,25 +475,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             true
         }
         else -> false
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val editing = when (requestCode) {
-            REQUEST_CODE_ADD -> false
-            REQUEST_CODE_EDIT -> true
-            else -> return super.onActivityResult(requestCode, resultCode, data)
-        }
-        val ret by lazy { AlertDialogFragment.getRet<AclEditResult>(data!!) }
-        when (resultCode) {
-            DialogInterface.BUTTON_POSITIVE -> {
-                if (editing) adapter.remove(ret.replacing.toAny())
-                adapter.add(ret.edited.toAny())?.also { list.post { list.scrollToPosition(it) } }
-            }
-            DialogInterface.BUTTON_NEUTRAL -> ret.replacing.toAny().let { item ->
-                adapter.remove(item)
-                undoManager.remove(Pair(-1, item))
-            }
-        }
     }
 
     override fun onDetach() {
