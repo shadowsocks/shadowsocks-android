@@ -68,7 +68,6 @@ dependencies {
     val workVersion = "2.5.0"
 
     api(project(":plugin"))
-    api("androidx.appcompat:appcompat:1.2.0")
     api("androidx.core:core-ktx:1.5.0-rc01")
 
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
