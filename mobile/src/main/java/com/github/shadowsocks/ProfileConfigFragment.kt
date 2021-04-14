@@ -35,6 +35,7 @@ import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenCreated
 import androidx.preference.*
@@ -129,7 +130,24 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ViewCompat.setOnApplyWindowInsetsListener(listView, ListListener)
-        AlertDialogFragment.setResultListener<ProfileConfigActivity.UnsavedChangesDialogFragment, Empty>(this) { which, ret ->
+        setFragmentResultListener(PluginPreferenceDialogFragment::class.java.name) { _, bundle ->
+            val selected = plugin.plugins.lookup.getValue(
+                bundle.getString(PluginPreferenceDialogFragment.KEY_SELECTED_ID)!!)
+            val override = pluginConfiguration.pluginsOptions.keys.firstOrNull {
+                plugin.plugins.lookup[it] == selected
+            }
+            pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, override ?: selected.id)
+            DataStore.plugin = pluginConfiguration.toString()
+            DataStore.dirty = true
+            plugin.value = pluginConfiguration.selected
+            pluginConfigure.isEnabled = selected !is NoPlugin
+            pluginConfigure.text = pluginConfiguration.getOptions().toString()
+            if (!selected.trusted) {
+                Snackbar.make(requireView(), R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
+            }
+        }
+        AlertDialogFragment.setResultListener<ProfileConfigActivity.UnsavedChangesDialogFragment, Empty>(this) {
+                which, _ ->
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> saveAndExit()
                 DialogInterface.BUTTON_NEGATIVE -> requireActivity().finish()
@@ -147,7 +165,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     private fun showPluginEditor() {
         PluginConfigurationDialogFragment().apply {
             setArg(Key.pluginConfigure, pluginConfiguration.selected)
-            setTargetFragment(this@ProfileConfigFragment, 0)
         }.showAllowingStateLoss(parentFragmentManager, Key.pluginConfigure)
     }
 
@@ -198,7 +215,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         when (preference.key) {
             Key.plugin -> PluginPreferenceDialogFragment().apply {
                 setArg(Key.plugin)
-                setTargetFragment(this@ProfileConfigFragment, REQUEST_PICK_PLUGIN)
             }.showAllowingStateLoss(parentFragmentManager, Key.plugin)
             Key.pluginConfigure -> {
                 val intent = PluginManager.buildIntent(plugin.selectedEntry!!.id, PluginContract.ACTION_CONFIGURE)
@@ -220,26 +236,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
                 onPreferenceChange(null, options)
             }
             PluginContract.RESULT_FALLBACK -> showPluginEditor()
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode != REQUEST_PICK_PLUGIN) super.onActivityResult(requestCode, resultCode, data)
-        else if (resultCode == Activity.RESULT_OK) {
-            val selected = plugin.plugins.lookup.getValue(
-                data?.getStringExtra(PluginPreferenceDialogFragment.KEY_SELECTED_ID)!!)
-            val override = pluginConfiguration.pluginsOptions.keys.firstOrNull {
-                plugin.plugins.lookup[it] == selected
-            }
-            pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, override ?: selected.id)
-            DataStore.plugin = pluginConfiguration.toString()
-            DataStore.dirty = true
-            plugin.value = pluginConfiguration.selected
-            pluginConfigure.isEnabled = selected !is NoPlugin
-            pluginConfigure.text = pluginConfiguration.getOptions().toString()
-            if (!selected.trusted) {
-                Snackbar.make(requireView(), R.string.plugin_untrusted, Snackbar.LENGTH_LONG).show()
-            }
         }
     }
 
