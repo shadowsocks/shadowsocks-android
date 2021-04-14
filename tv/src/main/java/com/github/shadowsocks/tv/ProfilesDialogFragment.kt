@@ -43,7 +43,7 @@ class ProfilesDialogFragment : LeanbackListPreferenceDialogFragmentCompat() {
         }
 
         override fun onClick(v: View) {
-            val index = adapterPosition
+            val index = bindingAdapterPosition
             if (index == RecyclerView.NO_POSITION) return
             Core.switchProfile(adapter.profiles[index].id)
             (targetFragment as MainPreferenceFragment).startService()
