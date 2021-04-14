@@ -20,7 +20,6 @@
 
 package com.github.shadowsocks.preference
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -37,6 +36,7 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.setFragmentResult
 import androidx.preference.PreferenceDialogFragmentCompat
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -134,8 +134,7 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
     override fun onDialogClosed(positiveResult: Boolean) {
         val clicked = clicked
         if (clicked != null && clicked != preference.selectedEntry) {
-            targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_OK,
-                    Intent().putExtra(KEY_SELECTED_ID, clicked.id))
-        } else targetFragment!!.onActivityResult(targetRequestCode, Activity.RESULT_CANCELED, null)
+            setFragmentResult(javaClass.name, bundleOf(KEY_SELECTED_ID to clicked.id))
+        }
     }
 }

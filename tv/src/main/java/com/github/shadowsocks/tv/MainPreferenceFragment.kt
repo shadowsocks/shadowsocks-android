@@ -27,6 +27,7 @@ import android.os.RemoteException
 import android.text.format.Formatter
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
 import androidx.preference.*
@@ -121,6 +122,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         preferenceManager.preferenceDataStore = DataStore.publicStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.pref_main)
+        setFragmentResultListener(ProfilesDialogFragment::class.java.name) { _, _ -> startService() }
         fab = findPreference(Key.id)!!
         populateProfiles()
         stats = findPreference(Key.controlStats)!!
