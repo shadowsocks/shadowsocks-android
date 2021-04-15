@@ -36,6 +36,7 @@ class LocalDnsWorker(private val resolver: suspend (ByteArray) -> ByteArray) : C
                         is TimeoutCancellationException -> Timber.w("Resolving timed out")
                         is CancellationException -> { } // ignore
                         is IOException -> Timber.d(e)
+                        is UnsupportedOperationException -> Timber.w(e.message)
                         else -> Timber.w(e)
                     }
                     try {
