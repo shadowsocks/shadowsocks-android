@@ -163,6 +163,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     private fun showPluginEditor() {
         PluginConfigurationDialogFragment().apply {
             setArg(Key.pluginConfigure, pluginConfiguration.selected)
+            setTargetFragment(this@ProfileConfigFragment, 0)
         }.showAllowingStateLoss(parentFragmentManager, Key.pluginConfigure)
     }
 
@@ -213,6 +214,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         when (preference.key) {
             Key.plugin -> PluginPreferenceDialogFragment().apply {
                 setArg(Key.plugin)
+                setTargetFragment(this@ProfileConfigFragment, 0)
             }.showAllowingStateLoss(parentFragmentManager, Key.plugin)
             Key.pluginConfigure -> {
                 val intent = PluginManager.buildIntent(plugin.selectedEntry!!.id, PluginContract.ACTION_CONFIGURE)

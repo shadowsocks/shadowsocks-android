@@ -45,6 +45,7 @@ class MainFragment : LeanbackSettingsFragmentCompat() {
                             as MainPreferenceFragment).state == BaseService.State.Stopped) {
                 startPreferenceFragment(ProfilesDialogFragment().apply {
                     arguments = bundleOf(Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, Key.id))
+                    setTargetFragment(caller, 0)
                 })
             }
             return true
@@ -52,6 +53,7 @@ class MainFragment : LeanbackSettingsFragmentCompat() {
         if (pref is ListPreference && pref !is MultiSelectListPreference) {
             startPreferenceFragment(LeanbackSingleListPreferenceDialogFragment().apply {
                 arguments = bundleOf(Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, pref.key))
+                setTargetFragment(caller, 0)
             })
             return true
         }
