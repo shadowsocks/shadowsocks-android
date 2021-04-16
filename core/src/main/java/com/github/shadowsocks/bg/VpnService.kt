@@ -108,6 +108,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     private var worker: ProtectWorker? = null
     private var active = false
     private var metered = false
+    @Volatile
     private var underlyingNetwork: Network? = null
         set(value) {
             field = value
