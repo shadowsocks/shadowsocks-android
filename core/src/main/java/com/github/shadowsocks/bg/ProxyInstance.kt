@@ -56,7 +56,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }
         // check the crypto
         val deprecatedCiphers
-            = arrayOf("xchacha20-ietf-poly1305", "aes-192-gcm", "chacha20", "salsa20")
+            = arrayOf("aes-192-gcm", "chacha20", "salsa20")
         for (c in deprecatedCiphers)
         {
             if (profile.method == c) {
