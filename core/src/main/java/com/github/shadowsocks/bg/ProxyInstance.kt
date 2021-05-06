@@ -47,7 +47,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
 
     suspend fun init(service: BaseService.Interface) {
         // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (profile.host.parseNumericAddress() == null && profile.plugin != null) {
+        if (plugin != null && profile.host.parseNumericAddress() == null) {
             profile.host = try {
                 service.resolver(profile.host).firstOrNull()
             } catch (e: IOException) {
