@@ -64,12 +64,12 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.4.2"
-    val roomVersion = "2.3.0-rc01"
+    val coroutinesVersion = "1.5.0-RC"
+    val roomVersion = "2.3.0"
     val workVersion = "2.5.0"
 
     api(project(":plugin"))
-    api("androidx.core:core-ktx:1.5.0-rc01")
+    api("androidx.core:core-ktx:1.5.0-rc02")
 
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")

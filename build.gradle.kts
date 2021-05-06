@@ -22,7 +22,7 @@ buildscript {
         classpath("com.google.gms:google-services:4.3.5")
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.14.2")
         classpath("gradle.plugin.org.mozilla.rust-android-gradle:plugin:0.8.3")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.30")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.32")
     }
 }
 

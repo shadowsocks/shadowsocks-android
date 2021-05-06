@@ -1,7 +1,7 @@
 * 2.0.1:
   * Moved `AlertDialogFragment` and related utilities to `fragment` package, with support for Fragment Result API from AndroidX Fragment 1.3.
   * Dependency updates:
-    - `androidx.fragment:fragment-ktx:1.3.2`;
+    - `androidx.fragment:fragment-ktx:1.3.3`;
     - `com.google.android.material:material:1.3.0`;
     - `org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.32`.
 * 2.0.0:

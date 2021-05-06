@@ -29,7 +29,8 @@ import android.system.Os
 import android.system.OsConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.onFailure
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
@@ -61,7 +62,7 @@ abstract class LocalSocketListener(name: String, socketFile: File) : Thread(name
                 }
             }
         }
-        closeChannel.sendBlocking(Unit)
+        closeChannel.trySendBlocking(Unit).onFailure { throw it!! }
     }
 
     @SuppressLint("NewApi")
