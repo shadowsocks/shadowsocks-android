@@ -66,8 +66,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or
      * device storage, depending on which is currently available.
      */
-    fun start(service: BaseService.Interface, stat: File, configFile: File, mode: String,
-              dnsRelay: Boolean = true) {
+    fun start(service: BaseService.Interface, stat: File, configFile: File, mode: String, dnsRelay: Boolean = true) {
         // setup traffic monitor path
         trafficMonitor = TrafficMonitor(stat)
 
