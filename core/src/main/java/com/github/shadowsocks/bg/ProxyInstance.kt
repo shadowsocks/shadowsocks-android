@@ -41,6 +41,12 @@ import java.net.UnknownHostException
  * This class sets up environment for ss-local.
  */
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
+    init {
+        // check the crypto
+        require(profile.method !in arrayOf("aes-192-gcm", "chacha20", "salsa20")) {
+            "cipher ${profile.method} is deprecated."
+        }
+    }
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
@@ -53,15 +59,6 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             } catch (e: IOException) {
                 throw UnknownHostException().initCause(e)
             }?.hostAddress ?: throw UnknownHostException()
-        }
-        // check the crypto
-        val deprecatedCiphers
-            = arrayOf("aes-192-gcm", "chacha20", "salsa20")
-        for (c in deprecatedCiphers)
-        {
-            if (profile.method == c) {
-                throw IllegalArgumentException("cipher $c is deprecated.")
-            }
         }
     }
 
