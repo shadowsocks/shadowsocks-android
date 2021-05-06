@@ -81,37 +81,32 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             config.put("plugin", path).put("plugin_opts", opts.toString())
         }
         config.put("dns", "unix://local_dns_path")
+        config.put("locals", JSONArray().apply {
+            // local SOCKS5 proxy
+            put(JSONObject().apply {
+                put("local_address", DataStore.listenAddress)
+                put("local_port", DataStore.portProxy)
+                put("local_udp_address", DataStore.listenAddress)
+                put("local_udp_port", DataStore.portProxy)
+                put("mode", mode)
+            })
 
-        // init local config array
-        val localConfigs = JSONArray()
-
-        // local SOCKS5 proxy
-        val proxyConfig = JSONObject()
-        proxyConfig.put("local_address", DataStore.listenAddress)
-        proxyConfig.put("local_port", DataStore.portProxy)
-        proxyConfig.put("local_udp_address", DataStore.listenAddress)
-        proxyConfig.put("local_udp_port", DataStore.portProxy)
-        proxyConfig.put("mode", mode)
-        localConfigs.put(proxyConfig)
-
-        // local DNS proxy
-        if (dnsRelay) try {
-            URI("dns://${profile.remoteDns}")
-        } catch (e: URISyntaxException) {
-            throw BaseService.ExpectedExceptionWrapper(e)
-        }.let { dns ->
-            val dnsConfig = JSONObject()
-            dnsConfig.put("local_address", DataStore.listenAddress)
-            dnsConfig.put("local_port", DataStore.portLocalDns)
-            dnsConfig.put("local_dns_address", "local_dns_path")
-            dnsConfig.put("remote_dns_address", dns.host ?: "0.0.0.0")
-            dnsConfig.put("remote_dns_port", if (dns.port < 0) 53 else dns.port)
-            dnsConfig.put("protocol", "dns")
-            localConfigs.put(dnsConfig)
-        }
-
-        // add all the locals
-        config.put("locals", localConfigs)
+            // local DNS proxy
+            if (dnsRelay) try {
+                URI("dns://${profile.remoteDns}")
+            } catch (e: URISyntaxException) {
+                throw BaseService.ExpectedExceptionWrapper(e)
+            }.let { dns ->
+                put(JSONObject().apply {
+                    put("local_address", DataStore.listenAddress)
+                    put("local_port", DataStore.portLocalDns)
+                    put("local_dns_address", "local_dns_path")
+                    put("remote_dns_address", dns.host ?: "0.0.0.0")
+                    put("remote_dns_port", if (dns.port < 0) 53 else dns.port)
+                    put("protocol", "dns")
+                })
+            }
+        })
         configFile.writeText(config.toString())
 
         // build the command line
@@ -121,7 +116,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
                 "-c", configFile.absolutePath,
         )
 
-        if (service.isVpnService) cmd += arrayListOf("--vpn")
+        if (service.isVpnService) cmd += "--vpn"
 
         if (route != Acl.ALL) {
             cmd += "--acl"
