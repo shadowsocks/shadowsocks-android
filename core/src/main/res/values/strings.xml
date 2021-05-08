@@ -69,7 +69,6 @@
   <string name="service_proxy">Proxy Service</string>
   <string name="service_transproxy">Transproxy Service</string>
   <string name="forward_success">Shadowsocks started.</string>
-  <string name="invalid_server">Invalid server name</string>
   <string name="service_failed">Failed to connect the remote server</string>
   <string name="stop">Stop</string>
   <string name="stopping">Shutting down…</string>
