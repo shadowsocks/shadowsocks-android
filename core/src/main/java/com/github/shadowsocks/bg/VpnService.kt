@@ -146,7 +146,6 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     }
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
-    override suspend fun resolver(host: String) = DnsResolverCompat.resolve(DefaultNetworkListener.get(), host)
     override suspend fun rawResolver(query: ByteArray) =
             // no need to listen for network here as this is only used for forwarding local DNS queries.
             // retries should be attempted by client.

@@ -27,15 +27,12 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.parseNumericAddress
 import kotlinx.coroutines.CoroutineScope
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.io.IOException
 import java.net.URI
 import java.net.URISyntaxException
-import java.net.UnknownHostException
 
 /**
  * This class sets up environment for ss-local.
@@ -50,17 +47,6 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
-
-    suspend fun init(service: BaseService.Interface) {
-        // it's hard to resolve DNS on a specific interface so we'll do it here
-        if (plugin != null && profile.host.parseNumericAddress() == null) {
-            profile.host = try {
-                service.resolver(profile.host).firstOrNull()
-            } catch (e: IOException) {
-                throw UnknownHostException().initCause(e)
-            }?.hostAddress ?: throw UnknownHostException()
-        }
-    }
 
     /**
      * Sensitive shadowsocks configuration file requires extra protection. It may be stored in encrypted storage or

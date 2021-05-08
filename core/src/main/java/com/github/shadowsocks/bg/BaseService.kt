@@ -50,7 +50,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.net.URL
-import java.net.UnknownHostException
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -316,7 +315,6 @@ object BaseService {
                 listOfNotNull(data.proxy, data.udpFallback).forEach { it.trafficMonitor?.persistStats(it.profile.id) }
 
         suspend fun preInit() { }
-        suspend fun resolver(host: String) = DnsResolverCompat.resolveOnActiveNetwork(host)
         suspend fun rawResolver(query: ByteArray) = DnsResolverCompat.resolveRawOnActiveNetwork(query)
         suspend fun openConnection(url: URL) = url.openConnection()
 
@@ -355,8 +353,6 @@ object BaseService {
                 try {
                     Executable.killAll()    // clean up old processes
                     preInit()
-                    proxy.init(this@Interface)
-                    data.udpFallback?.init(this@Interface)
                     if (profile.route == Acl.CUSTOM_RULES) try {
                         withContext(Dispatchers.IO) {
                             Acl.customRules.flatten(10, this@Interface::openConnection).also {
@@ -379,8 +375,6 @@ object BaseService {
                     data.changeState(State.Connected)
                 } catch (_: CancellationException) {
                     // if the job was cancelled, it is canceller's responsibility to call stopRunner
-                } catch (_: UnknownHostException) {
-                    stopRunner(false, getString(R.string.invalid_server))
                 } catch (exc: Throwable) {
                     if (exc is ExpectedException) Timber.d(exc) else Timber.w(exc)
                     stopRunner(false, "${getString(R.string.service_failed)}: ${exc.readableMessage}")
