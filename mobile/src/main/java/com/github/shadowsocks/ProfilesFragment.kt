@@ -239,11 +239,11 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
         fun filter(name: String) {
             val active = ProfileManager.getActiveProfiles()?.toMutableList() ?: mutableListOf()
             profiles.clear()
-            active.forEach {
-                if (it.name?.contains(name, true) ?: false || it.host.contains(name, true)) {
-                    profiles.add(it)
-                }
-            }
+            val locale = resources.configuration.locale
+            val lower = name.lowercase(locale)
+            profiles.addAll(active.filter {
+                it.name?.lowercase(locale)?.contains(lower) == true || it.host.lowercase(locale).contains(lower)
+            })
             notifyDataSetChanged()
         }
 
@@ -350,7 +350,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
         toolbar.setOnMenuItemClickListener(this)
         val searchView = toolbar.findViewById<SearchView>(R.id.action_search)
         searchView.setOnQueryTextListener(this)
-        searchView.setQueryHint(getString(android.R.string.search_go))
+        searchView.queryHint = getString(android.R.string.search_go)
 
         ProfileManager.ensureNotEmpty()
         profilesList = view.findViewById(R.id.list)
