@@ -12,6 +12,8 @@ android {
         versionCode = findProperty("VERSION_CODE").toString().toInt()
         versionName = findProperty("VERSION_NAME").toString()
     }
+
+    lintOptions.informational("GradleDependency")
 }
 
 mavenPublish.targets.getByName("uploadArchives") {
@@ -23,9 +25,7 @@ mavenPublish.targets.getByName("uploadArchives") {
 
 dependencies {
     api(kotlin("stdlib-jdk8"))
-    api("androidx.core:core-ktx:1.3.2")
-    // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
-    api("androidx.drawerlayout:drawerlayout:1.1.1")
-    api("androidx.fragment:fragment-ktx:1.3.2")
-    api("com.google.android.material:material:1.3.0")
+    api("androidx.core:core-ktx:1.0.0")
+    api("androidx.fragment:fragment-ktx:1.3.0")
+    api("com.google.android.material:material:1.1.0")
 }

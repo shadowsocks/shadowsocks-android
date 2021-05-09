@@ -70,6 +70,10 @@ dependencies {
 
     api(project(":plugin"))
     api("androidx.core:core-ktx:1.6.0-alpha03")
+    // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
+    api("androidx.drawerlayout:drawerlayout:1.1.1")
+    api("androidx.fragment:fragment-ktx:1.3.2")
+    api("com.google.android.material:material:1.3.0")
 
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
