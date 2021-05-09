@@ -89,6 +89,7 @@ fun Project.setupApp() {
         lintOptions.disable("RemoveWorkManagerInitializer")
         packagingOptions {
             exclude("**/*.kotlin_*")
+            jniLibs.useLegacyPackaging = true
         }
         splits.abi {
             isEnable = true
