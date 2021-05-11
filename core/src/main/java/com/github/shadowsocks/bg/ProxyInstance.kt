@@ -21,8 +21,10 @@
 package com.github.shadowsocks.bg
 
 import android.content.Context
+import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
+import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
@@ -39,6 +41,9 @@ import java.net.URISyntaxException
  */
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
     init {
+        require(profile.host.isNotEmpty() && (profile.method == "none" || profile.password.isEmpty())) {
+            app.getString(R.string.proxy_empty)
+        }
         // check the crypto
         require(profile.method !in arrayOf("aes-192-gcm", "chacha20", "salsa20")) {
             "cipher ${profile.method} is deprecated."

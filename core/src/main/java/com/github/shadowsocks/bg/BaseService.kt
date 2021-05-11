@@ -221,13 +221,6 @@ object BaseService {
         fun onBind(intent: Intent): IBinder? = if (intent.action == Action.SERVICE) data.binder else null
 
         fun forceLoad() {
-            val (profile, fallback) = Core.currentProfile
-                    ?: return stopRunner(false, (this as Context).getString(R.string.profile_empty))
-            if (profile.host.isEmpty() || (!profile.method.equals("none") && profile.password.isEmpty()) ||
-                    fallback != null && (fallback.host.isEmpty() || (!fallback.method.equals("none") && fallback.password.isEmpty()))) {
-                stopRunner(false, (this as Context).getString(R.string.proxy_empty))
-                return
-            }
             val s = data.state
             when {
                 s == State.Stopped -> startRunner()
@@ -330,10 +323,14 @@ object BaseService {
                 return Service.START_NOT_STICKY
             }
             val (profile, fallback) = expanded
-            profile.name = profile.formattedName    // save name for later queries
-            val proxy = ProxyInstance(profile)
-            data.proxy = proxy
-            data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
+            try {
+                data.proxy = ProxyInstance(profile)
+                data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
+            } catch (e: IllegalArgumentException) {
+                data.notification = createNotification("")
+                stopRunner(false, e.message)
+                return Service.START_NOT_STICKY
+            }
 
             BootReceiver.enabled = DataStore.persistAcrossReboot
             if (!data.closeReceiverRegistered) {
@@ -369,7 +366,7 @@ object BaseService {
                     }
                     startProcesses()
 
-                    proxy.scheduleUpdate()
+                    data.proxy!!.scheduleUpdate()
                     data.udpFallback?.scheduleUpdate()
 
                     data.changeState(State.Connected)
