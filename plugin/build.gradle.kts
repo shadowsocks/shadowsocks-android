@@ -17,8 +17,6 @@ android {
 }
 
 mavenPublish.targets.getByName("uploadArchives") {
-    releaseRepositoryUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-    snapshotRepositoryUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
     repositoryUsername = findProperty("NEXUS_USERNAME").toString()
     repositoryPassword = findProperty("NEXUS_PASSWORD").toString()
 }
