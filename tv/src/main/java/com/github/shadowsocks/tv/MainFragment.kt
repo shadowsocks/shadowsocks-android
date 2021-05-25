@@ -62,8 +62,10 @@ class MainFragment : LeanbackSettingsFragmentCompat() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view.findViewById<View>(R.id.settings_preference_fragment_container).updateLayoutParams {
-            width = ViewGroup.LayoutParams.MATCH_PARENT
+        if (BuildConfig.FULLSCREEN) {
+            view.findViewById<View>(R.id.settings_preference_fragment_container).updateLayoutParams {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+            }
         }
     }
 }
