@@ -59,11 +59,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
     }
 
     private inner class AnimatedState(@DrawableRes resId: Int,
-                                      private val onStart: BaseProgressIndicator<*>.() -> Unit = {
-                                          hide()
-                                          isIndeterminate = true
-                                          show()
-                                      }) {
+                                      private val onStart: BaseProgressIndicator<*>.() -> Unit = { hide() }) {
         val icon: AnimatedVectorDrawableCompat = AnimatedVectorDrawableCompat.create(context, resId)!!.apply {
             registerAnimationCallback(this@ServiceButton.callback)
         }
@@ -75,8 +71,14 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
         fun stop() = icon.stop()
     }
 
-    private val iconStopped by lazy { AnimatedState(R.drawable.ic_service_stopped) { hide() } }
-    private val iconConnecting by lazy { AnimatedState(R.drawable.ic_service_connecting) }
+    private val iconStopped by lazy { AnimatedState(R.drawable.ic_service_stopped) }
+    private val iconConnecting by lazy {
+        AnimatedState(R.drawable.ic_service_connecting) {
+            hide()
+            isIndeterminate = true
+            show()
+        }
+    }
     private val iconConnected by lazy { AnimatedState(R.drawable.ic_service_connected) { setProgressCompat(1, true) } }
     private val iconStopping by lazy { AnimatedState(R.drawable.ic_service_stopping) }
     private val animationQueue = ArrayDeque<AnimatedState>()
