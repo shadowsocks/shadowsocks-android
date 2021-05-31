@@ -41,7 +41,7 @@ import java.net.URISyntaxException
  */
 class ProxyInstance(val profile: Profile, private val route: String = profile.route) {
     init {
-        require(profile.host.isNotEmpty() && (profile.method == "none" || profile.password.isEmpty())) {
+        require(profile.host.isNotEmpty() && (profile.method == "none" || profile.password.isNotEmpty())) {
             app.getString(R.string.proxy_empty)
         }
         // check the crypto
