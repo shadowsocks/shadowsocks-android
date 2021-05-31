@@ -25,7 +25,6 @@
             android:id="@+id/fabProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:elevation="6dp"
             android:max="1"
             android:visibility="invisible"
             app:layout_anchor="@+id/fab"
