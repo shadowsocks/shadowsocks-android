@@ -149,6 +149,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         }
 
         fab = findViewById(R.id.fab)
+        fab.initProgress(findViewById(R.id.fabProgress))
         fab.setOnClickListener { toggle() }
         ViewCompat.setOnApplyWindowInsetsListener(fab) { view, insets ->
             view.updateLayoutParams<ViewGroup.MarginLayoutParams> {

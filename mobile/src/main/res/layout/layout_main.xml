@@ -20,6 +20,20 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"/>
 
+        <!-- We double trackThickness as half of it will be invisible -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/fabProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elevation="6dp"
+            android:max="1"
+            android:visibility="invisible"
+            app:layout_anchor="@+id/fab"
+            app:layout_anchorGravity="center"
+            app:layout_behavior=".widget.FabProgressBehavior"
+            app:indicatorColor="@color/material_accent_200"
+            app:trackThickness="8dp"
+            app:trackCornerRadius="@dimen/mtrl_progress_track_thickness"/>
         <com.github.shadowsocks.widget.ServiceButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
