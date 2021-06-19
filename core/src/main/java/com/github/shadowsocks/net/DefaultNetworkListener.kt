@@ -34,7 +34,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 import java.net.UnknownHostException
 
 object DefaultNetworkListener {
@@ -127,17 +126,20 @@ object DefaultNetworkListener {
             in 31..Int.MAX_VALUE -> @TargetApi(31) {
                 Core.connectivity.registerBestMatchingNetworkCallback(request, Callback, mainHandler)
             }
-            in 24..27 -> @TargetApi(24) {
+            in 28 until 31 -> @TargetApi(28) {  // we want REQUEST here instead of LISTEN
+                Core.connectivity.requestNetwork(request, Callback, mainHandler)
+            }
+            in 26 until 28 -> @TargetApi(26) {
+                Core.connectivity.registerDefaultNetworkCallback(Callback, mainHandler)
+            }
+            in 24 until 26 -> @TargetApi(24) {
                 Core.connectivity.registerDefaultNetworkCallback(Callback)
             }
             else -> try {
                 fallback = false
-                // we want REQUEST here instead of LISTEN
                 Core.connectivity.requestNetwork(request, Callback)
             } catch (e: SecurityException) {
-                // known bug: https://stackoverflow.com/a/33509180/2245107
-                if (Build.VERSION.SDK_INT != 23) Timber.w(e)
-                fallback = true
+                fallback = true     // known bug on API 23: https://stackoverflow.com/a/33509180/2245107
             }
         }
     }
