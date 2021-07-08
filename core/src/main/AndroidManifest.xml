@@ -77,6 +77,7 @@
         <activity
             android:name="com.github.shadowsocks.UrlImportActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
+            android:exported="true"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -89,12 +90,14 @@
         <activity
             android:name="com.github.shadowsocks.VpnRequestActivity"
             android:theme="@style/Theme.AppCompat.Translucent"
+            android:exported="false"
             android:excludeFromRecents="true"
             android:taskAffinity=""/>
 
         <receiver android:name="com.github.shadowsocks.BootReceiver"
                   android:process=":bg"
                   android:directBootAware="true"
+                  android:exported="true"
                   android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

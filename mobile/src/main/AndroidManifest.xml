@@ -19,6 +19,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
+            android:exported="true"
             android:theme="@style/Theme.Shadowsocks.Immersive.Navigation"
             android:launchMode="singleTask">
             <intent-filter>
@@ -35,6 +36,7 @@
 
         <activity
             android:name=".ProfileConfigActivity"
+            android:exported="false"
             android:theme="@style/Theme.Shadowsocks.Immersive"
             android:excludeFromRecents="true"
             android:label="@string/profile_config"
@@ -42,6 +44,7 @@
 
         <activity
             android:name=".AppManager"
+            android:exported="false"
             android:label="@string/proxied_apps"
             android:parentActivityName=".ProfileConfigActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive"
@@ -50,6 +53,7 @@
 
         <activity
             android:name=".UdpFallbackProfileActivity"
+            android:exported="false"
             android:label="@string/udp_fallback"
             android:theme="@style/Theme.Shadowsocks.Immersive"
             android:launchMode="singleTask"
@@ -57,6 +61,7 @@
 
         <activity
             android:name=".ScannerActivity"
+            android:exported="true"
             android:label="@string/add_profile_methods_scan_qr_code"
             android:parentActivityName=".MainActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive"
@@ -64,8 +69,10 @@
             android:screenOrientation="locked"
             android:excludeFromRecents="true"/>
 
-        <activity android:name=".tasker.ConfigActivity"
-                  android:theme="@style/Theme.Shadowsocks.Immersive">
+        <activity
+            android:name=".tasker.ConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Shadowsocks.Immersive">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
@@ -75,6 +82,7 @@
             android:name=".QuickToggleShortcut"
             android:label="@string/quick_toggle"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="true"
             android:launchMode="singleTask"
             android:excludeFromRecents="true"
             android:taskAffinity=""
@@ -87,6 +95,7 @@
         <service android:name=".bg.TileService"
                  android:label="@string/quick_toggle"
                  android:process=":bg"
+                 android:exported="true"
                  android:directBootAware="true"
                  android:icon="@drawable/ic_service_active"
                  android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
@@ -102,6 +111,7 @@
         <receiver android:name=".tasker.ActionListener"
                   android:process=":bg"
                   android:directBootAware="true"
+                  android:exported="true"
                   tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="com.twofortyfouram.locale.intent.action.FIRE_SETTING"/>
