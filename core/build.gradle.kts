@@ -64,7 +64,7 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.5.0"
+    val coroutinesVersion = "1.5.1"
     val roomVersion = "2.3.0"
     val workVersion = "2.5.0"
 
@@ -72,7 +72,7 @@ dependencies {
     api("androidx.core:core-ktx:1.6.0")
     // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
     api("androidx.drawerlayout:drawerlayout:1.1.1")
-    api("androidx.fragment:fragment-ktx:1.3.5")
+    api("androidx.fragment:fragment-ktx:1.3.6")
     api("com.google.android.material:material:1.4.0")
 
     api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
@@ -84,7 +84,7 @@ dependencies {
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.8.7")
     api("com.google.firebase:firebase-analytics-ktx:19.0.0")
-    api("com.google.firebase:firebase-crashlytics:18.1.0")
+    api("com.google.firebase:firebase-crashlytics:18.2.1")
     api("com.jakewharton.timber:timber:4.7.1")
     api("dnsjava:dnsjava:3.4.0")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")

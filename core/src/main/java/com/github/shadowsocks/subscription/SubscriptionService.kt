@@ -43,7 +43,6 @@ import com.google.gson.JsonStreamParser
 import kotlinx.coroutines.*
 import timber.log.Timber
 import java.io.File
-import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
