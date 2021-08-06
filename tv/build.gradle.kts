@@ -27,5 +27,5 @@ android {
 }
 
 dependencies {
-    implementation("androidx.leanback:leanback-preference:1.1.0-rc02")
+    implementation("androidx.leanback:leanback-preference:1.1.0-rc01")
 }
