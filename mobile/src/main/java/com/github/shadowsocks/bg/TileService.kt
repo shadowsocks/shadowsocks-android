@@ -47,7 +47,7 @@ class TileService : BaseTileService(), ShadowsocksConnection.Callback {
         updateTile(BaseService.State.values()[service.state]) { service.profileName }
         if (tapPending) {
             tapPending = false
-            onClick()
+            toggle()
         }
     }
 

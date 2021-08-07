@@ -138,7 +138,7 @@ object DefaultNetworkListener {
             else -> try {
                 fallback = false
                 Core.connectivity.requestNetwork(request, Callback)
-            } catch (e: SecurityException) {
+            } catch (e: RuntimeException) {
                 fallback = true     // known bug on API 23: https://stackoverflow.com/a/33509180/2245107
             }
         }

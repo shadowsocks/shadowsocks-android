@@ -1,4 +1,4 @@
-# https://github.com/detekt/detekt/blob/v1.14.2/detekt-core/src/main/resources/default-detekt-config.yml
+# https://github.com/detekt/detekt/blob/v1.17.1/detekt-core/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -36,6 +36,8 @@ complexity:
     ignoreAnnotated: []
   MethodOverloading:
     active: false
+  NamedArguments:
+    active: false
   NestedBlockDepth:
     active: true
     threshold: 4
@@ -65,6 +67,8 @@ coroutines:
   GlobalCoroutineUsage:
     active: false
   RedundantSuspendModifier:
+    active: true
+  SleepInsteadOfDelay:
     active: true
   SuspendFunWithFlowReturnType:
     active: true
@@ -113,8 +117,10 @@ exceptions:
     active: false
   NotImplementedDeclaration:
     active: true
+  ObjectExtendsThrowable:
+    active: true
   PrintStackTrace:
-    active: false
+    active: true
   RethrowCaughtException:
     active: false
   ReturnFromFinally:
@@ -179,11 +185,13 @@ formatting:
   ImportOrdering:
     active: true
     autoCorrect: true
-    layout: 'idea'
+    layout: '*,java.**,javax.**,kotlin.**,^'
   Indentation:
     active: false
   MaximumLineLength:
-    active: false
+    active: true
+    maxLineLength: 120
+    ignoreBackTickedIdentifier: false
   ModifierOrdering:
     active: true
     autoCorrect: true
@@ -229,6 +237,9 @@ formatting:
     autoCorrect: true
   ParameterListWrapping:
     active: false
+  SpacingAroundAngleBrackets:
+    active: true
+    autoCorrect: true
   SpacingAroundColon:
     active: true
     autoCorrect: true
@@ -254,6 +265,9 @@ formatting:
     active: true
     autoCorrect: true
   SpacingAroundRangeOperator:
+    active: true
+    autoCorrect: true
+  SpacingAroundUnaryOperator:
     active: true
     autoCorrect: true
   SpacingBetweenDeclarationsWithAnnotations:
@@ -306,12 +320,15 @@ naming:
     ignoreOverridden: true
   InvalidPackageDeclaration:
     active: true
+    excludes: ['buildSrc/**', '**/*.kts']
     rootPackage: ''
   MatchingDeclarationName:
     active: true
     mustBeFirst: true
   MemberNameEqualsClassName:
     active: false
+  NoNameShadowing:
+    active: true
   NonBooleanPropertyPrefixedWithIs:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
@@ -327,7 +344,7 @@ naming:
     packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
   TopLevelPropertyNaming:
     active: true
-    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    excludes: ['buildSrc/**', '**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     constantPattern: '[A-Z][_A-Z0-9]*'
     propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
     privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'
@@ -359,13 +376,21 @@ performance:
 
 potential-bugs:
   active: true
+  CastToNullableType:
+    active: false
   Deprecation:
+    active: true
+  DontDowncastCollectionTypes:
+    active: true
+  DoubleMutabilityForCollection:
     active: true
   DuplicateCaseInWhenExpression:
     active: true
   EqualsAlwaysReturnsTrueOrFalse:
     active: true
   EqualsWithHashCodeExist:
+    active: true
+  ExitOutsideMain:
     active: true
   ExplicitGarbageCollectionCall:
     active: true
@@ -398,15 +423,19 @@ potential-bugs:
   UnconditionalJumpStatementInLoop:
     active: true
   UnnecessaryNotNullOperator:
-    active: false
+    active: true
   UnnecessarySafeCall:
-    active: false
+    active: true
+  UnreachableCatchBlock:
+    active: true
   UnreachableCode:
     active: true
   UnsafeCallOnNullableType:
     active: true
   UnsafeCast:
-    active: false
+    active: true
+  UnusedUnaryOperator:
+    active: true
   UselessPostfixExpression:
     active: true
   WrongEqualsTypeParameter:
@@ -421,6 +450,8 @@ style:
   DataClassContainsFunctions:
     active: false
   DataClassShouldBeImmutable:
+    active: false
+  DestructuringDeclarationWithTooManyEntries:
     active: false
   EqualsNullCall:
     active: true
@@ -446,6 +477,7 @@ style:
     methods: ['kotlin.io.println', 'kotlin.io.print']
   ForbiddenPublicDataClass:
     active: true
+    excludes: ['**']
     ignorePackages: ['*.internal', '*.internal.*']
   ForbiddenVoid:
     active: true
@@ -454,12 +486,15 @@ style:
   FunctionOnlyReturningConstant:
     active: true
     ignoreOverridableFunction: true
+    ignoreActualFunction: true
     excludedFunctions: 'describeContents'
     excludeAnnotatedFunction: ['dagger.Provides']
   LibraryCodeMustSpecifyReturnType:
     active: true
+    excludes: ['**']
   LibraryEntitiesShouldNotBePublic:
     active: true
+    excludes: ['**']
   LoopWithTooManyJumpStatements:
     active: true
     maxJumpCount: 1
@@ -479,11 +514,15 @@ style:
     active: true
   ModifierOrder:
     active: true
+  MultilineLambdaItParameter:
+    active: false
   NestedClassesVisibility:
     active: true
   NewLineAtEndOfFile:
     active: true
   NoTabs:
+    active: true
+  ObjectLiteralToLambda:
     active: true
   OptionalAbstractKeyword:
     active: true
@@ -496,6 +535,8 @@ style:
   ProtectedMemberInFinalClass:
     active: true
   RedundantExplicitType:
+    active: true
+  RedundantHigherOrderMapUsage:
     active: true
   RedundantVisibilityModifierRule:
     active: true
@@ -519,6 +560,8 @@ style:
   UnnecessaryAnnotationUseSiteTarget:
     active: true
   UnnecessaryApply:
+    active: true
+  UnnecessaryFilter:
     active: true
   UnnecessaryInheritance:
     active: true
@@ -545,8 +588,14 @@ style:
     active: false
   UseEmptyCounterpart:
     active: true
+  UseIfEmptyOrIfBlank:
+    active: true
   UseIfInsteadOfWhen:
     active: false
+  UseIsNullOrEmpty:
+    active: true
+  UseOrEmpty:
+    active: true
   UseRequire:
     active: true
   UseRequireNotNull:
