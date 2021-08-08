@@ -25,10 +25,10 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 fun Project.setupCommon() {
     android.apply {
         buildToolsVersion("30.0.3")
-        compileSdkVersion("android-S")
+        compileSdkVersion(31)
         defaultConfig {
             minSdkVersion(23)
-            targetSdkVersion("S")
+            targetSdkVersion(31)
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
         val javaVersion = JavaVersion.VERSION_1_8
