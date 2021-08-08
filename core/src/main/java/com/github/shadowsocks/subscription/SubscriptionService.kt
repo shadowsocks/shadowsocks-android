@@ -82,7 +82,7 @@ class SubscriptionService : Service(), CoroutineScope {
                             R.drawable.ic_navigation_close,
                             getText(R.string.stop),
                             PendingIntent.getBroadcast(this@SubscriptionService, 0,
-                                    Intent(Action.ABORT).setPackage(packageName), 0)).apply {
+                                    Intent(Action.ABORT).setPackage(packageName), PendingIntent.FLAG_IMMUTABLE)).apply {
                         setShowsUserInterface(false)
                     }.build())
                     setCategory(NotificationCompat.CATEGORY_PROGRESS)

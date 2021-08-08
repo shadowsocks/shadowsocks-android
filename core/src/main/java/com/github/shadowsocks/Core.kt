@@ -99,7 +99,7 @@ object Core : Configuration.Provider {
         this.app = app
         this.configureIntent = {
             PendingIntent.getActivity(it, 0, Intent(it, configureClass.java)
-                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), 0)
+                    .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT), PendingIntent.FLAG_IMMUTABLE)
         }
 
         if (Build.VERSION.SDK_INT >= 24) {  // migrate old files
