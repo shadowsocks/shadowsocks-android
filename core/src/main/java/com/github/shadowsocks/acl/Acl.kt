@@ -34,6 +34,7 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.io.Reader
+import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLConnection
 import kotlin.coroutines.coroutineContext
@@ -152,7 +153,9 @@ class Acl {
 
     suspend fun flatten(depth: Int, connect: suspend (URL) -> URLConnection): Acl {
         if (depth > 0) for (url in urls.asIterable()) {
-            val child = Acl().fromReader(connect(url).getInputStream().bufferedReader(), bypass)
+            val child = Acl().fromReader(connect(url).also {
+                (it as? HttpURLConnection)?.instanceFollowRedirects = true
+            }.getInputStream().bufferedReader(), bypass)
             child.flatten(depth - 1, connect)
             if (bypass != child.bypass) {
                 Timber.w("Imported network ACL has a conflicting mode set. " +
