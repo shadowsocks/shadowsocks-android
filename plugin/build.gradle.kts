@@ -7,14 +7,7 @@ plugins {
 
 setupCommon()
 
-android {
-    defaultConfig {
-        versionCode = findProperty("VERSION_CODE").toString().toInt()
-        versionName = findProperty("VERSION_NAME").toString()
-    }
-
-    lintOptions.informational("GradleDependency")
-}
+android.lintOptions.informational("GradleDependency")
 
 dependencies {
     api(kotlin("stdlib-jdk8"))

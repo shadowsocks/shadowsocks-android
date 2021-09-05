@@ -24,14 +24,14 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 
 fun Project.setupCommon() {
     android.apply {
-        buildToolsVersion("30.0.3")
+        buildToolsVersion("31.0.0")
         compileSdkVersion(31)
         defaultConfig {
-            minSdkVersion(23)
-            targetSdkVersion(31)
+            minSdk = 23
+            targetSdk = 31
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
-        val javaVersion = JavaVersion.VERSION_1_8
+        val javaVersion = JavaVersion.VERSION_11
         compileOptions {
             sourceCompatibility = javaVersion
             targetCompatibility = javaVersion
@@ -75,7 +75,18 @@ fun Project.setupApp() {
     setupCore()
 
     android.apply {
-        defaultConfig.resConfigs(listOf("ar", "es", "fa", "fr", "ja", "ko", "ru", "tr", "zh-rCN", "zh-rTW"))
+        defaultConfig.resourceConfigurations.addAll(listOf(
+            "ar",
+            "es",
+            "fa",
+            "fr",
+            "ja",
+            "ko",
+            "ru",
+            "tr",
+            "zh-rCN",
+            "zh-rTW",
+        ))
         buildTypes {
             getByName("debug") {
                 isPseudoLocalesEnabled = true
@@ -88,7 +99,7 @@ fun Project.setupApp() {
         }
         lintOptions.disable("RemoveWorkManagerInitializer")
         packagingOptions {
-            exclude("**/*.kotlin_*")
+            excludes.add("**/*.kotlin_*")
             jniLibs.useLegacyPackaging = true
         }
         splits.abi {

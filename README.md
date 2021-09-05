@@ -15,7 +15,7 @@ for Android TV ([beta](https://play.google.com/apps/testing/com.github.shadowsoc
 
 ### PREREQUISITES
 
-* JDK 1.8
+* JDK 11+
 * Android SDK
   - Android NDK
 * Rust with Android targets installed  

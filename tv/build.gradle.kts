@@ -14,13 +14,13 @@ android {
         applicationId = "com.github.shadowsocks.tv"
         buildConfigField("boolean", "FULLSCREEN", "false")
     }
-    flavorDimensions("market")
+    flavorDimensions.add("market")
     productFlavors {
         create("freedom") {
-            dimension("market")
+            dimension = "market"
         }
         create("google") {
-            dimension("market")
+            dimension = "market"
             buildConfigField("boolean", "FULLSCREEN", "true")
         }
     }
