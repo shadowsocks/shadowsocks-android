@@ -16,11 +16,6 @@ android {
     lintOptions.informational("GradleDependency")
 }
 
-mavenPublish.targets.getByName("uploadArchives") {
-    repositoryUsername = findProperty("NEXUS_USERNAME").toString()
-    repositoryPassword = findProperty("NEXUS_PASSWORD").toString()
-}
-
 dependencies {
     api(kotlin("stdlib-jdk8"))
     api("androidx.core:core-ktx:1.0.0")
