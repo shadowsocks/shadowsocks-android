@@ -74,7 +74,7 @@
 
         <activity
             android:name="com.github.shadowsocks.UrlImportActivity"
-            android:theme="@style/Theme.AppCompat.Translucent"
+            android:theme="@style/Theme.Shadowsocks.Translucent"
             android:exported="true"
             android:excludeFromRecents="true">
             <intent-filter>
@@ -87,7 +87,7 @@
 
         <activity
             android:name="com.github.shadowsocks.VpnRequestActivity"
-            android:theme="@style/Theme.AppCompat.Translucent"
+            android:theme="@style/Theme.Shadowsocks.Translucent"
             android:exported="false"
             android:excludeFromRecents="true"
             android:taskAffinity=""/>
