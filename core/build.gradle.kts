@@ -75,7 +75,6 @@ dependencies {
     api("androidx.fragment:fragment-ktx:1.3.6")
     api("com.google.android.material:material:1.4.0")
 
-    api("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
     api("androidx.preference:preference:1.1.1")
     api("androidx.room:room-runtime:$roomVersion")
