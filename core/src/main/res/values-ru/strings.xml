@@ -44,7 +44,8 @@
     <string name="ipv6_summary">"Перенаправлять трафик IPv6 на удалённый сервер"</string>
     <string name="route_list">"Маршрут"</string>
     <string name="route_entry_gfwlist">"Список GFW"</string>
-    <string name="proxied_apps">"Работа VPN\nв конкретных приложениях"</string>
+    <string name="proxied_apps">"Работа VPN
+в конкретных приложениях"</string>
     <string name="proxied_apps_summary">"Настроить работу VPN только в нужных приложениях"</string>
     <string name="on">"Вкл."</string>
     <string name="bypass_apps">"Черный список"</string>
