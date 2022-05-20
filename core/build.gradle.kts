@@ -39,11 +39,13 @@ cargo {
     profile = findProperty("CARGO_PROFILE")?.toString() ?: currentFlavor
     extraCargoBuildArguments = listOf("--bin", libname!!)
     featureSpec.noDefaultBut(arrayOf(
-            "stream-cipher",
-            "aead-cipher-extra",
-            "logging",
-            "local-flow-stat",
-            "local-dns",
+        "stream-cipher",
+        "aead-cipher-extra",
+        "logging",
+        "local-flow-stat",
+        "local-dns",
+        "security-iv-printable-prefix",
+        "aead-cipher-2022",
     ))
     exec = { spec, toolchain ->
         spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
