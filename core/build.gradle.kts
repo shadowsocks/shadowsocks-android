@@ -49,7 +49,8 @@ cargo {
             "aead-cipher-extra",
             "logging",
             "local-flow-stat",
-            "local-dns"))
+            "local-dns",
+    ))
     exec = { spec, toolchain ->
         spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
 //        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")

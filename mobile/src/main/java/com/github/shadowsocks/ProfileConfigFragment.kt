@@ -56,7 +56,7 @@ import kotlinx.parcelize.Parcelize
 class ProfileConfigFragment : PreferenceFragmentCompat(),
         Preference.OnPreferenceChangeListener, OnPreferenceDataStoreChangeListener {
     companion object PasswordSummaryProvider : Preference.SummaryProvider<EditTextPreference> {
-        override fun provideSummary(preference: EditTextPreference?) = "\u2022".repeat(preference?.text?.length ?: 0)
+        override fun provideSummary(preference: EditTextPreference) = "\u2022".repeat(preference.text?.length ?: 0)
     }
 
     @Parcelize
@@ -194,7 +194,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         else udpFallback.summary = fallbackProfile.formattedName
     }
 
-    override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean = try {
+    override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean = try {
         val selected = pluginConfiguration.selected
         pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions +
                 (pluginConfiguration.selected to PluginOptions(selected, newValue as? String?)), selected)
@@ -233,7 +233,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             Activity.RESULT_OK -> {
                 val options = data?.getStringExtra(PluginContract.EXTRA_OPTIONS)
                 pluginConfigure.text = options
-                onPreferenceChange(null, options)
+                onPreferenceChange(pluginConfigure, options)
             }
             PluginContract.RESULT_FALLBACK -> showPluginEditor()
         }

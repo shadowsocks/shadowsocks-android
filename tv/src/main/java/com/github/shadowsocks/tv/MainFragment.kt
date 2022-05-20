@@ -34,13 +34,13 @@ import com.github.shadowsocks.utils.Key
 
 class MainFragment : LeanbackSettingsFragmentCompat() {
     override fun onPreferenceStartInitialScreen() = startPreferenceFragment(MainPreferenceFragment())
-    override fun onPreferenceStartScreen(caller: PreferenceFragmentCompat?, pref: PreferenceScreen?): Boolean {
+    override fun onPreferenceStartScreen(caller: PreferenceFragmentCompat, pref: PreferenceScreen): Boolean {
         onPreferenceStartInitialScreen()
         return true
     }
-    override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat?, pref: Preference?) = false
-    override fun onPreferenceDisplayDialog(caller: PreferenceFragmentCompat, pref: Preference?): Boolean {
-        if (pref?.key == Key.id) {
+    override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean = false
+    override fun onPreferenceDisplayDialog(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
+        if (pref.key == Key.id) {
             if ((childFragmentManager.findFragmentById(R.id.settings_preference_fragment_container)
                             as MainPreferenceFragment).state == BaseService.State.Stopped) {
                 startPreferenceFragment(ProfilesDialogFragment().apply {

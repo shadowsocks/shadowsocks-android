@@ -68,7 +68,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
             serviceMode.isEnabled = stopped
             portProxy.isEnabled = stopped
             portLocalDns.isEnabled = stopped
-            if (stopped) onServiceModeChange.onPreferenceChange(null, DataStore.serviceMode) else {
+            if (stopped) onServiceModeChange.onPreferenceChange(serviceMode, DataStore.serviceMode) else {
                 portTransproxy.isEnabled = false
             }
         }
