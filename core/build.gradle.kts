@@ -44,7 +44,8 @@ cargo {
         "logging",
         "local-flow-stat",
         "local-dns",
-        "security-iv-printable-prefix",
+        "armv8",
+        "neon",
         "aead-cipher-2022",
     ))
     exec = { spec, toolchain ->
