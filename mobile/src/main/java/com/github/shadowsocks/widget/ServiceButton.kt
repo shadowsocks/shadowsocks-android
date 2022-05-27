@@ -44,11 +44,6 @@ import java.util.*
 
 class ServiceButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         FloatingActionButton(context, attrs, defStyleAttr), DynamicAnimation.OnAnimationEndListener {
-    companion object {
-        private val springAnimator by lazy {
-            DeterminateDrawable::class.java.getDeclaredField("springAnimator").apply { isAccessible = true }
-        }
-    }
 
     private val callback = object : Animatable2Compat.AnimationCallback() {
         override fun onAnimationEnd(drawable: Drawable) {
@@ -100,7 +95,7 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
     private lateinit var progress: BaseProgressIndicator<*>
     fun initProgress(progress: BaseProgressIndicator<*>) {
         this.progress = progress
-        (springAnimator.get(progress.progressDrawable) as DynamicAnimation<*>).addEndListener(this)
+        progress.progressDrawable?.addSpringAnimationEndListener(this)
     }
     override fun onAnimationEnd(animation: DynamicAnimation<out DynamicAnimation<*>>?, canceled: Boolean, value: Float,
                                 velocity: Float) {
