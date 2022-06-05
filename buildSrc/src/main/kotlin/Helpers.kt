@@ -65,7 +65,7 @@ fun Project.setupCore() {
             warning("RestrictedApi")
             disable("UseAppTint")
         }
-        ndkVersion = "21.4.7075529"
+        ndkVersion = "25.0.8528842"
     }
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.1.5")
 }
@@ -97,9 +97,9 @@ fun Project.setupApp() {
                 proguardFile(getDefaultProguardFile("proguard-android.txt"))
             }
         }
-        lintOptions.disable("RemoveWorkManagerInitializer")
+        lintOptions.disable += "RemoveWorkManagerInitializer"
         packagingOptions {
-            excludes.add("**/*.kotlin_*")
+            resources.excludes += "**/*.kotlin_*"
             jniLibs.useLegacyPackaging = true
         }
         splits.abi {
