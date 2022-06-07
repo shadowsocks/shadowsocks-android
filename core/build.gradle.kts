@@ -53,7 +53,7 @@ cargo {
     ))
     exec = { spec, toolchain ->
         spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
-//        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
+        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
         spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
     }
 }

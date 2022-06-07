@@ -24,6 +24,9 @@ if sys.platform == 'msys' or sys.platform == 'cygwin':
     rustcc = win2posix(rustcc)
 
 args = [rustcc, os.environ['RUST_ANDROID_GRADLE_CC_LINK_ARG']] + sys.argv[1:]
+# https://github.com/rust-windowing/android-ndk-rs/issues/149
+args.remove("-lgcc")
+args.append(os.path.join(os.path.dirname(__file__), "libgcc.a"))
 
 linkargfileName = ''
 if (sys.platform == 'msys' or sys.platform == 'cygwin') and len(''.join(args)) > 8191:
