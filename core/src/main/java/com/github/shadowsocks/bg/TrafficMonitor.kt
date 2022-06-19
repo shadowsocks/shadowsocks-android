@@ -69,8 +69,8 @@ class TrafficMonitor(statFile: File) {
         if (delta != 0L) {
             if (dirty) {
                 out = current.copy().apply {
-                    txRate = (txTotal - out.txTotal) * 1000 / delta
-                    rxRate = (rxTotal - out.rxTotal) * 1000 / delta
+                    txRate = (txTotal - out.txTotal) * 1024 / delta
+                    rxRate = (rxTotal - out.rxTotal) * 1024 / delta
                 }
                 dirty = false
                 updated = true

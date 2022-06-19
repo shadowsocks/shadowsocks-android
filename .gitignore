@@ -11,3 +11,4 @@ release/
 
 # release apks
 *.apk
+.DS_Store
