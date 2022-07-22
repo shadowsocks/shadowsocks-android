@@ -78,8 +78,8 @@ fun Project.setupApp() {
     android.apply {
         defaultConfig.resourceConfigurations.addAll(listOf(
             "ar",
-            "es",
             "de",
+            "es",
             "fa",
             "fr",
             "ja",
