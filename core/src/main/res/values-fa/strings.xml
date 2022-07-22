@@ -28,7 +28,7 @@
     <string name="stat_summary">"ارسال: \t\t\t\t\t%3$s\t↑\t%1$s
 دریافت: \t%4$s\t↓\t%2$s"</string>
     <string name="connection_test_testing">"در حال آزمایش…"</string>
-    <string name="connection_test_available">"موفقیت: دستیابی به HTTPS انجام شد. ٪میلی‌ثانیه"</string>
+    <string name="connection_test_available">"موفقیت: دستیابی به HTTPS انجام شد. %d میلی‌ثانیه"</string>
     <string name="connection_test_error">"اتصال اینترنت شناسایی نشد: %s"</string>
     <string name="connection_test_fail">"ارتباط با اینترنت فراهم نیست"</string>
     <string name="connection_test_error_status_code">"کد خطا: #%d"</string>
@@ -155,7 +155,6 @@
     <string name="service_transproxy">"سرویس ترانس‌پروکسی"</string>
     <string name="vpn_permission_denied">"مجوز برای ساخت VPN فراهم نیست"</string>
     <string name="auto_connect_summary_v24">"شدوساکس را از ابتدا فعال کن. توصیه می‌شود که به جای این گزینه از گزینه Always-ON VPN استفاده شود"</string>
-    <string name="speed">"سرعت"</string>
     <string name="direct_boot_aware">"مجاز به تغییر در صفحه‌ی قفل"</string>
     <string name="direct_boot_aware_summary">"اطلاعات پروفایل انتخابی شما کمتر محافظت می شود"</string>
     <string name="acl_rule_online_config">"URL به پیکربندی آنلاین"</string>

@@ -193,7 +193,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
             else -> {
                 resources.getStringArray(R.array.bypass_private_route).forEach {
                     val subnet = Subnet.fromString(it)!!
-                    builder.addRoute(subnet.address.hostAddress, subnet.prefixSize)
+                    builder.addRoute(subnet.address.hostAddress!!, subnet.prefixSize)
                 }
                 builder.addRoute(PRIVATE_VLAN4_ROUTER, 32)
                 // https://issuetracker.google.com/issues/149636790

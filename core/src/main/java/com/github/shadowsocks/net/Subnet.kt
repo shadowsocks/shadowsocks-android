@@ -78,7 +78,7 @@ class Subnet(val address: InetAddress, val prefixSize: Int) : Comparable<Subnet>
     }, prefixSize)
 
     override fun toString(): String =
-            if (prefixSize == addressLength) address.hostAddress else address.hostAddress + '/' + prefixSize
+            if (prefixSize == addressLength) address.hostAddress!! else address.hostAddress!! + '/' + prefixSize
 
     private fun Byte.unsigned() = toInt() and 0xFF
     override fun compareTo(other: Subnet): Int {
