@@ -87,6 +87,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
                 service.getText(R.string.stop),
                 PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE).setPackage(service.packageName),
                     PendingIntent.FLAG_IMMUTABLE)).apply {
+            setAuthenticationRequired(true)
             setShowsUserInterface(false)
         }.build()
         if (Build.VERSION.SDK_INT < 24) builder.addAction(closeAction) else builder.addInvisibleAction(closeAction)
