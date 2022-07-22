@@ -22,10 +22,7 @@ package com.github.shadowsocks
 
 import android.app.*
 import android.app.admin.DevicePolicyManager
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -36,6 +33,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.core.os.persistableBundleOf
 import androidx.work.Configuration
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
@@ -170,8 +168,12 @@ object Core : Configuration.Provider {
             if (Build.VERSION.SDK_INT >= 28) PackageManager.GET_SIGNING_CERTIFICATES
             else @Suppress("DEPRECATION") PackageManager.GET_SIGNATURES)!!
 
-    fun trySetPrimaryClip(clip: String) = try {
-        clipboard.setPrimaryClip(ClipData.newPlainText(null, clip))
+    fun trySetPrimaryClip(clip: String, isSensitive: Boolean = false) = try {
+        clipboard.setPrimaryClip(ClipData.newPlainText(null, clip).apply {
+            if (isSensitive && Build.VERSION.SDK_INT >= 24) {
+                description.extras = persistableBundleOf(ClipDescription.EXTRA_IS_SENSITIVE to true)
+            }
+        })
         true
     } catch (e: RuntimeException) {
         Timber.d(e)
