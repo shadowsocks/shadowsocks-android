@@ -11,6 +11,8 @@ plugins {
 setupCore()
 
 android {
+    namespace = "com.github.shadowsocks.core"
+
     defaultConfig {
         consumerProguardFiles("proguard-rules.pro")
 
@@ -69,16 +71,14 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.6.1"
+    val coroutinesVersion = "1.6.4"
     val roomVersion = "2.4.2"
     val workVersion = "2.7.1"
 
     api(project(":plugin"))
-    api("androidx.core:core-ktx:1.7.0")
-    // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
-    api("androidx.drawerlayout:drawerlayout:1.1.1")
-    api("androidx.fragment:fragment-ktx:1.4.1")
-    api("com.google.android.material:material:1.6.0")
+    api("androidx.core:core-ktx:1.8.0")
+    api("androidx.fragment:fragment-ktx:1.5.0")
+    api("com.google.android.material:material:1.6.1")
 
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
     api("androidx.preference:preference:1.2.0")
@@ -87,10 +87,10 @@ dependencies {
     api("androidx.work:work-runtime-ktx:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.9.0")
-    api("com.google.firebase:firebase-analytics-ktx:21.0.0")
-    api("com.google.firebase:firebase-crashlytics:18.2.10")
+    api("com.google.firebase:firebase-analytics-ktx:21.1.0")
+    api("com.google.firebase:firebase-crashlytics:18.2.11")
     api("com.jakewharton.timber:timber:5.0.1")
-    api("dnsjava:dnsjava:3.5.0")
+    api("dnsjava:dnsjava:3.5.1")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     kapt("androidx.room:room-compiler:$roomVersion")

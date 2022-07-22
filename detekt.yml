@@ -1,4 +1,4 @@
-# https://github.com/detekt/detekt/blob/v1.17.1/detekt-core/src/main/resources/default-detekt-config.yml
+# https://github.com/detekt/detekt/blob/v1.19.0/detekt-core/src/main/resources/default-detekt-config.yml
 
 comments:
   active: false
@@ -19,6 +19,16 @@ complexity:
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
+    nestingFunctions:
+      - 'also'
+      - 'apply'
+      - 'forEach'
+      - 'isNotNull'
+      - 'ifNull'
+      - 'let'
+      - 'run'
+      - 'use'
+      - 'with'
   LabeledExpression:
     active: false
   LargeClass:
@@ -33,7 +43,7 @@ complexity:
     constructorThreshold: 7
     ignoreDefaultParameters: true
     ignoreDataClasses: true
-    ignoreAnnotated: []
+    ignoreAnnotatedParameter: []
   MethodOverloading:
     active: false
   NamedArguments:
@@ -65,6 +75,8 @@ complexity:
 coroutines:
   active: true
   GlobalCoroutineUsage:
+    active: false
+  InjectDispatcher:
     active: false
   RedundantSuspendModifier:
     active: true
@@ -112,7 +124,11 @@ exceptions:
   active: true
   ExceptionRaisedInUnexpectedLocation:
     active: true
-    methodNames: [toString, hashCode, equals, finalize]
+    methodNames:
+      - 'equals'
+      - 'finalize'
+      - 'hashCode'
+      - 'toString'
   InstanceOfCheckForException:
     active: false
   NotImplementedDeclaration:
@@ -129,10 +145,10 @@ exceptions:
   SwallowedException:
     active: true
     ignoredExceptionTypes:
-      - InterruptedException
-      - NumberFormatException
-      - ParseException
-      - MalformedURLException
+      - 'InterruptedException'
+      - 'MalformedURLException'
+      - 'NumberFormatException'
+      - 'ParseException'
     allowedExceptionNameRegex: '_|(ignore|expected).*'
   ThrowingExceptionFromFinally:
     active: false
@@ -142,9 +158,15 @@ exceptions:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
     exceptions:
-      - IllegalArgumentException
-      - IllegalStateException
-      - IOException
+      - 'ArrayIndexOutOfBoundsException'
+      - 'Exception'
+      - 'IllegalArgumentException'
+      - 'IllegalMonitorStateException'
+      - 'IllegalStateException'
+      - 'IndexOutOfBoundsException'
+      - 'NullPointerException'
+      - 'RuntimeException'
+      - 'Throwable'
   ThrowingNewInstanceOfSameException:
     active: true
   TooGenericExceptionCaught:
@@ -152,10 +174,10 @@ exceptions:
   TooGenericExceptionThrown:
     active: true
     exceptionNames:
-      - Error
-      - Exception
-      - Throwable
-      - RuntimeException
+      - 'Error'
+      - 'Exception'
+      - 'RuntimeException'
+      - 'Throwable'
 
 formatting:
   active: true
@@ -280,6 +302,8 @@ formatting:
 
 naming:
   active: true
+  BooleanPropertyNaming:
+    active: false
   ClassNaming:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
@@ -311,7 +335,6 @@ naming:
     functionPattern: '([a-z][a-zA-Z0-9]*)|(`.*`)'
     excludeClassPattern: '$^'
     ignoreOverridden: true
-    ignoreAnnotated: ['Composable']
   FunctionParameterNaming:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
@@ -320,8 +343,11 @@ naming:
     ignoreOverridden: true
   InvalidPackageDeclaration:
     active: true
-    excludes: ['buildSrc/**', '**/*.kts']
     rootPackage: ''
+  LambdaParameterNaming:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
+    parameterPattern: '[a-z][A-Za-z0-9]*|_'
   MatchingDeclarationName:
     active: true
     mustBeFirst: true
@@ -376,6 +402,10 @@ performance:
 
 potential-bugs:
   active: true
+  AvoidReferentialEquality:
+    active: true
+    forbiddenTypePatterns:
+      - 'kotlin.String'
   CastToNullableType:
     active: false
   Deprecation:
@@ -399,7 +429,11 @@ potential-bugs:
   IgnoredReturnValue:
     active: true
     restrictToAnnotatedMethods: true
-    returnValueAnnotations: ['*.CheckReturnValue', '*.CheckResult']
+    returnValueAnnotations:
+      - '*.CheckResult'
+      - '*.CheckReturnValue'
+    ignoreReturnValueAnnotations:
+      - '*.CanIgnoreReturnValue'
   ImplicitDefaultLocale:
     active: true
   ImplicitUnitReturnType:
@@ -414,6 +448,9 @@ potential-bugs:
     active: false
   MapGetWithNotNullAssertionOperator:
     active: true
+  MissingPackageDeclaration:
+    active: true
+    excludes: ['buildSrc/**', '**/*.kts']
   MissingWhenCase:
     active: false
   NullableToStringCall:
@@ -432,6 +469,7 @@ potential-bugs:
     active: true
   UnsafeCallOnNullableType:
     active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/jsTest/**', '**/iosTest/**']
   UnsafeCast:
     active: true
   UnusedUnaryOperator:
@@ -466,19 +504,27 @@ style:
     includeLineWrapping: false
   ForbiddenComment:
     active: true
-    values: ['TODO:', 'FIXME:', 'STOPSHIP:']
+    values:
+      - 'FIXME:'
+      - 'STOPSHIP:'
+      - 'TODO:'
     allowedPatterns: ''
+    customMessage: ''
   ForbiddenImport:
     active: true
     imports: []
     forbiddenPatterns: ''
   ForbiddenMethodCall:
     active: true
-    methods: ['kotlin.io.println', 'kotlin.io.print']
+    methods:
+      - 'kotlin.io.print'
+      - 'kotlin.io.println'
   ForbiddenPublicDataClass:
     active: true
     excludes: ['**']
-    ignorePackages: ['*.internal', '*.internal.*']
+    ignorePackages:
+      - '*.internal'
+      - '*.internal.*'
   ForbiddenVoid:
     active: true
     ignoreOverridden: true
@@ -487,8 +533,7 @@ style:
     active: true
     ignoreOverridableFunction: true
     ignoreActualFunction: true
-    excludedFunctions: 'describeContents'
-    excludeAnnotatedFunction: ['dagger.Provides']
+    excludedFunctions: ''
   LibraryCodeMustSpecifyReturnType:
     active: true
     excludes: ['**']
@@ -551,6 +596,7 @@ style:
   ThrowsCount:
     active: true
     max: 2
+    excludeGuardClauses: false
   TrailingWhitespace:
     active: true
   UnderscoresInNumericLiterals:
@@ -578,6 +624,8 @@ style:
   UnusedPrivateMember:
     active: true
     allowedNames: '(_|ignored|expected|serialVersionUID)'
+  UseAnyOrNoneInsteadOfFind:
+    active: true
   UseArrayLiteralsInAnnotations:
     active: true
   UseCheckNotNull:

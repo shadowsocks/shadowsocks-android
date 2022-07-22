@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.github.shadowsocks.plugin">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:theme="@style/Theme.Shadowsocks">
         <meta-data android:name="com.github.shadowsocks.plugin.version"
