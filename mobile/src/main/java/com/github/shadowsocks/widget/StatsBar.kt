@@ -74,16 +74,16 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
         TooltipCompat.setTooltipText(this, text)
     }
 
-    fun changeState(state: BaseService.State) {
+    fun changeState(state: BaseService.State, animate: Boolean) {
         val activity = context as MainActivity
         fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch(Dispatchers.Main) {
             activity.whenStarted { what() }
         }
         if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
-            postWhenStarted { performShow() }
+            postWhenStarted { performShow(animate) }
             tester.status.observe(activity) { it.retrieve(this::setStatus) { msg -> activity.snackbar(msg).show() } }
         } else {
-            postWhenStarted { performHide() }
+            postWhenStarted { performHide(animate) }
             updateTraffic(0, 0, 0, 0)
             tester.status.removeObservers(activity)
             if (state != BaseService.State.Idle) tester.invalidate()
