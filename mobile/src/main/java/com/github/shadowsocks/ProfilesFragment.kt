@@ -205,7 +205,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
                 true
             }
             R.id.action_export_clipboard -> {
-                val success = Core.trySetPrimaryClip(this.item.toString())
+                val success = Core.trySetPrimaryClip(this.item.toString(), true)
                 (activity as MainActivity).snackbar().setText(
                         if (success) R.string.action_export_msg else R.string.action_export_err).show()
                 true
@@ -432,7 +432,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             }
             R.id.action_export_clipboard -> {
                 val profiles = ProfileManager.getActiveProfiles()
-                val success = profiles != null && Core.trySetPrimaryClip(profiles.joinToString("\n"))
+                val success = profiles != null && Core.trySetPrimaryClip(profiles.joinToString("\n"), true)
                 (activity as MainActivity).snackbar().setText(
                         if (success) R.string.action_export_msg else R.string.action_export_err).show()
                 true
