@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     // service
     var state = BaseService.State.Idle
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
-            changeState(state, msg, true)
+            changeState(state, msg)
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId == 0L) this@MainActivity.stats.updateTraffic(
                 stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
@@ -105,9 +105,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         ProfilesFragment.instance?.onTrafficPersisted(profileId)
     }
 
-    private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = false) {
+    private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = true) {
         fab.changeState(state, this.state, animate)
-        stats.changeState(state)
+        stats.changeState(state, animate)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
         this.state = state
         ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
@@ -159,7 +159,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
             insets
         }
 
-        changeState(BaseService.State.Idle) // reset everything to init state
+        changeState(BaseService.State.Idle, animate = false)    // reset everything to init state
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
     }
