@@ -1,5 +1,5 @@
 rootProject.extra.apply {
-    set("androidPlugin", "com.android.tools.build:gradle:7.3.0-beta05")
+    set("androidPlugin", "com.android.tools.build:gradle:7.2.1")
     set("kotlinVersion", "1.7.10")
 }
 
