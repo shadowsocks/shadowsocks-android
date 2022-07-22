@@ -23,52 +23,52 @@
 
 <resources>
     <string name="app_name">"شدوساکس"</string>
-    <string name="remote_dns">"دی‌ان‌اس سرور"</string>
+    <string name="quick_toggle">"تغییر وضعیت"</string>
+    <string name="remote_dns">"DNS از راه دور"</string>
+    <string name="stat_summary">"ارسال: \t\t\t\t\t%3$s\t↑\t%1$s
+دریافت: \t%4$s\t↓\t%2$s"</string>
     <string name="connection_test_testing">"در حال آزمایش…"</string>
+    <string name="connection_test_available">"موفقیت: دستیابی به HTTPS انجام شد. ٪میلی‌ثانیه"</string>
+    <string name="connection_test_error">"اتصال اینترنت شناسایی نشد: %s"</string>
     <string name="connection_test_fail">"ارتباط با اینترنت فراهم نیست"</string>
+    <string name="connection_test_error_status_code">"کد خطا: #%d"</string>
 
     <!-- proxy category -->
     <string name="profile_name">"نام پروفایل"</string>
     <string name="proxy">"سرور"</string>
     <string name="remote_port">"پورت سرور"</string>
     <string name="sitekey">"کلمه عبور"</string>
-    <string name="enc_method">"طریقه رمزگذاری"</string>
+    <string name="enc_method">"روش رمزگذاری"</string>
 
     <!-- feature category -->
     <string name="ipv6">"مسیر IPv6"</string>
     <string name="ipv6_summary">"ترافیک IPv6 را به سرور هدایت کن"</string>
-    <string name="route_list">"روت"</string>
-    <string name="route_entry_gfwlist">"فهرست فیلترینگ"</string>
-    <string name="proxied_apps">"حالت "</string>
-    <string name="proxied_apps_summary">"تنظیم حالت وی‌پی‌ان برای اپلیکیشن‌های انتخاب شده"</string>
+    <string name="route_list">"مسیر"</string>
+    <string name="route_entry_gfwlist">"لیست فیلترینگ"</string>
+    <string name="proxied_apps">"برنامه های حالت VPN"</string>
+    <string name="proxied_apps_summary">"تنظیم حالت VPN برای اپلیکیشن‌های انتخاب شده"</string>
     <string name="on">"روشن"</string>
-
-    <!-- Fuzzy -->
-    <string name="bypass_apps">"حالت صرف‌نظر"</string>
-    <string name="bypass_apps_summary">"این اپلیکیشن‌ها از وی‌پی‌ان استفاده نکنند"</string>
+    <string name="bypass_apps">"کنار گذاشتن"</string>
+    <string name="bypass_apps_summary">"این گزینه را فعال کنید تا اپلیکیشن‌های انتخاب شده از VPN استفاده نکنند"</string>
     <string name="auto_connect">"وصل‌شدن اتوماتیک"</string>
-
-    <!-- Fuzzy -->
-    <string name="auto_connect_summary">"فعال‌شدن شدوساکس لحظه روشن‌شدن گوشی"</string>
-
-    <!-- Fuzzy -->
-    <string name="udp_dns">"ارسال دی‌ان‌اس"</string>
-
-    <!-- Fuzzy -->
-    <string name="udp_dns_summary">"ارسال کلیه درخواست‌های دی‌ان‌اس به سرور "</string>
+    <string name="auto_connect_summary">"فعال‌شدن شدوساکس لحظه روشن‌شدن گوشی بروزرسانی شود اگر از قبل درحال اجرا بوده است"</string>
+    <string name="tcp_fastopen_summary">"تغییر وضعیت ممکن است به مجوز ROOT نیاز داشته باشد"</string>
+    <string name="tcp_fastopen_summary_unsupported">"نسخه هسته پشتیبانی نشده: %s &lt;3.7.1"</string>
+    <string name="udp_dns">"ارسال DNS از طریق UDP"</string>
+    <string name="udp_dns_summary">"نیاز به جابجایی UDP در سمت سرور دارد"</string>
 
     <!-- notification category -->
     <string name="forward_success">"شدوساکس فعال شد."</string>
     <string name="invalid_server">"آدرس سرور نامعتبر است"</string>
     <string name="service_failed">"اتصال به سرور ناموفق بود!"</string>
-    <string name="stop">"غیرفعال‌کردن"</string>
-    <string name="stopping">"در حال قطع‌کردن اتصال…"</string>
-    <string name="reboot_required">"راه‌اندازی سرویس وی‌پی‌ان ناموفق بود. شاید مشکل با روشن خاموش کردن دستگاه حل شود."</string>
+    <string name="stop">"متوقف کردن"</string>
+    <string name="stopping">"خاموش شدن…"</string>
+    <string name="reboot_required">"سرویس VPN شروع نشد. شاید لازم باشد دستگاه خود را Restart کنید."</string>
     <string name="profile_invalid_input">"هیچ پروفایل معتبری یافت نشد!"</string>
 
     <!-- alert category -->
     <string name="profile_empty">"لطفا یک پروفایل انتخاب کنید."</string>
-    <string name="proxy_empty">"پروکسی یا کلمه عبور نباید خالی باشند!"</string>
+    <string name="proxy_empty">"پروکسی یا کلمه‌عبور نباید خالی باشند!"</string>
     <string name="connect">"اتصال"</string>
 
     <!-- menu category -->
@@ -76,74 +76,119 @@
     <string name="settings">"تنظیمات"</string>
     <string name="faq">"سوالات متداول"</string>
     <string name="about">"درباره ما"</string>
+    <string name="about_title">"شدوساکس %s"</string>
     <string name="edit">"ویرایش"</string>
     <string name="share">"به اشتراک گذاری"</string>
     <string name="add_profile">"افزودن پروفایل"</string>
     <string name="action_apply_all">"اعمال تنظیمات برای همه پروفایل‌ها"</string>
-    <string name="action_export">"صدور به کلیپ بورد"</string>
-    <string name="action_import">"ورود از کلیپ بورد"</string>
+    <string name="action_export">"صدور به کلیپ‌بورد"</string>
+    <string name="action_import">"ورود از کلیپ‌بورد"</string>
     <string name="action_export_msg">"صدور موفقیت‌آمیز!"</string>
-    <string name="action_export_err">"صدور ناموفق."</string>
-    <string name="action_import_msg">"ورود موفقیت‌آمیز"</string>
-    <string name="action_import_err">"ورود ناموفق."</string>
+    <string name="action_export_err">"صدور ناموفق!"</string>
+    <string name="action_import_msg">"وارد کردن با موفقیت انجام شد!"</string>
+    <string name="action_import_err">"خطا در هنگام وارد کردن!"</string>
 
     <!-- profile -->
     <string name="profile_config">"تنظیمات پروفایل"</string>
     <string name="delete">"حذف"</string>
     <string name="delete_confirm_prompt">"آیا مطمئن هستید که می‌خواهید این پروفایل را حذف کنید؟"</string>
-
-    <!-- Fuzzy -->
-    <string name="share_qr_nfc">"NFC یا QR Code"</string>
-    <string name="add_profile_dialog">"این پروفایل اضافه شود؟"</string>
-    <string name="add_profile_methods_scan_qr_code">"اسکن‌کردن QR Code"</string>
+    <string name="share_qr_nfc">"کد QR"</string>
+    <string name="add_profile_dialog">"این پروفایل شدوساکس اضافه شود؟"</string>
+    <string name="add_profile_methods_scan_qr_code">"اسکن‌کردن کد QR"</string>
+    <plurals name="removed">
+        <item quantity="other">"%d مورد حذف شد"</item>
+    </plurals>
     <string name="undo">"بازگرداندن"</string>
 
     <!-- tasker -->
     <string name="toggle_service_state">"فعال‌کردن سرویس"</string>
     <string name="start_service_default">"وصل‌شدن به سرور فعلی"</string>
-    <string name="start_service">"وصل شدن به "</string>
+    <string name="start_service">"وصل شدن به"</string>
+    <string name="stop_service">"تغییر به"</string>
     <string name="profile_default">"استفاده از پروفایل فعلی"</string>
 
     <!-- status -->
-    <string name="sent">"فرستاده‌شده:"</string>
-    <string name="received">"دریافت‌شده:"</string>
+    <string name="sent">"ارسال:"</string>
+    <string name="received">"دریافت شده:"</string>
 
     <!-- status -->
     <string name="connecting">"در حال اتصال…"</string>
-    <string name="vpn_connected">"وصل شد. برای بررسی اتصال ضربه (Tap) بزنید."</string>
+    <string name="vpn_connected">"وصل شد، برای بررسی اتصال ضربه (Tap) بزنید."</string>
     <string name="not_connected">"اتصال برقرار نیست!"</string>
 
     <!-- acl -->
-    <string name="custom_rules">"قواعد دلخواه"</string>
-    <string name="action_add_rule">"اضافه کردن قواعد"</string>
-    <string name="edit_rule">"ویرایش قواعد"</string>
+    <string name="custom_rules">"قوانین سفارشی"</string>
+    <string name="action_add_rule">"اضافه کردن قوانین"</string>
+    <string name="edit_rule">"ویرایش قانون"</string>
     <string name="route_entry_all">"همه"</string>
     <string name="route_entry_bypass_lan">"صرف‌نظر کردن از شبکه داخلی"</string>
-    <string name="route_entry_bypass_chn">"صرف‌نظر کردن از سایت‌های داخل ایران"</string>
-    <string name="route_entry_bypass_lan_chn">"صرف‌نظر کردن از شبکه داخلی و سایت‌های داخل ایران"</string>
-    <string name="route_entry_chinalist">"فهرست ایران"</string>
-    <string name="plugin_configure">"تنظیم"</string>
-    <string name="plugin_disabled">"خاموش"</string>
-    <string name="add_profile_scanner_permission_required">"مجوز دوربین برای اسکن کردن کد QR مورد نیاز است."</string>
+    <string name="route_entry_bypass_chn">"صرفه‌نظر کردن از سایت‌های سرزمین چین"</string>
+    <string name="route_entry_bypass_lan_chn">"صرف‌نظر کردن از شبکه داخلی و سایت‌های سرزمین چین"</string>
+    <string name="route_entry_chinalist">"فهرست سرزمین چین"</string>
+    <string name="acl_rule_templates_generic">"زیر شبکه یا نام میزبان الگوی PCRE"</string>
+    <string name="acl_rule_templates_domain">"نام دامنه و تمام نامهای زیر دامنه آن"</string>
+
+    <!-- plugin -->
+    <string name="plugin">"پلاگین"</string>
+    <string name="plugin_configure">"تنظیم..."</string>
+    <string name="plugin_disabled">"غیر فعال"</string>
+    <string name="plugin_unknown">"پلاگین ناشناخته %s"</string>
+    <string name="plugin_untrusted">"هشدار: به نظر نمی رسد که این افزونه از یک منبع معتبر شناخته شده باشد."</string>
+    <string name="profile_plugin">"پلاگین %s"</string>
+    <string name="add_profile_scanner_permission_required">"مجوز دسترسی به دوربین برای اسکن کردن کد QR مورد نیاز است."</string>
 
     <!-- notification category -->
-    <string name="service_vpn">"سرویس وی‌پی‌ان"</string>
+    <string name="service_vpn">"سرویس VPN"</string>
     <string name="add_profile_methods_manual_settings">"تنظیمات دستی"</string>
 
     <!-- misc -->
     <string name="advanced">"پیشرفته"</string>
 
     <!-- misc -->
-    <string name="service_mode">"وضعیت سرویس"</string>
+    <string name="service_mode">"حالت سرویس"</string>
     <string name="service_mode_proxy">"فقط پروکسی"</string>
-    <string name="service_mode_vpn">"وی‌پی‌ان"</string>
     <string name="service_mode_transproxy">"ترانس‌پروکسی"</string>
     <string name="port_proxy">"پورت پروکسی SOCKS5"</string>
-    <string name="port_local_dns">"پورت دی‌ان‌اس محلی"</string>
+    <string name="port_local_dns">"پورت DNS محلی"</string>
     <string name="port_transproxy">"پورت ترانس‌پروکسی"</string>
     <string name="service_proxy">"سرویس پروکسی"</string>
     <string name="service_transproxy">"سرویس ترانس‌پروکسی"</string>
-    <string name="vpn_permission_denied">"مجوز برای ساخت وی‌پی‌ان فراهم نیست"</string>
-    <string name="auto_connect_summary_v24">"شدوساکس را از ابتدا فعال کن. توصیه می‌شود که به جای این گزینه از گزینه always-on vpn استفاده شود"</string>
-    <string name="action_import_file">"ورودی از فایل…"</string>
+    <string name="vpn_permission_denied">"مجوز برای ساخت VPN فراهم نیست"</string>
+    <string name="auto_connect_summary_v24">"شدوساکس را از ابتدا فعال کن. توصیه می‌شود که به جای این گزینه از گزینه Always-ON VPN استفاده شود"</string>
+    <string name="speed">"سرعت"</string>
+    <string name="direct_boot_aware">"مجاز به تغییر در صفحه‌ی قفل"</string>
+    <string name="direct_boot_aware_summary">"اطلاعات پروفایل انتخابی شما کمتر محافظت می شود"</string>
+    <string name="acl_rule_online_config">"URL به پیکربندی آنلاین"</string>
+    <string name="action_import_file">"وارد کردن فایل‌ از..."</string>
+    <string name="night_mode">"حالت شب"</string>
+    <string name="night_mode_system">"سیستم را دنبال کنید"</string>
+    <string name="night_mode_auto">"خودکار"</string>
+    <string name="night_mode_on">"روشن"</string>
+    <string name="night_mode_off">"خاموش"</string>
+    <string name="send_email">"ارسال ایمیل"</string>
+    <string name="action_export_more">"صادر کردن..."</string>
+    <string name="action_export_file">"صادر کردن به پرونده..."</string>
+    <string name="cleartext_http_warning">"Cleartext ترافیک HTTP ناامن است"</string>
+    <string name="share_over_lan">"اشتراک‌گذاری از طریق LAN"</string>
+    <string name="connection_test_pending">"بررسی اتصال"</string>
+    <string name="file_manager_missing">"لطفاً یک فایل منیجر مانند MiXplorer نصب کنید"</string>
+    <string name="tcp_fastopen_failure">"خطا در تغییر وضعیت"</string>
+    <string name="action_replace_file">"جایگزین کردن با فایل..."</string>
+    <string name="off">"خاموش"</string>
+    <string name="proxied_apps_mode">"حالت"</string>
+    <string name="metered">"اشاره شده"</string>
+    <string name="metered_summary">"سیستم اشاره برای درمان VPN به عنوان اندازه گیری شده"</string>
+    <plurals name="hosts_summary">
+        <item quantity="other">"نام میزبان پیکربندی شده است"</item>
+    </plurals>
+
+    <!-- subscriptions -->
+    <string name="subscriptions">"اشتراک"</string>
+    <string name="add_subscription">"ایجاد اشتراک"</string>
+    <string name="edit_subscription">"ویرایش اشتراک"</string>
+    <string name="update_subscription">"سرورها را از اشتراک تازه کنید"</string>
+    <string name="service_subscription">"خدمات اشتراک"</string>
+    <string name="service_subscription_working">"همگام سازی اشتراک ها… (%d از%d)"</string>
+    <string name="service_subscription_finishing">"درحال پایان دادن..."</string>
+    <string name="plugin_auto_connect_unlock_only">"این پلاگین ممکن است با اتصال خودکار کار نکند"</string>
 </resources>

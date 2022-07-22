@@ -79,6 +79,8 @@ if __name__ == "__main__":
             'zh-TW': 'zh-rTW',
             # French
             'fr': 'fr',
+            # German
+            'de': 'de',
             # Japanese
             'ja': 'ja',
             # Korean
@@ -91,6 +93,8 @@ if __name__ == "__main__":
             'es': 'es',
             # Turkish
             'tr': 'tr',
+            # Ukrainian
+            'uk': 'uk',
         },
         tags={
             'mobile': 'core',

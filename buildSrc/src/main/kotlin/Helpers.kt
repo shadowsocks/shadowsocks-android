@@ -78,12 +78,14 @@ fun Project.setupApp() {
         defaultConfig.resourceConfigurations.addAll(listOf(
             "ar",
             "es",
+            "de",
             "fa",
             "fr",
             "ja",
             "ko",
             "ru",
             "tr",
+            "uk",
             "zh-rCN",
             "zh-rTW",
         ))
