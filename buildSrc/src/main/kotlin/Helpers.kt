@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.util.*
 
-const val lifecycleVersion = "2.4.0"
+const val lifecycleVersion = "2.5.0"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 

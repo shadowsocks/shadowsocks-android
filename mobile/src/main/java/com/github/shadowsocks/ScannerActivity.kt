@@ -124,7 +124,7 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
         startImport()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.scanner_menu, menu)
         return true
     }
