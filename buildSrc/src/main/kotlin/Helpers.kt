@@ -39,6 +39,7 @@ fun Project.setupCommon() {
         lintOptions {
             warning("ExtraTranslation")
             warning("ImpliedQuantity")
+            warning("ExtraTranslation")
             informational("MissingQuantity")
             informational("MissingTranslation")
         }
