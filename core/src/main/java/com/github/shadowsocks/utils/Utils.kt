@@ -62,6 +62,7 @@ val Throwable.readableMessage get() = localizedMessage ?: javaClass.name
 /**
  * https://android.googlesource.com/platform/prebuilts/runtime/+/94fec32/appcompat/hiddenapi-light-greylist.txt#9466
  */
+@SuppressLint("DiscouragedPrivateApi")
 private val getInt = FileDescriptor::class.java.getDeclaredMethod("getInt$")
 val FileDescriptor.int get() = getInt.invoke(this) as Int
 
