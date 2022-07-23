@@ -101,6 +101,7 @@ fun Project.setupApp() {
             }
         }
         lintOptions.disable += "RemoveWorkManagerInitializer"
+        lintOptions.disable += "DiscouragedPrivateApi"
         packagingOptions {
             resources.excludes += "**/*.kotlin_*"
             jniLibs.useLegacyPackaging = true
