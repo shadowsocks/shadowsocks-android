@@ -465,9 +465,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             activity.snackbar(e.readableMessage).show()
         }
     }
-    private val importProfiles = registerForActivityResult(OpenJson()) { importOrReplaceProfiles(it) }
-    private val replaceProfiles = registerForActivityResult(OpenJson()) { importOrReplaceProfiles(it, true) }
-    private val exportProfiles = registerForActivityResult(SaveJson()) { data ->
+    private val importProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it) }
+    private val replaceProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it, true) }
+    private val exportProfiles = registerForActivityResult(SaveJson) { data ->
         if (data != null) ProfileManager.serializeToJson()?.let { profiles ->
             val activity = activity as MainActivity
             try {
