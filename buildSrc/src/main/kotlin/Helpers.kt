@@ -39,6 +39,7 @@ fun Project.setupCommon() {
         lintOptions {
             warning("ExtraTranslation")
             warning("ImpliedQuantity")
+            informational("MissingQuantity")
             informational("MissingTranslation")
         }
         (this as ExtensionAware).extensions.getByName<KotlinJvmOptions>("kotlinOptions").jvmTarget =
@@ -77,6 +78,7 @@ fun Project.setupApp() {
     android.apply {
         defaultConfig.resourceConfigurations.addAll(listOf(
             "ar",
+            "de",
             "es",
             "fa",
             "fr",
@@ -84,6 +86,7 @@ fun Project.setupApp() {
             "ko",
             "ru",
             "tr",
+            "uk",
             "zh-rCN",
             "zh-rTW",
         ))

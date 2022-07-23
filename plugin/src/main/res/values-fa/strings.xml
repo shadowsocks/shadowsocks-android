@@ -28,4 +28,6 @@
     <string name="yes">"بله"</string>
     <string name="no">"خیر"</string>
     <string name="apply">"تایید"</string>
+    <string name="file_manager_missing">"لطفاً یک فایل منیجر مانند MiXplorer نصب کنید"</string>
+    <string name="browse">"مرور کردن..."</string>
 </resources>

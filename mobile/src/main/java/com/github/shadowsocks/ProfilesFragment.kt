@@ -376,14 +376,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
                     if (isEnabled) super.getDragDirs(recyclerView, viewHolder) else 0
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val index = viewHolder.adapterPosition
+                val index = viewHolder.bindingAdapterPosition
                 profilesAdapter.remove(index)
                 undoManager.remove(Pair(index, (viewHolder as ProfileViewHolder).item))
             }
 
             override fun onMove(recyclerView: RecyclerView,
                                 viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
-                profilesAdapter.move(viewHolder.adapterPosition, target.adapterPosition)
+                profilesAdapter.move(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
                 return true
             }
 

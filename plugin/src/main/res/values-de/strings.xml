@@ -22,12 +22,12 @@
 -->
 
 <resources>
-    <string name="proxy_cat">"サーバー設定"</string>
-    <string name="feature_cat">"機能設定"</string>
-    <string name="unsaved_changes_prompt">"変更は保存されておりません、保存しますか？"</string>
-    <string name="yes">"はい"</string>
-    <string name="no">"いいえ"</string>
-    <string name="apply">"適応"</string>
-    <string name="file_manager_missing">"ファイルマネージャーをインストールしてください（MiXplorerなど）"</string>
-    <string name="browse">"参照…"</string>
+    <string name="proxy_cat">"Servereinstellungen"</string>
+    <string name="feature_cat">"Funktionseinstellungen"</string>
+    <string name="unsaved_changes_prompt">"Änderungen nicht gespeichert. Speichern?"</string>
+    <string name="yes">"Ja"</string>
+    <string name="no">"Nein"</string>
+    <string name="apply">"Anwenden"</string>
+    <string name="file_manager_missing">"Bitte installiere einen Dateimanager, z.B. MiXplorer"</string>
+    <string name="browse">"Durchsuchen..."</string>
 </resources>

@@ -23,10 +23,11 @@
 
 <resources>
     <string name="proxy_cat">"Настройки сервера"</string>
-    <string name="feature_cat">"Настройки опций"</string>
+    <string name="feature_cat">"Функции"</string>
     <string name="unsaved_changes_prompt">"Сохранить изменения?"</string>
     <string name="yes">"Да"</string>
     <string name="no">"Нет"</string>
     <string name="apply">"Применить"</string>
-    <string name="file_manager_missing">"Установите файловый менеджер"</string>
+    <string name="file_manager_missing">"Установите файловый менеджер (например, MiXplorer)"</string>
+    <string name="browse">"Открыть…"</string>
 </resources>
