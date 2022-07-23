@@ -66,7 +66,7 @@ fun Project.setupCore() {
             warning("RestrictedApi")
             disable("UseAppTint")
         }
-        ndkVersion = "25.0.8528842"
+        ndkVersion = "25.0.8775105"
     }
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.1.5")
 }
