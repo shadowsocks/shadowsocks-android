@@ -32,14 +32,14 @@ import timber.log.Timber
 
 private val jsonMimeTypes = arrayOf("application/*", "text/*")
 
-class OpenJson : ActivityResultContracts.GetMultipleContents() {
+object OpenJson : ActivityResultContracts.GetMultipleContents() {
     override fun createIntent(context: Context, input: String) = super.createIntent(context,
             jsonMimeTypes.first()).apply { putExtra(Intent.EXTRA_MIME_TYPES, jsonMimeTypes) }
 }
 
-class SaveJson : ActivityResultContracts.CreateDocument() {
+object SaveJson : ActivityResultContracts.CreateDocument("application/json") {
     override fun createIntent(context: Context, input: String) =
-            super.createIntent(context, "profiles.json").apply { type = "application/json" }
+            super.createIntent(context, "profiles.json")
 }
 
 class StartService : ActivityResultContract<Void?, Boolean>() {

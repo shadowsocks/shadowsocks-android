@@ -59,7 +59,6 @@ import timber.log.Timber
 import java.net.IDN
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.*
 import java.util.regex.PatternSyntaxException
 
 class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, ActionMode.Callback {
@@ -413,7 +412,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
             override fun getSwipeDirs(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int =
                     if (isEnabled && selectedItems.isEmpty()) super.getSwipeDirs(recyclerView, viewHolder) else 0
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) =
-                    adapter.remove(viewHolder.adapterPosition)
+                    adapter.remove(viewHolder.bindingAdapterPosition)
             override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
                                 target: RecyclerView.ViewHolder): Boolean = false
         }).attachToRecyclerView(list)

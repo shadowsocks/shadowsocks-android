@@ -27,6 +27,7 @@ import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
@@ -136,6 +137,9 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.layout_main)
+        onBackPressedDispatcher.addCallback {
+
+        }
         snackbar = findViewById(R.id.snackbar)
         ViewCompat.setOnApplyWindowInsetsListener(snackbar, ListHolderListener)
         stats = findViewById(R.id.stats)

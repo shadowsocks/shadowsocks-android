@@ -225,7 +225,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private val connect = registerForActivityResult(StartService()) {
         if (it) Toast.makeText(requireContext(), R.string.vpn_permission_denied, Toast.LENGTH_SHORT).show()
     }
-    private val replaceProfiles = registerForActivityResult(OpenJson()) { dataUris ->
+    private val replaceProfiles = registerForActivityResult(OpenJson) { dataUris ->
         if (dataUris.isEmpty()) return@registerForActivityResult
         val context = requireContext()
         try {
@@ -238,7 +238,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         }
         populateProfiles()
     }
-    private val exportProfiles = registerForActivityResult(SaveJson()) { data ->
+    private val exportProfiles = registerForActivityResult(SaveJson) { data ->
         if (data != null) ProfileManager.serializeToJson()?.let { profiles ->
             val context = requireContext()
             try {
