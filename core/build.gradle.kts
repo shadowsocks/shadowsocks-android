@@ -36,7 +36,6 @@ android {
         warning += "UnusedAttribute"
         informational += "MissingTranslation"
         baseline = file("lint-baseline.xml")
-        abortOnError = false
     }
 }
 

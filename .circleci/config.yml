@@ -15,7 +15,7 @@ jobs:
           key: jars-{{ checksum "build.gradle.kts" }}
       - run:
           name: Run Build and Tests
-          command: ./gradlew assembleDebug check -PCARGO_PROFILE=debug
+          command: ./gradlew assembleDebug check -PCARGO_PROFILE=debug -Dlint.baselines.continue=true
       - save_cache:
           paths:
             - ~/.gradle
