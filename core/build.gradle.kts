@@ -51,9 +51,17 @@ cargo {
         "aead-cipher-2022",
     ))
     exec = { spec, toolchain ->
-        spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
-        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
-        spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
+        run {
+            val process: Process = Runtime.getRuntime().exec("which python3 >/dev/null 2>&1 && echo python3 installed")
+            val output = process.inputStream.bufferedReader().lineSequence().joinToString("\n")
+            if (output.contains("python3")) {
+                spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
+            } else {
+                spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python")
+            }
+            spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
+            spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
+        }
     }
 }
 
