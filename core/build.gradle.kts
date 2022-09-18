@@ -37,7 +37,7 @@ android {
 cargo {
     module = "src/main/rust/shadowsocks-rust"
     libname = "sslocal"
-    targets = listOf("arm", "arm64", "x86", "x86_64")
+    targets = listOf("arm", "arm64")
     profile = findProperty("CARGO_PROFILE")?.toString() ?: currentFlavor
     extraCargoBuildArguments = listOf("--bin", libname!!)
     featureSpec.noDefaultBut(arrayOf(
@@ -76,8 +76,8 @@ dependencies {
     val workVersion = "2.7.1"
 
     api(project(":plugin"))
-    api("androidx.core:core-ktx:1.8.0")
-    api("androidx.fragment:fragment-ktx:1.5.0")
+    api("androidx.core:core-ktx:1.9.0")
+    api("androidx.fragment:fragment-ktx:1.5.2")
     api("com.google.android.material:material:1.6.1")
 
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
@@ -87,8 +87,8 @@ dependencies {
     api("androidx.work:work-runtime-ktx:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
     api("com.google.code.gson:gson:2.9.0")
-    api("com.google.firebase:firebase-analytics-ktx:21.1.0")
-    api("com.google.firebase:firebase-crashlytics:18.2.11")
+    api("com.google.firebase:firebase-analytics-ktx:21.1.1")
+    api("com.google.firebase:firebase-crashlytics:18.2.13")
     api("com.jakewharton.timber:timber:5.0.1")
     api("dnsjava:dnsjava:3.5.1")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
