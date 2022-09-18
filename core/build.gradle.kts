@@ -52,11 +52,10 @@ cargo {
     ))
     exec = { spec, toolchain ->
         run {
-            val process: Process = Runtime.getRuntime().exec("which python3 >/dev/null 2>&1 && echo python3 installed")
-            val output = process.inputStream.bufferedReader().lineSequence().joinToString("\n")
-            if (output.contains("python3")) {
+            try {
+                Runtime.getRuntime().exec("python3 -V >/dev/null 2>&1")
                 spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
-            } else {
+            } catch (e: java.io.IOException) {
                 spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python")
             }
             spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
