@@ -1,4 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.cli.common.ExitCode
+import org.jetbrains.kotlin.gradle.tasks.throwGradleExceptionIfError
 
 plugins {
     id("com.android.library")
@@ -51,9 +53,24 @@ cargo {
         "aead-cipher-2022",
     ))
     exec = { spec, toolchain ->
-        spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
-        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
-        spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
+        run {
+            try {
+                Runtime.getRuntime().exec("python3 -V >/dev/null 2>&1")
+                spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
+                project.logger.lifecycle("Python 3 detected.")
+            } catch (e: java.io.IOException) {
+                project.logger.lifecycle("No python 3 detected.")
+                try {
+                    Runtime.getRuntime().exec("python -V >/dev/null 2>&1")
+                    spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python")
+                    project.logger.lifecycle("Python detected.")
+                } catch (e: java.io.IOException) {
+                    throw GradleException("No any python version detected. You should install the python first to compile project.")
+                }
+            }
+            spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
+            spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
+        }
     }
 }
 
