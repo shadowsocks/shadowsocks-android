@@ -12,7 +12,7 @@ import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.util.*
 
-const val lifecycleVersion = "2.5.0"
+const val lifecycleVersion = "2.5.1"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *>).lint
@@ -26,7 +26,7 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 
 fun Project.setupCommon() {
     android.apply {
-        buildToolsVersion("33.0.0")
+        buildToolsVersion("33.0.1")
         compileSdkVersion(33)
         defaultConfig {
             minSdk = 23
@@ -50,8 +50,8 @@ fun Project.setupCommon() {
 
     dependencies {
         add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test:runner:1.4.0")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.4.0")
+        add("androidTestImplementation", "androidx.test:runner:1.5.1")
+        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.0")
     }
 }
 
