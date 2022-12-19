@@ -7,7 +7,10 @@ plugins {
 
 setupCommon()
 
-android.lintOptions.informational("GradleDependency")
+android {
+    namespace = "com.github.shadowsocks.plugin"
+    lint.informational += "GradleDependency"
+}
 
 dependencies {
     api(kotlin("stdlib-jdk8"))

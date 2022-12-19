@@ -20,8 +20,8 @@ buildscript {
         classpath("com.google.android.gms:oss-licenses-plugin:0.10.5")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.1")
         classpath("com.google.gms:google-services:4.3.13")
-        classpath("com.vanniktech:gradle-maven-publish-plugin:0.18.0")
-        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.5.30")
+        classpath("com.vanniktech:gradle-maven-publish-plugin:0.21.0")
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.7.10")
         classpath("org.mozilla.rust-android-gradle:plugin:0.9.3")
     }
 }

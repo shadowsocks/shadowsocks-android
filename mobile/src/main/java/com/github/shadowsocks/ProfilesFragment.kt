@@ -205,7 +205,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
                 true
             }
             R.id.action_export_clipboard -> {
-                val success = Core.trySetPrimaryClip(this.item.toString())
+                val success = Core.trySetPrimaryClip(this.item.toString(), true)
                 (activity as MainActivity).snackbar().setText(
                         if (success) R.string.action_export_msg else R.string.action_export_err).show()
                 true
@@ -432,7 +432,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             }
             R.id.action_export_clipboard -> {
                 val profiles = ProfileManager.getActiveProfiles()
-                val success = profiles != null && Core.trySetPrimaryClip(profiles.joinToString("\n"))
+                val success = profiles != null && Core.trySetPrimaryClip(profiles.joinToString("\n"), true)
                 (activity as MainActivity).snackbar().setText(
                         if (success) R.string.action_export_msg else R.string.action_export_err).show()
                 true
@@ -465,9 +465,9 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             activity.snackbar(e.readableMessage).show()
         }
     }
-    private val importProfiles = registerForActivityResult(OpenJson()) { importOrReplaceProfiles(it) }
-    private val replaceProfiles = registerForActivityResult(OpenJson()) { importOrReplaceProfiles(it, true) }
-    private val exportProfiles = registerForActivityResult(SaveJson()) { data ->
+    private val importProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it) }
+    private val replaceProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it, true) }
+    private val exportProfiles = registerForActivityResult(SaveJson) { data ->
         if (data != null) ProfileManager.serializeToJson()?.let { profiles ->
             val activity = activity as MainActivity
             try {

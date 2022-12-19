@@ -30,6 +30,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.text.format.Formatter
 import androidx.core.app.NotificationCompat
+import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.github.shadowsocks.Core
@@ -87,6 +88,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
                 service.getText(R.string.stop),
                 PendingIntent.getBroadcast(service, 0, Intent(Action.CLOSE).setPackage(service.packageName),
                     PendingIntent.FLAG_IMMUTABLE)).apply {
+            setAuthenticationRequired(true)
             setShowsUserInterface(false)
         }.build()
         if (Build.VERSION.SDK_INT < 24) builder.addAction(closeAction) else builder.addInvisibleAction(closeAction)
@@ -118,6 +120,6 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
     fun destroy() {
         (service as Service).unregisterReceiver(this)
         updateCallback(false)
-        service.stopForeground(true)
+        ServiceCompat.stopForeground(service, ServiceCompat.STOP_FOREGROUND_REMOVE)
     }
 }

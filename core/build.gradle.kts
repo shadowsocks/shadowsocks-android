@@ -1,4 +1,6 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import org.jetbrains.kotlin.cli.common.ExitCode
+import org.jetbrains.kotlin.gradle.tasks.throwGradleExceptionIfError
 
 plugins {
     id("com.android.library")
@@ -11,6 +13,8 @@ plugins {
 setupCore()
 
 android {
+    namespace = "com.github.shadowsocks.core"
+
     defaultConfig {
         consumerProguardFiles("proguard-rules.pro")
 
@@ -56,9 +60,24 @@ cargo {
         "aead-cipher-2022",
     ))
     exec = { spec, toolchain ->
-        spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
-        spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
-        spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
+        run {
+            try {
+                Runtime.getRuntime().exec("python3 -V >/dev/null 2>&1")
+                spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
+                project.logger.lifecycle("Python 3 detected.")
+            } catch (e: java.io.IOException) {
+                project.logger.lifecycle("No python 3 detected.")
+                try {
+                    Runtime.getRuntime().exec("python -V >/dev/null 2>&1")
+                    spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python")
+                    project.logger.lifecycle("Python detected.")
+                } catch (e: java.io.IOException) {
+                    throw GradleException("No any python version detected. You should install the python first to compile project.")
+                }
+            }
+            spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
+            spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
+        }
     }
 }
 
@@ -76,14 +95,12 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.6.2"
+    val coroutinesVersion = "1.6.4"
     val roomVersion = "2.4.2"
     val workVersion = "2.7.1"
 
     api(project(":plugin"))
     api("androidx.core:core-ktx:1.8.0")
-    // https://android-developers.googleblog.com/2019/07/android-q-beta-5-update.html
-    api("androidx.drawerlayout:drawerlayout:1.1.1")
     api("androidx.fragment:fragment-ktx:1.5.0")
     api("com.google.android.material:material:1.6.1")
 

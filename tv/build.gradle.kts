@@ -10,6 +10,7 @@ plugins {
 setupApp()
 
 android {
+    namespace = "com.github.shadowsocks.tv"
     defaultConfig {
         applicationId = "com.github.shadowsocks.tv"
         buildConfigField("boolean", "FULLSCREEN", "false")
