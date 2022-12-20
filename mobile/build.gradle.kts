@@ -15,9 +15,9 @@ android {
 }
 
 dependencies {
-    val cameraxVersion = "1.1.0"
+    val cameraxVersion = "1.2.0"
 
-    implementation("androidx.browser:browser:1.4.0")
+    implementation("androidx.browser:browser:1.5.0-alpha02")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")

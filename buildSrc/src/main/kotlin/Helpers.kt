@@ -68,9 +68,9 @@ fun Project.setupCore() {
             warning += "RestrictedApi"
             disable += "UseAppTint"
         }
-        ndkVersion = "21.4.7075529"
+        ndkVersion = "25.1.8937393"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.1.6")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.0")
 }
 
 private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
