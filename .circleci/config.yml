@@ -3,13 +3,19 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: shadowsocks/android-ndk-go
+      - image: cimg/android:2022.09.2-ndk
     environment:
       GRADLE_OPTS: -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process"
+      RUST_VERSION: 1.66.0
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: cd core/src/main/rust/shadowsocks-rust && rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+      - run: curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain $RUST_VERSION -y
+      - run:
+          name: Update environment variables
+          command: |
+            echo 'export PATH="$HOME"/.cargo/bin:"$PATH"' >> "$BASH_ENV"
+      - run: rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
       - restore_cache:
           key: jars-{{ checksum "build.gradle.kts" }}
       - run:
