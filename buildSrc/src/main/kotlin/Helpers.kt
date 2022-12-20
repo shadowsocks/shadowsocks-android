@@ -26,7 +26,7 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 
 fun Project.setupCommon() {
     android.apply {
-        buildToolsVersion("33.0.0")
+        buildToolsVersion("33.0.1")
         compileSdkVersion(33)
         defaultConfig {
             minSdk = 23
@@ -50,8 +50,8 @@ fun Project.setupCommon() {
 
     dependencies {
         add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test:runner:1.4.0")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.4.0")
+        add("androidTestImplementation", "androidx.test:runner:1.5.1")
+        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.0")
     }
 }
 
@@ -59,8 +59,8 @@ fun Project.setupCore() {
     setupCommon()
     android.apply {
         defaultConfig {
-            versionCode = 5030150
-            versionName = "5.3.1-nightly"
+            versionCode = 5030250
+            versionName = "5.3.2-nightly"
         }
         compileOptions.isCoreLibraryDesugaringEnabled = true
         lint.apply {
@@ -68,9 +68,9 @@ fun Project.setupCore() {
             warning += "RestrictedApi"
             disable += "UseAppTint"
         }
-        ndkVersion = "21.4.7075529"
+        ndkVersion = "25.1.8937393"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:1.1.6")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.0")
 }
 
 private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
