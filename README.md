@@ -18,12 +18,7 @@ for Android TV ([beta](https://play.google.com/apps/testing/com.github.shadowsoc
 * JDK 11+
 * Android SDK
   - Android NDK
-* Rust with Android targets installed  
-
-```bash
-  $ cd core/src/main/rust/shadowsocks-rust
-  $ rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
-```
+* Rust with Android targets installed using `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
 
 ### BUILD
 
@@ -32,11 +27,6 @@ You can check whether the latest commit builds under UNIX environment by checkin
 * Install prerequisites
 * Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
 * Build it using Android Studio or gradle script
-
-### BUILD WITH DOCKER
-
-* Clone the repo using `git clone --recurse-submodules <repo>` or update submodules using `git submodule update --init --recursive`
-* Run `docker run --rm -v ${PWD}:/build -w /build shadowsocks/android-ndk-go ./gradlew assembleDebug`
 
 ### CONTRIBUTING
 
