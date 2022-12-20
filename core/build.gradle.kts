@@ -90,7 +90,6 @@ dependencies {
 
     api(project(":plugin"))
     api("androidx.core:core-ktx:1.9.0")
-    api("androidx.fragment:fragment-ktx:1.5.5")
     api("com.google.android.material:material:1.7.0")
 
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
