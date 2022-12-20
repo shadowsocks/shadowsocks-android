@@ -9,7 +9,7 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
-      - run: rustup default nightly-2022-08-28
+      - run: rustup default stable
       - run: cd core/src/main/rust/shadowsocks-rust && rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
       - restore_cache:
           key: jars-{{ checksum "build.gradle.kts" }}
