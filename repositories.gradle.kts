@@ -5,5 +5,5 @@ rootProject.extra.apply {
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
