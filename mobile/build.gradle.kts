@@ -15,9 +15,9 @@ android {
 }
 
 dependencies {
-    val cameraxVersion = "1.2.0"
+    val cameraxVersion = "1.2.1"
 
-    implementation("androidx.browser:browser:1.5.0-alpha02")
+    implementation("androidx.browser:browser:1.5.0-rc01")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
@@ -27,5 +27,5 @@ dependencies {
     implementation("com.google.zxing:core:3.5.1")
     implementation("com.takisoft.preferencex:preferencex-simplemenu:1.1.0")
     implementation("com.twofortyfouram:android-plugin-api-for-locale:1.0.4")
-    implementation("me.zhanghai.android.fastscroll:library:1.1.8")
+    implementation("me.zhanghai.android.fastscroll:library:1.2.0")
 }

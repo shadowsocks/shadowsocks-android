@@ -50,8 +50,8 @@ fun Project.setupCommon() {
 
     dependencies {
         add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test:runner:1.5.1")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.0")
+        add("androidTestImplementation", "androidx.test:runner:1.5.2")
+        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.1")
     }
 }
 
@@ -70,7 +70,7 @@ fun Project.setupCore() {
         }
         ndkVersion = "25.1.8937393"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.0")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.2")
 }
 
 private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
