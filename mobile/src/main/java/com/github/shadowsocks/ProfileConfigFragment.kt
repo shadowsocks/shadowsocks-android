@@ -80,6 +80,11 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     private lateinit var receiver: BroadcastReceiver
     private lateinit var udpFallback: Preference
 
+    private fun makeDirt() {
+        DataStore.dirty = true
+        (activity as ProfileConfigActivity).unsavedChangesHandler.isEnabled = true
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.preferenceDataStore = DataStore.privateStore
         val activity = requireActivity()
@@ -97,7 +102,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         isProxyApps.isEnabled = serviceMode == Key.modeVpn
         isProxyApps.setOnPreferenceChangeListener { _, newValue ->
             startActivity(Intent(activity, AppManager::class.java))
-            if (newValue as Boolean) DataStore.dirty = true
+            if (newValue as Boolean) makeDirt()
             newValue
         }
         findPreference<Preference>(Key.metered)!!.apply {
@@ -136,7 +141,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             }
             pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions, override ?: selected.id)
             DataStore.plugin = pluginConfiguration.toString()
-            DataStore.dirty = true
+            makeDirt()
             plugin.value = pluginConfiguration.selected
             pluginConfigure.isEnabled = selected !is NoPlugin
             pluginConfigure.text = pluginConfiguration.getOptions().toString()
@@ -199,7 +204,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         pluginConfiguration = PluginConfiguration(pluginConfiguration.pluginsOptions +
                 (pluginConfiguration.selected to PluginOptions(selected, newValue as? String?)), selected)
         DataStore.plugin = pluginConfiguration.toString()
-        DataStore.dirty = true
+        makeDirt()
         true
     } catch (exc: RuntimeException) {
         Snackbar.make(requireView(), exc.readableMessage, Snackbar.LENGTH_LONG).show()
@@ -207,7 +212,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
-        if (key != Key.proxyApps && findPreference<Preference>(key) != null) DataStore.dirty = true
+        if (key != Key.proxyApps && findPreference<Preference>(key) != null) makeDirt()
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference) {

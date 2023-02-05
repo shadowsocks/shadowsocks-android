@@ -27,7 +27,10 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.TextView
@@ -115,8 +118,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         }
     }
 
-    private inner class SubViewHolder(view: View) : RecyclerView.ViewHolder(view),
-            View.OnClickListener {
+    private inner class SubViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         lateinit var item: URL
         private val text = view.findViewById<TextView>(android.R.id.text1)
 
@@ -197,7 +199,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
     private val adapter by lazy { SubscriptionAdapter() }
     private lateinit var list: RecyclerView
-    private var mode: ActionMode? = null
     private lateinit var undoManager: UndoSnackbarManager<URL>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -238,14 +239,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         }).attachToRecyclerView(list)
     }
 
-    override fun onBackPressed(): Boolean {
-        val mode = mode
-        return if (mode != null) {
-            mode.finish()
-            true
-        } else super.onBackPressed()
-    }
-
     override fun onMenuItemClick(item: MenuItem): Boolean = when (item.itemId) {
         R.id.action_manual_settings -> {
             SubDialogFragment().apply {
@@ -264,7 +257,6 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
 
     override fun onDetach() {
         undoManager.flush()
-        mode?.finish()
         super.onDetach()
     }
 }
