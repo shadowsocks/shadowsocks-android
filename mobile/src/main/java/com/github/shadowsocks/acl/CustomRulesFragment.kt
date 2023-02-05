@@ -21,6 +21,7 @@
 package com.github.shadowsocks.acl
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Parcelable
@@ -31,6 +32,7 @@ import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -371,7 +373,10 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     private lateinit var undoManager: UndoSnackbarManager<Any>
 
     private fun onSelectedItemsUpdated() {
-        if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) mode = toolbar.startActionMode(this)
+        if (selectedItems.isEmpty()) mode?.finish() else if (mode == null) {
+            mode = toolbar.startActionMode(this)
+            backHandler.isEnabled = true
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -418,12 +423,15 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         }).attachToRecyclerView(list)
     }
 
-    override fun onBackPressed(): Boolean {
-        val mode = mode
-        return if (mode != null) {
-            mode.finish()
-            true
-        } else super.onBackPressed()
+    private val backHandler = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            mode?.finish()
+        }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        requireActivity().onBackPressedDispatcher.addCallback(backHandler)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -477,6 +485,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
     }
 
     override fun onDetach() {
+        backHandler.remove()
         undoManager.flush()
         mode?.finish()
         super.onDetach()
@@ -518,6 +527,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         selectedItems.clear()
         onSelectedItemsUpdated()
         adapter.notifyDataSetChanged()
+        backHandler.isEnabled = false
         this.mode = null
     }
 }

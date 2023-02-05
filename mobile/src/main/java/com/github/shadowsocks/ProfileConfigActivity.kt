@@ -25,6 +25,7 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,6 +48,11 @@ class ProfileConfigActivity : AppCompatActivity() {
     }
 
     private val child by lazy { supportFragmentManager.findFragmentById(R.id.content) as ProfileConfigFragment }
+    val unsavedChangesHandler = object : OnBackPressedCallback(DataStore.dirty) {
+        override fun handleOnBackPressed() = UnsavedChangesDialogFragment().apply {
+            key()
+        }.show(supportFragmentManager, null)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +63,12 @@ class ProfileConfigActivity : AppCompatActivity() {
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_navigation_close)
         }
+        onBackPressedDispatcher.addCallback(unsavedChangesHandler)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        unsavedChangesHandler.isEnabled = DataStore.dirty
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -69,12 +81,6 @@ class ProfileConfigActivity : AppCompatActivity() {
         return true
     }
     override fun onOptionsItemSelected(item: MenuItem) = child.onOptionsItemSelected(item)
-
-    override fun onBackPressed() {
-        if (DataStore.dirty) UnsavedChangesDialogFragment().apply {
-            key()
-        }.show(supportFragmentManager, null) else super.onBackPressed()
-    }
 
     val pluginHelp = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         (resultCode, data) ->

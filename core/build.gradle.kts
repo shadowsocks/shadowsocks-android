@@ -85,12 +85,12 @@ tasks.clean.dependsOn("cargoClean")
 
 dependencies {
     val coroutinesVersion = "1.6.4"
-    val roomVersion = "2.4.3"
+    val roomVersion = "2.5.0"
     val workVersion = "2.7.1"
 
     api(project(":plugin"))
     api("androidx.core:core-ktx:1.9.0")
-    api("com.google.android.material:material:1.7.0")
+    api("com.google.android.material:material:1.8.0")
 
     api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
     api("androidx.preference:preference:1.2.0")
@@ -98,9 +98,9 @@ dependencies {
     api("androidx.work:work-multiprocess:$workVersion")
     api("androidx.work:work-runtime-ktx:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
-    api("com.google.code.gson:gson:2.10")
+    api("com.google.code.gson:gson:2.10.1")
     api("com.google.firebase:firebase-analytics-ktx:21.2.0")
-    api("com.google.firebase:firebase-crashlytics:18.3.2")
+    api("com.google.firebase:firebase-crashlytics:18.3.3")
     api("com.jakewharton.timber:timber:5.0.1")
     api("dnsjava:dnsjava:3.5.2")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
@@ -109,5 +109,5 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:5.0.0-alpha.10")
     api("com.squareup.okhttp3:okhttp-brotli:5.0.0-alpha.10")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.4")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
 }

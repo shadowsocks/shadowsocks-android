@@ -35,6 +35,4 @@ open class ToolbarFragment : Fragment() {
         toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
         toolbar.setNavigationOnClickListener { (activity as MainActivity).drawer.openDrawer(GravityCompat.START) }
     }
-
-    open fun onBackPressed(): Boolean = false
 }

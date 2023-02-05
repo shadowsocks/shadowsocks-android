@@ -26,7 +26,9 @@ import android.os.RemoteException
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
@@ -54,6 +56,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
@@ -141,6 +144,21 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         stats = findViewById(R.id.stats)
         stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
+        val drawerHandler = object : OnBackPressedCallback(drawer.isOpen), DrawerLayout.DrawerListener {
+            override fun handleOnBackPressed() = drawer.closeDrawers()
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) { }
+            override fun onDrawerOpened(drawerView: View) {
+                isEnabled = true
+            }
+            override fun onDrawerClosed(drawerView: View) {
+                isEnabled = false
+            }
+            override fun onDrawerStateChanged(newState: Int) {
+                isEnabled = newState == DrawerLayout.STATE_IDLE == drawer.isOpen
+            }
+        }
+        onBackPressedDispatcher.addCallback(drawerHandler)
+        drawer.addDrawerListener(drawerHandler)
         navigation = findViewById(R.id.navigation)
         navigation.setNavigationItemSelectedListener(this)
         if (savedInstanceState == null) {
@@ -206,18 +224,6 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     override fun onStart() {
         super.onStart()
         connection.bandwidthTimeout = 500
-    }
-
-    override fun onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawers() else {
-            val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment
-            if (!currentFragment.onBackPressed()) {
-                if (currentFragment is ProfilesFragment) super.onBackPressed() else {
-                    navigation.menu.findItem(R.id.profiles).isChecked = true
-                    displayFragment(ProfilesFragment())
-                }
-            }
-        }
     }
 
     override fun onKeyShortcut(keyCode: Int, event: KeyEvent) = when {
