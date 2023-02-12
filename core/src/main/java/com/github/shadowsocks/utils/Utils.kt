@@ -33,6 +33,7 @@ import android.system.OsConstants
 import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.preference.Preference
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -82,15 +83,16 @@ fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_IN
 
 suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T): T {
     return suspendCancellableCoroutine { cont ->
-        cont.invokeOnCancellation {
-            if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
-        }
-        GlobalScope.launch(Dispatchers.IO) {
+        val job = GlobalScope.launch(Dispatchers.IO) {
             try {
                 cont.resume(block())
             } catch (e: Throwable) {
                 cont.resumeWithException(e)
             }
+        }
+        cont.invokeOnCancellation {
+            job.cancel(it as? CancellationException)
+            if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
         }
     }
 }
