@@ -21,6 +21,7 @@
 package com.github.shadowsocks.bg
 
 import android.content.Context
+import android.util.Base64
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.acl.AclSyncer
@@ -48,7 +49,13 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         require(profile.method !in arrayOf("aes-192-gcm", "chacha20", "salsa20")) {
             "cipher ${profile.method} is deprecated."
         }
+        // check the key format for aead-2022-cipher
+        require(profile.method in arrayOf("2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305")
+                && Base64.decode(profile.password, Base64.DEFAULT).size in arrayOf(16, 32)) {
+            "The Base64 Key is invalid."
+        }
     }
+
     private var configFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
