@@ -50,8 +50,11 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             "cipher ${profile.method} is deprecated."
         }
         // check the key format for aead-2022-cipher
-        require(profile.method in arrayOf("2022-blake3-aes-128-gcm", "2022-blake3-aes-256-gcm", "2022-blake3-chacha20-poly1305")
-                && Base64.decode(profile.password, Base64.DEFAULT).size in arrayOf(16, 32)) {
+        require(profile.method !in setOf(
+            "2022-blake3-aes-128-gcm",
+            "2022-blake3-aes-256-gcm",
+            "2022-blake3-chacha20-poly1305",
+        ) || Base64.decode(profile.password, Base64.DEFAULT).size in arrayOf(16, 32)) {
             "The Base64 Key is invalid."
         }
     }
