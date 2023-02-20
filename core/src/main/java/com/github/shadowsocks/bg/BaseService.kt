@@ -28,6 +28,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.os.RemoteException
+import androidx.core.content.ContextCompat
 import com.github.shadowsocks.BootReceiver
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
@@ -334,11 +335,11 @@ object BaseService {
 
             BootReceiver.enabled = DataStore.persistAcrossReboot
             if (!data.closeReceiverRegistered) {
-                registerReceiver(data.closeReceiver, IntentFilter().apply {
+                ContextCompat.registerReceiver(this, data.closeReceiver, IntentFilter().apply {
                     addAction(Action.RELOAD)
                     addAction(Intent.ACTION_SHUTDOWN)
                     addAction(Action.CLOSE)
-                }, "$packageName.SERVICE", null)
+                }, ContextCompat.RECEIVER_NOT_EXPORTED)
                 data.closeReceiverRegistered = true
             }
 

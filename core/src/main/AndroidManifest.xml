@@ -2,11 +2,6 @@
           xmlns:tools="http://schemas.android.com/tools"
           android:installLocation="internalOnly">
 
-    <permission
-        android:name="${applicationId}.SERVICE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name="${applicationId}.SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
@@ -26,7 +21,6 @@
     <application
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
-        android:autoRevokePermissions="allowed"
         android:enableOnBackInvokedCallback="true"
         android:extractNativeLibs="true"
         android:fullBackupContent="@xml/backup_descriptor"
