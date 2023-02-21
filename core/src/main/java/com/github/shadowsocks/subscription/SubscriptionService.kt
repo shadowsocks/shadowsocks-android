@@ -70,7 +70,8 @@ class SubscriptionService : Service(), CoroutineScope {
         if (worker == null) {
             idle.value = false
             if (!receiverRegistered) {
-                ContextCompat.registerReceiver(this, cancelReceiver, IntentFilter(Action.ABORT), RECEIVER_NOT_EXPORTED)
+                ContextCompat.registerReceiver(this, cancelReceiver, IntentFilter(Action.ABORT),
+                    ContextCompat.RECEIVER_NOT_EXPORTED)
                 receiverRegistered = true
             }
             worker = launch {
