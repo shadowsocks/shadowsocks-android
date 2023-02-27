@@ -36,6 +36,7 @@ import org.json.JSONObject
 import java.io.File
 import java.net.URI
 import java.net.URISyntaxException
+import java.util.function.Consumer
 
 /**
  * This class sets up environment for ss-local.
@@ -50,13 +51,15 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             "cipher ${profile.method} is deprecated."
         }
         // check the key format for aead-2022-cipher
-        require(profile.method !in setOf(
-            "2022-blake3-aes-128-gcm",
-            "2022-blake3-aes-256-gcm",
-            "2022-blake3-chacha20-poly1305",
-        ) || Base64.decode(profile.password, Base64.DEFAULT).size in arrayOf(16, 32)) {
-            "The Base64 Key is invalid."
-        }
+        profile.password.split(":").forEach(Consumer {
+            require(profile.method !in setOf(
+                "2022-blake3-aes-128-gcm",
+                "2022-blake3-aes-256-gcm",
+                "2022-blake3-chacha20-poly1305",
+            ) || Base64.decode(it, Base64.DEFAULT).size in arrayOf(16, 32)) {
+                "The Base64 Key is invalid."
+            }
+        })
     }
 
     private var configFile: File? = null
