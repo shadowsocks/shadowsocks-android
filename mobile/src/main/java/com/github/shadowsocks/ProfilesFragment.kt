@@ -251,7 +251,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             undoManager.flush()
             val first = profiles[from]
             var previousOrder = first.userOrder
-            val (step, range) = if (from < to) Pair(1, from until to) else Pair(-1, to + 1 downTo from)
+            val (step, range) = if (from < to) Pair(1, from until to) else Pair(-1, from downTo to + 1)
             for (i in range) {
                 val next = profiles[i + step]
                 val order = next.userOrder
