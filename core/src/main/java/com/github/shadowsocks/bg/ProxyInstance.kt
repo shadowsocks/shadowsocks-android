@@ -50,7 +50,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             "cipher ${profile.method} is deprecated."
         }
         // check the key format for aead-2022-cipher
-        if (profile.method !in setOf(
+        if (profile.method in setOf(
                 "2022-blake3-aes-128-gcm",
                 "2022-blake3-aes-256-gcm",
                 "2022-blake3-chacha20-poly1305",
