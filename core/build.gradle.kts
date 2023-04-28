@@ -27,7 +27,9 @@ android {
         }
     }
 
-    externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
+    externalNativeBuild.cmake {
+        path("src/main/jni/CMakeLists.txt")
+    }
 
     sourceSets.getByName("androidTest") {
         assets.setSrcDirs(assets.srcDirs + files("$projectDir/schemas"))
