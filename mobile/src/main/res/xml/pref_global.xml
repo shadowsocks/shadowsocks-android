@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-                  app:initialExpandedChildrenCount="2">
+                  app:initialExpandedChildrenCount="3">
     <SwitchPreference
         app:key="isAutoConnect"
         app:icon="@drawable/ic_communication_phonelink_ring"
@@ -11,7 +11,11 @@
         app:icon="@drawable/ic_action_lock"
         app:summary="@string/direct_boot_aware_summary"
         app:title="@string/direct_boot_aware"/>
-
+    <SwitchPreference
+        app:key="hideBackground"
+        app:icon="@drawable/ic_action_lock"
+        app:summary="@string/hide_background_summary"
+        app:title="@string/hide_background"/>
     <com.takisoft.preferencex.SimpleMenuPreference
         app:key="serviceMode"
         app:icon="@drawable/ic_device_developer_mode"

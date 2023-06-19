@@ -157,6 +157,8 @@
     <string name="auto_connect_summary_v24">"允许 Shadowsocks 随系统启动，建议使用始终开启的 VPN"</string>
     <string name="direct_boot_aware">"允许锁屏时切换"</string>
     <string name="direct_boot_aware_summary">"选中的配置信息会不那么安全"</string>
+    <string name="hide_background">"在最近使用的应用隐藏"</string>
+    <string name="hide_background_summary">"可以防止被误终止"</string>
     <string name="acl_rule_online_config">"在线规则文件 URL"</string>
     <string name="action_import_file">"从文件导入…"</string>
     <string name="night_mode">"夜间模式"</string>

@@ -45,6 +45,7 @@ object Key {
 
     const val persistAcrossReboot = "isAutoConnect"
     const val directBootAware = "directBootAware"
+    const val hideBackground = "hideBackground"
 
     const val proxyApps = "isProxyApps"
     const val bypass = "isBypassApps"

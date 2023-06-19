@@ -20,9 +20,12 @@
 
 package com.github.shadowsocks
 
+import android.app.Activity
+import android.app.ActivityManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -43,6 +46,16 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         addPreferencesFromResource(R.xml.pref_global)
         findPreference<SwitchPreference>(Key.persistAcrossReboot)!!.setOnPreferenceChangeListener { _, value ->
             BootReceiver.enabled = value as Boolean
+            true
+        }
+        findPreference<SwitchPreference>(Key.hideBackground)!!.setOnPreferenceChangeListener { _, value ->
+            System.out.println("aaaaaa")
+            val systemService  = (activity as Activity).getSystemService(AppCompatActivity.ACTIVITY_SERVICE) as ActivityManager
+            val appTasks: List<ActivityManager.AppTask> = systemService.getAppTasks()
+            val size = appTasks.size
+            if (size > 0) {
+                appTasks[0].setExcludeFromRecents(value as Boolean)
+            }
             true
         }
 

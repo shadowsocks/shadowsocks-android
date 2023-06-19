@@ -20,6 +20,8 @@
 
 package com.github.shadowsocks
 
+import android.app.ActivityManager
+import android.app.ActivityManager.AppTask
 import android.content.ActivityNotFoundException
 import android.os.Bundle
 import android.os.RemoteException
@@ -35,7 +37,10 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.acl.CustomRulesFragment
@@ -56,7 +61,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
-import timber.log.Timber
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
@@ -180,6 +188,18 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         changeState(BaseService.State.Idle, animate = false)    // reset everything to init state
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
+
+        if (DataStore.hideBackground) {   // hideBackground
+            val executorService: ScheduledExecutorService = ScheduledThreadPoolExecutor(1)
+            executorService.schedule({
+                val systemService  = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+                val appTasks: List<AppTask> = systemService.getAppTasks()
+                val size = appTasks.size
+                if (size > 0) {
+                    appTasks[0].setExcludeFromRecents(true)
+                }
+            }, 2, TimeUnit.SECONDS) //两秒后执行该任务
+        }
     }
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
