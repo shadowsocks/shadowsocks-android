@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.net
 
+import android.annotation.SuppressLint
 import android.annotation.TargetApi
 import android.net.DnsResolver
 import android.net.Network
@@ -32,6 +33,7 @@ import java.io.IOException
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
+import java.time.Duration
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import kotlin.coroutines.resume
@@ -44,6 +46,32 @@ sealed class DnsResolverCompat {
                 in 29..Int.MAX_VALUE -> DnsResolverCompat29
                 in 23 until 29 -> DnsResolverCompat23
                 else -> error("Unsupported API level")
+            }
+        }
+        private val isDohResolve get() = Core.currentProfile!!.main.localDohHostAddr.isEmpty().not()
+        private val dohResolver by lazy {
+            val fakeReslver = SimpleResolver()
+            val expanded = Core.currentProfile ?: return@lazy fakeReslver
+            val (profile, _) = expanded
+            val doh = profile.localDohHostAddr
+            if (doh.isEmpty()) {
+                return@lazy fakeReslver
+            }
+            val addrList = doh.split(",")
+            if (addrList.isEmpty()) {
+                return@lazy fakeReslver
+            }
+            val dohResolvers = arrayListOf<DohResolver>()
+            val exec = Executors.newFixedThreadPool(5)
+            val activeNetwork = Core.connectivity.activeNetwork ?: throw IOException("no network")
+            addrList.forEach {
+                dohResolvers.add(DohResolver(activeNetwork , it, 5, Duration.ofSeconds(5), exec))
+            }
+            ExtendedResolver(dohResolvers).apply {
+                Lookup.setDefaultResolver(this)
+//                timeout = Duration.ofSeconds(3)
+//                retries = 2
+                loadBalance = true
             }
         }
 
@@ -85,9 +113,9 @@ sealed class DnsResolverCompat {
         }
 
         override suspend fun resolve(network: Network, host: String) =
-                withContext(unboundedIO) { network.getAllByName(host) }
+            withContext(unboundedIO) { network.getAllByName(host) }
         override suspend fun resolveOnActiveNetwork(host: String) =
-                withContext(unboundedIO) { InetAddress.getAllByName(host) }
+            withContext(unboundedIO) { InetAddress.getAllByName(host) }
 
         private suspend fun resolveRaw(query: ByteArray, networkSpecified: Boolean = true,
                                        hostResolver: suspend (String) -> Array<InetAddress>): ByteArray {
@@ -133,9 +161,9 @@ sealed class DnsResolverCompat {
             }.toWire()
         }
         override suspend fun resolveRaw(network: Network, query: ByteArray) =
-                resolveRaw(query) { resolve(network, it) }
+            resolveRaw(query) { resolve(network, it) }
         override suspend fun resolveRawOnActiveNetwork(query: ByteArray) =
-                resolveRaw(query, false, this::resolveOnActiveNetwork)
+            resolveRaw(query, false, this::resolveOnActiveNetwork)
     }
 
     @TargetApi(29)
@@ -153,24 +181,37 @@ sealed class DnsResolverCompat {
                 cont.invokeOnCancellation { signal.cancel() }
                 // retry should be handled by client instead
                 DnsResolver.getInstance().query(network, host, DnsResolver.FLAG_NO_RETRY, this,
-                        signal, object : DnsResolver.Callback<Collection<InetAddress>> {
-                    override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) =
+                    signal, object : DnsResolver.Callback<Collection<InetAddress>> {
+                        override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) =
                             cont.resume(answer.toTypedArray())
-                    override fun onError(error: DnsResolver.DnsException) = cont.resumeWithException(IOException(error))
-                })
+                        override fun onError(error: DnsResolver.DnsException) = cont.resumeWithException(IOException(error))
+                    })
             }
         }
         override suspend fun resolveOnActiveNetwork(host: String) = resolve(activeNetwork, host)
 
         override suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray {
+            val msg = Message(query)
             return suspendCancellableCoroutine { cont ->
                 val signal = CancellationSignal()
                 cont.invokeOnCancellation { signal.cancel() }
-                DnsResolver.getInstance().rawQuery(network, query, DnsResolver.FLAG_NO_RETRY, this,
+                if (isDohResolve) {
+                    dohResolver.sendAsync(msg, this).whenCompleteAsync ({ answer, exception ->
+                        if (null == exception) {
+                            cont.resume(answer.toWire())
+//                          println("dns query response: $answer")
+                        } else {
+                            cont.resumeWithException(IOException(exception))
+                        }
+                    }, this)
+                } else {
+                    DnsResolver.getInstance().rawQuery(network, query, DnsResolver.FLAG_NO_RETRY, this,
                         signal, object : DnsResolver.Callback<ByteArray> {
-                    override fun onAnswer(answer: ByteArray, rcode: Int) = cont.resume(answer)
-                    override fun onError(error: DnsResolver.DnsException) = cont.resumeWithException(IOException(error))
-                })
+                            override fun onAnswer(answer: ByteArray, rcode: Int) = cont.resume(answer)
+                            override fun onError(error: DnsResolver.DnsException) =
+                                cont.resumeWithException(IOException(error))
+                        })
+                }
             }
         }
         override suspend fun resolveRawOnActiveNetwork(query: ByteArray) = resolveRaw(activeNetwork, query)

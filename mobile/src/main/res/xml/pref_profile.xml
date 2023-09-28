@@ -66,6 +66,11 @@
                 app:icon="@drawable/ic_action_dns"
                 app:title="@string/remote_dns"
                 app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+                app:key="localDohHostAddr"
+                app:icon="@drawable/ic_action_doh"
+                app:title="@string/local_doh_host_addr"
+                app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>
 
