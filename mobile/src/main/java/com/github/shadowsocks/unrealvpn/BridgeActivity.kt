@@ -7,11 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.ProfilesFragment
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
-import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
@@ -30,15 +28,7 @@ abstract class BridgeActivity : AppCompatActivity(), ShadowsocksConnection.Callb
         changeState(state, msg)
     }
 
-    override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
-        if (profileId == 0L) {
-            // this.stats.updateTraffic(stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
-        }
-    }
-
-    override fun trafficPersisted(profileId: Long) {
-        ProfilesFragment.instance?.onTrafficPersisted(profileId)
-    }
+    override fun trafficPersisted(profileId: Long) = Unit
 
     private fun changeState(
         state: BaseService.State,
@@ -51,12 +41,11 @@ abstract class BridgeActivity : AppCompatActivity(), ShadowsocksConnection.Callb
         }
 
         this.state = state
-        ProfilesFragment.instance?.profilesAdapter?.notifyDataSetChanged()  // refresh button enabled state
         stateListener?.invoke(state)
     }
 
     abstract fun showState(
-        state: BaseService.State,
+        newState: BaseService.State,
         animate: Boolean = true
     )
 
@@ -100,11 +89,6 @@ abstract class BridgeActivity : AppCompatActivity(), ShadowsocksConnection.Callb
         super.onCreate(savedInstanceState)
         createView()
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        /*if (savedInstanceState == null) {
-            navigation.menu.findItem(R.id.profiles).isChecked = true
-            displayFragment(ProfilesFragment())
-        }*/
-
         changeState(BaseService.State.Idle, animate = false)
         connection.connect(this, this)
         DataStore.publicStore.registerChangeListener(this)
