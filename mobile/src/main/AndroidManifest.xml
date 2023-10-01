@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="MissingLeanbackSupport">
@@ -20,7 +21,10 @@
     <application
         android:name=".App"
         tools:ignore="MissingTvBanner">
-
+        <activity
+            android:name=".unrealvpn.PaymentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.UnrealVPN" />
         <activity
             android:name=".unrealvpn.UnrealVPNActivity"
             android:exported="true"
@@ -38,7 +42,6 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ProfileConfigActivity"
             android:excludeFromRecents="true"
@@ -46,7 +49,6 @@
             android:label="@string/profile_config"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Shadowsocks.Immersive" />
-
         <activity
             android:name=".AppManager"
             android:excludeFromRecents="true"
@@ -55,7 +57,6 @@
             android:launchMode="singleTask"
             android:parentActivityName=".ProfileConfigActivity"
             android:theme="@style/Theme.Shadowsocks.Immersive" />
-
         <activity
             android:name=".UdpFallbackProfileActivity"
             android:excludeFromRecents="true"
@@ -63,7 +64,6 @@
             android:label="@string/udp_fallback"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Shadowsocks.Immersive" />
-
         <activity
             android:name=".ScannerActivity"
             android:excludeFromRecents="true"
@@ -73,7 +73,6 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="locked"
             android:theme="@style/Theme.Shadowsocks.Immersive" />
-
         <activity
             android:name=".tasker.ConfigActivity"
             android:exported="true"
@@ -82,7 +81,6 @@
                 <action android:name="com.twofortyfouram.locale.intent.action.EDIT_SETTING" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".QuickToggleShortcut"
             android:excludeFromRecents="true"
@@ -109,6 +107,7 @@
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+
             <meta-data
                 android:name="android.service.quicksettings.TOGGLEABLE_TILE"
                 android:value="true" />
@@ -129,4 +128,5 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3283768469187309~3571758745" />
     </application>
+
 </manifest>
