@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:padding="16dp">
+
+    <com.github.shadowsocks.unrealvpn.OutlineTextView
+        android:id="@+id/title_line_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="@string/unreal_vpn_title_line_1"
+        android:textAppearance="@style/UnrealVPN.Outline"
+        android:textSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:outlineColor="@color/unreal_vpn_text"
+        app:outlineWidth="2" />
+
+    <com.github.shadowsocks.unrealvpn.OutlineTextView
+        android:id="@+id/title_line_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-12dp"
+        android:text="@string/unreal_vpn_title_line_2"
+        android:textAppearance="@style/UnrealVPN.Outline"
+        android:textSize="94sp"
+        app:layout_constraintStart_toStartOf="@+id/title_line_1"
+        app:layout_constraintTop_toBottomOf="@+id/title_line_1"
+        app:outlineColor="@color/unreal_vpn_text"
+        app:outlineWidth="2" />
+
+    <Switch
+        android:id="@+id/connectionSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:drawablePadding="0dp"
+        android:padding="0dp"
+        android:showText="false"
+        android:switchPadding="0dp"
+        android:thumb="@drawable/unreal_thumb"
+        android:thumbTextPadding="0dp"
+        android:track="@drawable/unreal_track"
+        app:layout_constraintBottom_toTopOf="@+id/connectionStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_line_2"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+    <com.github.shadowsocks.unrealvpn.OutlineTextView
+        android:id="@+id/connectionStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="26dp"
+        android:text="@string/unreal_vpn_status_connected"
+        android:textAppearance="@style/UnrealVPN.Outline"
+        android:textSize="23sp"
+        app:layout_constraintBottom_toTopOf="@+id/removeLimitations"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/connectionSwitch"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:outlineColor="@color/unreal_vpn_text"
+        app:outlineWidth="2" />
+
+    <TextView
+        android:id="@+id/removeLimitations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/unreal_vpn_remove_limitations"
+        android:textAppearance="@style/UnrealVPN.RemoveLimits"
+        app:layout_constraintBottom_toTopOf="@+id/limitStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/limitStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/unreal_vpn_free_limit"
+        android:textAppearance="@style/UnrealVPN.DefaultText"
+        app:layout_constraintBottom_toTopOf="@+id/traffic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@null"
+        android:rotation="90"
+        android:src="@drawable/ic_compare_arrows_24"
+        app:layout_constraintBottom_toBottomOf="@+id/traffic"
+        app:layout_constraintEnd_toStartOf="@+id/traffic"
+        app:layout_constraintTop_toTopOf="@+id/traffic" />
+
+    <TextView
+        android:id="@+id/traffic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="114dp"
+        android:textAppearance="@style/UnrealVPN.DefaultText"
+        app:layout_constraintBottom_toTopOf="@+id/supportMail"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="34.4 MB" />
+
+    <TextView
+        android:id="@+id/supportMail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="@string/unreal_vpn_support_email"
+        android:textAppearance="@style/UnrealVPN.DefaultText"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

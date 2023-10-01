@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Theme.Shadowsocks.Immersive.Navigation">
         <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.UnrealVPN" parent="Theme.UnrealVPN.DayNight">
+        <item name="android:windowBackground">@color/unreal_vpn_bg</item>
+        <item name="android:statusBarColor">@color/unreal_vpn_bg</item>
+        <item name="android:navigationBarColor">@color/unreal_vpn_bg</item>
+        <item name="colorAccent">@color/unreal_vpn_accent</item>
+        <item name="colorButtonNormal">@color/unreal_vpn_accent</item>
+        <item name="colorPrimary">@color/unreal_vpn_switch_bg</item>
+        <item name="colorPrimaryDark">@color/unreal_vpn_switch_bg</item>
+    </style>
+
+    <style name="Theme.UnrealVPN.DayNight" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+
+    <style name="UnrealVPN">
+        <item name="android:textColor">@color/unreal_vpn_text</item>
+    </style>
+:!qq
+    <style name="UnrealVPN.Outline">
+        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/unreal_vpn_bg</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="UnrealVPN.RemoveLimits">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="UnrealVPN.DefaultText">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textSize">18sp</item>
     </style>
 </resources>

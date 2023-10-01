@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="outlineAttrs">
+        <attr name="outlineColor" format="color"/>
+        <attr name="outlineWidth" format="float"/>
+    </declare-styleable>
+</resources>

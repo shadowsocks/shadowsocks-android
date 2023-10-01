@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Shadowsocks</string>
+  <string name="app_name">Unreal VPN</string>
   <string name="quick_toggle">Toggle</string>
   <string name="send_email">Send email</string>
 

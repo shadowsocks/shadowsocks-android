@@ -35,7 +35,10 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.acl.CustomRulesFragment
@@ -56,10 +59,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.ktx.Firebase
-import timber.log.Timber
 
-class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
-        NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback,
+    OnPreferenceDataStoreChangeListener,
+    NavigationView.OnNavigationItemSelectedListener {
     companion object {
         var stateListener: ((BaseService.State) -> Unit)? = null
     }
@@ -71,21 +74,39 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     private lateinit var navigation: NavigationView
 
     lateinit var snackbar: CoordinatorLayout private set
-    fun snackbar(text: CharSequence = "") = Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
-        anchorView = fab
-    }
+    fun snackbar(text: CharSequence = "") =
+        Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG).apply {
+            anchorView = fab
+        }
 
     private val customTabsIntent by lazy {
         CustomTabsIntent.Builder().apply {
             setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
-            setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_LIGHT, CustomTabColorSchemeParams.Builder().apply {
-                setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.light_color_primary))
-            }.build())
-            setColorSchemeParams(CustomTabsIntent.COLOR_SCHEME_DARK, CustomTabColorSchemeParams.Builder().apply {
-                setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.dark_color_primary))
-            }.build())
+            setColorSchemeParams(
+                CustomTabsIntent.COLOR_SCHEME_LIGHT,
+                CustomTabColorSchemeParams.Builder().apply {
+                    setToolbarColor(
+                        ContextCompat.getColor(
+                            this@MainActivity,
+                            R.color.light_color_primary
+                        )
+                    )
+                }.build()
+            )
+            setColorSchemeParams(
+                CustomTabsIntent.COLOR_SCHEME_DARK,
+                CustomTabColorSchemeParams.Builder().apply {
+                    setToolbarColor(
+                        ContextCompat.getColor(
+                            this@MainActivity,
+                            R.color.dark_color_primary
+                        )
+                    )
+                }.build()
+            )
         }.build()
     }
+
     fun launchUrl(uri: String) = try {
         customTabsIntent.launchUrl(this, uri.toUri())
     } catch (_: ActivityNotFoundException) {
@@ -95,20 +116,27 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     // service
     var state = BaseService.State.Idle
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) =
-            changeState(state, msg)
+        changeState(state, msg)
+
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId == 0L) this@MainActivity.stats.updateTraffic(
-                stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal)
+            stats.txRate, stats.rxRate, stats.txTotal, stats.rxTotal
+        )
         if (state != BaseService.State.Stopping) {
             (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ProfilesFragment)
-                    ?.onTrafficUpdated(profileId, stats)
+                ?.onTrafficUpdated(profileId, stats)
         }
     }
+
     override fun trafficPersisted(profileId: Long) {
         ProfilesFragment.instance?.onTrafficPersisted(profileId)
     }
 
-    private fun changeState(state: BaseService.State, msg: String? = null, animate: Boolean = true) {
+    private fun changeState(
+        state: BaseService.State,
+        msg: String? = null,
+        animate: Boolean = true
+    ) {
         fab.changeState(state, this.state, animate)
         stats.changeState(state, animate)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
@@ -120,11 +148,14 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     private fun toggle() = if (state.canStop) Core.stopService() else connect.launch(null)
 
     private val connection = ShadowsocksConnection(true)
-    override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
-        BaseService.State.values()[service.state]
-    } catch (_: RemoteException) {
-        BaseService.State.Idle
-    })
+    override fun onServiceConnected(service: IShadowsocksService) = changeState(
+        try {
+            BaseService.State.values()[service.state]
+        } catch (_: RemoteException) {
+            BaseService.State.Idle
+        }
+    )
+
     override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
     override fun onBinderDied() {
         connection.disconnect(this)
@@ -144,19 +175,22 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
         stats = findViewById(R.id.stats)
         stats.setOnClickListener { if (state == BaseService.State.Connected) stats.testConnection() }
         drawer = findViewById(R.id.drawer)
-        val drawerHandler = object : OnBackPressedCallback(drawer.isOpen), DrawerLayout.DrawerListener {
-            override fun handleOnBackPressed() = drawer.closeDrawers()
-            override fun onDrawerSlide(drawerView: View, slideOffset: Float) { }
-            override fun onDrawerOpened(drawerView: View) {
-                isEnabled = true
+        val drawerHandler =
+            object : OnBackPressedCallback(drawer.isOpen), DrawerLayout.DrawerListener {
+                override fun handleOnBackPressed() = drawer.closeDrawers()
+                override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+                override fun onDrawerOpened(drawerView: View) {
+                    isEnabled = true
+                }
+
+                override fun onDrawerClosed(drawerView: View) {
+                    isEnabled = false
+                }
+
+                override fun onDrawerStateChanged(newState: Int) {
+                    isEnabled = newState == DrawerLayout.STATE_IDLE == drawer.isOpen
+                }
             }
-            override fun onDrawerClosed(drawerView: View) {
-                isEnabled = false
-            }
-            override fun onDrawerStateChanged(newState: Int) {
-                isEnabled = newState == DrawerLayout.STATE_IDLE == drawer.isOpen
-            }
-        }
         onBackPressedDispatcher.addCallback(drawerHandler)
         drawer.addDrawerListener(drawerHandler)
         navigation = findViewById(R.id.navigation)
@@ -192,7 +226,8 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
     }
 
     private fun displayFragment(fragment: ToolbarFragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment).commitAllowingStateLoss()
+        supportFragmentManager.beginTransaction().replace(R.id.fragment_holder, fragment)
+            .commitAllowingStateLoss()
         drawer.closeDrawers()
     }
 
@@ -201,17 +236,21 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
             when (item.itemId) {
                 R.id.profiles -> {
                     displayFragment(ProfilesFragment())
-                    connection.bandwidthTimeout = connection.bandwidthTimeout   // request stats update
+                    connection.bandwidthTimeout =
+                        connection.bandwidthTimeout   // request stats update
                 }
+
                 R.id.globalSettings -> displayFragment(GlobalSettingsFragment())
                 R.id.about -> {
                     Firebase.analytics.logEvent("about") { }
                     displayFragment(AboutFragment())
                 }
+
                 R.id.faq -> {
                     launchUrl(getString(R.string.faq_url))
                     return true
                 }
+
                 R.id.customRules -> displayFragment(CustomRulesFragment())
                 R.id.subscriptions -> displayFragment(SubscriptionFragment())
                 else -> return false
@@ -231,10 +270,12 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
             toggle()
             true
         }
+
         keyCode == KeyEvent.KEYCODE_T && event.hasModifiers(KeyEvent.META_CTRL_ON) -> {
             stats.testConnection()
             true
         }
+
         else -> (supportFragmentManager.findFragmentById(R.id.fragment_holder) as ToolbarFragment).toolbar.menu.let {
             it.setQwertyMode(KeyCharacterMap.load(event.deviceId).keyboardType != KeyCharacterMap.NUMERIC)
             it.performShortcut(keyCode, event, 0)

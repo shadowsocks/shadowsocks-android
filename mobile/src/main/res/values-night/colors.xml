@@ -2,4 +2,9 @@
 <resources>
     <color name="background_selected">@color/material_primary_800</color>
     <color name="background_stat">@color/material_primary_600</color>
+
+    <color name="unreal_vpn_bg">#000000</color>
+    <color name="unreal_vpn_text">#ffffff</color>
+    <color name="unreal_vpn_accent">#6CD86B</color>
+    <color name="unreal_vpn_switch_bg">#6F6F76</color>
 </resources>
