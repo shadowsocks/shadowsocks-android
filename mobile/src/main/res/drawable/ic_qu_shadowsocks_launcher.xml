@@ -2,17 +2,13 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:bottom="2dp"
         android:drawable="@drawable/ic_app_shortcut_background"
         android:left="2dp"
-        android:top="2dp"
         android:right="2dp"
-        android:bottom="2dp" />
+        android:top="2dp" />
 
     <item
         android:drawable="@drawable/ic_qu_shadowsocks_foreground"
-        android:left="12dp"
-        android:top="12dp"
-        android:right="12dp"
-        android:bottom="12dp" />
-
+        android:gravity="center" />
 </layer-list>

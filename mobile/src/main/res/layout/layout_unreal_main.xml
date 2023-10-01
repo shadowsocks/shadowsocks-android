@@ -35,12 +35,23 @@
         app:outlineColor="@color/unreal_vpn_text"
         app:outlineWidth="2" />
 
+    <View
+        android:id="@+id/switchOverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@+id/connectionSwitch"
+        app:layout_constraintEnd_toEndOf="@+id/connectionSwitch"
+        app:layout_constraintStart_toStartOf="@+id/connectionSwitch"
+        app:layout_constraintTop_toTopOf="@+id/connectionSwitch" />
+
     <Switch
         android:id="@+id/connectionSwitch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:clickable="false"
         android:drawablePadding="0dp"
+        android:focusable="false"
         android:padding="0dp"
         android:showText="false"
         android:switchPadding="0dp"
