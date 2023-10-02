@@ -15,6 +15,7 @@ import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.unrealvpn.network.CreateKeyAndSave
+import com.github.shadowsocks.unrealvpn.network.SetLimitsIfNeeded
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -29,6 +30,7 @@ class UnrealVPNActivity : BridgeActivity() {
     private lateinit var uiUtils: UiUtils
 
     private val createKeyAndSave = CreateKeyAndSave()
+    private val setLimitsIfNeeded = SetLimitsIfNeeded()
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun createView() {
@@ -51,6 +53,7 @@ class UnrealVPNActivity : BridgeActivity() {
         lifecycleScope.launchWhenCreated {
             try {
                 createKeyAndSave(this@UnrealVPNActivity)
+                setLimitsIfNeeded(this@UnrealVPNActivity)
             } catch (e: Exception) {
                 createSnackbar("Error: ${e.stackTraceToString()}").show()
             }

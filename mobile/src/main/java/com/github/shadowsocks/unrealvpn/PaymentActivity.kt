@@ -10,6 +10,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.github.shadowsocks.R
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.time.Duration.Companion.minutes
@@ -34,15 +35,17 @@ class PaymentActivity : AppCompatActivity() {
         val keyId = UnrealVpnStore.getId(this)
 
         webview.webViewClient = listenerClient
-        webview.getSettings().javaScriptEnabled = true;
-        webview.getSettings().javaScriptCanOpenWindowsAutomatically = true;
-        webview.loadUrl("$baseUrl?key=$keyEncoded&key_id=$keyId")
+        webview.getSettings().javaScriptEnabled = true
+        webview.getSettings().javaScriptCanOpenWindowsAutomatically = true
+        val url = "$baseUrl?key=$keyEncoded&key_id=$keyId"
+        webview.loadUrl(url)
+        Timber.d(url)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
-    private val oneMonth = 30.minutes.inWholeMilliseconds
+    private val oneMonth: Long = 3L.minutes.inWholeMilliseconds
 
     private fun onUrlChanged(url: String) {
         if (url.startsWith("https://yoomoney.ru/checkout/payments/v2/success")) {
