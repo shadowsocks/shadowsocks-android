@@ -39,7 +39,7 @@ class UnrealVPNActivity : BridgeActivity() {
         initConnectionButton()
         initLimits()
         initEmail()
-        showTraffic(Core.currentProfile?.main?.rx ?: 0)
+        showTraffic(0)
 
         GlobalScope.launch {
             delay(30.minutes.inWholeMilliseconds)
@@ -85,15 +85,18 @@ class UnrealVPNActivity : BridgeActivity() {
 
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId != 0L) {
-            showTraffic((Core.currentProfile?.main?.rx ?: 0) + stats.rxTotal)
+            showTraffic(stats.rxTotal + stats.txTotal)
         }
     }
 
-    private fun showTraffic(downloaded: Long) {
+    private fun showTraffic(current: Long) {
+        val rx = Core.currentProfile?.main?.rx ?: 0
+        val tx = Core.currentProfile?.main?.tx ?: 0
+
         val trafficView = findViewById<TextView>(R.id.traffic)
         trafficView.text = Formatter.formatFileSize(
             this,
-            downloaded
+            rx + tx + current
         )
     }
 
