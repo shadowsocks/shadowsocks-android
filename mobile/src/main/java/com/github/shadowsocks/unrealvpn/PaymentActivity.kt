@@ -30,8 +30,8 @@ class PaymentActivity : AppCompatActivity() {
 
         val webview = findViewById<WebView>(R.id.webview)
         val baseUrl = getString(R.string.unreal_vpn_payment_url)
-        val keyEncoded = UnrealVpnStore.getAccessUrl(this) // Uri.encode(
-        val keyId = UnrealVpnStore.getId(this) // Uri.encode(
+        val keyEncoded = UnrealVpnStore.getAccessUrl(this)
+        val keyId = UnrealVpnStore.getId(this)
 
         webview.webViewClient = listenerClient
         webview.getSettings().javaScriptEnabled = true;

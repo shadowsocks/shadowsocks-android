@@ -6,7 +6,7 @@
     <string name="unreal_vpn_extend_limits" translatable="false">Продлить доступ</string>
     <string name="unreal_vpn_support_email" translatable="false">Support@unrealvpn.com</string>
     <string name="unreal_vpn_free_limit" translatable="false">Доступно 100 Мб в месяц</string>
-    <string name="unreal_vpn_unlimited" translatable="false">Доступ без ограничений</string>
+    <string name="unreal_vpn_unlimited" translatable="false">Доступ без ограничений до %s</string>
 
     <string name="unreal_vpn_status_connected" translatable="false">Connected</string>
     <string name="unreal_vpn_status_connecting" translatable="false">Connecting...</string>

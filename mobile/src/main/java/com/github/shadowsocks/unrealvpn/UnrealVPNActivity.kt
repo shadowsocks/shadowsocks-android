@@ -20,6 +20,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import kotlin.time.Duration.Companion.minutes
 
 
@@ -118,17 +119,21 @@ class UnrealVPNActivity : BridgeActivity() {
         val removeLimitations = findViewById<TextView>(R.id.removeLimitations)
         val limits = findViewById<TextView>(R.id.limitStatus)
 
-        val unlimited = UnrealVpnStore.getUnlimitedUntil(this) > System.currentTimeMillis()
+        val unlimitedUntil = UnrealVpnStore.getUnlimitedUntil(this)
+        val isUnlimited = unlimitedUntil > System.currentTimeMillis()
         removeLimitations.text = buildSpannedString {
-            if (unlimited) {
+            if (isUnlimited) {
                 append(getString(R.string.unreal_vpn_extend_limits), UnderlineSpan(), 0)
             } else {
                 append(getString(R.string.unreal_vpn_remove_limitations), UnderlineSpan(), 0)
             }
         }
 
-        if (unlimited) {
-            limits.setText(R.string.unreal_vpn_unlimited)
+        if (isUnlimited) {
+            limits.text = getString(
+                R.string.unreal_vpn_unlimited,
+                formatter.format(unlimitedUntil)
+            )
         } else {
             limits.setText(R.string.unreal_vpn_free_limit)
         }
@@ -155,5 +160,9 @@ class UnrealVPNActivity : BridgeActivity() {
                 startActivity(intent)
             }
         }
+    }
+
+    private companion object {
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
     }
 }
