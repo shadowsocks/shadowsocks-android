@@ -28,14 +28,14 @@ object UnrealVpnStore {
             .apply()
     }
 
-    fun getTraffic(context: Context): Long {
-        return prefs(context).getLong("traffic", 0)
+    fun getId(context: Context): String? {
+        return prefs(context).getString("keyid", null)
     }
 
-    fun setTraffic(context: Context, traffic: Long) {
+    fun setId(context: Context, id: String) {
         prefs(context)
             .edit()
-            .putLong("traffic", traffic)
+            .putString("keyid", id)
             .apply()
     }
 

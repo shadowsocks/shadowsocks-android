@@ -1,7 +1,6 @@
 package com.github.shadowsocks.unrealvpn
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -31,11 +30,13 @@ class PaymentActivity : AppCompatActivity() {
 
         val webview = findViewById<WebView>(R.id.webview)
         val baseUrl = getString(R.string.unreal_vpn_payment_url)
-        val keyEncoded = Uri.encode(UnrealVpnStore.getAccessUrl(this))
+        val keyEncoded = UnrealVpnStore.getAccessUrl(this) // Uri.encode(
+        val keyId = UnrealVpnStore.getId(this) // Uri.encode(
+
         webview.webViewClient = listenerClient
         webview.getSettings().javaScriptEnabled = true;
         webview.getSettings().javaScriptCanOpenWindowsAutomatically = true;
-        webview.loadUrl("$baseUrl?key=$keyEncoded")
+        webview.loadUrl("$baseUrl?key=$keyEncoded&key_id=$keyId")
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }

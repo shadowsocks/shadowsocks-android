@@ -26,8 +26,9 @@ class CreateKeyAndSave {
                 UnrealVpnStore.setAccessUrl(context, accessUrl)
 
                 val keyName = createKeyName()
+                UnrealVpnStore.setId(context, keyName)
                 Timber.d("Key name: $keyName")
-                registerKey(keyName, keyId)
+                registerKey(keyName = keyName, id = keyId)
 
                 val emptyProfile = Profile(
                     id = 0,
@@ -59,7 +60,7 @@ class CreateKeyAndSave {
 
     @SuppressLint("SimpleDateFormat")
     private fun createKeyName(): String {
-        val formatter = SimpleDateFormat("yyyy-MM-DD")
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
         val date = formatter.format(System.currentTimeMillis())
         return "Created_$date"
     }

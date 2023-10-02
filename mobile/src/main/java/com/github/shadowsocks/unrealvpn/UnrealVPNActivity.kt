@@ -10,6 +10,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.core.text.buildSpannedString
 import androidx.lifecycle.lifecycleScope
+import com.github.shadowsocks.Core
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
@@ -37,6 +38,7 @@ class UnrealVPNActivity : BridgeActivity() {
         initConnectionButton()
         initLimits()
         initEmail()
+        showTraffic(Core.currentProfile?.main?.rx ?: 0)
 
         GlobalScope.launch {
             delay(30.minutes.inWholeMilliseconds)
@@ -78,18 +80,15 @@ class UnrealVPNActivity : BridgeActivity() {
             switch.isChecked = newCheckedState
         }
         connectionButton.isClickable = newState.canStop || newState == BaseService.State.Stopped
-        showTraffic()
     }
 
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {
         if (profileId != 0L) {
-            val currentTraffic = UnrealVpnStore.getTraffic(this) + stats.rxTotal
-            UnrealVpnStore.setTraffic(this, currentTraffic)
-            showTraffic(currentTraffic)
+            showTraffic((Core.currentProfile?.main?.rx ?: 0) + stats.rxTotal)
         }
     }
 
-    private fun showTraffic(downloaded: Long = UnrealVpnStore.getTraffic(this)) {
+    private fun showTraffic(downloaded: Long) {
         val trafficView = findViewById<TextView>(R.id.traffic)
         trafficView.text = Formatter.formatFileSize(
             this,
