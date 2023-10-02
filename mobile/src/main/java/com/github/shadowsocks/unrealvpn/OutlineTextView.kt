@@ -7,10 +7,9 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.widget.AutoSizeableTextView
 import com.github.shadowsocks.R
 
-class OutlineTextView : AppCompatTextView, AutoSizeableTextView {
+class OutlineTextView : AppCompatTextView {
     private var mAdditionalPadding = 0
 
     private val defaultStrokeWidth = 0F
@@ -21,7 +20,6 @@ class OutlineTextView : AppCompatTextView, AutoSizeableTextView {
 
     constructor(context: Context) : super(context) {
         initResources(context, null)
-
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
