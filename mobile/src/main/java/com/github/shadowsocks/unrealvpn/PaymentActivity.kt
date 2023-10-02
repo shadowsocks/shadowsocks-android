@@ -45,7 +45,7 @@ class PaymentActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
-    private val oneMonth: Long = 3L.minutes.inWholeMilliseconds
+    private val oneMonth: Long = 10L.minutes.inWholeMilliseconds
 
     private fun onUrlChanged(url: String) {
         if (url.startsWith("https://yoomoney.ru/checkout/payments/v2/success")) {
