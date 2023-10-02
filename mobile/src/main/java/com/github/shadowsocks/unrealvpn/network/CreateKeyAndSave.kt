@@ -24,9 +24,10 @@ class CreateKeyAndSave {
                 val keyId = keyResponse["id"].toString()
                 val accessUrl = keyResponse["accessUrl"].toString()
                 UnrealVpnStore.setAccessUrl(context, accessUrl)
+                UnrealVpnStore.setId(context, keyId)
+
 
                 val keyName = createKeyName()
-                UnrealVpnStore.setId(context, keyName)
                 Timber.d("Key name: $keyName")
                 registerKey(keyName = keyName, id = keyId)
 
