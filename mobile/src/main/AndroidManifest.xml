@@ -24,6 +24,7 @@
         <activity
             android:name=".unrealvpn.PaymentActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.UnrealVPN" />
         <activity
             android:name=".unrealvpn.UnrealVPNActivity"
