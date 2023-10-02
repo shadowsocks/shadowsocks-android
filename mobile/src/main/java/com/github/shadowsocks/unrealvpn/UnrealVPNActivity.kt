@@ -195,9 +195,9 @@ class UnrealVPNActivity : BridgeActivity() {
     private fun initEmail() {
         val emailView = findViewById<TextView>(R.id.supportMail)
         val email = getString(R.string.unreal_vpn_support_email)
-        val accessUrl = UnrealVpnStore.getAccessUrl(this@UnrealVPNActivity)
         emailView.text = buildSpannedString { append(email, UnderlineSpan(), 0) }
         emailView.setOnClickListener {
+            val accessUrl = UnrealVpnStore.getAccessUrl(this@UnrealVPNActivity)
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:")
                 putExtra(Intent.EXTRA_EMAIL, arrayOf(email))
