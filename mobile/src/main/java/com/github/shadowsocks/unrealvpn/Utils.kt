@@ -5,7 +5,6 @@ import android.content.Context
 import android.view.View
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.github.shadowsocks.R
@@ -43,6 +42,7 @@ class UiUtils(private val context: Context, private val snackbar: View) {
 
     fun snackbar(text: CharSequence = ""): Snackbar {
         return Snackbar.make(snackbar, text, Snackbar.LENGTH_LONG)
+            .setTextMaxLines(10)
     }
 
     fun launchUrl(uri: String) {

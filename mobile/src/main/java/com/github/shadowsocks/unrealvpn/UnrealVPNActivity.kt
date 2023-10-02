@@ -8,12 +8,14 @@ import android.text.style.UnderlineSpan
 import android.view.View
 import android.widget.Switch
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.core.text.buildSpannedString
 import androidx.lifecycle.lifecycleScope
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.R
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
+import com.github.shadowsocks.net.HttpsTest
 import com.github.shadowsocks.unrealvpn.network.CreateKeyAndSave
 import com.github.shadowsocks.unrealvpn.network.SetLimitsIfNeeded
 import com.google.android.material.snackbar.Snackbar
@@ -29,6 +31,7 @@ class UnrealVPNActivity : BridgeActivity() {
 
     private lateinit var uiUtils: UiUtils
 
+    private val tester by viewModels<HttpsTest>()
     private val createKeyAndSave = CreateKeyAndSave()
     private val setLimitsIfNeeded = SetLimitsIfNeeded()
 
@@ -64,26 +67,67 @@ class UnrealVPNActivity : BridgeActivity() {
         return uiUtils.snackbar(message)
     }
 
-    @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun showState(newState: BaseService.State, animate: Boolean) {
+        initConnectionStatus(newState, tester.status.value)
+        runTester(newState)
+    }
+
+    private fun runTester(newState: BaseService.State) {
+        if (newState == BaseService.State.Connected) {
+            tester.status.observe(this) {
+                it.retrieve(
+                    { testerStatus -> },
+                    { msg ->
+                        val commonError = getString(R.string.unreal_vpn_error_common)
+                        createSnackbar("$commonError\n$msg").show()
+                        if (state.canStop) {
+                            Core.stopService()
+                        }
+                    }
+                )
+                initConnectionStatus(state, it)
+            }
+            tester.testConnection()
+        } else {
+            tester.status.removeObservers(this)
+            if (state != BaseService.State.Idle) {
+                tester.invalidate()
+            }
+        }
+    }
+
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
+    private fun initConnectionStatus(
+        newState: BaseService.State,
+        testStatus: HttpsTest.Status?
+    ) {
         val switch = findViewById<Switch>(R.id.connectionSwitch)
         val connectionStatus = findViewById<TextView>(R.id.connectionStatus)
         val connectionButton = findViewById<View>(R.id.switchOverlay)
-
+        val connected = testStatus is HttpsTest.Status.Success
+        val testerIdle = testStatus == null || testStatus !is HttpsTest.Status.Testing
         val newText = when (newState) {
             BaseService.State.Connecting -> getString(R.string.unreal_vpn_status_connecting)
-            BaseService.State.Connected -> getString(R.string.unreal_vpn_status_connected)
+            BaseService.State.Connected -> {
+                if (connected) {
+                    getString(R.string.unreal_vpn_status_connected)
+                } else {
+                    getString(R.string.unreal_vpn_status_connecting)
+                }
+            }
+
             BaseService.State.Stopping -> getString(R.string.unreal_vpn_status_disconnecting)
             BaseService.State.Stopped -> getString(R.string.unreal_vpn_status_disconnected)
             else -> connectionStatus.text
         }
 
         connectionStatus.text = newText
-        val newCheckedState = newState == BaseService.State.Connected
+        val newCheckedState = newState == BaseService.State.Connected && connected
         if (switch.isChecked != newCheckedState) {
             switch.isChecked = newCheckedState
         }
-        connectionButton.isClickable = newState.canStop || newState == BaseService.State.Stopped
+        connectionButton.isClickable =
+            testerIdle && (newState.canStop || newState == BaseService.State.Stopped)
     }
 
     override fun trafficUpdated(profileId: Long, stats: TrafficStats) {

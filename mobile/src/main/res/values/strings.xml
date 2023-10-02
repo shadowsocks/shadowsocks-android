@@ -15,5 +15,6 @@
 
     <string name="unreal_vpn_payment_url" translatable="false">https://osa.unrealvpn.com/app/payment.html</string>
     <string name="unreal_vpn_failed_to_init" translatable="false">Не получилось проинициализировать. Перезапустите приложение</string>
-    <string name="unreal_vpn_pay_title">Оплата</string>
+    <string name="unreal_vpn_pay_title" translatable="false">Оплата</string>
+    <string name="unreal_vpn_error_common" translatable="false">Не удалось установить соединение. Похоже ваш ключ недействителен. Пожалуйста, обратитесь в техническую поддержку.</string>
 </resources>

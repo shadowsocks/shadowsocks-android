@@ -38,6 +38,7 @@ import java.net.HttpURLConnection
 import java.net.Proxy
 import java.net.URL
 import java.net.URLConnection
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Based on: https://android.googlesource.com/platform/frameworks/base/+/b19a838/services/core/java/com/android/server/connectivity/NetworkMonitor.java#1071
@@ -45,22 +46,29 @@ import java.net.URLConnection
 class HttpsTest : ViewModel() {
     sealed class Status {
         protected abstract val status: CharSequence
-        open fun retrieve(setStatus: (CharSequence) -> Unit, errorCallback: (String) -> Unit) = setStatus(status)
+        open fun retrieve(setStatus: (CharSequence) -> Unit, errorCallback: (String) -> Unit) =
+            setStatus(status)
 
         object Idle : Status() {
             override val status get() = app.getText(R.string.vpn_connected)
         }
+
         object Testing : Status() {
             override val status get() = app.getText(R.string.connection_test_testing)
         }
+
         class Success(private val elapsed: Long) : Status() {
             override val status get() = app.getString(R.string.connection_test_available, elapsed)
         }
+
         sealed class Error : Status() {
             override val status get() = app.getText(R.string.connection_test_fail)
             protected abstract val error: String
             private var shown = false
-            override fun retrieve(setStatus: (CharSequence) -> Unit, errorCallback: (String) -> Unit) {
+            override fun retrieve(
+                setStatus: (CharSequence) -> Unit,
+                errorCallback: (String) -> Unit
+            ) {
                 super.retrieve(setStatus, errorCallback)
                 if (shown) return
                 shown = true
@@ -68,8 +76,13 @@ class HttpsTest : ViewModel() {
             }
 
             class UnexpectedResponseCode(private val code: Int) : Error() {
-                override val error get() = app.getString(R.string.connection_test_error_status_code, code)
+                override val error
+                    get() = app.getString(
+                        R.string.connection_test_error_status_code,
+                        code
+                    )
             }
+
             class IOFailure(private val e: IOException) : Error() {
                 override val error get() = app.getString(R.string.connection_test_error, e.message)
             }
@@ -82,13 +95,14 @@ class HttpsTest : ViewModel() {
     fun testConnection() {
         cancelTest()
         status.value = Status.Testing
-        val url = URL("https://cp.cloudflare.com")
+        val url = URL("https://google.com")
         val conn = (if (DataStore.serviceMode != Key.modeVpn) {
             url.openConnection(Proxy(Proxy.Type.SOCKS, DataStore.proxyAddress))
         } else url.openConnection()) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
+        conn.connectTimeout = 10L.seconds.inWholeMilliseconds.toInt()
         running = GlobalScope.launch(Dispatchers.Main.immediate) {
             status.value = conn.useCancellable {
                 try {
