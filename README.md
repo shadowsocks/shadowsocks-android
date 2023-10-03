@@ -1,3 +1,29 @@
+# UnrealVPN
+
+## Installation and build
+
+1. Instal Rustup
+
+- `brew instal rustup`
+- `rustup-init`
+- `rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android`
+
+2. Clone repo https://github.com/sergeirakov/shadowsocks-android
+
+- `git clone --recurse-submodules <repo>`
+- Or if already cloned
+  `git submodule update --init --recursive`
+
+3. Build
+
+- Debug
+  `./gradlew :mobile:assembleDebug`
+- Release
+  `Build → Generate signed APK`
+  Keystore: `unrealvpn-keystore` pswd: `sounrealwow`
+  Alias: `key0` psw: `sounrealwow1`
+
+## Based on
 ## [Shadowsocks](https://shadowsocks.org) for Android
 
 [![CircleCI](https://circleci.com/gh/shadowsocks/shadowsocks-android.svg?style=shield)](https://circleci.com/gh/shadowsocks/shadowsocks-android)
