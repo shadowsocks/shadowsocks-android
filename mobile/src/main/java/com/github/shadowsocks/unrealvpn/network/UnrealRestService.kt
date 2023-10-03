@@ -1,5 +1,6 @@
 package com.github.shadowsocks.unrealvpn.network
 
+import com.github.shadowsocks.unrealvpn.BASE_URL
 import org.json.JSONObject
 
 class UnrealRestService {
@@ -35,9 +36,5 @@ class UnrealRestService {
             "$BASE_URL/access-keys/$keyId/name",
             requestBody.toString()
         )
-    }
-
-    private companion object {
-        const val BASE_URL = "https://osa.unrealvpn.com/api"
     }
 }

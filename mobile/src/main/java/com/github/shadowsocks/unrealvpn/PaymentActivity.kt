@@ -13,7 +13,6 @@ import com.github.shadowsocks.R
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
-import kotlin.time.Duration.Companion.minutes
 
 class PaymentActivity : AppCompatActivity() {
 
@@ -45,28 +44,30 @@ class PaymentActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
-    private val oneMonth: Long = 10L.minutes.inWholeMilliseconds
-
     private fun onUrlChanged(url: String) {
         if (url.startsWith("https://yoomoney.ru/checkout/payments/v2/success")) {
             val oldUnlim = UnrealVpnStore.getUnlimitedUntil(this)
             val oldOrCurrent = max(oldUnlim, System.currentTimeMillis())
+            val whenPremiumEnds = oldOrCurrent + PREMIUM_DURATION
             UnrealVpnStore.setUnlimitedUntil(
                 this,
-                oldOrCurrent + oneMonth
+                whenPremiumEnds
             )
-            scheduleStop()
+            scheduleStop(whenPremiumEnds)
             onBackPressedDispatcher.onBackPressed()
         }
     }
 
-    private fun scheduleStop() {
+    private fun scheduleStop(whenPremiumEnds: Long) {
         WorkManager.getInstance(this)
             .enqueueUniqueWork(
                 "StopWorker",
                 ExistingWorkPolicy.REPLACE,
                 OneTimeWorkRequest.Builder(StopWorker::class.java)
-                    .setInitialDelay(oneMonth, TimeUnit.MILLISECONDS)
+                    .setInitialDelay(
+                        whenPremiumEnds - System.currentTimeMillis(),
+                        TimeUnit.MILLISECONDS
+                    )
                     .build()
             )
     }
