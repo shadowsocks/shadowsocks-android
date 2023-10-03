@@ -1,8 +1,6 @@
 plugins {
     id("com.android.application")
     id("com.google.android.gms.oss-licenses-plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
     kotlin("android")
     kotlin("kapt")
 }

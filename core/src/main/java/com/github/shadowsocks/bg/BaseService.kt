@@ -42,10 +42,6 @@ import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.readableMessage
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -279,7 +275,6 @@ object BaseService {
             // channge the state
             data.changeState(State.Stopping)
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                Firebase.analytics.logEvent("stop") { param(FirebaseAnalytics.Param.METHOD, tag) }
                 data.connectingJob?.cancelAndJoin() // ensure stop connecting first
                 this@Interface as Service
                 // we use a coroutineScope here to allow clean-up in parallel
@@ -354,7 +349,6 @@ object BaseService {
             }
 
             data.notification = createNotification(profile.formattedName)
-            Firebase.analytics.logEvent("start") { param(FirebaseAnalytics.Param.METHOD, tag) }
 
             data.changeState(State.Connecting)
             data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
