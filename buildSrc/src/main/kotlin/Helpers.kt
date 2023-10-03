@@ -1,16 +1,13 @@
 
-import com.android.build.VariantOutput
 import com.android.build.api.dsl.CommonExtension
-import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
-import java.util.*
+import java.util.Locale
 
 const val lifecycleVersion = "2.5.1"
 
@@ -73,7 +70,7 @@ fun Project.setupCore() {
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.2")
 }
 
-private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
+// private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
 fun Project.setupApp() {
     setupCore()
 
@@ -104,19 +101,19 @@ fun Project.setupApp() {
         }
         lint.disable += "RemoveWorkManagerInitializer"
         packagingOptions.jniLibs.useLegacyPackaging = true
-        splits.abi {
+        /*splits.abi {
             isEnable = true
             isUniversalApk = true
-        }
+        }*/
     }
 
     dependencies.add("implementation", project(":core"))
 
-    if (currentFlavor == "release") (android as AbstractAppExtension).applicationVariants.all {
+    /*if (currentFlavor == "release") (android as AbstractAppExtension).applicationVariants.all {
         for (output in outputs) {
             abiCodes[(output as ApkVariantOutputImpl).getFilter(VariantOutput.ABI)]?.let { offset ->
                 output.versionCodeOverride = versionCode + offset
             }
         }
-    }
+    }*/
 }
