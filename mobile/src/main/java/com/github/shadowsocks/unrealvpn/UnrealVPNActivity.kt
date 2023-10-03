@@ -20,11 +20,7 @@ import com.github.shadowsocks.unrealvpn.network.CreateKeyAndSave
 import com.github.shadowsocks.unrealvpn.network.SetLimitsIfNeeded
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import kotlin.time.Duration.Companion.minutes
 
 
 class UnrealVPNActivity : BridgeActivity() {
@@ -45,11 +41,6 @@ class UnrealVPNActivity : BridgeActivity() {
         initLimits()
         initEmail()
         showTraffic(0)
-
-        GlobalScope.launch {
-            delay(30.minutes.inWholeMilliseconds)
-            throw RuntimeException("Demo version")
-        }
     }
 
     private fun tryCreateAndRegisterKey() {

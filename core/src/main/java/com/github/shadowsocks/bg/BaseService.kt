@@ -61,7 +61,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.net.URL
-import kotlin.time.Duration.Companion.minutes
 
 /**
  * This object uses WeakMap to simulate the effects of multi-inheritance.
@@ -324,10 +323,6 @@ object BaseService {
         suspend fun openConnection(url: URL) = url.openConnection()
 
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-            GlobalScope.launch {
-                delay(30.minutes.inWholeMilliseconds)
-                throw RuntimeException("Demo version")
-            }
             val data = data
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
             val expanded = Core.currentProfile
