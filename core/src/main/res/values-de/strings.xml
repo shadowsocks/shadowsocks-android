@@ -39,6 +39,7 @@ Empfangen: \t%4$s\t↓\t%2$s"</string>
     <string name="enc_method">"Verschlüsselungsmethode"</string>
 
     <!-- feature category -->
+    <string name="optimize_buffers">TCP-Puffer optimieren</string>
     <string name="ipv6">"IPv6-Route"</string>
     <string name="ipv6_summary">"Leite IPv6-Traffic zu Remote um"</string>
     <string name="route_entry_gfwlist">"GFW-Liste"</string>
@@ -49,6 +50,7 @@ Empfangen: \t%4$s\t↓\t%2$s"</string>
     <string name="bypass_apps_summary">"Aktiviere um ausgewählte Apps zu umgehen"</string>
     <string name="auto_connect">"Automatisch verbinden"</string>
     <string name="auto_connect_summary">"Starte Shadowsocks bei Systemstart/nach App-Update automatisch, falls es zuvor aktiv war"</string>
+    <string name="optimize_buffers_summary">Upload-Zeitüberschreitung (Bufferbloat) beheben</string>
     <string name="tcp_fastopen_summary">"Umschalten benötigt eventuell ROOT-Zugriff"</string>
     <string name="tcp_fastopen_summary_unsupported">"Nicht unterstützte Kernel-Version: %s &lt; 3.7.1"</string>
     <string name="udp_dns">"Sende DNS über UDP"</string>

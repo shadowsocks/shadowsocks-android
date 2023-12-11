@@ -39,6 +39,7 @@
     <string name="enc_method">"암호화 방법"</string>
 
     <!-- feature category -->
+    <string name="optimize_buffers">TCP 버퍼 최적화</string>
     <string name="ipv6">"IPv6 라우팅"</string>
     <string name="ipv6_summary">"IPv6 트래픽도 원격으로 리다이렉트 합니다"</string>
     <string name="route_list">"라우팅 대상"</string>
@@ -58,6 +59,7 @@
     <string name="auto_connect_summary">"장치가 켜질 때 Shadowsocks를 자동으로 활성화합니다"</string>
 
     <!-- Fuzzy -->
+    <string name="optimize_buffers_summary">업로드 버퍼 크기 초과로 인한 시간 초과 해결</string>
     <string name="tcp_fastopen_summary">"루트 권한이 필요합니다"</string>
     <string name="tcp_fastopen_summary_unsupported">"지원하지 않는 버전의 커널입니다: %s &lt; 3.7.1"</string>
 

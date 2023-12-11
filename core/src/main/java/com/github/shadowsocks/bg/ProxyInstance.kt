@@ -117,10 +117,22 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         val cmd = arrayListOf(
                 File((service as Context).applicationInfo.nativeLibraryDir, Executable.SS_LOCAL).absolutePath,
                 "--stat-path", stat.absolutePath,
-                "-c", configFile.absolutePath,
+                "-c", configFile.absolutePath
         )
 
-        if (service.isVpnService) cmd += "--vpn"
+        if (profile.optimizeBuffers) {
+            cmd += "--inbound-send-buffer-size 16384"
+            cmd += "--inbound-recv-buffer-size 16384"
+
+            if (profile.plugin?.isNotBlank() == true) {
+                cmd += "--outbound-send-buffer-size 16384"
+                cmd += "--outbound-recv-buffer-size 16384"
+            }
+        }
+
+        if (service.isVpnService) {
+            cmd += "--vpn"
+        }
 
         if (route != Acl.ALL) {
             cmd += "--acl"

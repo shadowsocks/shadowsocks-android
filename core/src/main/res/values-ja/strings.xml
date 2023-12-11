@@ -42,6 +42,7 @@
     <string name="enc_method">"暗号化方式"</string>
 
     <!-- feature category -->
+    <string name="optimize_buffers">TCP バッファを最適化</string>
     <string name="ipv6">"IPv6 プロキシ"</string>
     <string name="ipv6_summary">"リモートサーバーに IPv6 パケットを転送"</string>
     <string name="route_list">"プロキシ方式"</string>
@@ -59,6 +60,7 @@
     <string name="auto_connect_summary">"システム起動時にバックグラウンドで本サービスを開始"</string>
 
     <!-- Fuzzy -->
+    <string name="optimize_buffers_summary">バッファブロートによるアップロード遅延を解消する</string>
     <string name="tcp_fastopen_summary">"使用するには ROOT 権限が必要"</string>
     <string name="tcp_fastopen_summary_unsupported">"ご利用のカーネルバージョンはサポートしておりません：%s &lt; 3.7.1"</string>
 

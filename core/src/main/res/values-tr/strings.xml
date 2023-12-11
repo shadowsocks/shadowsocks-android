@@ -37,6 +37,7 @@
     <string name="remote_port">"Uzaktan Port"</string>
     <string name="sitekey">"Şifre"</string>
     <string name="enc_method">"Şifreleme Methodu"</string>
+    <string name="optimize_buffers">TCP Arabelleklerini Optimize Edin</string>
     <string name="ipv6_summary">"IPv6 trafiğini remote'a yönlendir"</string>
     <string name="route_list">"Rota"</string>
     <string name="route_entry_gfwlist">"GFW Listesi"</string>
@@ -53,6 +54,7 @@
     <string name="auto_connect_summary">"Shadowsocks'ı cihazı başlatırken aç"</string>
 
     <!-- Fuzzy -->
+    <string name="optimize_buffers_summary">Aşırı boyutlu arabelleklerden kaynaklanan yükleme zaman aşımını düzeltin.</string>
     <string name="tcp_fastopen_summary">"Açıp kapamak için ROOT yetkisi gerekiyor"</string>
     <string name="tcp_fastopen_summary_unsupported">"Desteklenmeyen kernel sürümü: %s &lt; 3.7.1"</string>
 
