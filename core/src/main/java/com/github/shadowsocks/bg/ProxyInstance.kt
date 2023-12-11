@@ -121,12 +121,12 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         )
 
         if (profile.optimizeBuffers) {
-            cmd += "--inbound-send-buffer-size 16384"
-            cmd += "--inbound-recv-buffer-size 16384"
+            cmd += "--inbound-send-buffer-size=16384"
+            cmd += "--inbound-recv-buffer-size=16384"
 
             if (profile.plugin?.isNotBlank() == true) {
-                cmd += "--outbound-send-buffer-size 16384"
-                cmd += "--outbound-recv-buffer-size 16384"
+                cmd += "--outbound-send-buffer-size=16384"
+                cmd += "--outbound-recv-buffer-size=16384"
             }
         }
 
