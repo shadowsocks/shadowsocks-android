@@ -79,6 +79,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     private lateinit var pluginConfiguration: PluginConfiguration
     private lateinit var receiver: BroadcastReceiver
     private lateinit var udpFallback: Preference
+    private lateinit var optimizeBuffers: SwitchPreference
 
     private fun makeDirt() {
         DataStore.dirty = true
@@ -115,6 +116,8 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         pluginConfiguration = PluginConfiguration(DataStore.plugin)
         initPlugins()
         udpFallback = findPreference(Key.udpFallback)!!
+        optimizeBuffers = findPreference(Key.optimizeBuffers)!!
+        optimizeBuffers.isChecked = DataStore.optimizeBuffers
         DataStore.privateStore.registerChangeListener(this)
 
         val profile = ProfileManager.getProfile(profileId) ?: Profile()

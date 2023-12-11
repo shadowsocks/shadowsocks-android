@@ -80,6 +80,7 @@
     <string name="profile_default">"Використовувати поточний профіль"</string>
 
     <!-- status -->
+    <string name="optimize_buffers_summary">Виправити таймаут завантаження через завеликі буфери</string>
     <string name="sent">"Надіслано:"</string>
     <string name="received">"Отримано:"</string>
 
@@ -92,6 +93,7 @@
     <string name="custom_rules">"Власні правила"</string>
     <string name="action_add_rule">"Додати правило…"</string>
     <string name="edit_rule">"Редагувати правило"</string>
+    <string name="optimize_buffers">Оптимізувати буфери TCP</string>
     <string name="route_entry_all">"Всі"</string>
     <string name="route_entry_bypass_lan">"Оминати локальні мережі"</string>
     <string name="route_entry_bypass_chn">"Оминати Китай"</string>
