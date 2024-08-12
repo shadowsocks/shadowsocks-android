@@ -33,6 +33,7 @@ LOCAL_MODULE := event
 LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
 LOCAL_CFLAGS := -I$(LOCAL_PATH)/libevent \
 	-I$(LOCAL_PATH)/libevent/include \
+	-Wno-error=implicit-function-declaration
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -66,7 +67,7 @@ LOCAL_STATIC_LIBRARIES := libevent
 
 LOCAL_MODULE := redsocks
 LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES))
-LOCAL_CFLAGS := -std=gnu99 -DUSE_IPTABLES \
+LOCAL_CFLAGS := -std=gnu99 -DUSE_IPTABLES -D_GNU_SOURCE\
 	-I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
 	-I$(LOCAL_PATH)/libevent
