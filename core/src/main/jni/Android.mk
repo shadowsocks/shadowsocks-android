@@ -26,6 +26,7 @@ include $(CLEAR_VARS)
 
 LIBEVENT_SOURCES := \
 	buffer.c bufferevent.c event.c \
+	bufferevent_pair.c bufferevent_filter.c \
 	bufferevent_sock.c bufferevent_ratelim.c \
 	evthread.c log.c evutil.c evutil_rand.c evutil_time.c evmap.c epoll.c poll.c signal.c select.c
 
@@ -33,6 +34,7 @@ LOCAL_MODULE := event
 LOCAL_SRC_FILES := $(addprefix libevent/, $(LIBEVENT_SOURCES))
 LOCAL_CFLAGS := -I$(LOCAL_PATH)/libevent \
 	-I$(LOCAL_PATH)/libevent/include \
+	-Wno-error=implicit-function-declaration
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -66,7 +68,7 @@ LOCAL_STATIC_LIBRARIES := libevent
 
 LOCAL_MODULE := redsocks
 LOCAL_SRC_FILES := $(addprefix redsocks/, $(REDSOCKS_SOURCES))
-LOCAL_CFLAGS := -std=gnu99 -DUSE_IPTABLES \
+LOCAL_CFLAGS := -std=gnu99 -DUSE_IPTABLES -D_GNU_SOURCE \
 	-I$(LOCAL_PATH)/redsocks \
 	-I$(LOCAL_PATH)/libevent/include \
 	-I$(LOCAL_PATH)/libevent
@@ -84,6 +86,7 @@ LOCAL_CFLAGS += -DBADVPN_THREADWORK_USE_PTHREAD -DBADVPN_LINUX -DBADVPN_BREACTOR
 LOCAL_CFLAGS += -DBADVPN_USE_SIGNALFD -DBADVPN_USE_EPOLL
 LOCAL_CFLAGS += -DBADVPN_LITTLE_ENDIAN -DBADVPN_THREAD_SAFE
 LOCAL_CFLAGS += -DNDEBUG -DANDROID
+LOCAL_CFLAGS += -Wno-parentheses -Wno-unused-value
 # LOCAL_CFLAGS += -DTUN2SOCKS_JNI
 
 LOCAL_STATIC_LIBRARIES := libancillary
