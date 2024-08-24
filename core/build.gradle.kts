@@ -106,6 +106,8 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     kapt("androidx.room:room-compiler:$roomVersion")
+    api("com.squareup.okhttp3:okhttp:5.0.0-alpha.10")
+    api("com.squareup.okhttp3:okhttp-brotli:5.0.0-alpha.10")
     androidTestImplementation("androidx.room:room-testing:$roomVersion")
     androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
 }

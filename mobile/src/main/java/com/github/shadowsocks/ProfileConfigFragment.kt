@@ -96,6 +96,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.pref_profile)
         findPreference<EditTextPreference>(Key.remotePort)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
+        findPreference<EditTextPreference>(Key.localDohHostAddr)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Monospace)
         val serviceMode = DataStore.serviceMode
         findPreference<Preference>(Key.ipv6)!!.isEnabled = serviceMode == Key.modeVpn
         isProxyApps = findPreference(Key.proxyApps)!!
@@ -124,6 +125,7 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             findPreference<Preference>(Key.password)!!.isEnabled = false
             findPreference<Preference>(Key.method)!!.isEnabled = false
             findPreference<Preference>(Key.remotePort)!!.isEnabled = false
+            findPreference<Preference>(Key.localDohHostAddr)!!.isEnabled = false
             plugin.isEnabled = false
             pluginConfigure.isEnabled = false
             udpFallback.isEnabled = false

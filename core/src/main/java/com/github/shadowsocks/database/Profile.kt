@@ -27,6 +27,7 @@ import android.util.Base64
 import android.util.LongSparseArray
 import androidx.core.net.toUri
 import androidx.room.*
+import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginOptions
 import com.github.shadowsocks.preference.DataStore
@@ -59,8 +60,9 @@ data class Profile(
         var password: String = "u1rRWTssNv0p",
         var method: String = "aes-256-cfb",
 
-        var route: String = "all",
+        var route: String = Acl.ALL,
         var remoteDns: String = "dns.google",
+        var localDohHostAddr: String = "223.5.5.5,120.53.53.53,223.6.6.6,1.12.12.12",
         var proxyApps: Boolean = false,
         var bypass: Boolean = false,
         var udpdns: Boolean = false,
@@ -197,6 +199,7 @@ data class Profile(
                     route = json["route"].optString ?: route
                     if (fallback) return@apply
                     remoteDns = json["remote_dns"].optString ?: remoteDns
+                    localDohHostAddr = json["localDohHostAddr"].optString ?: localDohHostAddr
                     ipv6 = json["ipv6"].optBoolean ?: ipv6
                     metered = json["metered"].optBoolean ?: metered
                     (json["proxy_apps"] as? JsonObject)?.also {
@@ -323,6 +326,7 @@ data class Profile(
         put("remarks", name)
         put("route", route)
         put("remote_dns", remoteDns)
+        put("localDohHostAddr", localDohHostAddr)
         put("ipv6", ipv6)
         put("metered", metered)
         put("proxy_apps", JSONObject().apply {
@@ -346,6 +350,7 @@ data class Profile(
         DataStore.privateStore.putString(Key.password, password)
         DataStore.privateStore.putString(Key.route, route)
         DataStore.privateStore.putString(Key.remoteDns, remoteDns)
+        DataStore.privateStore.putString(Key.localDohHostAddr, localDohHostAddr)
         DataStore.privateStore.putString(Key.method, method)
         DataStore.proxyApps = proxyApps
         DataStore.bypass = bypass
@@ -370,6 +375,7 @@ data class Profile(
         method = DataStore.privateStore.getString(Key.method) ?: ""
         route = DataStore.privateStore.getString(Key.route) ?: ""
         remoteDns = DataStore.privateStore.getString(Key.remoteDns) ?: ""
+        localDohHostAddr = DataStore.privateStore.getString(Key.localDohHostAddr) ?: ""
         proxyApps = DataStore.proxyApps
         bypass = DataStore.bypass
         udpdns = DataStore.privateStore.getBoolean(Key.udpdns, false)
