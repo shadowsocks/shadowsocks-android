@@ -4,7 +4,6 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     kotlin("android")
-    kotlin("kapt")
 }
 
 setupApp()

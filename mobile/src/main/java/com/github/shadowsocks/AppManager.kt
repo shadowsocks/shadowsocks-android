@@ -169,7 +169,7 @@ class AppManager : AppCompatActivity() {
         }
         override fun getFilter(): Filter = filterImpl
 
-        override fun getPopupText(position: Int) = filteredApps[position].name.firstOrNull()?.toString() ?: ""
+        override fun getPopupText(view: View, position: Int) = filteredApps[position].name.firstOrNull()?.toString() ?: ""
     }
 
     private val loading by lazy { findViewById<View>(R.id.loading) }

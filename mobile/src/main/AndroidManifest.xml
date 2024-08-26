@@ -99,11 +99,15 @@
                  android:exported="true"
                  android:directBootAware="true"
                  android:icon="@drawable/ic_service_active"
+                 android:foregroundServiceType="specialUse"
                  android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
                  tools:targetApi="n">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="tile" />
             <meta-data
                 android:name="android.service.quicksettings.TOGGLEABLE_TILE"
                 android:value="true" />

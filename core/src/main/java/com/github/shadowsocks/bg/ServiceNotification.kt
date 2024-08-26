@@ -26,6 +26,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.PowerManager
 import android.text.format.Formatter
@@ -115,7 +116,7 @@ class ServiceNotification(private val service: BaseService.Interface, profileNam
         }
     }
 
-    private fun show() = (service as Service).startForeground(1, builder.build())
+    private fun show() = ServiceCompat.startForeground(service as Service, 1, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
 
     fun destroy() {
         (service as Service).unregisterReceiver(this)

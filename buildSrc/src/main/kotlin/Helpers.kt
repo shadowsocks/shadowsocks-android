@@ -1,4 +1,3 @@
-
 import com.android.build.VariantOutput
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.gradle.AbstractAppExtension
@@ -15,7 +14,7 @@ import java.util.*
 const val lifecycleVersion = "2.5.1"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
-private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *>).lint
+private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *, *, *>).lint
 
 private val flavorRegex = "(assemble|generate)\\w*(Release|Debug)".toRegex()
 val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().let { task ->
@@ -26,11 +25,10 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 
 fun Project.setupCommon() {
     android.apply {
-        buildToolsVersion("33.0.1")
-        compileSdkVersion(33)
+        compileSdkVersion(34)
         defaultConfig {
             minSdk = 23
-            targetSdk = 33
+            targetSdk = 34
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
         val javaVersion = JavaVersion.VERSION_11
@@ -50,8 +48,8 @@ fun Project.setupCommon() {
 
     dependencies {
         add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test:runner:1.5.2")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.1")
+        add("androidTestImplementation", "androidx.test:runner:1.6.2")
+        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.6.1")
     }
 }
 
@@ -70,7 +68,7 @@ fun Project.setupCore() {
         }
         ndkVersion = "27.0.12077973"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.2")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.4")
 }
 
 private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)

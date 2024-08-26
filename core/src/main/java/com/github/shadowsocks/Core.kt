@@ -142,12 +142,13 @@ object Core : Configuration.Provider {
         updateNotificationChannels()
     }
 
-    override fun getWorkManagerConfiguration() = Configuration.Builder().apply {
-        setDefaultProcessName(app.packageName + ":bg")
-        setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.VERBOSE else Log.INFO)
-        setExecutor { GlobalScope.launch { it.run() } }
-        setTaskExecutor { GlobalScope.launch { it.run() } }
-    }.build()
+    override val workManagerConfiguration : Configuration
+        get() = Configuration.Builder().apply {
+            setDefaultProcessName(app.packageName + ":bg")
+            setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.VERBOSE else Log.INFO)
+            setExecutor { GlobalScope.launch { it.run() } }
+            setTaskExecutor { GlobalScope.launch { it.run() } }
+        }.build()
 
     fun updateNotificationChannels() {
         if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {

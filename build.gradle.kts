@@ -1,7 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 plugins {
-    id("com.github.ben-manes.versions") version "0.45.0"
+    id("com.github.ben-manes.versions") version "0.51.0"
+    id("com.google.devtools.ksp") version "2.0.10-1.0.24" apply false
 }
 
 buildscript {
@@ -22,7 +23,7 @@ buildscript {
         classpath("com.google.gms:google-services:4.3.15")
         classpath("com.vanniktech:gradle-maven-publish-plugin:0.24.0")
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.7.20")
-        classpath("org.mozilla.rust-android-gradle:plugin:0.9.3")
+        classpath("org.mozilla.rust-android-gradle:plugin:0.9.4")
     }
 }
 
@@ -31,7 +32,7 @@ allprojects {
 }
 
 tasks.register<Delete>("clean") {
-    delete(rootProject.buildDir)
+    delete(rootProject.layout.buildDirectory)
 }
 
 // skip uploading the mapping to Crashlytics
