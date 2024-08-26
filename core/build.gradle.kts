@@ -98,7 +98,7 @@ dependencies {
     api("androidx.work:work-multiprocess:$workVersion")
     api("androidx.work:work-runtime-ktx:$workVersion")
     api("com.google.android.gms:play-services-oss-licenses:17.0.0")
-    api("com.google.code.gson:gson:2.11.1")
+    api("com.google.code.gson:gson:2.11.0")
     api("com.google.firebase:firebase-analytics-ktx:22.1.0")
     api("com.google.firebase:firebase-crashlytics:19.0.3")
     api("com.jakewharton.timber:timber:5.0.1")
