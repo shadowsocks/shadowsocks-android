@@ -79,9 +79,16 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         network.bindSocket(fd)
                         return@let true
                     } catch (e: IOException) {
-                        when ((e.cause as? ErrnoException)?.errno) {
-                            OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
-                            else -> Timber.w(e)
+                        if (Build.VERSION.SDK_INT >= 31) {
+                            when ((e.cause as? ErrnoException)?.errno) {
+                                OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
+                                else -> Timber.w(e)
+                            }
+                        } else {
+                            when ((e.cause as? ErrnoException)?.errno) {
+                                OsConstants.EPERM, OsConstants.EACCES -> Timber.d(e)
+                                else -> Timber.w(e)
+                            }
                         }
                         return@let false
                     }
