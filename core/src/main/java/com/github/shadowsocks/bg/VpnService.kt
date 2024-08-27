@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -79,16 +80,9 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         network.bindSocket(fd)
                         return@let true
                     } catch (e: IOException) {
-                        if (Build.VERSION.SDK_INT >= 31) {
-                            when ((e.cause as? ErrnoException)?.errno) {
-                                OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
-                                else -> Timber.w(e)
-                            }
-                        } else {
-                            when ((e.cause as? ErrnoException)?.errno) {
-                                OsConstants.EPERM, OsConstants.EACCES -> Timber.d(e)
-                                else -> Timber.w(e)
-                            }
+                        when ((e.cause as? ErrnoException)?.errno) {
+                            OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
+                            else -> Timber.w(e)
                         }
                         return@let false
                     }

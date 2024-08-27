@@ -1,9 +1,9 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 
 plugins {
-    id("org.mozilla.rust-android-gradle.rust-android")
     id("com.android.library")
     id("com.google.devtools.ksp")
+    id("org.mozilla.rust-android-gradle.rust-android")
     kotlin("android")
     id("kotlin-parcelize")
 }
@@ -32,6 +32,8 @@ android {
     sourceSets.getByName("androidTest") {
         assets.setSrcDirs(assets.srcDirs + files("$projectDir/schemas"))
     }
+
+    buildFeatures.aidl = true
 }
 
 cargo {
@@ -84,7 +86,7 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.6.4"
+    val coroutinesVersion = "1.8.1"
     val roomVersion = "2.6.1"
     val workVersion = "2.9.1"
 
@@ -97,7 +99,7 @@ dependencies {
     api("androidx.room:room-runtime:$roomVersion")
     api("androidx.work:work-multiprocess:$workVersion")
     api("androidx.work:work-runtime-ktx:$workVersion")
-    api("com.google.android.gms:play-services-oss-licenses:17.0.0")
+    api("com.google.android.gms:play-services-oss-licenses:17.1.0")
     api("com.google.code.gson:gson:2.11.0")
     api("com.google.firebase:firebase-analytics-ktx:22.1.0")
     api("com.google.firebase:firebase-crashlytics:19.0.3")
