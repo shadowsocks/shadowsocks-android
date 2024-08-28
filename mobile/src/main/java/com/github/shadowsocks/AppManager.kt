@@ -33,7 +33,13 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.SparseBooleanArray
 import android.view.*
-import android.widget.*
+import android.widget.Filter
+import android.widget.Filterable
+import android.widget.ImageView
+import android.widget.RadioGroup
+import android.widget.SearchView
+import android.widget.Switch
+import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -54,6 +60,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import me.zhanghai.android.fastscroll.PopupTextProvider
@@ -169,7 +176,7 @@ class AppManager : AppCompatActivity() {
         }
         override fun getFilter(): Filter = filterImpl
 
-        override fun getPopupText(position: Int) = filteredApps[position].name.firstOrNull()?.toString() ?: ""
+        override fun getPopupText(view: View, position: Int) = filteredApps[position].name.firstOrNull()?.toString() ?: ""
     }
 
     private val loading by lazy { findViewById<View>(R.id.loading) }
@@ -208,7 +215,7 @@ class AppManager : AppCompatActivity() {
     @UiThread
     private fun loadApps() {
         loader?.cancel()
-        loader = lifecycleScope.launchWhenCreated {
+        loader = lifecycleScope.launch {
             loading.crossFadeFrom(list)
             val adapter = list.adapter as AppsAdapter
             withContext(Dispatchers.IO) { adapter.reload() }

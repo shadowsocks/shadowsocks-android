@@ -51,6 +51,7 @@ class UrlImportActivity : AppCompatActivity() {
         }
 
         override fun onDismiss(dialog: DialogInterface) {
+            super.onDismiss(dialog)
             requireActivity().finish()
         }
     }

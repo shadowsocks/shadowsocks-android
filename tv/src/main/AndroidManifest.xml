@@ -11,6 +11,7 @@
 
     <application
         android:name=".App"
+        android:localeConfig="@xml/locales_config"
         android:theme="@style/Theme.Shadowsocks.TV"
         tools:ignore="MissingTvBanner"
         tools:replace="theme">

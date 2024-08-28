@@ -28,28 +28,47 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.component1
 import androidx.activity.result.component2
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenCreated
-import androidx.preference.*
+import androidx.preference.EditTextPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceDataStore
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreference
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
-import com.github.shadowsocks.plugin.*
+import com.github.shadowsocks.plugin.NoPlugin
+import com.github.shadowsocks.plugin.PluginConfiguration
+import com.github.shadowsocks.plugin.PluginContract
+import com.github.shadowsocks.plugin.PluginManager
+import com.github.shadowsocks.plugin.PluginOptions
 import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
 import com.github.shadowsocks.plugin.fragment.Empty
 import com.github.shadowsocks.plugin.fragment.showAllowingStateLoss
-import com.github.shadowsocks.preference.*
-import com.github.shadowsocks.utils.*
+import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.preference.EditTextPreferenceModifiers
+import com.github.shadowsocks.preference.OnPreferenceDataStoreChangeListener
+import com.github.shadowsocks.preference.PluginConfigurationDialogFragment
+import com.github.shadowsocks.preference.PluginPreference
+import com.github.shadowsocks.preference.PluginPreferenceDialogFragment
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.DirectBoot
+import com.github.shadowsocks.utils.Key
+import com.github.shadowsocks.utils.listenForPackageChanges
+import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.remove
 import com.github.shadowsocks.widget.ListListener
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -93,6 +112,24 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             activity.finish()
             return
         }
+        activity.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) =
+                menuInflater.inflate(R.menu.profile_config_menu, menu)
+            override fun onMenuItemSelected(item: MenuItem) = when (item.itemId) {
+                R.id.action_delete -> {
+                    DeleteConfirmationDialogFragment().apply {
+                        arg(ProfileIdArg(profileId))
+                        key()
+                    }.show(parentFragmentManager, null)
+                    true
+                }
+                R.id.action_apply -> {
+                    saveAndExit()
+                    true
+                }
+                else -> false
+            }
+        }, this)
         addPreferencesFromResource(R.xml.pref_profile)
         findPreference<EditTextPreference>(Key.remotePort)!!.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         findPreference<EditTextPreference>(Key.password)!!.summaryProvider = PasswordSummaryProvider
@@ -185,9 +222,8 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
     override fun onAttach(context: Context) {
         super.onAttach(context)
         receiver = context.listenForPackageChanges(false) {
-            lifecycleScope.launch(Dispatchers.Main) {   // wait until changes were flushed
-                whenCreated { initPlugins() }
-            }
+            // wait until changes were flushed
+            lifecycleScope.launch { initPlugins() }
         }
     }
 
@@ -242,21 +278,6 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
             }
             PluginContract.RESULT_FALLBACK -> showPluginEditor()
         }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.action_delete -> {
-            DeleteConfirmationDialogFragment().apply {
-                arg(ProfileIdArg(profileId))
-                key()
-            }.show(parentFragmentManager, null)
-            true
-        }
-        R.id.action_apply -> {
-            saveAndExit()
-            true
-        }
-        else -> false
     }
 
     override fun onDetach() {

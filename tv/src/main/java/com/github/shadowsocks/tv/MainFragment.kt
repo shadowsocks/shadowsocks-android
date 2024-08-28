@@ -50,7 +50,7 @@ class MainFragment : LeanbackSettingsFragmentCompat() {
             }
             return true
         }
-        if (pref is ListPreference && pref !is MultiSelectListPreference) {
+        if (pref is ListPreference) {
             startPreferenceFragment(LeanbackSingleListPreferenceDialogFragment().apply {
                 arguments = bundleOf(Pair(LeanbackPreferenceDialogFragmentCompat.ARG_KEY, pref.key))
                 setTargetFragment(caller, 0)

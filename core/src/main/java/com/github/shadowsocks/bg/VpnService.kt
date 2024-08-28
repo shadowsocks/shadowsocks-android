@@ -20,6 +20,7 @@
 
 package com.github.shadowsocks.bg
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -79,6 +80,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         network.bindSocket(fd)
                         return@let true
                     } catch (e: IOException) {
+                        @SuppressLint("NewApi")
                         when ((e.cause as? ErrnoException)?.errno) {
                             OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
                             else -> Timber.w(e)
@@ -159,7 +161,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
 
     override val isVpnService get() = true
 
-    private suspend fun startVpn(): FileDescriptor {
+    private fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
                 .setConfigureIntent(Core.configureIntent(this))

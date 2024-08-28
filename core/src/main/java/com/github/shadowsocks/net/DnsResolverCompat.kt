@@ -26,14 +26,26 @@ import android.net.Network
 import android.os.Build
 import android.os.CancellationSignal
 import com.github.shadowsocks.Core
-import kotlinx.coroutines.*
-import org.xbill.DNS.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import org.xbill.DNS.AAAARecord
+import org.xbill.DNS.ARecord
+import org.xbill.DNS.DClass
+import org.xbill.DNS.Flags
+import org.xbill.DNS.Message
+import org.xbill.DNS.Name
+import org.xbill.DNS.Opcode
+import org.xbill.DNS.PTRRecord
+import org.xbill.DNS.ReverseMap
+import org.xbill.DNS.Section
+import org.xbill.DNS.Type
 import java.io.IOException
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -73,15 +85,14 @@ sealed class DnsResolverCompat {
     abstract suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray
     abstract suspend fun resolveRawOnActiveNetwork(query: ByteArray): ByteArray
 
-    private object DnsResolverCompat23 : DnsResolverCompat() {
+    private data object DnsResolverCompat23 : DnsResolverCompat() {
         /**
          * This dispatcher is used for noncancellable possibly-forever-blocking operations in network IO.
          *
          * See also: https://issuetracker.google.com/issues/133874590
          */
         private val unboundedIO by lazy {
-            if (Core.activity.isLowRamDevice) Dispatchers.IO
-            else Executors.newCachedThreadPool().asCoroutineDispatcher()
+            if (Core.activity.isLowRamDevice) Dispatchers.IO else Dispatchers.IO.limitedParallelism(Int.MAX_VALUE)
         }
 
         override suspend fun resolve(network: Network, host: String) =

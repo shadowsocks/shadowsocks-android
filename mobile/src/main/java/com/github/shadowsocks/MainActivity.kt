@@ -54,9 +54,8 @@ import com.github.shadowsocks.widget.StatsBar
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.analytics.logEvent
 import com.google.firebase.ktx.Firebase
-import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPreferenceDataStoreChangeListener,
         NavigationView.OnNavigationItemSelectedListener {
@@ -121,7 +120,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
-        BaseService.State.values()[service.state]
+        BaseService.State.entries[service.state]
     } catch (_: RemoteException) {
         BaseService.State.Idle
     })
