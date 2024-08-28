@@ -89,7 +89,7 @@ object Commandline {
      * An empty or null toProcess parameter results in a zero sized array.
      */
     fun translateCommandline(toProcess: String?): Array<String> {
-        if (toProcess == null || toProcess.isEmpty()) {
+        if (toProcess.isNullOrEmpty()) {
             //no command? no string
             return arrayOf()
         }

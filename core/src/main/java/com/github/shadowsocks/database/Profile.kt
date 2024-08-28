@@ -199,10 +199,10 @@ data class Profile(
                     remoteDns = json["remote_dns"].optString ?: remoteDns
                     ipv6 = json["ipv6"].optBoolean ?: ipv6
                     metered = json["metered"].optBoolean ?: metered
-                    (json["proxy_apps"] as? JsonObject)?.also {
-                        proxyApps = it["enabled"].optBoolean ?: proxyApps
-                        bypass = it["bypass"].optBoolean ?: bypass
-                        individual = (it["android_list"] as? JsonArray)?.asIterable()?.mapNotNull { it.optString }
+                    (json["proxy_apps"] as? JsonObject)?.also { obj ->
+                        proxyApps = obj["enabled"].optBoolean ?: proxyApps
+                        bypass = obj["bypass"].optBoolean ?: bypass
+                        individual = (obj["android_list"] as? JsonArray)?.asIterable()?.mapNotNull { it.optString }
                                 ?.joinToString("\n") ?: individual
                     }
                     udpdns = json["udpdns"].optBoolean ?: udpdns

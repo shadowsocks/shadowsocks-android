@@ -47,10 +47,10 @@ class HttpsTest : ViewModel() {
         protected abstract val status: CharSequence
         open fun retrieve(setStatus: (CharSequence) -> Unit, errorCallback: (String) -> Unit) = setStatus(status)
 
-        object Idle : Status() {
+        data object Idle : Status() {
             override val status get() = app.getText(R.string.vpn_connected)
         }
-        object Testing : Status() {
+        data object Testing : Status() {
             override val status get() = app.getText(R.string.connection_test_testing)
         }
         class Success(private val elapsed: Long) : Status() {

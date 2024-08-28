@@ -161,7 +161,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
 
     override val isVpnService get() = true
 
-    private suspend fun startVpn(): FileDescriptor {
+    private fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
                 .setConfigureIntent(Core.configureIntent(this))

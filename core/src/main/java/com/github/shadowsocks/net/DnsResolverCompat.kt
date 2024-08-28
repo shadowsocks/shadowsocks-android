@@ -73,7 +73,7 @@ sealed class DnsResolverCompat {
     abstract suspend fun resolveRaw(network: Network, query: ByteArray): ByteArray
     abstract suspend fun resolveRawOnActiveNetwork(query: ByteArray): ByteArray
 
-    private object DnsResolverCompat23 : DnsResolverCompat() {
+    private data object DnsResolverCompat23 : DnsResolverCompat() {
         /**
          * This dispatcher is used for noncancellable possibly-forever-blocking operations in network IO.
          *
