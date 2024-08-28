@@ -32,6 +32,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.getSystemService
@@ -97,7 +99,11 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
             val selector = if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)) {
                 CameraSelector.DEFAULT_BACK_CAMERA
             } else CameraSelector.DEFAULT_FRONT_CAMERA
-            val preview = Preview.Builder().build()
+            val preview = Preview.Builder().apply {
+                setResolutionSelector(ResolutionSelector.Builder().apply {
+                    setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                }.build())
+            }.build()
             preview.setSurfaceProvider(findViewById<PreviewView>(R.id.barcode).surfaceProvider)
             try {
                 cameraProvider.bindToLifecycle(this@ScannerActivity, selector, preview, imageAnalysis)
