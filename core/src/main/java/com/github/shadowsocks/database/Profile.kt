@@ -92,7 +92,7 @@ data class Profile(
         companion object {
             @JvmStatic
             @TypeConverter
-            fun of(value: Int) = values().single { it.persistedValue == value }
+            fun of(value: Int) = entries.single { it.persistedValue == value }
             @JvmStatic
             @TypeConverter
             fun toInt(status: SubscriptionStatus) = status.persistedValue

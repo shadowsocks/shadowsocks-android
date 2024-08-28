@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
-        BaseService.State.values()[service.state]
+        BaseService.State.entries[service.state]
     } catch (_: RemoteException) {
         BaseService.State.Idle
     })
