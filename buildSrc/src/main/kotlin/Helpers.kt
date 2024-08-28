@@ -5,7 +5,9 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import java.util.Locale
 
 const val lifecycleVersion = "2.8.4"
@@ -21,6 +23,7 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 }
 
 fun Project.setupCommon() {
+    val javaVersion = JavaVersion.VERSION_11
     android.apply {
         compileSdkVersion(34)
         defaultConfig {
@@ -28,7 +31,6 @@ fun Project.setupCommon() {
             targetSdk = 34
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
-        val javaVersion = JavaVersion.VERSION_11
         compileOptions {
             sourceCompatibility = javaVersion
             targetCompatibility = javaVersion
@@ -39,9 +41,9 @@ fun Project.setupCommon() {
             informational += "MissingQuantity"
             informational += "MissingTranslation"
         }
-        (this as ExtensionAware).extensions.getByName<KotlinJvmOptions>("kotlinOptions").jvmTarget =
-                javaVersion.toString()
     }
+    extensions.getByName<KotlinAndroidProjectExtension>("kotlin").compilerOptions.jvmTarget
+        .set(JvmTarget.fromTarget(javaVersion.toString()))
 
     dependencies {
         add("testImplementation", "junit:junit:4.13.2")

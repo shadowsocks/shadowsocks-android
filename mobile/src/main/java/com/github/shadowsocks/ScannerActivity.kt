@@ -65,15 +65,15 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
     @ExperimentalGetImage
     override fun analyze(image: ImageProxy) {
         val mediaImage = image.image ?: return
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launch {
             val result = try {
                 process { InputImage.fromMediaImage(mediaImage, image.imageInfo.rotationDegrees) }.also {
                     if (it) imageAnalysis.clearAnalyzer()
                 }
             } catch (_: CancellationException) {
-                return@launchWhenCreated
+                return@launch
             } catch (e: Exception) {
-                return@launchWhenCreated Timber.w(e)
+                return@launch Timber.w(e)
             } finally {
                 image.close()
             }
@@ -92,7 +92,7 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
         requestCamera.launch(Manifest.permission.CAMERA)
     }
     private val requestCamera = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) lifecycleScope.launchWhenCreated {
+        if (granted) lifecycleScope.launch {
             val cameraProvider = ProcessCameraProvider.getInstance(this@ScannerActivity).await()
             val selector = if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)) {
                 CameraSelector.DEFAULT_BACK_CAMERA

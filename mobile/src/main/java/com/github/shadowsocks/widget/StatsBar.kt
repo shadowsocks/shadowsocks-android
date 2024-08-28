@@ -29,13 +29,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStarted
+import androidx.lifecycle.withStarted
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
@@ -76,8 +75,8 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     fun changeState(state: BaseService.State, animate: Boolean) {
         val activity = context as MainActivity
-        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch(Dispatchers.Main) {
-            activity.whenStarted { what() }
+        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch {
+            activity.withStarted { what() }
         }
         if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
             postWhenStarted { performShow(animate) }
