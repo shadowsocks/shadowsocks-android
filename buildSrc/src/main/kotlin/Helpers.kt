@@ -23,10 +23,10 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 fun Project.setupCommon() {
     val javaVersion = JavaVersion.VERSION_11
     android.apply {
-        compileSdkVersion(34)
+        compileSdkVersion(35)
         defaultConfig {
             minSdk = 23
-            targetSdk = 34
+            targetSdk = 35
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
         compileOptions {
@@ -63,7 +63,6 @@ fun Project.setupCore() {
             warning += "RestrictedApi"
             disable += "UseAppTint"
         }
-        ndkVersion = "27.0.12077973"
         buildFeatures.buildConfig = true
     }
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.1")

@@ -28,6 +28,7 @@ android {
     }
 
     externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
+    ndkVersion = "27.0.12077973"
 
     sourceSets.getByName("androidTest") {
         assets.setSrcDirs(assets.srcDirs + files("$projectDir/schemas"))
@@ -66,6 +67,8 @@ cargo {
                     throw GradleException("No any python version detected. You should install the python first to compile project.")
                 }
             }
+            // https://developer.android.com/guide/practices/page-sizes#other-build-systems
+            spec.environment("RUST_ANDROID_GRADLE_CC_LINK_ARG", "-Wl,-z,max-page-size=16384,-soname,lib$libname.so")
             spec.environment("RUST_ANDROID_GRADLE_LINKER_WRAPPER_PY", "$projectDir/$module/../linker-wrapper.py")
             spec.environment("RUST_ANDROID_GRADLE_TARGET", "target/${toolchain.target}/$profile/lib$libname.so")
         }

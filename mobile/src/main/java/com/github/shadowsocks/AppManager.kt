@@ -139,7 +139,7 @@ class AppManager : AppCompatActivity() {
         suspend fun reload() {
             apps = getCachedApps(packageManager).map { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
-                ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
+                ProxiedApp(packageManager, packageInfo.applicationInfo!!, packageName)
             }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
         }
 
@@ -207,7 +207,7 @@ class AppManager : AppCompatActivity() {
     private fun initProxiedUids(str: String = DataStore.individual) {
         proxiedUids.clear()
         val apps = getCachedApps(packageManager)
-        for (line in str.lineSequence()) proxiedUids[(apps[line] ?: continue).applicationInfo.uid] = true
+        for (line in str.lineSequence()) proxiedUids[(apps[line] ?: continue).applicationInfo!!.uid] = true
     }
 
     private fun isProxiedApp(app: ProxiedApp) = proxiedUids[app.uid]
