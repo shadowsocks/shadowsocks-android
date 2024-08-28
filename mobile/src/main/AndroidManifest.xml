@@ -15,6 +15,7 @@
 
     <application
         android:name=".App"
+        android:localeConfig="@xml/locales_config"
         tools:ignore="MissingTvBanner">
 
         <activity
