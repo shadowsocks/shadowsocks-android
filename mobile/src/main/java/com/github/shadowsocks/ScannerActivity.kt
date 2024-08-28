@@ -47,15 +47,17 @@ import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
-class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
+class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer, ZoomSuggestionOptions.ZoomCallback {
     private val scanner = BarcodeScanning.getClient(BarcodeScannerOptions.Builder().apply {
         setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+        setZoomSuggestionOptions(ZoomSuggestionOptions.Builder(this@ScannerActivity).build())
     }.build())
     private val imageAnalysis by lazy {
         ImageAnalysis.Builder().apply {
@@ -63,6 +65,7 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
             setBackgroundExecutor(Dispatchers.Default.asExecutor())
         }.build().also { it.setAnalyzer(Dispatchers.Main.immediate.asExecutor(), this) }
     }
+    private var camera: Camera? = null
 
     @ExperimentalGetImage
     override fun analyze(image: ImageProxy) {
@@ -106,12 +109,18 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
             }.build()
             preview.setSurfaceProvider(findViewById<PreviewView>(R.id.barcode).surfaceProvider)
             try {
-                cameraProvider.bindToLifecycle(this@ScannerActivity, selector, preview, imageAnalysis)
+                camera = cameraProvider.bindToLifecycle(this@ScannerActivity, selector, preview, imageAnalysis)
             } catch (e: IllegalArgumentException) {
                 Timber.d(e)
                 startImport()
             }
         } else permissionMissing()
+    }
+
+    override fun setZoom(ratio: Float): Boolean {
+        val camera = camera ?: return false
+        camera.cameraControl.setZoomRatio(ratio)
+        return true
     }
 
     private suspend inline fun process(feature: Profile? = Core.currentProfile?.main,
