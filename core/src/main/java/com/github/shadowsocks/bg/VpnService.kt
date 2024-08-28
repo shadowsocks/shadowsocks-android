@@ -80,6 +80,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         network.bindSocket(fd)
                         return@let true
                     } catch (e: IOException) {
+                        @SuppressLint("NewApi")
                         when ((e.cause as? ErrnoException)?.errno) {
                             OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
                             else -> Timber.w(e)
