@@ -21,7 +21,6 @@
 package com.github.shadowsocks.bg
 
 import android.annotation.SuppressLint
-import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.LocalSocket
@@ -33,7 +32,6 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.ConcurrentLocalSocketListener
@@ -41,7 +39,6 @@ import com.github.shadowsocks.net.DefaultNetworkListener
 import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.int
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -136,15 +133,8 @@ class VpnService : BaseVpnService(), BaseService.Interface {
         conn = null
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (DataStore.serviceMode == Key.modeVpn) {
-            if (prepare(this) != null) {
-                startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } else return super<BaseService.Interface>.onStartCommand(intent, flags, startId)
-        }
-        stopRunner()
-        return Service.START_NOT_STICKY
-    }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
+        super<BaseService.Interface>.onStartCommand(intent, flags, startId)
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
     override suspend fun rawResolver(query: ByteArray) =

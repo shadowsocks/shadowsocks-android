@@ -66,7 +66,7 @@ fun Project.setupCore() {
         ndkVersion = "27.0.12077973"
         buildFeatures.buildConfig = true
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.0")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.1")
 }
 
 fun Project.setupApp() {
