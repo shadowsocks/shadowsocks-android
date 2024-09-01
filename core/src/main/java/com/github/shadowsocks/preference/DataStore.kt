@@ -104,6 +104,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var udpFallback: Long?
         get() = privateStore.getLong(Key.udpFallback)
         set(value) = privateStore.putLong(Key.udpFallback, value)
+    var optimizeBuffers: Boolean
+        get() = privateStore.getBoolean(Key.optimizeBuffers) ?: true
+        set(value) = privateStore.putBoolean(Key.optimizeBuffers, value)
     var dirty: Boolean
         get() = privateStore.getBoolean(Key.dirty) ?: false
         set(value) = privateStore.putBoolean(Key.dirty, value)
