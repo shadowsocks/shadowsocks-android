@@ -40,7 +40,6 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
     <string name="enc_method">"Método de Cifrado"</string>
 
     <!-- feature category -->
-    <string name="optimize_buffers">Optimizar buffers TCP</string>
     <string name="ipv6">"Ruta IPv6"</string>
     <string name="ipv6_summary">"Redireccionar tráfico IPv6 a ruta"</string>
     <string name="route_list">"Ruta"</string>
@@ -55,7 +54,6 @@ Recibido: \t%4$s\t↓\t%2$s"</string>
 
     <!-- Fuzzy -->
     <string name="auto_connect_summary">"Activar Shadowsocks al iniciar"</string>
-    <string name="optimize_buffers_summary">Corregir el error de tiempo de espera de carga debido a bufferbloat</string>
     <string name="tcp_fastopen_summary_unsupported">"Versión del Núcleo sin soporte: %s &lt; 3.7.1"</string>
     <string name="udp_dns">"Enviar DNS sobre UDP"</string>
 

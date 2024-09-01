@@ -41,7 +41,6 @@
     <string name="enc_method">"روش رمزگذاری"</string>
 
     <!-- feature category -->
-    <string name="optimize_buffers">بهینه‌سازی بافرهای TCP</string>
     <string name="ipv6">"مسیر IPv6"</string>
     <string name="ipv6_summary">"ترافیک IPv6 را به سرور هدایت کن"</string>
     <string name="route_list">"مسیر"</string>
@@ -53,7 +52,6 @@
     <string name="bypass_apps_summary">"این گزینه را فعال کنید تا اپلیکیشن‌های انتخاب شده از VPN استفاده نکنند"</string>
     <string name="auto_connect">"وصل‌شدن اتوماتیک"</string>
     <string name="auto_connect_summary">"فعال‌شدن شدوساکس لحظه روشن‌شدن گوشی بروزرسانی شود اگر از قبل درحال اجرا بوده است"</string>
-    <string name="optimize_buffers_summary">رفع مشکل تایم اوت آپلود به دلیل بافرهای بزرگ</string>
     <string name="tcp_fastopen_summary">"تغییر وضعیت ممکن است به مجوز ROOT نیاز داشته باشد"</string>
     <string name="tcp_fastopen_summary_unsupported">"نسخه هسته پشتیبانی نشده: %s &lt;3.7.1"</string>
     <string name="udp_dns">"ارسال DNS از طریق UDP"</string>

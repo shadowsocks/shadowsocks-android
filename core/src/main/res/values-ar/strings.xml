@@ -34,6 +34,4 @@
     <string name="remote_port">"المنفذ"</string>
     <string name="sitekey">"كلمة المرور"</string>
     <string name="enc_method">"طريقة التشفير"</string>
-    <string name="optimize_buffers">حسِن مخازن الذاكرة ل TCP</string>
-    <string name="optimize_buffers_summary">يعالج مشكلة نفاذ الوقت اثناء الرفع نتيجة تضخم مخازن الذاكرة</string>
 </resources>

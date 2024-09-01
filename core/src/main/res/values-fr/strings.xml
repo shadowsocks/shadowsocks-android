@@ -40,7 +40,6 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="enc_method">"Méthode d'Encryption"</string>
 
     <!-- feature category -->
-    <string name="optimize_buffers">Optimiser les tampons TCP</string>
     <string name="ipv6">"Route IPv6"</string>
     <string name="ipv6_summary">"Rediriger le trafic IPv6 vers le serveur distant"</string>
     <string name="route_list">"Route"</string>
@@ -58,7 +57,6 @@ Reçu : \t\t\t%4$s\t↓\t%2$s"</string>
     <string name="auto_connect_summary">"Activer Shadowsocks au démarrage"</string>
 
     <!-- Fuzzy -->
-    <string name="optimize_buffers_summary">Résoudre le problème de délai d\'envoi lié au bufferbloat</string>
     <string name="tcp_fastopen_summary">"Activer nécessite la permission ROOT"</string>
     <string name="tcp_fastopen_summary_unsupported">"Version du noyau non supportée : %s &lt;3.7.1"</string>
 
