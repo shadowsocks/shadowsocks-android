@@ -55,7 +55,7 @@ class QuickToggleShortcut : Activity(), ShadowsocksConnection.Callback {
     }
 
     override fun onServiceConnected(service: IShadowsocksService) {
-        val state = BaseService.State.values()[service.state]
+        val state = BaseService.State.entries[service.state]
         when {
             state.canStop -> Core.stopService()
             state == BaseService.State.Stopped -> Core.startService()

@@ -1,39 +1,34 @@
-
-import com.android.build.VariantOutput
 import com.android.build.api.dsl.CommonExtension
-import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
-import java.util.*
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import java.util.Locale
 
-const val lifecycleVersion = "2.5.1"
+const val lifecycleVersion = "2.8.4"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
-private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *>).lint
+private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *, *, *>).lint
 
 private val flavorRegex = "(assemble|generate)\\w*(Release|Debug)".toRegex()
 val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().let { task ->
-    flavorRegex.find(task)?.groupValues?.get(2)?.toLowerCase(Locale.ROOT) ?: "debug".also {
+    flavorRegex.find(task)?.groupValues?.get(2)?.lowercase(Locale.ROOT) ?: "debug".also {
         println("Warning: No match found for $task")
     }
 }
 
 fun Project.setupCommon() {
+    val javaVersion = JavaVersion.VERSION_11
     android.apply {
-        buildToolsVersion("33.0.1")
-        compileSdkVersion(33)
+        compileSdkVersion(35)
         defaultConfig {
             minSdk = 23
-            targetSdk = 33
+            targetSdk = 35
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
-        val javaVersion = JavaVersion.VERSION_11
         compileOptions {
             sourceCompatibility = javaVersion
             targetCompatibility = javaVersion
@@ -44,14 +39,14 @@ fun Project.setupCommon() {
             informational += "MissingQuantity"
             informational += "MissingTranslation"
         }
-        (this as ExtensionAware).extensions.getByName<KotlinJvmOptions>("kotlinOptions").jvmTarget =
-                javaVersion.toString()
     }
+    extensions.getByName<KotlinAndroidProjectExtension>("kotlin").compilerOptions.jvmTarget
+        .set(JvmTarget.fromTarget(javaVersion.toString()))
 
     dependencies {
         add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test:runner:1.5.2")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.5.1")
+        add("androidTestImplementation", "androidx.test:runner:1.6.2")
+        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.6.1")
     }
 }
 
@@ -68,12 +63,12 @@ fun Project.setupCore() {
             warning += "RestrictedApi"
             disable += "UseAppTint"
         }
-        ndkVersion = "25.1.8937393"
+        buildFeatures.buildConfig = true
+        ndkVersion = "27.0.12077973"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.0.2")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.1")
 }
 
-private val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
 fun Project.setupApp() {
     setupCore()
 
@@ -111,12 +106,4 @@ fun Project.setupApp() {
     }
 
     dependencies.add("implementation", project(":core"))
-
-    if (currentFlavor == "release") (android as AbstractAppExtension).applicationVariants.all {
-        for (output in outputs) {
-            abiCodes[(output as ApkVariantOutputImpl).getFilter(VariantOutput.ABI)]?.let { offset ->
-                output.versionCodeOverride = versionCode + offset
-            }
-        }
-    }
 }

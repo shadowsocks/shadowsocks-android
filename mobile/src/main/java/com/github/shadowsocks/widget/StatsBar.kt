@@ -28,15 +28,12 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.widget.TooltipCompat
 import androidx.coordinatorlayout.widget.CoordinatorLayout
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStarted
+import androidx.core.view.doOnPreDraw
 import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.net.HttpsTest
 import com.google.android.material.bottomappbar.BottomAppBar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
                                          defStyleAttr: Int = R.attr.bottomAppBarStyle) :
@@ -76,14 +73,11 @@ class StatsBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? 
 
     fun changeState(state: BaseService.State, animate: Boolean) {
         val activity = context as MainActivity
-        fun postWhenStarted(what: () -> Unit) = activity.lifecycleScope.launch(Dispatchers.Main) {
-            activity.whenStarted { what() }
-        }
         if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
-            postWhenStarted { performShow(animate) }
+            doOnPreDraw { performShow(animate) }
             tester.status.observe(activity) { it.retrieve(this::setStatus) { msg -> activity.snackbar(msg).show() } }
         } else {
-            postWhenStarted { performHide(animate) }
+            doOnPreDraw { performHide(animate) }
             updateTraffic(0, 0, 0, 0)
             tester.status.removeObservers(activity)
             if (state != BaseService.State.Idle) tester.invalidate()

@@ -31,16 +31,17 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withStarted
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.github.shadowsocks.R
 import com.github.shadowsocks.bg.BaseService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.BaseProgressIndicator
-import com.google.android.material.progressindicator.DeterminateDrawable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import java.util.*
+import kotlinx.coroutines.launch
+import java.util.ArrayDeque
 
 class ServiceButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
         FloatingActionButton(context, attrs, defStyleAttr), DynamicAnimation.OnAnimationEndListener {
@@ -74,10 +75,12 @@ class ServiceButton @JvmOverloads constructor(context: Context, attrs: Attribute
     private val iconConnecting by lazy {
         AnimatedState(R.drawable.ic_service_connecting) {
             hideProgress()
-            delayedAnimation = (context as LifecycleOwner).lifecycleScope.launchWhenStarted {
+            delayedAnimation = (context as LifecycleOwner).lifecycleScope.launch {
                 delay(context.resources.getInteger(android.R.integer.config_mediumAnimTime) + 1000L)
-                isIndeterminate = true
-                show()
+                context.lifecycle.withStarted {
+                    isIndeterminate = true
+                    show()
+                }
             }
         }
     }

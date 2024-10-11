@@ -20,7 +20,7 @@
 
 package com.github.shadowsocks.bg
 
-import android.app.Service
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.LocalSocket
@@ -32,7 +32,6 @@ import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
 import com.github.shadowsocks.Core
-import com.github.shadowsocks.VpnRequestActivity
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.net.ConcurrentLocalSocketListener
@@ -40,7 +39,6 @@ import com.github.shadowsocks.net.DefaultNetworkListener
 import com.github.shadowsocks.net.DnsResolverCompat
 import com.github.shadowsocks.net.Subnet
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.int
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -79,6 +77,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                         network.bindSocket(fd)
                         return@let true
                     } catch (e: IOException) {
+                        @SuppressLint("NewApi")
                         when ((e.cause as? ErrnoException)?.errno) {
                             OsConstants.EPERM, OsConstants.EACCES, OsConstants.ENONET -> Timber.d(e)
                             else -> Timber.w(e)
@@ -134,15 +133,8 @@ class VpnService : BaseVpnService(), BaseService.Interface {
         conn = null
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (DataStore.serviceMode == Key.modeVpn) {
-            if (prepare(this) != null) {
-                startActivity(Intent(this, VpnRequestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            } else return super<BaseService.Interface>.onStartCommand(intent, flags, startId)
-        }
-        stopRunner()
-        return Service.START_NOT_STICKY
-    }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
+        super<BaseService.Interface>.onStartCommand(intent, flags, startId)
 
     override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
     override suspend fun rawResolver(query: ByteArray) =
@@ -159,7 +151,7 @@ class VpnService : BaseVpnService(), BaseService.Interface {
 
     override val isVpnService get() = true
 
-    private suspend fun startVpn(): FileDescriptor {
+    private fun startVpn(): FileDescriptor {
         val profile = data.proxy!!.profile
         val builder = Builder()
                 .setConfigureIntent(Core.configureIntent(this))

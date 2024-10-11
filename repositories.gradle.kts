@@ -1,9 +1,9 @@
 rootProject.extra.apply {
-    set("androidPlugin", "com.android.tools.build:gradle:7.4.2")
-    set("kotlinVersion", "1.8.10")
+    set("androidPlugin", "com.android.tools.build:gradle:8.5.2")
+    set("kotlinVersion", "2.0.20")
 }
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }

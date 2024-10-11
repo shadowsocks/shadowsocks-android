@@ -20,9 +20,17 @@
 
 package com.github.shadowsocks
 
-import android.app.*
+import android.app.ActivityManager
+import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
-import android.content.*
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
@@ -34,7 +42,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.os.persistableBundleOf
-import androidx.work.Configuration
 import com.github.shadowsocks.acl.Acl
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.core.BuildConfig
@@ -47,19 +54,16 @@ import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.DeviceStorageApp
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.Key
+import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.initialize
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import kotlin.reflect.KClass
 
-object Core : Configuration.Provider {
+object Core {
     lateinit var app: Application
         @VisibleForTesting set
     lateinit var configureIntent: (Context) -> PendingIntent
@@ -111,7 +115,8 @@ object Core : Configuration.Provider {
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
-        Firebase.initialize(deviceStorage)  // multiple processes needs manual set-up
+        FirebaseApp.initializeApp(deviceStorage)  // multiple processes needs manual set-up
+        FirebaseCrashlytics.getInstance().setCustomKey("build", Build.DISPLAY)
         Timber.plant(object : Timber.DebugTree() {
             override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
                 if (t == null) {
@@ -141,13 +146,6 @@ object Core : Configuration.Provider {
         }
         updateNotificationChannels()
     }
-
-    override fun getWorkManagerConfiguration() = Configuration.Builder().apply {
-        setDefaultProcessName(app.packageName + ":bg")
-        setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.VERBOSE else Log.INFO)
-        setExecutor { GlobalScope.launch { it.run() } }
-        setTaskExecutor { GlobalScope.launch { it.run() } }
-    }.build()
 
     fun updateNotificationChannels() {
         if (Build.VERSION.SDK_INT >= 26) @RequiresApi(26) {

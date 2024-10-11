@@ -1,12 +1,17 @@
-version: 2
+version: 2.1
+
+orbs:
+  android: circleci/android@2.3.0
+
 jobs:
   build:
-    working_directory: ~/code
-    docker:
-      - image: cimg/android:2022.12.1-ndk
+    executor:
+      name: android/android-docker
+      tag: 2024.08.1-ndk
+      resource-class: large
     environment:
       GRADLE_OPTS: -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process"
-      RUST_VERSION: 1.67.0
+      RUST_VERSION: 1.80.0
     steps:
       - checkout
       - run: git submodule update --init --recursive
@@ -16,16 +21,11 @@ jobs:
           command: |
             echo 'export PATH="$HOME"/.cargo/bin:"$PATH"' >> "$BASH_ENV"
       - run: rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle.kts" }}
+      - android/restore-gradle-cache
       - run:
           name: Run Build and Tests
           command: ./gradlew assembleDebug check -PCARGO_PROFILE=debug
-      - save_cache:
-          paths:
-            - ~/.gradle
-            - ~/.android/build-cache
-          key: jars-{{ checksum "build.gradle.kts" }}
+      - android/save-gradle-cache
       - store_artifacts:
           path: mobile/build/outputs/apk
           destination: apk/mobile
@@ -44,3 +44,8 @@ jobs:
       - store_artifacts:
           path: tv/build/reports
           destination: reports/tv
+
+workflows:
+  test:
+    jobs:
+      - build

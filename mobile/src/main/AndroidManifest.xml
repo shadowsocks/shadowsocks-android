@@ -15,6 +15,7 @@
 
     <application
         android:name=".App"
+        android:localeConfig="@xml/locales_config"
         tools:ignore="MissingTvBanner">
 
         <activity
@@ -65,7 +66,7 @@
             android:exported="true"
             android:label="@string/add_profile_methods_scan_qr_code"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/Theme.Shadowsocks.Immersive"
+            android:theme="@style/Theme.Shadowsocks.Immersive.Navigation"
             android:launchMode="singleTask"
             android:screenOrientation="locked"
             android:excludeFromRecents="true"/>

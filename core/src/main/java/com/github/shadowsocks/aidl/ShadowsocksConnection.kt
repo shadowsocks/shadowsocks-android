@@ -70,7 +70,7 @@ class ShadowsocksConnection(private var listenForDeath: Boolean = false) : Servi
         override fun stateChanged(state: Int, profileName: String?, msg: String?) {
             val callback = callback ?: return
             GlobalScope.launch(Dispatchers.Main.immediate) {
-                callback.stateChanged(BaseService.State.values()[state], profileName, msg)
+                callback.stateChanged(BaseService.State.entries[state], profileName, msg)
             }
         }
         override fun trafficUpdated(profileId: Long, stats: TrafficStats) {

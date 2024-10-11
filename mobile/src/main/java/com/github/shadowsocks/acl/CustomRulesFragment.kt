@@ -73,7 +73,6 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         private val domainPattern =
                 "(?<=^(?:\\(\\^\\|\\\\\\.\\)|\\^\\(\\.\\*\\\\\\.\\)\\?|\\(\\?:\\^\\|\\\\\\.\\))).*(?=\\\$\$)".toRegex()
 
-        @Suppress("FunctionName")
         private fun AclItem(item: Any) = when (item) {
             is String -> AclItem(item, false)
             is Subnet -> AclItem(item.toString(), false)
@@ -146,7 +145,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
 
         private fun validate(template: Int = templateSelector.selectedItemPosition, value: Editable = editText.text) {
             var message = ""
-            positive.isEnabled = when (Template.values()[template]) {
+            positive.isEnabled = when (Template.entries[template]) {
                 Template.Generic -> value.toString().run {
                     try {
                         if (Subnet.fromString(this) == null) toPattern()
@@ -178,7 +177,7 @@ class CustomRulesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, 
         override fun ret(which: Int) = when (which) {
             DialogInterface.BUTTON_POSITIVE -> {
                 AclEditResult(editText.text.toString().let { text ->
-                    when (Template.values()[templateSelector.selectedItemPosition]) {
+                    when (Template.entries[templateSelector.selectedItemPosition]) {
                         Template.Generic -> AclItem(text)
                         Template.Domain -> AclItem(IDN.toASCII(text, IDN.ALLOW_UNASSIGNED or IDN.USE_STD3_ASCII_RULES)
                                 .replace(".", "\\.").let { "(?:^|\\.)$it\$" })

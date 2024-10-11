@@ -32,6 +32,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.getSystemService
@@ -45,15 +47,17 @@ import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.ZoomSuggestionOptions
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 
-class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
+class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer, ZoomSuggestionOptions.ZoomCallback {
     private val scanner = BarcodeScanning.getClient(BarcodeScannerOptions.Builder().apply {
         setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+        setZoomSuggestionOptions(ZoomSuggestionOptions.Builder(this@ScannerActivity).build())
     }.build())
     private val imageAnalysis by lazy {
         ImageAnalysis.Builder().apply {
@@ -61,19 +65,20 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
             setBackgroundExecutor(Dispatchers.Default.asExecutor())
         }.build().also { it.setAnalyzer(Dispatchers.Main.immediate.asExecutor(), this) }
     }
+    private var camera: Camera? = null
 
     @ExperimentalGetImage
     override fun analyze(image: ImageProxy) {
         val mediaImage = image.image ?: return
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launch {
             val result = try {
                 process { InputImage.fromMediaImage(mediaImage, image.imageInfo.rotationDegrees) }.also {
                     if (it) imageAnalysis.clearAnalyzer()
                 }
             } catch (_: CancellationException) {
-                return@launchWhenCreated
+                return@launch
             } catch (e: Exception) {
-                return@launchWhenCreated Timber.w(e)
+                return@launch Timber.w(e)
             } finally {
                 image.close()
             }
@@ -92,20 +97,30 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer {
         requestCamera.launch(Manifest.permission.CAMERA)
     }
     private val requestCamera = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) lifecycleScope.launchWhenCreated {
+        if (granted) lifecycleScope.launch {
             val cameraProvider = ProcessCameraProvider.getInstance(this@ScannerActivity).await()
             val selector = if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)) {
                 CameraSelector.DEFAULT_BACK_CAMERA
             } else CameraSelector.DEFAULT_FRONT_CAMERA
-            val preview = Preview.Builder().build()
+            val preview = Preview.Builder().apply {
+                setResolutionSelector(ResolutionSelector.Builder().apply {
+                    setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                }.build())
+            }.build()
             preview.setSurfaceProvider(findViewById<PreviewView>(R.id.barcode).surfaceProvider)
             try {
-                cameraProvider.bindToLifecycle(this@ScannerActivity, selector, preview, imageAnalysis)
+                camera = cameraProvider.bindToLifecycle(this@ScannerActivity, selector, preview, imageAnalysis)
             } catch (e: IllegalArgumentException) {
                 Timber.d(e)
                 startImport()
             }
         } else permissionMissing()
+    }
+
+    override fun setZoom(ratio: Float): Boolean {
+        val camera = camera ?: return false
+        camera.cameraControl.setZoomRatio(ratio)
+        return true
     }
 
     private suspend inline fun process(feature: Profile? = Core.currentProfile?.main,

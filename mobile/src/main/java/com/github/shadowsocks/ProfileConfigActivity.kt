@@ -23,8 +23,6 @@ package com.github.shadowsocks
 import android.app.Activity
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.component1
 import androidx.activity.result.component2
@@ -47,7 +45,6 @@ class ProfileConfigActivity : AppCompatActivity() {
         }
     }
 
-    private val child by lazy { supportFragmentManager.findFragmentById(R.id.content) as ProfileConfigFragment }
     val unsavedChangesHandler = object : OnBackPressedCallback(DataStore.dirty) {
         override fun handleOnBackPressed() = UnsavedChangesDialogFragment().apply {
             key()
@@ -75,12 +72,6 @@ class ProfileConfigActivity : AppCompatActivity() {
         if (!super.onSupportNavigateUp()) finish()
         return true
     }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.profile_config_menu, menu)
-        return true
-    }
-    override fun onOptionsItemSelected(item: MenuItem) = child.onOptionsItemSelected(item)
 
     val pluginHelp = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         (resultCode, data) ->
