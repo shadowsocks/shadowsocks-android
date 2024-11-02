@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import java.util.Locale
 
-const val lifecycleVersion = "2.8.4"
+const val lifecycleVersion = "2.8.7"
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *, *, *>).lint
@@ -64,9 +64,9 @@ fun Project.setupCore() {
             disable += "UseAppTint"
         }
         buildFeatures.buildConfig = true
-        ndkVersion = "27.0.12077973"
+        ndkVersion = "27.2.12479018"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.1")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.2")
 }
 
 fun Project.setupApp() {

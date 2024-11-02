@@ -92,7 +92,8 @@ sealed class DnsResolverCompat {
          * See also: https://issuetracker.google.com/issues/133874590
          */
         private val unboundedIO by lazy {
-            if (Core.activity.isLowRamDevice) Dispatchers.IO else Dispatchers.IO.limitedParallelism(Int.MAX_VALUE)
+            if (Core.activity.isLowRamDevice) Dispatchers.IO
+            else Dispatchers.IO.limitedParallelism(Int.MAX_VALUE, "unboundedIO")
         }
 
         override suspend fun resolve(network: Network, host: String) =
