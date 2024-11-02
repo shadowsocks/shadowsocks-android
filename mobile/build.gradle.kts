@@ -15,13 +15,14 @@ android {
 }
 
 dependencies {
-    val cameraxVersion = "1.3.4"
+    val cameraxVersion = "1.4.0"
 
     implementation("androidx.browser:browser:1.8.0")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
     implementation("com.google.zxing:core:3.5.3")

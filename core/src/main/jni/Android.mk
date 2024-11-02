@@ -159,6 +159,7 @@ TUN2SOCKS_SOURCES := \
         base/BPending.c \
 		system/BDatagram_unix.c \
         flowextra/PacketPassInactivityMonitor.c \
+        socks_udp_client/SocksUdpClient.c \
         tun2socks/SocksUdpGwClient.c \
         udpgw_client/UdpGwClient.c
 
