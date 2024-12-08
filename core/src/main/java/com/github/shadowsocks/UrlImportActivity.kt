@@ -33,7 +33,7 @@ import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
 import com.github.shadowsocks.plugin.fragment.Empty
 import com.github.shadowsocks.plugin.fragment.showAllowingStateLoss
 import kotlinx.parcelize.Parcelize
-
+//todo: create profile from url
 class UrlImportActivity : AppCompatActivity() {
     @Parcelize
     data class ProfilesArg(val profiles: List<Profile>) : Parcelable

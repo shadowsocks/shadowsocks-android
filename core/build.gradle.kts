@@ -54,7 +54,7 @@ cargo {
         run {
             try {
                 Runtime.getRuntime().exec(arrayOf("python3", "-V"))
-                spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "python3")
+                spec.environment("RUST_ANDROID_GRADLE_PYTHON_COMMAND", "C:\\Users\\rogui\\AppData\\Local\\Programs\\Python\\Python310\\python.exe")
                 project.logger.lifecycle("Python 3 detected.")
             } catch (e: java.io.IOException) {
                 project.logger.lifecycle("No python 3 detected.")

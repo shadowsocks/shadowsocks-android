@@ -64,6 +64,7 @@ import com.google.zxing.WriterException
 import timber.log.Timber
 import java.nio.charset.StandardCharsets
 
+//todo: profile select
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, SearchView.OnQueryTextListener {
     companion object {
         /**

@@ -91,6 +91,12 @@ object Core {
         return ProfileManager.expand(ProfileManager.getProfile(DataStore.profileId) ?: return null)
     }
 
+    /**
+     * Switches the current profile to the profile with the specified ID.
+     *
+     * @param id The ID of the profile to switch to.
+     * @return The profile that was switched to.
+     */
     fun switchProfile(id: Long): Profile {
         val result = ProfileManager.getProfile(id) ?: ProfileManager.createProfile()
         DataStore.profileId = result.id

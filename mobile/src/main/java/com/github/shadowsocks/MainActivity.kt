@@ -118,6 +118,7 @@ class MainActivity : AppCompatActivity(), ShadowsocksConnection.Callback, OnPref
 
     private fun toggle() = if (state.canStop) Core.stopService() else connect.launch(null)
 
+
     private val connection = ShadowsocksConnection(true)
     override fun onServiceConnected(service: IShadowsocksService) = changeState(try {
         BaseService.State.entries[service.state]
