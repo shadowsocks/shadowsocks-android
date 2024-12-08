@@ -10,10 +10,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         tools:ignore="MissingTvBanner">
 
+        <!-- Disable FirebaseCrashlytics -->
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false"
+            tools:node="remove" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.testApp">
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
