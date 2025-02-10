@@ -93,8 +93,6 @@ LOCAL_STATIC_LIBRARIES := libancillary
 
 LOCAL_C_INCLUDES:= \
 		$(LOCAL_PATH)/libancillary \
-        $(LOCAL_PATH)/badvpn/lwip/src/include/ipv4 \
-        $(LOCAL_PATH)/badvpn/lwip/src/include/ipv6 \
         $(LOCAL_PATH)/badvpn/lwip/src/include \
         $(LOCAL_PATH)/badvpn/lwip/custom \
         $(LOCAL_PATH)/badvpn/
