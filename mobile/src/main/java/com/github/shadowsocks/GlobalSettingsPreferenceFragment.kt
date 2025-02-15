@@ -53,6 +53,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         } else canToggleLocked.remove()
 
         val serviceMode = findPreference<Preference>(Key.serviceMode)!!
+        val shareOverLan = findPreference<Preference>(Key.shareOverLan)!!
         val portProxy = findPreference<EditTextPreference>(Key.portProxy)!!
         portProxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         val portLocalDns = findPreference<EditTextPreference>(Key.portLocalDns)!!
@@ -66,6 +67,7 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         val listener: (BaseService.State) -> Unit = {
             val stopped = it == BaseService.State.Stopped
             serviceMode.isEnabled = stopped
+            shareOverLan.isEnabled = stopped
             portProxy.isEnabled = stopped
             portLocalDns.isEnabled = stopped
             if (stopped) onServiceModeChange.onPreferenceChange(serviceMode, DataStore.serviceMode) else {

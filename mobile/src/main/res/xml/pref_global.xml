@@ -20,6 +20,9 @@
         app:defaultValue="vpn"
         app:title="@string/service_mode"
         app:useSimpleSummaryProvider="true"/>
+    <SwitchPreference
+        app:key="shareOverLan"
+        app:title="@string/share_over_lan"/>
     <EditTextPreference
         app:key="portProxy"
         app:icon="@drawable/ic_maps_directions_boat"

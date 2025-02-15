@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-import pipes
 import shutil
 import subprocess
 import sys
@@ -24,6 +23,15 @@ if sys.platform == 'msys' or sys.platform == 'cygwin':
     rustcc = win2posix(rustcc)
 
 args = [rustcc, os.environ['RUST_ANDROID_GRADLE_CC_LINK_ARG']] + sys.argv[1:]
+
+def cmd_quote(string):
+    import sys
+    if int(sys.version[2]) < 3:
+        import pipes
+        return pipes.quote(string)
+    else:
+        import shlex
+        return shlex.quote(string)
 
 def update_in_place(arglist):
     # The `gcc` library is not included starting from NDK version 23.
@@ -68,7 +76,7 @@ if (sys.platform == 'msys' or sys.platform == 'cygwin') and len(''.join(args)) >
 
 
 # This only appears when the subprocess call fails, but it's helpful then.
-printable_cmd = " ".join(pipes.quote(arg) for arg in args)
+printable_cmd = " ".join(cmd_quote(arg) for arg in args)
 print(printable_cmd)
 
 code = subprocess.call(args)
