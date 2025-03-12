@@ -64,7 +64,6 @@ fun Project.setupCore() {
             disable += "UseAppTint"
         }
         buildFeatures.buildConfig = true
-        ndkVersion = "27.2.12479018"
     }
     dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.5")
 }

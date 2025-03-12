@@ -347,7 +347,7 @@ object BaseService {
             Firebase.analytics.logEvent("start") { param(FirebaseAnalytics.Param.METHOD, tag) }
 
             data.changeState(State.Connecting)
-            data.connectingJob = GlobalScope.launch(Dispatchers.Main) {
+            data.connectingJob = GlobalScope.launch(Dispatchers.Main.immediate) {
                 try {
                     Executable.killAll()    // clean up old processes
                     preInit()
