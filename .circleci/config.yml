@@ -7,11 +7,11 @@ jobs:
   build:
     executor:
       name: android/android-docker
-      tag: 2024.08.1-ndk
+      tag: 2025.03.1-ndk
       resource-class: large
     environment:
       GRADLE_OPTS: -Dorg.gradle.workers.max=1 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy="in-process"
-      RUST_VERSION: 1.80.0
+      RUST_VERSION: 1.85.0
     steps:
       - checkout
       - run: git submodule update --init --recursive
