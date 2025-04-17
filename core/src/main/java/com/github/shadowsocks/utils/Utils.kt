@@ -36,8 +36,12 @@ import androidx.preference.Preference
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.FileDescriptor
 import java.net.HttpURLConnection
@@ -81,19 +85,15 @@ fun String?.parseNumericAddress(): InetAddress? = Os.inet_pton(OsConstants.AF_IN
             if (Build.VERSION.SDK_INT >= 29) it else parseNumericAddress.invoke(null, this) as InetAddress
         }
 
-suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T): T {
-    return suspendCancellableCoroutine { cont ->
-        val job = GlobalScope.launch(Dispatchers.IO) {
-            try {
-                cont.resume(block())
-            } catch (e: Throwable) {
-                cont.resumeWithException(e)
-            }
-        }
-        cont.invokeOnCancellation {
-            job.cancel(it as? CancellationException)
-            if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
-        }
+suspend fun <T> HttpURLConnection.useCancellable(block: suspend HttpURLConnection.() -> T) = coroutineScope {
+    @OptIn(InternalCoroutinesApi::class)    // https://github.com/Kotlin/kotlinx.coroutines/issues/4117
+    coroutineContext.job.invokeOnCompletion(true) {
+        if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
+    }
+    try {
+        withContext(Dispatchers.IO) { block() }
+    } finally {
+        if (Build.VERSION.SDK_INT >= 26) disconnect() else GlobalScope.launch(Dispatchers.IO) { disconnect() }
     }
 }
 
