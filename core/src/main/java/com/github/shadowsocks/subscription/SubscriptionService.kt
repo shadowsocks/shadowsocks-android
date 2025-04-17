@@ -38,9 +38,22 @@ import com.github.shadowsocks.core.R
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.*
-import com.google.gson.JsonStreamParser
-import kotlinx.coroutines.*
+import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.asIterable
+import com.github.shadowsocks.utils.broadcastReceiver
+import com.github.shadowsocks.utils.readableMessage
+import com.github.shadowsocks.utils.useCancellable
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import java.io.InputStream
@@ -169,7 +182,7 @@ class SubscriptionService : Service(), CoroutineScope {
         }
 
         for (json in jsons.asIterable()) try {
-            Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
+            Profile.parseJson(json.bufferedReader().readText(), feature) {
                 subscriptions.compute(it.name to it.formattedAddress) { _, oldProfile ->
                     when (oldProfile?.subscription) {
                         Profile.SubscriptionStatus.Active -> {

@@ -26,24 +26,27 @@ import android.os.Parcelable
 import android.util.Base64
 import android.util.LongSparseArray
 import androidx.core.net.toUri
-import androidx.room.*
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.Insert
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import androidx.room.TypeConverter
+import androidx.room.Update
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginOptions
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.parsePort
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonPrimitive
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONTokener
 import timber.log.Timber
 import java.io.Serializable
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.*
+import java.util.Locale
 
 @Entity
 @Parcelize
@@ -162,25 +165,14 @@ data class Profile(
         private class JsonParser(private val feature: Profile? = null) : ArrayList<Profile>() {
             val fallbackMap = mutableMapOf<Profile, Profile>()
 
-            private val JsonElement?.optString get() = (this as? JsonPrimitive)?.asString
-            private val JsonElement?.optBoolean
-                get() = // asBoolean attempts to cast everything to boolean
-                    (this as? JsonPrimitive)?.run { if (isBoolean) asBoolean else null }
-            private val JsonElement?.optInt
-                get() = try {
-                    (this as? JsonPrimitive)?.asInt
-                } catch (_: NumberFormatException) {
-                    null
-                }
-
-            private fun tryParse(json: JsonObject, fallback: Boolean = false): Profile? {
-                val host = json["server"].optString
+            private fun tryParse(json: JSONObject, fallback: Boolean = false): Profile? {
+                val host = json.optString("server")
                 if (host.isNullOrEmpty()) return null
-                val remotePort = json["server_port"]?.optInt
-                if (remotePort == null || remotePort <= 0) return null
-                val password = json["password"].optString
+                val remotePort = json.optInt("server_port")
+                if (remotePort <= 0) return null
+                val password = json.optString("password")
                 if (password.isNullOrEmpty()) return null
-                val method = json["method"].optString
+                val method = json.optString("method")
                 if (method.isNullOrEmpty()) return null
                 return Profile().also {
                     it.host = host
@@ -189,34 +181,35 @@ data class Profile(
                     it.method = method
                 }.apply {
                     feature?.copyFeatureSettingsTo(this)
-                    val id = json["plugin"].optString
+                    val id = json.optString("plugin")
                     if (!id.isNullOrEmpty()) {
-                        plugin = PluginOptions(id, json["plugin_opts"].optString).toString(false)
+                        plugin = PluginOptions(id, json.optString("plugin_opts")).toString(false)
                     }
-                    name = json["remarks"].optString
-                    route = json["route"].optString ?: route
+                    name = json.optString("remarks")
+                    route = json.optString("route", route)
                     if (fallback) return@apply
-                    remoteDns = json["remote_dns"].optString ?: remoteDns
-                    ipv6 = json["ipv6"].optBoolean ?: ipv6
-                    metered = json["metered"].optBoolean ?: metered
-                    (json["proxy_apps"] as? JsonObject)?.also { obj ->
-                        proxyApps = obj["enabled"].optBoolean ?: proxyApps
-                        bypass = obj["bypass"].optBoolean ?: bypass
-                        individual = (obj["android_list"] as? JsonArray)?.asIterable()?.mapNotNull { it.optString }
-                                ?.joinToString("\n") ?: individual
+                    remoteDns = json.optString("remote_dns", remoteDns)
+                    ipv6 = json.optBoolean("ipv6", ipv6)
+                    metered = json.optBoolean("metered", metered)
+                    json.optJSONObject("proxy_apps")?.also { obj ->
+                        proxyApps = obj.optBoolean("enabled", proxyApps)
+                        bypass = obj.optBoolean("bypass", bypass)
+                        individual = obj.optJSONArray("android_list")?.let {
+                            0.until(it.length()).joinToString("\n", transform = it::optString)
+                        } ?: individual
                     }
-                    udpdns = json["udpdns"].optBoolean ?: udpdns
-                    (json["udp_fallback"] as? JsonObject)?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }
+                    udpdns = json.optBoolean("udpdns", udpdns)
+                    json.optJSONObject("udp_fallback")?.let { tryParse(it, true) }?.also { fallbackMap[this] = it }
                 }
             }
 
-            fun process(json: JsonElement?) {
+            fun process(json: Any?) {
                 when (json) {
-                    is JsonObject -> {
+                    is JSONObject -> {
                         val profile = tryParse(json)
-                        if (profile != null) add(profile) else for ((_, value) in json.entrySet()) process(value)
+                        if (profile != null) add(profile) else json.keys().forEach { process(json.opt(it)) }
                     }
-                    is JsonArray -> json.asIterable().forEach(this::process)
+                    is JSONArray -> 0.until(json.length()).forEach { process(json.opt(it)) }
                     // ignore other types
                 }
             }
@@ -235,9 +228,9 @@ data class Profile(
             }
         }
 
-        fun parseJson(json: JsonElement, feature: Profile? = null, create: (Profile) -> Profile) {
+        fun parseJson(json: String, feature: Profile? = null, create: (Profile) -> Profile) {
             JsonParser(feature).run {
-                process(json)
+                JSONTokener(json).apply { while (more()) process(nextValue()) }
                 for (i in indices) {
                     val fallback = fallbackMap.remove(this[i])
                     this[i] = create(this[i])
