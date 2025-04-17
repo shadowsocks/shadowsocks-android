@@ -2,7 +2,7 @@
 
 plugins {
     id("com.github.ben-manes.versions") version "0.52.0"
-    id("com.google.devtools.ksp") version "2.1.10-1.0.31" apply false
+    id("com.google.devtools.ksp") version "2.1.20-2.0.0" apply false
 }
 
 buildscript {
