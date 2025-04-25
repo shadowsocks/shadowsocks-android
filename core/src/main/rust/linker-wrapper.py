@@ -1,7 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os
-import pipes
+import shlex
 import shutil
 import subprocess
 import sys
@@ -68,7 +68,7 @@ if (sys.platform == 'msys' or sys.platform == 'cygwin') and len(''.join(args)) >
 
 
 # This only appears when the subprocess call fails, but it's helpful then.
-printable_cmd = " ".join(pipes.quote(arg) for arg in args)
+printable_cmd = " ".join(shlex.quote(arg) for arg in args)
 print(printable_cmd)
 
 code = subprocess.call(args)

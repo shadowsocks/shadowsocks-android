@@ -136,7 +136,11 @@ class VpnService : BaseVpnService(), BaseService.Interface {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
         super<BaseService.Interface>.onStartCommand(intent, flags, startId)
 
-    override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
+    override suspend fun preInit() {
+        // double check prepare to workaround bugs in certain OS
+        if (prepare(this) != null) throw NullConnectionException()
+        DefaultNetworkListener.start(this) { underlyingNetwork = it }
+    }
     override suspend fun rawResolver(query: ByteArray) =
             // no need to listen for network here as this is only used for forwarding local DNS queries.
             // retries should be attempted by client.

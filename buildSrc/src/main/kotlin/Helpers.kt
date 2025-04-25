@@ -23,7 +23,7 @@ val Project.currentFlavor get() = gradle.startParameter.taskRequests.toString().
 fun Project.setupCommon() {
     val javaVersion = JavaVersion.VERSION_11
     android.apply {
-        compileSdkVersion(35)
+        compileSdkVersion(36)
         defaultConfig {
             minSdk = 23
             targetSdk = 35
@@ -64,9 +64,8 @@ fun Project.setupCore() {
             disable += "UseAppTint"
         }
         buildFeatures.buildConfig = true
-        ndkVersion = "27.2.12479018"
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.2")
+    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.5")
 }
 
 fun Project.setupApp() {

@@ -36,8 +36,7 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.core.BuildConfig
 import com.github.shadowsocks.utils.useCancellable
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -53,8 +52,7 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
             if (!WorkManager.isInitialized()) WorkManager.initialize(app, Configuration.Builder().apply {
                 setDefaultProcessName(app.packageName + ":bg")
                 setMinimumLoggingLevel(if (BuildConfig.DEBUG) Log.VERBOSE else Log.INFO)
-                setExecutor { GlobalScope.launch { it.run() } }
-                setTaskExecutor { GlobalScope.launch { it.run() } }
+                setWorkerCoroutineContext(Dispatchers.IO)
             }.build())
             WorkManager.getInstance(app).enqueueUniqueWork(
                     route, ExistingWorkPolicy.REPLACE, OneTimeWorkRequestBuilder<AclSyncer>().apply {

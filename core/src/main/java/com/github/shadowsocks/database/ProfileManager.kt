@@ -26,7 +26,6 @@ import com.github.shadowsocks.Core
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.DirectBoot
 import com.github.shadowsocks.utils.forEachTry
-import com.google.gson.JsonStreamParser
 import org.json.JSONArray
 import timber.log.Timber
 import java.io.IOException
@@ -71,7 +70,7 @@ object ProfileManager {
         } else Core.currentProfile?.main
         val lazyClear = lazy { clear() }
         jsons.asIterable().forEachTry { json ->
-            Profile.parseJson(JsonStreamParser(json.bufferedReader()).asSequence().single(), feature) {
+            Profile.parseJson(json.bufferedReader().readText(), feature) {
                 if (replace) {
                     lazyClear.value
                     // if two profiles has the same address, treat them as the same profile and copy stats over

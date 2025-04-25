@@ -57,7 +57,6 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -179,7 +178,7 @@ class ScannerActivity : AppCompatActivity(), ImageAnalysis.Analyzer, ZoomSuggest
         importOrFinish(it, true)
     }
     private fun importOrFinish(dataUris: List<Uri>, finish: Boolean = false) {
-        if (dataUris.isNotEmpty()) GlobalScope.launch(Dispatchers.Main.immediate) {
+        if (dataUris.isNotEmpty()) lifecycleScope.launch(Dispatchers.Main.immediate) {
             onSupportNavigateUp()
             val feature = Core.currentProfile?.main
             try {
