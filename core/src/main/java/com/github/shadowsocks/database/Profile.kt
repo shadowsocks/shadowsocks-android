@@ -73,6 +73,7 @@ data class Profile(
         var individual: String = "",
         var plugin: String? = null,
         var udpFallback: Long? = null,
+        var optimizeBuffers: Boolean = true,
 
         // managed fields
         var subscription: SubscriptionStatus = SubscriptionStatus.UserConfigured,
@@ -348,6 +349,7 @@ data class Profile(
         DataStore.individual = individual
         DataStore.plugin = plugin ?: ""
         DataStore.udpFallback = udpFallback
+        DataStore.optimizeBuffers = optimizeBuffers
         DataStore.privateStore.remove(Key.dirty)
     }
 
@@ -371,5 +373,6 @@ data class Profile(
         individual = DataStore.individual
         plugin = DataStore.plugin
         udpFallback = DataStore.udpFallback
+        optimizeBuffers = DataStore.optimizeBuffers
     }
 }
