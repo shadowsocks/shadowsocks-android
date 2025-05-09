@@ -27,5 +27,9 @@ android {
 }
 
 dependencies {
-    implementation("androidx.leanback:leanback-preference:1.1.0-rc01")
+    coreLibraryDesugaring(libs.desugar)
+    implementation(libs.androidx.leanback.preference)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
 }

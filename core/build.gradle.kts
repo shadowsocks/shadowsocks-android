@@ -88,27 +88,25 @@ tasks.register<Exec>("cargoClean") {
 tasks.clean.dependsOn("cargoClean")
 
 dependencies {
-    val coroutinesVersion = "1.10.2"
-    val roomVersion = "2.7.0"
-    val workVersion = "2.10.0"
-
     api(project(":plugin"))
-    api("androidx.core:core-ktx:1.16.0")
-    api("com.google.android.material:material:1.12.0")
-
-    api("androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion")
-    api("androidx.preference:preference:1.2.1")
-    api("androidx.room:room-runtime:$roomVersion")
-    api("androidx.work:work-multiprocess:$workVersion")
-    api("androidx.work:work-runtime-ktx:$workVersion")
-    api("com.google.android.gms:play-services-oss-licenses:17.1.0")
-    api("com.google.firebase:firebase-analytics:22.4.0")
-    api("com.google.firebase:firebase-crashlytics:19.4.2")
-    api("com.jakewharton.timber:timber:5.0.1")
-    api("dnsjava:dnsjava:3.6.3")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    androidTestImplementation("androidx.room:room-testing:$roomVersion")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.2.1")
+    api(libs.androidx.core.ktx)
+    api(libs.androidx.lifecycle.livedata.core.ktx)
+    api(libs.androidx.preference)
+    api(libs.androidx.room.runtime)
+    api(libs.androidx.work.multiprocess)
+    api(libs.androidx.work.runtime.ktx)
+    api(libs.dnsjava)
+    api(libs.firebase.analytics)
+    api(libs.firebase.crashlytics)
+    api(libs.kotlinx.coroutines.android)
+    api(libs.kotlinx.coroutines.play.services)
+    api(libs.material)
+    api(libs.play.services.oss.licenses)
+    api(libs.timber)
+    ksp(libs.androidx.room.compiler)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.junit.ktx)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.test.runner)
 }

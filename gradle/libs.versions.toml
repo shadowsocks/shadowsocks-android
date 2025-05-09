@@ -1,0 +1,54 @@
+[versions]
+camera = "1.4.2"
+coroutines = "1.10.2"
+lifecycle = "2.9.0"
+room = "2.7.1"
+work = "2.10.1"
+
+[libraries]
+android-gradle = "com.android.tools.build:gradle:8.10.0"
+androidx-browser = "androidx.browser:browser:1.8.0"
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camera" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camera" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camera" }
+androidx-concurrent-futures-ktx = "androidx.concurrent:concurrent-futures-ktx:1.2.0"
+androidx-constraintlayout = "androidx.constraintlayout:constraintlayout:2.2.1"
+androidx-core-ktx = "androidx.core:core-ktx:1.16.0"
+androidx-espresso-core = "androidx.test.espresso:espresso-core:3.6.1"
+androidx-junit-ktx = "androidx.test.ext:junit-ktx:1.2.1"
+androidx-leanback-preference = "androidx.leanback:leanback-preference:1.2.0"
+androidx-lifecycle-livedata-core-ktx = { module = "androidx.lifecycle:lifecycle-livedata-core-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-preference = "androidx.preference:preference:1.2.1"
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+androidx-test-runner = "androidx.test:runner:1.6.2"
+androidx-work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = "work" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+barcode-scanning = "com.google.mlkit:barcode-scanning:17.3.0"
+desugar = "com.android.tools:desugar_jdk_libs:2.1.5"
+dnsjava = "dnsjava:dnsjava:3.6.3"
+dokka = "org.jetbrains.dokka:dokka-gradle-plugin:2.0.0"
+fastscroll = "me.zhanghai.android.fastscroll:library:1.3.0"
+firebase-analytics = "com.google.firebase:firebase-analytics:22.4.0"
+firebase-crashlytics = "com.google.firebase:firebase-crashlytics:19.4.3"
+firebase-crashlytics-gradle = "com.google.firebase:firebase-crashlytics-gradle:3.0.3"
+google-oss-licenses = "com.google.android.gms:oss-licenses-plugin:0.10.6"
+google-services = "com.google.gms:google-services:4.4.2"
+gradle-maven-publish = "com.vanniktech:gradle-maven-publish-plugin:0.31.0"
+junit = "junit:junit:4.13.2"
+kotlin-gradle = "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.20"
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
+locale-api = "com.twofortyfouram:android-plugin-api-for-locale:1.0.4"
+material = "com.google.android.material:material:1.12.0"
+play-services-oss-licenses = "com.google.android.gms:play-services-oss-licenses:17.1.0"
+preferencex-simplemenu = "com.takisoft.preferencex:preferencex-simplemenu:1.1.0"
+rust-android = "org.mozilla.rust-android-gradle:plugin:0.9.6"
+timber = "com.jakewharton.timber:timber:5.0.1"
+zxing = "com.google.zxing:core:3.5.3"
+
+[plugins]
+ksp = "com.google.devtools.ksp:2.1.20-2.0.1"
+versions = "com.github.ben-manes.versions:0.52.0"

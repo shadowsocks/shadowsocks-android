@@ -8,8 +8,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import java.util.Locale
 
-const val lifecycleVersion = "2.8.7"
-
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *, *, *>).lint
 
@@ -42,12 +40,6 @@ fun Project.setupCommon() {
     }
     extensions.getByName<KotlinAndroidProjectExtension>("kotlin").compilerOptions.jvmTarget
         .set(JvmTarget.fromTarget(javaVersion.toString()))
-
-    dependencies {
-        add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test:runner:1.6.2")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.6.1")
-    }
 }
 
 fun Project.setupCore() {
@@ -57,7 +49,6 @@ fun Project.setupCore() {
             versionCode = 5030450
             versionName = "5.3.4-nightly"
         }
-        compileOptions.isCoreLibraryDesugaringEnabled = true
         lint.apply {
             disable += "BadConfigurationProvider"
             warning += "RestrictedApi"
@@ -65,7 +56,6 @@ fun Project.setupCore() {
         }
         buildFeatures.buildConfig = true
     }
-    dependencies.add("coreLibraryDesugaring", "com.android.tools:desugar_jdk_libs:2.1.5")
 }
 
 fun Project.setupApp() {
@@ -86,6 +76,7 @@ fun Project.setupApp() {
             "zh-rCN",
             "zh-rTW",
         ))
+        compileOptions.isCoreLibraryDesugaringEnabled = true
         buildTypes {
             getByName("debug") {
                 isPseudoLocalesEnabled = true

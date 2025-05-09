@@ -15,18 +15,20 @@ android {
 }
 
 dependencies {
-    val cameraxVersion = "1.4.2"
-
-    implementation("androidx.browser:browser:1.8.0")
-    implementation("androidx.camera:camera-camera2:$cameraxVersion")
-    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
-    implementation("androidx.camera:camera-view:$cameraxVersion")
-    implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-    implementation("com.google.mlkit:barcode-scanning:17.3.0")
-    implementation("com.google.zxing:core:3.5.3")
-    implementation("com.takisoft.preferencex:preferencex-simplemenu:1.1.0")
-    implementation("com.twofortyfouram:android-plugin-api-for-locale:1.0.4")
-    implementation("me.zhanghai.android.fastscroll:library:1.3.0")
+    coreLibraryDesugaring(libs.desugar)
+    implementation(libs.androidx.browser)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.concurrent.futures.ktx)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.barcode.scanning)
+    implementation(libs.fastscroll)
+    implementation(libs.locale.api)
+    implementation(libs.preferencex.simplemenu)
+    implementation(libs.zxing)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
 }
