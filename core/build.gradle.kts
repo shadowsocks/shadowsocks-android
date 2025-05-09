@@ -103,6 +103,7 @@ dependencies {
     api(libs.material)
     api(libs.play.services.oss.licenses)
     api(libs.timber)
+    coreLibraryDesugaring(libs.desugar)
     ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

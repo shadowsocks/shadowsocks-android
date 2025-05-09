@@ -49,6 +49,7 @@ fun Project.setupCore() {
             versionCode = 5030450
             versionName = "5.3.4-nightly"
         }
+        compileOptions.isCoreLibraryDesugaringEnabled = true
         lint.apply {
             disable += "BadConfigurationProvider"
             warning += "RestrictedApi"
@@ -76,7 +77,6 @@ fun Project.setupApp() {
             "zh-rCN",
             "zh-rTW",
         ))
-        compileOptions.isCoreLibraryDesugaringEnabled = true
         buildTypes {
             getByName("debug") {
                 isPseudoLocalesEnabled = true
