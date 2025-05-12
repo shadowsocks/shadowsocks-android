@@ -80,6 +80,7 @@ fun Project.setupApp() {
         buildTypes {
             getByName("debug") {
                 isPseudoLocalesEnabled = true
+                packagingOptions.doNotStrip("**/libsslocal.so")
             }
             getByName("release") {
                 isShrinkResources = true
