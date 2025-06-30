@@ -9,10 +9,8 @@
 
 <a href="https://f-droid.org/packages/com.github.shadowsocks/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="48"></a>
 for Android & Chrome OS  
-<!---
 <a href="https://f-droid.org/packages/com.github.shadowsocks.tv/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="48"></a>
 for Android TV
---->
 
 
 ### PREREQUISITES
