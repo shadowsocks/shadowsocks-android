@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pkgutil
-import urlparse
+
+from urllib.parse import urlparse
 import socket
 import logging
+from base64 import b64decode
 from argparse import ArgumentParser
 from datetime import date
 
@@ -23,7 +25,7 @@ def parse_args():
 def decode_gfwlist(content):
     # decode base64 if have to
     try:
-        return content.decode('base64')
+        return b64decode(content).decode('utf-8')
     except:
         return content
 
@@ -33,10 +35,10 @@ def get_hostname(something):
         # quite enough for GFW
         if not something.startswith('http:'):
             something = 'http://' + something
-        r = urlparse.urlparse(something)
+        r = urlparse(something)
         return r.hostname
     except Exception as e:
-        logging.error(e) 
+        logging.error(e)
         return None
 
 
@@ -79,7 +81,7 @@ def parse_gfwlist(content):
 
 
 def generate_acl(domains):
-    header ="""#
+    header = """#
 # GFW list from https://github.com/gfwlist/gfwlist/blob/master/gfwlist.txt
 # updated on DATE
 #
@@ -96,10 +98,10 @@ def generate_acl(domains):
     for domain in sorted(domains):
         try:
             socket.inet_aton(domain)
-            ip_content += (domain + "\n")
+            ip_content += domain + '\n'
         except socket.error:
-            domain = domain.replace('.', '\.')
-            proxy_content += ('(?:^|\.)' + domain + '$\n')
+            domain = domain.replace('.', '\\.')
+            proxy_content += '(?:^|\\.)' + domain + '$\n'
 
     proxy_content = header + ip_content + proxy_content
 
@@ -108,14 +110,14 @@ def generate_acl(domains):
 
 def main():
     args = parse_args()
-    with open(args.input, 'rb') as f:
+    with open(args.input) as f:
         content = f.read()
     content = decode_gfwlist(content)
     domains = parse_gfwlist(content)
     acl_content = generate_acl(domains)
-    with open(args.output, 'wb') as f:
+    with open(args.output, 'w') as f:
         f.write(acl_content)
+
 
 if __name__ == '__main__':
     main()
-
