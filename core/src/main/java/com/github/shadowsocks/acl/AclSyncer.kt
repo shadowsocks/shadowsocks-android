@@ -35,6 +35,7 @@ import androidx.work.WorkerParameters
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.core.BuildConfig
+import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.useCancellable
 import kotlinx.coroutines.Dispatchers
 import timber.log.Timber
@@ -68,7 +69,8 @@ class AclSyncer(context: Context, workerParams: WorkerParameters) : CoroutineWor
 
     override suspend fun doWork(): Result = try {
         val route = inputData.getString(KEY_ROUTE)!!
-        val connection = URL("https://shadowsocks.org/acl/android/v1/$route.acl").openConnection() as HttpURLConnection
+        val connection = URL("https://shadowsocks.org/acl/android/v1/$route.acl")
+            .openConnection(DataStore.proxy) as HttpURLConnection
         val acl = connection.useCancellable { inputStream.bufferedReader().use { it.readText() } }
         Acl.getFile(route).printWriter().use { it.write(acl) }
         Result.success()

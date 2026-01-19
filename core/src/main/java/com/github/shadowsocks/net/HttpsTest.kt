@@ -27,7 +27,6 @@ import androidx.lifecycle.ViewModel
 import com.github.shadowsocks.Core.app
 import com.github.shadowsocks.core.R
 import com.github.shadowsocks.preference.DataStore
-import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.useCancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -35,7 +34,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.Proxy
 import java.net.URL
 import java.net.URLConnection
 
@@ -83,9 +81,7 @@ class HttpsTest : ViewModel() {
         cancelTest()
         status.value = Status.Testing
         val url = URL("https://cp.cloudflare.com")
-        val conn = (if (DataStore.serviceMode != Key.modeVpn) {
-            url.openConnection(Proxy(Proxy.Type.SOCKS, DataStore.proxyAddress))
-        } else url.openConnection()) as HttpURLConnection
+        val conn = url.openConnection(DataStore.proxy) as HttpURLConnection
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
