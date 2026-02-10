@@ -65,8 +65,11 @@
                 app:key="remoteDns"
                 app:icon="@drawable/ic_action_dns"
                 app:title="@string/remote_dns"
-                app:useSimpleSummaryProvider="true"/>
-
+                app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+                app:key="optimizeBuffers"
+                app:title="@string/optimize_buffers"
+                app:summary="@string/optimize_buffers_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory
