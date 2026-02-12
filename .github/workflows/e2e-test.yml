@@ -70,7 +70,7 @@ jobs:
         env:
           SKIP_EMULATOR_BOOT: "true"
           ADB: adb
-          APK: ${{ github.workspace }}/mobile/build/outputs/apk/debug/mobile-x86_64-debug.apk
+          APK: ${{ github.workspace }}/mobile/build/outputs/apk/debug/mobile-debug.apk
           SSSERVER: ${{ github.workspace }}/core/src/main/rust/shadowsocks-rust/target/release/ssserver
 
       - name: Upload screenshots
