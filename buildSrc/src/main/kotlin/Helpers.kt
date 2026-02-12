@@ -92,10 +92,6 @@ fun Project.setupApp() {
         }
         lint.disable += "RemoveWorkManagerInitializer"
         packagingOptions.jniLibs.useLegacyPackaging = true
-        splits.abi {
-            isEnable = true
-            isUniversalApk = true
-        }
     }
 
     dependencies.add("implementation", project(":core"))

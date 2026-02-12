@@ -12,3 +12,4 @@ release/
 # release apks
 *.apk
 .DS_Store
+CLAUDE.md
