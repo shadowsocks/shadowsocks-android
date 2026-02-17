@@ -77,6 +77,16 @@ class _AppListNotifier extends AsyncNotifier<_AppListConfig> {
     }
   }
 
+  void toggleBypass() {
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(_AppListConfig(
+      enabled: current.enabled,
+      bypass: !current.bypass,
+      apps: current.apps,
+    ));
+  }
+
   Future<void> save() async {
     final current = state.valueOrNull;
     if (current == null) return;
@@ -132,6 +142,21 @@ class _AppManagerScreenState extends ConsumerState<AppManagerScreen> {
               onChanged: (v) => setState(() => _search = v),
             ),
           ),
+          config.whenData((c) => SwitchListTile(
+            title: const Text('Bypass Mode'),
+            subtitle: Text(
+              c.bypass
+                  ? 'Selected apps bypass the proxy'
+                  : 'Only selected apps use the proxy',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            value: c.bypass,
+            onChanged: (_) =>
+                ref.read(_appListProvider.notifier).toggleBypass(),
+          )).value ?? const SizedBox.shrink(),
+          const Divider(height: 1),
           Expanded(
             child: config.when(
               data: (c) {
