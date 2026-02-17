@@ -23,6 +23,8 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
   late TextEditingController _portCtrl;
   late TextEditingController _passwordCtrl;
   late TextEditingController _remoteDnsCtrl;
+  late TextEditingController _pluginCtrl;
+  late TextEditingController _pluginOptsCtrl;
   String _method = 'chacha20-ietf-poly1305';
   String _route = 'all';
   bool _ipv6 = false;
@@ -39,6 +41,8 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
     _portCtrl = TextEditingController(text: '8388');
     _passwordCtrl = TextEditingController();
     _remoteDnsCtrl = TextEditingController(text: 'dns.google');
+    _pluginCtrl = TextEditingController();
+    _pluginOptsCtrl = TextEditingController();
     _loadProfile();
   }
 
@@ -58,6 +62,7 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
           _ipv6 = profile.ipv6;
           _metered = profile.metered;
           _udpdns = profile.udpdns;
+          _parsePlugin(profile.plugin);
         });
       }
     }
@@ -71,6 +76,8 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
     _portCtrl.dispose();
     _passwordCtrl.dispose();
     _remoteDnsCtrl.dispose();
+    _pluginCtrl.dispose();
+    _pluginOptsCtrl.dispose();
     super.dispose();
   }
 
@@ -114,6 +121,7 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
       'ipv6': _ipv6,
       'metered': _metered,
       'udpdns': _udpdns,
+      'plugin': _buildPluginString(),
     };
 
     if (widget.isNew) {
@@ -266,6 +274,27 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    _sectionHeader('Plugin'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _pluginCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Plugin',
+                        hintText: 'e.g. v2ray-plugin, obfs-local',
+                        prefixIcon: Icon(Icons.extension_rounded),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _pluginOptsCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Plugin Options',
+                        hintText: 'key=value;key=value',
+                        prefixIcon: Icon(Icons.tune_rounded),
+                      ),
+                      maxLines: null,
+                    ),
+                    const SizedBox(height: 24),
                     _sectionHeader('Options'),
                     const SizedBox(height: 8),
                     _switchTile(
@@ -321,6 +350,24 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
         letterSpacing: 0.5,
       ),
     );
+  }
+
+  void _parsePlugin(String? plugin) {
+    if (plugin == null || plugin.isEmpty) return;
+    final semicolon = plugin.indexOf(';');
+    if (semicolon < 0) {
+      _pluginCtrl.text = plugin;
+    } else {
+      _pluginCtrl.text = plugin.substring(0, semicolon);
+      _pluginOptsCtrl.text = plugin.substring(semicolon + 1);
+    }
+  }
+
+  String _buildPluginString() {
+    final id = _pluginCtrl.text.trim();
+    if (id.isEmpty) return '';
+    final opts = _pluginOptsCtrl.text.trim();
+    return opts.isEmpty ? id : '$id;$opts';
   }
 
   Widget _switchTile(
