@@ -12,3 +12,6 @@ release/
 # release apks
 *.apk
 .DS_Store
+
+# E2E test screenshots
+screen_*.png
