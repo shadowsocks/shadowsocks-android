@@ -19,11 +19,14 @@
         tools:ignore="MissingTvBanner">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".flutter.FlutterBridgeActivity"
             android:label="@string/app_name"
             android:exported="true"
             android:theme="@style/Theme.Shadowsocks.Immersive.Navigation"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

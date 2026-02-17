@@ -28,6 +28,8 @@ dependencies {
     implementation(libs.locale.api)
     implementation(libs.preferencex.simplemenu)
     implementation(libs.zxing)
+    // Flutter module
+    implementation(project(":flutter"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.test.runner)
