@@ -24,6 +24,16 @@ class ServiceChannel {
     return await _method.invokeMethod<String>('testConnection');
   }
 
+  /// Launches the plugin's native configuration activity.
+  /// Returns {'status': 'ok', 'options': '...'}, {'status': 'fallback'}, or {'status': 'cancelled'}.
+  Future<Map<String, dynamic>> configurePlugin(String pluginId, String options) async {
+    final result = await _method.invokeMapMethod<String, dynamic>(
+      'configurePlugin',
+      {'pluginId': pluginId, 'options': options},
+    );
+    return result ?? {'status': 'fallback'};
+  }
+
   Stream<ServiceStatus> get stateStream {
     return _stateEvent.receiveBroadcastStream().map((event) {
       return ServiceStatus.fromMap(event as Map<dynamic, dynamic>);

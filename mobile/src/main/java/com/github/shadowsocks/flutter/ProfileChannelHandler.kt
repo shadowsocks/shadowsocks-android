@@ -3,6 +3,7 @@ package com.github.shadowsocks.flutter
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
+import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
@@ -79,6 +80,17 @@ object ProfileChannelHandler {
                             val id = (call.argument<Any>("id") as Number).toLong()
                             val profile = ProfileManager.getProfile(id)
                             result.success(profile?.toUri()?.toString())
+                        }
+                        "getPlugins" -> {
+                            val plugins = PluginManager.fetchPlugins()
+                            result.success(plugins.map { plugin ->
+                                mapOf(
+                                    "id" to plugin.id,
+                                    "label" to plugin.label.toString(),
+                                    "packageName" to plugin.packageName,
+                                    "defaultConfig" to (plugin.defaultConfig ?: ""),
+                                )
+                            })
                         }
                         "reorderProfiles" -> {
                             @Suppress("UNCHECKED_CAST")

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../channels/service_channel.dart';
 import '../../models/profile.dart';
 import '../../providers/profiles_provider.dart';
+import '../../providers/service_provider.dart';
 
 class ProfileConfigScreen extends ConsumerStatefulWidget {
   final String? profileId;
@@ -16,6 +18,18 @@ class ProfileConfigScreen extends ConsumerStatefulWidget {
       _ProfileConfigScreenState();
 }
 
+class _PluginInfo {
+  final String id;
+  final String label;
+  final String defaultConfig;
+
+  const _PluginInfo({
+    required this.id,
+    required this.label,
+    this.defaultConfig = '',
+  });
+}
+
 class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameCtrl;
@@ -23,10 +37,11 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
   late TextEditingController _portCtrl;
   late TextEditingController _passwordCtrl;
   late TextEditingController _remoteDnsCtrl;
-  late TextEditingController _pluginCtrl;
   late TextEditingController _pluginOptsCtrl;
   String _method = 'chacha20-ietf-poly1305';
   String _route = 'all';
+  String _selectedPluginId = '';
+  List<_PluginInfo> _plugins = [];
   bool _ipv6 = false;
   bool _metered = false;
   bool _udpdns = false;
@@ -41,14 +56,28 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
     _portCtrl = TextEditingController(text: '8388');
     _passwordCtrl = TextEditingController();
     _remoteDnsCtrl = TextEditingController(text: 'dns.google');
-    _pluginCtrl = TextEditingController();
     _pluginOptsCtrl = TextEditingController();
     _loadProfile();
   }
 
   Future<void> _loadProfile() async {
+    final channel = ref.read(profileChannelProvider);
+
+    // Fetch installed plugins
+    try {
+      final pluginMaps = await channel.getPlugins();
+      _plugins = pluginMaps
+          .map((m) => _PluginInfo(
+                id: (m['id'] as String?) ?? '',
+                label: (m['label'] as String?) ?? '',
+                defaultConfig: (m['defaultConfig'] as String?) ?? '',
+              ))
+          .toList();
+    } catch (_) {
+      _plugins = [];
+    }
+
     if (!widget.isNew) {
-      final channel = ref.read(profileChannelProvider);
       final profile = await channel.getProfile(int.parse(widget.profileId!));
       if (profile != null && mounted) {
         setState(() {
@@ -66,7 +95,7 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
         });
       }
     }
-    setState(() => _loading = false);
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
@@ -76,7 +105,6 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
     _portCtrl.dispose();
     _passwordCtrl.dispose();
     _remoteDnsCtrl.dispose();
-    _pluginCtrl.dispose();
     _pluginOptsCtrl.dispose();
     super.dispose();
   }
@@ -276,24 +304,69 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
                     const SizedBox(height: 24),
                     _sectionHeader('Plugin'),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _pluginCtrl,
+                    DropdownButtonFormField<String>(
+                      value: _plugins.any((p) => p.id == _selectedPluginId)
+                          ? _selectedPluginId
+                          : '',
                       decoration: const InputDecoration(
                         labelText: 'Plugin',
-                        hintText: 'e.g. v2ray-plugin, obfs-local',
                         prefixIcon: Icon(Icons.extension_rounded),
                       ),
+                      items: [
+                        const DropdownMenuItem(
+                          value: '',
+                          child: Text('None'),
+                        ),
+                        ..._plugins
+                            .where((p) => p.id.isNotEmpty)
+                            .map((p) => DropdownMenuItem(
+                                  value: p.id,
+                                  child: Text(p.label.isNotEmpty
+                                      ? p.label
+                                      : p.id),
+                                )),
+                      ],
+                      onChanged: (v) {
+                        setState(() {
+                          _selectedPluginId = v ?? '';
+                          if (_selectedPluginId.isNotEmpty &&
+                              _pluginOptsCtrl.text.isEmpty) {
+                            final plugin = _plugins.firstWhere(
+                              (p) => p.id == _selectedPluginId,
+                              orElse: () => const _PluginInfo(id: '', label: ''),
+                            );
+                            if (plugin.defaultConfig.isNotEmpty) {
+                              _pluginOptsCtrl.text = plugin.defaultConfig;
+                            }
+                          }
+                        });
+                        _markDirty();
+                      },
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _pluginOptsCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Plugin Options',
-                        hintText: 'key=value;key=value',
-                        prefixIcon: Icon(Icons.tune_rounded),
+                    if (_selectedPluginId.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _pluginOptsCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Plugin Options',
+                                hintText: 'key=value;key=value',
+                                prefixIcon: Icon(Icons.tune_rounded),
+                              ),
+                              maxLines: null,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton.filled(
+                            icon: const Icon(Icons.settings_rounded),
+                            tooltip: 'Configure plugin',
+                            onPressed: () => _launchPluginConfig(),
+                          ),
+                        ],
                       ),
-                      maxLines: null,
-                    ),
+                    ],
                     const SizedBox(height: 24),
                     _sectionHeader('Options'),
                     const SizedBox(height: 8),
@@ -352,22 +425,37 @@ class _ProfileConfigScreenState extends ConsumerState<ProfileConfigScreen> {
     );
   }
 
+  Future<void> _launchPluginConfig() async {
+    final serviceChannel = ref.read(serviceChannelProvider);
+    final result = await serviceChannel.configurePlugin(
+      _selectedPluginId,
+      _pluginOptsCtrl.text,
+    );
+    final status = result['status'] as String?;
+    if (status == 'ok' && mounted) {
+      setState(() {
+        _pluginOptsCtrl.text = (result['options'] as String?) ?? '';
+        _markDirty();
+      });
+    }
+    // 'fallback' and 'cancelled' — just keep the manual text field as-is
+  }
+
   void _parsePlugin(String? plugin) {
     if (plugin == null || plugin.isEmpty) return;
     final semicolon = plugin.indexOf(';');
     if (semicolon < 0) {
-      _pluginCtrl.text = plugin;
+      _selectedPluginId = plugin;
     } else {
-      _pluginCtrl.text = plugin.substring(0, semicolon);
+      _selectedPluginId = plugin.substring(0, semicolon);
       _pluginOptsCtrl.text = plugin.substring(semicolon + 1);
     }
   }
 
   String _buildPluginString() {
-    final id = _pluginCtrl.text.trim();
-    if (id.isEmpty) return '';
+    if (_selectedPluginId.isEmpty) return '';
     final opts = _pluginOptsCtrl.text.trim();
-    return opts.isEmpty ? id : '$id;$opts';
+    return opts.isEmpty ? _selectedPluginId : '$_selectedPluginId;$opts';
   }
 
   Widget _switchTile(

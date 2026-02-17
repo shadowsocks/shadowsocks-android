@@ -1,12 +1,16 @@
 package com.github.shadowsocks.flutter
 
+import android.app.Activity
 import android.os.Bundle
 import android.os.RemoteException
+import androidx.activity.result.contract.ActivityResultContracts
 import com.github.shadowsocks.Core
 import com.github.shadowsocks.aidl.IShadowsocksService
 import com.github.shadowsocks.aidl.ShadowsocksConnection
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
+import com.github.shadowsocks.plugin.PluginContract
+import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Key
 import com.github.shadowsocks.utils.StartService
@@ -20,6 +24,7 @@ class FlutterBridgeActivity : FlutterFragmentActivity(), ShadowsocksConnection.C
     private val connection = ShadowsocksConnection(true)
     private var state = BaseService.State.Idle
     private var pendingResult: MethodChannel.Result? = null
+    private var pendingPluginResult: MethodChannel.Result? = null
 
     // Event sinks for streaming data to Flutter
     var stateEventSink: EventChannel.EventSink? = null
@@ -32,6 +37,25 @@ class FlutterBridgeActivity : FlutterFragmentActivity(), ShadowsocksConnection.C
             result?.success(false)
         } else {
             result?.success(true)
+        }
+    }
+
+    private val configurePlugin = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { activityResult ->
+        val result = pendingPluginResult
+        pendingPluginResult = null
+        when (activityResult.resultCode) {
+            Activity.RESULT_OK -> {
+                val options = activityResult.data?.getStringExtra(PluginContract.EXTRA_OPTIONS)
+                result?.success(mapOf("status" to "ok", "options" to (options ?: "")))
+            }
+            PluginContract.RESULT_FALLBACK -> {
+                result?.success(mapOf("status" to "fallback"))
+            }
+            else -> {
+                result?.success(mapOf("status" to "cancelled"))
+            }
         }
     }
 
@@ -48,6 +72,19 @@ class FlutterBridgeActivity : FlutterFragmentActivity(), ShadowsocksConnection.C
                 "requestVpnPermission" -> {
                     pendingResult = result
                     connect.launch(null)
+                }
+                "configurePlugin" -> {
+                    val pluginId = call.argument<String>("pluginId") ?: ""
+                    val options = call.argument<String>("options") ?: ""
+                    val intent = PluginManager.buildIntent(pluginId, PluginContract.ACTION_CONFIGURE)
+                    if (intent.resolveActivity(packageManager) != null) {
+                        pendingPluginResult = result
+                        configurePlugin.launch(
+                            intent.putExtra(PluginContract.EXTRA_OPTIONS, options)
+                        )
+                    } else {
+                        result.success(mapOf("status" to "fallback"))
+                    }
                 }
                 "testConnection" -> result.success(null) // TODO: implement HttpsTest
                 else -> result.notImplemented()
