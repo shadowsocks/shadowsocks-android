@@ -21,6 +21,21 @@ jobs:
           command: |
             echo 'export PATH="$HOME"/.cargo/bin:"$PATH"' >> "$BASH_ENV"
       - run: rustup target add armv7-linux-androideabi aarch64-linux-android i686-linux-android x86_64-linux-android
+      - run:
+          name: Install Flutter SDK
+          command: |
+            git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "$HOME/flutter"
+            echo 'export PATH="$HOME/flutter/bin:$PATH"' >> "$BASH_ENV"
+            source "$BASH_ENV"
+            flutter precache --android
+      - run:
+          name: Configure Flutter module
+          command: |
+            echo "flutter.sdk=$HOME/flutter" >> local.properties
+            cd flutter_module && flutter pub get
+      - run:
+          name: Flutter tests
+          command: cd flutter_module && flutter test
       - android/restore-gradle-cache
       - run:
           name: Run Build and Tests

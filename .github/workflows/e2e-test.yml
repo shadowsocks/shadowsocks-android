@@ -23,6 +23,18 @@ jobs:
         with:
           targets: x86_64-linux-android
 
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Configure Flutter module
+        run: |
+          echo "flutter.sdk=$(which flutter | xargs dirname | xargs dirname)" >> local.properties
+          cd flutter_module && flutter pub get
+
+      - name: Flutter tests
+        run: cd flutter_module && flutter test
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \

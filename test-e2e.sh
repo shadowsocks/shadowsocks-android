@@ -129,7 +129,7 @@ info "Step 5: Configuring profile..."
 # ensureNotEmpty() creates a default profile (id=1) and sets profileId=1.
 # serviceMode defaults to "vpn".
 info "  Launching app to initialize databases..."
-"$ADB" shell am start -W -n "$PKG/.MainActivity"
+"$ADB" shell am start -W -n "$PKG/.flutter.FlutterBridgeActivity"
 sleep 8
 screenshot "01_init"
 # Force a checkpoint to flush WAL into main database file
@@ -185,7 +185,7 @@ info "  Profile configuration done."
 info "Step 6: Enabling VPN..."
 
 # Launch the app
-"$ADB" shell am start -W -n "$PKG/.MainActivity"
+"$ADB" shell am start -W -n "$PKG/.flutter.FlutterBridgeActivity"
 sleep 3
 screenshot "02_app_launched"
 
