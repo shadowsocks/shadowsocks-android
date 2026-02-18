@@ -39,7 +39,7 @@ jobs:
       - android/restore-gradle-cache
       - run:
           name: Run Build and Tests
-          command: ./gradlew assembleDebug check -PCARGO_PROFILE=debug
+          command: ./gradlew assembleDebug check -PCARGO_PROFILE=debug -x :mobile:releaseOssLicensesTask -x :mobile:debugOssLicensesTask
       - android/save-gradle-cache
       - store_artifacts:
           path: mobile/build/outputs/apk
