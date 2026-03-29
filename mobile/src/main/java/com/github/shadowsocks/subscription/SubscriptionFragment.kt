@@ -45,6 +45,7 @@ import com.github.shadowsocks.MainActivity
 import com.github.shadowsocks.R
 import com.github.shadowsocks.ToolbarFragment
 import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
+import com.github.shadowsocks.utils.SubscriptionUrls
 import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
@@ -97,7 +98,7 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         private fun validate(value: Editable = editText.text) {
             var message = ""
             positive.isEnabled = try {
-                val url = URL(value.toString())
+                val url = SubscriptionUrls.parse(value.toString())
                 if ("http".equals(url.protocol, true)) message = getString(R.string.cleartext_http_warning)
                 true
             } catch (e: MalformedURLException) {
@@ -210,11 +211,11 @@ class SubscriptionFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener 
         AlertDialogFragment.setResultListener<SubDialogFragment, SubEditResult>(this) { which, ret ->
             val (edited, replacing) = ret ?: return@setResultListener
             replacing?.let { item ->
-                val url = URL(item)
+                val url = SubscriptionUrls.parse(item)
                 adapter.remove(url)
                 if (which == DialogInterface.BUTTON_NEUTRAL) undoManager.remove(-1 to url)
             }
-            if (edited != null) adapter.add(URL(edited)).also { list.post { list.scrollToPosition(it) } }
+            if (edited != null) adapter.add(SubscriptionUrls.parse(edited)).also { list.post { list.scrollToPosition(it) } }
         }
         toolbar.setTitle(R.string.subscriptions)
         toolbar.inflateMenu(R.menu.subscription_menu)

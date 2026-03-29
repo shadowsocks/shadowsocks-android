@@ -81,4 +81,5 @@ object Action {
     const val ABORT = "com.github.shadowsocks.ABORT"
 
     const val EXTRA_PROFILE_ID = "com.github.shadowsocks.EXTRA_PROFILE_ID"
+    const val EXTRA_SUBSCRIPTION_URL = "com.github.shadowsocks.EXTRA_SUBSCRIPTION_URL"
 }

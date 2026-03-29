@@ -32,9 +32,15 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import android.widget.ImageView
+import android.widget.ListView
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
@@ -42,6 +48,8 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
@@ -50,6 +58,8 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.fragment.showAllowingStateLoss
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.subscription.SsConfLocationClient
+import com.github.shadowsocks.subscription.SubscriptionService
 import com.github.shadowsocks.utils.Action
 import com.github.shadowsocks.utils.OpenJson
 import com.github.shadowsocks.utils.SaveJson
@@ -57,12 +67,15 @@ import com.github.shadowsocks.utils.readableMessage
 import com.github.shadowsocks.widget.ListHolderListener
 import com.github.shadowsocks.widget.MainListListener
 import com.github.shadowsocks.widget.UndoSnackbarManager
+import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.nio.charset.StandardCharsets
+import java.util.Locale
 
 class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, SearchView.OnQueryTextListener {
     companion object {
@@ -125,6 +138,7 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
         private val traffic = itemView.findViewById<TextView>(R.id.traffic)
         private val edit = itemView.findViewById<View>(R.id.edit)
         private val subscription = itemView.findViewById<View>(R.id.subscription)
+        private val changeLocation = itemView.findViewById<View>(R.id.change_location)
 
         init {
             edit.setOnClickListener {
@@ -133,10 +147,18 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             }
             subscription.setOnClickListener {
                 item = ProfileManager.getProfile(item.id) ?: return@setOnClickListener
-                startConfig(item)
+                item.subscriptionUrl?.also { url ->
+                    SubscriptionService.start(requireContext(), url)
+                    (activity as MainActivity).snackbar().setText(R.string.update_subscription).show()
+                }
+            }
+            changeLocation.setOnClickListener {
+                item = ProfileManager.getProfile(item.id) ?: return@setOnClickListener
+                showLocationPicker(item)
             }
             TooltipCompat.setTooltipText(edit, edit.contentDescription)
             TooltipCompat.setTooltipText(subscription, subscription.contentDescription)
+            TooltipCompat.setTooltipText(changeLocation, changeLocation.contentDescription)
             itemView.setOnClickListener(this)
             val share = itemView.findViewById<View>(R.id.share)
             share.setOnClickListener {
@@ -155,6 +177,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             edit.alpha = if (editable) 1F else .5F
             subscription.isEnabled = editable
             subscription.alpha = if (editable) 1F else .5F
+            changeLocation.isEnabled = editable
+            changeLocation.alpha = if (editable) 1F else .5F
             var tx = item.tx
             var rx = item.rx
             statsCache[item.id]?.apply {
@@ -180,11 +204,17 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             }
 
             if (item.subscription == Profile.SubscriptionStatus.Active) {
-                edit.visibility = View.GONE
+                edit.visibility = View.VISIBLE
                 subscription.visibility = View.VISIBLE
+                changeLocation.visibility = if (SsConfLocationClient.supports(item.subscriptionUrl)) View.VISIBLE else View.GONE
+                subscription.isEnabled = editable && item.subscriptionUrl != null
+                subscription.alpha = if (subscription.isEnabled) 1F else .5F
+                changeLocation.isEnabled = editable && SsConfLocationClient.supports(item.subscriptionUrl)
+                changeLocation.alpha = if (changeLocation.isEnabled) 1F else .5F
             } else {
                 edit.visibility = View.VISIBLE
                 subscription.visibility = View.GONE
+                changeLocation.visibility = View.GONE
             }
         }
 
@@ -211,6 +241,50 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
                 true
             }
             else -> false
+        }
+    }
+
+    private inner class LocationAdapter(
+            context: android.content.Context,
+            private val allItems: List<SsConfLocationClient.Location>,
+    ) : ArrayAdapter<SsConfLocationClient.Location>(context, android.R.layout.simple_list_item_2, android.R.id.text1),
+            Filterable {
+        private var filteredItems = allItems.toList()
+
+        override fun getCount() = filteredItems.size
+        override fun getItem(position: Int) = filteredItems[position]
+
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+            val view = convertView ?: LayoutInflater.from(context)
+                    .inflate(android.R.layout.simple_list_item_2, parent, false)
+            val item = getItem(position)!!
+            view.findViewById<TextView>(android.R.id.text1).text =
+                    if (item.bestLocation) getString(R.string.location_best_format, item.description) else item.description
+            view.findViewById<TextView>(android.R.id.text2).text =
+                    item.speed?.let { getString(R.string.location_speed_format, it) } ?: item.value
+            return view
+        }
+
+        override fun getFilter() = object : Filter() {
+            override fun performFiltering(constraint: CharSequence?) = FilterResults().apply {
+                val query = constraint?.toString()?.trim()?.lowercase(Locale.getDefault()).orEmpty()
+                values = if (query.isEmpty()) {
+                    allItems
+                } else {
+                    allItems.filter {
+                        it.description.lowercase(Locale.getDefault()).contains(query) ||
+                                it.value.lowercase(Locale.getDefault()).contains(query) ||
+                                (it.speed?.lowercase(Locale.getDefault())?.contains(query) == true)
+                    }
+                }
+                count = (values as List<*>).size
+            }
+
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                @Suppress("UNCHECKED_CAST")
+                filteredItems = (results?.values as? List<SsConfLocationClient.Location>)?.toList().orEmpty()
+                notifyDataSetChanged()
+            }
         }
     }
 
@@ -465,6 +539,142 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
             activity.snackbar(e.readableMessage).show()
         }
     }
+
+    private fun showLocationPicker(profile: Profile) {
+        val subscriptionUrl = profile.subscriptionUrl ?: return
+        val loading = (activity as MainActivity).snackbar(getString(R.string.loading_locations))
+                .setDuration(Snackbar.LENGTH_INDEFINITE)
+        loading.show()
+        lifecycleScope.launch {
+            try {
+                val locations = SsConfLocationClient.fetchLocations(
+                        subscriptionUrl,
+                        Locale.getDefault().toLanguageTag(),
+                ).filterNot { it.systemLocation }
+                loading.dismiss()
+                if (!isAdded) return@launch
+                if (locations.isEmpty()) {
+                    (activity as MainActivity).snackbar().setText(R.string.no_locations_available).show()
+                    return@launch
+                }
+                val dialogView = LinearLayout(requireContext()).apply {
+                    orientation = LinearLayout.VERTICAL
+                }
+                val searchView = SearchView(requireContext()).apply {
+                    isIconified = false
+                    queryHint = getString(android.R.string.search_go)
+                }
+                val listView = ListView(requireContext())
+                val adapter = LocationAdapter(requireContext(), locations)
+                listView.adapter = adapter
+                listView.setOnItemClickListener { _, _, position, _ ->
+                    adapter.getItem(position)?.let { submitLocationChange(profile, it.value) }
+                }
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?) = false
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        adapter.filter.filter(newText)
+                        return true
+                    }
+                })
+                dialogView.addView(searchView)
+                dialogView.addView(listView, LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply {
+                    height = (resources.displayMetrics.density * 360).toInt()
+                })
+                val dialog = AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.change_location)
+                        .setView(dialogView)
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                listView.setOnItemClickListener { _, _, position, _ ->
+                    adapter.getItem(position)?.let {
+                        dialog.dismiss()
+                        submitLocationChange(profile, it.value)
+                    }
+                }
+            } catch (e: Exception) {
+                loading.dismiss()
+                if (isAdded) (activity as MainActivity).snackbar(locationErrorMessage(e)).show()
+            }
+        }
+    }
+
+    private fun submitLocationChange(profile: Profile, location: String) {
+        val subscriptionUrl = profile.subscriptionUrl ?: return
+        val loading = (activity as MainActivity).snackbar(getString(R.string.changing_location))
+                .setDuration(Snackbar.LENGTH_INDEFINITE)
+        loading.show()
+        lifecycleScope.launch {
+            try {
+                val result = SsConfLocationClient.changeLocation(
+                        subscriptionUrl,
+                        location,
+                        Locale.getDefault().toLanguageTag(),
+                )
+                loading.dismiss()
+                result.tag?.let {
+                    ProfileManager.getProfile(profile.id)?.also { fresh ->
+                        fresh.name = it
+                        ProfileManager.updateProfile(fresh)
+                        profilesAdapter.deepRefreshId(fresh.id)
+                    }
+                }
+                (activity as MainActivity).snackbar().setText(R.string.location_changed_refreshing).show()
+                refreshSubscriptionAfterLocationChange(profile.id, subscriptionUrl)
+            } catch (e: Exception) {
+                loading.dismiss()
+                if (isAdded) (activity as MainActivity).snackbar(locationErrorMessage(e)).show()
+            }
+        }
+    }
+
+    private fun refreshSubscriptionAfterLocationChange(profileId: Long, subscriptionUrl: String) {
+        val activity = activity as MainActivity
+        val shouldReloadService = profileId == DataStore.profileId && activity.state.canStop
+        if (!shouldReloadService) {
+            SubscriptionService.start(requireContext(), subscriptionUrl)
+            return
+        }
+        var sawBusy = false
+        val observer = object : Observer<Boolean> {
+            override fun onChanged(idle: Boolean) {
+                if (!sawBusy) {
+                    if (!idle) sawBusy = true
+                    return
+                }
+                if (!idle) return
+                SubscriptionService.idle.removeObserver(this)
+                if (!isAdded) return
+                if (!activity.state.canStop) return
+                val currentProfile = ProfileManager.getProfile(DataStore.profileId)
+                val targetProfile = when {
+                    currentProfile?.subscriptionUrl == subscriptionUrl -> currentProfile
+                    else -> ProfileManager.getActiveProfiles()?.firstOrNull { it.subscriptionUrl == subscriptionUrl }
+                } ?: return
+                if (targetProfile.id != DataStore.profileId) {
+                    Core.switchProfile(targetProfile.id)
+                    profilesAdapter.refreshId(profileId)
+                    profilesAdapter.refreshId(targetProfile.id)
+                }
+                Core.reloadService()
+            }
+        }
+        SubscriptionService.idle.observe(viewLifecycleOwner, observer)
+        SubscriptionService.start(requireContext(), subscriptionUrl)
+    }
+
+    private fun locationErrorMessage(error: Exception) = when (error) {
+        is SsConfLocationClient.ApiException -> when (error.statusCode) {
+            403 -> getString(R.string.change_location_restricted)
+            404 -> getString(R.string.location_api_not_found)
+            else -> getString(R.string.location_change_error_status, error.statusCode)
+        }
+        else -> getString(R.string.location_change_error_detail, error.readableMessage)
+    }
+
     private val importProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it) }
     private val replaceProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it, true) }
     private val exportProfiles = registerForActivityResult(SaveJson) { data ->

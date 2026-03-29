@@ -24,6 +24,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
@@ -39,6 +40,7 @@ import com.github.shadowsocks.database.Profile
 import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.preference.DataStore
 import com.github.shadowsocks.utils.Action
+import com.github.shadowsocks.utils.SubscriptionUrls
 import com.github.shadowsocks.utils.asIterable
 import com.github.shadowsocks.utils.broadcastReceiver
 import com.github.shadowsocks.utils.readableMessage
@@ -67,6 +69,12 @@ class SubscriptionService : Service(), CoroutineScope {
 
         val idle = MutableLiveData(true)
 
+        fun start(context: Context, url: String? = null) {
+            val intent = Intent(context, SubscriptionService::class.java)
+            if (url != null) intent.putExtra(Action.EXTRA_SUBSCRIPTION_URL, url)
+            context.startService(intent)
+        }
+
         val notificationChannel @RequiresApi(26) get() = NotificationChannel(NOTIFICATION_CHANNEL,
                 app.getText(R.string.service_subscription), NotificationManager.IMPORTANCE_LOW)
     }
@@ -88,7 +96,9 @@ class SubscriptionService : Service(), CoroutineScope {
                 receiverRegistered = true
             }
             worker = launch {
-                val urls = Subscription.instance.urls
+                val urls = intent?.getStringExtra(Action.EXTRA_SUBSCRIPTION_URL)?.let {
+                    listOf(SubscriptionUrls.parse(it))
+                } ?: Subscription.instance.urls.asIterable().toList()
                 val notification = NotificationCompat.Builder(this@SubscriptionService, NOTIFICATION_CHANNEL).apply {
                     color = ContextCompat.getColor(this@SubscriptionService, R.color.material_primary_500)
                     priority = NotificationCompat.PRIORITY_LOW
@@ -100,29 +110,29 @@ class SubscriptionService : Service(), CoroutineScope {
                         setShowsUserInterface(false)
                     }.build())
                     setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                    setContentTitle(getString(R.string.service_subscription_working, 0, urls.size()))
+                    setContentTitle(getString(R.string.service_subscription_working, 0, urls.size))
                     setOngoing(true)
-                    setProgress(urls.size(), 0, false)
+                    setProgress(urls.size, 0, false)
                     setSmallIcon(R.drawable.ic_file_cloud_download)
                     setWhen(0)
                 }
                 Core.notification.notify(NOTIFICATION_ID, notification.build())
                 counter = 0
-                val workers = urls.asIterable().map { url -> fetchJsonAsync(url, urls.size(), notification) }
+                val workers = urls.map { url -> fetchJsonAsync(url, urls.size, notification) }
                 try {
                     val localJsons = workers.awaitAll()
-                    withContext(Dispatchers.Main) {
-                        Core.notification.notify(NOTIFICATION_ID, notification.apply {
-                            setContentTitle(getText(R.string.service_subscription_finishing))
-                            setProgress(0, 0, true)
-                        }.build())
-                        createProfilesFromSubscription(localJsons.asSequence().filterNotNull().map { it.inputStream() })
-                    }
+                        withContext(Dispatchers.Main) {
+                            Core.notification.notify(NOTIFICATION_ID, notification.apply {
+                                setContentTitle(getText(R.string.service_subscription_finishing))
+                                setProgress(0, 0, true)
+                            }.build())
+                            createProfilesFromSubscription(localJsons.asSequence().filterNotNull())
+                        }
                 } finally {
                     for (worker in workers) {
                         worker.cancel()
                         try {
-                            worker.getCompleted()?.apply { if (!delete()) deleteOnExit() }
+                            worker.getCompleted()?.second?.apply { if (!delete()) deleteOnExit() }
                         } catch (_: Exception) { }
                     }
                     GlobalScope.launch(Dispatchers.Main) {
@@ -144,7 +154,7 @@ class SubscriptionService : Service(), CoroutineScope {
             (url.openConnection() as HttpURLConnection).useCancellable {
                 tempFile.outputStream().use { out -> inputStream.copyTo(out) }
             }
-            tempFile
+            url to tempFile
         } catch (e: Exception) {
             Timber.d(e)
             launch(Dispatchers.Main) {
@@ -163,16 +173,24 @@ class SubscriptionService : Service(), CoroutineScope {
         }
     }
 
-    private fun createProfilesFromSubscription(jsons: Sequence<InputStream>) {
+    private fun createProfilesFromSubscription(jsons: Sequence<Pair<URL, File>>) {
+        val entries = jsons.toList()
         val currentId = DataStore.profileId
         val profiles = ProfileManager.getAllProfiles()
-        val subscriptions = mutableMapOf<Pair<String?, String>, Profile>()
+        val targetUrls = entries.map { it.first.toString() }.toSet()
+        val subscriptions = mutableMapOf<Triple<String?, String?, String>, Profile>()
         val toUpdate = mutableSetOf<Long>()
+        val preferredProfiles = mutableMapOf<String, Profile>()
         var feature: Profile? = null
         profiles?.forEach { profile ->  // preprocessing phase
             if (currentId == profile.id) feature = profile
             if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) return@forEach
-            if (subscriptions.putIfAbsent(profile.name to profile.formattedAddress, profile) != null) {
+            if (profile.subscriptionUrl !in targetUrls) return@forEach
+            if (entries.size == 1 && currentId == profile.id && profile.subscriptionUrl != null) {
+                preferredProfiles[profile.subscriptionUrl!!] = profile
+            }
+            if (subscriptions.putIfAbsent(
+                            Triple(profile.subscriptionUrl, profile.name, profile.formattedAddress), profile) != null) {
                 ProfileManager.delProfile(profile.id)
                 if (currentId == profile.id) DataStore.profileId = 0
             } else if (profile.subscription == Profile.SubscriptionStatus.Active) {
@@ -181,27 +199,31 @@ class SubscriptionService : Service(), CoroutineScope {
             }
         }
 
-        for (json in jsons.asIterable()) try {
-            Profile.parseJson(json.bufferedReader().readText(), feature) {
-                subscriptions.compute(it.name to it.formattedAddress) { _, oldProfile ->
+        for ((url, file) in entries) try {
+            val sourceUrl = url.toString()
+            Profile.parseJson(file.inputStream().bufferedReader().readText(), feature) {
+                it.subscriptionUrl = sourceUrl
+                subscriptions.compute(Triple(sourceUrl, it.name, it.formattedAddress)) { _, oldProfile ->
                     when (oldProfile?.subscription) {
                         Profile.SubscriptionStatus.Active -> {
+                            feature?.copyFeatureSettingsTo(oldProfile)
                             Timber.w("Duplicate profiles detected. Please use different profile names and/or " +
                                     "address:port for better subscription support.")
                             oldProfile
                         }
                         Profile.SubscriptionStatus.Obsolete -> {
-                            toUpdate.add(oldProfile.id)
-                            oldProfile.password = it.password
-                            oldProfile.method = it.method
-                            oldProfile.plugin = it.plugin
-                            oldProfile.udpFallback = it.udpFallback
-                            oldProfile.subscription = Profile.SubscriptionStatus.Active
-                            oldProfile
+                            updateSubscriptionProfile(oldProfile, it, sourceUrl, feature, toUpdate)
                         }
-                        else -> ProfileManager.createProfile(it.apply {
-                            subscription = Profile.SubscriptionStatus.Active
-                        })
+                        else -> {
+                            val preferredProfile = preferredProfiles.remove(sourceUrl)
+                            if (preferredProfile != null && preferredProfile.subscription != Profile.SubscriptionStatus.UserConfigured) {
+                                updateSubscriptionProfile(preferredProfile, it, sourceUrl, feature, toUpdate)
+                            } else {
+                                ProfileManager.createProfile(it.apply {
+                                    subscription = Profile.SubscriptionStatus.Active
+                                })
+                            }
+                        }
                     }
                 }!!
             }
@@ -212,6 +234,28 @@ class SubscriptionService : Service(), CoroutineScope {
 
         profiles?.forEach { profile -> if (toUpdate.contains(profile.id)) ProfileManager.updateProfile(profile) }
         ProfileManager.listener?.reloadProfiles()
+    }
+
+    private fun updateSubscriptionProfile(
+            target: Profile,
+            source: Profile,
+            sourceUrl: String,
+            feature: Profile?,
+            toUpdate: MutableSet<Long>,
+    ): Profile {
+        toUpdate.add(target.id)
+        feature?.copyFeatureSettingsTo(target)
+        target.name = source.name
+        target.host = source.host
+        target.remotePort = source.remotePort
+        target.password = source.password
+        target.method = source.method
+        target.plugin = source.plugin
+        target.udpFallback = source.udpFallback
+        target.subscriptionUrl = sourceUrl
+        target.subscription = Profile.SubscriptionStatus.Active
+        if (DataStore.profileId == 0L) DataStore.profileId = target.id
+        return target
     }
 
     override fun onDestroy() {

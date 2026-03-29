@@ -43,6 +43,8 @@ android {
 cargo {
     module = "src/main/rust/shadowsocks-rust"
     libname = "sslocal"
+    cargoCommand = "${System.getProperty("user.home")}/.cargo/bin/cargo"
+    rustcCommand = "${System.getProperty("user.home")}/.cargo/bin/rustc"
     targets = if (targetAbi != null) listOf(targetAbi) else listOf("arm", "arm64", "x86", "x86_64")
     profile = findProperty("CARGO_PROFILE")?.toString() ?: currentFlavor
     extraCargoBuildArguments = listOf("--bin", libname!!)

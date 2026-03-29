@@ -194,6 +194,17 @@
     <string name="add_subscription">"Добавить подписку"</string>
     <string name="edit_subscription">"Изменить подписку"</string>
     <string name="update_subscription">"Обновить серверы из подписки"</string>
+    <string name="change_location">"Сменить локацию"</string>
+    <string name="loading_locations">"Загрузка локаций…"</string>
+    <string name="no_locations_available">"Локации недоступны."</string>
+    <string name="changing_location">"Смена локации…"</string>
+    <string name="location_changed_refreshing">"Локация изменена. Обновляю подписку…"</string>
+    <string name="change_location_restricted">"Смена локации недоступна для этого аккаунта."</string>
+    <string name="location_api_not_found">"API смены локации недоступно для этой подписки."</string>
+    <string name="location_change_error_status">"Не удалось сменить локацию. Код ошибки: #%d"</string>
+    <string name="location_change_error_detail">"Не удалось сменить локацию: %s"</string>
+    <string name="location_best_format">"%1$s · Быстрее всего"</string>
+    <string name="location_speed_format">"Скорость: %1$s"</string>
     <string name="service_subscription">"Служба подписки"</string>
     <string name="service_subscription_working">"Синхронизация подписок… (%d из %d)"</string>
     <string name="service_subscription_finishing">"Завершение…"</string>

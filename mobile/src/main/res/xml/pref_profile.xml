@@ -88,7 +88,7 @@
                 app:icon="@drawable/ic_maps_360"
                 app:title="@string/udp_fallback"
                 app:summary="@string/plugin_disabled">
-            <intent android:targetPackage="com.github.shadowsocks"
+            <intent android:targetPackage="com.github.shadowsocks.vanya"
                     android:targetClass="com.github.shadowsocks.UdpFallbackProfileActivity"/>
         </Preference>
 

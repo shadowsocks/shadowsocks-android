@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-  <string name="app_name">Shadowsocks</string>
+  <string name="app_name">Shadowsocks-Vanya</string>
   <string name="quick_toggle">Toggle</string>
   <string name="send_email">Send email</string>
 
@@ -136,6 +136,17 @@
   <string name="add_subscription">Add a subscription</string>
   <string name="edit_subscription">Edit subscription</string>
   <string name="update_subscription">Refresh servers from subscription</string>
+  <string name="change_location">Change location</string>
+  <string name="loading_locations">Loading locations…</string>
+  <string name="no_locations_available">No locations available.</string>
+  <string name="changing_location">Changing location…</string>
+  <string name="location_changed_refreshing">Location changed. Refreshing subscription…</string>
+  <string name="change_location_restricted">Location change is restricted for this account.</string>
+  <string name="location_api_not_found">Location API is unavailable for this subscription.</string>
+  <string name="location_change_error_status">Failed to change location. Error code: #%d</string>
+  <string name="location_change_error_detail">Failed to change location: %s</string>
+  <string name="location_best_format">%1$s · Fastest</string>
+  <string name="location_speed_format">Speed: %1$s</string>
   <string name="service_subscription">Subscription Service</string>
   <string name="service_subscription_working">Syncing subscriptions… (%d of %d)</string>
   <string name="service_subscription_finishing">Finishing up…</string>

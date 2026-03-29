@@ -214,7 +214,17 @@ class ProfileConfigFragment : PreferenceFragmentCompat(),
         profile.id = profileId
         profile.deserialize()
         ProfileManager.updateProfile(profile)
-        ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profileId)
+        if (profile.subscription == Profile.SubscriptionStatus.UserConfigured) {
+            ProfilesFragment.instance?.profilesAdapter?.deepRefreshId(profileId)
+        } else {
+            ProfileManager.getAllProfiles()?.forEach {
+                if (it.id != profile.id && it.subscription != Profile.SubscriptionStatus.UserConfigured) {
+                    profile.copyFeatureSettingsTo(it)
+                    ProfileManager.updateProfile(it)
+                }
+            }
+            ProfileManager.listener?.reloadProfiles()
+        }
         if (profileId in Core.activeProfileIds && DataStore.directBootAware) DirectBoot.update()
         requireActivity().finish()
     }

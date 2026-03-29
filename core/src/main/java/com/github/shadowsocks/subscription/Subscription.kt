@@ -22,6 +22,7 @@ package com.github.shadowsocks.subscription
 
 import androidx.recyclerview.widget.SortedList
 import com.github.shadowsocks.preference.DataStore
+import com.github.shadowsocks.utils.SubscriptionUrls
 import com.github.shadowsocks.utils.URLSorter
 import com.github.shadowsocks.utils.asIterable
 import java.io.Reader
@@ -47,7 +48,7 @@ class Subscription {
         urls.clear()
         reader.useLines {
             for (line in it) try {
-                urls.add(URL(line))
+                urls.add(SubscriptionUrls.parse(line))
             } catch (_: Exception) { }
         }
         return this

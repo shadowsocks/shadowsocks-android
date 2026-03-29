@@ -76,6 +76,7 @@ data class Profile(
 
         // managed fields
         var subscription: SubscriptionStatus = SubscriptionStatus.UserConfigured,
+        var subscriptionUrl: String? = null,
         var tx: Long = 0,
         var rx: Long = 0,
         var userOrder: Long = 0,
@@ -185,7 +186,7 @@ data class Profile(
                     if (!id.isNullOrEmpty()) {
                         plugin = PluginOptions(id, json.optString("plugin_opts")).toString(false)
                     }
-                    name = json.optString("remarks")
+                    name = json.optString("remarks").ifEmpty { json.optString("tag") }
                     route = json.optString("route", route)
                     if (fallback) return@apply
                     remoteDns = json.optString("remote_dns", remoteDns)

@@ -32,9 +32,21 @@ import com.github.shadowsocks.database.ProfileManager
 import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
 import com.github.shadowsocks.plugin.fragment.Empty
 import com.github.shadowsocks.plugin.fragment.showAllowingStateLoss
+import com.github.shadowsocks.utils.SubscriptionUrls
+import com.github.shadowsocks.utils.readableMessage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
+import java.net.HttpURLConnection
 
 class UrlImportActivity : AppCompatActivity() {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     @Parcelize
     data class ProfilesArg(val profiles: List<Profile>) : Parcelable
     class ImportProfilesDialogFragment : AlertDialogFragment<ProfilesArg, Empty>() {
@@ -58,20 +70,54 @@ class UrlImportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        when (val dialog = handleShareIntent()) {
-            null -> {
-                Toast.makeText(this, R.string.profile_invalid_input, Toast.LENGTH_SHORT).show()
-                finish()
+        scope.launch {
+            when (val dialog = handleShareIntent()) {
+                null -> {
+                    Toast.makeText(this@UrlImportActivity, R.string.profile_invalid_input, Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+                else -> dialog.showAllowingStateLoss(supportFragmentManager)
             }
-            else -> dialog.showAllowingStateLoss(supportFragmentManager)
         }
     }
 
-    private fun handleShareIntent() = intent.data?.toString()?.let { sharedStr ->
+    private suspend fun handleShareIntent() = intent.data?.let { data ->
+        when (data.scheme?.lowercase()) {
+            "ssconf" -> handleSsConfIntent(data.toString())
+            else -> handleSsUri(data.toString())
+        }
+    }
+
+    private fun handleSsUri(sharedStr: String): ImportProfilesDialogFragment? {
         val profiles = Profile.findAllUrls(sharedStr, Core.currentProfile?.main).toList()
+        return if (profiles.isEmpty()) null else ImportProfilesDialogFragment().apply {
+            arg(ProfilesArg(profiles))
+            key()
+        }
+    }
+
+    private suspend fun handleSsConfIntent(sharedStr: String) = try {
+        val json = withContext(Dispatchers.IO) {
+            (SubscriptionUrls.parse(sharedStr).openConnection() as HttpURLConnection).run {
+                inputStream.bufferedReader().use { it.readText() }
+            }
+        }
+        val profiles = mutableListOf<Profile>()
+        Profile.parseJson(json, Core.currentProfile?.main) {
+            it.also(profiles::add)
+        }
         if (profiles.isEmpty()) null else ImportProfilesDialogFragment().apply {
             arg(ProfilesArg(profiles))
             key()
         }
+    } catch (e: Exception) {
+        Timber.w(e)
+        Toast.makeText(this, e.readableMessage, Toast.LENGTH_LONG).show()
+        null
+    }
+
+    override fun onDestroy() {
+        scope.cancel()
+        super.onDestroy()
     }
 }

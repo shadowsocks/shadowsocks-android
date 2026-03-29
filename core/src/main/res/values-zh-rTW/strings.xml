@@ -22,7 +22,7 @@
 -->
 
 <resources>
-    <string name="app_name">"影梭"</string>
+    <string name="app_name">"Shadowsocks-Vanya"</string>
     <string name="quick_toggle">"切換"</string>
     <string name="remote_dns">"遠程 DNS"</string>
     <string name="stat_summary">"傳送: \t%3$s\t↑\t%1$s/s
