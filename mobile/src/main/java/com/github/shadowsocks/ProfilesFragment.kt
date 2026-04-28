@@ -42,7 +42,11 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import com.github.shadowsocks.aidl.TrafficStats
 import com.github.shadowsocks.bg.BaseService
 import com.github.shadowsocks.database.Profile
@@ -457,22 +461,30 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
     private fun importOrReplaceProfiles(dataUris: List<Uri>, replace: Boolean = false) {
         if (dataUris.isEmpty()) return
         val activity = activity as MainActivity
-        try {
-            ProfileManager.createProfilesFromJson(dataUris.asSequence().map {
-                activity.contentResolver.openInputStream(it)
-            }.filterNotNull(), replace)
-        } catch (e: Exception) {
-            activity.snackbar(e.readableMessage).show()
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    ProfileManager.createProfilesFromJson(dataUris.asSequence().map {
+                        activity.contentResolver.openInputStream(it)
+                    }.filterNotNull(), replace)
+                }
+            } catch (e: Exception) {
+                activity.snackbar(e.readableMessage).show()
+            }
         }
     }
     private val importProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it) }
     private val replaceProfiles = registerForActivityResult(OpenJson) { importOrReplaceProfiles(it, true) }
     private val exportProfiles = registerForActivityResult(SaveJson) { data ->
-        if (data != null) ProfileManager.serializeToJson()?.let { profiles ->
+        if (data != null) lifecycleScope.launch {
             val activity = activity as MainActivity
             try {
-                activity.contentResolver.openOutputStream(data)!!.bufferedWriter().use {
-                    it.write(profiles.toString(2))
+                withContext(Dispatchers.IO) {
+                    ProfileManager.serializeToJson()?.let { profiles ->
+                        activity.contentResolver.openOutputStream(data)!!.bufferedWriter().use {
+                            it.write(profiles.toString(2))
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Timber.w(e)
