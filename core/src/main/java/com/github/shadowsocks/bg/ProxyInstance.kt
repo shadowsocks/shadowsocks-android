@@ -118,10 +118,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         configFile.writeText(config.toString())
 
         // write SOCKS5 auth config file if password protection is enabled
-        val socksAuthFile = File(configFile.parent, "socks5_auth")
         if (socksPassword.isNotEmpty()) {
-            socks5AuthFile = socksAuthFile
-            socksAuthFile.writeText(JSONObject().apply {
+            val authFile = File(configFile.parentFile ?: configFile.canonicalFile.parentFile, "socks5_auth")
+            socks5AuthFile = authFile
+            authFile.writeText(JSONObject().apply {
                 put("password", JSONObject().apply {
                     put("users", JSONArray().apply {
                         put(JSONObject().apply {
