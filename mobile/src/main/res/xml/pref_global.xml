@@ -34,4 +34,10 @@
         app:key="portTransproxy"
         app:title="@string/port_transproxy"
         app:useSimpleSummaryProvider="true"/>
+    <EditTextPreference
+        app:dialogLayout="@layout/preference_dialog_password"
+        app:key="socksPassword"
+        app:icon="@drawable/ic_settings_password"
+        app:title="@string/socks5_proxy_password"
+        app:summary="@string/socks5_proxy_password_summary"/>
 </PreferenceScreen>

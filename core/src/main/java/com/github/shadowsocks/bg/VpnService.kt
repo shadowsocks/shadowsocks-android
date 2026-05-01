@@ -214,6 +214,13 @@ class VpnService : BaseVpnService(), BaseService.Interface {
                 "--sock-path", "sock_path",
                 "--dnsgw", "127.0.0.1:${DataStore.portLocalDns}",
                 "--loglevel", "warning")
+        val socksPassword = DataStore.socksPassword
+        if (socksPassword.isNotEmpty()) {
+            cmd += "--username"
+            cmd += "shadowsocks"
+            cmd += "--password"
+            cmd += socksPassword
+        }
         if (profile.ipv6) {
             cmd += "--netif-ip6addr"
             cmd += PRIVATE_VLAN6_ROUTER

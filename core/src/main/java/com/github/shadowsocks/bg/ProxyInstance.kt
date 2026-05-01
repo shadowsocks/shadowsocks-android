@@ -64,6 +64,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
     }
 
     private var configFile: File? = null
+    private var socks5AuthFile: File? = null
     var trafficMonitor: TrafficMonitor? = null
     val plugin by lazy { PluginManager.init(PluginConfiguration(profile.plugin ?: "")) }
 
@@ -86,6 +87,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         }
         config.put("dns", "unix://local_dns_path")
         config.put("mode", mode)
+        val socksPassword = DataStore.socksPassword
         config.put("locals", JSONArray().apply {
             // local SOCKS5 proxy
             put(JSONObject().apply {
@@ -94,6 +96,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
                 put("local_udp_address", DataStore.listenAddress)
                 put("local_udp_port", DataStore.portProxy)
                 put("mode", mode)
+                if (socksPassword.isNotEmpty()) put("socks5_auth_config_path", "socks5_auth")
             })
 
             // local DNS proxy
@@ -113,6 +116,22 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
             }
         })
         configFile.writeText(config.toString())
+
+        // write SOCKS5 auth config file if password protection is enabled
+        val socksAuthFile = File(configFile.parent, "socks5_auth")
+        if (socksPassword.isNotEmpty()) {
+            socks5AuthFile = socksAuthFile
+            socksAuthFile.writeText(JSONObject().apply {
+                put("password", JSONObject().apply {
+                    put("users", JSONArray().apply {
+                        put(JSONObject().apply {
+                            put("user_name", "shadowsocks")
+                            put("password", socksPassword)
+                        })
+                    })
+                })
+            }.toString())
+        }
 
         // build the command line
         val cmd = arrayListOf(
@@ -143,5 +162,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         trafficMonitor = null
         configFile?.delete()    // remove old config possibly in device storage
         configFile = null
+        socks5AuthFile?.delete()
+        socks5AuthFile = null
     }
 }

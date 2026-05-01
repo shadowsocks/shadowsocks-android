@@ -56,6 +56,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
     private lateinit var portProxy: EditTextPreference
     private lateinit var portLocalDns: EditTextPreference
     private lateinit var portTransproxy: EditTextPreference
+    private lateinit var socksPassword: EditTextPreference
     private val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
         portTransproxy.isEnabled = newValue as String? == Key.modeTransproxy
         true
@@ -101,6 +102,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         shareOverLan.isEnabled = stopped
         portProxy.isEnabled = stopped
         portLocalDns.isEnabled = stopped
+        socksPassword.isEnabled = stopped
         if (stopped) onServiceModeChange.onPreferenceChange(serviceMode, DataStore.serviceMode) else {
             portTransproxy.isEnabled = false
         }
@@ -141,6 +143,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         portLocalDns.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         portTransproxy = findPreference(Key.portTransproxy)!!
         portTransproxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
+        socksPassword = findPreference(Key.socksPassword)!!
         serviceMode.onPreferenceChangeListener = onServiceModeChange
         findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
 

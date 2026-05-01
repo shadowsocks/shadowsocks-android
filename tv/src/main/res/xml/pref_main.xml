@@ -48,6 +48,11 @@
             app:key="portTransproxy"
             app:title="@string/port_transproxy"
             app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+            app:key="socksPassword"
+            app:title="@string/socks5_proxy_password"
+            app:summary="@string/socks5_proxy_password_summary"
+            app:useSimpleSummaryProvider="false"/>
     </PreferenceCategory>
 
     <Preference
