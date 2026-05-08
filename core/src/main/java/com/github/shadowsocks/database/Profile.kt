@@ -230,7 +230,10 @@ data class Profile(
 
         fun parseJson(json: String, feature: Profile? = null, create: (Profile) -> Profile) {
             JsonParser(feature).run {
-                JSONTokener(json).apply { while (more()) process(nextValue()) }
+                // Single root value, matching the pre-gson-removal `.single()` semantics.
+                // `JSONTokener.more()` reports true on trailing whitespace, so a `while (more())`
+                // loop throws JSONException on the standard trailing newline of any imported file.
+                process(JSONTokener(json).nextValue())
                 for (i in indices) {
                     val fallback = fallbackMap.remove(this[i])
                     this[i] = create(this[i])
