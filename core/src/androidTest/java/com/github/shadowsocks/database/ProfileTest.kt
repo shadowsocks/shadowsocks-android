@@ -33,4 +33,18 @@ class ProfileTest {
         Assert.assertEquals("ss://YmYtY2ZiOnRlc3Q@192.168.100.1:8888#example-server".toUri(),
                 results.single().toUri())
     }
+
+    @Test
+    fun parsingPlainUserInfo() {
+        val results = Profile.findAllUrls(
+                "ss://2022-blake3-chacha20-poly1305:F6BY4IwbXB5Juobo2aofoJ6P86G%2FyBYJO3pJzcMIUOU%3D@1.2.3.4:8400")
+                .toList()
+        Assert.assertEquals(1, results.size)
+        results.single().also {
+            Assert.assertEquals("2022-blake3-chacha20-poly1305", it.method)
+            Assert.assertEquals("F6BY4IwbXB5Juobo2aofoJ6P86G/yBYJO3pJzcMIUOU=", it.password)
+            Assert.assertEquals("1.2.3.4", it.host)
+            Assert.assertEquals(8400, it.remotePort)
+        }
+    }
 }
