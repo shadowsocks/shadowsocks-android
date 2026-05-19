@@ -244,6 +244,8 @@ object BaseService {
             val context = if (Build.VERSION.SDK_INT < 24 || Core.user.isUserUnlocked) app else Core.deviceStorage
             val configRoot = context.noBackupFilesDir
             val udpFallback = data.udpFallback
+            // ss-local can resolve the remote server hostname as soon as it starts, so bind the local DNS socket first.
+            data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
             data.proxy!!.start(this,
                     File(Core.deviceStorage.noBackupFilesDir, "stat_main"),
                     File(configRoot, CONFIG_FILE),
@@ -254,7 +256,6 @@ object BaseService {
                     File(Core.deviceStorage.noBackupFilesDir, "stat_udp"),
                     File(configRoot, CONFIG_FILE_UDP),
                     "udp_only", false)
-            data.localDns = LocalDnsWorker(this::rawResolver).apply { start() }
         }
 
         fun startRunner() {
