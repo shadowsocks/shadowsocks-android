@@ -109,6 +109,15 @@ data class Profile(
         private val userInfoPattern = "^(.+?):(.*)$".toRegex()
         private val legacyPattern = "^(.+?):(.*)@(.+?):(\\d+?)$".toRegex()
 
+        private fun userInfoCandidates(uri: Uri) = sequence {
+            uri.userInfo?.also { userInfo ->
+                try {
+                    yield(String(Base64.decode(userInfo, Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE)))
+                } catch (_: IllegalArgumentException) { }
+                yield(userInfo)
+            }
+        }
+
         fun findAllUrls(data: CharSequence?, feature: Profile? = null) = pattern.findAll(data ?: "").map {
             val uri = it.value.toUri()
             try {
@@ -129,8 +138,7 @@ data class Profile(
                         null
                     }
                 } else {
-                    val match = userInfoPattern.matchEntire(String(Base64.decode(uri.userInfo,
-                            Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE)))
+                    val match = userInfoCandidates(uri).mapNotNull(userInfoPattern::matchEntire).firstOrNull()
                     if (match != null) {
                         val profile = Profile()
                         feature?.copyFeatureSettingsTo(profile)
