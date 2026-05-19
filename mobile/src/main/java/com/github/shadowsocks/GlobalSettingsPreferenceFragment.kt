@@ -59,6 +59,8 @@ class GlobalSettingsPreferenceFragment : PreferenceFragmentCompat() {
         portLocalDns.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         val portTransproxy = findPreference<EditTextPreference>(Key.portTransproxy)!!
         portTransproxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
+        val connectionTestUrl = findPreference<EditTextPreference>(Key.connectionTestUrl)!!
+        connectionTestUrl.setOnBindEditTextListener(EditTextPreferenceModifiers.Url)
         val onServiceModeChange = Preference.OnPreferenceChangeListener { _, newValue ->
             portTransproxy.isEnabled = newValue as String? == Key.modeTransproxy
             true

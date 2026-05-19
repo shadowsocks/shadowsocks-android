@@ -80,8 +80,13 @@ class HttpsTest : ViewModel() {
     fun testConnection() {
         cancelTest()
         status.value = Status.Testing
-        val url = URL("https://cp.cloudflare.com")
-        val conn = url.openConnection(DataStore.proxy) as HttpURLConnection
+        val conn = try {
+            URL(DataStore.connectionTestUrl).openConnection(DataStore.proxy) as? HttpURLConnection
+                    ?: throw IOException("URL is not HTTP(S)")
+        } catch (e: IOException) {
+            status.value = Status.Error.IOFailure(e)
+            return
+        }
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false
