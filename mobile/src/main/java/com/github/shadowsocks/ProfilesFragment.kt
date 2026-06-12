@@ -44,6 +44,7 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -463,11 +464,14 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
         val activity = activity as MainActivity
         lifecycleScope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    ProfileManager.createProfilesFromJson(dataUris.asSequence().map {
-                        activity.contentResolver.openInputStream(it)
-                    }.filterNotNull(), replace)
+                val jsons = withContext(Dispatchers.IO) {
+                    dataUris.mapNotNull { uri ->
+                        activity.contentResolver.openInputStream(uri)?.readBytes()
+                    }
                 }
+                ProfileManager.createProfilesFromJson(jsons.asSequence().map { it.inputStream() }, replace)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 activity.snackbar(e.readableMessage).show()
             }
@@ -486,6 +490,8 @@ class ProfilesFragment : ToolbarFragment(), Toolbar.OnMenuItemClickListener, Sea
                         }
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e)
                 activity.snackbar(e.readableMessage).show()

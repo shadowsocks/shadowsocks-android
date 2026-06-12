@@ -32,6 +32,7 @@ import androidx.fragment.app.viewModels
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.*
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -239,6 +240,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                         context.contentResolver.openInputStream(it)
                     }.filterNotNull(), true)
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e)
                 Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
@@ -257,6 +260,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
                         }
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Timber.w(e)
                 Toast.makeText(context, e.readableMessage, Toast.LENGTH_SHORT).show()
