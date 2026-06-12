@@ -335,7 +335,12 @@ object BaseService {
             val (profile, fallback) = expanded
             try {
                 data.proxy = ProxyInstance(profile)
-                data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, profile.route)
+                data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, when (profile.route) {
+                    // UDP relay sees IP endpoints, so GFWLIST and mixed custom ACL routes need
+                    // the selected fallback.
+                    Acl.GFWLIST, Acl.CUSTOM_RULES -> Acl.ALL
+                    else -> profile.route
+                })
             } catch (e: IllegalArgumentException) {
                 data.notification = createNotification("")
                 stopRunner(false, e.message)
