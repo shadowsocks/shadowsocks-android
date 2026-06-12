@@ -78,7 +78,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var portTransproxy: Int
         get() = getLocalPort(Key.portTransproxy, 8200)
         set(value) = publicStore.putString(Key.portTransproxy, value.toString())
-    val connectionTestUrl get() = publicStore.getString(Key.connectionTestUrl) ?: DEFAULT_CONNECTION_TEST_URL
+    val connectionTestUrl get() = publicStore.getString(Key.connectionTestUrl)?.trim()?.takeIf { it.isNotEmpty() }
+            ?: DEFAULT_CONNECTION_TEST_URL
 
     /**
      * Initialize settings that have complicated default values.
