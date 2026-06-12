@@ -336,7 +336,8 @@ object BaseService {
             try {
                 data.proxy = ProxyInstance(profile)
                 data.udpFallback = if (fallback == null) null else ProxyInstance(fallback, when (profile.route) {
-                    // UDP relay sees IP endpoints, so hostname-only ACL routes would bypass the selected fallback.
+                    // UDP relay sees IP endpoints, so GFWLIST and mixed custom ACL routes need
+                    // the selected fallback.
                     Acl.GFWLIST, Acl.CUSTOM_RULES -> Acl.ALL
                     else -> profile.route
                 })
