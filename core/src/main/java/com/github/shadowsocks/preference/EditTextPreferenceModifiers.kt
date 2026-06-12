@@ -22,6 +22,7 @@ package com.github.shadowsocks.preference
 
 import android.graphics.Typeface
 import android.text.InputFilter
+import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.preference.EditTextPreference
@@ -30,6 +31,13 @@ object EditTextPreferenceModifiers {
     object Monospace : EditTextPreference.OnBindEditTextListener {
         override fun onBindEditText(editText: EditText) {
             editText.typeface = Typeface.MONOSPACE
+        }
+    }
+
+    object Password : EditTextPreference.OnBindEditTextListener {
+        override fun onBindEditText(editText: EditText) {
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            editText.setSingleLine()
         }
     }
 

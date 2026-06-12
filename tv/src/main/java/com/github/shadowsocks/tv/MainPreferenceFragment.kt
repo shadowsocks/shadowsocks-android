@@ -144,6 +144,7 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         portTransproxy = findPreference(Key.portTransproxy)!!
         portTransproxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         socksPassword = findPreference(Key.socksPassword)!!
+        socksPassword.setOnBindEditTextListener(EditTextPreferenceModifiers.Password)
         serviceMode.onPreferenceChangeListener = onServiceModeChange
         findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
 

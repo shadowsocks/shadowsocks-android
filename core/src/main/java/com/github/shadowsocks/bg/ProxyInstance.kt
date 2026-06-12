@@ -88,6 +88,10 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         config.put("dns", "unix://local_dns_path")
         config.put("mode", mode)
         val socksPassword = DataStore.socksPassword
+        // compute auth file path before building JSON so the absolute path can be embedded
+        val authFile = if (socksPassword.isNotEmpty()) {
+            File(configFile.parentFile, "${configFile.name}_auth")
+        } else null
         config.put("locals", JSONArray().apply {
             // local SOCKS5 proxy
             put(JSONObject().apply {
@@ -96,7 +100,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
                 put("local_udp_address", DataStore.listenAddress)
                 put("local_udp_port", DataStore.portProxy)
                 put("mode", mode)
-                if (socksPassword.isNotEmpty()) put("socks5_auth_config_path", "socks5_auth")
+                if (authFile != null) put("socks5_auth_config_path", authFile.absolutePath)
             })
 
             // local DNS proxy
@@ -118,8 +122,7 @@ class ProxyInstance(val profile: Profile, private val route: String = profile.ro
         configFile.writeText(config.toString())
 
         // write SOCKS5 auth config file if password protection is enabled
-        if (socksPassword.isNotEmpty()) {
-            val authFile = File(configFile.parentFile ?: configFile.canonicalFile.parentFile, "socks5_auth")
+        if (authFile != null) {
             socks5AuthFile = authFile
             authFile.writeText(JSONObject().apply {
                 put("password", JSONObject().apply {
