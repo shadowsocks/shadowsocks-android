@@ -22,6 +22,7 @@ package com.github.shadowsocks.preference
 
 import android.graphics.Typeface
 import android.text.InputFilter
+import android.text.InputType
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.preference.EditTextPreference
@@ -39,6 +40,14 @@ object EditTextPreferenceModifiers {
         override fun onBindEditText(editText: EditText) {
             editText.inputType = EditorInfo.TYPE_CLASS_NUMBER
             editText.filters = portLengthFilter
+            editText.setSingleLine()
+            editText.setSelection(editText.text.length)
+        }
+    }
+
+    object Url : EditTextPreference.OnBindEditTextListener {
+        override fun onBindEditText(editText: EditText) {
+            editText.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
             editText.setSingleLine()
             editText.setSelection(editText.text.length)
         }

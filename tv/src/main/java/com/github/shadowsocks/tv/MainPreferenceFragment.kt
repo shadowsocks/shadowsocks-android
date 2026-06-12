@@ -141,6 +141,8 @@ class MainPreferenceFragment : LeanbackPreferenceFragmentCompat(), ShadowsocksCo
         portLocalDns.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         portTransproxy = findPreference(Key.portTransproxy)!!
         portTransproxy.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
+        findPreference<EditTextPreference>(Key.connectionTestUrl)!!
+                .setOnBindEditTextListener(EditTextPreferenceModifiers.Url)
         serviceMode.onPreferenceChangeListener = onServiceModeChange
         findPreference<Preference>(Key.about)!!.summary = getString(R.string.about_title, BuildConfig.VERSION_NAME)
 

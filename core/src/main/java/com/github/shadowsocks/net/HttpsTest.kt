@@ -33,9 +33,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLConnection
+import javax.net.ssl.HttpsURLConnection
 
 /**
  * Based on: https://android.googlesource.com/platform/frameworks/base/+/b19a838/services/core/java/com/android/server/connectivity/NetworkMonitor.java#1071
@@ -80,8 +80,13 @@ class HttpsTest : ViewModel() {
     fun testConnection() {
         cancelTest()
         status.value = Status.Testing
-        val url = URL("https://cp.cloudflare.com")
-        val conn = url.openConnection(DataStore.proxy) as HttpURLConnection
+        val conn = try {
+            URL(DataStore.connectionTestUrl).openConnection(DataStore.proxy) as? HttpsURLConnection
+                    ?: throw IOException("URL is not HTTPS")
+        } catch (e: IOException) {
+            status.value = Status.Error.IOFailure(e)
+            return
+        }
         conn.setRequestProperty("Connection", "close")
         conn.instanceFollowRedirects = false
         conn.useCaches = false

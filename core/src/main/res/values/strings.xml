@@ -14,6 +14,7 @@
   <string name="port_proxy">SOCKS5 proxy port</string>
   <string name="port_local_dns">Local DNS port</string>
   <string name="port_transproxy">Transproxy port</string>
+  <string name="connection_test_url">Connection test URL</string>
 
   <string name="remote_dns">Remote DNS</string>
   <string name="traffic">%1$s↑\t%2$s↓</string>

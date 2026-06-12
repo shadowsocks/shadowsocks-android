@@ -33,6 +33,8 @@ import java.net.InetSocketAddress
 import java.net.Proxy
 
 object DataStore : OnPreferenceDataStoreChangeListener {
+    private const val DEFAULT_CONNECTION_TEST_URL = "https://cp.cloudflare.com"
+
     val publicStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     // privateStore will only be used as temp storage for ProfileConfigFragment
     val privateStore = RoomPreferenceDataStore(PrivateDatabase.kvPairDao)
@@ -76,6 +78,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var portTransproxy: Int
         get() = getLocalPort(Key.portTransproxy, 8200)
         set(value) = publicStore.putString(Key.portTransproxy, value.toString())
+    val connectionTestUrl get() = publicStore.getString(Key.connectionTestUrl)?.trim()?.takeIf { it.isNotEmpty() }
+            ?: DEFAULT_CONNECTION_TEST_URL
 
     /**
      * Initialize settings that have complicated default values.
@@ -85,6 +89,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         if (publicStore.getString(Key.portProxy) == null) portProxy = portProxy
         if (publicStore.getString(Key.portLocalDns) == null) portLocalDns = portLocalDns
         if (publicStore.getString(Key.portTransproxy) == null) portTransproxy = portTransproxy
+        if (publicStore.getString(Key.connectionTestUrl) == null) {
+            publicStore.putString(Key.connectionTestUrl, connectionTestUrl)
+        }
     }
 
     var editingId: Long?

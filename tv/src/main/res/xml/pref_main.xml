@@ -48,6 +48,10 @@
             app:key="portTransproxy"
             app:title="@string/port_transproxy"
             app:useSimpleSummaryProvider="true"/>
+        <EditTextPreference
+            app:key="connectionTestUrl"
+            app:title="@string/connection_test_url"
+            app:useSimpleSummaryProvider="true"/>
     </PreferenceCategory>
 
     <Preference
