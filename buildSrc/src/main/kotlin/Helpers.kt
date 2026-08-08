@@ -6,6 +6,9 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 private val BaseExtension.lint get() = (this as CommonExtension<*, *, *, *, *, *>).lint
@@ -48,8 +51,11 @@ fun Project.setupCore() {
     setupCommon()
     android.apply {
         defaultConfig {
-            versionCode = 5030550
-            versionName = "5.3.5-nightly"
+            // Build timestamp (UTC) as version code; hour precision keeps it
+            // below Play's 2100000000 cap until year 2100.
+            versionCode = LocalDateTime.now(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHH")).toInt()
+            versionName = "5.3.6"
         }
         compileOptions.isCoreLibraryDesugaringEnabled = true
         lint.apply {
